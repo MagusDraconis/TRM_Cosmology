@@ -22,16 +22,16 @@ namespace TRM.Tests
 
             var galaxies = SparcMrtParser.ParseFile(filePath);
 
-            // Nutze die neue Methode
+            // Use the updated fitting method
             var (directSlope, inverseSlopePhysical, intercept, rmaSlope) = SparcMrtParser.FitBtrf(galaxies);
 
-            // Ausgaben zur Überprüfung
-            _output.WriteLine($"Geparste Galaxien: {galaxies.Count}");
-            _output.WriteLine($"Standard OLS Steigung (mit Bias): {directSlope:F3}");
-            _output.WriteLine($"Invers bereinigte Steigung: {inverseSlopePhysical:F3}");
+            // Diagnostic output
+            _output.WriteLine($"Parsed galaxies: {galaxies.Count}");
+            _output.WriteLine($"Standard OLS slope (with bias): {directSlope:F3}");
+            _output.WriteLine($"Inverse-corrected slope: {inverseSlopePhysical:F3}");
 
-            // Dein Arbeitsmodell fordert eine fundamentale Steigung von 4.0
-            // Der invers bereinigte Wert der SPARC-Daten liegt typischerweise bei ~3.9 - 4.1
+            // The working model expects a fundamental slope of 4.0
+            // The inverse-corrected SPARC slope is typically around 3.9 - 4.1
             double expectedSlope = 4.0;
             double tolerance = 0.3;
 

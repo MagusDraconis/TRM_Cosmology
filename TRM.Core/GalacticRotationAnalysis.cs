@@ -8,11 +8,11 @@ namespace TRM.Core;
 
 public class GalacticRotationAnalysis
 {
-    // Physikalische Konstanten im CGS-System
+    // Physical constants in CGS units
     private const double KpcToCm = 3.08567758e21;
     private const double KmsToCmS = 100000.0;
     
-    // Milgrom-Beschleunigungskonstante (entspringt dem TRM-Hintergrund-Driftfeld H_T)
+    // Milgrom acceleration constant (linked to TRM background drift field H_T)
     private const double A0_Cosmic = 1.2e-8; // cm/s^2
 
     public readonly record struct RotationPoint(
@@ -32,13 +32,13 @@ public class GalacticRotationAnalysis
     );
 
     /// <summary>
-    /// Lädt eine standardisierte SPARC-Rotationskurvendatei.
+    /// Loads a standardized SPARC rotation-curve file.
     /// </summary>
     public List<RotationPoint> LoadSparcGalaxy(string filePath)
     {
         var points = new List<RotationPoint>();
         if (!File.Exists(filePath))
-            throw new FileNotFoundException($"SPARC-Datei nicht gefunden: {filePath}");
+            throw new FileNotFoundException($"SPARC file not found: {filePath}");
 
         foreach (var rawLine in File.ReadLines(filePath))
         {
@@ -61,7 +61,7 @@ public class GalacticRotationAnalysis
                 continue;
             }
 
-            // Messfehler von 0 abfangen, um Division durch Null bei Chi² zu verhindern
+            // Guard against zero measurement error to avoid division by zero in Chi²
             if (verr <= 0) verr = 1.0;
 
             points.Add(new RotationPoint(rad, vobs, verr, vgas, vdisk, vbulge));
@@ -71,7 +71,7 @@ public class GalacticRotationAnalysis
     }
 
     /// <summary>
-    /// Berechnet die theoretische TRM-Geschwindigkeit für einen gegebenen Punkt.
+    /// Computes the theoretical TRM velocity for a given point.
     /// </summary>
     public double CalculateTheoreticalVelocity(
         RotationPoint point,
@@ -79,10 +79,10 @@ public class GalacticRotationAnalysis
         double upsilonDisk = 0.5,
         double upsilonBulge = 0.7)
     {
-        // 1. Radiale Distanz in cm konvertieren
+        // 1) Convert radial distance to cm
         double rCm = point.RadiusKpc * KpcToCm;
 
-        // 2. Gesamte baryonische Newton-Geschwindigkeit über Mass-to-Light Ratios (Upsilon) quadrieren
+        // 2) Compute total baryonic Newtonian velocity squared using mass-to-light ratios (Upsilon)
         // V_bar^2 = V_gas^2 + Y_disk * V_disk^2 + Y_bulge * V_bulge^2
         double vBarSquaredKm2S2 = Math.Pow(point.VGas, 2)
                                   + upsilonDisk * Math.Pow(point.VDisk, 2)
@@ -93,22 +93,22 @@ public class GalacticRotationAnalysis
         // Konvertierung in CGS (cm^2/s^2)
         double vBarSquaredCm2S2 = vBarSquaredKm2S2 * Math.Pow(KmsToCmS, 2);
 
-        // 3. Lokale klassische Newton-Beschleunigung berechnen: g_Newt = V_bar^2 / r
+        // 3) Compute local classical Newtonian acceleration: g_Newt = V_bar^2 / r
         double gNewt = vBarSquaredCm2S2 / rCm;
 
-        // 4. TRM Metrik-Kopplung anwenden (Regime-Übergang ohne radiale Sprünge)
+        // 4) Apply TRM metric coupling (smooth regime transition)
         // g_eff = g_Newt + sqrt(g_Newt * a0) / lambda
         double gTRM = Math.Sqrt(gNewt * A0_Cosmic) / lambda;
         double gEff = gNewt + gTRM;
 
-        // 5. Rückkonvertierung in beobachtbare Umlaufgeschwindigkeit (km/s)
+        // 5) Convert back to observable orbital velocity (km/s)
         // V_theo = sqrt(r * g_eff)
         double vTheoCmS = Math.Sqrt(rCm * gEff);
         return vTheoCmS / KmsToCmS;
     }
 
     /// <summary>
-    /// Führt einen hochpräzisen Fit für eine Galaxie durch, um Lambda zu kalibrieren.
+    /// Runs a high-precision fit for one galaxy to calibrate lambda.
     /// </summary>
     public GalaxyFitResult FitGalaxy(
         string galaxyName,
@@ -122,7 +122,7 @@ public class GalacticRotationAnalysis
         if (points == null || points.Count == 0)
             return new GalaxyFitResult(galaxyName, 0, double.MaxValue, 0);
 
-        // Intensiver Sweep für Lambda (Kohärenz-Skalierungsfaktor) von 0.5 bis 3.0
+        // Dense sweep for lambda (coherence scaling factor) from 0.5 to 3.0
         for (double l = 0.5; l <= 3.0; l += 0.01)
         {
             double currentChi2 = 0.0;
@@ -131,12 +131,12 @@ public class GalacticRotationAnalysis
             {
                 double vTheo = CalculateTheoreticalVelocity(point, l, upsilonDisk, upsilonBulge);
 
-                // Gewichtetes Residuumsquadrat (Chi²) berechnen
+                // Compute weighted residual square (Chi²)
                 double residual = Math.Pow(point.VObs - vTheo, 2) / Math.Pow(point.VError, 2);
                 currentChi2 += residual;
             }
 
-            // Reduziertes Chi² anstreben
+            // Minimize reduced Chi²
             if (currentChi2 < minChi2)
             {
                 minChi2 = currentChi2;
@@ -144,7 +144,7 @@ public class GalacticRotationAnalysis
             }
         }
 
-        // Berechne reduziertes Chi² für die Ausgabe (Chi² / Freiheitsgrade)
+        // Compute reduced Chi² for reporting (Chi² / degrees of freedom)
         double reducedChi2 = minChi2 / points.Count;
 
         return new GalaxyFitResult(galaxyName, bestLambda, reducedChi2, points.Count);

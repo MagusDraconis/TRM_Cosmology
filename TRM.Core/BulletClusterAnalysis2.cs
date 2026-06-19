@@ -15,26 +15,26 @@ public class BulletClusterAnalysis2
     private readonly record struct BimodalExportRow(string Cluster, double Z, double MaxGradP, double Improvement);
     private static readonly object LogLock = new();
 
-    // NEU: Globale Registrierung der morphologischen Elliptizität (Asymmetrie) aus Chandra-Daten
+    // Global registry of cluster ellipticities (morphological asymmetry) from Chandra data
     public Dictionary<string, double> ClusterEllipticities { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        // Einige bekannte Extremfälle zur direkten Kalibrierung:
-        { "1E0657_56", 0.48 },    // Bullet Cluster (Hochgradig gestört)
-        { "ABELL_2744", 0.55 },   // Pandora's Cluster (Brutaler Vierfach-Merger)
-        { "ABELL_3391", 0.45 },   // Stark asymmetrisches System
-        { "AC_114", 0.42 },       // Bekannter Merger
-        { "ABELL_2029", 0.04 },   // Extrem symmetrischer, relaxierter Cool-Core Haufen
-        { "ABELL_1060", 0.05 }    // Sehr sphärisch
+        // Known calibration extremes:
+        { "1E0657_56", 0.48 },    // Bullet Cluster (highly disturbed)
+        { "ABELL_2744", 0.55 },   // Pandora's Cluster (major multi-merger)
+        { "ABELL_3391", 0.45 },   // strongly asymmetric system
+        { "AC_114", 0.42 },       // known merger
+        { "ABELL_2029", 0.04 },   // very symmetric, relaxed cool-core cluster
+        { "ABELL_1060", 0.05 }    // near-spherical
     };
 
-    // Hilfsmethode zur sicheren Abfrage der Elliptizität mit Fallback
+    // Helper to resolve ellipticity with fallback
     private double GetClusterEllipticity(string clusterName)
     {
         if (ClusterEllipticities.TryGetValue(clusterName, out double ellipticity))
         {
             return ellipticity;
         }
-        return 0.15; // Phänomenologischer globaler Mittelwert für ungelistete Haufen
+        return 0.15; // Phenomenological global average for unlisted clusters
     }
 
     public List<AcceptShell> AnalyzeFromComaFile(string filePath, string clusterName = "1E0657_56")
@@ -55,7 +55,7 @@ public class BulletClusterAnalysis2
     public Dictionary<string, List<AcceptShell>> LoadAllClusterShells(string filePath)
     {
         if (!File.Exists(filePath))
-            throw new FileNotFoundException($"Die Datei {filePath} wurde nicht gefunden.");
+            throw new FileNotFoundException($"File not found: {filePath}.");
 
         var clusterDb = new Dictionary<string, List<AcceptShell>>(StringComparer.OrdinalIgnoreCase);
 
@@ -233,20 +233,20 @@ public class BulletClusterAnalysis2
         return totalError > 0 ? totalError : double.MaxValue;
     }
 
-    // JETZT NEU: Berechnet die bimodale Theorie inklusive Geometrie-Dämpfungsfaktor Beta
+    // Evaluates the bimodal theory including geometric damping factor beta
     public void EvaluateBimodalTheoryForAllClusters(
         string profileFilePath,
         string redshiftFilePath,
         double C = 1.3195,
         double alpha = -0.7589,
         double baselineK = 0.1,
-        double beta = 0.0) // Wenn beta = 0, verhält sich das System exakt wie deine V2.1
+        double beta = 0.0) // beta = 0 reproduces the V2.1 behavior
     {
         var allClusters = LoadAllClusterShells(profileFilePath);
         var redshifts = LoadClusterRedshifts(redshiftFilePath);
 
         Console.WriteLine("\n=======================================================================================");
-        Console.WriteLine($"   BIMODALE THEORIE-PRÜFUNG (INKL. GEOMETRIE): Newton vs. TRM K(z, \u03b5)");
+        Console.WriteLine($"   BIMODAL THEORY CHECK (WITH GEOMETRY): Newton vs. TRM K(z, \u03b5)");
         Console.WriteLine("=======================================================================================");
         Console.WriteLine("ClusterName      | Gruppe | Angewandtes K | Bester Fehler | Improvement vs Baseline");
         Console.WriteLine("---------------------------------------------------------------------------------------");
@@ -275,13 +275,13 @@ public class BulletClusterAnalysis2
             double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
             if (errorBaseline > 1e300 || double.IsNaN(errorBaseline)) errorBaseline = 1e300;
 
-            // Universelles K(z) abfragen
+            // Evaluate universal K(z)
             double universalK = C * Math.Pow(zCluster, alpha);
 
-            // JETZT NEU: Geometrische Dämpfung auf das universelle K anwenden
+            // Apply geometric damping to universal K
             double ellipticity = GetClusterEllipticity(clusterName);
             double geometricK = universalK * (1.0 - beta * ellipticity);
-            if (geometricK < baselineK) geometricK = baselineK; // Schutz vor unphysikalischem mathematischen Vorzeichenwechsel
+            if (geometricK < baselineK) geometricK = baselineK; // Guard against non-physical sign inversions
 
             double errorUniversal = CalculateErrorForK(fitSamples, zCluster, geometricK);
             if (errorUniversal > 1e300 || double.IsNaN(errorUniversal)) errorUniversal = 1e300;
@@ -328,16 +328,16 @@ public class BulletClusterAnalysis2
                                       ? (totalBaselineErrorSum / totalBimodalErrorSum) : 0;
 
         Console.WriteLine("=======================================================================================");
-        Console.WriteLine($"ZUSAMMENFASSUNG DER GEOMETRISCH-OPTIMIERTEN THEORIE:");
-        Console.WriteLine($"Analysierte Cluster gesamt:       {totalClusters}");
-        Console.WriteLine($"Gruppe A (Klassisch Newton):      {countGroupA} Haufen ({((double)countGroupA / totalClusters) * 100:F1}%)");
-        Console.WriteLine($"Gruppe B (Clockwork Aktiv):       {countGroupB} Haufen ({((double)countGroupB / totalClusters) * 100:F1}%)");
-        Console.WriteLine($"Durchschnittliche Verbesserung:   {avgImprovement:F2}x pro Haufen");
-        Console.WriteLine($"Globale Gesamt-Fehlerreduktion:   {globalErrorReduction:F2}x besser als reine Baseline!");
+        Console.WriteLine($"SUMMARY OF GEOMETRY-OPTIMIZED THEORY:");
+        Console.WriteLine($"Total analyzed clusters:          {totalClusters}");
+        Console.WriteLine($"Group A (classical Newton):       {countGroupA} clusters ({((double)countGroupA / totalClusters) * 100:F1}%)");
+        Console.WriteLine($"Group B (Clockwork active):       {countGroupB} clusters ({((double)countGroupB / totalClusters) * 100:F1}%)");
+        Console.WriteLine($"Average improvement:              {avgImprovement:F2}x per cluster");
+        Console.WriteLine($"Global total error reduction:     {globalErrorReduction:F2}x vs baseline");
         Console.WriteLine("=======================================================================================\n");
     }
 
-    // JETZT NEU: Der physikalische Trigger wertet nun auch Beta für die Entscheidung aus
+    // Physical trigger now includes beta in the decision path
     public void EvaluatePhysicsDrivenBimodalTheory(
             Dictionary<string, List<AcceptShell>> allClusters,
             Dictionary<string, double> redshifts,
@@ -345,14 +345,14 @@ public class BulletClusterAnalysis2
             double alpha = -0.7589,
             double baselineK = 0.1,
             double pressureThreshold = 6.0e-34,
-            double beta = 0.0, // Geometrie-Dämpfungskoeffizient
+            double beta = 0.0, // Geometric damping coefficient
             string resultsCsvPath = "results.csv")
     {
         Console.WriteLine("\n=========================================================================================================");
-        Console.WriteLine($"   FINALER BEWEIS V2.2: TRM vs. Newton (Druck-Trigger: {pressureThreshold:E2} | Beta: {beta:F2})");
+        Console.WriteLine($"   FINAL EVIDENCE V2.2: TRM vs. Newton (Pressure trigger: {pressureThreshold:E2} | Beta: {beta:F2})");
         Console.WriteLine("=========================================================================================================");
         Console.WriteLine(String.Format("{0,-18} | {1,-6} | {2,-11} | {3,-13} | {4,-8} | {5,-12} | {6,-12} | {7}",
-            "Cluster", "z", "Max Grad(P)", "Entscheidung", "K-Wert", "Baseline-Err", "Final-Error", "Improvement"));
+            "Cluster", "z", "Max Grad(P)", "Decision", "K-value", "Baseline-Err", "Final-Error", "Improvement"));
         Console.WriteLine(new String('-', 108));
 
         int countNewton = 0;
@@ -381,7 +381,7 @@ public class BulletClusterAnalysis2
             double maxPressureGrad = System.Linq.Enumerable.Max(fitSamples, s => Math.Abs(s.PressureGradient));
             bool useClockwork = maxPressureGrad < pressureThreshold;
 
-            // Geometrische Modifikation laden
+            // Load geometric modification
             double ellipticity = GetClusterEllipticity(clusterName);
             double universalK = C * Math.Pow(zCluster, alpha);
             double geometricK = universalK * (1.0 - beta * ellipticity);
@@ -398,7 +398,7 @@ public class BulletClusterAnalysis2
             double errorFinal = CalculateErrorForK(fitSamples, zCluster, finalK);
             if (double.IsNaN(errorFinal) || errorFinal > 1e300) errorFinal = 1e300;
 
-            // Das Orakel rechnet nun ebenfalls mit dem geometrisch korrigierten Wert
+            // Oracle comparison also uses the geometry-corrected value
             double oracleError = CalculateErrorForK(fitSamples, zCluster, geometricK);
             bool truthNeedsClockwork = (oracleError < errorBaseline * 0.95);
             if (useClockwork == truthNeedsClockwork) successfulPredictions++;
@@ -422,17 +422,17 @@ public class BulletClusterAnalysis2
         double geometricMeanImprovement = validImprovementCount > 0 ? Math.Exp(sumLogImprovement / validImprovementCount) : 1.0;
 
         Console.WriteLine(new String('-', 108));
-        Console.WriteLine($"ZUSAMMENFASSUNG FÜR DIE PUBLIKATION:");
-        Console.WriteLine($"Als Newton klassifiziert:         {countNewton} Haufen");
-        Console.WriteLine($"Als TRM klassifiziert:            {countTRM} Haufen");
-        Console.WriteLine($"Vorhersage-Genauigkeit:           {predictionAccuracy:F1}% (Trigger wählte richtige Physik)");
-        Console.WriteLine($"Globale Durchschnittsverbesserung:{geometricMeanImprovement:F2}x pro Haufen (Geometrisches Mittel)");
+        Console.WriteLine($"PUBLICATION SUMMARY:");
+        Console.WriteLine($"Classified as Newton:             {countNewton} clusters");
+        Console.WriteLine($"Classified as TRM:                {countTRM} clusters");
+        Console.WriteLine($"Prediction accuracy:              {predictionAccuracy:F1}% (trigger selected correct physics)");
+        Console.WriteLine($"Global average improvement:       {geometricMeanImprovement:F2}x per cluster (geometric mean)");
         Console.WriteLine("=========================================================================================================\n");
 
         ExportBimodalResultsToCsv(exportRows, resultsCsvPath);
     }
 
-    // JETZT NEU: Der stumme Vorhersagetest verarbeitet nun das 2D-Grid (Threshold und Beta)
+    // Silent prediction test for 2D grid (threshold and beta)
     public double RunSilentPredictionTest(
         Dictionary<string, List<AcceptShell>> allClusters,
         Dictionary<string, double> redshifts,
@@ -487,23 +487,23 @@ public class BulletClusterAnalysis2
         return totalClusters > 0 ? ((double)successfulPredictions / totalClusters) * 100 : 0.0;
     }
 
-    // JETZT NEU: Der 2D-Optimierungs-Sweep findet die perfekte Balance aus Trigger und Geometrie!
+    // 2D optimization sweep to balance trigger and geometry
     public void FindBestPhysicalThresholdAndBeta(
         Dictionary<string, List<AcceptShell>> allClusters,
         Dictionary<string, double> redshifts)
     {
         Console.WriteLine("\n==========================================================================");
-        Console.WriteLine(" Starte 2D-Parameterraum-Sweep: Optimierung von Druck-Trigger UND Beta");
+        Console.WriteLine(" Starting 2D parameter sweep: optimizing pressure trigger and beta");
         Console.WriteLine("==========================================================================");
 
         double bestThreshold = 0;
         double bestBeta = 0;
         double maxAccuracy = 0;
 
-        // Äußere Schleife: Druck-Trigger (Schritte von 1.0E-34 bis 2.0E-32)
+        // Outer loop: pressure trigger (1.0E-34 to 2.0E-32)
         for (double t = 1.0e-34; t <= 2.0e-32; t += 2.0e-34)
         {
-            // Innere Schleife: Beta (Geometrische Dämpfung von 0.0 bis 1.5 in feinen Schritten)
+            // Inner loop: beta (geometric damping from 0.0 to 1.5)
             for (double b = 0.0; b <= 1.5; b += 0.05)
             {
                 double accuracy = RunSilentPredictionTest(allClusters, redshifts, 1.3195, -0.7589, 0.1, t, b);
@@ -517,10 +517,10 @@ public class BulletClusterAnalysis2
             }
         }
 
-        Console.WriteLine($"\n🌟 ABSOLUTES OPTIMUM GEFUNDEN!");
-        Console.WriteLine($"-> Perfekter Druck-Threshold: {bestThreshold:E2}");
-        Console.WriteLine($"-> Perfekter Geometrie-Koeffizient (Beta): {bestBeta:F2}");
-        Console.WriteLine($"-> MAXIMALE BIMODALE VORHERSAGEGENAUIGKEIT: {maxAccuracy:F1}%");
+        Console.WriteLine($"\nBest optimum found.");
+        Console.WriteLine($"-> Best pressure threshold: {bestThreshold:E2}");
+        Console.WriteLine($"-> Best geometric coefficient (beta): {bestBeta:F2}");
+        Console.WriteLine($"-> Maximum bimodal prediction accuracy: {maxAccuracy:F1}%");
         Console.WriteLine("==========================================================================\n");
     }
 
@@ -536,7 +536,7 @@ public class BulletClusterAnalysis2
 
     public Dictionary<string, double> LoadClusterRedshifts(string filePath)
     {
-        if (!File.Exists(filePath)) throw new FileNotFoundException($"Die Datei {filePath} wurde nicht gefunden.");
+        if (!File.Exists(filePath)) throw new FileNotFoundException($"File not found: {filePath}.");
         var redshifts = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         foreach (var rawLine in File.ReadLines(filePath))
         {

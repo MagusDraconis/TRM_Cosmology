@@ -81,7 +81,7 @@ namespace TRM.CMD
                 return;
             }
 
-            var analysis = new BulletClusterAnalysis2(); // Stelle sicher, dass die Klasse public ist in TRM.Core
+            var analysis = new BulletClusterAnalysis2();
             Console.WriteLine("Loading cluster shells and redshifts...");
             var allClusters = analysis.LoadAllClusterShells(dataPath);
             var redshifts = analysis.LoadClusterRedshifts(redshiftPath);
@@ -91,16 +91,15 @@ namespace TRM.CMD
             Console.WriteLine("STEP 1: Executing 2D-Grid-Sweep for optimal Pressure Threshold and Ellipticity Beta...");
             Console.WriteLine("This will identify the natural constants of the bimodal temporal transition.\n");
 
-            // Führt den Sweep aus (Deine Methode schreibt das Ergebnis bereits in die Konsole)
+            // Execute the sweep (method prints detailed progress to the console)
             analysis.FindBestPhysicalThresholdAndBeta(allClusters, redshifts);
 
             // --- FINAL EVALUATION ---
             Console.WriteLine("\nSTEP 2: Generating final theoretical evaluation for the publication...");
 
-            // Diese Werte können später durch Konsoleneingaben ersetzt werden, falls Forscher damit spielen wollen.
-            // Für den Standard-Lauf nutzen wir deine etablierten Best-Fit Parameter.
-            double optimizedThreshold = 2.70e-033; // Peak aus deinem großen Sweep
-            double optimizedBeta = 1.45;           // Geometrische Dämpfung
+            // Default best-fit values (can be moved to interactive input later)
+            double optimizedThreshold = 2.70e-033; // Peak from the parameter sweep
+            double optimizedBeta = 1.45;           // Geometric damping factor
             string outputCsv = Path.Combine(Directory.GetCurrentDirectory(), "TRM_V2.2_ACCEPT_Results.csv");
 
             analysis.EvaluatePhysicsDrivenBimodalTheory(

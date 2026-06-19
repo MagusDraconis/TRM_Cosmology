@@ -11,7 +11,7 @@ namespace TRM.Core
 
     public class SparcRarAnalysis1
     {
-        // Umrechnungsfaktor von (km/s)^2 / kpc in m/s^2:
+        // Conversion factor from (km/s)^2 / kpc to m/s^2:
         // (10^3 m/s)^2 / (3.08567758 * 10^19 m) = 10^6 / 3.08567758 * 10^19
         private const double Kms2KpcToMs2 = 3.240779289e-14;
         static HashSet<string> blacklist = new(StringComparer.OrdinalIgnoreCase)
@@ -26,7 +26,7 @@ namespace TRM.Core
             var rarPoints = new List<RarPoint>();
 
             if (!File.Exists(zipPath))
-                throw new FileNotFoundException($"Die Datei {zipPath} wurde nicht gefunden.");
+                throw new FileNotFoundException($"File not found: {zipPath}.");
 
             using (ZipArchive archive = ZipFile.OpenRead(zipPath))
             {
@@ -74,15 +74,15 @@ namespace TRM.Core
                                         vBulge = double.Parse(parts[4], CultureInfo.InvariantCulture);
                                     }
 
-                                    // --- PHYSIKALISCHES PRUNING ---
-                                    // 1. Division-by-Zero und instabile Kernregionen (R < 0.5 kpc) ausschließen
+                                    // --- PHYSICAL PRUNING ---
+                                    // 1) Exclude division-by-zero and unstable core regions (R < 0.5 kpc)
                                     if (r < 0.5) continue;
 
-                                    // 2. Extrem verrauschte Datenpunkte ausschließen (Fehler in Vobs > 15% oder > 20 km/s)
+                                    // 2) Exclude heavily noisy points (Vobs error > 15% or > 20 km/s)
                                     if (parts.Length >= 6 && (errVobs > 20.0 || (vObs > 0 && errVobs / vObs > 0.15)))
                                         continue;
 
-                                    // 3. Nur Punkte mit stabiler Rotation betrachten
+                                    // 3) Keep only points with stable rotation
                                     if (vObs < 10.0) continue;
 
                                     double gObsAstronomical = (vObs * vObs) / r;
@@ -99,7 +99,7 @@ namespace TRM.Core
                                         double gBarAstronomical = vBarSq / r;
                                         double gBarMs2 = gBarAstronomical * Kms2KpcToMs2;
 
-                                        // Asymmetrische Schocks ausschließen (wenn beobachtete Energie massiv unter der baryonischen liegt)
+                                        // Exclude asymmetric-shock regime (when observed energy is far below baryonic estimate)
                                         if (gObsMs2 > 0 && gBarMs2 > 0 && (gObsMs2 / gBarMs2 > 0.01))
                                         {
                                             rarPoints.Add(new RarPoint(
@@ -127,10 +127,10 @@ namespace TRM.Core
             var validGalaxies = new Dictionary<string, (double Inclination, int Quality)>(StringComparer.OrdinalIgnoreCase);
 
             if (!File.Exists(zipPath))
-                throw new FileNotFoundException($"Die Datei {zipPath} wurde nicht gefunden.");
+                throw new FileNotFoundException($"File not found: {zipPath}.");
 
             if (!File.Exists(mrtPath))
-                throw new FileNotFoundException($"Die Datei {mrtPath} wurde nicht gefunden.");
+                throw new FileNotFoundException($"File not found: {mrtPath}.");
 
             bool dataSectionStarted = false;
             int separatorCount = 0;
@@ -141,7 +141,7 @@ namespace TRM.Core
                 if (string.IsNullOrWhiteSpace(trimmed))
                     continue;
 
-                // Datenblock startet nach der dritten "-----" Trennlinie
+                // Data section starts after the third "-----" separator line
                 if (trimmed.StartsWith("----", StringComparison.Ordinal))
                 {
                     separatorCount++;
@@ -177,22 +177,22 @@ namespace TRM.Core
                         !entry.FullName.EndsWith(".dat", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    // Bereinige den Galaxiennamen aus dem Dateinamen
+                    // Normalize galaxy name from file name
                     string galaxyName = Path.GetFileNameWithoutExtension(entry.Name)
                                         .Replace("_rotmod", "", StringComparison.OrdinalIgnoreCase)
                                         .Trim();
                     string galaxyKey = NormalizeGalaxyKey(galaxyName);
 
-                    // Cross-Matching mit der fehlerfreien Master-Tabelle
+                    // Cross-match with the master reference table
                     if (validGalaxies.TryGetValue(galaxyKey, out var galaxyMeta))
                     {
-                        // Gesetzmäßiger Filter: Face-On-Galaxien verzerren die Kreisbahngeschwindigkeit quadratisch
+                        // Rule-based filter: face-on galaxies strongly distort circular velocity
                         if (galaxyMeta.Inclination < 30.0 || galaxyMeta.Quality >= 3)
                             continue;
                     }
                     else
                     {
-                        // Galaxie nicht in Tabelle 1 vorhanden -> Ausschließen zur Absicherung der Datenreinheit
+                        // Not found in table 1 -> exclude to preserve data quality
                         continue;
                     }
 
@@ -230,7 +230,7 @@ namespace TRM.Core
                                     !double.TryParse(parts[componentStart + 2], NumberStyles.Float, CultureInfo.InvariantCulture, out double vBulge))
                                     continue;
 
-                                // Lokales Pruning
+                                // Local pruning
                                 if (r < 0.5) continue;
                                 if (vObs < 10.0) continue;
                                 if (parts.Length >= 6 && (errVobs > 20.0 || (vObs > 0 && errVobs / vObs > 0.15)))
@@ -278,7 +278,7 @@ namespace TRM.Core
 
         public static List<RarBinResult> ComputeRarProfiles(List<RarPoint> points, double binSize = 0.2)
         {
-            // Wir gruppieren die Daten im Log10-Raum der baryonischen Beschleunigung
+            // Group data in log10 space of baryonic acceleration
             var groupedPoints = points
                 .GroupBy(p => Math.Floor(Math.Log10(p.GbarMs2) / binSize) * binSize)
                 .OrderBy(g => g.Key)
@@ -290,15 +290,15 @@ namespace TRM.Core
             {
                 double binCenter = group.Key + (binSize / 2.0);
 
-                // Logarithmierte beobachtete Beschleunigungen in diesem Intervall
+                // Log-transformed observed accelerations in this bin
                 var logGobsValues = group.Select(p => Math.Log10(p.GobsMs2)).ToList();
 
                 int count = logGobsValues.Count;
-                if (count < 5) continue; // Ignoriere unterbesetzte Randbereiche
+                if (count < 5) continue; // Ignore low-population edge bins
 
                 double meanLogGobs = logGobsValues.Average();
 
-                // Varianz und Standardabweichung berechnen
+                // Compute variance and standard deviation
                 double sumOfSquares = logGobsValues.Sum(v => Math.Pow(v - meanLogGobs, 2));
                 double stdDev = Math.Sqrt(sumOfSquares / count);
 
@@ -308,8 +308,8 @@ namespace TRM.Core
             return binResults;
         }
         /// <summary>
-        /// Berechnet die theoretische beobachtete Beschleunigung basierend auf der 
-        /// standardmäßigen RAR-Interpolationsfunktion für einen gegebenen a0-Wert.
+        /// Computes the theoretical observed acceleration using
+        /// the standard RAR interpolation function for a given a0 value.
         /// </summary>
         public static double PredictGobs(double gBar, double a0)
         {
@@ -321,8 +321,8 @@ namespace TRM.Core
         }
 
         /// <summary>
-        /// Führt eine hochpräzise zweistufige Rastersuche durch, um dasjenige log10(a0) zu finden,
-        /// welches die Summe der Quadrate der Log-Residuen über alle Datenpunkte minimiert.
+        /// Runs a high-precision two-stage grid search to find log10(a0)
+        /// that minimizes the sum of squared log-residuals across all points.
         /// </summary>
         public static (double BestLogA0, double BestA0, double RmsError) FitA0(
             List<RarPoint> points,
@@ -331,7 +331,7 @@ namespace TRM.Core
 
 
             if (points == null || points.Count == 0)
-                throw new ArgumentException("Keine Datenpunkte für den Fit übergeben.");
+                throw new ArgumentException("No data points were provided for the fit.");
 
             var normalizedInclinations = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
             if (inclinations is { Count: > 0 })
@@ -344,13 +344,13 @@ namespace TRM.Core
                 }
             }
 
-            // Heuristische Upsilon-Map vor dem Fit erzeugen
+            // Build heuristic Upsilon map before fitting
             var upsilonDiskMap = EstimateUpsilonMap(points);
 
             double bestLogA0 = 0;
             double minSsr = double.MaxValue; // Sum of Squared Residuals
 
-            // Erste Stufe: Grobes Raster von -11.0 bis -9.0 mit Schrittweite 0.01
+            // First stage: coarse grid from -11.0 to -9.0 in steps of 0.01
             for (double logA0 = -11.0; logA0 <= -9.0; logA0 += 0.01)
             {
                 double a0 = Math.Pow(10, logA0);
@@ -363,7 +363,7 @@ namespace TRM.Core
                 }
             }
 
-            // Zweite Stufe: Feines Kämmen um das gefundene Minimum herum (±0.02) mit Schrittweite 0.0001
+            // Second stage: fine sweep around the minimum (±0.02) with 0.0001 step
             double startFine = bestLogA0 - 0.02;
             double endFine = bestLogA0 + 0.02;
 
@@ -379,7 +379,7 @@ namespace TRM.Core
                 }
             }
 
-            // Root Mean Square Error (Standardfehler) berechnen
+            // Compute root mean square error
             double rmsError = Math.Sqrt(minSsr);
             double bestA0 = Math.Pow(10, bestLogA0);
 
@@ -397,16 +397,16 @@ namespace TRM.Core
     Dictionary<string, double> inclinations,
     Dictionary<string, double> upsilonDiskMap)
         {
-            Console.WriteLine("\n--- Residuen-Analyse der Galaxien ---");
+            Console.WriteLine("\n--- Galaxy residual analysis ---");
 
-            // Wir gruppieren nach Galaxie, um den durchschnittlichen Fehler pro Galaxie zu sehen
+            // Group by galaxy to inspect average error per galaxy
             var residuals = points.GroupBy(p => p.GalaxyName)
                 .Select(group =>
                 {
                     double sumResidual = 0;
                     int count = 0;
 
-                    // Re-berechne das Residuum für diese Galaxie mit dem BESTEN A0
+                    // Recompute residual for this galaxy using best A0
                     foreach (var p in group)
                     {
                         string galaxyKey = NormalizeGalaxyKey(p.GalaxyName);
@@ -427,49 +427,49 @@ namespace TRM.Core
                     }
                     return new { Name = group.Key, AvgResidual = count > 0 ? sumResidual / count : 0 };
                 })
-                .OrderByDescending(x => x.AvgResidual) // Die schlimmsten Ausreißer zuerst!
+                .OrderByDescending(x => x.AvgResidual) // Worst outliers first
                 .ToList();
 
-            foreach (var item in residuals.Take(20)) // Zeige die Top 20 "Problemkinder"
+            foreach (var item in residuals.Take(20)) // Show top 20 problematic galaxies
             {
-                Console.WriteLine($"Galaxie: {item.Name,-15} | Avg Residuum: {item.AvgResidual:F4}");
+                Console.WriteLine($"Galaxy: {item.Name,-15} | Avg residual: {item.AvgResidual:F4}");
             }
         }
         private static double CalculateWeightedSsr(
                 List<RarPoint> points,
                 double a0,
                 Dictionary<string, double> inclinations,
-                Dictionary<string, double> upsilonDiskMap) // NEU: Mapping pro Galaxie
+                Dictionary<string, double> upsilonDiskMap) // Per-galaxy mapping
         {
             double totalWeight = 0;
             double weightedSsr = 0;
             foreach (var p in points)
             {
                 string galaxyKey = NormalizeGalaxyKey(p.GalaxyName);
-                // Checken, ob Galaxie auf der Blacklist steht
+                // Check whether galaxy is blacklisted
                 if (blacklist.Contains(galaxyKey))
                 {
-                    continue; // Diese Galaxie komplett ignorieren
+                    continue; // Ignore this galaxy entirely
                 }
-                // 1. Inklination holen
-                double inc = inclinations.GetValueOrDefault(galaxyKey, 60.0); // Fallback falls keine Inklination vorhanden
+                // 1) Get inclination
+                double inc = inclinations.GetValueOrDefault(galaxyKey, 60.0); // Fallback if inclination is unavailable
                 double sinI = Math.Sin(inc * Math.PI / 180.0);
                 double weight = sinI * sinI;
 
-                // 2. Individuelles Upsilon holen (Default 0.5, falls nicht in der Map)
+                // 2) Get per-galaxy Upsilon (default 0.5 if missing)
                 double upsilonDisk = upsilonDiskMap.GetValueOrDefault(galaxyKey, 0.5);
 
-                // 3. Baryonische Beschleunigung mit dynamischem Upsilon berechnen
+                // 3) Compute baryonic acceleration with dynamic Upsilon
                 // g_bar = (v_gas^2 + upsilon * v_disk^2 + upsilon_bulge * v_bulge^2) / r
                 double vDiskSq = p.Vdisk * p.Vdisk;
                 double vBulgeSq = p.Vbulge * p.Vbulge;
                 double vGasSq = p.Vgas * p.Vgas;
 
-                // Wir gehen davon aus, dass Bulge-Upsilon stabil bleibt (da meist alte Population)
+                // Assume bulge Upsilon remains stable (typically older stellar population)
                 double vBarSq = vGasSq + (upsilonDisk * vDiskSq) + (0.7 * vBulgeSq);
                 double gBarMs2 = (vBarSq / p.RadiusKpc) * Kms2KpcToMs2;
 
-                // Restliche Berechnung (Log-Residuen)
+                // Remaining log-residual computation
                 double logGobsActual = Math.Log10(p.GobsMs2);
                 double gObsPredicted = PredictGobs(gBarMs2, a0);
                 if (gObsPredicted <= 0) continue;
@@ -478,7 +478,7 @@ namespace TRM.Core
 
                 weightedSsr += weight * (residual * residual);
                 totalWeight += weight;
-                // Debugging-Schritt:
+                // Debug step:
                 
             }
             
@@ -493,7 +493,7 @@ namespace TRM.Core
             if (allPoints == null || allPoints.Count == 0)
                 return map;
 
-            // Heuristik:
+            // Heuristic:
             // - Gasanteil > 30% => Upsilon_disk = 0.3
             // - sonst         => Upsilon_disk = 0.5
             foreach (var galaxyGroup in allPoints.GroupBy(p => NormalizeGalaxyKey(p.GalaxyName)))
@@ -508,17 +508,17 @@ namespace TRM.Core
                     double vBulgeSq = p.Vbulge > 0 ? p.Vbulge * p.Vbulge : 0;
 
                     gasContribution += vGasSq;
-                    // Referenz-Sternanteil mit Standardwerten
+                    // Reference stellar contribution with default values
                     stellarContribution += (0.5 * vDiskSq) + (0.7 * vBulgeSq);
                 }
 
                 double baryonicTotal = gasContribution + stellarContribution;
                 double gasFraction = baryonicTotal > 0 ? gasContribution / baryonicTotal : 0;
 
-                // Statt hartem Sprung:
-                // Skaliere Upsilon zwischen 0.5 (bei 0% Gas) und 0.3 (bei 50% Gas)
+                // Instead of a hard step:
+                // Scale Upsilon between 0.5 (0% gas) and 0.3 (50% gas)
                 double upsilonDisk = 0.5 - (gasFraction * 0.4);
-                // Sicherstellen, dass wir im physikalisch sinnvollen Bereich bleiben
+                // Keep value in a physically meaningful range
                 upsilonDisk = Math.Max(0.3, Math.Min(0.5, upsilonDisk));
 
                 map[galaxyGroup.Key] = upsilonDisk;

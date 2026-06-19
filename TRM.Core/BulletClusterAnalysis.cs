@@ -126,17 +126,17 @@ public class BulletClusterAnalysis
             curr.CalculatedMass = Math.Abs(-(rCm * rCm / (PhysicalConstants.G * rho)) * dPdr) / PhysicalConstants.M_Solar;
         }
     }
-    // Deine Theorie-Implementierung: TRM-Inertia (Synchronisation Delay)
+    // TRM inertia implementation (synchronization delay)
     public double CalculateMassWithTRM(double rCm, double rho, double dPdr, double redshift, double k)
     {
-        // Dein TRM-Sync-Faktor
-        // Je höher k oder z, desto schwächer die effektive Gravitationskopplung
+        // TRM synchronization factor
+        // Higher k or z weakens the effective gravitational coupling
         double syncFactor = 1.0 / (1.0 + k * redshift);
 
-        // Effektives G (durch die Trägheit "abgeschwächt")
+        // Effective G reduced by inertial coupling
         double G_effective = PhysicalConstants.G * syncFactor;
 
-        // Berechnung der Masse nach deiner Theorie
+        // Mass calculation under this model
         // M = | -(r^2 / (G_eff * rho)) * dP/dr |
         return Math.Abs(-(Math.Pow(rCm, 2) / (G_effective * rho)) * dPdr) / PhysicalConstants.M_Solar;
     }
@@ -241,13 +241,13 @@ public class BulletClusterAnalysis
             return (0, double.MaxValue);
 
         // ========================================================
-        // SANITY-FILTER: Erstellt eine leere Liste exakt vom selben Typ wie rawSamples
+        // SANITY FILTER: create a filtered list with the same sample type
         // ========================================================
         var fitSamples = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(rawSamples, sample =>
         {
             double mHydroStandard = Math.Abs(-(sample.RadiusSquaredCm2 / (PhysicalConstants.G * sample.Density)) * sample.PressureGradient) / PhysicalConstants.M_Solar;
 
-            // Eine Schale ist "gesund", wenn die Masse eine gültige Zahl und nicht unphysikalisch riesig ist
+            // A shell is valid if mass is finite and physically reasonable
             return !double.IsNaN(mHydroStandard) &&
                    !double.IsInfinity(mHydroStandard) &&
                    mHydroStandard < 1e16 &&
@@ -280,7 +280,7 @@ public class BulletClusterAnalysis
 
         double minError = CalculateErrorForK(fitSamples, zCluster, bestK);
 
-        // Der Debug-Schutz von vorhin, falls trotz Filter etwas schiefgeht
+        // Extra debug guard if filtered values still overflow
         if (minError > 1e300 || double.IsInfinity(minError) || double.IsNaN(minError))
         {
             minError = 1e300;
@@ -389,7 +389,7 @@ public class BulletClusterAnalysis
         if (shells == null || shells.Count < 3)
         {
             Console.WriteLine($"Cluster: {clusterName}");
-            Console.WriteLine("  Nicht genügend Datenpunkte für Vergleich.");
+            Console.WriteLine("  Not enough data points for comparison.");
             Console.WriteLine("------------------------------------------");
             return;
         }
@@ -397,16 +397,16 @@ public class BulletClusterAnalysis
         var fitSamples = BuildFitSamples(shells);
         double errorAtBaseline = CalculateErrorForK(fitSamples, fixedZ, baselineK);
 
-        // Berechne das Verhältnis (Improvement Factor)
+        // Compute improvement factor
         double improvement = (bestError > 0 && !double.IsNaN(bestError) && !double.IsInfinity(bestError))
             ? errorAtBaseline / bestError
             : double.PositiveInfinity;
 
         //Console.WriteLine($"Cluster: {clusterName}");
-        //Console.WriteLine($"  Verwendetes z (fix): {fixedZ:F4}");
-        //Console.WriteLine($"  Fehler (Baseline k={baselineK:F2}): {errorAtBaseline:E2}");
-        //Console.WriteLine($"  Fehler (Dein k={bestK}): {bestError:E2}");
-        //Console.WriteLine($"  Verbesserung: Faktor {improvement:F2}x");
+        //Console.WriteLine($"  Fixed z: {fixedZ:F4}");
+        //Console.WriteLine($"  Error (baseline k={baselineK:F2}): {errorAtBaseline:E2}");
+        //Console.WriteLine($"  Error (model k={bestK}): {bestError:E2}");
+        //Console.WriteLine($"  Improvement factor: {improvement:F2}x");
        
         Console.WriteLine($"{clusterName} | {fixedZ:F4} | {baselineK:F2} | {errorAtBaseline:E2} | {bestK} | {bestError:E2} | {improvement:F2}x");
         Console.WriteLine("------------------------------------------");
@@ -437,12 +437,12 @@ public class BulletClusterAnalysis
                 double mReported = shell.ReportedMass;
                 double mHydro = shell.CalculatedMass;
 
-                // Filter: Wir ignorieren Zeilen mit negativen reported Werten (Messrauschen)
+                // Filter: ignore rows with negative reported values (measurement noise)
                 if (mReported > 0 && mHydro > 0)
                 {
                     double coverage = (mHydro / mReported) * 100;
 
-                    // Wir schreiben die Werte mit Punkt statt Komma für internationale Kompatibilität
+                    // Write values with invariant culture for international compatibility
                     string line = string.Format(CultureInfo.InvariantCulture,
                                   "{0:F0};{1:E2};{2:E2};{3:F2}",
                                   r, mReported, mHydro, coverage);
@@ -451,23 +451,23 @@ public class BulletClusterAnalysis
                 }
             }
         }
-        Console.WriteLine($"Analyse erfolgreich exportiert nach: {filePath}");
+        Console.WriteLine($"Analysis exported successfully to: {filePath}");
     }
 
     public static void DeriveDynamicKzLaw(List<ClusterKFitResult> results, Dictionary<string, double> redshifts)
     {
         Console.WriteLine("\n=======================================================");
-        Console.WriteLine("    ANALYSE DER DYNAMISCHEN K(z) ABHÄNGIGKEIT          ");
+        Console.WriteLine("    ANALYSIS OF THE DYNAMIC K(z) DEPENDENCE           ");
         Console.WriteLine("=======================================================\n");
 
-        // 1. Filtere die Daten: Wir brauchen nur die Haufen, die WIRKLICH eine 
-        // Modifikation benötigen. Alles was exakt am Floor (0.1) oder am Limit klebt, 
-        // verfälscht die Kurve, da es keine echten physikalischen Optima sind.
+        // 1) Filter data: keep only clusters that truly require modification.
+        // Values stuck at the floor (0.1) or upper limit distort the fit
+        // because they are not physical optima.
         var validFits = new List<(double z, double k)>();
 
         foreach (var result in results)
         {
-            // Schließe Baseline-Haufen (k <= 0.11) aus und sorge dafür, dass z bekannt ist
+            // Exclude baseline clusters (k <= 0.11) and require known z
             if (result.BestK > 0.11 && redshifts.TryGetValue(result.ClusterName, out double z))
             {
                 validFits.Add((z, result.BestK));
@@ -476,11 +476,11 @@ public class BulletClusterAnalysis
 
         if (validFits.Count < 2)
         {
-            Console.WriteLine("Nicht genügend gültige Ausreißer-Haufen für eine Regression gefunden.");
+            Console.WriteLine("Not enough valid outlier clusters for regression.");
             return;
         }
 
-        // 2. Lineare Regression im Log-Log-Raum für das Potenzgesetz K(z) = C * z^alpha
+        // 2) Linear regression in log-log space for power law K(z) = C * z^alpha
         // ln(K) = ln(C) + alpha * ln(z)
 
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
@@ -497,7 +497,7 @@ public class BulletClusterAnalysis
             sumX2 += lnZ * lnZ;
         }
 
-        // Analytische Berechnung von Steigung (alpha) und y-Achsenabschnitt (ln(C))
+        // Analytical solution for slope (alpha) and intercept (ln(C))
         double denominator = (n * sumX2) - (sumX * sumX);
         if (denominator == 0) return;
 
@@ -505,28 +505,27 @@ public class BulletClusterAnalysis
         double lnC = (sumY - (alpha * sumX)) / n;
         double C = Math.Exp(lnC);
 
-        // 3. Ausgabe der physikalischen Gesetze
-        Console.WriteLine($"Anzahl analysierter Modifikations-Haufen: {n}");
-        Console.WriteLine($"Ermittelter Vorfaktor (C): {C:F4}");
-        Console.WriteLine($"Ermittelter Exponent (alpha): {alpha:F4}");
+        // 3) Report fitted physical law
+        Console.WriteLine($"Analyzed modified clusters: {n}");
+        Console.WriteLine($"Estimated prefactor (C): {C:F4}");
+        Console.WriteLine($"Estimated exponent (alpha): {alpha:F4}");
         Console.WriteLine("-------------------------------------------------------");
 
         Console.WriteLine("\n[ RESULTIERENDES PHYSIKALISCHES GESETZ ]");
         Console.WriteLine($"K(z) = {C:F4} * z^({alpha:F4})");
 
-        // 4. Physikalische Deutung
-        Console.WriteLine("\n[ KOSMOLOGISCHE DEUTUNG ]");
+        // 4) Physical interpretation
+        Console.WriteLine("\n[ COSMOLOGICAL INTERPRETATION ]");
         if (Math.Abs(alpha - (-1.0)) < 0.2)
         {
-            Console.WriteLine("🌟 SENSATIONELL! Der Exponent liegt extrem nah bei -1.0.");
-            Console.WriteLine($"Das beweist: K(z) skaliert streng reziprok mit dem Redshift (1/z).");
-            Console.WriteLine($"Der universelle Zeitsynchronisations-Faktor für Galaxienhaufen ist konstant!");
-            Console.WriteLine($"Das universelle Kappa ist: K * z = {C:F4}");
+            Console.WriteLine("Exponent is very close to -1.0.");
+            Console.WriteLine($"This suggests K(z) scales nearly reciprocally with redshift (1/z).");
+            Console.WriteLine($"The universal cluster time-synchronization factor appears approximately constant.");
+            Console.WriteLine($"Derived universal kappa: K * z = {C:F4}");
         }
         else
         {
-            Console.WriteLine("Der Exponent weicht von -1 ab. Das bedeutet, das Zeit-Feld hat eine");
-            Console.WriteLine("komplexere, nicht-lineare kosmologische Entwicklungsgeschichte.");
+            Console.WriteLine("Exponent deviates from -1, indicating a more complex non-linear evolution.");
         }
         Console.WriteLine("=======================================================\n");
     }
@@ -542,7 +541,7 @@ public class BulletClusterAnalysis
         var redshifts = LoadClusterRedshifts(redshiftFilePath);
 
         Console.WriteLine("\n=======================================================================================");
-        Console.WriteLine($"   PRÜFUNG DES UNIVERSELLEN GESETZES: K(z) = {C:F4} * z^({alpha:F4})");
+        Console.WriteLine($"   TEST OF UNIVERSAL LAW: K(z) = {C:F4} * z^({alpha:F4})");
         Console.WriteLine("=======================================================================================");
         Console.WriteLine("ClusterName      | z      | Universal K | Baseline Error | Universal Error | Improvement");
         Console.WriteLine("---------------------------------------------------------------------------------------");
@@ -560,7 +559,7 @@ public class BulletClusterAnalysis
 
             if (!redshifts.TryGetValue(clusterName, out var zCluster) || zCluster <= 0) continue;
 
-            // 1. Daten holen und unseren Sanity-Filter anwenden
+            // 1) Load data and apply sanity filter
             var rawSamples = BuildFitSamples(shells);
             var fitSamples = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(rawSamples, sample =>
             {
@@ -570,18 +569,18 @@ public class BulletClusterAnalysis
 
             if (fitSamples.Count == 0) continue;
 
-            // 2. Das universelle physikalische K berechnen (KEIN OPTIMIERER MEHR!)
+            // 2) Compute universal physical K (no optimizer)
             double universalK = C * Math.Pow(zCluster, alpha);
 
-            // 3. Fehler vergleichen
+            // 3) Compare errors
             double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
             double errorUniversal = CalculateErrorForK(fitSamples, zCluster, universalK);
 
-            // Numerischen Überlauf abfangen
+            // Guard against numeric overflow
             if (errorBaseline > 1e300 || double.IsNaN(errorBaseline)) errorBaseline = 1e300;
             if (errorUniversal > 1e300 || double.IsNaN(errorUniversal)) errorUniversal = 1e300;
 
-            // 4. Verbesserung berechnen
+            // 4) Compute improvement
             double improvement = 1.0;
             if (errorUniversal > 0 && errorUniversal < 1e300)
             {
@@ -590,14 +589,13 @@ public class BulletClusterAnalysis
 
             validCount++;
 
-            // Nur Haufen zählen, die sich wirklich signifikant verbessern (nicht nur Rundungsrauschen)
+            // Count only clusters with significant improvement (not rounding noise)
             if (improvement > 1.05) improvedCount++;
 
-            // Wir cappen die Verbesserung bei 1000x für den Durchschnitt, 
-            // damit ein einzelner absurder 10.000x Ausreißer die Statistik nicht zerstört
+            // Cap improvement at 1000x for averaging to avoid extreme outlier dominance
             sumImprovement += Math.Min(improvement, 1000.0);
 
-            // Absolute Fehler summieren (nur wenn sie nicht übergelaufen sind)
+            // Sum absolute errors only for finite values
             if (errorBaseline < 1e300 && errorUniversal < 1e300)
             {
                 totalBaselineError += errorBaseline;
@@ -608,17 +606,17 @@ public class BulletClusterAnalysis
         }
 
         // =======================================================
-        // ABSCHLUSS-STATISTIK
+        // FINAL STATISTICS
         // =======================================================
         double avgImprovement = sumImprovement / validCount;
         double globalErrorReduction = (totalBaselineError > 0) ? (totalBaselineError / totalUniversalError) : 0;
 
         Console.WriteLine("=======================================================================================");
-        Console.WriteLine($"ZUSAMMENFASSUNG DER PARAMETERFREIEN THEORIE:");
-        Console.WriteLine($"Erfolgreich analysierte Cluster:  {validCount}");
-        Console.WriteLine($"Haufen mit echter Verbesserung:   {improvedCount} von {validCount} ({((double)improvedCount / validCount) * 100:F1}%)");
-        Console.WriteLine($"Durchschnittliche Verbesserung:   {avgImprovement:F2}x pro Haufen");
-        Console.WriteLine($"Globale Fehlerreduktion (Summe):  {globalErrorReduction:F2}x besser als Baseline");
+        Console.WriteLine($"SUMMARY OF PARAMETER-FREE THEORY:");
+        Console.WriteLine($"Successfully analyzed clusters:    {validCount}");
+        Console.WriteLine($"Clusters with real improvement:    {improvedCount} of {validCount} ({((double)improvedCount / validCount) * 100:F1}%)");
+        Console.WriteLine($"Average improvement:              {avgImprovement:F2}x per cluster");
+        Console.WriteLine($"Global error reduction (sum):     {globalErrorReduction:F2}x vs baseline");
         Console.WriteLine("=======================================================================================\n");
     }
     public void EvaluateBimodalTheoryForAllClusters(
@@ -632,16 +630,16 @@ public class BulletClusterAnalysis
         var redshifts = LoadClusterRedshifts(redshiftFilePath);
 
         Console.WriteLine("\n=======================================================================================");
-        Console.WriteLine($"   BIMODALE THEORIE-PRÜFUNG: Newton (0.1) vs. Kosmologische Kopplung K(z)");
+        Console.WriteLine($"   BIMODAL THEORY CHECK: Newton (0.1) vs. Cosmological coupling K(z)");
         Console.WriteLine("=======================================================================================");
         Console.WriteLine("ClusterName      | Gruppe | Angewandtes K | Bester Fehler | Improvement vs Baseline");
         Console.WriteLine("---------------------------------------------------------------------------------------");
 
-        int countGroupA = 0; // Bleiben bei Newton
-        int countGroupB = 0; // Brauchen Clockwork-Modifikation
+        int countGroupA = 0; // Stay on Newton
+        int countGroupB = 0; // Require Clockwork modification
 
-        double totalBaselineErrorSum = 0; // Was Newton für alle Haufen gesamt hätte
-        double totalBimodalErrorSum = 0;  // Was unsere hybride Theorie gesamt liefert
+        double totalBaselineErrorSum = 0; // Baseline Newton aggregate error
+        double totalBimodalErrorSum = 0;  // Hybrid-theory aggregate error
         double sumImprovement = 0;
 
         foreach (var entry in allClusters.OrderBy(k => k.Key))
@@ -651,7 +649,7 @@ public class BulletClusterAnalysis
 
             if (!redshifts.TryGetValue(clusterName, out var zCluster) || zCluster <= 0) continue;
 
-            // Sanity-Filter für unphysikalische Schalen
+            // Sanity filter for unphysical shells
             var fitSamples = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(BuildFitSamples(shells), sample =>
             {
                 double mHydroStandard = Math.Abs(-(sample.RadiusSquaredCm2 / (PhysicalConstants.G * sample.Density)) * sample.PressureGradient) / PhysicalConstants.M_Solar;
@@ -660,22 +658,22 @@ public class BulletClusterAnalysis
 
             if (fitSamples.Count == 0) continue;
 
-            // 1. Newton-Fehler berechnen
+            // 1) Compute Newton baseline error
             double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
             if (errorBaseline > 1e300 || double.IsNaN(errorBaseline)) errorBaseline = 1e300;
 
-            // 2. Clockwork-Fehler berechnen (Universelles Gesetz)
+            // 2) Compute Clockwork error (universal law)
             double universalK = C * Math.Pow(zCluster, alpha);
             double errorUniversal = CalculateErrorForK(fitSamples, zCluster, universalK);
             if (errorUniversal > 1e300 || double.IsNaN(errorUniversal)) errorUniversal = 1e300;
 
-            // 3. DER AKTIVIERUNGS-SCHALTER (Bimodale Entscheidung)
+            // 3) Activation switch (bimodal decision)
             string gruppe;
             double finalK;
             double finalError;
             double improvement = 1.0;
 
-            // Wenn die Modifikation den Fehler signifikant verbessert (um mehr als 5%), aktivieren wir sie!
+            // Activate modification only if error improves by more than 5%
             if (errorUniversal < errorBaseline * 0.95)
             {
                 gruppe = "B (Clockwork)";
@@ -691,7 +689,7 @@ public class BulletClusterAnalysis
                 countGroupA++;
             }
 
-            // Verbesserung berechnen
+            // Compute improvement
             if (finalError > 0 && finalError < 1e300)
             {
                 improvement = errorBaseline / finalError;
@@ -709,7 +707,7 @@ public class BulletClusterAnalysis
         }
 
         // =======================================================
-        // ABSCHLUSS-STATISTIK
+        // FINAL STATISTICS
         // =======================================================
         int totalClusters = countGroupA + countGroupB;
         double avgImprovement = sumImprovement / totalClusters;
@@ -717,12 +715,12 @@ public class BulletClusterAnalysis
                                       ? (totalBaselineErrorSum / totalBimodalErrorSum) : 0;
 
         Console.WriteLine("=======================================================================================");
-        Console.WriteLine($"ZUSAMMENFASSUNG DER OPTIMIERTEN THEORIE:");
-        Console.WriteLine($"Analysierte Cluster gesamt:       {totalClusters}");
-        Console.WriteLine($"Gruppe A (Klassisch Newton):      {countGroupA} Haufen ({((double)countGroupA / totalClusters) * 100:F1}%)");
-        Console.WriteLine($"Gruppe B (Clockwork K(z) Aktiv):  {countGroupB} Haufen ({((double)countGroupB / totalClusters) * 100:F1}%)");
-        Console.WriteLine($"Durchschnittliche Verbesserung:   {avgImprovement:F2}x pro Haufen (über alle)");
-        Console.WriteLine($"Globale Fehlerreduktion (Summe):  {globalErrorReduction:F2}x besser als reine Baseline!");
+        Console.WriteLine($"SUMMARY OF OPTIMIZED THEORY:");
+        Console.WriteLine($"Total analyzed clusters:          {totalClusters}");
+        Console.WriteLine($"Group A (classical Newton):       {countGroupA} clusters ({((double)countGroupA / totalClusters) * 100:F1}%)");
+        Console.WriteLine($"Group B (active Clockwork K(z)):  {countGroupB} clusters ({((double)countGroupB / totalClusters) * 100:F1}%)");
+        Console.WriteLine($"Average improvement:              {avgImprovement:F2}x per cluster");
+        Console.WriteLine($"Global error reduction (sum):     {globalErrorReduction:F2}x vs pure baseline");
         Console.WriteLine("=======================================================================================\n");
     }
 
@@ -737,10 +735,10 @@ public class BulletClusterAnalysis
         var redshifts = LoadClusterRedshifts(redshiftFilePath);
 
         Console.WriteLine("\n=======================================================================================");
-        Console.WriteLine("   PHYSIKALISCHE DIAGNOSE: Die Suche nach dem Aktivierungs-Threshold");
+        Console.WriteLine("   PHYSICAL DIAGNOSTIC: searching for activation threshold");
         Console.WriteLine("=======================================================================================");
 
-        // Sammler für statistische Eigenschaften
+        // Collectors for statistical properties
         var groupA_Densities = new List<double>();
         var groupA_PressureGrads = new List<double>();
         var groupA_Masses = new List<double>();
@@ -767,7 +765,7 @@ public class BulletClusterAnalysis
 
             if (fitSamples.Count == 0) continue;
 
-            // Fehler berechnen zur Klassifizierung
+            // Compute errors for classification
             double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
             if (double.IsNaN(errorBaseline) || errorBaseline > 1e300) errorBaseline = 1e300;
 
@@ -775,16 +773,16 @@ public class BulletClusterAnalysis
             double errorUniversal = CalculateErrorForK(fitSamples, zCluster, universalK);
             if (double.IsNaN(errorUniversal) || errorUniversal > 1e300) errorUniversal = 1e300;
 
-            // Physikalische Kern-Eigenschaften dieses Haufens extrahieren
-            // Wir nehmen die maximale Dichte und den max. Druckgradienten als Indikator für den "Core"-Zustand
+            // Extract core physical properties of this cluster
+            // Use maximum density and pressure gradient as core-state indicators
             double maxDensity = System.Linq.Enumerable.Max(fitSamples, s => s.Density);
             double maxPressureGrad = System.Linq.Enumerable.Max(fitSamples, s => Math.Abs(s.PressureGradient));
-            double totalMass = System.Linq.Enumerable.Max(fitSamples, s => s.ReportedMass); // Äußerste gemeldete Masse
+            double totalMass = System.Linq.Enumerable.Max(fitSamples, s => s.ReportedMass); // Outermost reported mass
 
-            // Klassifizierung (Gruppe A vs B)
+            // Classification (Group A vs B)
             if (errorUniversal < errorBaseline * 0.95)
             {
-                // GRUPPE B (Clockwork)
+                // GROUP B (Clockwork)
                 groupB_Densities.Add(maxDensity);
                 groupB_PressureGrads.Add(maxPressureGrad);
                 groupB_Masses.Add(totalMass);
@@ -792,7 +790,7 @@ public class BulletClusterAnalysis
             }
             else
             {
-                // GRUPPE A (Newton)
+                // GROUP A (Newton)
                 groupA_Densities.Add(maxDensity);
                 groupA_PressureGrads.Add(maxPressureGrad);
                 groupA_Masses.Add(totalMass);
@@ -801,41 +799,41 @@ public class BulletClusterAnalysis
         }
 
         // =======================================================
-        // AUSWERTUNG DER DATEN
+        // DATA EVALUATION
         // =======================================================
-        Console.WriteLine($"Gruppe A (Newton): {groupA_Densities.Count} Haufen");
-        Console.WriteLine($"Gruppe B (Clockwork): {groupB_Densities.Count} Haufen\n");
+        Console.WriteLine($"Group A (Newton): {groupA_Densities.Count} clusters");
+        Console.WriteLine($"Group B (Clockwork): {groupB_Densities.Count} clusters\n");
 
-        Console.WriteLine(String.Format("{0,-25} | {1,-22} | {2,-22}", "Physikalische Eigenschaft", "Gruppe A (Newton)", "Gruppe B (Clockwork)"));
+        Console.WriteLine(String.Format("{0,-25} | {1,-22} | {2,-22}", "Physical property", "Group A (Newton)", "Group B (Clockwork)"));
         Console.WriteLine(new String('-', 75));
 
-        PrintComparisonRow("Durchschnittliches z", groupA_Redshifts, groupB_Redshifts, "F4");
-        PrintComparisonRow("Max. Kerndichte (rho)", groupA_Densities, groupB_Densities, "E2");
-        PrintComparisonRow("Max. Druckgradient", groupA_PressureGrads, groupB_PressureGrads, "E2");
-        PrintComparisonRow("Durchschn. Gesamtmasse", groupA_Masses, groupB_Masses, "E2");
+        PrintComparisonRow("Average z", groupA_Redshifts, groupB_Redshifts, "F4");
+        PrintComparisonRow("Max core density (rho)", groupA_Densities, groupB_Densities, "E2");
+        PrintComparisonRow("Max pressure gradient", groupA_PressureGrads, groupB_PressureGrads, "E2");
+        PrintComparisonRow("Average total mass", groupA_Masses, groupB_Masses, "E2");
 
         Console.WriteLine(new String('-', 75));
-        Console.WriteLine("\n[ NÄCHSTER SCHRITT FÜR DAS PAPER ]");
-        Console.WriteLine("Suche in der obigen Tabelle nach der Eigenschaft, die den größten relativen Unterschied aufweist.");
-        Console.WriteLine("Dieser Unterschied ist der physikalische Trigger für die makroskopische Zeitsynchronisation!");
+        Console.WriteLine("\n[ NEXT STEP FOR THE PAPER ]");
+        Console.WriteLine("Inspect the table above for the property with the largest relative difference.");
+        Console.WriteLine("That difference is the physical trigger for macroscopic time synchronization.");
         Console.WriteLine("=======================================================================================\n");
     }
 
-    // Hilfsmethode für die saubere Konsolenausgabe
+    // Helper for clean console output
     private void PrintComparisonRow(string label, List<double> listA, List<double> listB, string format)
     {
         double avgA = listA.Count > 0 ? System.Linq.Enumerable.Average(listA) : 0;
         double avgB = listB.Count > 0 ? System.Linq.Enumerable.Average(listB) : 0;
 
-        // Berechne den relativen Unterschied (Faktor)
+        // Compute relative difference (factor)
         double ratio = (avgA > 0 && avgB > 0) ? Math.Max(avgA / avgB, avgB / avgA) : 1;
-        string winner = avgA > avgB ? "A ist größer" : "B ist größer";
+        string winner = avgA > avgB ? "A is larger" : "B is larger";
 
         Console.WriteLine(String.Format("{0,-25} | {1,-22} | {2,-22}",
             label,
             avgA.ToString(format),
             avgB.ToString(format)));
-        Console.WriteLine(String.Format("{0,-25} | -> Unterschied: {1:F1}x ({2})", "", ratio, winner));
+        Console.WriteLine(String.Format("{0,-25} | -> Difference: {1:F1}x ({2})", "", ratio, winner));
         Console.WriteLine();
     }
 
@@ -846,13 +844,13 @@ public class BulletClusterAnalysis
             double alpha = -0.7589,
             double baselineK = 0.1,
             double pressureThreshold = 6.0e-34,
-            string resultsCsvPath = "results.csv") // DEIN ECHTER PHYSIKALISCHER TRIGGER!
+            string resultsCsvPath = "results.csv") // Physically motivated trigger
     {
         Console.WriteLine("\n=========================================================================================================");
-        Console.WriteLine($"   FINALER BEWEIS: TRM vs. Newton (Phasen-Trigger: {pressureThreshold:E2})");
+        Console.WriteLine($"   FINAL EVIDENCE: TRM vs. Newton (phase trigger: {pressureThreshold:E2})");
         Console.WriteLine("=========================================================================================================");
         Console.WriteLine(String.Format("{0,-18} | {1,-6} | {2,-11} | {3,-13} | {4,-8} | {5,-12} | {6,-12} | {7}",
-            "Cluster", "z", "Max Grad(P)", "Entscheidung", "K-Wert", "Baseline-Err", "Final-Error", "Improvement"));
+            "Cluster", "z", "Max Grad(P)", "Decision", "K-value", "Baseline-Err", "Final-Error", "Improvement"));
         Console.WriteLine(new String('-', 108));
 
         int countNewton = 0;
@@ -860,7 +858,7 @@ public class BulletClusterAnalysis
         int successfulPredictions = 0;
         var exportRows = new List<BimodalExportRow>();
 
-        // NEU: Geometrische Durchschnittsberechnung
+        // Geometric-mean aggregation
         double sumLogImprovement = 0;
         int validImprovementCount = 0;
 
@@ -894,17 +892,17 @@ public class BulletClusterAnalysis
             double errorFinal = CalculateErrorForK(fitSamples, zCluster, finalK);
             if (double.IsNaN(errorFinal) || errorFinal > 1e300) errorFinal = 1e300;
 
-            // Das Orakel für die Statistik
+            // Oracle check for statistics
             double oracleError = CalculateErrorForK(fitSamples, zCluster, C * Math.Pow(zCluster, alpha));
             bool truthNeedsClockwork = (oracleError < errorBaseline * 0.95);
             if (useClockwork == truthNeedsClockwork) successfulPredictions++;
 
-            // Verbesserung berechnen
+            // Compute improvement
             double improvement = 1.0;
             if (errorFinal > 0 && errorFinal < 1e300 && errorBaseline < 1e300)
             {
                 improvement = errorBaseline / errorFinal;
-                sumLogImprovement += Math.Log(improvement); // Logarithmus für den geometrischen Schnitt
+                sumLogImprovement += Math.Log(improvement); // Log for geometric mean
                 validImprovementCount++;
             }
 
@@ -917,15 +915,15 @@ public class BulletClusterAnalysis
         int totalClusters = countNewton + countTRM;
         double predictionAccuracy = ((double)successfulPredictions / totalClusters) * 100;
 
-        // Die physikalisch saubere Auswertung (Geometrischer Durchschnitt)
+        // Physically robust evaluation (geometric mean)
         double geometricMeanImprovement = validImprovementCount > 0 ? Math.Exp(sumLogImprovement / validImprovementCount) : 1.0;
 
         Console.WriteLine(new String('-', 108));
-        Console.WriteLine($"ZUSAMMENFASSUNG FÜR DIE PUBLIKATION:");
-        Console.WriteLine($"Als Newton klassifiziert:         {countNewton} Haufen");
-        Console.WriteLine($"Als TRM klassifiziert:      {countTRM} Haufen");
-        Console.WriteLine($"Vorhersage-Genauigkeit:           {predictionAccuracy:F1}% (Trigger wählte richtige Physik)");
-        Console.WriteLine($"Globale Durchschnittsverbesserung:{geometricMeanImprovement:F2}x pro Haufen (Geometrisches Mittel)");
+        Console.WriteLine($"PUBLICATION SUMMARY:");
+        Console.WriteLine($"Classified as Newton:             {countNewton} clusters");
+        Console.WriteLine($"Classified as TRM:                {countTRM} clusters");
+        Console.WriteLine($"Prediction accuracy:              {predictionAccuracy:F1}% (trigger selected correct physics)");
+        Console.WriteLine($"Global average improvement:       {geometricMeanImprovement:F2}x per cluster (geometric mean)");
         Console.WriteLine("=========================================================================================================\n");
 
         ExportBimodalResultsToCsv(exportRows, resultsCsvPath);
@@ -954,15 +952,14 @@ public class BulletClusterAnalysis
     public void FindBestPhysicalThreshold(Dictionary<string, List<AcceptShell>> allClusters,
     Dictionary<string, double> redshifts)
     {
-        Console.WriteLine("\nSuche nach dem optimalen Druck-Schwellenwert...");
+        Console.WriteLine("\nSearching for the optimal pressure threshold...");
         double bestThreshold = 0;
         double maxAccuracy = 0;
 
-        // Wir testen Werte von 1.0E-34 bis 2.0E-32 in feinen Schritten
+        // Sweep values from 1.0E-34 to 2.0E-32 in fine steps
         for (double t = 1.0e-34; t <= 2.0e-32; t += 1.0e-34)
         {
-            // Führe eine lautlose Variante deiner EvaluatePhysicsDrivenBimodalTheory aus, 
-            // die nur die predictionAccuracy zurückgibt:
+            // Run silent variant that returns only prediction accuracy
             double accuracy = RunSilentPredictionTest(allClusters, redshifts, 1.3195, -0.7589, 0.1, t);
 
             if (accuracy > maxAccuracy)
@@ -972,8 +969,8 @@ public class BulletClusterAnalysis
             }
         }
 
-        Console.WriteLine($"\nPERFEKTER THRESHOLD GEFUNDEN: {bestThreshold:E2}");
-        Console.WriteLine($"MAXIMALE VORHERSAGEGENAUIGKEIT: {maxAccuracy:F1}%");
+        Console.WriteLine($"\nBEST THRESHOLD FOUND: {bestThreshold:E2}");
+        Console.WriteLine($"MAXIMUM PREDICTION ACCURACY: {maxAccuracy:F1}%");
     }
 
     public double RunSilentPredictionTest(
@@ -982,14 +979,14 @@ public class BulletClusterAnalysis
     double C = 1.3195,
     double alpha = -0.7589,
     double baselineK = 0.1,
-    double pressureThreshold = 5.0e-33) // Der von uns entdeckte physikalische Trigger!
+    double pressureThreshold = 5.0e-33) // Discovered physical trigger
     {
 
                
-        Console.WriteLine($"   PHYSIKALISCH VORHERSAGENDE THEORIE: TRM vs. Newton (Trigger-Schwelle: {pressureThreshold:E1})");
+        Console.WriteLine($"   PHYSICS-PREDICTIVE THEORY: TRM vs. Newton (trigger threshold: {pressureThreshold:E1})");
         
         //Console.WriteLine(String.Format("{0,-16} | {1,-6} | {2,-11} | {3,-13} | {4,-8} | {5,-12} | {6,-12} | {7}",
-        //    "Cluster", "z", "Max Grad(P)", "Entscheidung", "K-Wert", "Baseline-Err", "Final-Error", "Improvement"));
+        //    "Cluster", "z", "Max Grad(P)", "Decision", "K-value", "Baseline-Err", "Final-Error", "Improvement"));
         //Console.WriteLine(new String('-', 105));
 
         int countNewton = 0;
@@ -1006,7 +1003,7 @@ public class BulletClusterAnalysis
 
             if (!redshifts.TryGetValue(clusterName, out var zCluster) || zCluster <= 0) continue;
 
-            // Sanity-Filter
+            // Sanity filter
             var rawSamples = BuildFitSamples(shells);
             var fitSamples = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(rawSamples, sample =>
             {
@@ -1016,10 +1013,10 @@ public class BulletClusterAnalysis
 
             if (fitSamples.Count == 0) continue;
 
-            // 1. Finde die physikalische Eigenschaft: Max Druckgradient
+            // 1) Determine physical feature: max pressure gradient
             double maxPressureGrad = System.Linq.Enumerable.Max(fitSamples, s => Math.Abs(s.PressureGradient));
 
-            // 2. DIE PHYSIKALISCHE ENTSCHEIDUNG (Ohne den Fehler zu kennen!)
+            // 2) Physical decision path (without seeing final error)
             bool useClockwork = maxPressureGrad < pressureThreshold;
 
             double finalK;
@@ -1038,7 +1035,7 @@ public class BulletClusterAnalysis
                 countNewton++;
             }
 
-            // 3. Fehler berechnen
+            // 3) Compute errors
             double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
             if (double.IsNaN(errorBaseline) || errorBaseline > 1e300) errorBaseline = 1e300;
 
@@ -1046,22 +1043,22 @@ public class BulletClusterAnalysis
             if (double.IsNaN(errorFinal) || errorFinal > 1e300) errorFinal = 1e300;
 
             // ====================================================================
-            // NEU: DAS UNBESTECHLICHE ORAKEL (Die echte physikalische Wahrheit)
+            // Oracle check (reference physical truth)
             // ====================================================================
-            // Wir berechnen stumm, was passiert wäre, wenn wir Clockwork genutzt hätten:
+            // Silently compute outcome if Clockwork had been used
             double oracleUniversalError = CalculateErrorForK(fitSamples, zCluster, C * Math.Pow(zCluster, alpha));
 
-            // Die Wahrheit: Braucht dieser Haufen in der Realität die Clockwork-Modifikation?
+            // Reference truth: does this cluster actually need Clockwork modification?
             bool truthNeedsClockwork = (oracleUniversalError < errorBaseline * 0.95);
 
-            // War unsere physikalische Trigger-Entscheidung (useClockwork) korrekt?
+            // Was the trigger decision (useClockwork) correct?
             if (useClockwork == truthNeedsClockwork)
             {
-                successfulPredictions++; // Nur ein ECHTER Treffer wird gezählt!
+                successfulPredictions++; // Count only true hits
             }
             // ====================================================================
 
-            // 4. Statistik & Ausgabe
+            // 4) Statistics and output
             double improvement = 1.0;
             if (errorFinal > 0 && errorFinal < 1e300)
             {
@@ -1072,7 +1069,7 @@ public class BulletClusterAnalysis
         }
 
         // =======================================================
-        // ABSCHLUSS-STATISTIK FÜR DAS PAPER
+        // FINAL STATISTICS FOR PAPER
         // =======================================================
         int totalClusters = countNewton + countTRM;
         double globalErrorReduction = (totalBaselineErrorSum > 0 && totalFinalErrorSum > 0)

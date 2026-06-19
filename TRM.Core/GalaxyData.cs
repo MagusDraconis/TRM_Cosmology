@@ -6,15 +6,15 @@ using System.Linq;
 
 namespace TRM.Core
 {
-    // 1. ERWEITERTES DATENMODELL
+    // Extended data model
     public record GalaxyData(
         string Name,
         double L36,      // Leuchtkraft 10^9 L_sun
         double MHI,      // HI-Masse 10^9 M_sun
         double Vflat,    // km/s
-        double EVflat,   // Fehler km/s
-        double Inc,      // Inklination (Neigungswinkel) in Grad -> NEU
-        int Q            // Qualitätsflag (1=gut, 2=akzeptabel, 3=schlecht) -> NEU
+        double EVflat,   // Error km/s
+        double Inc,      // Inclination angle in degrees
+        int Q            // Quality flag (1=good, 2=acceptable, 3=poor)
     )
     {
         public double Mbar => (0.5 * L36) + (1.33 * MHI);
@@ -48,28 +48,28 @@ namespace TRM.Core
 
                     var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    // Mindestens 18 Elemente, damit Index 17 (Q) sicher existiert
+                    // Require at least 18 elements so index 17 (Q) is safe
                     if (parts.Length >= 18)
                     {
                         try
                         {
                             string name = parts[0];
-                            double inc = double.Parse(parts[5], CultureInfo.InvariantCulture);     // Spalte 6 (deg)
-                            double l36 = double.Parse(parts[7], CultureInfo.InvariantCulture);     // Spalte 8 (10^9 L_sun)
-                            double mHi = double.Parse(parts[13], CultureInfo.InvariantCulture);    // Spalte 14 (10^9 M_sun)
-                            double vFlat = double.Parse(parts[15], CultureInfo.InvariantCulture);  // Spalte 16 (km/s)
-                            double eVflat = double.Parse(parts[16], CultureInfo.InvariantCulture); // Spalte 17 (km/s)
-                            int q = int.Parse(parts[17], CultureInfo.InvariantCulture);            // Spalte 18 (Flag)
+                            double inc = double.Parse(parts[5], CultureInfo.InvariantCulture);     // Column 6 (deg)
+                            double l36 = double.Parse(parts[7], CultureInfo.InvariantCulture);     // Column 8 (10^9 L_sun)
+                            double mHi = double.Parse(parts[13], CultureInfo.InvariantCulture);    // Column 14 (10^9 M_sun)
+                            double vFlat = double.Parse(parts[15], CultureInfo.InvariantCulture);  // Column 16 (km/s)
+                            double eVflat = double.Parse(parts[16], CultureInfo.InvariantCulture); // Column 17 (km/s)
+                            int q = int.Parse(parts[17], CultureInfo.InvariantCulture);            // Column 18 (flag)
 
                             if (vFlat > 0)
                             {
-                                // Konstruktor mit den neuen Parametern aufrufen
+                                // Construct record with parsed fields
                                 galaxies.Add(new GalaxyData(name, l36, mHi, vFlat, eVflat, inc, q));
                             }
                         }
                         catch (FormatException)
                         {
-                            // Überspringt unvollständige Zeilen am Tabellenende
+                            // Skip incomplete trailing rows
                             continue;
                         }
                     }
@@ -80,7 +80,7 @@ namespace TRM.Core
 
         public static (double DirectSlope, double InverseSlopePhysical, double RmaSlope, double Intercept) FitBtrf(List<GalaxyData> data)
         {
-            // LINQ greift jetzt fehlerfrei auf .Inc und .Q zu
+            // Filter points by physical and quality constraints
             var validPoints = data.Where(g => g.MbarAbsolute > 0
                                            && g.Vflat > 0
                                            && g.Inc >= 30.0
@@ -106,7 +106,7 @@ namespace TRM.Core
             double inverseSlopeStandard = (n * sumXY - sumX * sumY) / (n * sumY2 - sumY * sumY);
             double inverseSlopePhysical = 1.0 / inverseSlopeStandard;
 
-            // Symmetrischer RMA-Schätzer (Reduced Major Axis)
+            // Symmetric RMA estimator (Reduced Major Axis)
             double rmaSlope = Math.Sqrt(directSlope * inverseSlopePhysical);
 
             return (directSlope, inverseSlopePhysical, rmaSlope, intercept);

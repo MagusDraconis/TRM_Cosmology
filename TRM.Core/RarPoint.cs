@@ -1,6 +1,6 @@
 ﻿namespace TRM.Core
 {
-    // Datenstruktur für einen einzelnen Radius-Messpunkt einer Galaxie
+    // Data structure for a single galaxy radial measurement point
     public record RarPoint(
         string GalaxyName,
         double RadiusKpc,
@@ -8,7 +8,7 @@
         double Vgas,
         double Vdisk,
         double Vbulge,
-        double GobsMs2,  // Beobachtete Beschleunigung in m/s^2
-        double GbarMs2   // Erwartete Newton-Beschleunigung in m/s^2
+        double GobsMs2,  // Observed acceleration in m/s^2
+        double GbarMs2   // Expected Newtonian acceleration in m/s^2
     );
 }

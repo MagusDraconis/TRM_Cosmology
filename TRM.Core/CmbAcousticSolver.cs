@@ -7,7 +7,7 @@ public class CmbAcousticSolver
 {
     public record CmbPeakResult(int MultipoleL, double AmplitudeTT);
 
-    // Die neue, astrophysikalisch aussagekräftige Resultat-Struktur
+    // Result structure for CMB optimization outputs
     public record CmbOptimizationResult(
         double TrmDriveFreq,
         double DopplerWeight,
@@ -20,7 +20,7 @@ public class CmbAcousticSolver
     private double SolveAcousticAmplitude(double k, double etaRec, double cs, double driveFreq, double dopplerWeight)
     {
         double etaStart = 0.01 * etaRec;
-        double step = (etaRec - etaStart) / 400.0; // Sehr feine Integration für das Paper
+        double step = (etaRec - etaStart) / 400.0; // High-resolution integration
 
         double theta = 1.0;
         double thetaDot = 0.0;
@@ -56,10 +56,10 @@ public class CmbAcousticSolver
             eta += step;
         }
 
-        // 1. Sachs-Wolfe (Dichte)
+        // 1) Sachs-Wolfe contribution (density)
         double sachsWolfe = theta * theta;
 
-        // 2. Doppler (Kinetik der Baryonen, dynamisch kalibrierbar)
+        // 2) Doppler contribution (baryon velocity, tunable weight)
         double velocity = thetaDot / (k * cs);
         double doppler = velocity * velocity * dopplerWeight;
 
@@ -72,7 +72,7 @@ public class CmbAcousticSolver
         double kcs = k * cs;
         double kcsSquared = kcs * kcs;
 
-        // Die primordiale Resonanzfrequenz der Zeit-Matrix!
+        // Primordial TRM drive component
         double trmDrive = 0.05 * Math.Cos(driveFreq * k * eta);
 
         double thetaDoubleDot = -hubbleDamping * thetaDot - kcsSquared * theta + trmDrive;
@@ -81,7 +81,7 @@ public class CmbAcousticSolver
     }
 
     /// <summary>
-    /// Isoliert die exakten physikalischen Maxima im kontinuierlichen k-Raum (Sachs-Wolfe-gefiltert)
+    /// Finds the first two physical maxima in continuous k-space (Sachs-Wolfe filtered)
     /// </summary>
     private (double k1, double k2) FindPeaksInKSpace(double etaRec, double cs, double driveFreq, double dopplerWeight)
     {
@@ -97,7 +97,7 @@ public class CmbAcousticSolver
         double k2 = 0;
         int peakCount = 0;
 
-        // Wir scannen mit noch feinerer Auflösung
+        // Scan k-space with high resolution
         for (int i = 0; i < kSteps; i++)
         {
             double k = kStart + (i * kStep);
@@ -105,11 +105,10 @@ public class CmbAcousticSolver
 
             if (prevPrevPower >= 0 && prevPower >= 0)
             {
-                // ECHTE PEAK-BEDINGUNG: Erst hoch (prev > prevPrev), dann runter (prev > current)
+                // True peak condition: rising then falling
                 if (prevPower > prevPrevPower && prevPower > power)
                 {
-                    // Physikalischer Filter: Echte akustische Peaks fangen im k-Raum erst später an.
-                    // Das filtert das initiale Sachs-Wolfe-Plateau zu 100% heraus.
+                    // Physical filter: ignore the initial Sachs-Wolfe plateau region
                     if (prevK > 0.005)
                     {
                         if (peakCount == 0)
@@ -122,7 +121,7 @@ public class CmbAcousticSolver
                         }
 
                         peakCount++;
-                        if (peakCount == 2) break; // Wir haben die beiden echten Peaks!
+                        if (peakCount == 2) break; // Found both peaks
                     }
                 }
             }
@@ -136,11 +135,11 @@ public class CmbAcousticSolver
     }
 
     /// <summary>
-    /// Der hochauflösende k-Raum-Sweep zur Entschlüsselung der Naturkonstanten
+    /// High-resolution k-space sweep used to fit physical parameters
     /// </summary>
     public CmbOptimizationResult FindPerfectPhysicalParameters()
     {
-        double etaRec = 280.0; // Kosmologischer Anker
+        double etaRec = 280.0; // Cosmological anchor
         double cs = 1.0 / Math.Sqrt(3.0);
         const double freqStart = 1.90;
         const double freqEnd = 2.05;
@@ -158,13 +157,13 @@ public class CmbAcousticSolver
 
         double minRatioError = double.MaxValue;
 
-        // Das unbestechliche Gesetz der Natur aus den Planck-Daten
+        // Target ratio from Planck peak positions
         double targetRatio = 540.0 / 220.0;
 
-        Console.WriteLine("Starte Micro-Sweep in der bekannten TRM-Resonanzzone...");
+        Console.WriteLine("Starting micro-sweep in the TRM resonance zone...");
 
-        // MICRO-SWEEP: Wir suchen nur noch extrem fein um die bekannten physikalischen Werte herum
-        // Frequenz: 1.90 bis 2.05 | Doppler: 0.05 bis 0.12
+        // Micro-sweep around expected physical values
+        // Frequency: 1.90 to 2.05 | Doppler: 0.05 to 0.12
         object sync = new();
         Parallel.For(0, freqSteps, freqIndex =>
         {
@@ -210,7 +209,7 @@ public class CmbAcousticSolver
             }
         });
 
-        // Die finale Projektion auf die Himmelskugel:
+        // Final projection to multipole space
         double bestDa = 220.0 / bestK1;
 
         double finalL1 = bestK1 * bestDa;

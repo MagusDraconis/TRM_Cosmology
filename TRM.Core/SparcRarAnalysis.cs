@@ -14,7 +14,7 @@ namespace TRM.Core
     {
         private const double Kms2KpcToMs2 = 3.240779289e-14;
 
-        // Wissenschaftlich begründete Blacklist für gestörte Kinematik (z.B. starke Asymmetrien oder Tidal Interactions)
+        // Science-based blacklist for strongly disturbed kinematics
         static HashSet<string> blacklist = new(StringComparer.OrdinalIgnoreCase)
         {
             "CamB", "NGC6789", "UGC07399", "UGC11557", "KK98-251",
@@ -24,7 +24,7 @@ namespace TRM.Core
         public static List<RarPoint> ParseRarFromZip(string zipPath, double upsilonDisk = 0.5, double upsilonBulge = 0.7)
         {
             var rarPoints = new List<RarPoint>();
-            if (!File.Exists(zipPath)) throw new FileNotFoundException($"Datei {zipPath} nicht gefunden.");
+            if (!File.Exists(zipPath)) throw new FileNotFoundException($"File not found: {zipPath}.");
 
             using (ZipArchive archive = ZipFile.OpenRead(zipPath))
             {
@@ -99,7 +99,7 @@ namespace TRM.Core
         public static List<RarPoint> ParseRarWithFixedWidthInclinationFilter(string zipPath, string mrtPath, double upsilonDisk = 0.5, double upsilonBulge = 0.7)
         {
             var validGalaxies = new Dictionary<string, (double Inclination, int Quality)>(StringComparer.OrdinalIgnoreCase);
-            if (!File.Exists(zipPath) || !File.Exists(mrtPath)) throw new FileNotFoundException("SPARC-Dateien unvollständig.");
+            if (!File.Exists(zipPath) || !File.Exists(mrtPath)) throw new FileNotFoundException("SPARC input files are incomplete.");
 
             bool dataSectionStarted = false;
             int separatorCount = 0;
@@ -203,15 +203,15 @@ namespace TRM.Core
             return rarPoints;
         }
 
-        // JETZT NEU: Wählbares physikalisches Gesetz (Klassisch MOND vs. Deine Clockwork Cosmology)
+        // Selectable physical law (classical MOND vs. Clockwork Cosmology)
         public static double PredictGobs(double gBar, double a0, ModelType model)
         {
             if (gBar <= 0 || a0 <= 0) return 0;
 
             if (model == ModelType.ClockworkTRM)
             {
-                // DEINE PHYSIK (V2.2): g_obs = g_bar + sqrt(g_bar * a_0)
-                // Entspringt der nicht-lokalen zeitlichen Phasensynchronisation mit dem Hintergrund
+                // TRM V2.2: g_obs = g_bar + sqrt(g_bar * a_0)
+                // Interpreted as non-local temporal phase synchronization with the background
                 return gBar + Math.Sqrt(gBar * a0);
             }
             else
@@ -222,14 +222,14 @@ namespace TRM.Core
             }
         }
 
-        // JETZT NEU: Hochpräziser 2D-Co-Fit für a0 UND den Upsilon-Skalierungsfaktor
+        // High-precision 2D co-fit for a0 and Upsilon scaling factor
         public static (double BestLogA0, double BestA0, double RmsError) FitA0(
             List<RarPoint> points,
             Dictionary<string, double>? inclinations = null,
-            ModelType model = ModelType.ClockworkTRM) // Standardmäßig auf deine TRM-Physik geschaltet
+            ModelType model = ModelType.ClockworkTRM) // Default to TRM model
         {
             if (points == null || points.Count == 0)
-                throw new ArgumentException("Keine Datenpunkte übergeben.");
+                throw new ArgumentException("No data points were provided.");
 
             var normalizedInclinations = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
             if (inclinations is { Count: > 0 })
@@ -246,8 +246,8 @@ namespace TRM.Core
             double minSsr = double.MaxValue;
             double bestUpsilonScale = 1.0;
 
-            // 2D Parameterraum-Sweep: Wir scannen a0 UND kalibrieren deine Gas-Heuristik fein nach!
-            // Da deine Heuristik bereits exzellent ist, erlauben wir einen globalen Tuning-Faktor (0.8 bis 1.2)
+            // 2D parameter sweep across a0 and gas-heuristic scaling
+            // Allow a global tuning factor from 0.8 to 1.2
             for (double logA0 = -11.0; logA0 <= -9.0; logA0 += 0.01)
             {
                 for (double upsScale = 0.8; upsScale <= 1.2; upsScale += 0.05)
@@ -265,14 +265,14 @@ namespace TRM.Core
                 }
             }
 
-            // Zweite Stufe: Extrem feines Kämmen im dichten Netz um das gefundene Minimum herum
+            // Second stage: fine-grained local sweep around the minimum
             double startFine = bestLogA0 - 0.02;
             double endFine = bestLogA0 + 0.02;
 
             for (double logA0 = startFine; logA0 <= endFine; logA0 += 0.0001)
             {
                 double a0 = Math.Pow(10, logA0);
-                var currentUpsilonMap = EstimateUpsilonMap(points, bestUpsilonScale); // Fixiert auf bestem Scale
+                var currentUpsilonMap = EstimateUpsilonMap(points, bestUpsilonScale); // Fixed at best scale
                 double ssr = CalculateWeightedSsr(points, a0, normalizedInclinations, currentUpsilonMap, model);
 
                 if (ssr < minSsr)
@@ -305,7 +305,7 @@ namespace TRM.Core
 
                 double inc = inclinations.GetValueOrDefault(galaxyKey, 60.0);
                 double sinI = Math.Sin(inc * Math.PI / 180.0);
-                double weight = sinI * sinI; // Gewichtigung nach Kreisbahnstabilität
+                double weight = sinI * sinI; // Weighted by orbital stability
 
                 double upsilonDisk = upsilonDiskMap.GetValueOrDefault(galaxyKey, 0.5);
 
@@ -313,12 +313,12 @@ namespace TRM.Core
                 double vBulgeSq = p.Vbulge * p.Vbulge;
                 double vGasSq = p.Vgas * p.Vgas;
 
-                // Bulge bleibt stabil bei 0.7 (alte Population), Disk zieht das dynamische Upsilon
+                // Keep bulge at 0.7 (older stellar population), apply dynamic Upsilon to disk
                 double vBarSq = vGasSq + (upsilonDisk * vDiskSq) + (0.7 * vBulgeSq);
                 double gBarMs2 = (vBarSq / p.RadiusKpc) * Kms2KpcToMs2;
 
                 double logGobsActual = Math.Log10(p.GobsMs2);
-                double gObsPredicted = PredictGobs(gBarMs2, a0, model); // Übergabe des gewählten Modells
+                double gObsPredicted = PredictGobs(gBarMs2, a0, model); // Use selected model
                 if (gObsPredicted <= 0) continue;
 
                 double residual = logGobsActual - Math.Log10(gObsPredicted);
@@ -330,7 +330,7 @@ namespace TRM.Core
             return totalWeight <= 0 ? double.MaxValue : weightedSsr / totalWeight;
         }
 
-        // Erweiterte Heuristik mit Skalierungsfaktor für den Co-Fit
+        // Extended heuristic with scale factor for co-fit
         public static Dictionary<string, double> EstimateUpsilonMap(List<RarPoint> allPoints, double globalScaleFactor = 1.0)
         {
             var map = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -350,10 +350,10 @@ namespace TRM.Core
                 double baryonicTotal = gasContribution + stellarContribution;
                 double gasFraction = baryonicTotal > 0 ? gasContribution / baryonicTotal : 0;
 
-                // Basis-Skalierung basierend auf deiner genialen Logik
+                // Base scaling from gas fraction
                 double upsilonDisk = 0.5 - (gasFraction * 0.4);
 
-                // JETZT NEU: Einbindung des globalen Optimierungs-Parameters aus dem Co-Fit
+                // Apply global optimization parameter from co-fit
                 upsilonDisk *= globalScaleFactor;
 
                 upsilonDisk = Math.Max(0.3, Math.Min(0.5, upsilonDisk));
