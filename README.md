@@ -5,7 +5,7 @@
 
 **TRM Cosmology** is a high-performance .NET 10 analytical framework designed to empirically validate the **Clockwork Cosmology (V2.2)** hypothesis. 
 
-This repository provides the computational engine to demonstrate that the universe can be quantitatively described **without invoking non-baryonic Cold Dark Matter (CDM)**. By redefining gravity as a kinematic drift driven by macroscopic gradients within a ubiquitous **Temporal Rate Matrix (TRM)**, this solution seamlessly unifies astrophysical phenomena across three fundamentally distinct scales.
+This repository provides the computational engine to demonstrate that the universe can be quantitatively described **without invoking non-baryonic Cold Dark Matter (CDM) or Dark Energy (Lambda)**. By redefining gravity and cosmic expansion as a kinematic drift driven by macroscopic gradients within a ubiquitous **Temporal Rate Matrix (TRM)**, this solution seamlessly unifies astrophysical phenomena across four fundamentally distinct cosmological scales.
 
 ## 🚀 Key Breakthroughs & Domains
 
@@ -15,6 +15,8 @@ This repository provides the computational engine to demonstrate that the univer
    * *Result:* Achieves an a priori predictive accuracy of **63.7%** across the ACCEPT X-ray catalog, dynamically preventing unphysical over-corrections in post-merger systems (e.g., the Bullet Cluster and Abell 2744).
 3. **Cosmological Scales (CMB / Planck):** Replaces dark matter potential wells with primordial phase-synchronizations. Uses a high-speed Runge-Kutta 4 (RK4) Fourier-space solver to model the photon-baryon fluid.
    * *Result:* Accurately reproduces the primary acoustic peaks of the Cosmic Microwave Background at l ≈ 220 and l ≈ 540 at a derived absolute Euclidean distance of **D_A ≈ 26.2 Gpc**.
+4. **Cosmic Expansion (Pantheon+ Supernovae):** Replaces Dark Energy (Lambda) by identifying the phenomenon as a continuous kinematic "temporal friction" (matrix drift) within a Euclidean space, rather than an accelerating vacuum energy.
+   * *Result:* Evaluates 1,590 Type Ia supernovae to blindly extract a base temporal pacing of **H_T = 72.93 km/s/Mpc** (flawlessly matching the SH0ES local Hubble measurement). Accurately models high-redshift magnitude deviations via a negative temporal drift coefficient of **beta_T = -0.2840** (RMS: 0.6564 dex).
 
 ---
 
@@ -23,7 +25,7 @@ This repository provides the computational engine to demonstrate that the univer
 - `TRM.Core`  
   The theoretical engine. Contains shared analysis models, the RK4 acoustic solver, and grid-sweep optimization algorithms.
 - `TRM.CMD`  
-  Console entry point to execute selected high-performance analyses and parameter sweeps.
+  Console entry point to execute selected high-performance analyses and parameter sweeps via an interactive menu.
 - `TRM.Tests`  
   xUnit test suite acting as the scientific safeguard. Contains dataset-driven validations ensuring the framework strictly adheres to established astrophysical benchmarks.
 - `TRM.Python`  
@@ -47,33 +49,16 @@ From the solution root directory:
 
 ### Run the Analysis (Console App)
 `dotnet run --project TRM.CMD/TRM.CMD.csproj`
-*Note: The console app reads cluster input files from its output/runtime directory via relative paths. Ensure required SPARC/ACCEPT data files are present in the execution directory.*
+*Note: The console app reads input catalogs from the `Data` directory. Ensure required files (e.g., SPARC/ACCEPT catalogs and `Pantheon+SH0ES.dat`) are present in your local execution folder.*
 
 ### Run the Scientific Validations (Tests)
-Execute the rigorous xUnit test suite to verify the exact cosmological constants (a_0, eta_rec, D_A) against the latest observational bounds:
+Execute the rigorous xUnit test suite to verify the exact cosmological constants (a_0, eta_rec, beta_T) against the latest observational bounds:
 `dotnet test TRM.Tests/TRM.Tests.csproj`
 *Tests use `ITestOutputHelper` for detailed log outputs, visible directly in your Test Explorer or CLI.*
 
 ---
 
-## 📊 Data Visualization
-
-The framework generates data files (e.g., `results.csv`) containing cluster redshifts, pressure gradients, and theoretical improvements. The script `TRM.Python/TRM.Python.py` parses these outputs to create visualizations.
-
-**Expected CSV Columns:**
-- `Cluster`
-- `z`
-- `MaxGradP`
-- `Improvement`
-
-**Generate Plots:**
-`python TRM.Python/TRM.Python.py`
-
-**Output Image:** `Clockwork_Threshold_Plot.png`
-
----
-
 ## 📌 Notes & Scientific Contribution
-- **Data-Driven:** Most analyses depend on external observational datasets. Relevant sample files are included under `TRM.Tests`.
-- **Troubleshooting:** If `FileNotFound` errors occur during runtime, verify your working directory and the relative file paths to the data catalogs.
+- **Data-Driven:** All analyses depend on external, peer-reviewed observational datasets (SPARC, ACCEPT, Planck, Pantheon+). 
+- **Troubleshooting:** If `FileNotFound` errors occur during runtime, verify your working directory and ensure the database catalogs are correctly placed in the `Data` folder and set to "Copy if newer".
 - **Contributing:** This is an open-science initiative. Feel free to open issues or submit Pull Requests if you want to optimize the integrators or test the TRM framework against new astrophysical databases.

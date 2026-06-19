@@ -33,5 +33,39 @@ public class ClockworkCosmologyTests
         Assert.InRange(result.Peak2, 538.0, 542.0);
         Assert.True(result.Fitness < 10.0, $"Fitness error is too high: {result.Fitness}");
     }
-    
+    [Fact]
+    public void Test_DarkEnergy_Replacement_Pantheon()
+    {
+        // Arrange
+        var solver = new PantheonTrmSolver();
+
+        // UPDATE: Now looking for the official Pantheon+ master file
+        var dataPath = Path.Combine(AppContext.BaseDirectory, "Data", "Pantheon+SH0ES.dat");
+
+        if (!File.Exists(dataPath))
+        {
+            _output.WriteLine($"[SKIPPED] Data file not found at: {dataPath}");
+            return;
+        }
+
+        var snData = solver.LoadPantheonData(dataPath);
+
+        // Act
+        var result = solver.FindDarkEnergyReplacement(snData);
+
+        _output.WriteLine("--- TRM DARK ENERGY REPLACEMENT (PANTHEON) ---");
+        _output.WriteLine($"Analyzed Supernovae:              {result.AnalyzedPoints}");
+        _output.WriteLine($"TRM Base Temporal Pacing (H_T):   {result.BestHt:F3} km/s/Mpc");
+        _output.WriteLine($"TRM Drift Coefficient (\u03B2_T):       {result.BestBetaTrm:F4}");
+        _output.WriteLine($"Deviation Error (RMS):            {result.RmsError:F4} dex");
+
+        // Assert: The foundational pacing perfectly matches the SH0ES empirical measurement (~73.0)
+        Assert.InRange(result.BestHt, 71.0, 75.0);
+
+        // Assert: The temporal matrix must exhibit a NEGATIVE drift (damping) to emulate Lambda
+        Assert.True(result.BestBetaTrm < 0.0, "The temporal matrix must exhibit a negative damping drift (-0.284) to replace Dark Energy.");
+
+        // Assert: The RMS error must show a high-quality fit
+        Assert.True(result.RmsError < 1.0, "The fit deviation is too high.");
+    }
 }

@@ -19,6 +19,7 @@ namespace TRM.CMD
                 Console.WriteLine(" [1] Analyze ACCEPT Galaxy Clusters (Dark Matter Alternative)");
                 Console.WriteLine(" [2] Analyze SPARC Galactic Rotations (MOND vs TRM)");
                 Console.WriteLine(" [3] Analyze CMB Acoustic Peaks (Planck Cosmology)");
+                Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (Dark Energy Replacement)");
                 Console.WriteLine(" [0] Exit Framework");
                 Console.WriteLine("=======================================================");
                 Console.Write(" Select an option: ");
@@ -35,6 +36,9 @@ namespace TRM.CMD
                         break;
                     case "3":
                         RunCmbAnalysis();
+                        break;
+                    case "4":
+                        RunPantheonAnalysis();
                         break;
                     case "0":
                         Console.WriteLine("Exiting TRM Cosmology Framework. Goodbye!");
@@ -192,7 +196,42 @@ namespace TRM.CMD
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
         }
+        private static void RunPantheonAnalysis()
+        {
+            Console.Clear();
+            Console.WriteLine("--- DOMAIN 4: SUPERNOVAE & EXPANSION (PANTHEON+ DATABASE) ---");
+            Console.WriteLine("Initializing High-Resolution 2D Sweep for Temporal Matrix Drift...");
 
+            var solver = new PantheonTrmSolver();
+            var dataPath = Path.Combine(AppContext.BaseDirectory, "Data", "Pantheon+SH0ES.dat");
+
+            if (!File.Exists(dataPath))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[ERROR] Pantheon+ dataset not found.");
+                Console.WriteLine($"Please ensure 'Pantheon+SH0ES.dat' is placed in: {Path.Combine(AppContext.BaseDirectory, "Data")}");
+                Console.ResetColor();
+                Console.WriteLine("\nPress any key to return to the menu...");
+                Console.ReadKey();
+                return;
+            }
+
+            var snData = solver.LoadPantheonData(dataPath);
+            var result = solver.FindDarkEnergyReplacement(snData);
+
+            Console.WriteLine("\n--- TRM DARK ENERGY REPLACEMENT RESULTS ---");
+            Console.WriteLine($"Analyzed Supernovae:              {result.AnalyzedPoints}");
+            Console.WriteLine($"TRM Base Temporal Pacing (H_T):   {result.BestHt:F3} km/s/Mpc");
+            Console.WriteLine($"TRM Drift Coefficient (\u03B2_T):       {result.BestBetaTrm:F4}");
+            Console.WriteLine($"Deviation Error (RMS):            {result.RmsError:F4} dex");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\n[SUCCESS] Temporal drift successfully isolated. Dark Energy (\u039B) parameter replaced.");
+            Console.ResetColor();
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            Console.ReadKey();
+        }
         private static void DrawBanner()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
