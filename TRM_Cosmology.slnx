@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="TRM.CMD/TRM.CMD.csproj" Id="2ed77da7-60be-4985-b7dd-e9b46ee343eb" />
+  <Project Path="TRM.Core/TRM.Core.csproj" />
+  <Project Path="TRM.Python/TRM.Python.pyproj" Type="888888a0-9f3d-457c-b088-3a5042f75d52" Id="6a8310b5-356b-4cdd-8e8b-cfcc23d9254d">
+    <Build Project="false" />
+  </Project>
+  <Project Path="TRM.Tests/TRM.Tests.csproj" />
+</Solution>
