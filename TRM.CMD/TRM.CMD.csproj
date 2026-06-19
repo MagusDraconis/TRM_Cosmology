@@ -11,15 +11,9 @@
     <ProjectReference Include="..\TRM.Core\TRM.Core.csproj" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <None Include="..\TRM.Tests\Coma_Cluster_Chandra_temperature_all_profiles.dat">
-      <Link>Coma_Cluster_Chandra_temperature_all_profiles.dat</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\TRM.Tests\Coma_Cluster_Chandra_temperature_accept_main.tab">
-      <Link>Coma_Cluster_Chandra_temperature_accept_main.tab</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

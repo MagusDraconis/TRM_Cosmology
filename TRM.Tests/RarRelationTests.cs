@@ -19,8 +19,8 @@ public class RarRelationTests
     [Fact]
     public void Test_Parse_RotmodZip_And_Verify_AccelerationScale()
     {
-        string zipPath = "Rotmod_LTG.zip";
-        Assert.True(File.Exists(zipPath), "Die Datei Rotmod_LTG.zip muss im Ausgabeverzeichnis liegen.");
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        Assert.True(File.Exists(zipPath), "Die Datei Rotmod_LTG.zip wurde nicht gefunden.");
 
         // Extrahiere alle radialen Datenpunkte aller Galaxien
         var rarData = SparcRarAnalysis.ParseRarFromZip(zipPath);
@@ -49,7 +49,7 @@ public class RarRelationTests
     [Fact]
     public void Test_Verify_Rar_Asymptotic_Limits()
     {
-        string zipPath = "Rotmod_LTG.zip";
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         var rarData = SparcRarAnalysis.ParseRarFromZip(zipPath);
 
         // Berechne die gemittelten Profile über alle Galaxien hinweg
@@ -90,8 +90,8 @@ public class RarRelationTests
     [Fact]
     public void Test_Global_NonLinear_Fit_For_A0()
     {
-        string zipPath = "Rotmod_LTG.zip";
-        string mrtPath = "SPARC_Lelli2016c.mrt";
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
 
         // Nutze die neue Methode mit integriertem Inklinations-Matching
         var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
@@ -122,8 +122,8 @@ public class RarRelationTests
     [Fact]
     public void Test_Clockwork_vs_MOND_Global_Fit()
     {
-        string zipPath = "Rotmod_LTG.zip";
-        string mrtPath = "SPARC_Lelli2016c.mrt";
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
 
         var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
         var inclinations = SparcMrtParser.ParseFile(mrtPath).ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);

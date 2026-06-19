@@ -17,7 +17,7 @@ namespace TRM.Tests
         [Fact]
         public void Test_SparcData_Matches_Theoretical_Slope_Of_Four()
         {
-            string filePath = "SPARC_Lelli2016c.mrt";
+            string filePath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
             Assert.True(File.Exists(filePath));
 
             var galaxies = SparcMrtParser.ParseFile(filePath);
