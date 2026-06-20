@@ -3,20 +3,46 @@
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**TRM Cosmology** is a high-performance .NET 10 analytical framework designed to empirically validate the **Clockwork Cosmology (V2.2)** hypothesis. 
+This repository contains the numerical implementation and analysis tools for the **Temporal Rate Matrix (TRM)** framework, as presented in the paper:
 
-This repository provides the computational engine to demonstrate that the universe can be quantitatively described **without invoking non-baryonic Cold Dark Matter (CDM) or Dark Energy (Lambda)**. By redefining gravity and cosmic expansion as a kinematic drift driven by macroscopic gradients within a ubiquitous **Temporal Rate Matrix (TRM)**, this solution seamlessly unifies astrophysical phenomena across four fundamentally distinct cosmological scales.
+> *Clockwork Cosmology: A Temporal Rate Matrix Framework for Unified Gravitational and Cosmological Dynamics*
 
-## 🚀 Key Breakthroughs & Domains
 
-1. **Galactic Scales (SPARC Database):** Natively resolves the Baryonic Tully-Fisher Relation (BTFR) and flat rotation curves using a pure algebraic TRM boundary equation (g_obs = g_bar + sqrt(g_bar * a_0)). 
-   * *Result:* Matches the SPARC catalog with a residual scatter of **sigma ≈ 0.1412 dex**, operating exactly at the observational noise floor without ad-hoc empirical interpolation functions (like MOND).
-2. **Galaxy Cluster Scales (ACCEPT Database):** Solves the "missing mass" anomaly in galaxy clusters through a parameter-free bimodal phase transition, moderated by morphological ellipticity (beta). 
-   * *Result:* Achieves an a priori predictive accuracy of **63.7%** across the ACCEPT X-ray catalog, dynamically preventing unphysical over-corrections in post-merger systems (e.g., the Bullet Cluster and Abell 2744).
-3. **Cosmological Scales (CMB / Planck):** Replaces dark matter potential wells with primordial phase-synchronizations. Uses a high-speed Runge-Kutta 4 (RK4) Fourier-space solver to model the photon-baryon fluid.
-   * *Result:* Accurately reproduces the primary acoustic peaks of the Cosmic Microwave Background at l ≈ 220 and l ≈ 540 at a derived absolute Euclidean distance of **D_A ≈ 26.2 Gpc**.
-4. **Cosmic Expansion (Pantheon+ Supernovae):** Replaces Dark Energy (Lambda) by identifying the phenomenon as a continuous kinematic "temporal friction" (matrix drift) within a Euclidean space, rather than an accelerating vacuum energy.
-   * *Result:* Evaluates 1,590 Type Ia supernovae to blindly extract a base temporal pacing of **H_T = 72.93 km/s/Mpc** (flawlessly matching the SH0ES local Hubble measurement). Accurately models high-redshift magnitude deviations via a negative temporal drift coefficient of **beta_T = -0.2840** (RMS: 0.6564 dex).
+## 🔬 Overview
+
+The TRM framework explores an alternative scalar-field approach to gravitational and cosmological phenomena.  
+Instead of treating dark matter and dark energy as independent components, the model interprets observed discrepancies as manifestations of a single **temporal rate field**:
+
+\[
+\mathcal{T}(x,t)
+\]
+
+The repository implements the numerical models used to evaluate this framework across multiple astrophysical domains.
+
+---
+## <img src="https://cdn.simpleicons.org/zenodo/0A7BBB" alt="Zenodo" width="18" /> Zenodo link
+
+[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20772292-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.20772292)
+
+## 📊 Implemented Domains
+
+This repository includes computational models and analysis scripts for:
+
+- **Galactic Rotation Curves (SPARC)**
+  - Non-linear co-fit for the acceleration scale \( a_0 \)
+  - Reproduction of flat rotation curves and BTFR
+
+- **Galaxy Clusters (ACCEPT)**
+  - Pressure-triggered regime transition
+  - Bimodal classification (Newtonian vs TRM-supported)
+
+- **Cosmic Microwave Background (Planck)**
+  - k-space acoustic analysis
+  - Temporal phase-coherence modeling
+
+- **Cosmological Expansion (Pantheon+)**
+  - Luminosity-distance fitting
+  - Temporal drift coefficient \( \beta_{\mathcal{T}} \)
 
 ---
 
@@ -60,5 +86,5 @@ Execute the rigorous xUnit test suite to verify the exact cosmological constants
 
 ## 📌 Notes & Scientific Contribution
 - **Data-Driven:** All analyses depend on external, peer-reviewed observational datasets (SPARC, ACCEPT, Planck, Pantheon+). 
-- **Troubleshooting:** If `FileNotFound` errors occur during runtime, verify your working directory and ensure the database catalogs are correctly placed in the `Data` folder and set to "Copy if newer".
+- **Troubleshooting:** If `FileNotFound` errors occur during runtime, verify your working directory and ensure the data catalogs are correctly placed in the `Data` folder and set to "Copy if newer".
 - **Contributing:** This is an open-science initiative. Feel free to open issues or submit Pull Requests if you want to optimize the integrators or test the TRM framework against new astrophysical databases.
