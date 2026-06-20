@@ -3,7 +3,7 @@ using Xunit;
 using Xunit.Abstractions;
 using TRM.Core;
 
-namespace TRM.Tests
+namespace TRM.Tests.CoreTests
 {
     public class BtfRelationTests
     {

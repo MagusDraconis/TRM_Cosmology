@@ -3,7 +3,7 @@ using TRM.Core;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace TRM.Tests;
+namespace TRM.Tests.CoreTests;
 
 public class ClockworkCosmologyTests
 {
