@@ -16,6 +16,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\TRM.Core\TRM.Core.csproj" />
+		<ProjectReference Include="..\TRM.Simulations\TRM.Simulations.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
