@@ -8,12 +8,6 @@ namespace TRM.Core;
 
 public class GalacticRotationAnalysis
 {
-    // Physical constants in CGS units
-    private const double KpcToCm = 3.08567758e21;
-    private const double KmsToCmS = 100000.0;
-    
-    // Milgrom acceleration constant (linked to TRM background drift field H_T)
-    private const double A0_Cosmic = 1.2e-8; // cm/s^2
 
     public readonly record struct RotationPoint(
         double RadiusKpc,
@@ -80,7 +74,7 @@ public class GalacticRotationAnalysis
         double upsilonBulge = 0.7)
     {
         // 1) Convert radial distance to cm
-        double rCm = point.RadiusKpc * KpcToCm;
+        double rCm = point.RadiusKpc * PhysicalConstants.KpcToCm;
 
         // 2) Compute total baryonic Newtonian velocity squared using mass-to-light ratios (Upsilon)
         // V_bar^2 = V_gas^2 + Y_disk * V_disk^2 + Y_bulge * V_bulge^2
@@ -91,20 +85,20 @@ public class GalacticRotationAnalysis
         if (vBarSquaredKm2S2 <= 0) return 0.0;
 
         // Konvertierung in CGS (cm^2/s^2)
-        double vBarSquaredCm2S2 = vBarSquaredKm2S2 * Math.Pow(KmsToCmS, 2);
+        double vBarSquaredCm2S2 = vBarSquaredKm2S2 * Math.Pow(PhysicalConstants.KmsToCmS, 2);
 
         // 3) Compute local classical Newtonian acceleration: g_Newt = V_bar^2 / r
         double gNewt = vBarSquaredCm2S2 / rCm;
 
         // 4) Apply TRM metric coupling (smooth regime transition)
         // g_eff = g_Newt + sqrt(g_Newt * a0) / lambda
-        double gTRM = Math.Sqrt(gNewt * A0_Cosmic) / lambda;
+        double gTRM = Math.Sqrt(gNewt * PhysicalConstants.A0_Cosmic) / lambda;
         double gEff = gNewt + gTRM;
 
         // 5) Convert back to observable orbital velocity (km/s)
         // V_theo = sqrt(r * g_eff)
         double vTheoCmS = Math.Sqrt(rCm * gEff);
-        return vTheoCmS / KmsToCmS;
+        return vTheoCmS / PhysicalConstants.KmsToCmS;
     }
 
     /// <summary>

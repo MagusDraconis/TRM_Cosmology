@@ -18,6 +18,13 @@ public class PlanckMultiScan
     {
         var results = new List<ScanResult>();
 
+        // Referenzwerte (baseline Planck → gibt dir "wahre" c, ħ, G)
+        var baseDerived = new DerivedConstants(baseP);
+
+        double c0 = baseDerived.SpeedOfLight;
+        double hbar0 = baseDerived.ReducedPlanck;
+        double G0 = baseDerived.G;
+
         for (int i = 0; i < steps; i++)
         {
             double epsL = RandomRange(-maxVariation, maxVariation);
@@ -32,6 +39,17 @@ public class PlanckMultiScan
 
             var d = new DerivedConstants(pVar);
 
+            // Ratio zur Referenz
+            double cRatio = d.SpeedOfLight / c0;
+            double hbarRatio = d.ReducedPlanck / hbar0;
+            double GRatio = d.G / G0;
+
+            // 🔥 DAS ist deine Stability-Metric
+            double stability =
+                Math.Pow(cRatio - 1, 2) +
+                Math.Pow(hbarRatio - 1, 2) +
+                Math.Pow(GRatio - 1, 2);
+
             results.Add(new ScanResult
             {
                 epsL = epsL,
@@ -39,7 +57,9 @@ public class PlanckMultiScan
                 epsM = epsM,
                 c = d.SpeedOfLight,
                 hbar = d.ReducedPlanck,
-                G = d.G
+                G = d.G,
+                Stability = stability
+
             });
         }
 

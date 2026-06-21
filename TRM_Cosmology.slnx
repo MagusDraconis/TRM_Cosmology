@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="ProjectStructure.md" />
     <File Path="README.md" />
   </Folder>
   <Project Path="TRM.CMD/TRM.CMD.csproj" Id="2ed77da7-60be-4985-b7dd-e9b46ee343eb" />

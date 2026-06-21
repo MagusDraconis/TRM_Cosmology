@@ -22,9 +22,9 @@ public class PlanckConstants
 
     public static PlanckConstants FromPhysicalConstants()
     {
-        double c = PhysicalConstants.c;
-        double hbar = PhysicalConstants.hbar;
-        double G = PhysicalConstants.G;
+        double c = PhysicalConstantsSI.c;
+        double hbar = PhysicalConstantsSI.hbar;
+        double G = PhysicalConstantsSI.G;
 
         double lP = Math.Sqrt(hbar * G / Math.Pow(c, 3));
         double tP = lP / c;
@@ -36,9 +36,13 @@ public class PlanckConstants
 
 }
 
-public static class PhysicalConstants
+public static class PhysicalConstantsSI
 {
-    public const double c = 299792458.0;
+
     public const double hbar = 1.054571817e-34;
-    public const double G = 6.67430e-11;
+
+    public const double G = 6.67430e-11; // SI
+    public const double M_Solar = 1.989e30; // kg
+    public const double c = 299792458.0; // m/s
+    public const double b = 6.9634e8;    // m
 }

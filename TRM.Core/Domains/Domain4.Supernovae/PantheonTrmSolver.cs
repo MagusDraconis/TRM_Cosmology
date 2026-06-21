@@ -20,7 +20,7 @@ public class PantheonTrmSolver
         int AnalyzedPoints
     );
 
-    private const double C_Kms = 299792.458; // Lichtgeschwindigkeit in km/s
+    
 
 
 
@@ -30,7 +30,7 @@ public class PantheonTrmSolver
     public double CalculateTrmDistanceModulus(double z, double hT, double betaTrm)
     {
         // TRM Leuchtkraftdistanz in Mpc: d_L = (c / H_T) * z * (1+z) * exp(beta * z)
-        double dL = (C_Kms / hT) * z * (1.0 + z) * Math.Exp(betaTrm * z);
+        double dL = (PhysicalConstants.C_Kms / hT) * z * (1.0 + z) * Math.Exp(betaTrm * z);
 
         // Umrechnung in das Distanzmodul: mu = 5 * log10(d_L) + 25
         return 5.0 * Math.Log10(dL) + 25.0;

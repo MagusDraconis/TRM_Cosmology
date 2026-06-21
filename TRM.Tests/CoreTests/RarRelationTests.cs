@@ -53,7 +53,7 @@ public class RarRelationTests
         var rarData = SparcRarAnalysis.ParseRarFromZip(zipPath);
 
         // Compute averaged profiles across all galaxies
-        var bins = SparcRarAnalysis1.ComputeRarProfiles(rarData);
+        var bins = SparcRarAnalysis.ComputeRarProfiles(rarData);
 
         _output.WriteLine("--- RADIAL ACCELERATION RELATION (RAR) PROFILE ---");
         _output.WriteLine("log10(g_bar) | log10(g_obs) | StdDev | Points");

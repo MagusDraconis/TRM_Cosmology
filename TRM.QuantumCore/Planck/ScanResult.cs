@@ -9,4 +9,8 @@ public class ScanResult
     public double c;
     public double hbar;
     public double G;
+
+    public double Stability { get; set; }
+    public double HbarError { get; set; } // optional sauber statt Tag
+
 }
