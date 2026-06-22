@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using TRM.Core;
+using TRM.Core.Domains.Domain4.Supernovae;
+using TRM.Core.Shared;
 
 namespace TRM.CMD
 {
@@ -175,22 +177,43 @@ namespace TRM.CMD
         private static void RunCmbAnalysis()
         {
             Console.Clear();
-            Console.WriteLine("--- DOMAIN 3: COSMIC MICROWAVE BACKGROUND (PLANCK DATA) ---");
-            Console.WriteLine("Initializing High-Performance k-Space Sweep...");
+            Console.WriteLine("--- DOMAIN 3: COSMIC MICROWAVE BACKGROUND (TRM k-SPACE + SCALE TEST) ---");
+            Console.WriteLine("Initializing high-performance k-space sweep...");
 
             var solver = new CmbAcousticSolver();
-            var result = solver.FindPerfectPhysicalParameters();
 
-            Console.WriteLine("\n--- TRM COSMOLOGICAL CMB-FIT RESULTS ---");
-            Console.WriteLine($"Isolated TRM Drive Frequency:        {result.TrmDriveFreq:F3}");
-            Console.WriteLine($"Kinetic Doppler Weight:              {result.DopplerWeight:F3}");
-            Console.WriteLine($"Calculated Angular Diameter Dist.:   {result.BestDa:F2} Mpc");
-            Console.WriteLine($"Calculated 1st Acoustic Peak (l):    {result.Peak1:F1}");
-            Console.WriteLine($"Calculated 2nd Acoustic Peak (l):    {result.Peak2:F1}");
-            Console.WriteLine($"Deviation Standard Error (Fitness):  {result.Fitness:F4}");
+            // 1. Acoustic k-space structure
+            var acoustic = solver.FindPerfectPhysicalParameters();
+
+            Console.WriteLine("\n--- TRM CMB k-SPACE RESULT ---");
+            Console.WriteLine($"Isolated TRM Drive Frequency:        {acoustic.TrmDriveFreq:F3}");
+            Console.WriteLine($"Kinetic Doppler Weight:              {acoustic.DopplerWeight:F3}");
+            Console.WriteLine($"K1:                                  {acoustic.K1:F6}");
+            Console.WriteLine($"K2:                                  {acoustic.K2:F6}");
+            Console.WriteLine($"Peak Ratio K2/K1:                    {acoustic.PeakRatio:F6}");
+            Console.WriteLine($"Ratio Fitness:                       {acoustic.Fitness:F6}");
+
+            // 2. TRM scale consistency
+            var scaling = TrmCosmologyParameters.Current();
+            double cs = 1.0 / Math.Sqrt(3.0);
+
+            var prediction = solver.CalculateCmbScalePrediction(
+                acoustic.K1,
+                cs,
+                acoustic.TrmDriveFreq,
+                scaling);
+
+            Console.WriteLine("\n--- TRM CMB SCALE PREDICTION ---");
+            Console.WriteLine($"HT:                                  {scaling.HT:F3} km/s/Mpc");
+            Console.WriteLine($"BetaEta:                             {scaling.BetaEta:F6}");
+            Console.WriteLine($"Alpha:                               {scaling.Alpha:F3}");
+            Console.WriteLine($"etaRec:                              {prediction.EtaRec:F6}");
+            Console.WriteLine($"zRec:                                {prediction.ZRec:F6}");
+            Console.WriteLine($"Angular Diameter Distance:           {prediction.AngularDiameterDistance:F2} Mpc");
+            Console.WriteLine($"Predicted First Multipole lPred:     {prediction.LPred:F2}");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n[SUCCESS] Acoustic peaks perfectly aligned with natural Planck parameters.");
+            Console.WriteLine("\n[SUCCESS] CMB k-space structure and TRM scale prediction evaluated.");
             Console.ResetColor();
 
             Console.WriteLine("\nPress any key to return to the menu...");
@@ -199,45 +222,60 @@ namespace TRM.CMD
         private static void RunPantheonAnalysis()
         {
             Console.Clear();
-            Console.WriteLine("--- DOMAIN 4: SUPERNOVAE & EXPANSION (PANTHEON+ DATABASE) ---");
-            Console.WriteLine("Initializing High-Resolution 2D Sweep for Temporal Matrix Drift...");
+            Console.WriteLine("--- DOMAIN 4: SUPERNOVAE & DISTANCE SCALE (PANTHEON+ DATABASE) ---");
+            Console.WriteLine("Evaluating Pantheon+ with the current TRM distance mapper...");
 
-            var solver = new PantheonTrmSolver();
-            var dataPath = Path.Combine(AppContext.BaseDirectory, "Data", "Pantheon+SH0ES.dat");
+            var dataPath = Path.Combine(
+                AppContext.BaseDirectory,
+                "Data",
+                "Pantheon+SH0ES.dat");
 
             if (!File.Exists(dataPath))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n[ERROR] Pantheon+ dataset not found.");
+                Console.WriteLine("\n[ERROR] Pantheon+ dataset not found.");
                 Console.WriteLine($"Please ensure 'Pantheon+SH0ES.dat' is placed in: {Path.Combine(AppContext.BaseDirectory, "Data")}");
                 Console.ResetColor();
+
                 Console.WriteLine("\nPress any key to return to the menu...");
                 Console.ReadKey();
                 return;
             }
 
-            var snData = solver.LoadPantheonData(dataPath);
-            var result = solver.FindDarkEnergyReplacement(snData);
+            var loader = new PantheonDataLoader();
+            var snData = loader.LoadPantheonData(dataPath);
 
-            Console.WriteLine("\n--- TRM DARK ENERGY REPLACEMENT RESULTS ---");
-            Console.WriteLine($"Analyzed Supernovae:              {result.AnalyzedPoints}");
-            Console.WriteLine($"TRM Base Temporal Pacing (H_T):   {result.BestHt:F3} km/s/Mpc");
-            Console.WriteLine($"TRM Drift Coefficient (\u03B2_T):       {result.BestBetaTrm:F4}");
-            Console.WriteLine($"Deviation Error (RMS):            {result.RmsError:F4} dex");
+            var scaling = TrmCosmologyParameters.Current();
+            var mapper = new TrmDistanceMapper(scaling);
+            var solver = new PantheonTrmScaleSolver(mapper);
+
+            var result = solver.Evaluate(snData);
+
+            Console.WriteLine("\n--- TRM PANTHEON SCALE-DISTANCE RESULTS ---");
+            Console.WriteLine($"Analyzed Supernovae:                {result.AnalyzedPoints}");
+            Console.WriteLine($"HT:                                  {scaling.HT:F3} km/s/Mpc");
+            Console.WriteLine($"BetaEta:                             {scaling.BetaEta:F6}");
+            Console.WriteLine($"Alpha:                               {scaling.Alpha:F3}");
+            Console.WriteLine($"RMS Error:                           {result.RmsError:F6} mag");
+            Console.WriteLine($"Mean Residual:                       {result.MeanResidual:F6} mag");
+            Console.WriteLine($"Mean Absolute Residual:              {result.MeanAbsResidual:F6} mag");
+            Console.WriteLine($"Centered RMS Error:                  {result.CenteredRmsError:F6} mag");
+            Console.WriteLine($"Max Absolute Residual:               {result.MaxAbsResidual:F6} mag");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n[SUCCESS] Temporal drift successfully isolated. Dark Energy (\u039B) parameter replaced.");
+            Console.WriteLine("\n[SUCCESS] Pantheon+ evaluated with the current TRM distance scale.");
             Console.ResetColor();
 
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
         }
+
         private static void DrawBanner()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(@"
-  _______ _____  __  __   _____                                 _                   
- |__   __|  __ \|  \/  | / ____|                               | |                  
+  _______ _____  __  __   _____                          _                   
+ |__   __|  __ \|  \/  | / ____|                        | |                  
     | |  | |__) | \  / || |     ___  ___ _ __ ___   ___ | | ___   __ _ _   _ 
     | |  |  _  /| |\/| || |    / _ \/ __| '_ ` _ \ / _ \| |/ _ \ / _` | | | |
     | |  | | \ \| |  | || |___| (_) \__ \ | | | | | (_) | | (_) | (_| | |_| |

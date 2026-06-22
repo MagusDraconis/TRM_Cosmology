@@ -11,9 +11,9 @@ public class CmbAcousticSolver
     public record CmbOptimizationResult(
         double TrmDriveFreq,
         double DopplerWeight,
-        double BestDa,
-        double Peak1,
-        double Peak2,
+        double K1,   // <<< NEU
+        double K2,   // <<< NEU
+        double PeakRatio,
         double Fitness
     );
 
@@ -83,52 +83,87 @@ public class CmbAcousticSolver
     /// <summary>
     /// Finds the first two physical maxima in continuous k-space (Sachs-Wolfe filtered)
     /// </summary>
-    private (double k1, double k2) FindPeaksInKSpace(double etaRec, double cs, double driveFreq, double dopplerWeight)
+    /// <summary>
+    /// Finds the first two physical maxima in continuous normalized k-space.
+    /// The scan variable q is dimensionless/raw, while kEff = q / etaRec is
+    /// the effective acoustic k used in the oscillator.
+    /// </summary>
+    private (double k1, double k2) FindPeaksInKSpace(
+        double etaRec,
+        double cs,
+        double driveFreq,
+        double dopplerWeight)
     {
-        const double kStart = 0.001;
-        const double kEnd = 0.08;
-        const double kStep = 0.0001;
-        int kSteps = (int)Math.Round((kEnd - kStart) / kStep) + 1;
+        const double qStart = 0.5;
+        const double qEnd = 50.0;
+        const double qStep = 0.01;
 
-        double prevPrevPower = -1;
-        double prevPower = -1;
-        double prevK = -1;
-        double k1 = 0;
-        double k2 = 0;
+        int qSteps = (int)Math.Round((qEnd - qStart) / qStep) + 1;
+
+        double prevPrevPower = double.NaN;
+        double prevPower = double.NaN;
+
+        double prevQ = double.NaN;
+        double prevKEff = double.NaN;
+
+        double k1 = 0.0;
+        double k2 = 0.0;
         int peakCount = 0;
 
-        // Scan k-space with high resolution
-        for (int i = 0; i < kSteps; i++)
+        for (int i = 0; i < qSteps; i++)
         {
-            double k = kStart + (i * kStep);
-            double power = SolveAcousticAmplitude(k, etaRec, cs, driveFreq, dopplerWeight);
+            double q = qStart + (i * qStep);
 
-            if (prevPrevPower >= 0 && prevPower >= 0)
+            // Effective acoustic k used by the solver
+            double kEff = q / etaRec;
+
+            double power = SolveAcousticAmplitude(
+                kEff,
+                etaRec,
+                cs,
+                driveFreq,
+                dopplerWeight);
+
+            if (double.IsNaN(power) || double.IsInfinity(power))
             {
-                // True peak condition: rising then falling
-                if (prevPower > prevPrevPower && prevPower > power)
+                prevPrevPower = prevPower;
+                prevPower = double.NaN;
+                prevQ = q;
+                prevKEff = kEff;
+                continue;
+            }
+
+            if (!double.IsNaN(prevPrevPower) && !double.IsNaN(prevPower))
+            {
+                bool isPeak = prevPower > prevPrevPower && prevPower > power;
+
+                if (isPeak)
                 {
-                    // Physical filter: ignore the initial Sachs-Wolfe plateau region
-                    if (prevK > 0.005)
+                    // Sachs-Wolfe plateau filter must apply to effective k,
+                    // not raw q.
+                    if (prevKEff > 0.005)
                     {
                         if (peakCount == 0)
                         {
-                            k1 = prevK;
+                            k1 = prevKEff;
                         }
                         else
                         {
-                            k2 = prevK;
+                            k2 = prevKEff;
                         }
 
                         peakCount++;
-                        if (peakCount == 2) break; // Found both peaks
+
+                        if (peakCount == 2)
+                            break;
                     }
                 }
             }
 
             prevPrevPower = prevPower;
             prevPower = power;
-            prevK = k;
+            prevQ = q;
+            prevKEff = kEff;
         }
 
         return (k1, k2);
@@ -139,49 +174,67 @@ public class CmbAcousticSolver
     /// </summary>
     public CmbOptimizationResult FindPerfectPhysicalParameters()
     {
-        double etaRec = 280.0; // Cosmological anchor
+        double etaRec = 280.0;
         double cs = 1.0 / Math.Sqrt(3.0);
+
         const double freqStart = 1.90;
         const double freqEnd = 2.05;
         const double freqStep = 0.002;
+
         const double dopStart = 0.05;
         const double dopEnd = 0.12;
         const double dopStep = 0.002;
+
         int freqSteps = (int)Math.Round((freqEnd - freqStart) / freqStep) + 1;
         int dopSteps = (int)Math.Round((dopEnd - dopStart) / dopStep) + 1;
 
-        double bestFreq = 0;
-        double bestDop = 0;
-        double bestK1 = 0;
-        double bestK2 = 0;
+        double bestFreq = 0.0;
+        double bestDop = 0.0;
+        double bestK1 = 0.0;
+        double bestK2 = 0.0;
 
         double minRatioError = double.MaxValue;
 
-        // Target ratio from Planck peak positions
         double targetRatio = 540.0 / 220.0;
 
-        Console.WriteLine("Starting micro-sweep in the TRM resonance zone...");
-
-        // Micro-sweep around expected physical values
-        // Frequency: 1.90 to 2.05 | Doppler: 0.05 to 0.12
         object sync = new();
+
         Parallel.For(0, freqSteps, freqIndex =>
         {
             double freq = freqStart + (freqIndex * freqStep);
+
             double localBestError = double.MaxValue;
-            double localBestFreq = 0;
-            double localBestDop = 0;
-            double localBestK1 = 0;
-            double localBestK2 = 0;
+            double localBestFreq = 0.0;
+            double localBestDop = 0.0;
+            double localBestK1 = 0.0;
+            double localBestK2 = 0.0;
 
             for (int dopIndex = 0; dopIndex < dopSteps; dopIndex++)
             {
                 double dop = dopStart + (dopIndex * dopStep);
+
                 var (k1, k2) = FindPeaksInKSpace(etaRec, cs, freq, dop);
-                if (k1 == 0 || k2 == 0) continue;
+
+                if (k1 <= 0 || k2 <= 0 ||
+                    double.IsNaN(k1) || double.IsNaN(k2) ||
+                    double.IsInfinity(k1) || double.IsInfinity(k2))
+                {
+                    continue;
+                }
 
                 double ratio = k2 / k1;
+
+                if (double.IsNaN(ratio) || double.IsInfinity(ratio))
+                {
+                    continue;
+                }
+
                 double error = Math.Abs(ratio - targetRatio);
+
+                if (double.IsNaN(error) || double.IsInfinity(error))
+                {
+                    continue;
+                }
 
                 if (error < localBestError)
                 {
@@ -209,15 +262,119 @@ public class CmbAcousticSolver
             }
         });
 
-        // Final projection to multipole space
-        double bestDa = 220.0 / bestK1;
+        // ✅ HIER ist der richtige Ort für den Guard.
+        // Nach Parallel.For, nicht darin.
+        if (bestK1 <= 0 || bestK2 <= 0 ||
+            double.IsNaN(bestK1) || double.IsNaN(bestK2) ||
+            double.IsInfinity(bestK1) || double.IsInfinity(bestK2))
+        {
+            return new CmbOptimizationResult(
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                double.MaxValue
+            );
+        }
 
-        double finalL1 = bestK1 * bestDa;
-        double finalL2 = bestK2 * bestDa;
-        double fitness = Math.Pow(finalL1 - 220.0, 2) + Math.Pow(finalL2 - 540.0, 2);
+        double finalRatio = bestK2 / bestK1;
 
-        return new CmbOptimizationResult(bestFreq, bestDop, bestDa, finalL1, finalL2, fitness);
+        if (double.IsNaN(finalRatio) || double.IsInfinity(finalRatio))
+        {
+            return new CmbOptimizationResult(
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                double.MaxValue
+            );
+        }
+
+        double fitness = Math.Abs(finalRatio - targetRatio);
+
+        return new CmbOptimizationResult(
+            bestFreq,
+            bestDop,
+            bestK1,
+            bestK2,
+            finalRatio,
+            fitness
+        );
+    }
+
+    public record CmbScalePrediction(
+        double EtaRec,
+        double ZRec,
+        double AngularDiameterDistance,
+        double LPred
+);
+    public CmbScalePrediction CalculateCmbScalePrediction(
+    double k1,
+    double cs,
+    double driveFreq,
+    TrmCosmologyParameters scaling)
+    {
+        double etaRec = FindRecombinationEta(k1, cs, driveFreq);
+
+        double zRec = CalculateTrmRecombinationRedshift(
+            etaRec,
+            scaling.BetaEta,
+            scaling.Alpha);
+
+        double dA = (PhysicalConstants.C_Kms / scaling.HT)
+                    * Math.Log(1.0 + zRec);
+
+        double lPred = k1 * dA;
+
+        return new CmbScalePrediction(
+            etaRec,
+            zRec,
+            dA,
+            lPred);
     }
 
 
+
+    public double CalculateTrmRecombinationRedshift(
+        double etaRec,
+        double betaTrm,
+        double alpha)
+    {
+        return Math.Exp(betaTrm * alpha * etaRec) - 1.0;
+    }
+
+    public double FindRecombinationEta(double k, double cs, double driveFreq)
+    {
+        double etaStart = 0.01;
+        double etaEnd = 400.0;
+        double step = (etaEnd - etaStart) / 400.0;
+
+        double theta = 1.0;
+        double thetaDot = 0.0;
+        double eta = etaStart;
+
+        double bestEta = eta;
+        double maxRatio = 0.0;
+
+        while (eta < etaEnd)
+        {
+            var (k1Theta, k1ThetaDot) = Derivatives(eta, theta, thetaDot, k, cs, driveFreq);
+
+            theta += k1Theta * step;
+            thetaDot += k1ThetaDot * step;
+            eta += step;
+
+            double ratio = Math.Abs(thetaDot) / (Math.Abs(theta) + 1e-6);
+
+            if (ratio > maxRatio)
+            {
+                maxRatio = ratio;
+                bestEta = eta;
+            }
+        }
+
+        return bestEta;
+    }
 }
