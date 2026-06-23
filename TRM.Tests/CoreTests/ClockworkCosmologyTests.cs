@@ -158,12 +158,82 @@ public class ClockworkCosmologyTests
         _output.WriteLine($"dAngular: {result.TrmAngularDiameterDistance}");
         _output.WriteLine($"dLum:     {result.TrmLuminosityDistance}");
 
-        Assert.True(result.TrmBaseDistance > 0.0);
-        Assert.True(result.TrmAngularDiameterDistance > 0.0);
-        Assert.True(result.TrmLuminosityDistance > 0.0);
+        double expectedDA = result.TrmBaseDistance / (1.0 + zRec);
 
-        Assert.InRange(result.TrmAngularDiameterDistance, 20000.0, 40000.0);
+
+        Assert.Equal(
+            result.TrmBaseDistance / (1.0 + zRec),
+            result.TrmAngularDiameterDistance,
+            6);
+
+        Assert.Equal(
+            result.TrmBaseDistance * (1.0 + zRec),
+            result.TrmLuminosityDistance,
+            6);
+
+        Assert.True(result.TrmLuminosityDistance > 0.0);
     }
+    [Fact]
+    public void Test_TrmDistanceMapper_SanityCurve_Behaviour_IsConsistent()
+    {
+        var scaling = TrmCosmologyParameters.Current();
+        var mapper = new TrmDistanceMapper(scaling);
+
+        var redshifts = new double[]
+        {
+        0.01, 0.1, 0.5, 1.0, 3.0, 10.0, 100.0, 1100.0
+        };
+
+        double prevBase = 0.0;
+        double prevLum = 0.0;
+
+        _output.WriteLine("--- TRM DISTANCE MAPPER SANITY TEST ---");
+
+        foreach(var z in redshifts)
+        {
+            var r = mapper.MapFromRedshift(z);
+
+            _output.WriteLine(
+                $"z={z,8:F2} | dBase={r.TrmBaseDistance,10:F2} | dA={r.TrmAngularDiameterDistance,10:F2} | dL={r.TrmLuminosityDistance,12:F2}");
+
+            // ✅ dBase muss monoton wachsen
+            Assert.True(r.TrmBaseDistance > prevBase, $"dBase not increasing at z={z}");
+
+            // ✅ dLum muss monoton wachsen
+            Assert.True(r.TrmLuminosityDistance > prevLum, $"dLum not increasing at z={z}");
+
+            // ✅ Grundrelationen
+            Assert.Equal(
+                r.TrmBaseDistance / (1.0 + z),
+                r.TrmAngularDiameterDistance,
+                6);
+
+            Assert.Equal(
+                r.TrmBaseDistance * (1.0 + z),
+                r.TrmLuminosityDistance,
+                6);
+
+            // ✅ zentrale physikalische Relation
+            Assert.Equal(
+                r.TrmLuminosityDistance,
+                r.TrmAngularDiameterDistance * Math.Pow(1.0 + z, 2),
+                6);
+
+            prevBase = r.TrmBaseDistance;
+            prevLum = r.TrmLuminosityDistance;
+        }
+
+        // ✅ zusätzlicher globaler Check: CMB Verhalten
+
+        var lowZ = mapper.MapFromRedshift(0.5);
+        var midZ = mapper.MapFromRedshift(3.0);
+        var highZ = mapper.MapFromRedshift(1100.0);
+
+        // Angular distance hat Maximum irgendwo im mittleren z
+        Assert.True(midZ.TrmAngularDiameterDistance > lowZ.TrmAngularDiameterDistance);
+        Assert.True(highZ.TrmAngularDiameterDistance < midZ.TrmAngularDiameterDistance);
+    }
+
     [Fact]
     public void Test_TrmDistanceMapper_LuminosityRelation_IsConsistent()
     {
@@ -240,4 +310,148 @@ public class ClockworkCosmologyTests
         Assert.True(result.MaxAbsResidual < 1.5, $"Max absolute residual too high: {result.MaxAbsResidual}");
     }
 
+    [Fact]
+    public void Test_TrmDistanceMapper_HTSensitivity_CmbScale()
+    {
+        double zRec = 1177.6950315159318;
+
+        var htValues = new[]
+        {
+        68.0,
+        70.0,
+        72.93,
+        75.0,
+        78.0
+    };
+
+        _output.WriteLine("--- TRM HT SENSITIVITY / CMB SCALE ---");
+
+        foreach(var ht in htValues)
+        {
+            var scaling = TrmCosmologyParameters.WithHT(ht);
+            var mapper = new TrmDistanceMapper(scaling);
+
+            var r = mapper.MapFromRedshift(zRec);
+
+            _output.WriteLine(
+                $"HT={ht:F2} | " +
+                $"dBase={r.TrmBaseDistance:F3} | " +
+                $"dA={r.TrmAngularDiameterDistance:F6} | " +
+                $"dL={r.TrmLuminosityDistance:E3}");
+
+            Assert.True(r.TrmBaseDistance > 0);
+            Assert.True(r.TrmAngularDiameterDistance > 0);
+            Assert.True(r.TrmLuminosityDistance > 0);
+        }
+    }
+    [Fact]
+    public void Test_Pantheon_TrmScaleDistance_HTSensitivity()
+    {
+        var htValues = new[]
+        {
+        68.0,
+        69.0,
+        70.0,
+        71.0,
+        72.0,
+        72.93,
+        73.5,
+        74.0,
+        75.0,
+        76.0,
+        78.0
+    };
+
+        _output.WriteLine("--- TRM PANTHEON HT SENSITIVITY ---");
+
+        foreach(var ht in htValues)
+        {
+            var scaling = TrmCosmologyParameters.WithHT(ht);
+
+            var result = EvaluatePantheonScaleDistance(scaling);
+
+            _output.WriteLine(
+                $"HT={ht,6:F2} | " +
+                $"RMS={result.RmsError:F6} | " +
+                $"CenteredRMS={result.CenteredRmsError:F6} | " +
+                $"MeanResidual={result.MeanResidual:F6} | " +
+                $"MeanAbs={result.MeanAbsResidual:F6} | " +
+                $"MaxAbs={result.MaxAbsResidual:F6}"
+            );
+        }
+    }
+    [Fact]
+    public void Test_Pantheon_TrmScaleDistance_HTFineScan()
+    {
+        _output.WriteLine("--- TRM PANTHEON HT FINE SCAN ---");
+
+        double bestHt = double.NaN;
+        double bestRms = double.MaxValue;
+
+        for(double ht = 69.5; ht <= 71.0; ht += 0.05)
+        {
+            var scaling = TrmCosmologyParameters.WithHT(ht);
+            var result = EvaluatePantheonScaleDistance(scaling);
+
+            _output.WriteLine(
+                $"HT={ht,6:F2} | " +
+                $"RMS={result.RmsError:F6} | " +
+                $"MeanResidual={result.MeanResidual:F6} | " +
+                $"MeanAbs={result.MeanAbsResidual:F6}");
+
+            if(result.RmsError < bestRms)
+            {
+                bestRms = result.RmsError;
+                bestHt = ht;
+            }
+        }
+
+        _output.WriteLine($"BEST_HT={bestHt:F3} | BEST_RMS={bestRms:F6}");
+    }
+    private PantheonScaleDistanceResult EvaluatePantheonScaleDistance(
+        TrmCosmologyParameters scaling)
+    {
+        var loader = new PantheonDataLoader();
+
+        var dataPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Data",
+            "Pantheon+SH0ES.dat");
+
+        if(!File.Exists(dataPath))
+        {
+            _output.WriteLine($"[SKIPPED] Data file not found at: {dataPath}");
+
+            return new PantheonScaleDistanceResult(
+                Count: 0,
+                HT: scaling.HT,
+                BetaEta: scaling.BetaEta,
+                Alpha: scaling.Alpha,
+                RmsError: double.NaN,
+                MeanResidual: double.NaN,
+                MeanAbsResidual: double.NaN,
+                MaxAbsResidual: double.NaN,
+                CenteredRmsError: double.NaN
+            );
+        }
+
+        var mapper = new TrmDistanceMapper(scaling);
+        var solver = new PantheonTrmScaleSolver(mapper);
+
+        var snData = loader.LoadPantheonData(dataPath);
+
+        var result = solver.Evaluate(snData);
+
+        return new PantheonScaleDistanceResult(
+            Count: result.AnalyzedPoints,
+            HT: scaling.HT,
+            BetaEta: scaling.BetaEta,
+            Alpha: scaling.Alpha,
+            RmsError: result.RmsError,
+            MeanResidual: result.MeanResidual,
+            MeanAbsResidual: result.MeanAbsResidual,
+            MaxAbsResidual: result.MaxAbsResidual,
+            CenteredRmsError: result.CenteredRmsError
+        );
+    }
 }

@@ -32,10 +32,12 @@ public class TrmDistanceMapper
     /// For now this equals the TRM base distance.
     /// If later TRM requires a projection correction, it belongs here.
     /// </summary>
+
     public double CalculateTrmAngularDiameterDistance(double z)
     {
-        return CalculateTrmBaseDistance(z);
+        return CalculateTrmBaseDistance(z) / (1.0 + z);
     }
+
 
     /// <summary>
     /// TRM luminosity-distance-like quantity.

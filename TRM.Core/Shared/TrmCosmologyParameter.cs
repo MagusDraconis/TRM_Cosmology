@@ -54,12 +54,52 @@ public sealed record TrmCosmologyParameters(
         return 6.8;
     }
 
+
     /// <summary>
-    /// Current placeholder for TRM cosmological distance pacing in km/s/Mpc.
-    /// TODO: Replace with result from PantheonTrmSolver or a unified TRM distance relation.
+    /// Current Pantheon-calibrated TRM cosmological distance pacing in km/s/Mpc.
+    /// 
+    /// Calibration status:
+    /// - Fine scan over Pantheon+SH0ES scale-distance residuals gives best RMS near HT ≈ 70.30.
+    /// - At HT ≈ 70.30 the mean residual is approximately zero.
+    /// - This value should still be treated as a calibrated working value, not yet as a fundamental derivation.
+    /// 
+    /// TODO:
+    /// - Replace with result from a unified TRM distance relation.
+    /// - Derive HT from TQM/TRM dynamics rather than Pantheon calibration.
     /// </summary>
     public static double GetHT()
     {
-        return 72.93;
+        return 70.30;
+    }
+
+
+
+    /// <summary>
+    /// Returns the current working TRM cosmological parameter set,
+    /// but with an explicitly supplied HT value.
+    /// Useful for HT sensitivity tests.
+    /// </summary>
+    public static TrmCosmologyParameters WithHT(double ht)
+    {
+        return new TrmCosmologyParameters(
+            BetaEta: GetBetaEta(),
+            Alpha: GetAlpha(),
+            HT: ht);
+    }
+
+    /// <summary>
+    /// Returns the current working TRM cosmological parameter set
+    /// with optional explicit overrides.
+    /// Useful for sensitivity tests without changing the central defaults.
+    /// </summary>
+    public static TrmCosmologyParameters WithOverrides(
+        double? betaEta = null,
+        double? alpha = null,
+        double? ht = null)
+    {
+        return new TrmCosmologyParameters(
+            BetaEta: betaEta ?? GetBetaEta(),
+            Alpha: alpha ?? GetAlpha(),
+            HT: ht ?? GetHT());
     }
 }

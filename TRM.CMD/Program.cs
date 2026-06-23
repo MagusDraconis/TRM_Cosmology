@@ -22,12 +22,13 @@ namespace TRM.CMD
                 isFirstIteration = false;
                 
                 Console.WriteLine("\n=======================================================");
-                Console.WriteLine(" V2.2 EXPERIMENT SELECTION");
+                Console.WriteLine(" V3.0 EXPERIMENT SELECTION");
                 Console.WriteLine("=======================================================");
-                Console.WriteLine(" [1] Analyze ACCEPT Galaxy Clusters (Dark Matter Alternative)");
+                Console.WriteLine(" [1] Run Cluster Diagnostics (TRM vs Newtonian Gravity)");
                 Console.WriteLine(" [2] Analyze SPARC Galactic Rotations (MOND vs TRM)");
                 Console.WriteLine(" [3] Analyze CMB Acoustic Peaks (Planck Cosmology)");
                 Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (Dark Energy Replacement)");
+                //Console.WriteLine(" [5] Run Cluster Diagnostics (TRM vs Newtonian Gravity)");
                 Console.WriteLine(" [0] Exit Framework");
                 Console.WriteLine("=======================================================");
                 Console.Write(" Select an option: ");
@@ -37,7 +38,7 @@ namespace TRM.CMD
                 switch (input)
                 {
                     case "1":
-                        RunAcceptClusterAnalysis();
+                        RunCluster_Diagnostics();
                         break;
                     case "2":
                         RunSparcGalacticAnalysis();
@@ -48,6 +49,9 @@ namespace TRM.CMD
                     case "4":
                         RunPantheonAnalysis();
                         break;
+                    //case "5":
+                    //        RunCluster_Diagnostics();
+                        break;
                     case "0":
                         Console.WriteLine("Exiting TRM Cosmology Framework. Goodbye!");
                         return;
@@ -57,11 +61,11 @@ namespace TRM.CMD
                 }
             }
         }
-
-        private static void RunAcceptClusterAnalysis()
+        private static void RunCluster_Diagnostics()
         {
             ClearConsole();
-            Console.WriteLine("--- DOMAIN 1: GALAXY CLUSTERS (ACCEPT DATABASE) ---");
+            Console.WriteLine("--- DOMAIN 1: CLUSTER DIAGNOSTICS ---");
+            Console.WriteLine("This module provides diagnostic tools for analyzing galaxy cluster data.");
 
             string dataPath;
             string redshiftPath;
@@ -71,7 +75,7 @@ namespace TRM.CMD
                 dataPath = WorkspaceFileLocator.GetFilePath("Coma_Cluster_Chandra_temperature_all_profiles.dat");
                 redshiftPath = WorkspaceFileLocator.GetFilePath("Coma_Cluster_Chandra_temperature_accept_main.tab");
             }
-            catch (FileNotFoundException ex)
+            catch(FileNotFoundException ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\n[ERROR] Required datasets not found.");
@@ -82,7 +86,7 @@ namespace TRM.CMD
 
             var dataDir = Path.GetDirectoryName(dataPath) ?? Directory.GetCurrentDirectory();
 
-            if (!File.Exists(dataPath) || !File.Exists(redshiftPath))
+            if(!File.Exists(dataPath) || !File.Exists(redshiftPath))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\n[ERROR] Required datasets not found.");
@@ -93,41 +97,60 @@ namespace TRM.CMD
                 return;
             }
 
+
             var analysis = new BulletClusterAnalysis2();
+
             Console.WriteLine("Loading cluster shells and redshifts...");
+
             var allClusters = analysis.LoadAllClusterShells(dataPath);
             var redshifts = analysis.LoadClusterRedshifts(redshiftPath);
+
             Console.WriteLine($"Successfully loaded {allClusters.Count} clusters.\n");
 
-            // --- THEORETICAL PARAMETER SWEEP ---
-            Console.WriteLine("STEP 1: Executing 2D-Grid-Sweep for optimal Pressure Threshold and Ellipticity Beta...");
-            Console.WriteLine("This will identify the natural constants of the bimodal temporal transition.\n");
+            // ✅ TRM-Geometrie aktivieren
+            var scaling = TrmCosmologyParameters.Current();
+            var mapper = new TrmDistanceMapper(scaling);
+            analysis.ApplyTrmGeometry(allClusters, redshifts, mapper);
 
-            // Execute the sweep (method prints detailed progress to the console)
-            analysis.FindBestPhysicalThresholdAndBeta(allClusters, redshifts);
+            // 🔧 gleiche Werte wie im Cluster-Run verwenden
+            double optimizedThreshold = 5.30e-33;   // aus deinem letzten Sweep
+            double optimizedBeta = 1.20;            // dito
 
-            // --- FINAL EVALUATION ---
-            Console.WriteLine("\nSTEP 2: Generating final theoretical evaluation for the publication...");
-
-            // Default best-fit values (can be moved to interactive input later)
-            double optimizedThreshold = 2.70e-033; // Peak from the parameter sweep
-            double optimizedBeta = 1.45;           // Geometric damping factor
-            string outputCsv = Path.Combine(Directory.GetCurrentDirectory(), "TRM_V2.2_ACCEPT_Results.csv");
-
-            analysis.EvaluatePhysicsDrivenBimodalTheory(
+            var diagnostics = analysis.RunClusterDiagnostics(
                 allClusters,
                 redshifts,
+                pressureThreshold: optimizedThreshold,
                 C: 1.3195,
                 alpha: -0.7589,
-                baselineK: 0.1,
-                pressureThreshold: optimizedThreshold,
-                beta: optimizedBeta,
-                resultsCsvPath: outputCsv
+                beta: optimizedBeta
             );
+            analysis.PrintWeightSystematics(diagnostics);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"\n[SUCCESS] Analysis complete. Results exported to: {outputCsv}");
-            Console.ResetColor();
+            Console.WriteLine("\n--- CLUSTER DIAGNOSTICS ---");
+
+            foreach(var d in diagnostics.OrderBy(x => x.Improvement))
+            {
+                Console.WriteLine(
+                    $"{d.Name,-18} | z={d.Z:F3} | f={d.Fz:F3} | " +
+                    $"gradP={d.MaxPressureGradient:E2} | " +
+                    $"{d.Regime,-15} | {d.Improvement,5:F2}x | {d.Diagnosis}"
+                );
+
+            }
+            var worst = diagnostics.Where(d => d.Improvement < 0.8);
+            if(worst.Any())
+            {
+                Console.WriteLine("\n--- WORST PERFORMING CLUSTERS ---");
+                foreach(var d in worst)
+                {
+                    Console.WriteLine(
+                        $"{d.Name,-18} | z={d.Z:F3} | f={d.Fz:F3} | " +
+                        $"gradP={d.MaxPressureGradient:E2} | " +
+                        $"{d.Regime,-15} | {d.Improvement,5:F2}x | {d.Diagnosis}"
+                    );
+
+                }
+            }
 
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
@@ -278,7 +301,7 @@ namespace TRM.CMD
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
         }
-
+        
         private static void ClearConsole()
         {
             if (Console.IsOutputRedirected)
@@ -311,7 +334,7 @@ namespace TRM.CMD
                                                                   __/ | __/ |
                                                                  |___/ |___/ 
             ");
-            Console.WriteLine("   Clockwork Cosmology V2.2 - Theoretical Physics Evaluation Engine");
+            Console.WriteLine("   Clockwork Cosmology V3.0 - Theoretical Physics Evaluation Engine");
             Console.ResetColor();
         }
     }

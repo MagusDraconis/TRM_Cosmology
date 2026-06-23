@@ -18,4 +18,3 @@ public static class PhysicalConstants
 
     public const double C_Kms = 299792.458; // Lichtgeschwindigkeit in km/s
 }
-

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TRM.Core.Shared;
 
 namespace TRM.Core;
 
@@ -14,6 +15,14 @@ public class BulletClusterAnalysis2
     private readonly record struct FitSample(double RadiusSquaredCm2, double Density, double PressureGradient, double ReportedMass);
     private readonly record struct BimodalExportRow(string Cluster, double Z, double MaxGradP, double Improvement);
     private static readonly object LogLock = new();
+    private readonly TrmDistanceMapper _mapper;
+
+    public BulletClusterAnalysis2()
+    {
+        var scaling = TrmCosmologyParameters.Current();
+        _mapper = new TrmDistanceMapper(scaling);
+    }
+
 
     // Global registry of cluster ellipticities (morphological asymmetry) from Chandra data
     public Dictionary<string, double> ClusterEllipticities { get; set; } = new(StringComparer.OrdinalIgnoreCase)
@@ -131,8 +140,15 @@ public class BulletClusterAnalysis2
             var curr = shells[i];
             var next = shells[i + 1];
 
-            double rCm = curr.RadiusKpc * PhysicalConstants.KpcToCm;
-            double drCm = (next.RadiusKpc - prev.RadiusKpc) * PhysicalConstants.KpcToCm;
+
+            double rCm = curr.RadiusKpc_TRM > 0
+                ? curr.RadiusKpc_TRM * PhysicalConstants.KpcToCm
+                : curr.RadiusKpc * PhysicalConstants.KpcToCm;
+
+            double drCm = ((next.RadiusKpc_TRM > 0 ? next.RadiusKpc_TRM : next.RadiusKpc)
+             - (prev.RadiusKpc_TRM > 0 ? prev.RadiusKpc_TRM : prev.RadiusKpc))
+             * PhysicalConstants.KpcToCm;
+
             if (drCm == 0)
                 continue;
 
@@ -146,11 +162,31 @@ public class BulletClusterAnalysis2
         }
     }
 
-    public double CalculateMassWithTRM(double rCm, double rho, double dPdr, double redshift, double k)
+    public double CalculateMassUnified(double rCm, double rho, double dPdr, double redshift, double k)
     {
-        double syncFactor = 1.0 / (1.0 + k * redshift);
-        double G_effective = PhysicalConstants.G * syncFactor;
-        return Math.Abs(-(Math.Pow(rCm, 2) / (G_effective * rho)) * dPdr) / PhysicalConstants.M_Solar;
+        if(rho <= 0 || !IsFinite(dPdr))
+            return double.MaxValue;
+
+        // --- 1. Dynamikgewicht (kein Switch mehr!) ---
+        double referenceGrad = 1e-33;
+
+        double turbulence = Math.Abs(dPdr) / referenceGrad;
+
+        // glatte Übergangsfunktion
+        double w = 1.0 / (1.0 + 2.0 * turbulence);//double w = 1.0 / (1.0 + turbulence);
+        // ruhig → w≈1, turbulent → w≈0
+
+        // --- 2. TRM-Kopplung ---
+        double trmFactor = 1.0 / (1.0 + k * redshift);
+
+        // --- 3. GEMISCHTES G ---
+        double effectiveFactor = (1.0 - w) + w * trmFactor;
+
+        double G_effective = PhysicalConstants.G * effectiveFactor;
+
+        // --- 4. Masse ---
+        return Math.Abs(-(Math.Pow(rCm, 2) / (G_effective * rho)) * dPdr)
+               / PhysicalConstants.M_Solar;
     }
 
     private static List<FitSample> BuildFitSamples(List<AcceptShell> shells)
@@ -187,8 +223,13 @@ public class BulletClusterAnalysis2
             if (rho <= 0 || !IsFinite(rho))
                 continue;
 
-            double rCm = curr.RadiusKpc * PhysicalConstants.KpcToCm;
-            if (rCm <= 0 || !IsFinite(rCm))
+
+
+            double radius = curr.RadiusKpc_TRM > 0 ? curr.RadiusKpc_TRM : curr.RadiusKpc;
+            double rCm = radius * PhysicalConstants.KpcToCm;
+
+
+            if(rCm <= 0 || !IsFinite(rCm))
                 continue;
 
             samples.Add(new FitSample(rCm * rCm, rho, dPdr, curr.ReportedMass));
@@ -199,35 +240,49 @@ public class BulletClusterAnalysis2
 
     private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
 
-    private static double CalculateErrorForK(List<FitSample> fitSamples, double zCluster, double k)
+    private static double CalculateErrorUnified(List<FitSample> samples, double zCluster, double k)
     {
-        if (fitSamples == null || fitSamples.Count == 0)
-            return double.MaxValue;
-
-        if (!IsFinite(zCluster) || !IsFinite(k))
+        if(samples == null || samples.Count == 0)
             return double.MaxValue;
 
         double totalError = 0;
-        double denominator = 1.0 + (k * zCluster);
-        if (Math.Abs(denominator) < 1e-30)
-            return double.MaxValue;
 
-        double syncFactor = 1.0 / denominator;
-        double gEffective = PhysicalConstants.G * syncFactor;
-        if (gEffective <= 0 || !IsFinite(gEffective))
-            return double.MaxValue;
-
-        foreach (var sample in fitSamples)
+        foreach(var s in samples)
         {
-            double mTheory = Math.Abs(-(sample.RadiusSquaredCm2 / (gEffective * sample.Density)) * sample.PressureGradient) / PhysicalConstants.M_Solar;
-            if (!IsFinite(mTheory))
+            if(!IsFinite(s.PressureGradient) || !IsFinite(s.Density))
                 continue;
 
-            double squaredError = Math.Pow(mTheory - sample.ReportedMass, 2);
-            if (!IsFinite(squaredError))
+            double referenceGrad = 1e-33;
+            double turbulence = Math.Abs(s.PressureGradient) / referenceGrad;
+
+            double w = 1.0 / (1.0 + 2.0 * turbulence);
+
+            double trmFactor = 1.0 / (1.0 + k * zCluster);
+            double effectiveFactor = (1.0 - w) + w * trmFactor;
+
+            double G_eff = PhysicalConstants.G * effectiveFactor;
+
+
+            double shear = Math.Abs(s.PressureGradient - samples.Average(p => p.PressureGradient));
+
+            double correction = 1.0 + shear / referenceGrad;
+
+            double effectiveGradient = s.PressureGradient / correction;
+
+
+            double mTheory =
+                Math.Abs(-(s.RadiusSquaredCm2 / (G_eff * s.Density)) * effectiveGradient)
+                / PhysicalConstants.M_Solar;
+
+            if(!IsFinite(mTheory))
                 continue;
 
-            totalError += squaredError;
+            double err = Math.Pow(mTheory - s.ReportedMass, 2);
+
+            if(!IsFinite(err))
+                continue;
+
+            totalError += err;
         }
 
         return totalError > 0 ? totalError : double.MaxValue;
@@ -272,7 +327,7 @@ public class BulletClusterAnalysis2
 
             if (fitSamples.Count == 0) continue;
 
-            double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
+            double errorBaseline = CalculateErrorUnified(fitSamples, zCluster, baselineK);
             if (errorBaseline > 1e300 || double.IsNaN(errorBaseline)) errorBaseline = 1e300;
 
             // Evaluate universal K(z)
@@ -283,7 +338,7 @@ public class BulletClusterAnalysis2
             double geometricK = universalK * (1.0 - beta * ellipticity);
             if (geometricK < baselineK) geometricK = baselineK; // Guard against non-physical sign inversions
 
-            double errorUniversal = CalculateErrorForK(fitSamples, zCluster, geometricK);
+            double errorUniversal = CalculateErrorUnified(fitSamples, zCluster, geometricK);
             if (errorUniversal > 1e300 || double.IsNaN(errorUniversal)) errorUniversal = 1e300;
 
             string gruppe;
@@ -392,14 +447,14 @@ public class BulletClusterAnalysis2
 
             if (useClockwork) countTRM++; else countNewton++;
 
-            double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
+            double errorBaseline = CalculateErrorUnified(fitSamples, zCluster, baselineK);
             if (double.IsNaN(errorBaseline) || errorBaseline > 1e300) errorBaseline = 1e300;
 
-            double errorFinal = CalculateErrorForK(fitSamples, zCluster, finalK);
+            double errorFinal = CalculateErrorUnified(fitSamples, zCluster, finalK);
             if (double.IsNaN(errorFinal) || errorFinal > 1e300) errorFinal = 1e300;
 
             // Oracle comparison also uses the geometry-corrected value
-            double oracleError = CalculateErrorForK(fitSamples, zCluster, geometricK);
+            double oracleError = CalculateErrorUnified(fitSamples, zCluster, geometricK);
             bool truthNeedsClockwork = (oracleError < errorBaseline * 0.95);
             if (useClockwork == truthNeedsClockwork) successfulPredictions++;
 
@@ -471,10 +526,10 @@ public class BulletClusterAnalysis2
 
             if (useClockwork) countTRM++; else countNewton++;
 
-            double errorBaseline = CalculateErrorForK(fitSamples, zCluster, baselineK);
+            double errorBaseline = CalculateErrorUnified(fitSamples, zCluster, baselineK);
             if (double.IsNaN(errorBaseline) || errorBaseline > 1e300) errorBaseline = 1e300;
 
-            double oracleUniversalError = CalculateErrorForK(fitSamples, zCluster, geometricK);
+            double oracleUniversalError = CalculateErrorUnified(fitSamples, zCluster, geometricK);
             bool truthNeedsClockwork = (oracleUniversalError < errorBaseline * 0.95);
 
             if (useClockwork == truthNeedsClockwork)
@@ -549,5 +604,366 @@ public class BulletClusterAnalysis2
             if (!redshifts.ContainsKey(parts[0])) redshifts[parts[0]] = z;
         }
         return redshifts;
+    }
+    public void ApplyTrmGeometry(
+    Dictionary<string, List<AcceptShell>> clusters,
+    Dictionary<string, double> redshifts,
+    TrmDistanceMapper mapper)
+    {
+        foreach(var (clusterName, shells) in clusters)
+        {
+            if(!redshifts.TryGetValue(clusterName, out double z))
+                continue;
+
+            double dA_TRM = mapper.CalculateTrmAngularDiameterDistance(z);
+            double dA_GR = LambdaCdMHelper.CalculateAngularDiameterDistance(z);
+
+            double f = dA_TRM / dA_GR;
+
+            foreach(var shell in shells)
+            {
+                // ✅ Radius transformieren
+                shell.RadiusKpc_TRM = shell.RadiusKpc * f;
+
+                // ✅ Density transformieren
+                shell.ElectronDensity /= Math.Pow(f, 3);
+
+                // ✅ Pressure transformieren
+                shell.Pressure /= Math.Pow(f, 3);
+
+                // ✅ Mass skalieren
+                shell.ReportedMass *= f;
+            }
+            Console.WriteLine($"Cluster {clusterName}: f(z) = {f}");
+        }
+    }
+    public List<ClusterDiagnostic> RunClusterDiagnostics(
+    Dictionary<string, List<AcceptShell>> allClusters,
+    Dictionary<string, double> redshifts,
+    double pressureThreshold,
+    double C,
+    double alpha,
+    double beta,
+    double baselineK = 0.1)
+    {
+        var results = new List<ClusterDiagnostic>();
+
+        foreach(var entry in allClusters)
+        {
+            string clusterName = entry.Key;
+            var shells = entry.Value;
+
+            if(!redshifts.TryGetValue(clusterName, out double z) || z <= 0)
+                continue;
+
+            var samples = BuildFitSamples(shells);
+            if(samples.Count == 0)
+                continue;
+
+            double maxGradP = samples.Max(s => Math.Abs(s.PressureGradient));
+
+            double referenceGrad = 1e-33;
+
+            double gradVariance = ComputeGradientVariance(samples);
+            double inertial = ComputeInertialProxy(samples);
+
+            double meanGrad = samples.Average(s => s.PressureGradient);
+
+            double anisotropy = samples
+                .Average(s => Math.Abs(s.PressureGradient - meanGrad))
+                / (Math.Abs(meanGrad) + 1e-40);
+
+            double turbulence = maxGradP / referenceGrad;
+            double shear = gradVariance / referenceGrad;
+            double inertialNorm = inertial / (referenceGrad + 1e-40);
+
+            double dynamicFactor =
+                turbulence
+                + 0.5 * shear
+                + 0.5 * anisotropy
+                + 0.5 * inertialNorm;
+
+            double weight = 1.0 / (1.0 + 2.0 * dynamicFactor);
+            string regime = ClassifyRegime(weight);
+
+
+            double dA_TRM = _mapper.CalculateTrmAngularDiameterDistance(z);
+            double dA_GR = LambdaCdMHelper.CalculateAngularDiameterDistance(z);
+
+            double fz = dA_TRM / dA_GR;            
+
+            double universalK = C * Math.Pow(z, alpha);
+            double ellipticity = GetClusterEllipticity(clusterName);
+
+
+            string morphologyClass = ClassifyEffectiveMorphology(
+                weight,
+                turbulence,
+                shear,
+                anisotropy,
+                inertialNorm,
+                ellipticity);
+
+
+            double geometricK = universalK * (1.0 - beta * ellipticity);
+
+            if(geometricK < baselineK)
+                geometricK = baselineK;
+
+            double chosenK = baselineK * (1.0 - weight) + geometricK * weight;
+
+            double errorBaseline = CalculateErrorUnified(samples, z, baselineK);
+            double errorFinal = CalculateErrorUnified(samples, z, chosenK);
+
+            double improvement = (errorFinal > 0) ? errorBaseline / errorFinal : 1.0;
+
+            string diagnosis = DiagnoseCluster(fz, maxGradP, improvement, weight);
+
+
+
+            results.Add(new ClusterDiagnostic(
+                clusterName,
+                z,
+                fz,
+                maxGradP,
+                improvement,
+                diagnosis,
+                weight,
+                turbulence,
+                shear,
+                anisotropy,
+                inertialNorm,
+                dynamicFactor,
+                ellipticity,
+                morphologyClass,
+                regime));
+        }
+
+        return results;
+    }
+    private string DiagnoseCluster(double fz, double gradP, double improvement, double weight)
+    {
+        double geometryLeverage = 1.0 - fz;
+
+        bool isTrmDominant = weight > 0.7;
+        bool isNewtonDominant = weight < 0.3;
+
+        const double lowGeometryLimit = 0.07;
+        const double highTurbulenceLimit = 1e-33;
+
+        // starke Verbesserung
+        if(improvement > 1.5)
+            return "TRM highly effective";
+
+        // moderate Verbesserung
+        if(improvement > 1.1)
+            return "TRM beneficial";
+
+        // neutral
+        if(improvement > 0.95)
+            return "Neutral regime";
+
+        // schlechte Performance genauer unterscheiden
+        if(improvement < 0.8)
+        {
+            if(gradP > highTurbulenceLimit)
+                return "High turbulence (dynamics dominated)";
+
+            if(geometryLeverage < lowGeometryLimit)
+                return "Low geometry leverage (f too close to 1)";
+
+            if(isNewtonDominant)
+                return "Correctly Newton-dominant";
+
+            if(isTrmDominant)
+                return "TRM overcorrection";
+
+            return "Mixed instability";
+        }
+
+        return "Mixed/unclear regime";
+    }
+
+    private static double ComputeGradientVariance(List<FitSample> samples)
+    {
+        var grads = samples.Select(s => s.PressureGradient).ToList();
+
+        double mean = grads.Average();
+        double variance = grads.Select(g => Math.Pow(g - mean, 2)).Average();
+
+        return Math.Sqrt(variance);
+    }
+    private static double ComputeInertialProxy(List<FitSample> samples)
+    {
+        if(samples.Count < 2)
+            return 0;
+
+        // nach Radius sortieren (wichtig!)
+        var ordered = samples.OrderBy(s => s.RadiusSquaredCm2).ToList();
+
+        double totalChange = 0;
+        int count = 0;
+
+        for(int i = 1; i < ordered.Count; i++)
+        {
+            double gradPrev = ordered[i - 1].PressureGradient;
+            double gradCurr = ordered[i].PressureGradient;
+
+            double delta = Math.Abs(gradCurr - gradPrev);
+
+            totalChange += delta;
+            count++;
+        }
+
+        return count > 0 ? totalChange / count : 0;
+    }
+
+    private static string ClassifyEffectiveMorphology(
+        double weight,
+        double turbulence,
+        double shear,
+        double anisotropy,
+        double inertialNorm,
+        double ellipticity)
+    {
+        bool highDynamics =
+            turbulence > 2.0 ||
+            shear > 2.0 ||
+            anisotropy > 2.0 ||
+            inertialNorm > 2.0;
+
+        bool veryRelaxed =
+            turbulence < 0.7 &&
+            shear < 0.7 &&
+            anisotropy < 1.0 &&
+            inertialNorm < 0.7 &&
+            ellipticity < 0.25;
+
+        if(weight > 0.65 && veryRelaxed)
+            return "Relaxed / TRM-like";
+
+        if(highDynamics || weight < 0.30)
+            return "Disturbed / Newton-like";
+
+        if(ellipticity > 0.35)
+            return "Elliptic / asymmetric";
+
+        return "Transitional / mixed";
+    }
+
+    public static string ClassifyRegime(double weight)
+    {
+        if(weight > 0.7)
+            return "TRM-dominant";
+
+        if(weight < 0.3)
+            return "Newton-dominant";
+
+        return "Mixed";
+    }
+
+    public void PrintWeightSystematics(List<ClusterDiagnostic> diagnostics)
+    {
+        Console.WriteLine();
+        Console.WriteLine("--- WEIGHT SYSTEMATICS: z, f(z), morphology ---");
+
+        PrintCorrelationBlock(diagnostics);
+
+        Console.WriteLine();
+        Console.WriteLine("--- WEIGHT BY REDSHIFT BIN ---");
+
+        PrintBin(
+            diagnostics.Where(d => d.Z < 0.1),
+            "low z < 0.1");
+
+        PrintBin(
+            diagnostics.Where(d => d.Z >= 0.1 && d.Z < 0.3),
+            "mid z 0.1–0.3");
+
+        PrintBin(
+            diagnostics.Where(d => d.Z >= 0.3 && d.Z < 0.6),
+            "high z 0.3–0.6");
+
+        PrintBin(
+            diagnostics.Where(d => d.Z >= 0.6),
+            "very high z >= 0.6");
+
+        Console.WriteLine();
+        Console.WriteLine("--- WEIGHT BY EFFECTIVE MORPHOLOGY ---");
+
+        foreach(var group in diagnostics.GroupBy(d => d.MorphologyClass).OrderBy(g => g.Key))
+        {
+            PrintBin(group, group.Key);
+        }
+    }
+    private static void PrintBin(IEnumerable<ClusterDiagnostic> items, string label)
+    {
+        var list = items.ToList();
+
+        if(list.Count == 0)
+        {
+            Console.WriteLine($"{label,-28} | n=0");
+            return;
+        }
+
+        double avgWeight = list.Average(d => d.Weight);
+        double avgImprovement = list.Average(d => d.Improvement);
+        double avgZ = list.Average(d => d.Z);
+        double avgFz = list.Average(d => d.Fz);
+        double avgDyn = list.Average(d => d.DynamicFactor);
+
+        Console.WriteLine(
+            $"{label,-28} | n={list.Count,3} | " +
+            $"<z>={avgZ:F3} | <f>={avgFz:F3} | " +
+            $"<w>={avgWeight:F3} | <dyn>={avgDyn:F3} | " +
+            $"<imp>={avgImprovement:F2}x"
+        );
+    }
+    private static void PrintCorrelationBlock(List<ClusterDiagnostic> diagnostics)
+    {
+        Console.WriteLine();
+        Console.WriteLine("--- PEARSON CORRELATIONS ---");
+
+        Console.WriteLine($"corr(z, weight):             {Pearson(diagnostics.Select(d => d.Z), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(fz, weight):            {Pearson(diagnostics.Select(d => d.Fz), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(dynamicFactor, weight): {Pearson(diagnostics.Select(d => d.DynamicFactor), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(turbulence, weight):    {Pearson(diagnostics.Select(d => d.Turbulence), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(shear, weight):         {Pearson(diagnostics.Select(d => d.Shear), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(anisotropy, weight):    {Pearson(diagnostics.Select(d => d.Anisotropy), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(inertial, weight):      {Pearson(diagnostics.Select(d => d.InertialNorm), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(ellipticity, weight):   {Pearson(diagnostics.Select(d => d.Ellipticity), diagnostics.Select(d => d.Weight)):F3}");
+        Console.WriteLine($"corr(improvement, weight):   {Pearson(diagnostics.Select(d => d.Improvement), diagnostics.Select(d => d.Weight)):F3}");
+    }
+    private static double Pearson(IEnumerable<double> xs, IEnumerable<double> ys)
+    {
+        var x = xs.ToList();
+        var y = ys.ToList();
+
+        if(x.Count != y.Count || x.Count < 2)
+            return double.NaN;
+
+        double meanX = x.Average();
+        double meanY = y.Average();
+
+        double numerator = 0.0;
+        double denomX = 0.0;
+        double denomY = 0.0;
+
+        for(int i = 0; i < x.Count; i++)
+        {
+            double dx = x[i] - meanX;
+            double dy = y[i] - meanY;
+
+            numerator += dx * dy;
+            denomX += dx * dx;
+            denomY += dy * dy;
+        }
+
+        double denom = Math.Sqrt(denomX * denomY);
+
+        if(denom <= 0 || double.IsNaN(denom))
+            return double.NaN;
+
+        return numerator / denom;
     }
 }
