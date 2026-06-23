@@ -12,9 +12,15 @@ namespace TRM.CMD
         static void Main(string[] args)
         {
             DrawBanner();
-
+            var isFirstIteration = true;
             while (true)
             {
+                if (!isFirstIteration)
+                {
+                    ClearConsole();
+                }
+                isFirstIteration = false;
+                
                 Console.WriteLine("\n=======================================================");
                 Console.WriteLine(" V2.2 EXPERIMENT SELECTION");
                 Console.WriteLine("=======================================================");
@@ -45,7 +51,7 @@ namespace TRM.CMD
                     case "0":
                         Console.WriteLine("Exiting TRM Cosmology Framework. Goodbye!");
                         return;
-                    default:
+                    default:                                                
                         Console.WriteLine("Invalid selection. Please enter a valid number.");
                         break;
                 }
@@ -54,8 +60,8 @@ namespace TRM.CMD
 
         private static void RunAcceptClusterAnalysis()
         {
-            Console.Clear();
-            Console.WriteLine("--- DOMAIN 2: GALAXY CLUSTERS (ACCEPT DATABASE) ---");
+            ClearConsole();
+            Console.WriteLine("--- DOMAIN 1: GALAXY CLUSTERS (ACCEPT DATABASE) ---");
 
             string dataPath;
             string redshiftPath;
@@ -122,12 +128,15 @@ namespace TRM.CMD
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"\n[SUCCESS] Analysis complete. Results exported to: {outputCsv}");
             Console.ResetColor();
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            Console.ReadKey();
         }
 
         private static void RunSparcGalacticAnalysis()
         {
-            Console.Clear();
-            Console.WriteLine("--- DOMAIN 1: GALACTIC ROTATION CURVES (SPARC DATABASE) ---");
+            ClearConsole();
+            Console.WriteLine("--- DOMAIN 2: GALACTIC ROTATION CURVES (SPARC DATABASE) ---");
             Console.WriteLine("This module executes the non-linear co-fit for the universal acceleration constant a_0.");
             Console.WriteLine("Resolving SPARC datasets...");
 
@@ -157,13 +166,13 @@ namespace TRM.CMD
                 Console.WriteLine("\n[SUCCESS] SPARC fit completed.");
                 Console.ResetColor();
             }
-            catch (FileNotFoundException ex)
+            catch(FileNotFoundException ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\n[ERROR] Required dataset missing: {ex.Message}");
                 Console.ResetColor();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\n[ERROR] SPARC analysis failed: {ex.Message}");
@@ -176,7 +185,7 @@ namespace TRM.CMD
 
         private static void RunCmbAnalysis()
         {
-            Console.Clear();
+            ClearConsole();
             Console.WriteLine("--- DOMAIN 3: COSMIC MICROWAVE BACKGROUND (TRM k-SPACE + SCALE TEST) ---");
             Console.WriteLine("Initializing high-performance k-space sweep...");
 
@@ -221,7 +230,7 @@ namespace TRM.CMD
         }
         private static void RunPantheonAnalysis()
         {
-            Console.Clear();
+            ClearConsole();
             Console.WriteLine("--- DOMAIN 4: SUPERNOVAE & DISTANCE SCALE (PANTHEON+ DATABASE) ---");
             Console.WriteLine("Evaluating Pantheon+ with the current TRM distance mapper...");
 
@@ -268,6 +277,25 @@ namespace TRM.CMD
 
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
+        }
+
+        private static void ClearConsole()
+        {
+            if (Console.IsOutputRedirected)
+            {
+                return;
+            }
+
+            try
+            {
+                Console.Clear();
+            }
+            catch (IOException)
+            {
+                // Ignore and try ANSI clear sequence fallback.
+            }
+
+            Console.Write("\u001b[3J\u001b[2J\u001b[H");
         }
 
         private static void DrawBanner()
