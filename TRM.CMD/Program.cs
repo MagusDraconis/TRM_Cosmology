@@ -27,8 +27,7 @@ namespace TRM.CMD
                 Console.WriteLine(" [1] Run Cluster Diagnostics (TRM vs Newtonian Gravity)");
                 Console.WriteLine(" [2] Analyze SPARC Galactic Rotations (MOND vs TRM)");
                 Console.WriteLine(" [3] Analyze CMB Acoustic Peaks (Planck Cosmology)");
-                Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (Dark Energy Replacement)");
-                //Console.WriteLine(" [5] Run Cluster Diagnostics (TRM vs Newtonian Gravity)");
+                Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (Dark Energy Replacement)");                
                 Console.WriteLine(" [0] Exit Framework");
                 Console.WriteLine("=======================================================");
                 Console.Write(" Select an option: ");
@@ -49,9 +48,7 @@ namespace TRM.CMD
                     case "4":
                         RunPantheonAnalysis();
                         break;
-                    //case "5":
-                    //        RunCluster_Diagnostics();
-                        break;
+
                     case "0":
                         Console.WriteLine("Exiting TRM Cosmology Framework. Goodbye!");
                         return;
