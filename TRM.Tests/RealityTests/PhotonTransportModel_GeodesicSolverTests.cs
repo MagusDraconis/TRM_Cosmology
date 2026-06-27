@@ -610,14 +610,10 @@ namespace TRM.Tests.RealityTests
             Assert.InRange(maxRatio, 0.85, 1.25);
         }
 
-        [Trait("Category", "PhysicsValidation")]
+        [Trait("Category", "LongRunning")]
         [Fact]
         public void EL13_CollectiveOmega_RatioCompetition_Should_Keep_20Over17_Competitive()
         {
-            // skip this test for now; it is a long-running ablation sweep that is not critical for regression validation
-            if(true)  return;
-
-            
             var gammaGrid = BuildGammaGrid(0.72, 1.02, 0.02);
             double[] candidates = { 19.0 / 16.0, 20.0 / 17.0, 6.0 / 5.0, 21.0 / 18.0 };
 

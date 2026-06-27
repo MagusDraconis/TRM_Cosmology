@@ -13,8 +13,8 @@ Stand: automatische Strukturklassifikation auf Basis der vorhandenen xUnit-Tests
 ## Kategorieverteilung (aktueller Vorschlag)
 
 - CoreRegression: 10
-- LongRunning: 14
-- PhysicsValidation: 152
+- LongRunning: 15
+- PhysicsValidation: 151
 - ResearchDiagnostics: 33
 
 Hinweis Laufzeit: Es liegen keine vollständigen per-Test-Durations aus diesem Dokumentationslauf vor; Angaben sind bewusst grobe Klassen aus Teststruktur/Namen. Test-Mapping ist aktuell vollständig synchronisiert.
@@ -159,7 +159,7 @@ Hinweis Laufzeit: Es liegen keine vollständigen per-Test-Durations aus diesem D
 | `PhotonTransportModel_GeodesicSolverTests.EL10_GammaGrid_Should_Not_Force_Peak_By_StartValue` | **PhysicsValidation** | Ablationstest: breites Gamma-Grid (0.70..1.10) prüft, dass der Peak nicht aus dem Suchbereichsstart entsteht. | Kurz-Mittel (<5s meist) | Mittel-Hoch | Ja | behalten/härten |
 | `PhotonTransportModel_GeodesicSolverTests.EL11_GammaPeak_Should_Remain_Near_CollectiveWindow_When_Varying_CollectiveOmegaPrior` | **PhysicsValidation** | Robustheitscheck gegen Variation des collectiveOmega-Priors (1.10, 20/17, 1.20) bei stabiler Peak-Lage. | Kurz-Mittel (<5s meist) | Mittel-Hoch | Ja | behalten/härten |
 | `PhotonTransportModel_GeodesicSolverTests.EL12_GammaPeak_Should_Remain_Robust_Across_KappaWeightAndCellCount_Ablation` | **PhysicsValidation** | Mehrdimensionale Ablation über kappa, collectiveWeight und cellCount; prüft Peak-Mittel, Peak-Spread und weak-field-Fenster. | Mittel (1-10s, teils datenabhängig) | Hoch | Ja | behalten/härten |
-| `PhotonTransportModel_GeodesicSolverTests.EL13_CollectiveOmega_RatioCompetition_Should_Keep_20Over17_Competitive` | **PhysicsValidation** | Ratio-Competition-Test für kollektive Kadenzkandidaten (19/16, 20/17, 6/5, 21/18); prüft, ob 20/17 im Score wettbewerbsfähig bleibt. | Mittel (1-10s, teils datenabhängig) | Hoch | Ja | behalten/härten |
+| `PhotonTransportModel_GeodesicSolverTests.EL13_CollectiveOmega_RatioCompetition_Should_Keep_20Over17_Competitive` | **LongRunning** | Aufwendiger Ratio-Competition-Ablationslauf über mehrere Kadenzkandidaten; fachlich wichtig, aber zu langsam für Default-CI. | Lang (10s-120s+, sweep/seed-abhängig) | Hoch | Nein (Nightly/Manual) | verschieben |
 | `PhotonTransportModel_GeodesicSolverTests.EL14_GammaPeak_Should_Not_Collapse_To_GridEdges_When_PriorStrengthReduced` | **PhysicsValidation** | Prior-Strength-Ablation: reduziert Priorgewicht und prüft, dass der Peak nicht auf Grid-Grenzen kollabiert. | Mittel (1-10s, teils datenabhängig) | Hoch | Ja | behalten/härten |
 | `PhotonTransportModel_GeodesicSolverTests.EL15_CollectiveOmega_CrossRegime_Stability_Should_Remain_Bounded_For_20Over17` | **PhysicsValidation** | Cross-Regime-Stabilität über kappa/weight/cellCount mit Vergleichskandidaten; prüft bounded spread und schwache Feldkonsistenz. | Mittel (1-10s, teils datenabhängig) | Hoch | Ja | behalten/härten |
 | `PhotonTransportModel_GeodesicSolverTests.EL16_PriorWeight_Should_Show_CompetitivenessTransition_For_20Over17` | **PhysicsValidation** | Sweep über Prior-Gewichte und Prüfung der Wettbewerbs-Transition für 20/17 gegenüber Ratio-Kandidaten. | Mittel (1-10s, teils datenabhängig) | Hoch | Ja | behalten/härten |
