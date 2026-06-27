@@ -699,6 +699,7 @@ public class TRM_Realtiy_Tests
         Assert.True(true);
     }
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void TRM25_HighPrecision_Mercury_Precession_RK4()
     {
@@ -804,6 +805,7 @@ public class TRM_Realtiy_Tests
         Assert.True(true);
     }
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void TRM26_Precise_Mercury_Precession_MultiOrbit()
     {
@@ -1887,6 +1889,7 @@ public class TRM_Realtiy_Tests
         }
     }
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void TRM39_RK4_Photon_TRM35_CompactnessSweep_Test()
     {
@@ -4667,6 +4670,11 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM70_Power_Combination_Test()
     {
+        if (!_includeLonglasingTests)
+        {
+            _output.WriteLine("TRM67B skipped because IncludeLonglasingTests=false.");
+            return;
+        }
         _output.WriteLine("---- TRM70 POWER COMBINATION TEST ----");
         _output.WriteLine("Scanning (phi^n * |dmu/dt|^p) combinations");
         _output.WriteLine("------------------------------------------------");

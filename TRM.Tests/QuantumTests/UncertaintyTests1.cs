@@ -17,6 +17,7 @@ public class UncertaintyTests1
     }
 
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void Run_Uncertainty_With_LogSpace_And_Analyze()
     {
@@ -59,6 +60,7 @@ public class UncertaintyTests1
         Assert.InRange(mean, 1.0e-34, 1.1e-34);
         Assert.True(relError < 0.05); // <5%
     }
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void Run_Uncertainty_Experiment_And_Export_Csv_LogSpace()
     {

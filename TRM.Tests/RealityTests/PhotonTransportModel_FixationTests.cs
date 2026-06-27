@@ -21,6 +21,7 @@ namespace TRM.Tests.RealityTests
         {
             _output = output;
         }
+        [Trait("Category", "CoreRegression")]
         [Fact]
         public void TRM78_EffectiveIndex_Should_Be_Positive_And_Finite()
         {
@@ -47,6 +48,7 @@ namespace TRM.Tests.RealityTests
             }
         }
 
+        [Trait("Category", "CoreRegression")]
         [Fact]
         public void TRM79_RK4_Should_Preserve_PhotonSpeed()
         {
@@ -81,6 +83,7 @@ namespace TRM.Tests.RealityTests
             Assert.InRange(speed, c - 1e-12, c + 1e-12);
         }
 
+        [Trait("Category", "CoreRegression")]
         [Fact]
         public void TRM80_LocalMemoryChannel_Should_Be_Finite_And_NonNegative()
         {
@@ -111,6 +114,7 @@ namespace TRM.Tests.RealityTests
             Assert.True(localMemory >= 0.0, "local memory must be non-negative.");
         }
 
+        [Trait("Category", "CoreRegression")]
         [Fact]
         public void TRM81_Deflection_Should_Decrease_With_ImpactParameter()
         {
@@ -141,6 +145,7 @@ namespace TRM.Tests.RealityTests
         /// Checks scale behavior of implemented Shapiro diagnostic under proportional integration domain.
         /// Status: tested (regression for current implementation), diagnostic, limitation (implementation-bound invariant).
         /// </summary>
+        [Trait("Category", "CoreRegression")]
         [Fact]
         public void TRM82_ShapiroDelay_Should_Be_ScaleStable_For_Proportional_IntegrationDomain()
         {
@@ -194,6 +199,7 @@ namespace TRM.Tests.RealityTests
 
 
 
+        [Trait("Category", "CoreRegression")]
         [Fact]
         public void TRM83_TimeAndSpaceChannels_Should_Separate_Cleanly()
         {

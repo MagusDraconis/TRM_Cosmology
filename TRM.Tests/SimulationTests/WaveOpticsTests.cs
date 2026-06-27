@@ -345,6 +345,7 @@ public class WaveOpticsTests
         Assert.True(Math.Sign(anglePos) != Math.Sign(angleNeg), "Expected opposite signs for +b and -b");
         Assert.True(relError < 0.01, "Expected equal magnitudes for +b and -b");
     }
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void TRMBaseline_Should_Be_Consistently_Half_Of_SpatialGR_Across_Multiple_Mass_And_Impact_Parameter_Pairs()
     {
@@ -397,6 +398,7 @@ public class WaveOpticsTests
         }
 
     }
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void TRMBaseline_Should_Show_Global_HalfGR_Pattern_Across_Multiple_Mass_And_Impact_Parameter_Pairs()
     {

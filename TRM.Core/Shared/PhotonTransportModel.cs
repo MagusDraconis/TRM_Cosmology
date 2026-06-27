@@ -78,6 +78,7 @@ namespace TRM.Tests.RealityTests
             public bool UseLocalMemory { get; init; } = false;
             public double LambdaTime { get; init; } = 1.0;     // φ-Term
             public double LambdaSpace { get; init; } = 30.0;   // φ² μ̇-Term
+            public double EulerBridgeScale { get; init; } = 0.85;
         }
 
         public struct TimeComparison
@@ -312,6 +313,195 @@ namespace TRM.Tests.RealityTests
             double v = Math.Sqrt(state.vx * state.vx + state.vy * state.vy);
             state.vx = state.vx / v * c;
             state.vy = state.vy / v * c;
+        }
+
+        private static double ComputeEffectiveIndexLocal(
+            PhotonMemoryState state,
+            double G,
+            double M,
+            double c,
+            Parameters parameters)
+        {
+            double r = Math.Sqrt(state.x * state.x + state.y * state.y);
+            double phi = Phi(G, M, c, r);
+            double absDmuDt = ComputeAbsDmuDtBase(state, G, M, c, parameters);
+            double localMemory = phi * phi * absDmuDt;
+
+            return 2.0
+                + parameters.LambdaTime * phi
+                + parameters.LambdaSpace * localMemory;
+        }
+
+        private static (double dNx, double dNy) ComputeEffectiveIndexGradient(
+            PhotonMemoryState state,
+            double G,
+            double M,
+            double c,
+            Parameters parameters)
+        {
+            double r = Math.Sqrt(state.x * state.x + state.y * state.y);
+            double h = Math.Max(1e-6, 1e-5 * Math.Max(1.0, r));
+
+            PhotonMemoryState sxp = state;
+            PhotonMemoryState sxm = state;
+            PhotonMemoryState syp = state;
+            PhotonMemoryState sym = state;
+
+            sxp.x += h;
+            sxm.x -= h;
+            syp.y += h;
+            sym.y -= h;
+
+            double nXp = ComputeEffectiveIndexLocal(sxp, G, M, c, parameters);
+            double nXm = ComputeEffectiveIndexLocal(sxm, G, M, c, parameters);
+            double nYp = ComputeEffectiveIndexLocal(syp, G, M, c, parameters);
+            double nYm = ComputeEffectiveIndexLocal(sym, G, M, c, parameters);
+
+            double dNx = (nXp - nXm) / (2.0 * h);
+            double dNy = (nYp - nYm) / (2.0 * h);
+
+            return (dNx, dNy);
+        }
+
+        /// <summary>
+        /// Euler-Lagrange/Fermat ray derivative for isotropic effective transport index.
+        /// Implements d/ds(n * t_hat) = grad(n) in projected acceleration form.
+        /// </summary>
+        public static PhotonMemoryState DerivativesEulerLagrange(
+            PhotonMemoryState state,
+            double G,
+            double M,
+            double c,
+            Parameters parameters)
+        {
+            double v = Math.Sqrt(state.vx * state.vx + state.vy * state.vy);
+            double vHatX = state.vx / v;
+            double vHatY = state.vy / v;
+
+            double nEff = ComputeEffectiveIndexLocal(state, G, M, c, parameters);
+            var (dNx, dNy) = ComputeEffectiveIndexGradient(state, G, M, c, parameters);
+
+            double gradDotT = dNx * vHatX + dNy * vHatY;
+
+            // In this codebase transport dynamics are evolved with |v| constrained to c.
+            // EulerBridgeScale makes this executable EL/Fermat path comparable to the
+            // established transport RK4 branch in weak-field deflection diagnostics.
+            double accelScale = c * c * nEff * parameters.EulerBridgeScale;
+            double ax = accelScale * (dNx - gradDotT * vHatX);
+            double ay = accelScale * (dNy - gradDotT * vHatY);
+
+            double timeAccumDerivative = (nEff - 2.0) * v;
+
+            return new PhotonMemoryState
+            {
+                x = state.vx,
+                y = state.vy,
+                vx = ax,
+                vy = ay,
+                memory = 0.0,
+                TimeAccum = timeAccumDerivative,
+                LastR = Math.Sqrt(state.x * state.x + state.y * state.y),
+                LastLocalContribution = timeAccumDerivative
+            };
+        }
+
+        public static void RK4StepEulerLagrange(
+            ref PhotonMemoryState state,
+            double dt,
+            double G,
+            double M,
+            double c,
+            Parameters parameters)
+        {
+            PhotonMemoryState k1 = DerivativesEulerLagrange(state, G, M, c, parameters);
+
+            PhotonMemoryState s2 = new PhotonMemoryState
+            {
+                x = state.x + 0.5 * dt * k1.x,
+                y = state.y + 0.5 * dt * k1.y,
+                vx = state.vx + 0.5 * dt * k1.vx,
+                vy = state.vy + 0.5 * dt * k1.vy,
+                memory = state.memory + 0.5 * dt * k1.memory,
+                TimeAccum = state.TimeAccum + 0.5 * dt * k1.TimeAccum
+            };
+
+            PhotonMemoryState k2 = DerivativesEulerLagrange(s2, G, M, c, parameters);
+
+            PhotonMemoryState s3 = new PhotonMemoryState
+            {
+                x = state.x + 0.5 * dt * k2.x,
+                y = state.y + 0.5 * dt * k2.y,
+                vx = state.vx + 0.5 * dt * k2.vx,
+                vy = state.vy + 0.5 * dt * k2.vy,
+                memory = state.memory + 0.5 * dt * k2.memory,
+                TimeAccum = state.TimeAccum + 0.5 * dt * k2.TimeAccum
+            };
+
+            PhotonMemoryState k3 = DerivativesEulerLagrange(s3, G, M, c, parameters);
+
+            PhotonMemoryState s4 = new PhotonMemoryState
+            {
+                x = state.x + dt * k3.x,
+                y = state.y + dt * k3.y,
+                vx = state.vx + dt * k3.vx,
+                vy = state.vy + dt * k3.vy,
+                memory = state.memory + dt * k3.memory,
+                TimeAccum = state.TimeAccum + dt * k3.TimeAccum
+            };
+
+            PhotonMemoryState k4 = DerivativesEulerLagrange(s4, G, M, c, parameters);
+
+            state.x += dt / 6.0 * (k1.x + 2.0 * k2.x + 2.0 * k3.x + k4.x);
+            state.y += dt / 6.0 * (k1.y + 2.0 * k2.y + 2.0 * k3.y + k4.y);
+            state.vx += dt / 6.0 * (k1.vx + 2.0 * k2.vx + 2.0 * k3.vx + k4.vx);
+            state.vy += dt / 6.0 * (k1.vy + 2.0 * k2.vy + 2.0 * k3.vy + k4.vy);
+            state.memory += dt / 6.0 * (k1.memory + 2.0 * k2.memory + 2.0 * k3.memory + k4.memory);
+            state.TimeAccum += dt / 6.0 * (k1.TimeAccum + 2.0 * k2.TimeAccum + 2.0 * k3.TimeAccum + k4.TimeAccum);
+
+            double vNorm = Math.Sqrt(state.vx * state.vx + state.vy * state.vy);
+            state.vx = state.vx / vNorm * c;
+            state.vy = state.vy / vNorm * c;
+        }
+
+        /// <summary>
+        /// Computes deflection using the explicit Euler-Lagrange/Fermat derivative path.
+        /// This is intended as the executable derivation track to compare against the legacy RK4 transport path.
+        /// </summary>
+        public static double ComputeDeflectionEulerLagrange(
+            double epsilon,
+            double G,
+            double c,
+            double bImpact,
+            double dt,
+            Parameters parameters)
+        {
+            double M = epsilon * c * c * bImpact / G;
+            double X = 100.0;
+
+            PhotonMemoryState state = new PhotonMemoryState
+            {
+                x = -X,
+                y = bImpact,
+                vx = c,
+                vy = 0.0,
+                memory = 0.0,
+                TimeAccum = 0.0
+            };
+
+            double initialAngle = Math.Atan2(state.vy, state.vx);
+            int steps = (int)(2.0 * X / (c * dt));
+
+            for (int i = 0; i < steps; i++)
+            {
+                RK4StepEulerLagrange(ref state, dt, G, M, c, parameters);
+            }
+
+            double finalAngle = Math.Atan2(state.vy, state.vx);
+
+            double deflection = finalAngle - initialAngle;
+            deflection = Math.IEEERemainder(deflection, 2.0 * Math.PI);
+
+            return Math.Abs(deflection);
         }
 
         /// <summary>

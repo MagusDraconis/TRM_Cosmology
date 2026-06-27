@@ -670,6 +670,7 @@ public class OrbitalIntegratedTests
         //    $"Hybrid model should improve over local model: local={rmsLocal:F4}, hybrid={rmsHybrid:F4}");
     }
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void Test06_TRM_HybridModel_WeightSweep()
     {
@@ -1239,6 +1240,7 @@ public class OrbitalIntegratedTests
             $"RegimeModel worse than FullModel in >=4 Rd bin: full={fullRms4:F4}, regime={regimeRms4:F4}");
     }
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void Test10_TRM_RadialRegimeModel_GammaSweep()
     {
@@ -1348,6 +1350,7 @@ public class OrbitalIntegratedTests
             $"Gamma sweep produced no meaningful gain over gamma=0 baseline: baseline={rmsAtZero:F4}, best={bestRms:F4}");
     }
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void Test11_TRM_RadialRegimeModel_GammaSweep_RadiusBins()
     {

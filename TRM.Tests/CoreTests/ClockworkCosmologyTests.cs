@@ -390,6 +390,7 @@ public class ClockworkCosmologyTests
             );
         }
     }
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void Test_Pantheon_TrmScaleDistance_HTFineScan()
     {

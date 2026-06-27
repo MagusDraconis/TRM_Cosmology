@@ -22,6 +22,7 @@ public class PlanckConsistencyTests
         _output = output;
     }
 
+    [Trait("Category", "CoreRegression")]
     [Fact]
     public void PlanckDerivedConstantsMatchReality()
     {
@@ -60,6 +61,7 @@ public class PlanckConsistencyTests
     }
 
 
+    [Trait("Category", "LongRunning")]
     [Fact]
     public void PlanckMultiScan_Run()
     {

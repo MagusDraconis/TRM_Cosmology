@@ -654,6 +654,7 @@ namespace TRM.Tests.QuantumTests
             Assert.True(Math.Abs(bestByTickScore.Gamma - 1.0) <= 0.05,
                 "Best TickScore is not sufficiently close to gamma = 1.0");
         }
+        [Trait("Category", "LongRunning")]
         [Fact]
         public void Should_Show_Robust_TickScore_Minimum_Near_Gamma_One_Across_Multiple_Seeds()
         {
@@ -881,6 +882,7 @@ namespace TRM.Tests.QuantumTests
                 "Robust action-scale minimum is not sufficiently close to gamma = 1.0");
         }
 
+        [Trait("Category", "LongRunning")]
         [Fact]
         public void Should_Show_Gamma_Minimum_Near_One_Across_Multiple_Relevant_Planck_Points()
         {
@@ -2700,4 +2702,3 @@ namespace TRM.Tests.QuantumTests
     }
 
 }
-

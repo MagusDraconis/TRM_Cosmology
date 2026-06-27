@@ -82,6 +82,12 @@ Execute the rigorous xUnit test suite to verify the exact cosmological constants
 `dotnet test TRM.Tests/TRM.Tests.csproj`
 *Tests use `ITestOutputHelper` for detailed log outputs, visible directly in your Test Explorer or CLI.*
 
+Run only the fast hard regression gate:
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=CoreRegression"`
+
+Run the default suite without slow sweeps:
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category!=LongRunning"`
+
 ---
 
 ## 📌 Notes & Scientific Contribution
