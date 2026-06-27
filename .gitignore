@@ -361,4 +361,19 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/docs
+/docs/*
+!/docs/Theory/
+!/docs/review/
+
+/docs/Theory/*
+!/docs/Theory/TRM_Geodesic_Derivation.md
+!/docs/Theory/TRM_Collective_Mode_Locking_BridgeScale.md
+!/docs/Theory/TRM_Finsler_Optical_Action.md
+
+/docs/review/*
+!/docs/review/TRM_Peer_Review_Request.md
+!/docs/review/TRM_Current_Status_For_PeerReview.md
+!/docs/review/TRM_Service_Test_Consolidation.md
+!/docs/review/TRM_TestSuite_Classification.md
+!/docs/review/TRM_Real_Physics_Test_Coverage.md
+!/docs/review/TRM_Code_To_Theory_Audit.md
