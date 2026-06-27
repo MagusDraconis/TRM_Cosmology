@@ -1,5 +1,7 @@
 # Peer Review Request: Clockwork Cosmology / Temporal Rate Matrix (TRM) Project
 
+> Reviewer start point: `docs/review/REVIEW_PACKAGE.md`
+
 **Author:** Fabrice Wieser  
 **Project:** Clockwork Cosmology / Temporal Rate Matrix (TRM) / Temporal Quantum Matrix (TQM)  
 **Purpose of this document:** Request for independent technical and scientific peer review  

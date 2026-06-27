@@ -371,6 +371,7 @@ FodyWeavers.xsd
 !/docs/Theory/TRM_Finsler_Optical_Action.md
 
 /docs/review/*
+!/docs/review/REVIEW_PACKAGE.md
 !/docs/review/TRM_Peer_Review_Request.md
 !/docs/review/TRM_Current_Status_For_PeerReview.md
 !/docs/review/TRM_Service_Test_Consolidation.md
