@@ -4,9 +4,19 @@ using System.Linq;
 
 namespace TRM.Core
 {
+    /// <summary>
+    /// Theta-field relaxation solver used in TRM galactic rotation modeling.
+    /// Status: tested (indirectly through SPARC/RAR core tests), calibrated (solver strengths/relaxation), exploratory (synchronization proxy), not derived yet (full first-principles closure pending).
+    /// Related tests: TRM.Tests/CoreTests/OrbitalIntegratedTests.cs and TRM.Tests/CoreTests/RarRelationTests.cs.
+    /// Relevant docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+    /// </summary>
     public static class TrmFieldSolver
     {
 
+        /// <summary>
+        /// Solves theta field with default calibrated solver controls.
+        /// Status: tested + calibrated.
+        /// </summary>
         public static ThetaFieldProfile SolveField(List<RarPoint> galaxy)
         {
             return SolveField(
@@ -58,6 +68,10 @@ namespace TRM.Core
 
 
 
+        /// <summary>
+        /// Computes effective acceleration proxy from local theta gradients and field level.
+        /// Status: diagnostic + calibrated; used for comparative model analysis.
+        /// </summary>
         public static double ComputeEffectiveAcceleration(
             ThetaFieldProfile field,
             double targetRadiusKpc,

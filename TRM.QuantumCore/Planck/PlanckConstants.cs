@@ -5,6 +5,12 @@ using System.Text;
 namespace TRM.QuantumCore.Planck;
 
 
+/// <summary>
+/// Container for Planck base constants used by TRM quantum/uncertainty experiments.
+/// Status: derived (standard SI-to-Planck relations), tested (PlanckConsistencyTests), limitation (no uncertainty-propagation model here).
+/// Related tests: TRM.Tests/QuantumTests/PlanckConsistencyTests.cs.
+/// Relevant docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class PlanckConstants
 {
     public double lP { get; }
@@ -18,8 +24,12 @@ public class PlanckConstants
         mP = mp;
     }
 
-    
 
+
+    /// <summary>
+    /// Builds Planck constants from SI constants (hbar, G, c).
+    /// Status: derived + tested.
+    /// </summary>
     public static PlanckConstants FromPhysicalConstants()
     {
         double c = PhysicalConstantsSI.c;
@@ -36,6 +46,10 @@ public class PlanckConstants
 
 }
 
+/// <summary>
+/// SI constants used by Planck conversion and related test scenarios.
+/// Status: calibrated/defined constants; tested indirectly by Planck consistency tests.
+/// </summary>
 public static class PhysicalConstantsSI
 {
 

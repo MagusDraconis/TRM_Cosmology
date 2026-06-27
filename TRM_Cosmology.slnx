@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="docs/review/TRM_Code_To_Theory_Audit.md" />
+    <File Path="docs/Theory/TRM_Geodesic_Derivation.md" />
     <File Path="ProjectStructure.md" />
     <File Path="README.md" />
   </Folder>

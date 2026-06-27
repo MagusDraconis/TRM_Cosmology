@@ -8,6 +8,11 @@ using Xunit.Abstractions;
 
 namespace TRM.Tests.CoreTests;
 
+/// <summary>
+/// SPARC/RAR test suite for baryonic mapping modes, residual bins, and mass-model consistency checks.
+/// Status: tested (data pipeline), calibrated (parameterized model layers), diagnostic (residual analytics).
+/// Related docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class RarRelationTests
 {
     private readonly ITestOutputHelper _output;

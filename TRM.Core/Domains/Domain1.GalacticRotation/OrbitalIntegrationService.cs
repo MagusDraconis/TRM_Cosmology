@@ -5,8 +5,18 @@ using TRM.Core.Shared;
 
 namespace TRM.Core.Domains.Domain1.GalacticRotation;
 
+/// <summary>
+/// Orbit-integrated TRM acceleration service for SPARC/RAR analyses.
+/// Status: tested (via OrbitalIntegratedTests), calibrated (beta and weighting behavior), not derived yet (heuristic correction layer), diagnostic (used for model comparison sweeps).
+/// Related tests: TRM.Tests/CoreTests/OrbitalIntegratedTests.cs, TRM.Tests/CoreTests/RarRelationTests.cs.
+/// Relevant docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public static class OrbitalIntegrationService
 {
+    /// <summary>
+    /// Computes orbit-integrated effective acceleration including global drift-state correction.
+    /// Status: tested + calibrated.
+    /// </summary>
     public static double ComputeIntegratedG(
         List<RarPoint> galaxy,
         double targetRadius,
@@ -82,6 +92,10 @@ public static class OrbitalIntegrationService
     }
 
 
+    /// <summary>
+    /// Computes orbit-integrated acceleration without post-integration global correction.
+    /// Status: tested (baseline comparator in orbit/full/regime tests), diagnostic.
+    /// </summary>
     public static double ComputeIntegratedG_OrbitOnly(
     List<RarPoint> galaxy,
     double targetRadius,

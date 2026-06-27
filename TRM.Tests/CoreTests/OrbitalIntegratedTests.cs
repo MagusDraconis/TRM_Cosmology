@@ -7,6 +7,12 @@ using Xunit.Abstractions;
 
 namespace TRM.Tests.CoreTests;
 
+/// <summary>
+/// Orbit/full/regime/adaptive TRM comparison suite over SPARC-style galaxy profiles.
+/// Status: tested (comparative RMS checks), calibrated (regime and weighting parameters), diagnostic/exploratory (sweeps and bin studies).
+/// Related implementation: OrbitalIntegrationService and Domain1 galactic models.
+/// Related docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class OrbitalIntegratedTests
 {
     private readonly ITestOutputHelper _output;

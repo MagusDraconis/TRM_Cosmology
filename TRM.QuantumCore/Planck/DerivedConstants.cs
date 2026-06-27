@@ -4,6 +4,12 @@ using System.Text;
 
 namespace TRM.QuantumCore.Planck;
 
+/// <summary>
+/// Derived physical constants reconstructed from a PlanckConstants tuple.
+/// Status: derived + tested (speed-of-light and consistency checks), diagnostic in sensitivity scans.
+/// Related tests: TRM.Tests/QuantumTests/PlanckConsistencyTests.cs.
+/// Relevant docs: docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class DerivedConstants
 {
     private readonly PlanckConstants p;

@@ -7,6 +7,12 @@ using TRM.Core.Shared;
 namespace TRM.Core.Domains.Domain4.Supernovae;
 
 
+/// <summary>
+/// Pantheon residual evaluator for TRM luminosity-distance predictions.
+/// Status: tested (ClockworkCosmologyTests), calibrated (depends on current cosmology parameter set), diagnostic (fit-quality metrics), not derived yet (HT/BetaEta/Alpha closure pending).
+/// Related tests: TRM.Tests/CoreTests/ClockworkCosmologyTests.cs.
+/// Relevant docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class PantheonTrmScaleSolver
 {
     private readonly TrmDistanceMapper _mapper;
@@ -16,6 +22,10 @@ public class PantheonTrmScaleSolver
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
+    /// <summary>
+    /// Evaluates TRM-vs-observation residual metrics for a Pantheon sample.
+    /// Status: tested + diagnostic.
+    /// </summary>
     public PantheonScaleFitResult Evaluate(
         List<SupernovaPoint> data)
     {

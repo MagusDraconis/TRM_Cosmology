@@ -3,6 +3,12 @@ using System.Threading.Tasks;
 
 namespace TRM.Core;
 
+/// <summary>
+/// CMB acoustic solver for peak-ratio optimization and TRM scale prediction.
+/// Status: tested (ClockworkCosmologyTests), calibrated (drive/doppler optimization), not derived yet (parameter closure remains phenomenological).
+/// Related tests: TRM.Tests/CoreTests/ClockworkCosmologyTests.cs.
+/// Relevant docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class CmbAcousticSolver
 {
     public record CmbPeakResult(int MultipoleL, double AmplitudeTT);
@@ -172,6 +178,10 @@ public class CmbAcousticSolver
     /// <summary>
     /// High-resolution k-space sweep used to fit physical parameters
     /// </summary>
+    /// <summary>
+    /// Performs high-resolution parameter sweep to fit first two acoustic peak locations in k-space.
+    /// Status: tested + calibrated; diagnostic for CMB consistency studies.
+    /// </summary>
     public CmbOptimizationResult FindPerfectPhysicalParameters()
     {
         double etaRec = 280.0;
@@ -310,6 +320,10 @@ public class CmbAcousticSolver
         double AngularDiameterDistance,
         double LPred
 );
+    /// <summary>
+    /// Computes TRM CMB scale prediction from acoustic mode and current cosmology scaling tuple.
+    /// Status: tested (integration tests), calibrated (depends on HT/BetaEta/Alpha working values), not derived yet.
+    /// </summary>
     public CmbScalePrediction CalculateCmbScalePrediction(
     double k1,
     double cs,

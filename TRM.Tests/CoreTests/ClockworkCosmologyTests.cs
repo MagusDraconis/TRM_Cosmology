@@ -9,6 +9,12 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace TRM.Tests.CoreTests;
 
+/// <summary>
+/// Core cosmology integration tests for CMB peak behavior, TRM distance mapping, Pantheon residuals, and HT sensitivity.
+/// Status: tested (pipeline/integration), calibrated (depends on active cosmology parameter set), not derived yet (full first-principles closure pending).
+/// Related implementation: CmbAcousticSolver, TrmDistanceMapper, PantheonTrmScaleSolver, TrmCosmologyParameters.
+/// Related docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// </summary>
 public class ClockworkCosmologyTests
 {
     private readonly ITestOutputHelper _output;
@@ -17,6 +23,10 @@ public class ClockworkCosmologyTests
         _output = output;
     }
 
+    /// <summary>
+    /// Verifies first-to-second CMB peak ratio stability in the TRM acoustic solver scan.
+    /// Status: tested + diagnostic.
+    /// </summary>
     [Fact]
     public void Test_CMB_KSpacePeakRatio_IsStable()
     {

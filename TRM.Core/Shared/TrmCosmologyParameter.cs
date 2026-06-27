@@ -5,13 +5,10 @@ using System.Text;
 namespace TRM.Core;
 
 /// <summary>
-/// Central provider for current TRM cosmological scaling parameters.
-/// 
-/// IMPORTANT:
-/// The current implementation returns calibrated working values.
-/// These values are intentionally centralized here so that future
-/// derivations can replace the fixed constants without changing
-/// CMB, Pantheon, or other domain tests.
+/// Central provider for current TRM cosmological scaling parameters used by CMB and Pantheon pipelines.
+/// Theory/review links: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// Status: calibrated (current operational values), tested (via core cosmology tests), not derived yet (explicit TODO derivation path), limitation (no first-principles closure yet).
+/// Related tests: TRM.Tests/CoreTests/ClockworkCosmologyTests.cs.
 /// </summary>
 public sealed record TrmCosmologyParameters(
     double BetaEta,
@@ -19,14 +16,9 @@ public sealed record TrmCosmologyParameters(
     double HT)
 {
     /// <summary>
-    /// Returns the current working TRM cosmological parameter set.
-    /// 
-    /// TODO:
-    /// - Derive BetaEta from TRM/TQM temporal drift dynamics.
-    /// - Derive Alpha from solver-time to TRM-time normalization.
-    /// - Derive HT from the Pantheon/TRM distance solver or from a unified field relation.
-    /// 
-    /// Current values are calibrated placeholders used for consistency tests.
+    /// Returns the active cosmology parameter tuple consumed by TRM distance/CMB services.
+    /// Status: calibrated + tested in integration tests; not derived yet as a closed theoretical set.
+    /// Related docs: docs/review/TRM_Real_Physics_Test_Coverage.md (Pantheon/HT and CMB sections).
     /// </summary>
     public static TrmCosmologyParameters Current()
     {

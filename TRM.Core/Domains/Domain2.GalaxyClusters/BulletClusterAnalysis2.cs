@@ -9,6 +9,12 @@ using TRM.Core.Shared;
 
 namespace TRM.Core;
 
+/// <summary>
+/// Cluster analysis service for hydrostatic mass estimation and TRM/Newton mixed diagnostics.
+/// Status: calibrated (cluster factors), exploratory (bimodal evaluation workflow), limitation (no dedicated hard test suite currently mapped in TRM.Tests).
+/// Related docs: docs/review/TRM_Service_Test_Consolidation.md and docs/review/TRM_Real_Physics_Test_Coverage.md.
+/// Related tests: currently indirect repository-level review; dedicated cluster tests are a known gap.
+/// </summary>
 public class BulletClusterAnalysis2
 {
     public record ClusterKFitResult(string ClusterName, double BestK, double MinError, int PointCount);
@@ -162,6 +168,10 @@ public class BulletClusterAnalysis2
         }
     }
 
+    /// <summary>
+    /// Computes unified hydrostatic mass estimate with smooth turbulence weighting and TRM coupling.
+    /// Status: exploratory + calibrated; diagnostic for cluster-regime comparisons.
+    /// </summary>
     public double CalculateMassUnified(double rCm, double rho, double dPdr, double redshift, double k)
     {
         if(rho <= 0 || !IsFinite(dPdr))
