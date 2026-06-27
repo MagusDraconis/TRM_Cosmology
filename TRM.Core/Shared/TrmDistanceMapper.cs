@@ -125,4 +125,32 @@ public class TrmDistanceMapper
         double dL = CalculateTrmLuminosityDistance(z);
         return CalculateDistanceModulusFromLuminosityDistance(dL);
     }
+
+    public double ConvertLocalRadiusToTrm(
+    double z,
+    double localRadiusKpc,
+    double grReferenceDistance,
+    DistanceMeasureKind distanceKind)
+    {
+        if (localRadiusKpc <= 0)
+            throw new ArgumentOutOfRangeException(nameof(localRadiusKpc), "Local radius must be positive.");
+
+        double scale = GetDistanceScaleFactor(z, grReferenceDistance, distanceKind);
+
+        return localRadiusKpc * scale;
+    }
+
+    public double GetDistanceScaleFactor(
+    double z,
+    double grReferenceDistance,
+    DistanceMeasureKind distanceKind)
+    {
+        var mapped = MapFromRedshift(z, grReferenceDistance, distanceKind);
+
+        if (!mapped.ConversionFactor.HasValue)
+            throw new InvalidOperationException("Conversion factor was not computed.");
+
+        return mapped.ConversionFactor.Value;
+    }
+
 }

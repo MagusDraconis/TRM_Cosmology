@@ -147,9 +147,15 @@ public class SparcRarAnalysis
             // Low-z effective redshift from distance
             double zEff = distanceMpc * scaling.HT / PhysicalConstants.C_Kms;
 
-            double rTrm = mapper.ConvertGrDistanceToTrm(
+            //double rTrm = mapper.ConvertGrDistanceToTrm(
+            //    zEff,
+            //    p.RadiusKpc,
+            //    DistanceMeasureKind.ComovingLike
+            //);
+            double rTrm = mapper.ConvertLocalRadiusToTrm(
                 zEff,
                 p.RadiusKpc,
+                distanceMpc, // globale Referenzdistanz der Galaxie
                 DistanceMeasureKind.ComovingLike
             );
 
@@ -303,6 +309,13 @@ public class SparcRarAnalysis
 
             if (gObsMs2 > 0 && gBarMs2 > 0 && (gObsMs2 / gBarMs2 > 0.01))
             {
+
+                if (p.GalaxyName == "UGC02953")
+                {
+                    Console.WriteLine(
+                        $"{p.GalaxyName}  raw r={p.RadiusKpc:F6}  ->  rTrm={rTrm:F6}  zEff={zEff:F6}");
+                }
+
                 transformed.Add(new RarPoint(
                     p.GalaxyName,
                     rTrm,
