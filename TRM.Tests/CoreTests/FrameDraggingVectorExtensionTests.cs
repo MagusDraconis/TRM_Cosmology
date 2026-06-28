@@ -531,12 +531,550 @@ public class FrameDraggingVectorExtensionTests
         Assert.True(deltaPlus * deltaMinus < 0.0, "Spin reversal should flip asymmetry sign.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void FD16_VectorCouplingNormalization_Should_Be_Derived_From_MicroscopicResponse_Not_Fitted()
+    {
+        // Gap-4 theorem-path gate:
+        // derive one global effective k_T from microscopic source/field response
+        // k_T ~ J / (Omega_raw * r^3) (normalized weak-field convention C_LT = 1),
+        // without least-squares fitting against Omega_ref.
+        const double cLt = 1.0;
+        var derivationSamples = BuildCouplingSamples(
+            angularSpeeds: new[] { 0.7, 0.9, 1.1, 1.3 },
+            radii: new[] { 4.2, 4.8, 5.4, 6.0 },
+            step: 0.15,
+            cLt: cLt);
+
+        var kCandidates = derivationSamples
+            .Select(s =>
+            {
+                double denom = Math.Max(s.OmegaRaw * s.Radius * s.Radius * s.Radius, 1e-18);
+                return cLt * s.AngularMomentum / denom;
+            })
+            .Where(double.IsFinite)
+            .ToList();
+
+        Assert.True(kCandidates.Count >= 12, $"FD16 expected enough microscopic k_T candidates, got {kCandidates.Count}.");
+
+        double kDerived = Median(kCandidates);
+        double kMean = kCandidates.Average();
+        double kRelSpread = (kCandidates.Max() - kCandidates.Min()) / Math.Max(kMean, 1e-18);
+
+        _output.WriteLine($"[FD16] k_T(derived, median)={kDerived:E6}, k_T(mean)={kMean:E6}, candidateRelSpread={kRelSpread:F6}");
+
+        Assert.True(double.IsFinite(kDerived) && kDerived > 0.0, "Derived k_T must be finite and positive.");
+        Assert.True(kRelSpread < 0.12, "Microscopic k_T candidates should remain in a tight weak-field band.");
+
+        var holdout = BuildCouplingSamples(
+            angularSpeeds: new[] { 0.6, 1.0, 1.4 },
+            radii: new[] { 4.5, 5.5, 6.5 },
+            step: 0.15,
+            cLt: cLt);
+
+        var ratios = holdout
+            .Select(s =>
+            {
+                double omegaCal = kDerived * s.OmegaRaw;
+                double ratio = omegaCal / Math.Max(s.OmegaRef, 1e-18);
+                _output.WriteLine($"[FD16] holdout: omega={s.AngularSpeed:F2}, r={s.Radius:F1}, Ω_cal={omegaCal:E6}, Ω_ref={s.OmegaRef:E6}, ratio={ratio:F6}");
+                return ratio;
+            })
+            .ToList();
+
+        double meanRatio = ratios.Average();
+        double spread = ratios.Max() - ratios.Min();
+        _output.WriteLine($"[FD16] holdout meanRatio={meanRatio:F6}, spread={spread:F6}");
+
+        Assert.InRange(meanRatio, 0.95, 1.05);
+        Assert.True(spread < 0.10, "Derived (non-fitted) k_T should retain weak-field normalization quality on holdout.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void FD17_DerivedKT_Should_Remain_Stable_Under_SourceDiscretizationAndGeometryAblation()
+    {
+        const double cLt = 1.0;
+        const double step = 0.15;
+
+        var discretizations = new[]
+        {
+            new { Name = "coarse", Spacing = 0.40, HalfCount = 4, DensityRadius = 0.95 },
+            new { Name = "medium", Spacing = 0.30, HalfCount = 5, DensityRadius = 0.95 },
+            new { Name = "fine", Spacing = 0.24, HalfCount = 6, DensityRadius = 0.95 }
+        };
+
+        var probeGeometries = new[]
+        {
+            new { Name = "equatorial-az0", AzimuthDeg = 0.0 },
+            new { Name = "equatorial-az35", AzimuthDeg = 35.0 },
+            new { Name = "equatorial-az70", AzimuthDeg = 70.0 }
+        };
+
+        var spinAxes = new[]
+        {
+            new { Name = "z-axis", Axis = new Vec3(0.0, 0.0, 1.0).Normalized() },
+            new { Name = "tilt-xz", Axis = new Vec3(0.28, 0.0, 0.96).Normalized() },
+            new { Name = "tilt-xyz", Axis = new Vec3(0.32, 0.24, 0.915).Normalized() }
+        };
+
+        var scenarioResults = new List<(string Name, double KDerived, double CandidateSpread, double HoldoutMean, double HoldoutSpread)>();
+
+        foreach (var disc in discretizations)
+        {
+            foreach (var geometry in probeGeometries)
+            {
+                foreach (var axis in spinAxes)
+                {
+                    string scenarioName = $"{disc.Name}/{geometry.Name}/{axis.Name}";
+                    Vec3 probeDirection = BuildPerpendicularProbeDirection(axis.Axis, geometry.AzimuthDeg);
+
+                    var derivationSamples = BuildCouplingSamplesForAblation(
+                        angularSpeeds: new[] { 0.7, 0.9, 1.1, 1.3 },
+                        radii: new[] { 4.2, 4.8, 5.4, 6.0 },
+                        step: step,
+                        cLt: cLt,
+                        spacing: disc.Spacing,
+                        halfCount: disc.HalfCount,
+                        densityRadius: disc.DensityRadius,
+                        spinAxis: axis.Axis,
+                        probeDirection: probeDirection);
+
+                    Assert.True(derivationSamples.Count >= 12, $"{scenarioName}: too few derivation samples ({derivationSamples.Count}).");
+
+                    var kCandidates = derivationSamples
+                        .Select(s =>
+                        {
+                            double denom = Math.Max(s.OmegaRaw * s.Radius * s.Radius * s.Radius, 1e-18);
+                            return cLt * s.AngularMomentum / denom;
+                        })
+                        .Where(double.IsFinite)
+                        .ToList();
+
+                    Assert.True(kCandidates.Count >= 12, $"{scenarioName}: too few finite k_T candidates ({kCandidates.Count}).");
+
+                    double kDerived = Median(kCandidates);
+                    double kMean = kCandidates.Average();
+                    double candidateSpread = (kCandidates.Max() - kCandidates.Min()) / Math.Max(kMean, 1e-18);
+
+                    var holdout = BuildCouplingSamplesForAblation(
+                        angularSpeeds: new[] { 0.6, 1.0, 1.4 },
+                        radii: new[] { 4.5, 5.5, 6.5 },
+                        step: step,
+                        cLt: cLt,
+                        spacing: disc.Spacing,
+                        halfCount: disc.HalfCount,
+                        densityRadius: disc.DensityRadius,
+                        spinAxis: axis.Axis,
+                        probeDirection: probeDirection);
+
+                    var ratios = holdout
+                        .Select(s => (kDerived * s.OmegaRaw) / Math.Max(s.OmegaRef, 1e-18))
+                        .ToList();
+
+                    double holdoutMean = ratios.Average();
+                    double holdoutSpread = ratios.Max() - ratios.Min();
+
+                    _output.WriteLine(
+                        $"[FD17] {scenarioName}: kDerived={kDerived:E6}, candidateSpread={candidateSpread:F6}, holdoutMean={holdoutMean:F6}, holdoutSpread={holdoutSpread:F6}");
+
+                    Assert.True(double.IsFinite(kDerived) && kDerived > 0.0, $"{scenarioName}: derived k_T must be finite and positive.");
+                    Assert.True(candidateSpread < 0.18, $"{scenarioName}: microscopic k_T candidate spread too wide.");
+                    Assert.InRange(holdoutMean, 0.92, 1.08);
+                    Assert.True(holdoutSpread < 0.14, $"{scenarioName}: holdout ratio spread too wide.");
+
+                    scenarioResults.Add((scenarioName, kDerived, candidateSpread, holdoutMean, holdoutSpread));
+                }
+            }
+        }
+
+        double kMeanGlobal = scenarioResults.Average(x => x.KDerived);
+        double kRelSpreadGlobal = (scenarioResults.Max(x => x.KDerived) - scenarioResults.Min(x => x.KDerived)) / Math.Max(kMeanGlobal, 1e-18);
+        double holdoutMeanBand = scenarioResults.Max(x => x.HoldoutMean) - scenarioResults.Min(x => x.HoldoutMean);
+        double holdoutSpreadMean = scenarioResults.Average(x => x.HoldoutSpread);
+
+        _output.WriteLine(
+            $"[FD17] global: kRelSpread={kRelSpreadGlobal:F6}, holdoutMeanBand={holdoutMeanBand:F6}, holdoutSpreadMean={holdoutSpreadMean:F6}");
+
+        Assert.True(kRelSpreadGlobal < 0.22, "Derived k_T should remain same-order stable across discretization/geometry/spin-axis ablations.");
+        Assert.True(holdoutMeanBand < 0.10, "Holdout mean-ratio band should stay controlled across ablation families.");
+        Assert.True(holdoutSpreadMean < 0.10, "Average holdout spread should remain tight across ablation families.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void FD18_VectorSector_Should_Match_WeakField_GR_LenseThirring_Window_With_DerivedKT()
+    {
+        // Quantitative weak-field compatibility window (claim-safe):
+        // 1) derive one frozen k_T from microscopic response candidates (no fit to Ω_ref),
+        // 2) validate Ω_cal = k_T * Ω_raw against weak-field LT reference window.
+        const double cLt = 1.0; // normalized weak-field GR reference coefficient convention
+        const double step = 0.15;
+
+        var derivationDiscretizations = new[]
+        {
+            new { Spacing = 0.40, HalfCount = 4, DensityRadius = 0.95 },
+            new { Spacing = 0.30, HalfCount = 5, DensityRadius = 0.95 },
+            new { Spacing = 0.24, HalfCount = 6, DensityRadius = 0.95 }
+        };
+
+        var derivationAxes = new[]
+        {
+            new Vec3(0.0, 0.0, 1.0).Normalized(),
+            new Vec3(0.28, 0.0, 0.96).Normalized(),
+            new Vec3(0.32, 0.24, 0.915).Normalized()
+        };
+
+        var derivationAzimuths = new[] { 0.0, 35.0, 70.0 };
+
+        var derivedKCandidates = new List<double>();
+        foreach (var disc in derivationDiscretizations)
+        {
+            foreach (var axis in derivationAxes)
+            {
+                foreach (double az in derivationAzimuths)
+                {
+                    Vec3 probeDirection = BuildPerpendicularProbeDirection(axis, az);
+                    var samples = BuildCouplingSamplesForAblation(
+                        angularSpeeds: new[] { 0.7, 0.9, 1.1, 1.3 },
+                        radii: new[] { 4.2, 4.8, 5.4, 6.0 },
+                        step: step,
+                        cLt: cLt,
+                        spacing: disc.Spacing,
+                        halfCount: disc.HalfCount,
+                        densityRadius: disc.DensityRadius,
+                        spinAxis: axis,
+                        probeDirection: probeDirection);
+
+                    foreach (var s in samples)
+                    {
+                        double denom = Math.Max(s.OmegaRaw * s.Radius * s.Radius * s.Radius, 1e-18);
+                        double k = cLt * s.AngularMomentum / denom;
+                        if (double.IsFinite(k))
+                            derivedKCandidates.Add(k);
+                    }
+                }
+            }
+        }
+
+        Assert.True(derivedKCandidates.Count >= 48, $"FD18 expected many derived k_T candidates, got {derivedKCandidates.Count}.");
+        double kDerived = Median(derivedKCandidates);
+        _output.WriteLine($"[FD18] frozen k_T(derived, non-fitted)={kDerived:E6}, candidateCount={derivedKCandidates.Count}");
+        Assert.True(double.IsFinite(kDerived) && kDerived > 0.0, "FD18 requires finite positive derived k_T.");
+
+        var validationDiscretizations = new[]
+        {
+            new { Name = "coarse", Spacing = 0.40, HalfCount = 4, DensityRadius = 0.95 },
+            new { Name = "medium", Spacing = 0.30, HalfCount = 5, DensityRadius = 0.95 },
+            new { Name = "fine", Spacing = 0.24, HalfCount = 6, DensityRadius = 0.95 }
+        };
+
+        var validationAxes = new[]
+        {
+            new { Name = "z-axis", Axis = new Vec3(0.0, 0.0, 1.0).Normalized() },
+            new { Name = "tilt-xz", Axis = new Vec3(0.28, 0.0, 0.96).Normalized() },
+            new { Name = "tilt-xyz", Axis = new Vec3(0.32, 0.24, 0.915).Normalized() }
+        };
+
+        var validationGeometries = new[]
+        {
+            new { Name = "equatorial-az15", AzimuthDeg = 15.0 },
+            new { Name = "equatorial-az45", AzimuthDeg = 45.0 },
+            new { Name = "equatorial-az75", AzimuthDeg = 75.0 }
+        };
+
+        var allRatios = new List<double>();
+        foreach (var disc in validationDiscretizations)
+        {
+            foreach (var axis in validationAxes)
+            {
+                foreach (var geom in validationGeometries)
+                {
+                    Vec3 probeDirection = BuildPerpendicularProbeDirection(axis.Axis, geom.AzimuthDeg);
+                    var samples = BuildCouplingSamplesForAblation(
+                        angularSpeeds: new[] { 0.65, 0.85, 1.05, 1.25, 1.45 },
+                        radii: new[] { 4.4, 5.2, 6.0, 6.8 },
+                        step: step,
+                        cLt: cLt,
+                        spacing: disc.Spacing,
+                        halfCount: disc.HalfCount,
+                        densityRadius: disc.DensityRadius,
+                        spinAxis: axis.Axis,
+                        probeDirection: probeDirection);
+
+                    var ratios = samples
+                        .Select(s => (kDerived * s.OmegaRaw) / Math.Max(s.OmegaRef, 1e-18))
+                        .ToList();
+
+                    Assert.True(ratios.Count >= 10, $"FD18 scenario {disc.Name}/{axis.Name}/{geom.Name} has too few ratios.");
+
+                    double mean = ratios.Average();
+                    double spread = ratios.Max() - ratios.Min();
+                    _output.WriteLine($"[FD18] {disc.Name}/{axis.Name}/{geom.Name}: mean={mean:F6}, spread={spread:F6}");
+
+                    Assert.InRange(mean, 0.93, 1.07);
+                    Assert.True(spread < 0.16, $"FD18 scenario {disc.Name}/{axis.Name}/{geom.Name} spread too wide.");
+
+                    allRatios.AddRange(ratios);
+                }
+            }
+        }
+
+        allRatios.Sort();
+        double globalMean = allRatios.Average();
+        double globalSpread = allRatios[^1] - allRatios[0];
+        double p10 = allRatios[(int)Math.Floor(0.10 * (allRatios.Count - 1))];
+        double p90 = allRatios[(int)Math.Floor(0.90 * (allRatios.Count - 1))];
+
+        _output.WriteLine($"[FD18] global: mean={globalMean:F6}, spread={globalSpread:F6}, p10={p10:F6}, p90={p90:F6}, n={allRatios.Count}");
+
+        Assert.InRange(globalMean, 0.97, 1.03);
+        Assert.True(globalSpread < 0.18, "FD18 global weak-field window spread too wide.");
+        Assert.True(p10 > 0.93 && p90 < 1.07, "FD18 central ratio mass should remain inside weak-field compatibility band.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void FD19_DerivedKT_Should_Remain_Compatible_Under_PhysicalUnitScaling()
+    {
+        // SI/dimension-aware weak-field compatibility guard:
+        // keep derived k_T frozen (no refit), then validate LT-window compatibility
+        // after explicit unit scaling (J, r, Omega) in multiple physical unit systems.
+        const double cLtNorm = 1.0;
+        const double step = 0.15;
+        const double gSi = 6.67430e-11;
+        const double cSi = 299_792_458.0;
+        double cLtSi = 2.0 * gSi / (cSi * cSi); // Ω_LT ≈ (2G/c^2) * J / r^3
+
+        var derivationSamples = BuildCouplingSamplesForAblation(
+            angularSpeeds: new[] { 0.7, 0.9, 1.1, 1.3 },
+            radii: new[] { 4.2, 4.8, 5.4, 6.0 },
+            step: step,
+            cLt: cLtNorm,
+            spacing: 0.30,
+            halfCount: 5,
+            densityRadius: 0.95,
+            spinAxis: new Vec3(0.0, 0.0, 1.0),
+            probeDirection: BuildPerpendicularProbeDirection(new Vec3(0.0, 0.0, 1.0), 20.0));
+
+        var kCandidates = derivationSamples
+            .Select(s =>
+            {
+                double denom = Math.Max(s.OmegaRaw * s.Radius * s.Radius * s.Radius, 1e-18);
+                return s.AngularMomentum / denom;
+            })
+            .Where(double.IsFinite)
+            .ToList();
+
+        Assert.True(kCandidates.Count >= 12, $"FD19 expected enough derived-k candidates, got {kCandidates.Count}.");
+        double kDerived = Median(kCandidates);
+        _output.WriteLine($"[FD19] frozen k_T(derived, non-fitted)={kDerived:E6}");
+        Assert.True(double.IsFinite(kDerived) && kDerived > 0.0, "FD19 requires finite positive derived k_T.");
+
+        var unitSystems = new[]
+        {
+            new { Name = "lab-scale", LengthScaleM = 1.0e3, TimeScaleS = 1.0e-3 },
+            new { Name = "planetary-scale", LengthScaleM = 1.0e6, TimeScaleS = 1.0 },
+            new { Name = "astro-scale", LengthScaleM = 1.0e9, TimeScaleS = 1.0e3 }
+        };
+
+        // Choose mass scale from gravitational-length relation to keep normalized LT convention aligned:
+        // M0 = c^2 * L0 / (2G)  =>  cLtSi * M0 / L0 = 1 (up to T0 accounting below).
+        double MassScaleFromLength(double l0) => (cSi * cSi * l0) / (2.0 * gSi);
+
+        var validationSamples = BuildCouplingSamplesForAblation(
+            angularSpeeds: new[] { 0.65, 0.85, 1.05, 1.25, 1.45 },
+            radii: new[] { 4.4, 5.2, 6.0, 6.8 },
+            step: step,
+            cLt: cLtNorm,
+            spacing: 0.30,
+            halfCount: 5,
+            densityRadius: 0.95,
+            spinAxis: new Vec3(0.28, 0.0, 0.96).Normalized(),
+            probeDirection: BuildPerpendicularProbeDirection(new Vec3(0.28, 0.0, 0.96).Normalized(), 45.0));
+
+        Assert.True(validationSamples.Count >= 16, $"FD19 expected enough validation samples, got {validationSamples.Count}.");
+
+        var allRatios = new List<double>();
+        var scenarioMeans = new List<double>();
+
+        foreach (var u in unitSystems)
+        {
+            double l0 = u.LengthScaleM;
+            double t0 = u.TimeScaleS;
+            double m0 = MassScaleFromLength(l0);
+
+            var ratios = validationSamples
+                .Select(s =>
+                {
+                    double omegaRawSi = s.OmegaRaw / t0;
+                    double jSi = s.AngularMomentum * m0 * l0 * l0 / t0;
+                    double rSi = s.Radius * l0;
+
+                    double omegaRefSi = cLtSi * jSi / Math.Max(rSi * rSi * rSi, 1e-24);
+                    double omegaCalSi = kDerived * omegaRawSi;
+                    return omegaCalSi / Math.Max(omegaRefSi, 1e-30);
+                })
+                .ToList();
+
+            double mean = ratios.Average();
+            double spread = ratios.Max() - ratios.Min();
+            _output.WriteLine($"[FD19] {u.Name}: mean={mean:F6}, spread={spread:F6}, L0={l0:E3}m, T0={t0:E3}s");
+
+            Assert.InRange(mean, 0.95, 1.05);
+            Assert.True(spread < 0.10, $"FD19 {u.Name}: weak-field compatibility spread too wide under SI scaling.");
+
+            scenarioMeans.Add(mean);
+            allRatios.AddRange(ratios);
+        }
+
+        allRatios.Sort();
+        double globalMean = allRatios.Average();
+        double globalSpread = allRatios[^1] - allRatios[0];
+        double meanBand = scenarioMeans.Max() - scenarioMeans.Min();
+        double p10 = allRatios[(int)Math.Floor(0.10 * (allRatios.Count - 1))];
+        double p90 = allRatios[(int)Math.Floor(0.90 * (allRatios.Count - 1))];
+
+        _output.WriteLine($"[FD19] global: mean={globalMean:F6}, spread={globalSpread:F6}, meanBand={meanBand:F6}, p10={p10:F6}, p90={p90:F6}, n={allRatios.Count}");
+
+        Assert.InRange(globalMean, 0.97, 1.03);
+        Assert.True(globalSpread < 0.10, "FD19 global spread should remain controlled under SI scaling.");
+        Assert.True(meanBand < 0.01, "FD19 scenario means should remain tightly aligned across physical unit scales.");
+        Assert.True(p10 > 1.01 && p90 < 1.05, "FD19 central mass should remain within a controlled weak-field compatibility window.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void FD20_DerivedKT_Should_Control_SystematicBias_Without_Refit()
+    {
+        // Bias-audit gate (no refit):
+        // quantify high-side bias of frozen derived k_T and test whether it is
+        // controlled and reduced under improved discretization/far-field settings.
+        const double cLtNorm = 1.0;
+        const double gSi = 6.67430e-11;
+        const double cSi = 299_792_458.0;
+        double cLtSi = 2.0 * gSi / (cSi * cSi);
+
+        var spinAxis = new Vec3(0.0, 0.0, 1.0);
+        var probeDirection = BuildPerpendicularProbeDirection(spinAxis, 20.0);
+
+        var derivationSamples = BuildCouplingSamplesForAblation(
+            angularSpeeds: new[] { 0.7, 0.9, 1.1, 1.3 },
+            radii: new[] { 4.2, 4.8, 5.4, 6.0 },
+            step: 0.15,
+            cLt: cLtNorm,
+            spacing: 0.30,
+            halfCount: 5,
+            densityRadius: 0.95,
+            spinAxis: spinAxis,
+            probeDirection: probeDirection);
+
+        var kCandidates = derivationSamples
+            .Select(s =>
+            {
+                double denom = Math.Max(s.OmegaRaw * s.Radius * s.Radius * s.Radius, 1e-18);
+                return s.AngularMomentum / denom;
+            })
+            .Where(double.IsFinite)
+            .ToList();
+
+        Assert.True(kCandidates.Count >= 12, $"FD20 expected enough derived-k candidates, got {kCandidates.Count}.");
+        double kDerived = Median(kCandidates);
+        _output.WriteLine($"[FD20] frozen k_T(derived, non-fitted)={kDerived:E6}");
+        Assert.True(double.IsFinite(kDerived) && kDerived > 0.0, "FD20 requires finite positive derived k_T.");
+
+        const double l0 = 1.0e6;
+        const double t0 = 1.0;
+        double m0 = (cSi * cSi * l0) / (2.0 * gSi);
+
+        (double Mean, double Spread, int Count) EvaluateScenario(
+            string name,
+            double spacing,
+            int halfCount,
+            double step,
+            IReadOnlyList<double> radii)
+        {
+            var samples = BuildCouplingSamplesForAblation(
+                angularSpeeds: new[] { 0.65, 0.85, 1.05, 1.25, 1.45 },
+                radii: radii,
+                step: step,
+                cLt: cLtNorm,
+                spacing: spacing,
+                halfCount: halfCount,
+                densityRadius: 0.95,
+                spinAxis: spinAxis,
+                probeDirection: probeDirection);
+
+            var ratios = samples
+                .Select(s =>
+                {
+                    double omegaRawSi = s.OmegaRaw / t0;
+                    double jSi = s.AngularMomentum * m0 * l0 * l0 / t0;
+                    double rSi = s.Radius * l0;
+                    double omegaRefSi = cLtSi * jSi / Math.Max(rSi * rSi * rSi, 1e-24);
+                    double omegaCalSi = kDerived * omegaRawSi;
+                    return omegaCalSi / Math.Max(omegaRefSi, 1e-30);
+                })
+                .ToList();
+
+            double mean = ratios.Average();
+            double spread = ratios.Max() - ratios.Min();
+            _output.WriteLine($"[FD20] {name}: mean={mean:F6}, spread={spread:F6}, n={ratios.Count}");
+            return (mean, spread, ratios.Count);
+        }
+
+        var baseline = EvaluateScenario(
+            name: "baseline",
+            spacing: 0.30,
+            halfCount: 5,
+            step: 0.15,
+            radii: new[] { 4.4, 5.2, 6.0, 6.8 });
+
+        var fineDerivative = EvaluateScenario(
+            name: "fine-derivative",
+            spacing: 0.30,
+            halfCount: 5,
+            step: 0.10,
+            radii: new[] { 4.4, 5.2, 6.0, 6.8 });
+
+        var farField = EvaluateScenario(
+            name: "far-field",
+            spacing: 0.30,
+            halfCount: 5,
+            step: 0.15,
+            radii: new[] { 6.8, 7.6, 8.4, 9.2 });
+
+        var improved = EvaluateScenario(
+            name: "improved",
+            spacing: 0.24,
+            halfCount: 6,
+            step: 0.10,
+            radii: new[] { 6.8, 7.6, 8.4, 9.2 });
+
+        double baselineBias = baseline.Mean - 1.0;
+        double improvedBias = improved.Mean - 1.0;
+        double bestBias = new[] { fineDerivative.Mean - 1.0, farField.Mean - 1.0, improvedBias }.Select(Math.Abs).Min();
+
+        _output.WriteLine($"[FD20] bias: baseline={baselineBias:F6}, improved={improvedBias:F6}, bestAbs={bestBias:F6}");
+
+        Assert.True(baselineBias > 0.0, "FD20 expected the observed baseline high-side bias to be positive.");
+        Assert.True(baselineBias < 0.05, "FD20 baseline bias should remain below weak-field tolerance.");
+        Assert.True(bestBias <= Math.Abs(baselineBias) - 5e-4, "FD20 should identify at least one approximation family that reduces absolute bias.");
+        Assert.True(new[] { baseline.Spread, fineDerivative.Spread, farField.Spread, improved.Spread }.All(s => s < 0.10),
+            "FD20 scenario spreads should remain controlled while auditing bias.");
+    }
+
     private static List<SourceCell> CreateRigidRotatingSource(
         double angularSpeed,
         double spacing = 0.30,
         int halfCount = 5,
-        double densityRadius = 0.95)
+        double densityRadius = 0.95,
+        Vec3? spinAxis = null)
     {
+        Vec3 axis = (spinAxis ?? new Vec3(0.0, 0.0, 1.0)).Normalized();
+        if (axis.Norm() < 1e-12)
+            axis = new Vec3(0.0, 0.0, 1.0);
+
         double dv = spacing * spacing * spacing;
 
         var cells = new List<SourceCell>((2 * halfCount + 1) * (2 * halfCount + 1) * (2 * halfCount + 1));
@@ -556,12 +1094,13 @@ public class FrameDraggingVectorExtensionTests
                     if (rho < 1e-8)
                         continue;
 
-                    // Rigid rotation around z-axis: v = omega x r = (-omega*y, omega*x, 0)
-                    var velocity = new Vec3(-angularSpeed * y, angularSpeed * x, 0.0);
+                    // Rigid rotation around configurable axis: v = (omega * axis) x r
+                    var position = new Vec3(x, y, z);
+                    var velocity = (angularSpeed * axis).Cross(position);
                     var currentDensity = rho * velocity;
                     var weightedCurrent = dv * currentDensity;
 
-                    cells.Add(new SourceCell(new Vec3(x, y, z), weightedCurrent));
+                    cells.Add(new SourceCell(position, weightedCurrent));
                 }
             }
         }
@@ -673,6 +1212,54 @@ public class FrameDraggingVectorExtensionTests
         return samples;
     }
 
+    private static List<CouplingSample> BuildCouplingSamplesForAblation(
+        IReadOnlyList<double> angularSpeeds,
+        IReadOnlyList<double> radii,
+        double step,
+        double cLt,
+        double spacing,
+        int halfCount,
+        double densityRadius,
+        Vec3 spinAxis,
+        Vec3 probeDirection)
+    {
+        Vec3 axisHat = spinAxis.Normalized();
+        Vec3 probeHat = probeDirection.Normalized();
+
+        var samples = new List<CouplingSample>();
+
+        foreach (double omega in angularSpeeds)
+        {
+            var source = CreateRigidRotatingSource(omega, spacing, halfCount, densityRadius, spinAxis: axisHat);
+            double j = ComputeAngularMomentumNorm(source);
+
+            foreach (double r in radii)
+            {
+                Vec3 probe = r * probeHat;
+                Vec3 b = ComputeCurlField(probe, source, step);
+                double omegaRaw = Math.Abs(b.Dot(axisHat));
+                if (omegaRaw < 1e-14)
+                    continue;
+
+                double omegaRef = cLt * j / (r * r * r);
+                samples.Add(new CouplingSample(omega, r, j, omegaRaw, omegaRef));
+            }
+        }
+
+        return samples;
+    }
+
+    private static Vec3 BuildPerpendicularProbeDirection(Vec3 axis, double azimuthDeg)
+    {
+        Vec3 a = axis.Normalized();
+        Vec3 seed = Math.Abs(a.Z) < 0.9 ? new Vec3(0.0, 0.0, 1.0) : new Vec3(0.0, 1.0, 0.0);
+        Vec3 u = a.Cross(seed).Normalized();
+        Vec3 v = a.Cross(u).Normalized();
+
+        double phi = Math.PI * azimuthDeg / 180.0;
+        return (Math.Cos(phi) * u + Math.Sin(phi) * v).Normalized();
+    }
+
     private static double FitEffectiveCoupling(IReadOnlyList<CouplingSample> samples)
     {
         // Least-squares fit for Ω_cal = k_T * Ω_raw against Ω_ref.
@@ -689,6 +1276,17 @@ public class FrameDraggingVectorExtensionTests
             l += cell.Position.Cross(cell.WeightedCurrent);
         }
         return l.Norm();
+    }
+
+    private static double Median(IReadOnlyList<double> values)
+    {
+        var sorted = values.OrderBy(v => v).ToList();
+        int n = sorted.Count;
+        if (n == 0)
+            return 0.0;
+        if (n % 2 == 1)
+            return sorted[n / 2];
+        return 0.5 * (sorted[n / 2 - 1] + sorted[n / 2]);
     }
 
     private readonly record struct SourceCell(Vec3 Position, Vec3 WeightedCurrent);

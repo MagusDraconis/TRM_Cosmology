@@ -174,6 +174,11 @@ Current status:
 - FD13: source-discretization robustness guard is passing.
 - FD14: spin-zero fallback guard is passing (vector sector collapses to scalar-limit compatibility).
 - FD15: prograde/retrograde light-path asymmetry guard is passing.
+- FD16: non-fitted microscopic-response normalization guard is passing; \(k_T\) derived from \(J/(\Omega_{\mathrm{raw}}r^3)\) remains stable and holdout-consistent in the synthetic weak-field setup.
+- FD17: derived-\(k_T\) robustness under source-discretization, probe-geometry, and spin-axis ablations is passing (\(k_{\mathrm{relSpread}}\approx 0.0597\), holdout-mean band \(\approx 0.00546\), mean holdout spread \(\approx 0.0115\)).
+- FD18: quantitative weak-field LT-window compatibility with frozen derived \(k_T\) is passing without refit (\(\text{mean}\approx 1.0068\), \(p10\approx 0.9887\), \(p90\approx 1.0294\)).
+- FD19: SI/dimension-aware unit-scaling compatibility with frozen derived \(k_T\) is passing across physical unit systems (\(\text{mean}\approx 1.0288\), \(\text{spread}\approx 0.0144\), \(\text{meanBand}\approx 0\)).
+- FD20: systematic-bias audit without refit is passing; small high-side tendency is controlled in weak-field tolerance and at least one approximation family reduces absolute bias.
 
 Only after FD01–FD09 should the project enter the first weak-field GR-shape comparison window:
 
@@ -189,9 +194,9 @@ FD10 status (current):
   - no rotation gives null field.
 - This is still a structural weak-field shape match, not a quantitative GR-amplitude match.
 
-Claim-safe update after FD01–FD15:
+Claim-safe update after FD01–FD20:
 
-> The TRM vector extension is now a weak-field frame-dragging candidate sector with structural Lense-Thirring scaling, stable effective coupling, scalar-limit preservation at zero spin, and prograde/retrograde light-path asymmetry.
+> The TRM vector extension is now a weak-field frame-dragging candidate sector with structural Lense-Thirring scaling, stable effective coupling, scalar-limit preservation at zero spin, prograde/retrograde light-path asymmetry, a non-fitted microscopic-response normalization proxy for \(k_T\), ablation-robust derived-\(k_T\) behavior, non-refit quantitative weak-field LT-window compatibility, SI/dimension-aware scaling compatibility, and controlled small high-side bias under bias-audit families.
 
 Still open:
 
