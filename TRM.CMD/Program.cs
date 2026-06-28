@@ -22,12 +22,13 @@ namespace TRM.CMD
                 isFirstIteration = false;
                 
                 Console.WriteLine("\n=======================================================");
-                Console.WriteLine(" V3.0 EXPERIMENT SELECTION");
+                Console.WriteLine(" V3.0 EXPERIMENT SELECTION (CLAIM-SAFE)");
                 Console.WriteLine("=======================================================");
                 Console.WriteLine(" [1] Run Cluster Diagnostics (TRM vs Newtonian Gravity)");
-                Console.WriteLine(" [2] Analyze SPARC Galactic Rotations (MOND vs TRM)");
+                Console.WriteLine(" [2] Analyze SPARC Galactic Rotations (TRM and MOND comparison)");
                 Console.WriteLine(" [3] Analyze CMB Acoustic Peaks (Planck Cosmology)");
-                Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (Dark Energy Replacement)");                
+                Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (TRM scale-distance diagnostics)");
+                Console.WriteLine(" [5] Show Sector Status Snapshot (Scalar / Vector / Theta)");
                 Console.WriteLine(" [0] Exit Framework");
                 Console.WriteLine("=======================================================");
                 Console.Write(" Select an option: ");
@@ -48,6 +49,9 @@ namespace TRM.CMD
                     case "4":
                         RunPantheonAnalysis();
                         break;
+                    case "5":
+                        ShowSectorStatusSnapshot();
+                        break;
 
                     case "0":
                         Console.WriteLine("Exiting TRM Cosmology Framework. Goodbye!");
@@ -61,7 +65,7 @@ namespace TRM.CMD
         private static void RunCluster_Diagnostics()
         {
             ClearConsole();
-            Console.WriteLine("--- DOMAIN 1: CLUSTER DIAGNOSTICS ---");
+            Console.WriteLine("--- DOMAIN 2: CLUSTER DIAGNOSTICS ---");
             Console.WriteLine("This module provides diagnostic tools for analyzing galaxy cluster data.");
 
             string dataPath;
@@ -150,13 +154,13 @@ namespace TRM.CMD
             }
 
             Console.WriteLine("\nPress any key to return to the menu...");
-            Console.ReadKey();
+            WaitForMenuReturn();
         }
 
         private static void RunSparcGalacticAnalysis()
         {
             ClearConsole();
-            Console.WriteLine("--- DOMAIN 2: GALACTIC ROTATION CURVES (SPARC DATABASE) ---");
+            Console.WriteLine("--- DOMAIN 1: GALACTIC ROTATION CURVES (SPARC DATABASE) ---");
             Console.WriteLine("This module executes the non-linear co-fit for the universal acceleration constant a_0.");
             Console.WriteLine("Resolving SPARC datasets...");
 
@@ -200,7 +204,7 @@ namespace TRM.CMD
             }
 
             Console.WriteLine("Press any key to return to the menu...");
-            Console.ReadKey();
+            WaitForMenuReturn();
         }
 
         private static void RunCmbAnalysis()
@@ -246,7 +250,7 @@ namespace TRM.CMD
             Console.ResetColor();
 
             Console.WriteLine("\nPress any key to return to the menu...");
-            Console.ReadKey();
+            WaitForMenuReturn();
         }
         private static void RunPantheonAnalysis()
         {
@@ -254,20 +258,19 @@ namespace TRM.CMD
             Console.WriteLine("--- DOMAIN 4: SUPERNOVAE & DISTANCE SCALE (PANTHEON+ DATABASE) ---");
             Console.WriteLine("Evaluating Pantheon+ with the current TRM distance mapper...");
 
-            var dataPath = Path.Combine(
-                AppContext.BaseDirectory,
-                "Data",
-                "Pantheon+SH0ES.dat");
-
-            if (!File.Exists(dataPath))
+            string dataPath;
+            try
+            {
+                dataPath = WorkspaceFileLocator.GetFilePath("Pantheon+SH0ES.dat");
+            }
+            catch (FileNotFoundException ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\n[ERROR] Pantheon+ dataset not found.");
-                Console.WriteLine($"Please ensure 'Pantheon+SH0ES.dat' is placed in: {Path.Combine(AppContext.BaseDirectory, "Data")}");
+                Console.WriteLine(ex.Message);
                 Console.ResetColor();
-
                 Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
+                WaitForMenuReturn();
                 return;
             }
 
@@ -296,7 +299,48 @@ namespace TRM.CMD
             Console.ResetColor();
 
             Console.WriteLine("\nPress any key to return to the menu...");
-            Console.ReadKey();
+            WaitForMenuReturn();
+        }
+
+        private static void ShowSectorStatusSnapshot()
+        {
+            ClearConsole();
+            Console.WriteLine("--- TRM FIELD SECTOR STATUS SNAPSHOT ---");
+            Console.WriteLine("Positioning: weak-field effective transport/synchronization framework.");
+            Console.WriteLine();
+            Console.WriteLine("[Scalar sector] T, phi, memory, EL/Fermat bridge");
+            Console.WriteLine(" - tested-effective in current weak-field pipeline");
+            Console.WriteLine(" - not yet full first-principles closure");
+            Console.WriteLine();
+            Console.WriteLine("[Vector sector] A_T, B_T (frame-dragging candidate)");
+            Console.WriteLine(" - FD01-FD15: structural weak-field LT-shape compatibility, stable effective k_T");
+            Console.WriteLine(" - scalar-limit preserved at spin zero, prograde/retrograde asymmetry present");
+            Console.WriteLine(" - not yet quantitative GR-equivalent, not first-principles-derived");
+            Console.WriteLine();
+            Console.WriteLine("[Theta sector] Theta, O5, lambda_Theta");
+            Console.WriteLine(" - TO01-TO28, TQK01-TQK04, LC01-LC08 tested-effective candidate path");
+            Console.WriteLine(" - not yet theorem-level first-principles closure");
+            Console.WriteLine();
+            Console.WriteLine("See docs/Theory/TRM_Field_Sector_Map.md and docs/Theory/TRM_First_Principles_Gap_List.md");
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void WaitForMenuReturn()
+        {
+            if (Console.IsInputRedirected || Console.IsOutputRedirected)
+            {
+                return;
+            }
+
+            try
+            {
+                Console.ReadKey(intercept: true);
+            }
+            catch (InvalidOperationException)
+            {
+                // Non-interactive host: skip blocking wait.
+            }
         }
         
         private static void ClearConsole()
@@ -332,6 +376,7 @@ namespace TRM.CMD
                                                                  |___/ |___/ 
             ");
             Console.WriteLine("   Clockwork Cosmology V3.0 - Theoretical Physics Evaluation Engine");
+            Console.WriteLine("   Scope: tested-effective weak-field candidate sectors (no theorem-level overclaims)");
             Console.ResetColor();
         }
     }

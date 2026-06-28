@@ -42,6 +42,7 @@ dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=LongRunning"
 ## 6. Main documents to read
 
 - `docs/Theory/TRM_Field_Sector_Map.md`
+- `docs/Theory/TRM_First_Principles_Gap_List.md` (first-principles blockers)
 - `docs/review/TRM_Peer_Review_Request.md`
 - `docs/review/TRM_Current_Status_For_PeerReview.md`
 - `docs/review/TRM_TestSuite_Classification.md`
