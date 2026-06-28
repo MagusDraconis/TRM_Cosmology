@@ -51,26 +51,17 @@ namespace TRM.Core
                     // Require at least 18 elements so index 17 (Q) is safe
                     if (parts.Length >= 18)
                     {
-                        try
-                        {
-                            string name = parts[0];
-                            double inc = double.Parse(parts[5], CultureInfo.InvariantCulture);     // Column 6 (deg)
-                            double l36 = double.Parse(parts[7], CultureInfo.InvariantCulture);     // Column 8 (10^9 L_sun)
-                            double mHi = double.Parse(parts[13], CultureInfo.InvariantCulture);    // Column 14 (10^9 M_sun)
-                            double vFlat = double.Parse(parts[15], CultureInfo.InvariantCulture);  // Column 16 (km/s)
-                            double eVflat = double.Parse(parts[16], CultureInfo.InvariantCulture); // Column 17 (km/s)
-                            int q = int.Parse(parts[17], CultureInfo.InvariantCulture);            // Column 18 (flag)
+                        string name = parts[0];
+                        bool okInc = double.TryParse(parts[5], NumberStyles.Float, CultureInfo.InvariantCulture, out double inc);      // Column 6 (deg)
+                        bool okL36 = double.TryParse(parts[7], NumberStyles.Float, CultureInfo.InvariantCulture, out double l36);      // Column 8 (10^9 L_sun)
+                        bool okMhi = double.TryParse(parts[13], NumberStyles.Float, CultureInfo.InvariantCulture, out double mHi);     // Column 14 (10^9 M_sun)
+                        bool okVf = double.TryParse(parts[15], NumberStyles.Float, CultureInfo.InvariantCulture, out double vFlat);    // Column 16 (km/s)
+                        bool okEvf = double.TryParse(parts[16], NumberStyles.Float, CultureInfo.InvariantCulture, out double eVflat);  // Column 17 (km/s)
+                        bool okQ = int.TryParse(parts[17], NumberStyles.Integer, CultureInfo.InvariantCulture, out int q);             // Column 18 (flag)
 
-                            if (vFlat > 0)
-                            {
-                                // Construct record with parsed fields
-                                galaxies.Add(new GalaxyData(name, l36, mHi, vFlat, eVflat, inc, q));
-                            }
-                        }
-                        catch (FormatException)
+                        if (okInc && okL36 && okMhi && okVf && okEvf && okQ && vFlat > 0)
                         {
-                            // Skip incomplete trailing rows
-                            continue;
+                            galaxies.Add(new GalaxyData(name, l36, mHi, vFlat, eVflat, inc, q));
                         }
                     }
                 }

@@ -200,7 +200,6 @@ public class TRM_Realtiy_Tests
     public void TRM19_Mercury_Orbit_RK4_From_Phase_Field()
     {
         double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
         double M = PhysicalConstantsSI.M_Solar;
 
         // Merkur initial
@@ -556,7 +555,6 @@ public class TRM_Realtiy_Tests
     public void TRM23_Mercury_Precession_Measurement()
     {
         double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
