@@ -23,7 +23,7 @@
 
 - First-principles origin and unique selection of the rational collective locking band `Omega ≈ 1.16..1.19`.
 - Full first-principles EL/Fermat production closure.
-- Frame-dragging / Lense-Thirring coverage in the current scalar path.
+- Frame-dragging / Lense-Thirring remains open in the scalar path; a new vector candidate sector (`FD01–FD15`) is now structurally/weak-field-shape tested but not yet first-principles-derived or quantitatively GR-equivalent.
 - Broader first-principles closure for calibrated cosmology and regime parameters.
 
 ## 5. How to run the tests
@@ -41,6 +41,7 @@ dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=LongRunning"
 
 ## 6. Main documents to read
 
+- `docs/Theory/TRM_Field_Sector_Map.md`
 - `docs/review/TRM_Peer_Review_Request.md`
 - `docs/review/TRM_Current_Status_For_PeerReview.md`
 - `docs/review/TRM_TestSuite_Classification.md`
@@ -48,3 +49,4 @@ dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=LongRunning"
 - `docs/Theory/TRM_Geodesic_Derivation.md`
 - `docs/Theory/TRM_Collective_Mode_Locking_BridgeScale.md`
 - `docs/Theory/TRM_Finsler_Optical_Action.md`
+- `docs/Theory/TRM_Vector_Tensor_Extension_FrameDragging.md`

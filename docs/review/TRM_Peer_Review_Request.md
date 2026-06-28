@@ -13,6 +13,14 @@
 
 This project investigates an alternative gravitational and cosmological framework in which observable gravitational and cosmological effects are modeled as consequences of a scalar temporal-rate structure rather than as primary effects of spacetime curvature or metric expansion.
 
+Latest reviewer-relevant status:
+
+- The Theta/O5/lambda track is now a **tested-effective candidate path** at derivation-gate level: `TO01–TO28`, `TQK01–TQK04`, `LC01–LC08`.
+- Current strongest candidate is **O5-W6-InvDistance + regularized \(\lambda_\Theta\)**.
+- A new vector frame-dragging candidate sector is now active and tested at structural weak-field level: `FD01–FD15` (Lense-Thirring scaling shape compatibility, effective \(k_T\) normalization robustness, scalar-limit preservation at spin zero, prograde/retrograde asymmetry).
+- Claim boundary remains strict: **hypothesis-supported**, **not theorem-level first-principles-derived**.
+- Highest-priority next theory block: derive \(\,O_5,\Theta,\lambda_\Theta\,\) from TQM lattice/microscopic coupling.
+
 The earlier **Clockwork Cosmology V1** formulation describes gravitation and cosmic redshift in an absolutely flat, infinite, rigid Euclidean space filled with a dynamic coordinate medium referred to as the *Time-Aether*. In that formulation, masses locally modify the time-rate factor \(T\), and the classical acceleration law is written as:
 
 \[
@@ -48,6 +56,12 @@ These documents establish the conceptual and mathematical baseline of the projec
 ## 3. Current Repository Status
 
 The current repository contains numerical tests and theory documents for the evolving TRM/TQM framework.
+
+For the Theta-observable branch, the current repository status is:
+
+- `TRM.Tests/CoreTests/ThetaObservableDerivationTests.cs` now includes `TO01–TO28`, `TQK01–TQK04`, and `LC01–LC08`.
+- These gates support O5-W6-InvDistance plus regularized regime-conditioned \(\lambda_\Theta\) as the strongest current nonlocal Theta-observable candidate.
+- This should be reviewed as tested-effective guard evidence, not as a closed theorem-level derivation.
 
 The current internal work focuses on photon propagation and includes:
 
@@ -360,7 +374,7 @@ This is the current implementation order to move from exploratory status toward 
 - Keep public scope explicitly at: **weak-field effective model**, **numerically stabilized**, **falsifiable**.
 - Keep the following as open work items, not final claims:
   - full first-principles EL/Fermat closure,
-  - frame-dragging / Lense-Thirring coverage,
+  - first-principles and quantitative closure of the new frame-dragging/Lense-Thirring vector sector,
   - first-principles derivation of calibrated cosmology and regime parameters,
   - first-principles selection of the rational collective mode-locking band.
 
@@ -409,7 +423,7 @@ For each central parameter, maintain explicit labels:
 
 Continue dedicated tests/documentation for open limitation tracks:
 
-- frame-dragging / Lense-Thirring,
+- vector frame-dragging/Lense-Thirring first-principles + quantitative benchmark closure,
 - cosmology parameter derivation,
 - cluster-model physical interpretation,
 - rational collective mode-locking band selection.
@@ -417,6 +431,20 @@ Continue dedicated tests/documentation for open limitation tracks:
 Exit criterion:
 
 - no central parameter is unlabeled and no major limitation is undocumented in code and review docs.
+
+### Phase 5 — Theta/O5/Lambda First-Principles Closure (next theory priority)
+
+- Focus on closing the derivation chain
+  \[
+  \Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}
+  \]
+  from TQM lattice/microscopic coupling.
+- Preserve current anti-overfit discipline (holdout + anti-proxy constraints; no per-galaxy fallback fitting).
+- Keep publication wording at hypothesis-supported until theorem-level closure is explicitly achieved.
+
+Exit criterion:
+
+- a reviewable derivation path from lattice coupling to \(O_5,\Theta,\lambda_\Theta\), with matching executable falsification tests and unchanged claim boundaries unless theorem-level criteria are met.
 
 ---
 

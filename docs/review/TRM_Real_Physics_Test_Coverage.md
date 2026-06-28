@@ -25,10 +25,10 @@ Quellen:
 ## Executive Coverage Snapshot
 
 - Breite numerische Abdeckung vorhanden für: Newton/Redshift-Basis, Mercury, Photon-Deflection, Schwarzschild-Referenzvergleich, Shapiro-Diagnostik, Planck-Konsistenz, Tick/Action/Phase-Scans, SPARC/RAR, CMB, Pantheon.
+- Theta/O5-Observable-Pfad ist jetzt **tested-effective**: TO01–TO28, TQK01–TQK04 und LC01–LC08 stützen O5-W6-InvDistance plus regularisiertes \(\lambda_\Theta\) als derzeit stärksten nichtlokalen Theta-Observable-Kandidaten; Claim-Grenze bleibt **hypothesis-supported**, nicht theorem-level derived.
+- Vektor-/Frame-dragging-Pfad ist als **tested-effective candidate sector** gestartet: FD01–FD15 stützen weak-field Lense-Thirring-Shape-Kompatibilität, stabile effektive Kopplungsnormalisierung, SpinZero-Skalar-Limit-Erhalt und prograde/retrograde Asymmetrie.
 - Wesentliche offene Punkte:
   - vollständige Euler-Lagrange-Produktionspipeline fehlt weiterhin (expliziter E-L/Fermat-Solverpfad vorhanden, aber noch nicht formal geschlossen),
-  - Lense-Thirring/Frame-dragging nicht direkt implementiert/getestet,
-  - Cluster-Regime-Service ohne dedizierte harte Tests,
   - mehrere zentrale Parameter sind kalibriert und als noch nicht vollständig hergeleitet markiert.
 
 ---
@@ -149,11 +149,11 @@ Quellen:
 - **Relevante Tests:**
   - `TRM.Tests/CoreTests/RarRelationTests.cs`
   - `TRM.Tests/CoreTests/OrbitalIntegratedTests.cs`
-  - `TRM.Tests/CoreTests/ThetaObservableDerivationTests.cs` (TO01–TO19)
+  - `TRM.Tests/CoreTests/ThetaObservableDerivationTests.cs` (TO01–TO28, TQK01–TQK04, LC01–LC08)
 - **Modellbezug:**
   - `gbar + sqrt(gbar*a0)` Basisterm, Orbit-/Regime-/Theta-Feld-Korrekturen, RMS-/Bin-Auswertungen.
-- **Status:** **tested** + **tested-effective (theta observable gate)** + **calibrated** + teilweise **not derived yet**
-- **Einordnung:** very strong pipeline and derivation-gate coverage. TO12–TO18 support O5-W6-InvDistance under class/holdout/stratified validation; TO19 adds explicit observed-velocity leakage guard. Current claim level remains hypothesis-supported, not first-principles-derived.
+- **Status:** **tested** + **tested-effective (theta observable + lambda-response discipline gate)** + **calibrated** + teilweise **not derived yet**
+- **Einordnung:** sehr starke Pipeline- und Derivation-Gate-Abdeckung. TO12–TO20 stützen O5-W6-InvDistance unter Klassen-/Holdout-/Strata-/Leakage-/Solver-Ablations-Validierung; TO21–TO24 ergänzen Operatorstruktur- und finite-coherence-Fenster-Guards; TO25–TO28 ergänzen diskrete Energiegradienten-Absicherung (\(O_5 \approx -\partial E_\Theta/\partial\Theta\)) mit Energy-Descent/Zero-Mode/Boundedness-Guards; TQK01–TQK04 ergänzen Small-Phase-Lattice-Energy-Reduktion und Gradientenkonsistenz; LC01–LC08 schließen die Lambda-Response-Disziplin mit Dimensions-/Globalisierungs-/Regularisierungs-/Strata-Safety-/Anti-Proxy-Guards ab. Claim-Status bleibt hypothesis-supported und nicht theorem-level fundamental.
 
 ## 11) cluster regime model
 
@@ -210,12 +210,13 @@ Quellen:
 - **Status:** **tested (partial)** + **not derived yet** + **limitation**
 - **Einordnung:** ausführbarer Herleitungs-Track begonnen und testbar, aber noch nicht als vollständig geschlossene E-L-Kette publikationsreif.
 
-## 15) Lense-Thirring / frame-dragging limitation
+## 15) Lense-Thirring / frame-dragging vector candidate sector
 
 - **Code-/Testlage:**
-  - in konsolidierter Repo-Suche keine direkte aktive Implementierung/Testabdeckung als dedizierter Effektpfad gefunden.
-- **Status:** **limitation**
-- **Einordnung:** Lense-Thirring / frame-dragging remains not covered by scalar TRM; diese Lücke ist aktuell bewusst offen und muss als KnownLimitation ausgewiesen bleiben.
+  - `TRM.Tests/CoreTests/FrameDraggingVectorExtensionTests.cs` (`FD01–FD15`)
+  - `docs/Theory/TRM_Vector_Tensor_Extension_FrameDragging.md`
+- **Status:** **tested-effective (weak-field candidate sector)** + **calibrated (effective \(k_T\))** + **not derived yet**
+- **Einordnung:** Der neue Vektor-Sektor zeigt strukturelle weak-field Lense-Thirring-Shape-Kompatibilität (J-linear, \(r^{-3}\), Spin-Sign-Flip, Null bei Nichtrotation), stabile globale effektive \(k_T\)-Normalisierung inkl. Holdout/Discretization-Robustheit sowie prograde/retrograde Lichtpfad-Asymmetrie. Gleichzeitig bleibt die Claim-Grenze strikt: nicht first-principles-derived, nicht quantitativ GR-äquivalent.
 
 ---
 
@@ -244,12 +245,12 @@ Quellen:
 | Planck constants | **tested** |
 | tick/action bridge | **exploratory** + **diagnostic** |
 | phase lock / collective gamma ≈ 0.85 | **tested (isolated cadence block)** + **exploratory** + **diagnostic** |
-| SPARC / RAR / orbit / theta field | **tested** + **calibrated** + teils **not derived yet** |
+| SPARC / RAR / orbit / theta field | **tested** + **tested-effective theta observable** + **calibrated** + **not derived yet** |
 | cluster regime model | **tested (baseline deterministic)** + **calibrated** + **exploratory** |
 | CMB | **tested** + **calibrated** |
 | Pantheon / HT | **tested** + **calibrated** + **not derived yet** |
 | Euler-Lagrange status | **tested (partial)** + **not derived yet** + **limitation** |
-| Lense-Thirring / frame-dragging | **limitation** |
+| Lense-Thirring / frame-dragging | **tested-effective candidate sector** + **calibrated** + **not derived yet** |
 
 ---
 

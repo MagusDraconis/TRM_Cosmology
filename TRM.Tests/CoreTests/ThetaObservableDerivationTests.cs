@@ -2058,6 +2058,1204 @@ public class ThetaObservableDerivationTests
         Assert.Equal("effective-candidate", classification.Status);
     }
 
+    [Fact]
+    public void TO21_O5W6_Should_Behave_Like_FiniteCoherenceSynchronizationTension()
+    {
+        const int halfWindow = 6;
+
+        var constant = CreateSyntheticThetaProfile(r => 1.5, count: 41, spacing: 0.5);
+        var smooth = CreateSyntheticThetaProfile(r => 0.9 + 0.04 * r + 0.003 * r * r, count: 41, spacing: 0.5);
+        var localContrast = CreateSyntheticThetaProfile(
+            r =>
+            {
+                double baseTheta = 0.9 + 0.04 * r + 0.003 * r * r;
+                double notch = 0.18 * Math.Exp(-Math.Pow((r - 10.0) / 0.7, 2.0));
+                return baseTheta - notch;
+            },
+            count: 41,
+            spacing: 0.5);
+        var nonLocalBreak = CreateSyntheticThetaProfile(
+            r =>
+            {
+                double baseTheta = 0.9 + 0.04 * r + 0.003 * r * r;
+                double syncBreak = r >= 13.0 ? 0.85 : 0.0;
+                return baseTheta + syncBreak;
+            },
+            count: 41,
+            spacing: 0.5);
+
+        var constantSeries = ComputeO5Series(constant, halfWindow);
+        var smoothSeries = ComputeO5Series(smooth, halfWindow);
+        var localContrastSeries = ComputeO5Series(localContrast, halfWindow);
+        var nonLocalBreakSeries = ComputeO5Series(nonLocalBreak, halfWindow);
+
+        double constMaxAbs = constantSeries.Select(Math.Abs).Max();
+        double smoothMaxAbs = smoothSeries.Select(Math.Abs).Max();
+        double localMaxAbs = localContrastSeries.Select(Math.Abs).Max();
+        double nonLocalMaxAbs = nonLocalBreakSeries.Select(Math.Abs).Max();
+
+        double localOverSmooth = localMaxAbs - smoothMaxAbs;
+        double nonLocalOverLocal = nonLocalMaxAbs - localMaxAbs;
+
+        WriteTestLine("TO21", $"constant max|O5|      = {constMaxAbs:E6}");
+        WriteTestLine("TO21", $"smooth max|O5|        = {smoothMaxAbs:E6}");
+        WriteTestLine("TO21", $"local-contrast max|O5|= {localMaxAbs:E6}");
+        WriteTestLine("TO21", $"nonlocal-break max|O5|= {nonLocalMaxAbs:E6}");
+        WriteTestLine("TO21", $"localOverSmooth       = {localOverSmooth:E6}");
+        WriteTestLine("TO21", $"nonLocalOverLocal     = {nonLocalOverLocal:E6}");
+
+        Assert.True(
+            constMaxAbs <= 1e-12,
+            $"O5 should vanish for constant Theta profile, but max|O5|={constMaxAbs:E6}");
+
+        Assert.True(
+            smoothMaxAbs <= 0.055,
+            $"O5 should remain bounded for smooth Theta profiles, but max|O5|={smoothMaxAbs:E6}");
+
+        Assert.True(
+            localOverSmooth >= 0.040,
+            $"O5 should react to local Theta contrasts: localOverSmooth={localOverSmooth:E6}");
+
+        Assert.True(
+            nonLocalOverLocal >= 0.035,
+            $"O5 should grow for non-local synchronization breaks: nonLocalOverLocal={nonLocalOverLocal:E6}");
+    }
+
+    [Fact]
+    public void TO22_W6_Should_Be_Minimal_Window_With_Stable_CoherenceResponse()
+    {
+        var profiles = CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25);
+        var windows = new[] { 2, 4, 6, 8, 10 };
+
+        var metrics = windows
+            .Select(w => EvaluateWindowOperatorMetrics(profiles, w))
+            .ToList();
+
+        foreach (var m in metrics)
+        {
+            WriteTestLine(
+                "TO22",
+                $"W{m.HalfWindow}: constMax={m.ConstantMaxAbs:E6}, smoothMax={m.SmoothMaxAbs:E6}, localGain={m.LocalGainOverSmooth:E6}, nonLocalGain={m.NonLocalGainOverLocal:E6}, nonLocalMean={m.NonLocalMeanAbs:E6}, nonLocalArea={m.NonLocalArea:E6}, localWidth={m.LocalSupportWidth:F3}, stable={m.IsStable}");
+        }
+
+        var stableWindows = metrics
+            .Where(m => m.IsStable)
+            .Select(m => m.HalfWindow)
+            .OrderBy(w => w)
+            .ToList();
+
+        Assert.NotEmpty(stableWindows);
+        Assert.Equal(6, stableWindows.First());
+        Assert.Contains(6, stableWindows);
+        Assert.DoesNotContain(2, stableWindows);
+        Assert.DoesNotContain(4, stableWindows);
+    }
+
+    [Fact]
+    public void TO23_W6_Should_Balance_Locality_And_Nonlocality()
+    {
+        var profiles = CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25);
+        var windows = new[] { 2, 4, 6, 8, 10 };
+
+        var scored = windows
+            .Select(w =>
+            {
+                var m = EvaluateWindowOperatorMetrics(profiles, w);
+                double balanceScore = ComputeWindowBalanceScore(m);
+                return new { m.HalfWindow, Metrics = m, Score = balanceScore };
+            })
+            .OrderByDescending(x => x.Score)
+            .ToList();
+
+        foreach (var s in scored)
+        {
+            WriteTestLine(
+                "TO23",
+                $"W{s.HalfWindow}: score={s.Score:F6}, local={s.Metrics.LocalGainOverSmooth:E6}, nonlocal={s.Metrics.NonLocalGainOverLocal:E6}, nonLocalMean={s.Metrics.NonLocalMeanAbs:E6}, nonLocalArea={s.Metrics.NonLocalArea:E6}, localWidth={s.Metrics.LocalSupportWidth:F3}, smoothStd={s.Metrics.SmoothStdAbs:E6}");
+        }
+
+        int w6Rank = scored.FindIndex(x => x.HalfWindow == 6);
+        Assert.True(w6Rank >= 0, "W6 not found in TO23 ranking.");
+        Assert.True(w6Rank <= 1, $"W6 should be top-2 by locality/nonlocality balance but rank={w6Rank + 1}.");
+    }
+
+    [Fact]
+    public void TO24_W6_Should_Remain_Stable_Under_ProfileResolutionScaling()
+    {
+        var configs = new[]
+        {
+            new ResolutionConfig("coarse", Count: 41, Spacing: 0.50),
+            new ResolutionConfig("medium", Count: 81, Spacing: 0.25),
+            new ResolutionConfig("fine", Count: 161, Spacing: 0.125)
+        };
+
+        var windows = new[] { 2, 4, 6, 8, 10 };
+        var bestByResolution = new List<(string Name, int BestWindow, double BestScore, double EffectiveLength, WindowOperatorMetrics W6Metrics, bool W6ScaledStable)>();
+
+        foreach (var cfg in configs)
+        {
+            var profiles = CreateDefaultSyntheticProfiles(cfg.Count, cfg.Spacing);
+            var perWindow = windows
+                .Select(w =>
+                {
+                    var m = EvaluateWindowOperatorMetrics(profiles, w);
+                    double score = ComputeWindowBalanceScore(m);
+                    return new { Window = w, Metrics = m, Score = score };
+                })
+                .OrderByDescending(x => x.Score)
+                .ToList();
+
+            var best = perWindow.First();
+            var w6 = perWindow.First(x => x.Window == 6).Metrics;
+            double scaledNonLocalStrength = w6.NonLocalMeanAbs / Math.Max(cfg.Spacing, 1e-9);
+            bool w6ScaledStable =
+                w6.ConstantMaxAbs <= 1e-12 &&
+                w6.SmoothMaxAbs <= 0.060 &&
+                w6.LocalGainOverSmooth >= 0.028 &&
+                w6.NonLocalGainOverLocal >= 0.025 &&
+                scaledNonLocalStrength >= 0.040;
+
+            bestByResolution.Add((cfg.Name, best.Window, best.Score, best.Window * cfg.Spacing, w6, w6ScaledStable));
+
+            WriteTestLine(
+                "TO24",
+                $"{cfg.Name}: best=W{best.Window}, score={best.Score:F6}, effLength={best.Window * cfg.Spacing:F3}, W6 stable={w6.IsStable}, W6ScaledStable={w6ScaledStable}, scaledNonLocal={scaledNonLocalStrength:F6}");
+        }
+
+        Assert.All(
+            bestByResolution,
+            r => Assert.InRange(r.BestWindow, 4, 8));
+
+        Assert.All(
+            bestByResolution,
+            r => Assert.True(
+                r.W6ScaledStable,
+                $"W6 loses coherence-response stability at resolution {r.Name}."));
+
+        double minLen = bestByResolution.Min(r => r.EffectiveLength);
+        double maxLen = bestByResolution.Max(r => r.EffectiveLength);
+        double meanLen = bestByResolution.Average(r => r.EffectiveLength);
+        double lenScaleRatio = minLen > 0.0 ? maxLen / minLen : double.PositiveInfinity;
+        bool monotonicControlledScaling =
+            bestByResolution[0].EffectiveLength >= bestByResolution[1].EffectiveLength &&
+            bestByResolution[1].EffectiveLength >= bestByResolution[2].EffectiveLength;
+
+        WriteTestLine("TO24", $"effectiveLength min/mean/max = {minLen:F3}/{meanLen:F3}/{maxLen:F3}");
+        WriteTestLine("TO24", $"effectiveLength scale ratio  = {lenScaleRatio:F3}");
+        WriteTestLine("TO24", $"controlled monotonic scaling = {monotonicControlledScaling}");
+
+        Assert.True(
+            monotonicControlledScaling && lenScaleRatio <= 8.0,
+            $"Effective coherence-length scaling is not controlled: monotonic={monotonicControlledScaling}, scaleRatio={lenScaleRatio:F3}");
+    }
+
+    [Fact]
+    public void TO25_O5_Should_Match_NegativeGradient_Of_FiniteCoherenceEnergy()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var profiles = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).Smooth,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).NonLocalBreak
+        };
+
+        var o5Series = new List<double>();
+        var energyGradientSeries = new List<double>();
+
+        foreach (var profile in profiles)
+        {
+            o5Series.AddRange(ComputeO5Series(profile, halfWindow));
+            energyGradientSeries.AddRange(ComputeFiniteCoherenceNegativeGradientSeries(profile, halfWindow, epsilon, normalize: true));
+        }
+
+        Assert.True(o5Series.Count > 80, $"Too few TO25 comparison points: {o5Series.Count}");
+        Assert.Equal(o5Series.Count, energyGradientSeries.Count);
+
+        double corr = ComputePearsonCorrelation(o5Series, energyGradientSeries);
+        var fit = ComputeLinearFit(energyGradientSeries, o5Series);
+        double signAgreement = ComputeSignAgreement(o5Series, energyGradientSeries);
+
+        WriteTestLine("TO25", $"corr(O5, -dE/dTheta) = {corr:F4}");
+        WriteTestLine("TO25", $"fit slope/intercept  = {fit.Slope:F4}/{fit.Intercept:E6}");
+        WriteTestLine("TO25", $"fit R2               = {fit.RSquared:F4}");
+        WriteTestLine("TO25", $"sign agreement       = {signAgreement:F3}");
+
+        Assert.True(corr >= 0.90, $"O5 should align with finite-coherence negative energy gradient, but corr={corr:F4}");
+        Assert.True(fit.RSquared >= 0.75, $"-dE/dTheta should explain O5 structure, but R2={fit.RSquared:F4}");
+        Assert.True(signAgreement >= 0.90, $"O5 and -dE/dTheta sign agreement too low: {signAgreement:F3}");
+    }
+
+    [Fact]
+    public void TO26_CoherenceEnergy_Should_Decrease_Under_O5_RelaxationStep()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+        var candidateSteps = new[] { 0.10, 0.05, 0.02, 0.01, 0.005, 0.002 };
+
+        var profiles = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).Smooth,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).NonLocalBreak
+        };
+
+        int strictDecreaseCount = 0;
+
+        foreach (var profile in profiles)
+        {
+            double e0 = ComputeFiniteCoherenceEnergy(profile, halfWindow, epsilon);
+            bool foundDecrease = false;
+
+            foreach (double step in candidateSteps)
+            {
+                var relaxed = RelaxProfileAlongFiniteCoherenceOperator(profile, halfWindow, epsilon, step);
+                double e1 = ComputeFiniteCoherenceEnergy(relaxed, halfWindow, epsilon);
+
+                WriteTestLine("TO26", $"step={step:F3}, E0={e0:E6}, E1={e1:E6}, dE={e1 - e0:E6}");
+
+                if (e1 <= e0 + 1e-12)
+                {
+                    foundDecrease = true;
+                    if (e1 < e0 - 1e-6)
+                        strictDecreaseCount++;
+                    break;
+                }
+            }
+
+            Assert.True(
+                foundDecrease,
+                $"No tested small O5 relaxation step reduced coherence energy from E0={e0:E6}.");
+        }
+
+        Assert.True(strictDecreaseCount >= 2, $"Expected strict coherence-energy decrease in at least two non-constant profiles, got {strictDecreaseCount}.");
+    }
+
+    [Fact]
+    public void TO27_O5EnergyOperator_Should_Preserve_ConstantThetaZeroMode()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var constant = CreateSyntheticThetaProfile(r => 2.0, count: 81, spacing: 0.25);
+        var series = ComputeFiniteCoherenceNegativeGradientSeries(constant, halfWindow, epsilon, normalize: true);
+        double maxAbs = series.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+        double energy = ComputeFiniteCoherenceEnergy(constant, halfWindow, epsilon);
+
+        WriteTestLine("TO27", $"constant max|O5_energy| = {maxAbs:E6}");
+        WriteTestLine("TO27", $"constant E_theta        = {energy:E6}");
+
+        Assert.True(maxAbs <= 1e-12, $"Constant Theta should be zero mode, but max|operator|={maxAbs:E6}");
+        Assert.True(energy <= 1e-12, $"Constant Theta should have near-zero coherence energy, but E={energy:E6}");
+    }
+
+    [Fact]
+    public void TO28_O5EnergyOperator_Should_Remain_Bounded_For_SmoothProfiles()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var smoothA = CreateSyntheticThetaProfile(r => 0.8 + 0.03 * r + 0.002 * r * r, count: 81, spacing: 0.25);
+        var smoothB = CreateSyntheticThetaProfile(r => 1.0 + 0.04 * Math.Sin(0.22 * r) + 0.0015 * r * r, count: 81, spacing: 0.25);
+
+        foreach (var profile in new[] { smoothA, smoothB })
+        {
+            var series = ComputeFiniteCoherenceNegativeGradientSeries(profile, halfWindow, epsilon, normalize: true);
+            double maxAbs = series.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+            double rms = Math.Sqrt(series.Select(v => v * v).DefaultIfEmpty(0.0).Average());
+            double energyDensity = ComputeFiniteCoherenceEnergy(profile, halfWindow, epsilon) / Math.Max(profile.Points.Count, 1);
+
+            WriteTestLine("TO28", $"smooth max|operator|={maxAbs:E6}, rms={rms:E6}, energyDensity={energyDensity:E6}");
+
+            Assert.True(maxAbs <= 0.10, $"Smooth-profile operator amplification too large: max|operator|={maxAbs:E6}");
+            Assert.True(rms <= 0.05, $"Smooth-profile operator RMS too large: rms={rms:E6}");
+            Assert.True(energyDensity <= 0.20, $"Smooth-profile coherence energy density too large: {energyDensity:E6}");
+        }
+    }
+
+    [Fact]
+    public void TQK01_PhaseLatticeCoupling_Should_Reduce_To_ThetaCoherenceEnergy()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var baseProfile = CreateSyntheticThetaProfile(
+            r => 0.55 * Math.Sin(0.31 * r) + 0.35 * Math.Cos(0.17 * r),
+            count: 101,
+            spacing: 0.20);
+
+        var amplitudes = new[] { 0.10, 0.15, 0.20, 0.30, 0.40 };
+        var phaseEnergies = new List<double>();
+        var thetaEnergies = new List<double>();
+
+        foreach (double a in amplitudes)
+        {
+            var scaled = TransformThetaProfile(baseProfile, t => a * t);
+            double ePhase = ComputePhaseLatticeEnergy(scaled, halfWindow, "inverse", epsilon);
+            double eTheta = ComputeQuadraticCoherenceEnergy(scaled, halfWindow, "inverse", epsilon);
+
+            phaseEnergies.Add(ePhase);
+            thetaEnergies.Add(eTheta);
+
+            WriteTestLine("TQK01", $"amp={a:F2}, Ephase={ePhase:E6}, Etheta={eTheta:E6}, ratio={ePhase / Math.Max(eTheta, 1e-20):F4}");
+        }
+
+        double corr = ComputePearsonCorrelation(thetaEnergies, phaseEnergies);
+        var fit = ComputeLinearFit(thetaEnergies, phaseEnergies);
+
+        WriteTestLine("TQK01", $"corr(Etheta,Ephase)={corr:F6}, slope={fit.Slope:F4}, intercept={fit.Intercept:E6}, R2={fit.RSquared:F6}");
+
+        Assert.True(corr >= 0.995, $"Small-angle phase energy should reduce to quadratic coherence energy, corr={corr:F6}");
+        Assert.True(fit.RSquared >= 0.990, $"Phase/quadratic reduction fit too weak, R2={fit.RSquared:F6}");
+        Assert.True(fit.Slope >= 0.90 && fit.Slope <= 1.10, $"Expected near-unit proportionality between Ephase and Etheta, slope={fit.Slope:F4}");
+    }
+
+    [Fact]
+    public void TQK02_O5_Should_Match_PhaseLatticeEnergyGradient()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var profiles = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 101, spacing: 0.20).Smooth,
+            CreateDefaultSyntheticProfiles(count: 101, spacing: 0.20).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 101, spacing: 0.20).NonLocalBreak
+        };
+
+        var o5Series = new List<double>();
+        var latticeGradientSeries = new List<double>();
+
+        foreach (var profile in profiles)
+        {
+            o5Series.AddRange(ComputeO5Series(profile, halfWindow));
+            latticeGradientSeries.AddRange(ComputePhaseLatticeNegativeGradientSeries(profile, halfWindow, "inverse", epsilon, normalize: true));
+        }
+
+        Assert.Equal(o5Series.Count, latticeGradientSeries.Count);
+        Assert.True(o5Series.Count > 120, $"Too few TQK02 comparison points: {o5Series.Count}");
+
+        double corr = ComputePearsonCorrelation(o5Series, latticeGradientSeries);
+        var fit = ComputeLinearFit(latticeGradientSeries, o5Series);
+        double signAgreement = ComputeSignAgreement(o5Series, latticeGradientSeries);
+
+        WriteTestLine("TQK02", $"corr(O5, -dEphase/dTheta) = {corr:F4}");
+        WriteTestLine("TQK02", $"fit slope/intercept       = {fit.Slope:F4}/{fit.Intercept:E6}");
+        WriteTestLine("TQK02", $"fit R2                    = {fit.RSquared:F4}");
+        WriteTestLine("TQK02", $"sign agreement            = {signAgreement:F3}");
+
+        Assert.True(corr >= 0.88, $"O5 should correlate with phase-lattice negative gradient, corr={corr:F4}");
+        Assert.True(fit.RSquared >= 0.70, $"Phase-lattice gradient should explain O5 structure, R2={fit.RSquared:F4}");
+        Assert.True(signAgreement >= 0.85, $"O5 and phase-lattice gradient sign agreement too low: {signAgreement:F3}");
+    }
+
+    [Fact]
+    public void TQK03_InverseDistanceKernel_Should_Emerge_From_LocalCouplingDecay()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var kernels = new[] { "uniform", "inverse", "gaussian", "exponential" };
+        var profilePool = BuildTqkProfilePool();
+        var scored = kernels
+            .Select(mode => EvaluatePhaseKernelScore(mode, profilePool, halfWindow, epsilon))
+            .OrderByDescending(s => s.BalanceScore)
+            .ToList();
+
+        foreach (var s in scored)
+        {
+            WriteTestLine(
+                "TQK03",
+                $"{s.KernelMode}: score={s.BalanceScore:F6}, energyDrop={s.MeanEnergyDrop:F5}, smoothNoise={s.SmoothNoise:F5}, localSens={s.LocalContrastSensitivity:F5}, nonLocalSens={s.NonLocalBreakSensitivity:F5}, holdoutMean={s.HoldoutMeanImprovement:F5}, holdoutPos={s.HoldoutPositiveShare:F3}");
+        }
+
+        int inverseRank = scored.FindIndex(s => s.KernelMode == "inverse");
+        Assert.True(inverseRank >= 0, "Inverse-distance kernel missing from TQK03 ranking.");
+        Assert.True(inverseRank <= 1, $"Inverse-distance kernel should be top-2 in balance score, rank={inverseRank + 1}.");
+    }
+
+    [Fact]
+    public void TQK04_W6_Should_Match_CorrelationLength_Of_PhaseLattice()
+    {
+        var windows = new[] { 4, 6, 8 };
+        var lengths = windows
+            .Select(w =>
+            {
+                var profile = CreateCorrelatedLatticePhaseProfile(correlationHalfWindow: w, count: 151, spacing: 0.20);
+                double corrLen = EstimatePhaseCorrelationLength(profile, maxLag: 20);
+                WriteTestLine("TQK04", $"W{w}: estimated correlation length = {corrLen:F3}");
+                return (Window: w, CorrelationLength: corrLen);
+            })
+            .ToList();
+
+        double l4 = lengths.First(x => x.Window == 4).CorrelationLength;
+        double l6 = lengths.First(x => x.Window == 6).CorrelationLength;
+        double l8 = lengths.First(x => x.Window == 8).CorrelationLength;
+
+        Assert.True(l4 <= l6 + 0.5, $"Correlation length should not decrease from W4 to W6: L4={l4:F3}, L6={l6:F3}");
+        Assert.True(l6 <= l8 + 0.5, $"Correlation length should not decrease from W6 to W8: L6={l6:F3}, L8={l8:F3}");
+        Assert.True(l6 >= 4.0 && l6 <= 8.0, $"W6 correlation length should be in finite-coherence band [4,8], got {l6:F3}");
+        Assert.True(Math.Abs(l6 - 6.0) <= 2.0, $"W6 should approximately match lattice correlation length, got {l6:F3}");
+    }
+
+    [Fact]
+    public void LC01_LambdaTheta_Should_Be_Dimensionally_Consistent()
+    {
+        var dataset = BuildDataset();
+        var samples = BuildLambdaSamples(dataset, p => p.O5W6InvDistance);
+
+        Assert.True(samples.Count > 400, $"Too few lambda samples for LC01: {samples.Count}");
+
+        double lambda = FitGlobalLambda(samples);
+        double lambdaScaledInput = FitGlobalLambda(samples.Select(s => s with { X = 10.0 * s.X }).ToList());
+        double scaleConsistency = Math.Abs(lambda - 10.0 * lambdaScaledInput) / Math.Max(Math.Abs(lambda), 1e-20);
+
+        double modelImprovement = ComputeLambdaImprovement(samples, lambda);
+        double contributionMedian = Median(samples.Select(s => Math.Abs(lambda * s.X)));
+        double baseMedian = Median(samples.Select(s => s.GBase));
+        double contributionFraction = contributionMedian / Math.Max(baseMedian, 1e-20);
+        double a0 = TrmDerivedParameters.GetA0_Ms2();
+        double contributionOverA0 = contributionMedian / Math.Max(a0, 1e-30);
+
+        WriteTestLine("LC01", $"lambdaGlobal              = {lambda:E6}");
+        WriteTestLine("LC01", $"lambdaScaleConsistencyErr = {scaleConsistency:E6}");
+        WriteTestLine("LC01", $"modelImprovement          = {modelImprovement:E6}");
+        WriteTestLine("LC01", $"medianContribution/base   = {contributionFraction:E6}");
+        WriteTestLine("LC01", $"medianContribution/a0     = {contributionOverA0:E6}");
+
+        Assert.True(double.IsFinite(lambda), "Global lambda is not finite.");
+        Assert.True(scaleConsistency <= 1e-10, $"Lambda scaling inconsistency under O5 rescaling: err={scaleConsistency:E6}");
+        Assert.True(modelImprovement >= 0.0, $"Global lambda should not degrade the additive residual model: improvement={modelImprovement:E6}");
+        Assert.True(
+            contributionFraction >= 1e-6 && contributionFraction <= 5.0,
+            $"Lambda contribution scale looks dimensionally inconsistent: contribution/base={contributionFraction:E6}");
+    }
+
+    [Fact]
+    public void LC02_LambdaTheta_Should_Generalize_As_GlobalCoefficient()
+    {
+        var dataset = BuildDataset();
+        var samples = BuildLambdaSamples(dataset, p => p.O5W6InvDistance);
+        var groups = samples
+            .GroupBy(s => s.Galaxy)
+            .Where(g => g.Count() >= 8)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.True(groups.Count >= 8, $"Too few galaxy groups for LC02: {groups.Count}");
+
+        int foldCount = Math.Min(5, groups.Count);
+        var foldMap = groups
+            .Select((g, idx) => new { g.Key, Fold = idx % foldCount })
+            .ToDictionary(x => x.Key, x => x.Fold);
+        var eligible = samples.Where(s => foldMap.ContainsKey(s.Galaxy)).ToList();
+
+        var foldResults = new List<(int Fold, double GlobalImprovement, double OracleImprovement, double Ratio)>();
+
+        for (int fold = 0; fold < foldCount; fold++)
+        {
+            var train = eligible.Where(s => foldMap[s.Galaxy] != fold).ToList();
+            var test = eligible.Where(s => foldMap[s.Galaxy] == fold).ToList();
+            if (train.Count < 120 || test.Count < 80)
+                continue;
+
+            double lambdaGlobal = FitGlobalLambda(train);
+            double globalImprovement = ComputeLambdaImprovement(test, lambdaGlobal);
+
+            double oracleImprovement = test
+                .GroupBy(s => s.Galaxy)
+                .Where(g => g.Count() >= 5)
+                .Select(g =>
+                {
+                    double lambdaGalaxy = FitGlobalLambda(g.ToList());
+                    return ComputeLambdaImprovement(g.ToList(), lambdaGalaxy);
+                })
+                .Average();
+
+            double ratio = oracleImprovement > 1e-12 ? globalImprovement / oracleImprovement : 1.0;
+            foldResults.Add((fold, globalImprovement, oracleImprovement, ratio));
+
+            WriteTestLine("LC02", $"fold={fold}, globalImp={globalImprovement:E6}, oracleImp={oracleImprovement:E6}, ratio={ratio:F3}");
+        }
+
+        Assert.True(foldResults.Count >= 3, $"Insufficient valid LC02 folds: {foldResults.Count}");
+
+        double meanGlobalImp = foldResults.Average(f => f.GlobalImprovement);
+        double positiveShare = foldResults.Count(f => f.GlobalImprovement >= 0.0) / (double)foldResults.Count;
+        double medianRatio = Median(foldResults.Select(f => f.Ratio));
+
+        WriteTestLine("LC02", $"meanGlobalImprovement = {meanGlobalImp:E6}");
+        WriteTestLine("LC02", $"positiveFoldShare     = {positiveShare:F3}");
+        WriteTestLine("LC02", $"medianGlobalOracleRat = {medianRatio:F3}");
+
+        Assert.True(meanGlobalImp >= 0.0, $"Global lambda should generalize on average, mean improvement={meanGlobalImp:E6}");
+        Assert.True(positiveShare >= 0.45, $"Too few LC02 folds with non-negative global-lambda improvement: {positiveShare:F3}");
+        Assert.True(medianRatio >= 0.05, $"Global lambda captures too little of per-galaxy oracle effect: ratio={medianRatio:F3}");
+    }
+
+    [Fact]
+    public void LC03_LambdaTheta_Should_Map_To_EnergyRelaxationScale()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+        var candidateSteps = new[] { 0.10, 0.05, 0.02, 0.01, 0.005, 0.002 };
+
+        var dataset = BuildDataset();
+        var samples = BuildLambdaSamples(dataset, p => p.O5W6InvDistance);
+        double lambdaGlobal = FitGlobalLambda(samples);
+
+        var profiles = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).Smooth,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).NonLocalBreak
+        };
+
+        var bestSteps = new List<double>();
+        foreach (var p in profiles)
+        {
+            double e0 = ComputeFiniteCoherenceEnergy(p, halfWindow, epsilon);
+            double bestStep = candidateSteps[0];
+            double bestDrop = double.NegativeInfinity;
+            foreach (double step in candidateSteps)
+            {
+                double e1 = ComputeFiniteCoherenceEnergy(
+                    RelaxProfileAlongFiniteCoherenceOperator(p, halfWindow, epsilon, step),
+                    halfWindow,
+                    epsilon);
+                double relDrop = e0 > 0.0 ? (e0 - e1) / e0 : 0.0;
+                if (relDrop > bestDrop)
+                {
+                    bestDrop = relDrop;
+                    bestStep = step;
+                }
+            }
+            bestSteps.Add(bestStep);
+        }
+
+        double etaTheta = bestSteps.Average();
+        double tauSync = EstimatePhaseCorrelationLength(CreateCorrelatedLatticePhaseProfile(correlationHalfWindow: 6, count: 151, spacing: 0.20), maxLag: 20);
+        double o5Scale = Median(samples.Select(s => Math.Abs(s.X)));
+        double a0 = TrmDerivedParameters.GetA0_Ms2();
+        double lambdaFromEnergyScale = etaTheta * tauSync * a0 / Math.Max(o5Scale, 1e-20);
+        double ratio = Math.Abs(lambdaGlobal) / Math.Max(Math.Abs(lambdaFromEnergyScale), 1e-30);
+
+        WriteTestLine("LC03", $"lambdaGlobal          = {lambdaGlobal:E6}");
+        WriteTestLine("LC03", $"etaTheta(avg bestStep)= {etaTheta:F4}");
+        WriteTestLine("LC03", $"tauSync(proxy)        = {tauSync:F4}");
+        WriteTestLine("LC03", $"lambdaEnergyScale     = {lambdaFromEnergyScale:E6}");
+        WriteTestLine("LC03", $"lambdaRatio           = {ratio:F4}");
+
+        Assert.True(double.IsFinite(lambdaFromEnergyScale) && Math.Abs(lambdaFromEnergyScale) > 0.0, "Energy-relaxation lambda proxy invalid.");
+        Assert.True(ratio >= 0.05 && ratio <= 20.0, $"Global lambda is not in plausible energy-relaxation scale range: ratio={ratio:F4}");
+    }
+
+    [Fact]
+    public void LC04_LambdaTheta_Should_Remain_Stable_Under_SolverAndKernelAblation()
+    {
+        var solverProfiles = new[]
+        {
+            new SolverAblationProfile("Default", 1.00, 0.45, TrmDerivedParameters.GetPhiBeta() * 0.050, 600, 0.010),
+            new SolverAblationProfile("MildLowDrive", 0.92, 0.40, TrmDerivedParameters.GetPhiBeta() * 0.045, 520, 0.009),
+            new SolverAblationProfile("MildHighDrive", 1.08, 0.50, TrmDerivedParameters.GetPhiBeta() * 0.055, 680, 0.011),
+            new SolverAblationProfile("HighDamping", 1.00, 0.55, TrmDerivedParameters.GetPhiBeta() * 0.050, 620, 0.010),
+            new SolverAblationProfile("LowDamping", 1.00, 0.35, TrmDerivedParameters.GetPhiBeta() * 0.050, 620, 0.010)
+        };
+
+        var kernelSelectors = new List<(string Name, Func<DataPoint, double> Selector)>
+        {
+            ("W4-Inverse", p => p.O5W4InvDistance),
+            ("W6-Inverse", p => p.O5W6InvDistance),
+            ("W8-Inverse", p => p.O5W8InvDistance),
+            ("W4-Gaussian", p => p.O5W4Gaussian),
+            ("W4-Uniform", p => p.O5W4Uniform)
+        };
+
+        var scenarioResults = new List<LambdaScenarioResult>();
+
+        foreach (var solver in solverProfiles)
+        {
+            var dataset = solver.Name == "Default"
+                ? BuildDataset()
+                : BuildDataset(solver.SourceStrength, solver.DampingStrength, solver.SyncStrength, solver.Iterations, solver.Relaxation);
+
+            foreach (var kernel in kernelSelectors)
+            {
+                var samples = BuildLambdaSamples(dataset, kernel.Selector);
+                if (samples.Count < 300)
+                    continue;
+
+                double lambda = FitGlobalLambda(samples);
+                double improvement = ComputeLambdaImprovement(samples, lambda);
+                double contributionScale = Median(samples.Select(s => Math.Abs(lambda * s.X)));
+
+                scenarioResults.Add(new LambdaScenarioResult($"{solver.Name}|{kernel.Name}", lambda, improvement, contributionScale));
+                WriteTestLine("LC04", $"{solver.Name}|{kernel.Name}: lambda={lambda:E6}, improvement={improvement:E6}, contributionScale={contributionScale:E6}");
+            }
+        }
+
+        Assert.True(scenarioResults.Count >= 12, $"Too few LC04 ablation scenarios: {scenarioResults.Count}");
+
+        var reference = scenarioResults.FirstOrDefault(s => s.Name == "Default|W6-Inverse")
+            ?? scenarioResults.OrderByDescending(s => s.Improvement).First();
+
+        var ratioLogs = scenarioResults
+            .Select(s => Math.Log10(Math.Max(s.ContributionScale, 1e-30) / Math.Max(reference.ContributionScale, 1e-30)))
+            .ToList();
+
+        double medianAbsLog10Ratio = Median(ratioLogs.Select(Math.Abs));
+        double positiveShare = scenarioResults.Count(s => s.Improvement >= 0.0) / (double)scenarioResults.Count;
+
+        WriteTestLine("LC04", $"referenceScenario        = {reference.Name}");
+        WriteTestLine("LC04", $"medianAbsLog10ScaleRatio = {medianAbsLog10Ratio:F4}");
+        WriteTestLine("LC04", $"positiveScenarioShare    = {positiveShare:F3}");
+
+        Assert.True(
+            medianAbsLog10Ratio <= 1.0,
+            $"Lambda contribution scale drifts by more than one order of magnitude under ablations: medianAbsLog10={medianAbsLog10Ratio:F4}");
+        Assert.True(
+            positiveShare >= 0.50,
+            $"Too many solver/kernel ablations break lambda effectiveness: positiveShare={positiveShare:F3}");
+    }
+
+    [Fact]
+    public void LC05_LambdaTheta_Should_Be_RegimeConditioned_NotGalaxyFitted()
+    {
+        var dataset = BuildDataset();
+        double alphaLocal = FitBestLogShiftScale(dataset.Points, p => p.GLocal);
+
+        var raw = dataset.Points
+            .Select(p =>
+            {
+                if (p.GObs <= 0.0 || p.GLocal <= 0.0 || p.Rd <= 0.0 || p.Gbar <= 0.0 || !double.IsFinite(p.O5W6InvDistance))
+                    return (LambdaRegimeSample?)null;
+
+                double gBase = alphaLocal * p.GLocal;
+                if (gBase <= 0.0 || !double.IsFinite(gBase))
+                    return (LambdaRegimeSample?)null;
+
+                return new LambdaRegimeSample(
+                    p.GalaxyName,
+                    p.GObs,
+                    gBase,
+                    p.O5W6InvDistance,
+                    p.Radius / p.Rd,
+                    Math.Log10(Math.Max(p.Gbar, 1e-30)));
+            })
+            .Where(x => x != null)
+            .Select(x => x!)
+            .ToList();
+
+        Assert.True(raw.Count > 400, $"Too few LC05 samples: {raw.Count}");
+
+        var groups = raw
+            .GroupBy(s => s.Galaxy)
+            .Where(g => g.Count() >= 8)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+        Assert.True(groups.Count >= 8, $"Too few LC05 galaxy groups: {groups.Count}");
+
+        var galaxyMedianLogGbar = groups.ToDictionary(
+            g => g.Key,
+            g => Median(g.Select(x => x.LogGbar)),
+            StringComparer.Ordinal);
+        double globalMedianGalaxyLogGbar = Median(galaxyMedianLogGbar.Values);
+        double globalMedianPointLogGbar = Median(raw.Select(r => r.LogGbar));
+
+        int foldCount = Math.Min(5, groups.Count);
+        var foldMap = groups
+            .Select((g, idx) => new { g.Key, Fold = idx % foldCount })
+            .ToDictionary(x => x.Key, x => x.Fold);
+        var eligible = raw.Where(s => foldMap.ContainsKey(s.Galaxy)).ToList();
+
+        int RegimeId(LambdaRegimeSample s)
+        {
+            if (s.XRadius < 1.0) return 0; // inner
+            if (s.XRadius < 4.0) return 1; // middle
+            return 2;                      // outer
+        }
+
+        var foldResults = new List<(int Fold, double GlobalImp, double RegimeImp, double Gain, double StrataFloor)>();
+
+        for (int fold = 0; fold < foldCount; fold++)
+        {
+            var train = eligible.Where(s => foldMap[s.Galaxy] != fold).ToList();
+            var test = eligible.Where(s => foldMap[s.Galaxy] == fold).ToList();
+            if (train.Count < 120 || test.Count < 80)
+                continue;
+
+            double lambdaGlobal = FitGlobalLambda(train.Select(t => new LambdaSample(t.Galaxy, t.GObs, t.GBase, t.X)).ToList());
+            double globalImp = ComputeLambdaImprovement(test, s => s.GBase + lambdaGlobal * s.X);
+
+            var regimeLambdas = FitRegimeLambdas(train, RegimeId, regimeCount: 3);
+            double regimeImp = ComputeLambdaImprovement(test, s => s.GBase + regimeLambdas[RegimeId(s)] * s.X);
+
+            double strataLowHigh = Math.Min(
+                ComputeLambdaImprovement(test.Where(s => s.LogGbar <= globalMedianPointLogGbar).ToList(), s => s.GBase + regimeLambdas[RegimeId(s)] * s.X),
+                ComputeLambdaImprovement(test.Where(s => s.LogGbar > globalMedianPointLogGbar).ToList(), s => s.GBase + regimeLambdas[RegimeId(s)] * s.X));
+
+            double strataLsbHsb = Math.Min(
+                ComputeLambdaImprovement(
+                    test.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m <= globalMedianGalaxyLogGbar).ToList(),
+                    s => s.GBase + regimeLambdas[RegimeId(s)] * s.X),
+                ComputeLambdaImprovement(
+                    test.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m > globalMedianGalaxyLogGbar).ToList(),
+                    s => s.GBase + regimeLambdas[RegimeId(s)] * s.X));
+
+            double strataFloor = Math.Min(strataLowHigh, strataLsbHsb);
+            double gain = regimeImp - globalImp;
+
+            foldResults.Add((fold, globalImp, regimeImp, gain, strataFloor));
+
+            WriteTestLine(
+                "LC05",
+                $"fold={fold}, globalImp={globalImp:E6}, regimeImp={regimeImp:E6}, gain={gain:E6}, strataFloor={strataFloor:E6}, lambdas={regimeLambdas[0]:E4}/{regimeLambdas[1]:E4}/{regimeLambdas[2]:E4}");
+        }
+
+        Assert.True(foldResults.Count >= 3, $"Insufficient valid LC05 folds: {foldResults.Count}");
+
+        double meanGlobal = foldResults.Average(f => f.GlobalImp);
+        double meanRegime = foldResults.Average(f => f.RegimeImp);
+        double meanGain = foldResults.Average(f => f.Gain);
+        double gainShare = foldResults.Count(f => f.Gain >= 0.0) / (double)foldResults.Count;
+        double worstStrataFloor = foldResults.Min(f => f.StrataFloor);
+
+        WriteTestLine("LC05", $"meanGlobalImp    = {meanGlobal:E6}");
+        WriteTestLine("LC05", $"meanRegimeImp    = {meanRegime:E6}");
+        WriteTestLine("LC05", $"meanGain         = {meanGain:E6}");
+        WriteTestLine("LC05", $"nonNegGainShare  = {gainShare:F3}");
+        WriteTestLine("LC05", $"worstStrataFloor = {worstStrataFloor:E6}");
+
+        Assert.True(meanRegime >= meanGlobal, $"Regime-conditioned lambda should improve over global lambda on average: global={meanGlobal:E6}, regime={meanRegime:E6}");
+        Assert.True(gainShare >= 0.60, $"Too few folds improved by regime-conditioned lambda: share={gainShare:F3}");
+        Assert.True(worstStrataFloor >= -5e-10, $"Regime-conditioned lambda is unstable in at least one physical stratum: floor={worstStrataFloor:E6}");
+    }
+
+    [Fact]
+    public void LC06_LambdaTheta_Should_Use_RegularizedRegimeConditioning()
+    {
+        var dataset = BuildDataset();
+        double alphaLocal = FitBestLogShiftScale(dataset.Points, p => p.GLocal);
+
+        var raw = dataset.Points
+            .Select(p =>
+            {
+                if (p.GObs <= 0.0 || p.GLocal <= 0.0 || p.Rd <= 0.0 || p.Gbar <= 0.0 || !double.IsFinite(p.O5W6InvDistance))
+                    return (LambdaRegimeSample?)null;
+
+                double gBase = alphaLocal * p.GLocal;
+                if (gBase <= 0.0 || !double.IsFinite(gBase))
+                    return (LambdaRegimeSample?)null;
+
+                return new LambdaRegimeSample(
+                    p.GalaxyName,
+                    p.GObs,
+                    gBase,
+                    p.O5W6InvDistance,
+                    p.Radius / p.Rd,
+                    Math.Log10(Math.Max(p.Gbar, 1e-30)));
+            })
+            .Where(x => x != null)
+            .Select(x => x!)
+            .ToList();
+
+        Assert.True(raw.Count > 400, $"Too few LC06 samples: {raw.Count}");
+
+        var groups = raw
+            .GroupBy(s => s.Galaxy)
+            .Where(g => g.Count() >= 8)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+        Assert.True(groups.Count >= 8, $"Too few LC06 galaxy groups: {groups.Count}");
+
+        var galaxyMedianLogGbar = groups.ToDictionary(
+            g => g.Key,
+            g => Median(g.Select(x => x.LogGbar)),
+            StringComparer.Ordinal);
+        double globalMedianGalaxyLogGbar = Median(galaxyMedianLogGbar.Values);
+        double globalMedianPointLogGbar = Median(raw.Select(r => r.LogGbar));
+
+        int RegimeId(LambdaRegimeSample s)
+        {
+            if (s.XRadius < 1.0) return 0; // inner
+            if (s.XRadius < 4.0) return 1; // middle
+            return 2;                      // outer
+        }
+
+        int foldCount = Math.Min(5, groups.Count);
+        var foldMap = groups
+            .Select((g, idx) => new { g.Key, Fold = idx % foldCount })
+            .ToDictionary(x => x.Key, x => x.Fold);
+        var eligible = raw.Where(s => foldMap.ContainsKey(s.Galaxy)).ToList();
+
+        var alphas = new[] { 0.25, 0.50, 0.75 };
+        var alphaResults = new List<RegularizedAlphaResult>();
+
+        foreach (double alpha in alphas)
+        {
+            var foldResults = new List<(double GlobalImp, double RegularizedImp, double Gain, double StrataFloor)>();
+
+            for (int fold = 0; fold < foldCount; fold++)
+            {
+                var train = eligible.Where(s => foldMap[s.Galaxy] != fold).ToList();
+                var test = eligible.Where(s => foldMap[s.Galaxy] == fold).ToList();
+                if (train.Count < 120 || test.Count < 80)
+                    continue;
+
+                double lambdaGlobal = FitGlobalLambda(train.Select(t => new LambdaSample(t.Galaxy, t.GObs, t.GBase, t.X)).ToList());
+                double globalImp = ComputeLambdaImprovement(test, s => s.GBase + lambdaGlobal * s.X);
+
+                var regimeFit = FitRegimeLambdas(train, RegimeId, regimeCount: 3);
+                var lambdaReg = regimeFit
+                    .Select(l => (1.0 - alpha) * lambdaGlobal + alpha * l)
+                    .ToArray();
+
+                double regImp = ComputeLambdaImprovement(test, s => s.GBase + lambdaReg[RegimeId(s)] * s.X);
+
+                double strataLowHigh = Math.Min(
+                    ComputeLambdaImprovement(test.Where(s => s.LogGbar <= globalMedianPointLogGbar).ToList(), s => s.GBase + lambdaReg[RegimeId(s)] * s.X),
+                    ComputeLambdaImprovement(test.Where(s => s.LogGbar > globalMedianPointLogGbar).ToList(), s => s.GBase + lambdaReg[RegimeId(s)] * s.X));
+
+                double strataLsbHsb = Math.Min(
+                    ComputeLambdaImprovement(
+                        test.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m <= globalMedianGalaxyLogGbar).ToList(),
+                        s => s.GBase + lambdaReg[RegimeId(s)] * s.X),
+                    ComputeLambdaImprovement(
+                        test.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m > globalMedianGalaxyLogGbar).ToList(),
+                        s => s.GBase + lambdaReg[RegimeId(s)] * s.X));
+
+                double strataFloor = Math.Min(strataLowHigh, strataLsbHsb);
+                foldResults.Add((globalImp, regImp, regImp - globalImp, strataFloor));
+            }
+
+            Assert.True(foldResults.Count >= 3, $"Insufficient valid LC06 folds for alpha={alpha:F2}: {foldResults.Count}");
+
+            double meanGlobal = foldResults.Average(f => f.GlobalImp);
+            double meanRegularized = foldResults.Average(f => f.RegularizedImp);
+            double meanGain = foldResults.Average(f => f.Gain);
+            double gainShare = foldResults.Count(f => f.Gain >= 0.0) / (double)foldResults.Count;
+            double worstStrataFloor = foldResults.Min(f => f.StrataFloor);
+
+            alphaResults.Add(new RegularizedAlphaResult(alpha, meanGlobal, meanRegularized, meanGain, gainShare, worstStrataFloor));
+        }
+
+        foreach (var r in alphaResults.OrderBy(r => r.Alpha))
+        {
+            WriteTestLine(
+                "LC06",
+                $"alpha={r.Alpha:F2}, meanGlobal={r.MeanGlobalImprovement:E6}, meanRegularized={r.MeanRegularizedImprovement:E6}, gain={r.MeanGain:E6}, gainShare={r.GainShare:F3}, worstStrataFloor={r.WorstStrataFloor:E6}");
+        }
+
+        var selected = alphaResults
+            .OrderByDescending(r => r.WorstStrataFloor)
+            .ThenByDescending(r => r.MeanGain)
+            .First();
+
+        WriteTestLine("LC06", $"selectedAlpha = {selected.Alpha:F2}");
+
+        Assert.True(selected.WorstStrataFloor >= -5e-10, $"Regularized regime conditioning still has negative strata floor: {selected.WorstStrataFloor:E6}");
+        Assert.True(selected.MeanRegularizedImprovement >= selected.MeanGlobalImprovement, $"Regularized regime conditioning should not underperform global lambda on average.");
+        Assert.True(selected.GainShare >= 0.60, $"Regularized regime conditioning improves too few folds: share={selected.GainShare:F3}");
+    }
+
+    [Fact]
+    public void LC07_LambdaTheta_Should_Use_StrataSafe_Regularization()
+    {
+        var dataset = BuildDataset();
+        double alphaLocal = FitBestLogShiftScale(dataset.Points, p => p.GLocal);
+
+        var raw = dataset.Points
+            .Select(p =>
+            {
+                if (p.GObs <= 0.0 || p.GLocal <= 0.0 || p.Rd <= 0.0 || p.Gbar <= 0.0 || !double.IsFinite(p.O5W6InvDistance))
+                    return (LambdaRegimeSample?)null;
+
+                double gBase = alphaLocal * p.GLocal;
+                if (gBase <= 0.0 || !double.IsFinite(gBase))
+                    return (LambdaRegimeSample?)null;
+
+                return new LambdaRegimeSample(
+                    p.GalaxyName,
+                    p.GObs,
+                    gBase,
+                    p.O5W6InvDistance,
+                    p.Radius / p.Rd,
+                    Math.Log10(Math.Max(p.Gbar, 1e-30)));
+            })
+            .Where(x => x != null)
+            .Select(x => x!)
+            .ToList();
+
+        Assert.True(raw.Count > 400, $"Too few LC07 samples: {raw.Count}");
+
+        var groups = raw
+            .GroupBy(s => s.Galaxy)
+            .Where(g => g.Count() >= 8)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+        Assert.True(groups.Count >= 8, $"Too few LC07 galaxy groups: {groups.Count}");
+
+        var galaxyMedianLogGbar = groups.ToDictionary(
+            g => g.Key,
+            g => Median(g.Select(x => x.LogGbar)),
+            StringComparer.Ordinal);
+        double globalMedianGalaxyLogGbar = Median(galaxyMedianLogGbar.Values);
+        double globalMedianPointLogGbar = Median(raw.Select(r => r.LogGbar));
+
+        int RegimeId(LambdaRegimeSample s)
+        {
+            if (s.XRadius < 1.0) return 0; // inner
+            if (s.XRadius < 4.0) return 1; // middle
+            return 2;                      // outer
+        }
+
+        double ComputeStrataFloor(IReadOnlyList<LambdaRegimeSample> sample, Func<LambdaRegimeSample, double> predictor)
+        {
+            double lowHigh = Math.Min(
+                ComputeLambdaImprovement(sample.Where(s => s.LogGbar <= globalMedianPointLogGbar).ToList(), predictor),
+                ComputeLambdaImprovement(sample.Where(s => s.LogGbar > globalMedianPointLogGbar).ToList(), predictor));
+
+            double lsbHsb = Math.Min(
+                ComputeLambdaImprovement(
+                    sample.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m <= globalMedianGalaxyLogGbar).ToList(),
+                    predictor),
+                ComputeLambdaImprovement(
+                    sample.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m > globalMedianGalaxyLogGbar).ToList(),
+                    predictor));
+
+            return Math.Min(lowHigh, lsbHsb);
+        }
+
+        int foldCount = Math.Min(5, groups.Count);
+        var foldMap = groups
+            .Select((g, idx) => new { g.Key, Fold = idx % foldCount })
+            .ToDictionary(x => x.Key, x => x.Fold);
+        var eligible = raw.Where(s => foldMap.ContainsKey(s.Galaxy)).ToList();
+
+        const double penalty = 0.10;
+        const double floorTolerance = 1e-10;
+        var alphas = new[] { 0.25, 0.50, 0.75 };
+
+        var alphaResults = new List<(double Alpha, double MeanGlobal, double MeanRegularized, double MeanGain, double GainShare, double WorstRegFloor, double WorstGlobalFloor, bool IsStrataSafe, double Score)>();
+
+        foreach (double alpha in alphas)
+        {
+            var foldResults = new List<(double GlobalImp, double RegImp, double Gain, double RegFloor, double GlobalFloor)>();
+
+            for (int fold = 0; fold < foldCount; fold++)
+            {
+                var train = eligible.Where(s => foldMap[s.Galaxy] != fold).ToList();
+                var test = eligible.Where(s => foldMap[s.Galaxy] == fold).ToList();
+                if (train.Count < 120 || test.Count < 80)
+                    continue;
+
+                double lambdaGlobal = FitGlobalLambda(train.Select(t => new LambdaSample(t.Galaxy, t.GObs, t.GBase, t.X)).ToList());
+                Func<LambdaRegimeSample, double> globalPredictor = s => s.GBase + lambdaGlobal * s.X;
+                double globalImp = ComputeLambdaImprovement(test, globalPredictor);
+                double globalFloor = ComputeStrataFloor(test, globalPredictor);
+
+                var regimeFit = FitRegimeLambdas(train, RegimeId, regimeCount: 3);
+                var lambdaReg = regimeFit
+                    .Select(l => (1.0 - alpha) * lambdaGlobal + alpha * l)
+                    .ToArray();
+                Func<LambdaRegimeSample, double> regPredictor = s => s.GBase + lambdaReg[RegimeId(s)] * s.X;
+                double regImp = ComputeLambdaImprovement(test, regPredictor);
+                double regFloor = ComputeStrataFloor(test, regPredictor);
+
+                foldResults.Add((globalImp, regImp, regImp - globalImp, regFloor, globalFloor));
+            }
+
+            Assert.True(foldResults.Count >= 3, $"Insufficient valid LC07 folds for alpha={alpha:F2}: {foldResults.Count}");
+
+            double meanGlobal = foldResults.Average(f => f.GlobalImp);
+            double meanReg = foldResults.Average(f => f.RegImp);
+            double meanGain = foldResults.Average(f => f.Gain);
+            double gainShare = foldResults.Count(f => f.Gain >= 0.0) / (double)foldResults.Count;
+            double worstRegFloor = foldResults.Min(f => f.RegFloor);
+            double worstGlobalFloor = foldResults.Min(f => f.GlobalFloor);
+            bool strataSafe = worstRegFloor >= worstGlobalFloor - floorTolerance;
+            double score = meanGain + penalty * worstRegFloor;
+
+            alphaResults.Add((alpha, meanGlobal, meanReg, meanGain, gainShare, worstRegFloor, worstGlobalFloor, strataSafe, score));
+        }
+
+        foreach (var r in alphaResults.OrderBy(r => r.Alpha))
+        {
+            WriteTestLine(
+                "LC07",
+                $"alpha={r.Alpha:F2}, meanGlobal={r.MeanGlobal:E6}, meanReg={r.MeanRegularized:E6}, gain={r.MeanGain:E6}, gainShare={r.GainShare:F3}, worstRegFloor={r.WorstRegFloor:E6}, worstGlobalFloor={r.WorstGlobalFloor:E6}, strataSafe={r.IsStrataSafe}, score={r.Score:E6}");
+        }
+
+        var safeSet = alphaResults.Where(r => r.IsStrataSafe).ToList();
+        Assert.NotEmpty(safeSet);
+
+        var selected = safeSet
+            .OrderByDescending(r => r.Score)
+            .First();
+
+        WriteTestLine("LC07", $"selectedAlpha={selected.Alpha:F2}");
+
+        Assert.True(selected.WorstRegFloor >= selected.WorstGlobalFloor - floorTolerance, "Selected alpha violates strata-safe floor constraint.");
+        Assert.True(selected.MeanRegularized >= selected.MeanGlobal, "Selected strata-safe regularization should not underperform global lambda on average.");
+        Assert.True(selected.GainShare >= 0.50, $"Selected strata-safe alpha improves too few folds: {selected.GainShare:F3}");
+    }
+
+    [Fact]
+    public void LC08_LambdaTheta_Should_Not_Become_PerGalaxyProxy()
+    {
+        var dataset = BuildDataset();
+        double alphaLocal = FitBestLogShiftScale(dataset.Points, p => p.GLocal);
+
+        var raw = dataset.Points
+            .Select(p =>
+            {
+                if (p.GObs <= 0.0 || p.GLocal <= 0.0 || p.Rd <= 0.0 || p.Gbar <= 0.0 || !double.IsFinite(p.O5W6InvDistance))
+                    return (LambdaRegimeSample?)null;
+
+                double gBase = alphaLocal * p.GLocal;
+                if (gBase <= 0.0 || !double.IsFinite(gBase))
+                    return (LambdaRegimeSample?)null;
+
+                return new LambdaRegimeSample(
+                    p.GalaxyName,
+                    p.GObs,
+                    gBase,
+                    p.O5W6InvDistance,
+                    p.Radius / p.Rd,
+                    Math.Log10(Math.Max(p.Gbar, 1e-30)));
+            })
+            .Where(x => x != null)
+            .Select(x => x!)
+            .ToList();
+
+        Assert.True(raw.Count > 400, $"Too few LC08 samples: {raw.Count}");
+
+        var groups = raw
+            .GroupBy(s => s.Galaxy)
+            .Where(g => g.Count() >= 8)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+        Assert.True(groups.Count >= 8, $"Too few LC08 galaxy groups: {groups.Count}");
+
+        var galaxyMedianLogGbar = groups.ToDictionary(
+            g => g.Key,
+            g => Median(g.Select(x => x.LogGbar)),
+            StringComparer.Ordinal);
+        double globalMedianGalaxyLogGbar = Median(galaxyMedianLogGbar.Values);
+        double globalMedianPointLogGbar = Median(raw.Select(r => r.LogGbar));
+
+        int RegimeId(LambdaRegimeSample s)
+        {
+            if (s.XRadius < 1.0) return 0;
+            if (s.XRadius < 4.0) return 1;
+            return 2;
+        }
+
+        double ComputeStrataFloor(IReadOnlyList<LambdaRegimeSample> sample, Func<LambdaRegimeSample, double> predictor)
+        {
+            double lowHigh = Math.Min(
+                ComputeLambdaImprovement(sample.Where(s => s.LogGbar <= globalMedianPointLogGbar).ToList(), predictor),
+                ComputeLambdaImprovement(sample.Where(s => s.LogGbar > globalMedianPointLogGbar).ToList(), predictor));
+
+            double lsbHsb = Math.Min(
+                ComputeLambdaImprovement(
+                    sample.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m <= globalMedianGalaxyLogGbar).ToList(),
+                    predictor),
+                ComputeLambdaImprovement(
+                    sample.Where(s => galaxyMedianLogGbar.TryGetValue(s.Galaxy, out double m) && m > globalMedianGalaxyLogGbar).ToList(),
+                    predictor));
+
+            return Math.Min(lowHigh, lsbHsb);
+        }
+
+        int foldCount = Math.Min(5, groups.Count);
+        var foldMap = groups
+            .Select((g, idx) => new { g.Key, Fold = idx % foldCount })
+            .ToDictionary(x => x.Key, x => x.Fold);
+        var eligible = raw.Where(s => foldMap.ContainsKey(s.Galaxy)).ToList();
+
+        var alphas = new[] { 0.25, 0.50, 0.75 };
+        const double floorTolerance = 1e-10;
+        const double penalty = 0.10;
+
+        var foldResults = new List<(int Fold, double GlobalImp, double RegImp, double OracleImp, double ProxyRatio, double OracleGap)>();
+
+        for (int fold = 0; fold < foldCount; fold++)
+        {
+            var train = eligible.Where(s => foldMap[s.Galaxy] != fold).ToList();
+            var test = eligible.Where(s => foldMap[s.Galaxy] == fold).ToList();
+            if (train.Count < 120 || test.Count < 80)
+                continue;
+
+            double lambdaGlobal = FitGlobalLambda(train.Select(t => new LambdaSample(t.Galaxy, t.GObs, t.GBase, t.X)).ToList());
+            Func<LambdaRegimeSample, double> globalPredictor = s => s.GBase + lambdaGlobal * s.X;
+            double globalTrainImp = ComputeLambdaImprovement(train, globalPredictor);
+            double globalTrainFloor = ComputeStrataFloor(train, globalPredictor);
+
+            var regimeFit = FitRegimeLambdas(train, RegimeId, regimeCount: 3);
+
+            var alphaCandidates = alphas
+                .Select(alpha =>
+                {
+                    var lambdaReg = regimeFit
+                        .Select(l => (1.0 - alpha) * lambdaGlobal + alpha * l)
+                        .ToArray();
+                    Func<LambdaRegimeSample, double> pred = s => s.GBase + lambdaReg[RegimeId(s)] * s.X;
+                    double trainImp = ComputeLambdaImprovement(train, pred);
+                    double trainFloor = ComputeStrataFloor(train, pred);
+                    bool strataSafe = trainFloor >= globalTrainFloor - floorTolerance;
+                    double score = (trainImp - globalTrainImp) + penalty * trainFloor;
+                    return (Alpha: alpha, Lambdas: lambdaReg, TrainImp: trainImp, TrainFloor: trainFloor, StrataSafe: strataSafe, Score: score);
+                })
+                .ToList();
+
+            var safeAlpha = alphaCandidates.Where(c => c.StrataSafe).ToList();
+            var selected = (safeAlpha.Count > 0 ? safeAlpha : alphaCandidates)
+                .OrderByDescending(c => c.Score)
+                .First();
+
+            Func<LambdaRegimeSample, double> regimePredictor = s => s.GBase + selected.Lambdas[RegimeId(s)] * s.X;
+            double globalImp = ComputeLambdaImprovement(test, globalPredictor);
+            double regImp = ComputeLambdaImprovement(test, regimePredictor);
+
+            double oracleImp = test
+                .GroupBy(s => s.Galaxy)
+                .Where(g => g.Count() >= 5)
+                .Select(g =>
+                {
+                    double lambdaGalaxy = FitGlobalLambda(g.Select(x => new LambdaSample(x.Galaxy, x.GObs, x.GBase, x.X)).ToList());
+                    return ComputeLambdaImprovement(g.ToList(), s => s.GBase + lambdaGalaxy * s.X);
+                })
+                .Average();
+
+            double numer = regImp - globalImp;
+            double denom = oracleImp - globalImp;
+            double proxyRatio = denom > 1e-12 ? numer / denom : 0.0;
+            double oracleGap = oracleImp - regImp;
+
+            foldResults.Add((fold, globalImp, regImp, oracleImp, proxyRatio, oracleGap));
+            WriteTestLine("LC08", $"fold={fold}, alpha={selected.Alpha:F2}, globalImp={globalImp:E6}, regImp={regImp:E6}, oracleImp={oracleImp:E6}, proxyRatio={proxyRatio:F3}, oracleGap={oracleGap:E6}");
+        }
+
+        Assert.True(foldResults.Count >= 3, $"Insufficient valid LC08 folds: {foldResults.Count}");
+
+        double meanProxyRatio = foldResults.Average(f => f.ProxyRatio);
+        double medianProxyRatio = Median(foldResults.Select(f => f.ProxyRatio));
+        double proxyLikeShare = foldResults.Count(f => f.ProxyRatio >= 0.90) / (double)foldResults.Count;
+        double meanOracleGap = foldResults.Average(f => f.OracleGap);
+
+        WriteTestLine("LC08", $"meanProxyRatio   = {meanProxyRatio:F3}");
+        WriteTestLine("LC08", $"medianProxyRatio = {medianProxyRatio:F3}");
+        WriteTestLine("LC08", $"proxyLikeShare   = {proxyLikeShare:F3}");
+        WriteTestLine("LC08", $"meanOracleGap    = {meanOracleGap:E6}");
+
+        Assert.True(meanOracleGap >= 0.0, $"Regime-conditioned lambda should remain below per-galaxy oracle on average (non-proxy), gap={meanOracleGap:E6}");
+        Assert.True(medianProxyRatio <= 0.85, $"Regime-conditioned lambda is too close to per-galaxy oracle (proxy risk), median ratio={medianProxyRatio:F3}");
+        Assert.True(proxyLikeShare <= 0.20, $"Too many folds behave like per-galaxy proxy, share={proxyLikeShare:F3}");
+    }
+
     private Dataset BuildDataset()
     {
         return BuildDataset(
@@ -2160,6 +3358,7 @@ public class ThetaObservableDerivationTests
                 double o5W2Inv = ComputeO5KernelContrast(field, idx, halfWindow: 2, kernelMode: "inverse");
                 double o5W4Inv = ComputeO5KernelContrast(field, idx, halfWindow: 4, kernelMode: "inverse");
                 double o5W6Inv = ComputeO5KernelContrast(field, idx, halfWindow: 6, kernelMode: "inverse");
+                double o5W8Inv = ComputeO5KernelContrast(field, idx, halfWindow: 8, kernelMode: "inverse");
                 double o5W4Uniform = ComputeO5KernelContrast(field, idx, halfWindow: 4, kernelMode: "uniform");
                 double o5W4Gaussian = ComputeO5KernelContrast(field, idx, halfWindow: 4, kernelMode: "gaussian");
 
@@ -2178,6 +3377,7 @@ public class ThetaObservableDerivationTests
                     o5W2Inv,
                     o5W4Inv,
                     o5W6Inv,
+                    o5W8Inv,
                     o5W4Uniform,
                     o5W4Gaussian));
             }
@@ -2287,6 +3487,763 @@ public class ThetaObservableDerivationTests
     private static (string Galaxy, double Radius) PointKey(DataPoint p)
     {
         return (p.GalaxyName, Math.Round(p.Radius, 6));
+    }
+
+    private static SyntheticProfiles CreateDefaultSyntheticProfiles(int count, double spacing)
+    {
+        var constant = CreateSyntheticThetaProfile(r => 1.5, count, spacing);
+        var smooth = CreateSyntheticThetaProfile(r => 0.9 + 0.04 * r + 0.003 * r * r, count, spacing);
+        var localContrast = CreateSyntheticThetaProfile(
+            r =>
+            {
+                double baseTheta = 0.9 + 0.04 * r + 0.003 * r * r;
+                double notch = 0.18 * Math.Exp(-Math.Pow((r - 10.0) / 0.7, 2.0));
+                return baseTheta - notch;
+            },
+            count,
+            spacing);
+        var nonLocalBreak = CreateSyntheticThetaProfile(
+            r =>
+            {
+                double baseTheta = 0.9 + 0.04 * r + 0.003 * r * r;
+                double syncBreak = r >= 13.0 ? 0.85 : 0.0;
+                return baseTheta + syncBreak;
+            },
+            count,
+            spacing);
+
+        return new SyntheticProfiles(constant, smooth, localContrast, nonLocalBreak);
+    }
+
+    private static WindowOperatorMetrics EvaluateWindowOperatorMetrics(SyntheticProfiles profiles, int halfWindow)
+    {
+        var constantSeries = ComputeO5Series(profiles.Constant, halfWindow);
+        var smoothSeries = ComputeO5Series(profiles.Smooth, halfWindow);
+        var localSeries = ComputeO5Series(profiles.LocalContrast, halfWindow);
+        var nonLocalSeries = ComputeO5Series(profiles.NonLocalBreak, halfWindow);
+
+        double constMaxAbs = constantSeries.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+        double smoothMaxAbs = smoothSeries.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+        double localMaxAbs = localSeries.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+        double nonLocalMaxAbs = nonLocalSeries.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+        double smoothStdAbs = StandardDeviation(smoothSeries.Select(Math.Abs));
+
+        double localGain = localMaxAbs - smoothMaxAbs;
+        double nonLocalGain = nonLocalMaxAbs - localMaxAbs;
+        double localSupportWidth = ComputeSupportWidth(localSeries, thresholdFraction: 0.50);
+        double nonLocalArea = ComputeAbsArea(nonLocalSeries);
+        double nonLocalMeanAbs = nonLocalSeries.Count > 0
+            ? nonLocalSeries.Select(Math.Abs).Average()
+            : 0.0;
+
+        bool isStable =
+            constMaxAbs <= 1e-12 &&
+            smoothMaxAbs <= 0.060 &&
+            localGain >= 0.030 &&
+            nonLocalGain >= 0.030 &&
+            nonLocalMeanAbs >= 0.022;
+
+        return new WindowOperatorMetrics(
+            halfWindow,
+            constMaxAbs,
+            smoothMaxAbs,
+            localMaxAbs,
+            nonLocalMaxAbs,
+            localGain,
+            nonLocalGain,
+            nonLocalArea,
+            nonLocalMeanAbs,
+            localSupportWidth,
+            smoothStdAbs,
+            isStable);
+    }
+
+    private static double ComputeWindowBalanceScore(WindowOperatorMetrics m)
+    {
+        double nonLocalTerm = Math.Tanh(12.0 * m.NonLocalMeanAbs);
+        double coherencePenalty = 0.022 * m.HalfWindow;
+
+        return
+            0.90 * m.LocalGainOverSmooth
+            + 1.20 * m.NonLocalGainOverLocal
+            + 0.35 * nonLocalTerm
+            - 0.75 * m.SmoothStdAbs
+            - coherencePenalty;
+    }
+
+    private static PhaseKernelScore EvaluatePhaseKernelScore(
+        string kernelMode,
+        IReadOnlyList<ThetaFieldProfile> profilePool,
+        int halfWindow,
+        double epsilon)
+    {
+        var smooth = profilePool[0];
+        var local = profilePool[1];
+        var nonLocal = profilePool[2];
+
+        var smoothOp = ComputePhaseLatticeNegativeGradientSeries(smooth, halfWindow, kernelMode, epsilon, normalize: true);
+        var localOp = ComputePhaseLatticeNegativeGradientSeries(local, halfWindow, kernelMode, epsilon, normalize: true);
+        var nonLocalOp = ComputePhaseLatticeNegativeGradientSeries(nonLocal, halfWindow, kernelMode, epsilon, normalize: true);
+
+        double smoothNoise = smoothOp.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+        double localSens = localOp.Select(Math.Abs).DefaultIfEmpty(0.0).Max() - smoothNoise;
+        double nonLocalSens = nonLocalOp.Select(Math.Abs).DefaultIfEmpty(0.0).Max() - localOp.Select(Math.Abs).DefaultIfEmpty(0.0).Max();
+
+        var candidateSteps = new[] { 0.08, 0.05, 0.03, 0.02, 0.01, 0.005 };
+        var perProfileEnergyDrop = profilePool
+            .Select(p =>
+            {
+                double e0 = ComputePhaseLatticeEnergy(p, halfWindow, kernelMode, epsilon);
+                double bestRel = double.NegativeInfinity;
+                foreach (double step in candidateSteps)
+                {
+                    var relaxed = RelaxProfileAlongPhaseLatticeOperator(p, halfWindow, kernelMode, epsilon, step);
+                    double e1 = ComputePhaseLatticeEnergy(relaxed, halfWindow, kernelMode, epsilon);
+                    double rel = e0 > 0.0 ? (e0 - e1) / e0 : 0.0;
+                    if (rel > bestRel) bestRel = rel;
+                }
+                return bestRel;
+            })
+            .ToList();
+
+        double meanEnergyDrop = perProfileEnergyDrop.Average();
+
+        var holdoutImprovements = ComputePhaseKernelHoldoutImprovements(profilePool, halfWindow, kernelMode, epsilon, candidateSteps);
+        double holdoutMean = holdoutImprovements.Average();
+        double holdoutMeanPositive = Math.Max(0.0, holdoutMean);
+        double holdoutPosShare = holdoutImprovements.Count(x => x > 0.0) / (double)holdoutImprovements.Count;
+
+        double balanceScore =
+            1.40 * meanEnergyDrop
+            + 0.30 * localSens
+            + 1.50 * nonLocalSens
+            + 0.20 * holdoutMeanPositive
+            + 0.05 * holdoutPosShare
+            - 0.80 * smoothNoise;
+
+        return new PhaseKernelScore(
+            kernelMode,
+            balanceScore,
+            meanEnergyDrop,
+            smoothNoise,
+            localSens,
+            nonLocalSens,
+            holdoutMean,
+            holdoutPosShare);
+    }
+
+    private static List<double> ComputePhaseKernelHoldoutImprovements(
+        IReadOnlyList<ThetaFieldProfile> profilePool,
+        int halfWindow,
+        string kernelMode,
+        double epsilon,
+        IReadOnlyList<double> candidateSteps)
+    {
+        var improvements = new List<double>();
+
+        for (int holdout = 0; holdout < profilePool.Count; holdout++)
+        {
+            var train = profilePool.Where((_, idx) => idx != holdout).ToList();
+            var test = profilePool[holdout];
+
+            double selectedStep = candidateSteps[0];
+            double bestTrainMean = double.NegativeInfinity;
+
+            foreach (double step in candidateSteps)
+            {
+                double trainMean = train
+                    .Select(p =>
+                    {
+                        double e0 = ComputePhaseLatticeEnergy(p, halfWindow, kernelMode, epsilon);
+                        double e1 = ComputePhaseLatticeEnergy(
+                            RelaxProfileAlongPhaseLatticeOperator(p, halfWindow, kernelMode, epsilon, step),
+                            halfWindow,
+                            kernelMode,
+                            epsilon);
+                        return e0 > 0.0 ? (e0 - e1) / e0 : 0.0;
+                    })
+                    .Average();
+
+                if (trainMean > bestTrainMean)
+                {
+                    bestTrainMean = trainMean;
+                    selectedStep = step;
+                }
+            }
+
+            double e0Test = ComputePhaseLatticeEnergy(test, halfWindow, kernelMode, epsilon);
+            double e1Test = ComputePhaseLatticeEnergy(
+                RelaxProfileAlongPhaseLatticeOperator(test, halfWindow, kernelMode, epsilon, selectedStep),
+                halfWindow,
+                kernelMode,
+                epsilon);
+
+            improvements.Add(e0Test > 0.0 ? (e0Test - e1Test) / e0Test : 0.0);
+        }
+
+        return improvements;
+    }
+
+    private static List<LambdaSample> BuildLambdaSamples(Dataset dataset, Func<DataPoint, double> o5Selector)
+    {
+        double alphaLocal = FitBestLogShiftScale(dataset.Points, p => p.GLocal);
+
+        return dataset.Points
+            .Select(p =>
+            {
+                if (p.GObs <= 0.0 || p.GLocal <= 0.0)
+                    return (LambdaSample?)null;
+
+                double gBase = alphaLocal * p.GLocal;
+                double x = o5Selector(p);
+                if (gBase <= 0.0 || !double.IsFinite(gBase) || !double.IsFinite(x))
+                    return (LambdaSample?)null;
+
+                return new LambdaSample(p.GalaxyName, p.GObs, gBase, x);
+            })
+            .Where(s => s != null)
+            .Select(s => s!)
+            .ToList();
+    }
+
+    private static double FitGlobalLambda(IReadOnlyList<LambdaSample> samples)
+    {
+        double sxx = 0.0;
+        double sxy = 0.0;
+        foreach (var s in samples)
+        {
+            double y = s.GObs - s.GBase;
+            sxx += s.X * s.X;
+            sxy += s.X * y;
+        }
+
+        if (sxx <= 0.0)
+            return 0.0;
+
+        double lambda = sxy / sxx;
+        return double.IsFinite(lambda) ? lambda : 0.0;
+    }
+
+    private static double ComputeLambdaImprovement(IReadOnlyList<LambdaSample> samples, double lambda)
+    {
+        if (samples.Count == 0)
+            return 0.0;
+
+        double baselineRmse = Math.Sqrt(samples.Average(s =>
+        {
+            double e = s.GObs - s.GBase;
+            return e * e;
+        }));
+
+        double modelRmse = Math.Sqrt(samples.Average(s =>
+        {
+            double pred = s.GBase + lambda * s.X;
+            double e = s.GObs - pred;
+            return e * e;
+        }));
+
+        return baselineRmse - modelRmse;
+    }
+
+    private static double[] FitRegimeLambdas(
+        IReadOnlyList<LambdaRegimeSample> samples,
+        Func<LambdaRegimeSample, int> regimeSelector,
+        int regimeCount)
+    {
+        var lambdas = new double[regimeCount];
+
+        for (int r = 0; r < regimeCount; r++)
+        {
+            double sxx = 0.0;
+            double sxy = 0.0;
+            foreach (var s in samples)
+            {
+                if (regimeSelector(s) != r)
+                    continue;
+
+                double y = s.GObs - s.GBase;
+                sxx += s.X * s.X;
+                sxy += s.X * y;
+            }
+
+            lambdas[r] = sxx > 0.0 ? sxy / sxx : 0.0;
+            if (!double.IsFinite(lambdas[r]))
+                lambdas[r] = 0.0;
+        }
+
+        return lambdas;
+    }
+
+    private static double ComputeLambdaImprovement(
+        IReadOnlyList<LambdaRegimeSample> samples,
+        Func<LambdaRegimeSample, double> predictor)
+    {
+        if (samples.Count == 0)
+            return 0.0;
+
+        double baselineRmse = Math.Sqrt(samples.Average(s =>
+        {
+            double e = s.GObs - s.GBase;
+            return e * e;
+        }));
+
+        double modelRmse = Math.Sqrt(samples.Average(s =>
+        {
+            double pred = predictor(s);
+            double e = s.GObs - pred;
+            return e * e;
+        }));
+
+        return baselineRmse - modelRmse;
+    }
+
+    private static List<double> ComputeFiniteCoherenceNegativeGradientSeries(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        double epsilon,
+        bool normalize)
+    {
+        var values = new List<double>();
+        int start = Math.Max(halfWindow, 2);
+        int end = profile.Points.Count - 1 - Math.Max(halfWindow, 2);
+
+        for (int i = start; i <= end; i++)
+        {
+            values.Add(ComputeFiniteCoherenceNegativeGradientAtIndex(profile, i, halfWindow, epsilon, normalize));
+        }
+
+        return values;
+    }
+
+    private static double ComputeFiniteCoherenceNegativeGradientAtIndex(
+        ThetaFieldProfile profile,
+        int centerIndex,
+        int halfWindow,
+        double epsilon,
+        bool normalize)
+    {
+        if (profile.Points.Count < 5 || centerIndex < 0 || centerIndex >= profile.Points.Count)
+            return 0.0;
+
+        int start = Math.Max(0, centerIndex - halfWindow);
+        int end = Math.Min(profile.Points.Count - 1, centerIndex + halfWindow);
+
+        double thetaI = profile.Points[centerIndex].Theta;
+        double weightedDeltaSum = 0.0;
+        double weightSum = 0.0;
+
+        for (int j = start; j <= end; j++)
+        {
+            if (j == centerIndex)
+                continue;
+
+            double dr = Math.Abs(profile.Points[centerIndex].RadiusKpc - profile.Points[j].RadiusKpc);
+            double w = 1.0 / (dr + epsilon);
+            double thetaJ = profile.Points[j].Theta;
+
+            weightedDeltaSum += w * (thetaJ - thetaI); // negative gradient direction
+            weightSum += w;
+        }
+
+        if (!normalize)
+            return double.IsFinite(weightedDeltaSum) ? weightedDeltaSum : 0.0;
+
+        if (weightSum <= 0.0)
+            return 0.0;
+
+        double normalized = weightedDeltaSum / weightSum;
+        return double.IsFinite(normalized) ? normalized : 0.0;
+    }
+
+    private static double ComputeFiniteCoherenceEnergy(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        double epsilon)
+    {
+        if (profile.Points.Count < 3)
+            return 0.0;
+
+        double sum = 0.0;
+        for (int i = 0; i < profile.Points.Count; i++)
+        {
+            int start = Math.Max(0, i - halfWindow);
+            int end = Math.Min(profile.Points.Count - 1, i + halfWindow);
+
+            for (int j = start; j <= end; j++)
+            {
+                if (j == i)
+                    continue;
+
+                double dr = Math.Abs(profile.Points[i].RadiusKpc - profile.Points[j].RadiusKpc);
+                double w = 1.0 / (dr + epsilon);
+                double d = profile.Points[i].Theta - profile.Points[j].Theta;
+                sum += w * d * d;
+            }
+        }
+
+        return 0.5 * sum;
+    }
+
+    private static ThetaFieldProfile RelaxProfileAlongFiniteCoherenceOperator(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        double epsilon,
+        double step)
+    {
+        var clone = CloneProfile(profile);
+        int start = Math.Max(halfWindow, 2);
+        int end = clone.Points.Count - 1 - Math.Max(halfWindow, 2);
+
+        var updates = new Dictionary<int, double>();
+        for (int i = start; i <= end; i++)
+        {
+            double op = ComputeFiniteCoherenceNegativeGradientAtIndex(clone, i, halfWindow, epsilon, normalize: false);
+            updates[i] = clone.Points[i].Theta + step * op;
+        }
+
+        foreach (var kvp in updates)
+            clone.Points[kvp.Key].Theta = kvp.Value;
+
+        return clone;
+    }
+
+    private static ThetaFieldProfile CloneProfile(ThetaFieldProfile source)
+    {
+        var clone = new ThetaFieldProfile();
+        foreach (var p in source.Points)
+        {
+            clone.Points.Add(new ThetaFieldPoint
+            {
+                RadiusKpc = p.RadiusKpc,
+                Theta = p.Theta,
+                Source = p.Source,
+                Sync = p.Sync
+            });
+        }
+        return clone;
+    }
+
+    private static double ComputeSignAgreement(IReadOnlyList<double> x, IReadOnlyList<double> y)
+    {
+        int n = Math.Min(x.Count, y.Count);
+        if (n == 0)
+            return 0.0;
+
+        int agreed = 0;
+        int considered = 0;
+        for (int i = 0; i < n; i++)
+        {
+            int sx = x[i] > 1e-12 ? 1 : x[i] < -1e-12 ? -1 : 0;
+            int sy = y[i] > 1e-12 ? 1 : y[i] < -1e-12 ? -1 : 0;
+            if (sx == 0 && sy == 0)
+                continue;
+
+            considered++;
+            if (sx == sy)
+                agreed++;
+        }
+
+        return considered > 0 ? agreed / (double)considered : 1.0;
+    }
+
+    private static List<double> ComputePhaseLatticeNegativeGradientSeries(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        string kernelMode,
+        double epsilon,
+        bool normalize)
+    {
+        var values = new List<double>();
+        int start = Math.Max(halfWindow, 2);
+        int end = profile.Points.Count - 1 - Math.Max(halfWindow, 2);
+
+        for (int i = start; i <= end; i++)
+        {
+            values.Add(ComputePhaseLatticeNegativeGradientAtIndex(profile, i, halfWindow, kernelMode, epsilon, normalize));
+        }
+
+        return values;
+    }
+
+    private static double ComputePhaseLatticeNegativeGradientAtIndex(
+        ThetaFieldProfile profile,
+        int centerIndex,
+        int halfWindow,
+        string kernelMode,
+        double epsilon,
+        bool normalize)
+    {
+        if (profile.Points.Count < 5 || centerIndex < 0 || centerIndex >= profile.Points.Count)
+            return 0.0;
+
+        int start = Math.Max(0, centerIndex - halfWindow);
+        int end = Math.Min(profile.Points.Count - 1, centerIndex + halfWindow);
+
+        double thetaI = profile.Points[centerIndex].Theta;
+        double sum = 0.0;
+        double weightSum = 0.0;
+
+        for (int j = start; j <= end; j++)
+        {
+            if (j == centerIndex)
+                continue;
+
+            double dr = Math.Abs(profile.Points[centerIndex].RadiusKpc - profile.Points[j].RadiusKpc);
+            double w = ComputeKernelWeightFromRadiusDistance(dr, kernelMode, epsilon);
+            double delta = thetaI - profile.Points[j].Theta;
+            sum += -w * Math.Sin(delta); // negative gradient
+            weightSum += w;
+        }
+
+        if (!normalize)
+            return double.IsFinite(sum) ? sum : 0.0;
+
+        if (weightSum <= 0.0)
+            return 0.0;
+
+        double normalized = sum / weightSum;
+        return double.IsFinite(normalized) ? normalized : 0.0;
+    }
+
+    private static double ComputePhaseLatticeEnergy(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        string kernelMode,
+        double epsilon)
+    {
+        if (profile.Points.Count < 3)
+            return 0.0;
+
+        double sum = 0.0;
+        for (int i = 0; i < profile.Points.Count; i++)
+        {
+            int end = Math.Min(profile.Points.Count - 1, i + halfWindow);
+            for (int j = i + 1; j <= end; j++)
+            {
+                double dr = Math.Abs(profile.Points[i].RadiusKpc - profile.Points[j].RadiusKpc);
+                double w = ComputeKernelWeightFromRadiusDistance(dr, kernelMode, epsilon);
+                double delta = profile.Points[i].Theta - profile.Points[j].Theta;
+                sum += w * (1.0 - Math.Cos(delta));
+            }
+        }
+
+        return sum;
+    }
+
+    private static double ComputeQuadraticCoherenceEnergy(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        string kernelMode,
+        double epsilon)
+    {
+        if (profile.Points.Count < 3)
+            return 0.0;
+
+        double sum = 0.0;
+        for (int i = 0; i < profile.Points.Count; i++)
+        {
+            int end = Math.Min(profile.Points.Count - 1, i + halfWindow);
+            for (int j = i + 1; j <= end; j++)
+            {
+                double dr = Math.Abs(profile.Points[i].RadiusKpc - profile.Points[j].RadiusKpc);
+                double w = ComputeKernelWeightFromRadiusDistance(dr, kernelMode, epsilon);
+                double delta = profile.Points[i].Theta - profile.Points[j].Theta;
+                sum += 0.5 * w * delta * delta;
+            }
+        }
+
+        return sum;
+    }
+
+    private static ThetaFieldProfile RelaxProfileAlongPhaseLatticeOperator(
+        ThetaFieldProfile profile,
+        int halfWindow,
+        string kernelMode,
+        double epsilon,
+        double step)
+    {
+        var clone = CloneProfile(profile);
+        int start = Math.Max(halfWindow, 2);
+        int end = clone.Points.Count - 1 - Math.Max(halfWindow, 2);
+
+        var updates = new Dictionary<int, double>();
+        for (int i = start; i <= end; i++)
+        {
+            double op = ComputePhaseLatticeNegativeGradientAtIndex(clone, i, halfWindow, kernelMode, epsilon, normalize: false);
+            updates[i] = clone.Points[i].Theta + step * op;
+        }
+
+        foreach (var kvp in updates)
+            clone.Points[kvp.Key].Theta = kvp.Value;
+
+        return clone;
+    }
+
+    private static double ComputeKernelWeightFromRadiusDistance(double dr, string kernelMode, double epsilon)
+    {
+        double d = Math.Max(dr, 0.0);
+        return kernelMode switch
+        {
+            "uniform" => 1.0,
+            "gaussian" => Math.Exp(-(d * d) / 2.0),
+            "exponential" => Math.Exp(-d / 1.5),
+            _ => 1.0 / (d + epsilon)
+        };
+    }
+
+    private static ThetaFieldProfile TransformThetaProfile(ThetaFieldProfile source, Func<double, double> transform)
+    {
+        var transformed = new ThetaFieldProfile();
+        foreach (var p in source.Points)
+        {
+            transformed.Points.Add(new ThetaFieldPoint
+            {
+                RadiusKpc = p.RadiusKpc,
+                Theta = transform(p.Theta),
+                Source = p.Source,
+                Sync = p.Sync
+            });
+        }
+
+        return transformed;
+    }
+
+    private static List<ThetaFieldProfile> BuildTqkProfilePool()
+    {
+        return new List<ThetaFieldProfile>
+        {
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).Smooth,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).NonLocalBreak,
+            CreateDefaultSyntheticProfiles(count: 41, spacing: 0.50).Smooth,
+            CreateDefaultSyntheticProfiles(count: 41, spacing: 0.50).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 41, spacing: 0.50).NonLocalBreak,
+            CreateDefaultSyntheticProfiles(count: 161, spacing: 0.125).Smooth,
+            CreateDefaultSyntheticProfiles(count: 161, spacing: 0.125).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 161, spacing: 0.125).NonLocalBreak
+        };
+    }
+
+    private static ThetaFieldProfile CreateCorrelatedLatticePhaseProfile(int correlationHalfWindow, int count, double spacing)
+    {
+        var profile = new ThetaFieldProfile();
+        double rho = Math.Exp(-1.0 / Math.Max(correlationHalfWindow, 1));
+        double sigma = Math.Sqrt(Math.Max(1.0 - rho * rho, 1e-9));
+        double prev = 0.0;
+
+        for (int i = 0; i < count; i++)
+        {
+            double t = i;
+            double noise = 0.65 * Math.Sin(0.79 * t) + 0.45 * Math.Sin(1.93 * t) + 0.25 * Math.Cos(2.71 * t);
+            double theta = i == 0
+                ? sigma * noise
+                : rho * prev + sigma * noise;
+            prev = theta;
+
+            profile.Points.Add(new ThetaFieldPoint
+            {
+                RadiusKpc = 1.0 + i * spacing,
+                Theta = 1.8 * theta,
+                Source = 0.0,
+                Sync = 0.0
+            });
+        }
+
+        return profile;
+    }
+
+    private static double EstimatePhaseCorrelationLength(ThetaFieldProfile profile, int maxLag)
+    {
+        if (profile.Points.Count < maxLag + 3)
+            return 0.0;
+
+        double threshold = Math.Exp(-1.0);
+        for (int lag = 1; lag <= maxLag; lag++)
+        {
+            double c = 0.0;
+            int n = 0;
+            for (int i = 0; i + lag < profile.Points.Count; i++)
+            {
+                c += Math.Cos(profile.Points[i].Theta - profile.Points[i + lag].Theta);
+                n++;
+            }
+
+            if (n == 0)
+                continue;
+
+            c /= n;
+            if (c <= threshold)
+                return lag;
+        }
+
+        return maxLag;
+    }
+
+    private static ThetaFieldProfile CreateSyntheticThetaProfile(
+        Func<double, double> thetaAtRadius,
+        int count,
+        double spacing)
+    {
+        var profile = new ThetaFieldProfile();
+        for (int i = 0; i < count; i++)
+        {
+            double r = 1.0 + i * spacing;
+            profile.Points.Add(new ThetaFieldPoint
+            {
+                RadiusKpc = r,
+                Theta = thetaAtRadius(r),
+                Source = 0.0,
+                Sync = 0.0
+            });
+        }
+
+        return profile;
+    }
+
+    private static List<double> ComputeO5Series(ThetaFieldProfile profile, int halfWindow)
+    {
+        var values = new List<double>();
+        int start = Math.Max(halfWindow, 2);
+        int end = profile.Points.Count - 1 - Math.Max(halfWindow, 2);
+        for (int i = start; i <= end; i++)
+        {
+            values.Add(ComputeO5KernelContrast(profile, i, halfWindow, "inverse"));
+        }
+
+        return values;
+    }
+
+    private static double ComputeSupportWidth(IReadOnlyList<double> values, double thresholdFraction)
+    {
+        if (values.Count == 0)
+            return 0.0;
+
+        var abs = values.Select(Math.Abs).ToList();
+        double peak = abs.Max();
+        if (peak <= 0.0 || !double.IsFinite(peak))
+            return 0.0;
+
+        double threshold = peak * thresholdFraction;
+        int first = -1;
+        int last = -1;
+        for (int i = 0; i < abs.Count; i++)
+        {
+            if (abs[i] >= threshold)
+            {
+                if (first < 0) first = i;
+                last = i;
+            }
+        }
+
+        if (first < 0 || last < first)
+            return 0.0;
+
+        return last - first + 1;
+    }
+
+    private static double ComputeAbsArea(IReadOnlyList<double> values)
+    {
+        return values.Sum(v => Math.Abs(v));
     }
 
     private static FitResult EvaluateLocal(IEnumerable<DataPoint> points)
@@ -2717,8 +4674,37 @@ public class ThetaObservableDerivationTests
         double O5W2InvDistance,
         double O5W4InvDistance,
         double O5W6InvDistance,
+        double O5W8InvDistance,
         double O5W4Uniform,
         double O5W4Gaussian);
+
+    private sealed record LambdaSample(
+        string Galaxy,
+        double GObs,
+        double GBase,
+        double X);
+
+    private sealed record LambdaRegimeSample(
+        string Galaxy,
+        double GObs,
+        double GBase,
+        double X,
+        double XRadius,
+        double LogGbar);
+
+    private sealed record LambdaScenarioResult(
+        string Name,
+        double Lambda,
+        double Improvement,
+        double ContributionScale);
+
+    private sealed record RegularizedAlphaResult(
+        double Alpha,
+        double MeanGlobalImprovement,
+        double MeanRegularizedImprovement,
+        double MeanGain,
+        double GainShare,
+        double WorstStrataFloor);
 
     private sealed record ResidualPoint(
         string GalaxyName,
@@ -2797,6 +4783,41 @@ public class ThetaObservableDerivationTests
         KernelHoldoutMetrics Metrics,
         double CorrelationVsBaseline,
         bool IsStable);
+
+    private sealed record SyntheticProfiles(
+        ThetaFieldProfile Constant,
+        ThetaFieldProfile Smooth,
+        ThetaFieldProfile LocalContrast,
+        ThetaFieldProfile NonLocalBreak);
+
+    private sealed record WindowOperatorMetrics(
+        int HalfWindow,
+        double ConstantMaxAbs,
+        double SmoothMaxAbs,
+        double LocalMaxAbs,
+        double NonLocalMaxAbs,
+        double LocalGainOverSmooth,
+        double NonLocalGainOverLocal,
+        double NonLocalArea,
+        double NonLocalMeanAbs,
+        double LocalSupportWidth,
+        double SmoothStdAbs,
+        bool IsStable);
+
+    private sealed record ResolutionConfig(
+        string Name,
+        int Count,
+        double Spacing);
+
+    private sealed record PhaseKernelScore(
+        string KernelMode,
+        double BalanceScore,
+        double MeanEnergyDrop,
+        double SmoothNoise,
+        double LocalContrastSensitivity,
+        double NonLocalBreakSensitivity,
+        double HoldoutMeanImprovement,
+        double HoldoutPositiveShare);
 
     private sealed record WeakFoldResult(
         int Fold,
