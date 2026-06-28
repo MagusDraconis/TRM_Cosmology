@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this review baseline, please cite it with the metadata below."
+title: "Temporal Rate Matrix / Temporal Quantum Matrix — V3.0 Review Baseline"
+type: software
+authors:
+  - family-names: Wieser
+    given-names: Fabrice
+version: 3.0-review
+date-released: 2026-06-28
+repository-code: "https://github.com/MagusDraconis/TRM_Cosmology"
+url: "https://github.com/MagusDraconis/TRM_Cosmology"
+keywords:
+  - Temporal Rate Matrix
+  - Temporal Quantum Matrix
+  - weak-field transport
+  - photon transport
+  - frame-dragging candidate
+  - nonlocal theta observable
+  - effective field framework
+  - reproducible physics tests
+abstract: "Tested-effective weak-field transport/synchronization framework with scalar, vector, theta, and unified-action review package. Claim-safe boundary: not theorem-level first-principles closure and not GR-equivalent."
