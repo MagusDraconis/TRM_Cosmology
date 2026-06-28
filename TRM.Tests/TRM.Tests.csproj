@@ -16,6 +16,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\TRM.Core\TRM.Core.csproj" />
+		<ProjectReference Include="..\TRM.Simulations\TRM.Simulations.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -23,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Analyse.csv">
+		<None Update="CoreTests\Analyse.csv">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 

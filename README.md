@@ -19,6 +19,14 @@ Instead of treating dark matter and dark energy as independent components, the m
 
 The repository implements the numerical models used to evaluate this framework across multiple astrophysical domains.
 
+## ✅ Current Branch Baseline (Preprint Snapshot)
+
+- **EL bridge track:** `EL01–EL17` provides an executable Euler-Lagrange/Fermat bridge path with weak-field bounded validation.
+- **Isolated mode-locking track:** `CML01–CML08` validates the collective cadence/bridge-scale path without direct `PhotonTransportModel` circularity.
+- **Memory ablation:** `MEM01` compares `LambdaSpace = 30` vs `LambdaSpace = 0` and quantifies impact on deflection and Schwarzschild proximity.
+- **Claim boundary:** `gamma ≈ 0.85` is treated as a **band-supported bridge scale** inside an inverse rational collective locking window, not as a uniquely fundamental constant.
+- **Local gates stabilized:** category-based test workflow is active (`CoreRegression`, `Category!=LongRunning`, `Category=LongRunning`).
+
 ---
 ## <img src="https://cdn.simpleicons.org/zenodo/0A7BBB" alt="Zenodo" width="18" /> Zenodo link
 
@@ -53,7 +61,7 @@ This repository includes computational models and analysis scripts for:
 - `TRM.CMD`  
   Console entry point to execute selected high-performance analyses and parameter sweeps via an interactive menu.
 - `TRM.Tests`  
-  xUnit test suite acting as the scientific safeguard. Contains dataset-driven validations ensuring the framework strictly adheres to established astrophysical benchmarks.
+  xUnit test suite acting as the scientific safeguard. Includes EL bridge tests (`EL01–EL17`), collective mode-locking tests (`CML01–CML08`), memory ablation (`MEM01`), plus domain validations and regression gates.
 - `TRM.Python`  
   Python plotting pipeline for visualizing output data (CSV) into publication-ready graphs.
 
@@ -81,6 +89,30 @@ From the solution root directory:
 Execute the rigorous xUnit test suite to verify the exact cosmological constants (a_0, eta_rec, beta_T) against the latest observational bounds:
 `dotnet test TRM.Tests/TRM.Tests.csproj`
 *Tests use `ITestOutputHelper` for detailed log outputs, visible directly in your Test Explorer or CLI.*
+
+Run only the fast hard regression gate:
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=CoreRegression"`
+
+Run the default suite without slow sweeps:
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category!=LongRunning"`
+
+Run long-running sweeps manually/nightly:
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=LongRunning"`
+
+---
+
+## 📄 Key Review/Theory Documents
+
+- `docs/review/REVIEW_PACKAGE.md` *(recommended reviewer start point)*
+- `docs/review/TRM_Peer_Review_Request.md`
+- `docs/review/TRM_Current_Status_For_PeerReview.md`
+- `docs/review/TRM_Service_Test_Consolidation.md`
+- `docs/review/TRM_TestSuite_Classification.md`
+- `docs/review/TRM_Real_Physics_Test_Coverage.md`
+- `docs/review/TRM_Code_To_Theory_Audit.md`
+- `docs/Theory/TRM_Geodesic_Derivation.md`
+- `docs/Theory/TRM_Collective_Mode_Locking_BridgeScale.md`
+- `docs/Theory/TRM_Finsler_Optical_Action.md`
 
 ---
 
