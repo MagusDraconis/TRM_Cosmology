@@ -1640,6 +1640,1237 @@ public class CollectiveModeLockingTests
         Assert.Contains(3, satisfyingWithoutActionTick);
     }
 
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF16_M3Uniqueness_Should_Persist_Under_ContinuousThresholdContinuation()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double BestCost)>(mValues.Length);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double bestCost = double.PositiveInfinity;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double cost = (1.0 - modeLock.ModeLockScore) + meanRelError;
+                if (cost < bestCost)
+                {
+                    bestCost = cost;
+                }
+
+                if (inBand)
+                {
+                    inBandCount++;
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, BestCost: bestCost));
+        }
+
+        const int directionClosureMinOccupancy = 1;
+        const int actionClosureMinOccupancy = 3;
+
+        var highOccupancyCosts = family
+            .Where(x => x.InBandCount >= actionClosureMinOccupancy)
+            .Select(x => x.BestCost)
+            .OrderBy(x => x)
+            .ToArray();
+
+        Assert.True(highOccupancyCosts.Length >= 2,
+            "Expected at least two high-occupancy modes to define baseline action/tick threshold.");
+
+        double baseActionTickCostThreshold = 0.5 * (highOccupancyCosts[0] + highOccupancyCosts[1]);
+
+        double[] phaseThresholds = BuildOmegaGrid(0.760, 0.820, 0.005).ToArray();
+        double[] costScales = BuildOmegaGrid(0.90, 1.10, 0.02).ToArray();
+        var uniqueM3Mask = new bool[phaseThresholds.Length, costScales.Length];
+
+        for (int i = 0; i < phaseThresholds.Length; i++)
+        {
+            double phaseThreshold = phaseThresholds[i];
+            for (int j = 0; j < costScales.Length; j++)
+            {
+                double actionTickCostThreshold = baseActionTickCostThreshold * costScales[j];
+
+                var satisfying = family
+                    .Where(x =>
+                        x.AvgClosureQuality >= phaseThreshold &&
+                        x.InBandCount >= directionClosureMinOccupancy &&
+                        x.InBandCount >= actionClosureMinOccupancy &&
+                        x.BestCost <= actionTickCostThreshold)
+                    .Select(x => x.M)
+                    .OrderBy(m => m)
+                    .ToArray();
+
+                uniqueM3Mask[i, j] = satisfying.Length == 1 && satisfying[0] == 3;
+            }
+        }
+
+        int successCount = 0;
+        for (int i = 0; i < phaseThresholds.Length; i++)
+        {
+            for (int j = 0; j < costScales.Length; j++)
+            {
+                if (uniqueM3Mask[i, j])
+                {
+                    successCount++;
+                }
+            }
+        }
+
+        var visited = new bool[phaseThresholds.Length, costScales.Length];
+        int bestComponent = 0;
+        int bestComponentPhaseSpan = 0;
+        int bestComponentCostSpan = 0;
+        int[] di = { -1, 1, 0, 0 };
+        int[] dj = { 0, 0, -1, 1 };
+
+        for (int i = 0; i < phaseThresholds.Length; i++)
+        {
+            for (int j = 0; j < costScales.Length; j++)
+            {
+                if (!uniqueM3Mask[i, j] || visited[i, j])
+                {
+                    continue;
+                }
+
+                var queue = new Queue<(int I, int J)>();
+                queue.Enqueue((i, j));
+                visited[i, j] = true;
+
+                int componentSize = 0;
+                int minI = i, maxI = i, minJ = j, maxJ = j;
+
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    componentSize++;
+                    minI = Math.Min(minI, current.I);
+                    maxI = Math.Max(maxI, current.I);
+                    minJ = Math.Min(minJ, current.J);
+                    maxJ = Math.Max(maxJ, current.J);
+
+                    for (int k = 0; k < 4; k++)
+                    {
+                        int ni = current.I + di[k];
+                        int nj = current.J + dj[k];
+
+                        if (ni < 0 || ni >= phaseThresholds.Length || nj < 0 || nj >= costScales.Length)
+                        {
+                            continue;
+                        }
+
+                        if (visited[ni, nj] || !uniqueM3Mask[ni, nj])
+                        {
+                            continue;
+                        }
+
+                        visited[ni, nj] = true;
+                        queue.Enqueue((ni, nj));
+                    }
+                }
+
+                int phaseSpan = maxI - minI + 1;
+                int costSpan = maxJ - minJ + 1;
+                if (componentSize > bestComponent)
+                {
+                    bestComponent = componentSize;
+                    bestComponentPhaseSpan = phaseSpan;
+                    bestComponentCostSpan = costSpan;
+                }
+            }
+        }
+
+        int phaseCenter = Array.FindIndex(phaseThresholds, x => Math.Abs(x - 0.780) < 1e-12);
+        int costCenter = Array.FindIndex(costScales, x => Math.Abs(x - 1.000) < 1e-12);
+        bool centerSupported = phaseCenter >= 0 && costCenter >= 0 && uniqueM3Mask[phaseCenter, costCenter];
+
+        _output.WriteLine($"RBF16 sweep grid                  : {phaseThresholds.Length}x{costScales.Length}");
+        _output.WriteLine($"RBF16 unique-m3 cells             : {successCount}");
+        _output.WriteLine($"RBF16 largest connected component : size={bestComponent}, phaseSpan={bestComponentPhaseSpan}, costSpan={bestComponentCostSpan}");
+        _output.WriteLine($"RBF16 center support (0.78,1.00)  : {centerSupported}");
+
+        Assert.True(successCount >= 12,
+            $"Expected non-trivial continuous uniqueness support for m=3. successCount={successCount}");
+        Assert.True(bestComponent >= 10 && bestComponentPhaseSpan >= 3 && bestComponentCostSpan >= 3,
+            $"Expected a connected threshold region with unique m=3 selection. size={bestComponent}, phaseSpan={bestComponentPhaseSpan}, costSpan={bestComponentCostSpan}");
+        Assert.True(centerSupported,
+            "Expected unique m=3 selection to include the baseline threshold center (phase=0.78, costScale=1.00).");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF17_ActionTickClosure_Should_Be_Derived_From_MicroscopicAction_Not_Imposed()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+        const double phaseClosureThreshold = 0.78;
+        const int directionClosureMinOccupancy = 1;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double DerivedActionTick)>(mValues.Length);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double minMicroscopicActionPerTickInBand = double.PositiveInfinity;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                // Coarse-grained lattice/action density:
+                // order deficit + closure defect + transport mismatch.
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+                double microscopicActionPerTick =
+                    (orderDefect * orderDefect + closureDefect * closureDefect + transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    minMicroscopicActionPerTickInBand = Math.Min(minMicroscopicActionPerTickInBand, microscopicActionPerTick);
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double derivedActionTick = minMicroscopicActionPerTickInBand + occupancyPenalty;
+
+            family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, DerivedActionTick: derivedActionTick));
+        }
+
+        var phaseDirectionCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        Assert.True(phaseDirectionCandidates.Length >= 2,
+            "Expected at least two phase+direction admissible modes to derive action/tick closure threshold.");
+
+        double derivedActionTickThreshold =
+            0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[1].DerivedActionTick);
+
+        var evaluation = family
+            .Select(x =>
+            {
+                bool phaseClosureOk = x.AvgClosureQuality >= phaseClosureThreshold;
+                bool directionClosureOk = x.InBandCount >= directionClosureMinOccupancy;
+                bool actionTickClosureOk = x.DerivedActionTick <= derivedActionTickThreshold;
+                bool allThree = phaseClosureOk && directionClosureOk && actionTickClosureOk;
+                return (x.M, x.InBandCount, x.AvgClosureQuality, x.DerivedActionTick, phaseClosureOk, directionClosureOk, actionTickClosureOk, allThree);
+            })
+            .OrderBy(x => x.M)
+            .ToArray();
+
+        foreach (var row in evaluation)
+        {
+            _output.WriteLine(
+                $"RBF17 m={row.M} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | derivedActionTick={row.DerivedActionTick:E6} | phase={row.phaseClosureOk} | direction={row.directionClosureOk} | actionTick={row.actionTickClosureOk} | all={row.allThree}");
+        }
+
+        _output.WriteLine($"RBF17 derived action/tick threshold: {derivedActionTickThreshold:E6}");
+
+        int minimalAllThreeMode = evaluation
+            .Where(x => x.allThree)
+            .Select(x => x.M)
+            .DefaultIfEmpty(int.MaxValue)
+            .Min();
+
+        var m2 = evaluation.First(x => x.M == 2);
+        var m3 = evaluation.First(x => x.M == 3);
+
+        Assert.True(double.IsFinite(derivedActionTickThreshold) && derivedActionTickThreshold > 0.0,
+            $"Expected finite positive derived action/tick threshold. thr={derivedActionTickThreshold:E6}");
+        Assert.True(m2.phaseClosureOk && m2.directionClosureOk && !m2.actionTickClosureOk,
+            $"Expected m=2 to fail derived action/tick closure while passing phase+direction. m2ActionTick={m2.actionTickClosureOk}");
+        Assert.True(m3.phaseClosureOk && m3.directionClosureOk && m3.actionTickClosureOk,
+            $"Expected m=3 to satisfy derived action/tick closure. m3ActionTick={m3.actionTickClosureOk}");
+        Assert.True(minimalAllThreeMode == 3,
+            $"Expected m=3 to remain minimal with derived microscopic action/tick closure. minimal={minimalAllThreeMode}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF18_M3Selection_Should_Remain_Unique_Across_SolverFamilies()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+        const double phaseClosureThreshold = 0.78;
+        const int directionClosureMinOccupancy = 1;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var baseNoCadence = BuildNoCadencePriorConfig();
+        var solverFamilies = new[]
+        {
+            new
+            {
+                Name = "baseline",
+                ModeLock = baseNoCadence,
+                ElDt = 0.001
+            },
+            new
+            {
+                Name = "fine-update",
+                ModeLock = baseNoCadence,
+                ElDt = 0.0008
+            },
+            new
+            {
+                Name = "coarse-update",
+                ModeLock = baseNoCadence,
+                ElDt = 0.0012
+            }
+        };
+
+        int uniqueM3FamilyCount = 0;
+
+        foreach (var familySolver in solverFamilies)
+        {
+            var family = new List<(int M, int InBandCount, double AvgClosureQuality, double DerivedActionTick)>(mValues.Length);
+
+            foreach (int m in mValues)
+            {
+                var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                    .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                    .ToArray();
+
+                int inBandCount = 0;
+                double closureQualitySum = 0.0;
+                double minMicroscopicActionPerTickInBand = double.PositiveInfinity;
+
+                foreach (var x in candidates)
+                {
+                    double omega = x.Omega;
+                    double gamma = 1.0 / omega;
+                    bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                    var modeLock = SimulateModeLock(omega, familySolver.ModeLock);
+                    var parameters = new PhotonTransportModel.Parameters
+                    {
+                        LambdaTime = 1.0,
+                        LambdaSpace = 30.0,
+                        EulerBridgeScale = gamma
+                    };
+
+                    double meanRelError = epsilons
+                        .Select(epsilon =>
+                        {
+                            double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(
+                                epsilon, G, c, b, familySolver.ElDt, parameters);
+                            double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                            return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                        })
+                        .Average();
+
+                    double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                    double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                    double transportDefect = Math.Max(0.0, meanRelError);
+                    double microscopicActionPerTick =
+                        (orderDefect * orderDefect + closureDefect * closureDefect + transportDefect * transportDefect)
+                        / Math.Max(omega, 1e-12);
+
+                    if (inBand)
+                    {
+                        inBandCount++;
+                        minMicroscopicActionPerTickInBand = Math.Min(minMicroscopicActionPerTickInBand, microscopicActionPerTick);
+                    }
+
+                    closureQualitySum += (1.0 - modeLock.ClosureResidual);
+                }
+
+                double avgClosureQuality = closureQualitySum / candidates.Length;
+                double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+                double derivedActionTick = minMicroscopicActionPerTickInBand + occupancyPenalty;
+
+                family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, DerivedActionTick: derivedActionTick));
+            }
+
+            var phaseDirectionCandidates = family
+                .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+                .OrderBy(x => x.DerivedActionTick)
+                .ToArray();
+
+            Assert.True(phaseDirectionCandidates.Length >= 2,
+                $"Expected at least two phase+direction admissible modes in family={familySolver.Name}.");
+
+            double derivedActionTickThreshold =
+                0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[1].DerivedActionTick);
+
+            var satisfying = family
+                .Where(x =>
+                    x.AvgClosureQuality >= phaseClosureThreshold &&
+                    x.InBandCount >= directionClosureMinOccupancy &&
+                    x.DerivedActionTick <= derivedActionTickThreshold)
+                .Select(x => x.M)
+                .OrderBy(m => m)
+                .ToArray();
+
+            bool uniqueM3 = satisfying.Length == 1 && satisfying[0] == 3;
+            if (uniqueM3)
+            {
+                uniqueM3FamilyCount++;
+            }
+
+            _output.WriteLine(
+                $"RBF18 family={familySolver.Name} | elDt={familySolver.ElDt:E3} | actionTickThr={derivedActionTickThreshold:E6} | satisfying=[{string.Join(", ", satisfying)}] | uniqueM3={uniqueM3}");
+        }
+
+        Assert.True(uniqueM3FamilyCount == solverFamilies.Length,
+            $"Expected unique m=3 selection across all solver families. success={uniqueM3FamilyCount}/{solverFamilies.Length}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF19_CompetingMFamily_Should_Fail_FullConstraintDerivation()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+        const double phaseClosureThreshold = 0.78;
+        const int directionClosureMinOccupancy = 1;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double DerivedActionTick)>(mValues.Length);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double minMicroscopicActionPerTickInBand = double.PositiveInfinity;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+                double microscopicActionPerTick =
+                    (orderDefect * orderDefect + closureDefect * closureDefect + transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    minMicroscopicActionPerTickInBand = Math.Min(minMicroscopicActionPerTickInBand, microscopicActionPerTick);
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double derivedActionTick = minMicroscopicActionPerTickInBand + occupancyPenalty;
+
+            family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, DerivedActionTick: derivedActionTick));
+        }
+
+        var phaseDirectionCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        Assert.True(phaseDirectionCandidates.Length >= 2,
+            "Expected at least two phase+direction admissible modes to derive action/tick threshold.");
+
+        double derivedActionTickThreshold =
+            0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[1].DerivedActionTick);
+
+        var evaluation = family
+            .Select(x =>
+            {
+                bool phaseClosureOk = x.AvgClosureQuality >= phaseClosureThreshold;
+                bool directionClosureOk = x.InBandCount >= directionClosureMinOccupancy;
+                bool actionTickClosureOk = x.DerivedActionTick <= derivedActionTickThreshold;
+                bool allThree = phaseClosureOk && directionClosureOk && actionTickClosureOk;
+                string failReason = allThree
+                    ? "passes-all"
+                    : !directionClosureOk ? "direction/band"
+                    : !phaseClosureOk ? "phase/closure"
+                    : "action/tick";
+                return (x.M, x.InBandCount, x.AvgClosureQuality, x.DerivedActionTick, phaseClosureOk, directionClosureOk, actionTickClosureOk, allThree, failReason);
+            })
+            .OrderBy(x => x.M)
+            .ToArray();
+
+        foreach (var row in evaluation)
+        {
+            _output.WriteLine(
+                $"RBF19 m={row.M} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | derivedActionTick={row.DerivedActionTick:E6} | phase={row.phaseClosureOk} | direction={row.directionClosureOk} | actionTick={row.actionTickClosureOk} | all={row.allThree} | fail={row.failReason}");
+        }
+
+        _output.WriteLine($"RBF19 derived action/tick threshold: {derivedActionTickThreshold:E6}");
+
+        var m1 = evaluation.First(x => x.M == 1);
+        var m2 = evaluation.First(x => x.M == 2);
+        var m3 = evaluation.First(x => x.M == 3);
+        var m4 = evaluation.First(x => x.M == 4);
+        var m5 = evaluation.First(x => x.M == 5);
+
+        Assert.True(m3.allThree,
+            "Expected m=3 to satisfy full derived constraint set.");
+
+        Assert.True(m2.phaseClosureOk && m2.directionClosureOk && !m2.actionTickClosureOk && m2.failReason == "action/tick",
+            $"Expected m=2 exclusion by action/tick. fail={m2.failReason}");
+        Assert.True(!m4.phaseClosureOk && m4.directionClosureOk && m4.failReason == "phase/closure",
+            $"Expected m=4 exclusion by phase/closure. fail={m4.failReason}");
+
+        Assert.True(!m1.directionClosureOk && m1.failReason == "direction/band",
+            $"Expected m=1 exclusion by direction/band. fail={m1.failReason}");
+        Assert.True(!m5.directionClosureOk && m5.failReason == "direction/band",
+            $"Expected m=5 exclusion by direction/band. fail={m5.failReason}");
+
+        Assert.True(evaluation.Count(x => x.allThree) == 1,
+            $"Expected unique full-constraint mode. all=[{string.Join(", ", evaluation.Where(x => x.allThree).Select(x => x.M))}]");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF20_TheoremAssumptionAudit_Should_Detect_If_M3Depends_On_OperationalArtifacts()
+    {
+        const double phaseClosureThreshold = 0.78;
+        const int directionClosureMinOccupancy = 1;
+
+// Normalized weak-field units.
+// This test audits operational m=3 selection robustness,
+// not SI-dimensional calibration or physical amplitude normalization.
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var qWindows = new (int QMin, int QMax)[]
+        {
+            (12, 24),
+            (14, 26),
+            (10, 22)
+        };
+
+        var precomputed = new Dictionary<(int QMin, int QMax, int M), (int InBandCount, double AvgClosureQuality, double MinNoNorm, double MinOverOmega, double MinOverSqrtOmega)>();
+
+        foreach (var window in qWindows)
+        {
+            for (int m = 1; m <= 6; m++)
+            {
+                var candidates = Enumerable.Range(window.QMin, window.QMax - window.QMin + 1)
+                    .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                    .ToArray();
+
+                int inBandCount = 0;
+                double closureQualitySum = 0.0;
+                double minNoNorm = double.PositiveInfinity;
+                double minOverOmega = double.PositiveInfinity;
+                double minOverSqrtOmega = double.PositiveInfinity;
+
+                foreach (var x in candidates)
+                {
+                    double omega = x.Omega;
+                    double gamma = 1.0 / omega;
+                    bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                    var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                    var parameters = new PhotonTransportModel.Parameters
+                    {
+                        LambdaTime = 1.0,
+                        LambdaSpace = 30.0,
+                        EulerBridgeScale = gamma
+                    };
+
+                    double meanRelError = epsilons
+                        .Select(epsilon =>
+                        {
+                            double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                            double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                            return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                        })
+                        .Average();
+
+                    double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                    double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                    double transportDefect = Math.Max(0.0, meanRelError);
+                    double actionBase =
+                        orderDefect * orderDefect +
+                        closureDefect * closureDefect +
+                        transportDefect * transportDefect;
+
+                    if (inBand)
+                    {
+                        inBandCount++;
+                        minNoNorm = Math.Min(minNoNorm, actionBase);
+                        minOverOmega = Math.Min(minOverOmega, actionBase / Math.Max(omega, 1e-12));
+                        minOverSqrtOmega = Math.Min(minOverSqrtOmega, actionBase / Math.Sqrt(Math.Max(omega, 1e-12)));
+                    }
+
+                    closureQualitySum += (1.0 - modeLock.ClosureResidual);
+                }
+
+                double avgClosureQuality = closureQualitySum / candidates.Length;
+                precomputed[(window.QMin, window.QMax, m)] = (inBandCount, avgClosureQuality, minNoNorm, minOverOmega, minOverSqrtOmega);
+            }
+        }
+
+        var scenarios = new[]
+        {
+            new { Name = "baseline", MMin = 1, MMax = 5, QMin = 12, QMax = 24, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "m-range-extended", MMin = 1, MMax = 6, QMin = 12, QMax = 24, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "m-range-truncated", MMin = 1, MMax = 4, QMin = 12, QMax = 24, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "q-window-up", MMin = 1, MMax = 5, QMin = 14, QMax = 26, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "q-window-down", MMin = 1, MMax = 5, QMin = 10, QMax = 22, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "normalization-none", MMin = 1, MMax = 5, QMin = 12, QMax = 24, Normalization = "none", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "normalization-sqrt", MMin = 1, MMax = 5, QMin = 12, QMax = 24, Normalization = "sqrt-omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "occupancy-min2", MMin = 1, MMax = 5, QMin = 12, QMax = 24, Normalization = "omega", ActionMinOcc = 2, Threshold = "midpoint-top2", TieBreak = "minimal-m" },
+            new { Name = "threshold-top3", MMin = 1, MMax = 5, QMin = 12, QMax = 24, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top3", TieBreak = "minimal-m" },
+            new { Name = "tie-break-low-action", MMin = 1, MMax = 5, QMin = 12, QMax = 24, Normalization = "omega", ActionMinOcc = 3, Threshold = "midpoint-top2", TieBreak = "lowest-action" }
+        };
+
+        var auditResults = new List<(string Name, bool Resolved, int SelectedMode, int[] SatisfyingModes, bool UniqueM3)>();
+
+        foreach (var scenario in scenarios)
+        {
+            var family = Enumerable.Range(scenario.MMin, scenario.MMax - scenario.MMin + 1)
+                .Select(m =>
+                {
+                    var row = precomputed[(scenario.QMin, scenario.QMax, m)];
+                    double minAction = scenario.Normalization switch
+                    {
+                        "none" => row.MinNoNorm,
+                        "sqrt-omega" => row.MinOverSqrtOmega,
+                        _ => row.MinOverOmega
+                    };
+                    double occupancyPenalty = 1.0 / Math.Max(row.InBandCount, 1);
+                    double derivedActionTick = minAction + occupancyPenalty;
+                    return (M: m, row.InBandCount, row.AvgClosureQuality, DerivedActionTick: derivedActionTick);
+                })
+                .OrderBy(x => x.M)
+                .ToArray();
+
+            var phaseDirectionCandidates = family
+                .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+                .OrderBy(x => x.DerivedActionTick)
+                .ToArray();
+
+            if (phaseDirectionCandidates.Length < 2)
+            {
+                auditResults.Add((scenario.Name, Resolved: false, SelectedMode: int.MaxValue, SatisfyingModes: Array.Empty<int>(), UniqueM3: false));
+                _output.WriteLine($"RBF20 scenario={scenario.Name} | unresolved (insufficient phase+direction candidates)");
+                continue;
+            }
+
+            double threshold = scenario.Threshold switch
+            {
+                "midpoint-top3" => 0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[Math.Min(2, phaseDirectionCandidates.Length - 1)].DerivedActionTick),
+                _ => 0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[1].DerivedActionTick)
+            };
+
+            var satisfying = family
+                .Where(x =>
+                    x.AvgClosureQuality >= phaseClosureThreshold &&
+                    x.InBandCount >= directionClosureMinOccupancy &&
+                    x.InBandCount >= scenario.ActionMinOcc &&
+                    x.DerivedActionTick <= threshold)
+                .OrderBy(x => x.M)
+                .ToArray();
+
+            int selectedMode;
+            if (satisfying.Length == 0)
+            {
+                selectedMode = int.MaxValue;
+            }
+            else if (satisfying.Length == 1)
+            {
+                selectedMode = satisfying[0].M;
+            }
+            else
+            {
+                selectedMode = scenario.TieBreak == "lowest-action"
+                    ? satisfying.OrderBy(x => x.DerivedActionTick).ThenBy(x => x.M).First().M
+                    : satisfying.Min(x => x.M);
+            }
+
+            bool uniqueM3 = satisfying.Length == 1 && satisfying[0].M == 3;
+            int[] satisfyingModes = satisfying.Select(x => x.M).ToArray();
+
+            auditResults.Add((scenario.Name, Resolved: true, SelectedMode: selectedMode, SatisfyingModes: satisfyingModes, UniqueM3: uniqueM3));
+            _output.WriteLine(
+                $"RBF20 scenario={scenario.Name} | selected={(selectedMode == int.MaxValue ? "none" : $"m{selectedMode}")} | satisfying=[{string.Join(", ", satisfyingModes)}] | uniqueM3={uniqueM3}");
+        }
+
+        var baseline = auditResults.First(r => r.Name == "baseline");
+        Assert.True(baseline.Resolved && baseline.UniqueM3,
+            "Expected baseline audit scenario to keep unique m=3.");
+
+        var resolved = auditResults.Where(r => r.Resolved).ToArray();
+        Assert.True(resolved.Length >= 8,
+            $"Expected broad artifact-audit coverage with resolved scenarios. resolved={resolved.Length}");
+
+        var offenders = resolved.Where(r => r.SelectedMode != 3).ToArray();
+        Assert.True(offenders.Length == 0,
+            $"Operational-artifact dependence detected. offenders=[{string.Join("; ", offenders.Select(o => $"{o.Name}:selected={(o.SelectedMode == int.MaxValue ? "none" : $"m{o.SelectedMode}")},satisfying=[{string.Join(",", o.SatisfyingModes)}]"))}]");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF21_M3_Should_Follow_From_MinimalThreeConstraintClosureModel()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+        const double phaseClosureThreshold = 0.78;
+        const int directionClosureMinOccupancy = 1;
+
+        // Normalized weak-field units for operational theorem-path guards.
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double DerivedActionTick)>(mValues.Length);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double minMicroscopicActionPerTickInBand = double.PositiveInfinity;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                // Minimal three-constraint model proxy:
+                // phase quality + direction/band occupancy + derived action/tick.
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+                double microscopicActionPerTick =
+                    (orderDefect * orderDefect + closureDefect * closureDefect + transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    minMicroscopicActionPerTickInBand = Math.Min(minMicroscopicActionPerTickInBand, microscopicActionPerTick);
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double derivedActionTick = minMicroscopicActionPerTickInBand + occupancyPenalty;
+
+            family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, DerivedActionTick: derivedActionTick));
+        }
+
+        var phaseDirectionCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        Assert.True(phaseDirectionCandidates.Length >= 2,
+            "Expected at least two phase+direction admissible modes to derive minimal-model action/tick threshold.");
+
+        double derivedActionTickThreshold =
+            0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[1].DerivedActionTick);
+
+        var evaluation = family
+            .Select(x =>
+            {
+                bool phaseClosureOk = x.AvgClosureQuality >= phaseClosureThreshold;
+                bool directionClosureOk = x.InBandCount >= directionClosureMinOccupancy;
+                bool actionTickClosureOk = x.DerivedActionTick <= derivedActionTickThreshold;
+                bool allThree = phaseClosureOk && directionClosureOk && actionTickClosureOk;
+
+                string failReason = allThree
+                    ? "passes-all"
+                    : !directionClosureOk ? "direction/band"
+                    : !phaseClosureOk ? "phase/closure"
+                    : "action/tick";
+
+                return (x.M, x.InBandCount, x.AvgClosureQuality, x.DerivedActionTick, phaseClosureOk, directionClosureOk, actionTickClosureOk, allThree, failReason);
+            })
+            .OrderBy(x => x.M)
+            .ToArray();
+
+        foreach (var row in evaluation)
+        {
+            _output.WriteLine(
+                $"RBF21 m={row.M} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | derivedActionTick={row.DerivedActionTick:E6} | phase={row.phaseClosureOk} | direction={row.directionClosureOk} | actionTick={row.actionTickClosureOk} | all={row.allThree} | fail={row.failReason}");
+        }
+
+        _output.WriteLine($"RBF21 derived action/tick threshold: {derivedActionTickThreshold:E6}");
+
+        var satisfyingModes = evaluation.Where(x => x.allThree).Select(x => x.M).OrderBy(x => x).ToArray();
+        int minimalAllThreeMode = satisfyingModes.DefaultIfEmpty(int.MaxValue).Min();
+
+        var m1 = evaluation.First(x => x.M == 1);
+        var m2 = evaluation.First(x => x.M == 2);
+        var m3 = evaluation.First(x => x.M == 3);
+        var m4 = evaluation.First(x => x.M == 4);
+        var m5 = evaluation.First(x => x.M == 5);
+
+        Assert.True(m3.allThree,
+            "Expected m=3 to satisfy the minimal three-constraint closure model.");
+        Assert.True(minimalAllThreeMode == 3,
+            $"Expected m=3 to be minimal satisfying mode. minimal={minimalAllThreeMode}, satisfying=[{string.Join(", ", satisfyingModes)}]");
+        Assert.True(satisfyingModes.Length == 1,
+            $"Expected unique minimal-model selection. satisfying=[{string.Join(", ", satisfyingModes)}]");
+
+        Assert.True(m2.phaseClosureOk && m2.directionClosureOk && !m2.actionTickClosureOk && m2.failReason == "action/tick",
+            $"Expected m=2 to fail by action/tick in minimal model. fail={m2.failReason}");
+        Assert.True(!m4.phaseClosureOk && m4.directionClosureOk && m4.failReason == "phase/closure",
+            $"Expected m=4 to fail by phase/closure in minimal model. fail={m4.failReason}");
+        Assert.True(!m1.directionClosureOk && m1.failReason == "direction/band",
+            $"Expected m=1 to fail by direction/band in minimal model. fail={m1.failReason}");
+        Assert.True(!m5.directionClosureOk && m5.failReason == "direction/band",
+            $"Expected m=5 to fail by direction/band in minimal model. fail={m5.failReason}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF22_M3_MinimalClosureModel_Should_Remain_Stable_Under_QWindowAndThresholdPerturbation()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int directionClosureMinOccupancy = 1;
+
+        // Baseline and small q-window perturbations around RBF21.
+        var qWindows = new (int QMin, int QMax)[]
+        {
+            (12, 24),
+            (12, 25),
+            (13, 25)
+        };
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        // Precompute family metrics per q-window and m once, then perturb thresholds.
+        var precomputed = new Dictionary<(int QMin, int QMax, int M), (int InBandCount, double AvgClosureQuality, double DerivedActionTick)>();
+        foreach (var window in qWindows)
+        {
+            foreach (int m in mValues)
+            {
+                var candidates = Enumerable.Range(window.QMin, window.QMax - window.QMin + 1)
+                    .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                    .ToArray();
+
+                int inBandCount = 0;
+                double closureQualitySum = 0.0;
+                double minMicroscopicActionPerTickInBand = double.PositiveInfinity;
+
+                foreach (var x in candidates)
+                {
+                    double omega = x.Omega;
+                    double gamma = 1.0 / omega;
+                    bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                    var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                    var parameters = new PhotonTransportModel.Parameters
+                    {
+                        LambdaTime = 1.0,
+                        LambdaSpace = 30.0,
+                        EulerBridgeScale = gamma
+                    };
+
+                    double meanRelError = epsilons
+                        .Select(epsilon =>
+                        {
+                            double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                            double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                            return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                        })
+                        .Average();
+
+                    double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                    double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                    double transportDefect = Math.Max(0.0, meanRelError);
+                    double microscopicActionPerTick =
+                        (orderDefect * orderDefect + closureDefect * closureDefect + transportDefect * transportDefect)
+                        / Math.Max(omega, 1e-12);
+
+                    if (inBand)
+                    {
+                        inBandCount++;
+                        minMicroscopicActionPerTickInBand = Math.Min(minMicroscopicActionPerTickInBand, microscopicActionPerTick);
+                    }
+
+                    closureQualitySum += (1.0 - modeLock.ClosureResidual);
+                }
+
+                double avgClosureQuality = closureQualitySum / candidates.Length;
+                double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+                double derivedActionTick = minMicroscopicActionPerTickInBand + occupancyPenalty;
+
+                precomputed[(window.QMin, window.QMax, m)] = (inBandCount, avgClosureQuality, derivedActionTick);
+            }
+        }
+
+        var phaseThresholds = new[] { 0.770, 0.775, 0.780 };
+        var actionThresholdScales = new[] { 0.96, 1.00, 1.04 };
+
+        int resolvedScenarios = 0;
+        int uniqueM3Scenarios = 0;
+        var offenders = new List<string>();
+
+        foreach (var window in qWindows)
+        {
+            foreach (double phaseClosureThreshold in phaseThresholds)
+            {
+                foreach (double actionScale in actionThresholdScales)
+                {
+                    var family = mValues
+                        .Select(m =>
+                        {
+                            var x = precomputed[(window.QMin, window.QMax, m)];
+                            return (M: m, x.InBandCount, x.AvgClosureQuality, x.DerivedActionTick);
+                        })
+                        .OrderBy(x => x.M)
+                        .ToArray();
+
+                    var phaseDirectionCandidates = family
+                        .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+                        .OrderBy(x => x.DerivedActionTick)
+                        .ToArray();
+
+                    if (phaseDirectionCandidates.Length < 1)
+                    {
+                        _output.WriteLine(
+                            $"RBF22 window={window.QMin}..{window.QMax} | phaseThr={phaseClosureThreshold:F3} | actionScale={actionScale:F2} | unresolved");
+                        continue;
+                    }
+
+                    double baseThreshold = phaseDirectionCandidates.Length >= 2
+                        ? 0.5 * (phaseDirectionCandidates[0].DerivedActionTick + phaseDirectionCandidates[1].DerivedActionTick)
+                        : 1.05 * phaseDirectionCandidates[0].DerivedActionTick;
+                    double derivedActionTickThreshold = actionScale * baseThreshold;
+
+                    var satisfying = family
+                        .Where(x =>
+                            x.AvgClosureQuality >= phaseClosureThreshold &&
+                            x.InBandCount >= directionClosureMinOccupancy &&
+                            x.DerivedActionTick <= derivedActionTickThreshold)
+                        .Select(x => x.M)
+                        .OrderBy(x => x)
+                        .ToArray();
+
+                    resolvedScenarios++;
+
+                    bool uniqueM3 = satisfying.Length == 1 && satisfying[0] == 3;
+                    if (uniqueM3)
+                    {
+                        uniqueM3Scenarios++;
+                    }
+                    else
+                    {
+                        offenders.Add(
+                            $"q={window.QMin}..{window.QMax},phase={phaseClosureThreshold:F3},scale={actionScale:F2},satisfying=[{string.Join(",", satisfying)}]");
+                    }
+
+                    _output.WriteLine(
+                        $"RBF22 window={window.QMin}..{window.QMax} | phaseThr={phaseClosureThreshold:F3} | actionScale={actionScale:F2} | thr={derivedActionTickThreshold:E6} | satisfying=[{string.Join(", ", satisfying)}] | uniqueM3={uniqueM3}");
+                }
+            }
+        }
+
+        _output.WriteLine($"RBF22 resolved scenarios: {resolvedScenarios}");
+        _output.WriteLine($"RBF22 unique m=3 count : {uniqueM3Scenarios}");
+
+        Assert.True(resolvedScenarios >= 24,
+            $"Expected broad perturbation coverage with resolved scenarios. resolved={resolvedScenarios}");
+        Assert.True(uniqueM3Scenarios == resolvedScenarios,
+            $"Expected unique m=3 across resolved perturbation scenarios. offenders=[{string.Join("; ", offenders)}]");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF23_ActionTickDiscriminator_Should_Emerge_From_PhaseLatticeEnergy()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+        const double phaseClosureThreshold = 0.78;
+        const int directionClosureMinOccupancy = 1;
+
+        const double orderWeight = 0.50;
+        const double closureWeight = 0.35;
+        const double transportWeight = 0.15;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double FunctionalActionTick)>(mValues.Length);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double inBandFunctionalSum = 0.0;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+
+                double microscopicActionTickFunctional =
+                    (orderWeight * orderDefect * orderDefect
+                    + closureWeight * closureDefect * closureDefect
+                    + transportWeight * transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    inBandFunctionalSum += microscopicActionTickFunctional;
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double meanInBandFunctional = inBandCount > 0
+                ? inBandFunctionalSum / inBandCount
+                : double.PositiveInfinity;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double functionalActionTick = meanInBandFunctional + occupancyPenalty;
+
+            family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, FunctionalActionTick: functionalActionTick));
+        }
+
+        var phaseDirectionCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= directionClosureMinOccupancy)
+            .OrderBy(x => x.FunctionalActionTick)
+            .ToArray();
+
+        Assert.True(phaseDirectionCandidates.Length >= 2,
+            "Expected at least two phase+direction admissible modes to derive an action/tick discriminator from phase-lattice energy.");
+
+        var actionTickRankByMode = phaseDirectionCandidates
+            .Select((x, idx) => (x.M, Rank: idx + 1, x.FunctionalActionTick))
+            .ToDictionary(x => x.M, x => x.Rank);
+
+        var evaluation = family
+            .Select(x =>
+            {
+                bool phaseClosureOk = x.AvgClosureQuality >= phaseClosureThreshold;
+                bool directionClosureOk = x.InBandCount >= directionClosureMinOccupancy;
+                bool actionTickClosureOk =
+                    phaseClosureOk &&
+                    directionClosureOk &&
+                    actionTickRankByMode.TryGetValue(x.M, out int actionTickRank) &&
+                    actionTickRank == 1;
+                bool allThree = phaseClosureOk && directionClosureOk && actionTickClosureOk;
+                string failReason = allThree
+                    ? "none"
+                    : !directionClosureOk
+                        ? "direction/band"
+                        : !phaseClosureOk
+                            ? "phase/closure"
+                            : "action/tick";
+
+                return (x.M, x.InBandCount, x.AvgClosureQuality, x.FunctionalActionTick, phaseClosureOk, directionClosureOk, actionTickClosureOk, allThree, failReason);
+            })
+            .OrderBy(x => x.M)
+            .ToArray();
+
+        foreach (var row in evaluation)
+        {
+            _output.WriteLine(
+                $"RBF23 m={row.M} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | functionalActionTick={row.FunctionalActionTick:E6} | phase={row.phaseClosureOk} | direction={row.directionClosureOk} | actionTick={row.actionTickClosureOk} | all={row.allThree} | fail={row.failReason}");
+        }
+
+        _output.WriteLine(
+            $"RBF23 action/tick discriminator ranking: [{string.Join(", ", phaseDirectionCandidates.Select((x, i) => $"m={x.M}:rank={i + 1},E={x.FunctionalActionTick:E6}"))}]");
+
+        var satisfyingModes = evaluation
+            .Where(x => x.allThree)
+            .Select(x => x.M)
+            .OrderBy(x => x)
+            .ToArray();
+        int minimalAllThreeMode = satisfyingModes.DefaultIfEmpty(int.MaxValue).Min();
+
+        var m2 = evaluation.First(x => x.M == 2);
+        var m3 = evaluation.First(x => x.M == 3);
+        var m4 = evaluation.First(x => x.M == 4);
+
+        Assert.True(phaseDirectionCandidates[0].M == 3,
+            $"Expected microscopic phase-lattice action/tick discriminator to rank m=3 best. rankedFirst={phaseDirectionCandidates[0].M}");
+        Assert.True(m3.phaseClosureOk && m3.directionClosureOk && m3.actionTickClosureOk,
+            $"Expected m=3 to satisfy the microscopic action/tick functional closure. m3ActionTick={m3.actionTickClosureOk}");
+        Assert.True(minimalAllThreeMode == 3,
+            $"Expected m=3 to remain minimal under microscopic functional closure. minimal={minimalAllThreeMode}, satisfying=[{string.Join(", ", satisfyingModes)}]");
+        Assert.True(satisfyingModes.Length == 1,
+            $"Expected unique satisfying mode under microscopic functional closure. satisfying=[{string.Join(", ", satisfyingModes)}]");
+        Assert.True(m2.phaseClosureOk && m2.directionClosureOk && !m2.actionTickClosureOk && m2.failReason == "action/tick",
+            $"Expected m=2 to fail by action/tick discriminator. fail={m2.failReason}");
+        Assert.True(!m4.phaseClosureOk && m4.directionClosureOk && m4.failReason == "phase/closure",
+            $"Expected m=4 to fail by phase/closure in microscopic functional model. fail={m4.failReason}");
+    }
+
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
         ModeLockConfig.Default with
         {

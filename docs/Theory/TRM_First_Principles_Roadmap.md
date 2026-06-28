@@ -41,8 +41,8 @@ Current classification:
 
 | Light | Status |
 |---|---|
-| green | **tested effective behavior:** RBF01–RBF20 support robust \(m=3\) selection, connected threshold-region stability, derived action/tick discriminator behavior, solver-family robustness, and artifact-audit hardening. |
-| yellow | **strongly constrained theorem path:** closure family \(q\Omega-p=0,\; p=q+m\) plus RBF16–RBF20 now provide a strongly constrained derivation path with explicit failure-by-family exclusion logic. |
+| green | **tested effective behavior:** RBF01–RBF23 support robust \(m=3\) selection, connected threshold-region stability, derived action/tick discriminator behavior, solver-family robustness, artifact-audit hardening, bounded perturbation stability of the minimal three-constraint model, and an action/tick discriminator derived from a microscopic phase-lattice energy proxy. |
+| yellow | **strongly constrained theorem path:** closure family \(q\Omega-p=0,\; p=q+m\) plus RBF16–RBF23 provide a strongly constrained derivation path with explicit failure-by-family exclusion logic. |
 | red | **still open / not derived:** theorem-level microscopic uniqueness of \(m=3\) independent of operational threshold families. |
 
 Current classification:
