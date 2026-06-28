@@ -24,8 +24,8 @@ Traffic-light meanings:
 
 | Light | Status |
 |---|---|
-| green | **tested effective behavior:** MEM01–MEM02, TRM84–TRM87, MC01–MC08, HOA01 support current channel role and constraints. |
-| yellow | **candidate derivation:** coarse-graining path via coherence amplitude and transport rotation is formalized in theory docs, but still hypothesis-supported. |
+| green | **tested effective behavior:** MEM01–MEM02, TRM84–TRM87, MC01–MC12, HOA01 support current channel role and constraints, including derived-invariant bridge substitution in MC12. |
+| yellow | **strongly supported derivation chain:** MC09–MC12 support \(A_{\mathrm{dyn}}\propto\phi \rightarrow A_{\mathrm{dyn}}^2|\dot{\mu}| \rightarrow \phi^2|\dot{\mu}|\) with high-form match and bridge retention up to an effective coupling scale (\(R^2_{\mathrm{MC11}}=0.999799\), \(\text{bridgeRetention}_{\mathrm{MC12}}=0.957676\), \(\text{meanGap}_{\mathrm{MC12}}=1.64\times 10^{-4}\)). |
 | red | **still open / not derived:** microscopic uniqueness proof for exponent pair \((a,b)=(2,1)\) and absolute-rate form \(\lvert d\mu/dt\rvert\). |
 
 Current classification:
@@ -41,16 +41,16 @@ Current classification:
 
 | Light | Status |
 |---|---|
-| green | **tested effective behavior:** RBF01–RBF15 show robust \(m=3\) selection under full constraints and collapse/non-uniqueness when action/tick is removed. |
-| yellow | **candidate derivation:** closure family \(q\Omega-p=0,\; p=q+m\) and three-constraint minimality logic are formalized as derive-or-falsify framework. |
+| green | **tested effective behavior:** RBF01–RBF20 support robust \(m=3\) selection, connected threshold-region stability, derived action/tick discriminator behavior, solver-family robustness, and artifact-audit hardening. |
+| yellow | **strongly constrained theorem path:** closure family \(q\Omega-p=0,\; p=q+m\) plus RBF16–RBF20 now provide a strongly constrained derivation path with explicit failure-by-family exclusion logic. |
 | red | **still open / not derived:** theorem-level microscopic uniqueness of \(m=3\) independent of operational threshold families. |
 
 Current classification:
 - tested: yes
-- derived: operational formalization only
+- derived: strongly constrained operational theorem path
 - hypothesis-supported: yes
 - not derived yet: theorem-level closure origin
-- limitation: threshold dependence remains explicit
+- limitation: no microscopic theorem proving full solver-family independence
 
 ---
 
@@ -58,16 +58,16 @@ Current classification:
 
 | Light | Status |
 |---|---|
-| green | **tested effective behavior:** SPARC/RAR + orbit/full-model suites, plus TO01–TO28, TQK01–TQK04, and LC01–LC08, support a stable effective theta-observable selection workflow with holdout, leakage, solver-ablation, operator-structure, energy-gradient, lattice-consistency, and lambda-discipline guards. |
-| yellow | **candidate derivation:** observable-family plan (\(\lvert\partial_r\Theta\rvert\), gradient+level, curvature, orbit-integrated observable) is structured and now test-gated. |
+| green | **tested effective behavior:** SPARC/RAR + orbit/full-model suites, plus TO01–TO28, TQK01–TQK04, LC01–LC08, and TOL01–TOL04, support a stable theta-observable path with holdout, leakage, solver-ablation, operator-structure, energy-gradient, lattice-consistency, lambda-discipline, and chain-level response checks. |
+| yellow | **strongly supported derivation chain:** TOL01–TOL04 support a coherent lattice-energy-backed path \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\), while microscopic closure is still open. |
 | red | **still open / not derived:** unique physically grounded observable map from \(\Theta\) to \(g_{\mathrm{obs}}\), with identifiability against local reparameterizations. |
 
 Current classification:
-- tested: yes (effective derivation-gate level, including TO01–TO28, TQK01–TQK04, and LC01–LC08)
+- tested: yes (effective derivation-gate level, including TO01–TO28, TQK01–TQK04, LC01–LC08, and TOL01–TOL04)
 - calibrated: yes (solver/couplings)
 - hypothesis-supported: yes
 - not derived yet: yes
-- limitation: proxy-level observable layer
+- limitation: not theorem-level microscopic closure
 
 Current synthesis:
 - TO01–TO06: bounded + structurally interesting theta-observable behavior.
@@ -80,7 +80,8 @@ Current synthesis:
 - TO25–TO28: O5 aligns with the negative gradient of a discrete finite-coherence energy and shows energy-descent, zero-mode, and bounded smooth-profile behavior.
 - TQK01–TQK04: phase-lattice small-angle reduction and gradient consistency checks are positive; inverse-distance kernel remains competitive; W6 stays in a plausible finite-coherence correlation-length band.
 - LC01–LC08: lambda-response discipline block is complete. \(\lambda_\Theta\) is constrained by dimensional/holdout/ablation/regularization guards and explicit anti-proxy tests, supporting a regularized regime-conditioned effective coefficient (not global-only and not per-galaxy identity fitting).
-- Claim boundary: O5-W6-InvDistance is now supported as a coarse-grained finite-coherence synchronization-tension operator derived from a small-phase TQM lattice-energy approximation. \(\lambda_\Theta\) is currently a disciplined effective response coefficient, still hypothesis-supported and not theorem-level fundamental.
+- TOL01–TOL04: support chain coherence from phase-lattice energy reduction to O5 energy-gradient behavior, response-scale mapping for \(\lambda_\Theta\), and holdout-stable chain response.
+- Claim boundary: the \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\) chain is now strongly supported as a lattice-energy-backed derivation path, but it remains not theorem-level first-principles closure.
 
 ---
 
