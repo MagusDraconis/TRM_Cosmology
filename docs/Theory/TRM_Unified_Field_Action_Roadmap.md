@@ -15,6 +15,7 @@ Current guard status:
 - UF01–UF05: sector-limit and additive-baseline consistency guards are passing.
 - UF06–UF07: bounded, limit-preserving small cross-coupling guards are passing.
 - UF08: globally identifiable cross-coupling guard (without per-group refit dependence) is passing.
+- UF09: cross-sector preservation guard for MC/FD/TO behavior under small couplings is passing.
 
 ---
 
@@ -97,7 +98,7 @@ Claim-safe statement:
 
 > TRM currently has strongly hardened effective sector paths for scalar transport, vector frame-dragging, and theta-response channels. A unified action-level framework is now structurally specified, but not yet closed as theorem-level first-principles derivation.
 >
-> UF01–UF08 support a unified effective action roadmap whose sector limits, additive baseline, bounded cross-terms, and globally identifiable cross-couplings are test-guarded. This remains a candidate action-level structure, not theorem-level unification.
+> UF01–UF09 support a unified effective action roadmap whose sector limits, additive baseline, bounded cross-terms, globally identifiable cross-couplings, and MC/FD/TO guard preservation are test-guarded. This remains a candidate action-level structure, not theorem-level unification.
 
 ---
 
@@ -124,11 +125,12 @@ Completed:
 6. `UF06_UnifiedAction_CrossTerms_Should_Remain_Bounded_For_SmallCouplings`
 7. `UF07_UnifiedAction_CrossTerms_Should_Not_Break_KnownSectorLimits`
 8. `UF08_AllowedCrossCouplings_Should_Be_Identifiable_Without_Refit`
+9. `UF09_UnifiedAction_Should_Not_Break_MC_FD_TO_Guards`
 
 Next:
 
-1. `UF09_UnifiedAction_Should_Not_Break_MC_FD_TO_Guards`
-2. `UF10_UnifiedAction_CrossCouplings_Should_Show_HoldoutStable_Bounds`
-3. `UF11_UnifiedAction_Should_Keep_NoRefit_Identifiability_Under_Ablation`
+1. `UF10_UnifiedAction_CrossCouplings_Should_Show_HoldoutStable_Bounds`
+2. `UF11_UnifiedAction_Should_Keep_NoRefit_Identifiability_Under_Ablation`
+3. `UF12_UnifiedAction_Should_Preserve_GuardStability_Under_CouplingSweep`
 
 All UF tests are guard-style derivation gates; no theorem-level overclaiming is allowed.

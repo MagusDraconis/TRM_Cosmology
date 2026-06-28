@@ -40,5 +40,5 @@ T,\ \vec A_T,\ \Theta
 that keeps current claim-safe boundaries and shows how scalar transport, vector frame-dragging, and theta-observable sectors connect in one derivation framework.
 
 Current unification hardening:
-- UF01–UF08 are passing and currently support limit consistency, additive zero-coupling decomposition, bounded small cross-couplings, and globally identifiable cross-couplings without per-group refit dependence.
+- UF01–UF09 are passing and currently support limit consistency, additive zero-coupling decomposition, bounded small cross-couplings, globally identifiable cross-couplings without per-group refit dependence, and preservation of existing MC/FD/TO guard behavior under small couplings.
 - Cross-sector interaction structure remains candidate-level and below theorem-level unification.
