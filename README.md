@@ -2,6 +2,7 @@
 
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21012262-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.21012262)
 
 > Claim-safe status: TRM/TQM V3.0 is a tested-effective, hypothesis-supported weak-field transport/synchronization framework. It does not claim theorem-level first-principles closure or equivalence with General Relativity.
 
@@ -32,10 +33,27 @@ The repository implements the numerical models used to evaluate this framework a
 - **Unified action path:** `UF01–UF09` guards scalar/vector/theta limit recovery, bounded small cross-terms, and integration preservation.
 - **Local gates stabilized:** category-based workflow is active (`CoreRegression`, `Category!=LongRunning`, `Category=LongRunning`).
 
----
-## <img src="https://cdn.simpleicons.org/zenodo/0A7BBB" alt="Zenodo" width="18" /> Zenodo link
 
-[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21012262-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.21012262)
+## 🧭 Reviewer quick start
+
+> TRM/TQM V3.0 is a tested-effective, hypothesis-supported multi-sector framework. It is not a claim to replace General Relativity and does not claim theorem-level first-principles closure.
+
+Key reproducibility commands:
+
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=CoreRegression"`
+
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category!=LongRunning"`
+
+## 📚 V3.0 paper set
+
+- `docs/papers/Paper1_TRM_V3_Framework/TRM_V3_0_Framework_Review_Baseline.pdf`
+- `docs/papers/Paper2_Memory_ModeLocking/TRM_V3_0_Memory_and_ModeLocking.pdf`
+- `docs/papers/Paper3_Theta_Vector_UnifiedAction/TRM_V3_0_Theta_Vector_and_UnifiedAction.pdf`
+
+## 🕰️ Version lineage
+
+- `V3.0`: current review baseline (multi-sector framework with explicit claim boundaries).
+- `V2.2` and `V1`: legacy historical baselines.
 
 ## 📊 Implemented Domains
 
