@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+
+\bibitem{collective_mode_locking}
+{TRM Project}.
+\newblock Trm collective mode locking bridge scale, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Collective\_Mode\_Locking\_BridgeScale.md.
+
+\bibitem{trm_status_v3}
+{TRM Project}.
+\newblock Trm current status for peer review, 2026.
+\newblock Repository document:
+  docs/review/TRM\_Current\_Status\_For\_PeerReview.md.
+
+\bibitem{finsler_action}
+{TRM Project}.
+\newblock Trm finsler optical action, 2026.
+\newblock Repository document: docs/Theory/TRM\_Finsler\_Optical\_Action.md.
+
+\bibitem{geodesic_derivation}
+{TRM Project}.
+\newblock Trm geodesic derivation, 2026.
+\newblock Repository document: docs/Theory/TRM\_Geodesic\_Derivation.md.
+
+\bibitem{m3_closure_path}
+{TRM Project}.
+\newblock Trm m3 closure theorem path, 2026.
+\newblock Repository document: docs/Theory/TRM\_M3\_Closure\_Theorem\_Path.md.
+
+\bibitem{trm_memory_first_principles}
+{TRM Project}.
+\newblock Trm memory channel: First-principles derivation track, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Memory\_Channel\_First\_Principles.md.
+
+\bibitem{memory_derivation}
+{TRM Project}.
+\newblock Trm memory channel microscopic derivation, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Memory\_Channel\_Microscopic\_Derivation.md.
+
+\bibitem{trm_rational_band_first_principles}
+{TRM Project}.
+\newblock Trm rational band: First-principles origin, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Rational\_Band\_First\_Principles.md.
+
+\end{thebibliography}

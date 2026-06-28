@@ -1,0 +1,135 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+
+\title{Memory-Channel and Mode-Locking Constraints in TRM/TQM V3.0}
+\author{
+Fabrice Wieser\\
+Independent Researcher\\
+\url{https://github.com/MagusDraconis/TRM_Cosmology}
+}
+\date{June 2026\\
+V3.0 Review Baseline\\
+Release tag: \texttt{trm-v3.0-review-release}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper isolates two tightly coupled TRM/TQM V3.0 tracks: the memory-channel derivation path and the rational mode-locking closure path \cite{memory_derivation,m3_closure_path}. The goal is to document what is currently tested-effective and structurally constrained, while preserving explicit claim boundaries \cite{trm_status_v3}. The memory term \(\phi^2\lvert\dot{\mu}\rvert\) is currently strongly supported as a minimal effective invariant under guard tests, and the \(m=3\) closure route is currently strongly constrained through RBF hardening \cite{trm_memory_first_principles,trm_rational_band_first_principles}. Neither path is claimed as theorem-level microscopic closure.
+\end{abstract}
+
+\section{Introduction}
+
+TRM/TQM V3.0 uses a test-gated strategy: derive candidate structures, stress them under ablations, and retain only forms that survive structural and numerical constraints \cite{trm_status_v3}. Within this strategy, the memory-channel and mode-locking blocks are central because they constrain transport response and closure order, respectively.
+
+This document focuses on:
+\begin{enumerate}
+  \item memory-channel admissibility and current microscopic support level;
+  \item mode-locking closure structure and the current \(m=3\) theorem-path hardening;
+  \item explicit failure criteria and remaining first-principles gaps.
+\end{enumerate}
+
+\section{Memory-Channel Track}
+
+\subsection{Core object}
+
+The effective memory-channel invariant is currently represented by:
+\[
+\phi^2\lvert\dot{\mu}\rvert.
+\]
+
+\subsection{Current test support}
+
+The memory path is guarded by MEM/TRM/MC blocks, including MC09-MC12 hardening, and currently supports \cite{memory_derivation,trm_memory_first_principles,geodesic_derivation,finsler_action}:
+\[
+A_{\mathrm{dyn}}\propto\phi
+\;\rightarrow\;
+A_{\mathrm{dyn}}^2\lvert\dot{\mu}\rvert
+\;\rightarrow\;
+\phi^2\lvert\dot{\mu}\rvert.
+\]
+
+At V3.0, this is interpreted as strong lattice-proxy/microscopic support at effective level, not theorem-level derivation.
+
+\subsection{Claim boundary}
+
+\begin{itemize}
+  \item Supported: tested-effective/hypothesis-supported effective invariant path.
+  \item Not claimed: theorem-level microscopic uniqueness proof.
+\end{itemize}
+
+\section{Rational Mode-Locking and \(m=3\) Closure Track}
+
+\subsection{Core object}
+
+The mode-locking path is organized around closure-family constraints and the inverse rational band \cite{collective_mode_locking,trm_rational_band_first_principles}:
+\[
+\Omega=\frac{q+3}{q},\qquad \gamma=\frac{1}{\Omega}
+\]
+\[
+\Omega \approx 1.16..1.19,\qquad \gamma \approx 0.84..0.86.
+\]
+
+\subsection{Current hardening status}
+
+The Gap-2 path is currently hardened through RBF blocks, with RBF16-RBF23 providing \cite{m3_closure_path,trm_status_v3}:
+\begin{enumerate}
+  \item connected threshold-region stability,
+  \item explicit failure-by-family exclusion,
+  \item bounded perturbation stability,
+  \item microscopic phase-lattice-energy-based action/tick discriminator reinforcement.
+\end{enumerate}
+
+This keeps \(m=3\) as a strongly constrained closure-order candidate under the tested rule family.
+
+\subsection{Claim boundary}
+
+\begin{itemize}
+  \item Supported: strongly constrained theorem path for \(m=3\).
+  \item Not claimed: theorem-level microscopic closure theorem.
+\end{itemize}
+
+\section{Coupled Interpretation: Memory + Mode-Locking}
+
+The two tracks are methodologically coupled:
+\begin{enumerate}
+  \item the memory-channel block constrains admissible transport-memory structure;
+  \item the mode-locking block constrains admissible closure order and discriminator structure.
+\end{enumerate}
+
+Together they reduce arbitrary model freedom, but they do not yet establish full microscopic first-principles completion.
+
+\section{Falsification and Failure Criteria}
+
+The current interpretation should be narrowed or rejected if:
+\begin{enumerate}
+  \item a competing memory invariant satisfies the same admissibility constraints with strictly better bridge behavior and no additional penalties;
+  \item \(m=3\) loses constrained minimality under robust, non-ad-hoc perturbation families;
+  \item microscopic derivation assumptions force a different leading invariant or closure order under the same structural constraints.
+\end{enumerate}
+
+\section{Remaining Gaps}
+
+Open items remain explicit:
+\begin{itemize}
+  \item theorem-level microscopic closure for \(\phi^2\lvert\dot{\mu}\rvert\),
+  \item theorem-level microscopic closure for \(m=3\),
+  \item full first-principles derivation bridge between these blocks and broader unified action structure.
+\end{itemize}
+
+\section{Conclusion}
+
+In V3.0, the memory-channel and mode-locking tracks are substantially hardened and claim-safe: both are strongly constrained and tested-effective in their current role, but neither is promoted to theorem-level microscopic proof. This status supports critical external review and targeted next-step falsification work, not over-claiming completion.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
