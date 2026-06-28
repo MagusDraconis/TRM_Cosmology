@@ -575,6 +575,109 @@ public class UnifiedFieldActionRoadmapTests
         Assert.True(worstRmsRatio < 1.02, "UF08 should not require per-group refit to explain grouped samples.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF09_UnifiedAction_Should_Not_Break_MC_FD_TO_Guards()
+    {
+        // Cross-coupling safety meta-guard:
+        // small unified couplings must not materially break proxy MC/FD/TO guards.
+        const double gammaTA = 0.01;
+        const double gammaTTheta = 0.008;
+        const double gammaATheta = 0.011;
+
+        // MC proxy: maintain near-linear relation of memory-channel form.
+        var mcBase = new List<double>();
+        var mcCoupled = new List<double>();
+        for (int i = 1; i <= 32; i++)
+        {
+            double phi = 0.02 * i;
+            double muDot = 0.015 + 0.0015 * i;
+            double vCurl = 0.03 + 0.0009 * i;
+            double thetaGrad = 0.02 * Math.Sin(0.2 * i);
+
+            double baseMem = phi * phi * Math.Abs(muDot);
+            double couplingFactor = 1.0 + gammaTA * phi * vCurl + gammaTTheta * phi * thetaGrad + gammaATheta * vCurl * thetaGrad;
+            double coupledMem = baseMem * couplingFactor;
+
+            mcBase.Add(baseMem);
+            mcCoupled.Add(coupledMem);
+        }
+
+        var mcFit = FitLineAndR2(mcBase, mcCoupled);
+        double mcMeanRatio = mcCoupled.Average() / Math.Max(mcBase.Average(), 1e-18);
+        _output.WriteLine($"[UF09] MC proxy: slope={mcFit.Slope:E6}, intercept={mcFit.Intercept:E6}, R2={mcFit.R2:F6}, meanRatio={mcMeanRatio:F6}");
+
+        Assert.True(mcFit.R2 > 0.999, "UF09 MC proxy linearity should remain very high under small couplings.");
+        Assert.InRange(mcMeanRatio, 0.99, 1.01);
+
+        // FD proxy: preserve near-linear Ω/J scaling shape.
+        var fdKBase = new List<double>();
+        var fdKCoupled = new List<double>();
+        foreach (double omega in new[] { 0.5, 0.8, 1.1, 1.4, 1.7 })
+        {
+            double j = 2.2 * omega;
+            double omegaBase = 0.031 * j;
+            double scalarGrad = 0.04 + 0.01 * omega;
+            double thetaGrad = 0.015 * Math.Cos(omega);
+            double couplingFactor = 1.0 + gammaTA * scalarGrad * omegaBase + gammaTTheta * scalarGrad * thetaGrad + gammaATheta * omegaBase * thetaGrad;
+            double omegaCoupled = omegaBase * couplingFactor;
+
+            fdKBase.Add(omegaBase / j);
+            fdKCoupled.Add(omegaCoupled / j);
+        }
+
+        double fdSpreadBase = RelativeSpread(fdKBase);
+        double fdSpreadCoupled = RelativeSpread(fdKCoupled);
+        _output.WriteLine($"[UF09] FD proxy: spreadBase={fdSpreadBase:E6}, spreadCoupled={fdSpreadCoupled:E6}");
+
+        Assert.True(fdSpreadCoupled < 0.02, "UF09 FD proxy linearity spread should remain tight.");
+        Assert.True(fdSpreadCoupled <= fdSpreadBase + 0.01, "UF09 FD proxy spread should not degrade materially.");
+
+        // TO proxy: preserve energy-descent relaxation behavior.
+        const double betaTheta = 0.7;
+        const double alphaT = 1.3;
+        const double massT = 0.4;
+        const double alphaA = 0.9;
+        const double dx = 1.0;
+        var thetaProfile = new[] { 0.00, 0.18, 0.31, 0.26, 0.12, -0.02 };
+        var o5 = ComputeThetaO5(thetaProfile, betaTheta, dx);
+        const double relaxStep = 0.08;
+        var thetaRelaxed = new double[thetaProfile.Length];
+        for (int i = 0; i < thetaProfile.Length; i++)
+            thetaRelaxed[i] = thetaProfile[i] + relaxStep * o5[i];
+
+        double eBeforeBase = ComputeThetaEnergy(thetaProfile, betaTheta, dx);
+        double eAfterBase = ComputeThetaEnergy(thetaRelaxed, betaTheta, dx);
+        double eBeforeCoupled = ComputeThetaEnergyFromUnified(thetaProfile, alphaT, massT, alphaA, betaTheta, gammaTA, gammaTTheta, gammaATheta, dx);
+        double eAfterCoupled = ComputeThetaEnergyFromUnified(thetaRelaxed, alphaT, massT, alphaA, betaTheta, gammaTA, gammaTTheta, gammaATheta, dx);
+        double dropBase = eBeforeBase - eAfterBase;
+        double dropCoupled = eBeforeCoupled - eAfterCoupled;
+        double dropRatio = dropCoupled / Math.Max(dropBase, 1e-18);
+
+        _output.WriteLine($"[UF09] TO proxy: eBeforeBase={eBeforeBase:E6}, eAfterBase={eAfterBase:E6}, eBeforeCoupled={eBeforeCoupled:E6}, eAfterCoupled={eAfterCoupled:E6}, dropRatio={dropRatio:F6}");
+
+        Assert.True(eAfterCoupled < eBeforeCoupled, "UF09 TO proxy should keep relaxation energy descent.");
+        Assert.InRange(dropRatio, 0.90, 1.10);
+
+        // Global positivity sanity on mixed states under small couplings.
+        double minUnified = double.PositiveInfinity;
+        foreach (var (sGrad, sVal, vCurl, tGrad) in new[]
+        {
+            (0.06, 0.05, 0.07, -0.04),
+            (-0.09, -0.03, 0.10, 0.06),
+            (0.12, 0.02, -0.11, 0.09),
+            (-0.14, 0.06, 0.13, -0.08),
+            (0.18, -0.05, -0.15, 0.11)
+        })
+        {
+            double u = UnifiedActionDensity(alphaT, massT, alphaA, betaTheta, gammaTA, gammaTTheta, gammaATheta, sGrad, sVal, vCurl, tGrad);
+            minUnified = Math.Min(minUnified, u);
+        }
+
+        _output.WriteLine($"[UF09] global sanity: minUnified={minUnified:E6}");
+        Assert.True(minUnified > 0.0, "UF09 unified action should remain positive on mixed sampled states.");
+    }
+
     private static double ScalarActionDensity(double alphaT, double massT, double scalarGrad, double scalarValue)
     {
         return alphaT * scalarGrad * scalarGrad + 0.5 * massT * scalarValue * scalarValue;
@@ -720,5 +823,62 @@ public class UnifiedFieldActionRoadmapTests
             m[0, 0] * (m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1]) -
             m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0]) +
             m[0, 2] * (m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0]);
+    }
+
+    private static (double Slope, double Intercept, double R2) FitLineAndR2(IReadOnlyList<double> x, IReadOnlyList<double> y)
+    {
+        int n = Math.Min(x.Count, y.Count);
+        if (n == 0)
+            return (0.0, 0.0, 0.0);
+
+        double meanX = 0.0, meanY = 0.0;
+        for (int i = 0; i < n; i++)
+        {
+            meanX += x[i];
+            meanY += y[i];
+        }
+        meanX /= n;
+        meanY /= n;
+
+        double sxx = 0.0, sxy = 0.0, sst = 0.0;
+        for (int i = 0; i < n; i++)
+        {
+            double dx = x[i] - meanX;
+            double dy = y[i] - meanY;
+            sxx += dx * dx;
+            sxy += dx * dy;
+            sst += dy * dy;
+        }
+
+        double slope = sxy / Math.Max(sxx, 1e-18);
+        double intercept = meanY - slope * meanX;
+
+        double sse = 0.0;
+        for (int i = 0; i < n; i++)
+        {
+            double yHat = slope * x[i] + intercept;
+            double e = y[i] - yHat;
+            sse += e * e;
+        }
+
+        double r2 = 1.0 - sse / Math.Max(sst, 1e-18);
+        return (slope, intercept, r2);
+    }
+
+    private static double RelativeSpread(IReadOnlyList<double> values)
+    {
+        if (values.Count == 0)
+            return 0.0;
+        double mean = 0.0;
+        foreach (double v in values) mean += v;
+        mean /= values.Count;
+        double min = double.PositiveInfinity;
+        double max = double.NegativeInfinity;
+        foreach (double v in values)
+        {
+            min = Math.Min(min, v);
+            max = Math.Max(max, v);
+        }
+        return (max - min) / Math.Max(Math.Abs(mean), 1e-18);
     }
 }
