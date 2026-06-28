@@ -1,17 +1,20 @@
-# 🌌 TRM Cosmology (Clockwork Cosmology V2.2)
+# 🌌 Temporal Rate Matrix / Temporal Quantum Matrix — V3.0 Review Baseline
 
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This repository contains the numerical implementation and analysis tools for the **Temporal Rate Matrix (TRM)** framework, as presented in the paper:
+> Claim-safe status: TRM/TQM V3.0 is a tested-effective, hypothesis-supported weak-field transport/synchronization framework. It does not claim theorem-level first-principles closure or equivalence with General Relativity.
 
-> *Clockwork Cosmology: A Temporal Rate Matrix Framework for Unified Gravitational and Cosmological Dynamics*
+This repository contains the numerical implementation and analysis tools for the **Temporal Rate Matrix (TRM)** / **Temporal Quantum Matrix (TQM)** framework.
+
+> *Temporal Rate Matrix / Temporal Quantum Matrix — V3.0 Review Baseline*
 
 
 ## 🔬 Overview
 
-The TRM framework explores an alternative scalar-field approach to gravitational and cosmological phenomena.  
-Instead of treating dark matter and dark energy as independent components, the model interprets observed discrepancies as manifestations of a single **temporal rate field**:
+The TRM/TQM framework is organized as a multi-sector weak-field effective model (scalar, vector, nonlocal theta, unified action roadmap) with explicit test guards and claim boundaries.
+
+Instead of claiming a completed curvature-first replacement theory, the model treats observed discrepancies as effective transport/synchronization behavior around a temporal-rate field:
 
 \[
 \mathcal{T}(x,t)
@@ -19,13 +22,15 @@ Instead of treating dark matter and dark energy as independent components, the m
 
 The repository implements the numerical models used to evaluate this framework across multiple astrophysical domains.
 
-## ✅ Current Branch Baseline (Preprint Snapshot)
+## ✅ Current Branch Baseline (V3.0 Review Release)
 
-- **EL bridge track:** `EL01–EL17` provides an executable Euler-Lagrange/Fermat bridge path with weak-field bounded validation.
-- **Isolated mode-locking track:** `CML01–CML08` validates the collective cadence/bridge-scale path without direct `PhotonTransportModel` circularity.
-- **Memory ablation:** `MEM01` compares `LambdaSpace = 30` vs `LambdaSpace = 0` and quantifies impact on deflection and Schwarzschild proximity.
-- **Claim boundary:** `gamma ≈ 0.85` is treated as a **band-supported bridge scale** inside an inverse rational collective locking window, not as a uniquely fundamental constant.
-- **Local gates stabilized:** category-based test workflow is active (`CoreRegression`, `Category!=LongRunning`, `Category=LongRunning`).
+- **Scalar transport + bridge guards:** EL/Fermat executable bridge path remains tested and bounded.
+- **Memory-channel path:** `MC09–MC12` hardens the \(\phi^2|\dot{\mu}|\) derivation path up to effective-coupling level.
+- **Rational closure path:** `RBF21–RBF23` hardens \(m=3\) via minimal three-constraint model, bounded perturbation stability, and phase-lattice-energy-based action/tick discriminator.
+- **Theta observable path:** TO/TQK/LC/TOL guard blocks support \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\) as tested-effective chain.
+- **Vector sector path:** `FD01–FD20` hardens weak-field frame-dragging candidate behavior and non-fitted effective \(k_T\) workflow.
+- **Unified action path:** `UF01–UF09` guards scalar/vector/theta limit recovery, bounded small cross-terms, and integration preservation.
+- **Local gates stabilized:** category-based workflow is active (`CoreRegression`, `Category!=LongRunning`, `Category=LongRunning`).
 
 ---
 ## <img src="https://cdn.simpleicons.org/zenodo/0A7BBB" alt="Zenodo" width="18" /> Zenodo link
@@ -61,7 +66,7 @@ This repository includes computational models and analysis scripts for:
 - `TRM.CMD`  
   Console entry point to execute selected high-performance analyses and parameter sweeps via an interactive menu.
 - `TRM.Tests`  
-  xUnit test suite acting as the scientific safeguard. Includes EL bridge tests (`EL01–EL17`), collective mode-locking tests (`CML01–CML08`), memory ablation (`MEM01`), plus domain validations and regression gates.
+  xUnit test suite acting as the scientific safeguard. Includes sector hardening blocks (MC09–MC12, RBF21–RBF23, TO/TQK/LC/TOL, FD01–FD20, UF01–UF09), plus domain validations and regression gates.
 - `TRM.Python`  
   Python plotting pipeline for visualizing output data (CSV) into publication-ready graphs.
 
@@ -103,6 +108,7 @@ Run long-running sweeps manually/nightly:
 
 ## 📄 Key Review/Theory Documents
 
+- `docs/review/TRM_Cover_Letter_And_Abstract.md`
 - `docs/review/REVIEW_PACKAGE.md` *(recommended reviewer start point)*
 - `docs/review/TRM_Peer_Review_Request.md`
 - `docs/review/TRM_Current_Status_For_PeerReview.md`
@@ -110,6 +116,9 @@ Run long-running sweeps manually/nightly:
 - `docs/review/TRM_TestSuite_Classification.md`
 - `docs/review/TRM_Real_Physics_Test_Coverage.md`
 - `docs/review/TRM_Code_To_Theory_Audit.md`
+- `docs/Theory/TRM_Field_Sector_Map.md`
+- `docs/Theory/TRM_First_Principles_Gap_List.md`
+- `docs/Theory/TRM_Unified_Field_Action_Roadmap.md`
 - `docs/Theory/TRM_Geodesic_Derivation.md`
 - `docs/Theory/TRM_Collective_Mode_Locking_BridgeScale.md`
 - `docs/Theory/TRM_Finsler_Optical_Action.md`
