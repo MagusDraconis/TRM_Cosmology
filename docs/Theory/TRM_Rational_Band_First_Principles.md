@@ -41,6 +41,18 @@ Additional RBF test status:
 - RBF10 stress-tests that RBF09 selection under score-weight ablation and finds \(m=3\) robustly retained as a top-ranked compromise mode (with majority wins across tested weight sets).
 - RBF11 proposes \(m=3\) as the minimal mode satisfying three operational closure constraints: phase closure, bridge-band occupancy, and action/tick consistency. The result is currently threshold-based and should be treated as a candidate formalization, not yet a uniqueness theorem.
 - RBF12 tests threshold robustness of that RBF11 formalization (phase threshold, action-occupancy minimum, and action/tick cost threshold scaling) and keeps \(m=3\) as the minimal closure mode in resolved ablation cases.
+- RBF13 identifies action/tick as the key discriminator: without it, minimal mode collapses to \(m=2\).
+- RBF14 confirms lock-vs-EL tradeoff against competing bands, not blanket single-band dominance.
+- RBF15 shows unique \(m=3\) with the full constraint stack and non-uniqueness without action/tick.
+- RBF16 shows unique \(m=3\) persists over a connected threshold region including the baseline point.
+- RBF17 derives the action/tick discriminator from a coarse-grained microscopic action proxy.
+- RBF18 keeps derived action/tick-based unique \(m=3\) selection across tested solver-step families.
+- RBF19 establishes failure-by-family exclusion reasons for neighboring modes.
+- RBF20 audits operational artifacts (candidate range, q-window, normalization, occupancy gates, threshold formation, tie-breaking) and keeps \(m=3\) in all resolved scenarios.
+
+Current Gap-2 status:
+
+> strongly constrained theorem path / not theorem-level proof.
 
 ---
 

@@ -644,6 +644,198 @@ namespace TRM.Tests.RealityTests
 
         [Trait("Category", "PhysicsValidation")]
         [Fact]
+        public void MC09_CoherenceAmplitude_Should_Scale_With_Phi_From_Lattice()
+        {
+            // TQM lattice proxy: weak-field source bias enters phase dynamics and modulates
+            // coarse-grained synchronization amplitude A(phi). This is a derive-or-falsify guard,
+            // not a theorem-level proof.
+            double[] phis = { 0.0, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+            var amplitudes = phis.Select(SimulateCoherenceAmplitudeFromLatticeProxy).ToArray();
+            double baseline = amplitudes[0];
+
+            var dynamicData = phis
+                .Skip(1)
+                .Select((phi, idx) => (X: phi, Y: amplitudes[idx + 1] - baseline))
+                .ToArray();
+
+            for (int i = 1; i < amplitudes.Length; i++)
+            {
+                _output.WriteLine($"[MC09] phi={phis[i]:E3} | A={amplitudes[i]:F6} | Adyn={amplitudes[i] - baseline:E6}");
+                Assert.True(amplitudes[i] + 1e-6 >= amplitudes[i - 1], "Expected non-decreasing coherence amplitude with phi in weak field.");
+            }
+
+            var fit = FitLinear(dynamicData);
+            double meanY = dynamicData.Average(p => p.Y);
+            double ssTot = dynamicData.Sum(p => (p.Y - meanY) * (p.Y - meanY));
+            double ssRes = dynamicData.Sum(p =>
+            {
+                double yHat = fit.Slope * p.X + fit.Intercept;
+                double e = p.Y - yHat;
+                return e * e;
+            });
+            double r2 = ssTot > 0.0 ? 1.0 - ssRes / ssTot : 1.0;
+
+            _output.WriteLine($"[MC09] A_dyn(phi) linear fit: slope={fit.Slope:E6}, intercept={fit.Intercept:E6}, R2={r2:F6}");
+
+            Assert.True(fit.Slope > 0.0, "Expected positive weak-field coherence-amplitude response to phi.");
+            Assert.True(Math.Abs(fit.Intercept) < 1e-3, "Expected near-zero intercept after baseline subtraction.");
+            Assert.True(r2 > 0.95, $"Expected near-linear weak-field A(phi) scaling in lattice proxy, got R2={r2:F4}.");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
+        public void MC10_QuadraticCoherenceCoupling_Should_Be_First_Admissible_MemoryInvariant()
+        {
+            // Uses MC09 lattice-proxy response A_dyn(phi) and checks first admissible memory order:
+            // A|dmu| should violate weak-field hierarchy, A^2|dmu| should satisfy it while staying bridge-relevant.
+            var parameters = new PhotonTransportModel.Parameters
+            {
+                LambdaTime = 1.0,
+                LambdaSpace = 30.0
+            };
+
+            const double absDmuDt = 0.02;
+            const double weakFieldSubleadingThreshold = 0.10;
+            const double bridgeRelevanceThreshold = 1e-6;
+            double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4 };
+
+            double baselineA = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+            bool linearViolates = false;
+            bool quadraticAdmissible = true;
+            bool quadraticBridgeRelevant = false;
+
+            foreach (double phi in phis)
+            {
+                double aDyn = SimulateCoherenceAmplitudeFromLatticeProxy(phi) - baselineA;
+                double aDynClamped = Math.Max(aDyn, 0.0);
+                double timeContribution = parameters.LambdaTime * phi;
+
+                double linearInvariant = aDynClamped * absDmuDt;
+                double quadraticInvariant = aDynClamped * aDynClamped * absDmuDt;
+
+                double linearRatio = parameters.LambdaSpace * linearInvariant / Math.Max(timeContribution, 1e-30);
+                double quadraticRatio = parameters.LambdaSpace * quadraticInvariant / Math.Max(timeContribution, 1e-30);
+
+                _output.WriteLine($"[MC10] phi={phi:E3} | Adyn={aDynClamped:E6} | linearRatio={linearRatio:E6} | quadraticRatio={quadraticRatio:E6}");
+
+                if (linearRatio >= weakFieldSubleadingThreshold)
+                    linearViolates = true;
+
+                if (quadraticRatio >= weakFieldSubleadingThreshold)
+                    quadraticAdmissible = false;
+
+                if (parameters.LambdaSpace * quadraticInvariant >= bridgeRelevanceThreshold)
+                    quadraticBridgeRelevant = true;
+            }
+
+            Assert.True(linearViolates,
+                "Expected lattice-proxy linear-in-A memory coupling to violate weak-field hierarchy.");
+            Assert.True(quadraticAdmissible,
+                "Expected lattice-proxy quadratic-in-A memory coupling to remain weak-field subleading.");
+            Assert.True(quadraticBridgeRelevant,
+                "Expected lattice-proxy quadratic-in-A memory coupling to remain bridge-relevant.");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
+        public void MC11_DerivedMemoryInvariant_Should_Match_PhotonTransport_Form()
+        {
+            // Bridge check:
+            // I_derived = A_dyn^2 * |dmu/dt|
+            // I_transport = phi^2 * |dmu/dt|
+            // Expect linear proportionality up to coupling scale.
+            double baselineA = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+            double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 2e-3 };
+            double[] absDmu = { 0.005, 0.01, 0.02, 0.03 };
+
+            var pairs = new List<(double X, double Y)>();
+
+            foreach (double phi in phis)
+            {
+                double aDyn = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phi) - baselineA);
+
+                foreach (double dmu in absDmu)
+                {
+                    double iTransport = phi * phi * dmu;
+                    double iDerived = aDyn * aDyn * dmu;
+                    pairs.Add((X: iTransport, Y: iDerived));
+                }
+            }
+
+            var fit = FitLinear(pairs);
+            double meanY = pairs.Average(p => p.Y);
+            double ssTot = pairs.Sum(p => (p.Y - meanY) * (p.Y - meanY));
+            double ssRes = pairs.Sum(p =>
+            {
+                double yHat = fit.Slope * p.X + fit.Intercept;
+                double e = p.Y - yHat;
+                return e * e;
+            });
+            double r2 = ssTot > 0.0 ? 1.0 - ssRes / ssTot : 1.0;
+
+            double maxY = pairs.Max(p => p.Y);
+            double interceptRel = Math.Abs(fit.Intercept) / Math.Max(maxY, 1e-30);
+
+            _output.WriteLine($"[MC11] Iderived vs Itransport fit: slope={fit.Slope:E6}, intercept={fit.Intercept:E6}, R2={r2:F6}, interceptRel={interceptRel:E6}");
+
+            Assert.True(fit.Slope > 0.0, "Expected positive proportionality between derived and transport invariants.");
+            Assert.True(r2 > 0.995, $"Expected strong linear match (up to coupling scale), got R2={r2:F6}.");
+            Assert.True(interceptRel < 0.02, $"Expected small relative intercept, got interceptRel={interceptRel:E6}.");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
+        public void MC12_DerivedMemoryInvariant_Should_Reproduce_ELBridge_When_Substituted()
+        {
+            // Substitute lattice-derived invariant A_dyn(phi)^2*|dmu/dt| into bridge path
+            // and verify bridge agreement remains in the same effective window (up to coupling scale).
+            const double G = 1.0;
+            const double c = 1.0;
+            const double b = 1.0;
+            const double dt = 0.001;
+            double[] epsilons = { 2e-3, 1e-2 };
+
+            var parameters = new PhotonTransportModel.Parameters
+            {
+                LambdaTime = 1.0,
+                LambdaSpace = 30.0
+            };
+
+            double couplingScale = FitDerivedToTransportCouplingScale();
+            _output.WriteLine($"[MC12] derived coupling scale={couplingScale:E6}");
+            Assert.True(couplingScale > 0.0 && double.IsFinite(couplingScale), "Expected positive finite coupling scale.");
+
+            var rows = epsilons.Select(epsilon =>
+            {
+                double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                double alphaBaseline = ComputeDeflectionForMemoryInvariantCandidate(
+                    epsilon, G, c, b, dt, parameters, phiPower: 2.0, dmuPower: 1.0);
+                double alphaDerived = ComputeDeflectionForDerivedMemoryInvariant(
+                    epsilon, G, c, b, dt, parameters, couplingScale);
+
+                double relBaseline = Math.Abs(alphaBaseline - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                double relDerived = Math.Abs(alphaDerived - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                double relGap = Math.Abs(alphaDerived - alphaBaseline) / Math.Max(alphaBaseline, 1e-16);
+
+                _output.WriteLine($"[MC12] eps={epsilon:E3} | baselineRel={relBaseline:E6} | derivedRel={relDerived:E6} | derivedVsBaseline={relGap:E6}");
+                return (relBaseline, relDerived, relGap);
+            }).ToArray();
+
+            double meanBaseline = rows.Average(r => r.relBaseline);
+            double meanDerived = rows.Average(r => r.relDerived);
+            double meanGap = rows.Average(r => r.relGap);
+            double bridgeRetention = meanBaseline > 0 ? meanDerived / meanBaseline : 1.0;
+
+            _output.WriteLine($"[MC12] meanBaseline={meanBaseline:E6} | meanDerived={meanDerived:E6} | bridgeRetention={bridgeRetention:F6} | meanGap={meanGap:E6}");
+
+            Assert.True(bridgeRetention >= 0.80 && bridgeRetention <= 1.20,
+                $"Derived invariant should preserve EL-bridge level up to coupling scale. retention={bridgeRetention:F6}");
+            Assert.True(meanGap < 0.20,
+                $"Derived substitution should stay close to baseline bridge behavior. meanGap={meanGap:E6}");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
         public void HOA01_TransportIndex_Should_Depend_On_Position_Direction_And_DirectionalChange()
         {
             const double G = 1.0;
@@ -1024,6 +1216,237 @@ namespace TRM.Tests.RealityTests
             rms = Math.Sqrt(rms / n);
 
             return (slope, intercept, rms);
+        }
+
+        private static double SimulateCoherenceAmplitudeFromLatticeProxy(double phi)
+        {
+            const int n = 64;
+            const int steps = 4000;
+            const int sampleWindow = 1000;
+            const double dt = 0.02;
+            const double omegaSpread = 0.08;
+            const double kBase = 0.80;
+            const double kPhi = 120.0;
+            const double alpha = 1.0;
+
+            var theta = new double[n];
+            var omega = new double[n];
+
+            for (int i = 0; i < n; i++)
+            {
+                double phase = 2.0 * Math.PI * i / n;
+                theta[i] = 0.15 * Math.Sin(phase) + 0.05 * Math.Cos(2.0 * phase);
+                omega[i] = omegaSpread * Math.Sin(phase);
+            }
+
+            double kEff = kBase + kPhi * phi;
+            double rAccum = 0.0;
+            int rCount = 0;
+
+            for (int t = 0; t < steps; t++)
+            {
+                var dTheta = new double[n];
+                for (int i = 0; i < n; i++)
+                {
+                    int left = (i - 1 + n) % n;
+                    int right = (i + 1) % n;
+                    double coupling = Math.Sin(theta[left] - theta[i]) + Math.Sin(theta[right] - theta[i]);
+                    dTheta[i] = omega[i] + alpha * phi + 0.5 * kEff * coupling;
+                }
+
+                for (int i = 0; i < n; i++)
+                {
+                    theta[i] += dt * dTheta[i];
+                }
+
+                if (t >= steps - sampleWindow)
+                {
+                    double c = 0.0;
+                    double s = 0.0;
+                    for (int i = 0; i < n; i++)
+                    {
+                        c += Math.Cos(theta[i]);
+                        s += Math.Sin(theta[i]);
+                    }
+
+                    double r = Math.Sqrt(c * c + s * s) / n;
+                    rAccum += r;
+                    rCount++;
+                }
+            }
+
+            return rAccum / Math.Max(rCount, 1);
+        }
+
+        private static double FitDerivedToTransportCouplingScale()
+        {
+            double baselineA = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+            double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 2e-3 };
+            double[] absDmu = { 0.005, 0.01, 0.02, 0.03 };
+
+            var pairs = new List<(double X, double Y)>();
+            foreach (double phi in phis)
+            {
+                double aDyn = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phi) - baselineA);
+                foreach (double dmu in absDmu)
+                {
+                    double iTransport = phi * phi * dmu;
+                    double iDerived = aDyn * aDyn * dmu;
+                    pairs.Add((X: iTransport, Y: iDerived));
+                }
+            }
+
+            var fit = FitLinear(pairs);
+            return fit.Slope > 0.0 ? 1.0 / fit.Slope : 0.0;
+        }
+
+        private static double ComputeDeflectionForDerivedMemoryInvariant(
+            double epsilon,
+            double G,
+            double c,
+            double b,
+            double dt,
+            PhotonTransportModel.Parameters parameters,
+            double couplingScale)
+        {
+            double M = epsilon * c * c * b / G;
+            double xMin = -100.0 * b;
+            double xMax = 100.0 * b;
+
+            double phiMax = Math.Max(epsilon, 1e-6);
+            var coherenceLookup = BuildCoherenceAmplitudeLookup(phiMax, points: 16);
+
+            var state = new PhotonTransportModel.PhotonMemoryState
+            {
+                x = xMin,
+                y = b,
+                vx = c,
+                vy = 0.0
+            };
+
+            int maxSteps = (int)Math.Ceiling((xMax - xMin) / (c * dt)) + 200000;
+            for (int i = 0; i < maxSteps && state.x < xMax; i++)
+            {
+                RK4StepForDerivedMemoryInvariant(
+                    ref state, dt, G, M, c, parameters, couplingScale, coherenceLookup);
+            }
+
+            return Math.Abs(Math.Atan2(state.vy, state.vx));
+        }
+
+        private static void RK4StepForDerivedMemoryInvariant(
+            ref PhotonTransportModel.PhotonMemoryState state,
+            double dt,
+            double G,
+            double M,
+            double c,
+            PhotonTransportModel.Parameters parameters,
+            double couplingScale,
+            (double[] PhiGrid, double[] ADynGrid) coherenceLookup)
+        {
+            var k1 = DerivativesForDerivedMemoryInvariant(state, G, M, c, parameters, couplingScale, coherenceLookup);
+            var s2 = AddScaled(state, k1, dt * 0.5);
+            var k2 = DerivativesForDerivedMemoryInvariant(s2, G, M, c, parameters, couplingScale, coherenceLookup);
+            var s3 = AddScaled(state, k2, dt * 0.5);
+            var k3 = DerivativesForDerivedMemoryInvariant(s3, G, M, c, parameters, couplingScale, coherenceLookup);
+            var s4 = AddScaled(state, k3, dt);
+            var k4 = DerivativesForDerivedMemoryInvariant(s4, G, M, c, parameters, couplingScale, coherenceLookup);
+
+            state = new PhotonTransportModel.PhotonMemoryState
+            {
+                x = state.x + dt / 6.0 * (k1.x + 2.0 * k2.x + 2.0 * k3.x + k4.x),
+                y = state.y + dt / 6.0 * (k1.y + 2.0 * k2.y + 2.0 * k3.y + k4.y),
+                vx = state.vx + dt / 6.0 * (k1.vx + 2.0 * k2.vx + 2.0 * k3.vx + k4.vx),
+                vy = state.vy + dt / 6.0 * (k1.vy + 2.0 * k2.vy + 2.0 * k3.vy + k4.vy)
+            };
+        }
+
+        private static PhotonTransportModel.PhotonMemoryState DerivativesForDerivedMemoryInvariant(
+            PhotonTransportModel.PhotonMemoryState state,
+            double G,
+            double M,
+            double c,
+            PhotonTransportModel.Parameters parameters,
+            double couplingScale,
+            (double[] PhiGrid, double[] ADynGrid) coherenceLookup)
+        {
+            double r = Math.Sqrt(state.x * state.x + state.y * state.y);
+            if (r < 1e-15)
+                return new PhotonTransportModel.PhotonMemoryState();
+
+            double ex = state.x / r;
+            double ey = state.y / r;
+
+            double phi = PhotonTransportModel.Phi(G, M, c, r);
+            double absDmuDt = PhotonTransportModel.ComputeAbsDmuDtBase(state, G, M, c, parameters);
+            double aDyn = InterpolateCoherenceAmplitude(phi, coherenceLookup.PhiGrid, coherenceLookup.ADynGrid);
+            double localMemoryInvariant = couplingScale * aDyn * aDyn * absDmuDt;
+
+            double nEff = 2.0
+                + parameters.LambdaTime * phi
+                + parameters.LambdaSpace * localMemoryInvariant;
+
+            double ar = -nEff * G * M / (r * r);
+            double ax = ar * ex;
+            double ay = ar * ey;
+
+            double v2 = state.vx * state.vx + state.vy * state.vy;
+            double dot = ax * state.vx + ay * state.vy;
+            double axProj = ax - dot / v2 * state.vx;
+            double ayProj = ay - dot / v2 * state.vy;
+
+            return new PhotonTransportModel.PhotonMemoryState
+            {
+                x = state.vx,
+                y = state.vy,
+                vx = axProj,
+                vy = ayProj
+            };
+        }
+
+        private static (double[] PhiGrid, double[] ADynGrid) BuildCoherenceAmplitudeLookup(double phiMax, int points)
+        {
+            double[] phiGrid = new double[Math.Max(points, 2)];
+            double[] aDynGrid = new double[phiGrid.Length];
+            double baselineA = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+
+            for (int i = 0; i < phiGrid.Length; i++)
+            {
+                double t = (double)i / (phiGrid.Length - 1);
+                double phi = phiMax * t;
+                phiGrid[i] = phi;
+                aDynGrid[i] = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phi) - baselineA);
+            }
+
+            return (phiGrid, aDynGrid);
+        }
+
+        private static double InterpolateCoherenceAmplitude(double phi, double[] phiGrid, double[] aDynGrid)
+        {
+            if (phi <= phiGrid[0])
+                return aDynGrid[0];
+
+            int last = phiGrid.Length - 1;
+            if (phi >= phiGrid[last])
+                return aDynGrid[last];
+
+            int lo = 0;
+            int hi = last;
+            while (hi - lo > 1)
+            {
+                int mid = (lo + hi) / 2;
+                if (phiGrid[mid] <= phi)
+                    lo = mid;
+                else
+                    hi = mid;
+            }
+
+            double x0 = phiGrid[lo];
+            double x1 = phiGrid[hi];
+            double y0 = aDynGrid[lo];
+            double y1 = aDynGrid[hi];
+            double w = (phi - x0) / Math.Max(x1 - x0, 1e-30);
+            return y0 + w * (y1 - y0);
         }
     }
 }
