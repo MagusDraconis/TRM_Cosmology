@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+
+\title{Temporal Rate Matrix V3.0: A Tested-Effective Weak-Field Transport and Synchronization Framework}
+\author{
+Fabrice Wieser\\
+Independent Researcher\\
+\url{https://github.com/MagusDraconis/TRM_Cosmology}
+}
+\date{June 2026\\
+V3.0 Review Baseline\\
+Release tag: \texttt{trm-v3.0-review-release}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper summarizes the V3.0 review baseline of the Temporal Rate Matrix / Temporal Quantum Matrix (TRM/TQM) framework as a weak-field effective transport and synchronization model \cite{trm_status_v3,field_sector_map}. The framework is organized into scalar, vector, and nonlocal theta sectors, plus a unified effective-action roadmap constrained by guard tests \cite{unified_action_roadmap}. Across the current test stack, the model is presented as tested-effective and hypothesis-supported, with explicit claim boundaries and open first-principles gaps \cite{gap_list,real_physics_coverage}. This work does not claim theorem-level first-principles closure and does not claim equivalence with General Relativity.
+\end{abstract}
+
+\section{Introduction}
+
+TRM/TQM V3.0 is positioned as a review-ready scientific baseline: numerically test-gated, falsifiable, and explicitly bounded in scope \cite{trm_status_v3}. The central question is whether the framework is mathematically coherent and reproducible as a weak-field effective model while first-principles closure remains incomplete.
+
+The review focus is therefore not replacement claims, but internal consistency, cross-sector compatibility, and falsifiability under regression and holdout-style guard design \cite{real_physics_coverage}.
+
+\section{Framework Architecture}
+
+The architecture consists of four connected layers \cite{field_sector_map}:
+
+\begin{enumerate}
+  \item Scalar transport backbone (photon transport and EL/Fermat bridge behavior).
+  \item Vector rotational candidate sector (weak-field frame-dragging structure).
+  \item Nonlocal theta observable sector \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\).
+  \item Unified effective-action layer linking scalar, vector, and theta sectors under limit-preservation guards.
+\end{enumerate}
+
+This architecture is used as a test-gated decomposition, not as a claim of completed microscopic derivation.
+
+\section{Scalar, Vector, and Theta Sectors}
+
+\subsection{Scalar sector}
+
+\textbf{Core object.} Effective transport index and memory-channel structure, including the \(\phi^2\lvert\dot{\mu}\rvert\) branch \cite{trm_status_v3}.
+
+\textbf{Current physical role.} Weak-field transport backbone with executable EL/Fermat bridge behavior and memory-channel consistency.
+
+\textbf{Test guard block.} EL bridge guards, MEM/TRM/MC baseline block, and MC09-MC12 hardening \cite{real_physics_coverage,trm_status_v3}.
+
+\textbf{Claim boundary.} Tested-effective/hypothesis-supported in weak-field domain; not theorem-level microscopic closure.
+
+The memory-path sequence used in current interpretation is:
+
+\[
+A_{\mathrm{dyn}}(\phi)\propto \phi
+\]
+
+\[
+I_{\mathrm{micro}} = A_{\mathrm{dyn}}^2\lvert\dot{\mu}\rvert
+\]
+
+\[
+I_{\mathrm{micro}} \propto \phi^2\lvert\dot{\mu}\rvert
+\]
+
+\subsection{Vector sector}
+
+\textbf{Core object.} Rotational field pair \((\vec A_T,\vec B_T=\nabla\times\vec A_T)\) with effective coupling \(k_T\) \cite{field_sector_map}.
+
+\textbf{Current physical role.} Weak-field frame-dragging candidate sector with structural Lense-Thirring-like scaling tests \cite{lense_thirring}.
+
+\textbf{Test guard block.} FD01-FD20, including derived-\(k_T\) stability, weak-field compatibility windows, and systematic-bias audits \cite{trm_status_v3,real_physics_coverage}.
+
+\textbf{Claim boundary.} Candidate weak-field sector; not full GR-equivalent closure and not theorem-level first-principles derivation.
+
+\subsection{Theta sector}
+
+\textbf{Core object.} Nonlocal observable chain \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\).
+
+\textbf{Current physical role.} Tested-effective candidate path for nonlocal observable response in the current framework \cite{field_sector_map}.
+
+\textbf{Test guard block.} TO01-TO28, TQK01-TQK04, LC01-LC08, and TOL01-TOL04 \cite{trm_status_v3,real_physics_coverage}.
+
+\textbf{Claim boundary.} Strongly supported derivation chain at guard level; not theorem-level fundamental closure to \(g_{\mathrm{obs}}\).
+
+\section{Test-Gated Methodology}
+
+\subsection{Evaluation protocol}
+
+The methodology is test-first and guard-based, with sector-specific hardening followed by cross-sector integration checks:
+
+\begin{itemize}
+  \item Gap 1 hardening: MC09-MC12.
+  \item Gap 2 hardening: RBF21-RBF23.
+  \item Gap 3 hardening: TO/TQK/LC/TOL blocks.
+  \item Gap 4 hardening: FD01-FD20.
+  \item Unified-action integration: UF01-UF09.
+\end{itemize}
+
+Category gates are used operationally as fast hard gate (\texttt{CoreRegression}), default validation (\texttt{Category!=LongRunning}), and extended sweeps (\texttt{Category=LongRunning}).
+
+\subsection{Acceptance criteria}
+
+At this stage, acceptance is defined by:
+
+\begin{enumerate}
+  \item sector guard pass under fixed documented criteria;
+  \item limit-preservation behavior under ablations/holdouts where applicable;
+  \item no cross-sector contradiction in unified guard slices;
+  \item explicit retention of claim boundaries in interpretation text.
+\end{enumerate}
+
+\subsection{Regression/guard philosophy}
+
+The guard philosophy is conservative: preserve previously validated behavior, add falsifiable new blocks incrementally, and treat unification/cross-terms as candidate-level unless stability and limit guards remain satisfied \cite{unified_action_roadmap}.
+
+\section{First-Principles Gaps}
+
+The first-principles status remains open in documented form \cite{gap_list}:
+
+\begin{itemize}
+  \item Gap 1 (memory term): strongly supported path, not theorem-level microscopically closed.
+  \item Gap 2 (\(m=3\) closure): strongly constrained/hardened path, not theorem-level microscopic proof.
+  \item Gap 3 (theta observable chain): strongly supported as tested-effective, not theorem-level closure.
+  \item Gap 4 (vector \(k_T\) normalization): strongly hardened weak-field path, not theorem-level first-principles closure.
+\end{itemize}
+
+\section{Unified Action Roadmap}
+
+The unified-action path is documented as a candidate-level roadmap \cite{unified_action_roadmap}:
+
+\[
+S_{\mathrm{eff}}[T,\vec A_T,\Theta]
+=
+S_T[T]+S_A[\vec A_T]+S_\Theta[\Theta]
++S_{\mathrm{int}}[T,\vec A_T,\Theta].
+\]
+
+UF01-UF09 currently support:
+
+\begin{itemize}
+  \item scalar/vector/theta limit recovery,
+  \item zero-coupling additive decomposition,
+  \item bounded small cross-couplings,
+  \item global cross-coupling identifiability without per-group refit dependency,
+  \item preservation of MC/FD/TO guard behavior under small couplings.
+\end{itemize}
+
+This is a candidate-level unified effective-action roadmap, not theorem-level unification.
+
+\section{Claim Boundaries}
+
+The V3.0 claim boundary is explicit and enforced:
+
+\begin{itemize}
+  \item TRM/TQM is presented as tested-effective and hypothesis-supported in weak-field scope \cite{trm_status_v3}.
+  \item It does \textbf{not} claim to replace General Relativity \cite{gr_tests}.
+  \item It does \textbf{not} claim theorem-level first-principles completion \cite{gap_list}.
+  \item It does \textbf{not} claim full GR-equivalent closure across all sectors \cite{lense_thirring}.
+\end{itemize}
+
+\section{Conclusion}
+
+TRM/TQM V3.0 provides a consolidated review baseline with numerical hardening, explicit cross-sector structure, and clear non-overclaim boundaries.
+
+The next falsification steps are direct:
+
+\begin{enumerate}
+  \item failure of unified cross-sector guards (UF block) under new external benchmark regimes;
+  \item failure of microscopic derivation paths (memory, \(m=3\), theta chain) to remain structurally consistent under tighter constraints;
+  \item failure of weak-field benchmark compatibility in independent external comparisons (including frame-dragging/scalar transport references) \cite{lense_thirring,sparc}.
+\end{enumerate}
+
+Any of these failures would require narrowing, revising, or rejecting parts of the current effective-framework interpretation.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

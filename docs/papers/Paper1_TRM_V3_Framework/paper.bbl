@@ -1,0 +1,53 @@
+\begin{thebibliography}{1}
+
+\bibitem{sparc}
+Federico Lelli, Stacy~S. McGaugh, and James~M. Schombert.
+\newblock Sparc: Mass models for 175 disk galaxies with spitzer photometry and
+  accurate rotation curves.
+\newblock {\em The Astronomical Journal}, 152(6):157, 2016.
+
+\bibitem{lense_thirring}
+Josef Lense and Hans Thirring.
+\newblock On the influence of the proper rotation of central bodies on the
+  motions of planets and moons according to einstein's theory of gravitation.
+\newblock {\em Physikalische Zeitschrift}, 19:156--163, 1918.
+\newblock Historical frame-dragging reference; verify final bibliographic
+  formatting.
+
+\bibitem{gr_tests}
+{Placeholder}.
+\newblock General relativity benchmark tests and comparisons (placeholder),
+  2026.
+\newblock Replace with concrete external GR benchmark reference(s) before
+  submission.
+
+\bibitem{trm_status_v3}
+{TRM Project}.
+\newblock Trm current status for peer review, 2026.
+\newblock Repository document:
+  docs/review/TRM\_Current\_Status\_For\_PeerReview.md.
+
+\bibitem{field_sector_map}
+{TRM Project}.
+\newblock Trm field sector map, 2026.
+\newblock Repository document: docs/Theory/TRM\_Field\_Sector\_Map.md.
+
+\bibitem{gap_list}
+{TRM Project}.
+\newblock Trm first-principles gap list, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_First\_Principles\_Gap\_List.md.
+
+\bibitem{real_physics_coverage}
+{TRM Project}.
+\newblock Trm real physics test coverage, 2026.
+\newblock Repository document:
+  docs/review/TRM\_Real\_Physics\_Test\_Coverage.md.
+
+\bibitem{unified_action_roadmap}
+{TRM Project}.
+\newblock Trm unified field action roadmap, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Unified\_Field\_Action\_Roadmap.md.
+
+\end{thebibliography}
