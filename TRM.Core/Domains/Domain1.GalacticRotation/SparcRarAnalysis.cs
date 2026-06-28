@@ -353,8 +353,8 @@ public class SparcRarAnalysis
                 using (Stream stream = entry.Open())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    string? line;
+                    while ((line = reader.ReadLine()) is not null)
                     {
                         string trimmed = line.Trim();
                         if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#")) continue;
@@ -464,8 +464,8 @@ public class SparcRarAnalysis
                 using (Stream stream = entry.Open())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    string dataLine;
-                    while ((dataLine = reader.ReadLine()) != null)
+                    string? dataLine;
+                    while ((dataLine = reader.ReadLine()) is not null)
                     {
                         string trimmed = dataLine.Trim();
                         if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#")) continue;
