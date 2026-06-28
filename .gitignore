@@ -369,6 +369,7 @@ FodyWeavers.xsd
 !/docs/Theory/TRM_Geodesic_Derivation.md
 !/docs/Theory/TRM_Collective_Mode_Locking_BridgeScale.md
 !/docs/Theory/TRM_Finsler_Optical_Action.md
+!/docs/Theory/TRM_Rational_Band_First_Principles.md
 
 /docs/review/*
 !/docs/review/REVIEW_PACKAGE.md

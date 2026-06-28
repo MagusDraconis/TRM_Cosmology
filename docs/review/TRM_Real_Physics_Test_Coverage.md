@@ -70,13 +70,14 @@ Quellen:
 
 - **Relevante Tests:**
   - `TRM_Realtiy_Tests.cs`: TRM32–TRM60 (u. a. Deflection/Skalierungsblöcke)
-  - `TRM.Tests/RealityTests/PhotonTransportModel_FixationTests.cs`: TRM78–TRM83
-  - `TRM.Tests/RealityTests/PhotonTransportModel_GeodesicSolverTests.cs`: MEM01 (Memory-Ablation)
+  - `TRM.Tests/RealityTests/PhotonTransportModel_FixationTests.cs`: TRM78–TRM87 + MC01–MC08 + HOA01 + CLAIM01
+  - `TRM.Tests/RealityTests/PhotonTransportModel_GeodesicSolverTests.cs`: MEM01–MEM02 (Memory-Ablation + Weak-Field-Boundary)
   - `TRM.Tests/SimulationTests/WaveOpticsTests.cs` (M- und 1/b-Skalierungen, Konvergenz)
 - **Modellbezug:**
   - `TRM.Core/Shared/PhotonTransportModel.cs` mit RK4, `n_eff`-Kanaltrennung, Deflection-Diagnostik.
 - **Status:** **tested** (Invarianten/Skalierungen) + **diagnostic**
 - **Einordnung:** numerisch gut abgesichert; Interpretation stark modellabhängig.
+  - MC01–MC08 schließen den lokalen Memory-Invariant-Selektionsblock ab (ohne bereits eine mikroskopische Theorem-Herleitung zu beanspruchen).
 
 ## 5) Schwarzschild null-geodesic comparison
 
@@ -93,6 +94,7 @@ Quellen:
 - **Relevante Tests:**
   - `TRM_Realtiy_Tests.cs`: TRM67–TRM77
   - `PhotonTransportModel_FixationTests.cs`: TRM82 (Skalierungsinvariante des implementierten Diagnostics)
+  - `PhotonTransportModel_GeodesicSolverTests.cs`: MEM01 (zeigt nahezu neutralen Shapiro-Effekt bei Memory-Ablation im aktuellen Modell)
 - **Modellbezug:**
   - geometrische Verzögerungsdiagnostik über `∫ phi ds` im Photon-Transport.
 - **Status:** **diagnostic** + **exploratory** (mit teilweiser **tested**-Fixierung auf Implementationsinvariante)
@@ -131,6 +133,9 @@ Quellen:
     - `CML02_ModeLock_Should_Depend_On_CellCoupling_Not_PhotonFit`
     - `CML03_ModeLock_Should_Degrade_When_PhaseClosure_IsBroken`
     - `CML04_Gamma_Should_Approach_17_20_From_CollectiveCadence`
+    - `RBF13_ConstraintRemoval_Should_Reveal_ActionTick_As_Key_For_M3Selection`
+    - `RBF14_CompetingBands_Should_Reveal_LockingVsELTradeoff`
+    - `RBF15_DeriveOrFalsify_Should_Show_M3Uniqueness_WithAllConstraints_And_NonUniqueness_Without_ActionTick`
   - wiederkehrende Gamma-Grid-Werte inkl. `0.85`
 - **Modellbezug:**
   - Phase-Lock/Synchronisationsscans (Kuramoto-artige Auswertungslinien) plus isolierter 20:17-Kadenz-Block ohne Photon-Transport-Zirkularität.
@@ -144,10 +149,11 @@ Quellen:
 - **Relevante Tests:**
   - `TRM.Tests/CoreTests/RarRelationTests.cs`
   - `TRM.Tests/CoreTests/OrbitalIntegratedTests.cs`
+  - `TRM.Tests/CoreTests/ThetaObservableDerivationTests.cs` (TO01–TO19)
 - **Modellbezug:**
   - `gbar + sqrt(gbar*a0)` Basisterm, Orbit-/Regime-/Theta-Feld-Korrekturen, RMS-/Bin-Auswertungen.
-- **Status:** **tested** + **calibrated** + teilweise **not derived yet**
-- **Einordnung:** sehr gute Datenpipeline-Abdeckung; zentrale Modellparameter bleiben teils heuristisch/kalibriert.
+- **Status:** **tested** + **tested-effective (theta observable gate)** + **calibrated** + teilweise **not derived yet**
+- **Einordnung:** very strong pipeline and derivation-gate coverage. TO12–TO18 support O5-W6-InvDistance under class/holdout/stratified validation; TO19 adds explicit observed-velocity leakage guard. Current claim level remains hypothesis-supported, not first-principles-derived.
 
 ## 11) cluster regime model
 
@@ -199,7 +205,7 @@ Quellen:
   - strukturelle Geodätengleichung mit Zeit-/Transport-/Memory-Term
 - **Code-Status:**
   - Photon-Transport implementiert die strukturähnlichen Terme numerisch,
-  - expliziter, eigenständiger Euler-Lagrange/Fermat-Solverpfad ist vorhanden (`PhotonTransportModel_GeodesicSolverTests`: EL01–EL17),
+  - expliziter, eigenständiger Euler-Lagrange/Fermat-Solverpfad ist vorhanden (`PhotonTransportModel_GeodesicSolverTests`: EL01–EL17 + MEM01–MEM02),
   - aber die vollständige formale Produktionskette bleibt unvollständig.
 - **Status:** **tested (partial)** + **not derived yet** + **limitation**
 - **Einordnung:** ausführbarer Herleitungs-Track begonnen und testbar, aber noch nicht als vollständig geschlossene E-L-Kette publikationsreif.

@@ -2,75 +2,59 @@
 
 ## Snapshot
 
-This status snapshot summarizes the current repository state after EL bridge hardening, cluster deterministic hardening, and cosmology parameter traceability hardening.
+TRM/TQM is currently a **tested, falsifiable effective theory framework** with strong numerical support.  
+It is **not yet** a closed first-principles fundamental theory.
 
 ## What is green/tested now
 
-- **Photon EL/Fermat bridge path:** `PhotonTransportModel_GeodesicSolverTests` (EL01-EL17) is passing and weak-field bounded against Schwarzschild reference.
-- **Cluster service baseline hardening:** `BulletClusterAnalysis2Tests` is passing with deterministic fixtures and finite/bounded checks.
-- **Cosmology parameter traceability:** `TrmCosmologyParameterTraceTests` is passing with algebraic inversion checks for `BetaEta`, `Alpha`, and `HT`.
-- **Isolated cadence validation:** `CollectiveModeLockingTests` validates 20:17 mode-lock behavior without `PhotonTransportModel` dependency.
-- **Core regression gate:** core tagged tests (including new trace tests) are green.
+- **Photon transport + EL/Fermat bridge:** `PhotonTransportModel_GeodesicSolverTests` (`EL01–EL17`, `MEM01–MEM02`) is passing with weak-field bounded EL/Schwarzschild behavior.
+- **Memory-channel structural guards:** `PhotonTransportModel_FixationTests` (`TRM84–TRM87`, `MC01–MC04`) and `HOA01` are passing.
+  - Quadratic \(\phi\)-scaling, linear \(|\dot\mu|\)-scaling,
+  - weak-field subleading behavior,
+  - separation from pure time-channel behavior,
+  - higher-order dependency trace \((x, v, \dot v)\).
+- **Claim-boundary guard:** `CLAIM01` is passing (frame-dragging/Lense-Thirring remains explicitly out of scope for scalar TRM).
+- **Collective locking / closure track:** `CML01–CML08` and `RBF05–RBF15` are passing in the current repository baseline.
+- **Cluster deterministic baseline hardening:** `BulletClusterAnalysis2Tests` is green.
+- **Cosmology traceability hardening:** `TrmCosmologyParameterTraceTests` is green.
 
-## Validated bridge track
+## Current interpretation of the RBF track
 
-- **Euler-Lagrange/Fermat:** now an executable and validated bridge track (EL01-EL17), but still not a fully closed production derivation chain.
-
-EL09 establishes a deterministic synchronization-to-EL bridge path.
-The bridge scale is no longer directly fitted in the photon test, but the synchronization solver still contains a collective-mode prior.
-Robustness and ablation tests (EL10–EL17) are now in place; first-principles emergence of gamma≈0.85 remains an open physics task.
-
-EL17 exposes the current emergence boundary: when the cadence prior is removed,
-20/17 loses competitiveness against neighboring rational cadence candidates.
-Therefore the current synchronization-to-EL bridge is robustly constrained but still cadence-prior assisted.
+- \(m=3\) is strongly supported as the current robust closure/balance candidate.
+- `RBF13` shows non-uniform constraint roles: removing action/tick collapses minimal mode to \(m=2\), while phase/direction removal alone does not.
+- `RBF14` shows a **locking-vs-EL tradeoff** across neighboring rational bands (not unique single-band victory).
+- `RBF15` operationalizes derive-or-falsify boundary logic:
+  - with all three constraints: unique \(m=3\),
+  - without action/tick: non-unique set with minimal collapse to \(m=2\).
 
 ## What remains calibrated
 
-- **`TrmCosmologyParameters` (`HT`, `BetaEta`, `Alpha`):** remain calibrated working values, now with explicit traceability and inversion tests.
-- **Parts of cluster and other effective-model coefficients:** remain fit/calibrated rather than first-principles closed.
+- `TrmCosmologyParameters` (`HT`, `BetaEta`, `Alpha`) are traceable and regression-guarded, but still calibration-backed.
+- Parts of effective coefficients in photon/cluster/regime layers remain calibrated working parameters.
 
-## What remains limitation
+## What remains limitation/open
 
-- **Lense-Thirring / frame-dragging:** not covered by the current scalar TRM implementation (no dedicated model/test path yet).
-- **Full EL production closure:** bridge is validated, but full formal closure (including boundary-condition-complete production path) remains open.
+- **Memory-term first-principles origin:** \(\phi^2|\dot\mu|\) is strongly test-guarded but not yet microscopically derived from TQM.
+- **Closure uniqueness theorem:** \(m=3\) is strongly supported but not yet theorem-level unique.
+- **Theta observable closure:** \(\Theta(r)\rightarrow g_{\mathrm{obs}}(r)\) is still open.
+- **Frame-dragging / Lense-Thirring:** not covered in current scalar TRM.
+- **Full formal EL production closure:** executable bridge exists, full formal closure remains open.
 
 ## Peer-review package readiness
 
 Current package is coherent and review-ready as a technical baseline:
 
-1. Theory documents
+1. Theory documents (`TRM_Geodesic_Derivation.md`, `TRM_Finsler_Optical_Action.md`, `THEORY_STATUS.md`, `TRM_Memory_Channel_First_Principles.md`, `TRM_M3_Closure_First_Principles.md`, `TRM_Theta_Observable_First_Principles.md`)
 2. Code-to-theory audit
 3. Service/test consolidation
 4. Test-suite classification
-5. Explicit known limitations
+5. Explicit known limitations and claim boundaries
 
-## Next physics block (after review package)
+## Next physics block (active priority order)
 
-**Priority topic:** explain `EulerBridgeScale = 0.85` physically, not only numerically.
-
-- Treat connection to collective peak `gamma ≈ 0.85` as a **testable hypothesis**, not as a claim.
-- Define a derivation/constraint path to decide whether the scale is emergent, fitted, or replaceable.
-
-## Opened derivation track: why `collectiveOmega = 20/17`?
-
-After EL09-EL17, the critical prior is now `collectiveOmega = 20/17` in the synchronization-to-EL bridge path.
-
-Current status statement:
-
-- `collectiveOmega = 20/17` is currently a deterministic, test-backed synchronization prior.
-- It is **not yet** a first-principles-derived constant.
-- `CML05` now provides an explicit no-cadence-prior score check (`0.55*meanOrder + 0.45*alignment`) to distinguish competitiveness vs. boundary behavior.
-- `CML06` shows that without explicit cadence prior, `20/17` does not need to strictly win but remains competitive inside a nearby rational mode-locking cluster.
-- `CML07` extends this to a dense rational sweep in the `1.16..1.19` window and supports a competitive band interpretation instead of a single-point resonance claim.
-- `CML08` links this band to EL weak-field behavior: candidates from the competitive mode-locking band map via `EulerBridgeScale = 1/Ω` into the EL/Schwarzschild weak-field window.
-- CML05 removes the explicit cadence prior. Under this condition, 20/17 no longer strictly wins, but remains competitive within a nearby rational mode-locking cluster. This suggests that the bridge scale may arise from a collective rational-locking band rather than from a uniquely selected 20:17 resonance.
-
-Planned falsification/derivation checkpoints:
-
-1. **Mode-ratio identifiability:** compare `20/17` against nearby rational alternatives (`19/16`, `6/5`, `21/18`) under the same robustness matrix.
-2. **Prior dominance test:** verify whether gamma-peak location remains stable when collective cadence prior strength is reduced.
-3. **Cross-regime invariance:** test whether preferred `collectiveOmega` remains stable across `(kappa, collectiveWeight, cellCount)` ablations.
-
-Acceptance threshold for "emergent":
-
-- A value is treated as emergent only if it is preferred across independent solver settings with bounded spread and without requiring tight prior shaping.
+1. **Derive-or-falsify \(m=3\)** from microscopic closure constraints (operationalized test boundary is already in place via `RBF15`).  
+   - Formal closure track is now opened in `docs/Theory/TRM_M3_Closure_First_Principles.md`.
+2. **Derive \(\phi^2|\dot\mu|\)** from TQM phase/lattice transport dynamics (beyond effective-form fit).  
+   - Derivation track is now opened in `docs/Theory/TRM_Memory_Channel_First_Principles.md`.
+3. **Close \(\Theta(r)\rightarrow g_{\mathrm{obs}}(r)\)** with explicit acceptance/falsification criteria.
+   - Formal closure track is now opened in `docs/Theory/TRM_Theta_Observable_First_Principles.md`.

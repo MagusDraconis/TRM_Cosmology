@@ -447,6 +447,65 @@ namespace TRM.Tests.RealityTests
 
         [Trait("Category", "PhysicsValidation")]
         [Fact]
+        public void MEM02_MemoryChannel_Should_Improve_ELBridge_In_LowerWeakField_And_Show_UpperBoundary()
+        {
+            const double G = 1.0;
+            const double c = 1.0;
+            const double b = 1.0;
+            const double dt = 0.001;
+            const double gammaBridge = 0.85;
+
+            double[] lowerWeakField = { 1e-3, 2e-3, 5e-3 };
+            const double upperBoundaryEpsilon = 1e-2;
+
+            var withMemory = new PhotonTransportModel.Parameters
+            {
+                LambdaTime = 1.0,
+                LambdaSpace = 30.0,
+                EulerBridgeScale = gammaBridge
+            };
+
+            var withoutMemory = new PhotonTransportModel.Parameters
+            {
+                LambdaTime = 1.0,
+                LambdaSpace = 0.0,
+                EulerBridgeScale = gammaBridge
+            };
+
+            foreach (double epsilon in lowerWeakField)
+            {
+                double alphaWithMemory = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, withMemory);
+                double alphaWithoutMemory = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, withoutMemory);
+                double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+
+                double relWithMemory = Math.Abs(alphaWithMemory - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                double relWithoutMemory = Math.Abs(alphaWithoutMemory - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+
+                _output.WriteLine(
+                    $"MEM02 epsilon={epsilon:E} | relWithMemory={relWithMemory:E6} | relWithoutMemory={relWithoutMemory:E6}");
+
+                Assert.True(relWithMemory < relWithoutMemory,
+                    $"Expected memory channel to improve EL bridge at epsilon={epsilon:E}. with={relWithMemory:E6}, without={relWithoutMemory:E6}");
+            }
+
+            // Boundary documentation point: at upper weak-field edge we only require finite diagnostics,
+            // not a forced monotonic improvement claim.
+            double alphaWithBoundary = PhotonTransportModel.ComputeDeflectionEulerLagrange(upperBoundaryEpsilon, G, c, b, dt, withMemory);
+            double alphaWithoutBoundary = PhotonTransportModel.ComputeDeflectionEulerLagrange(upperBoundaryEpsilon, G, c, b, dt, withoutMemory);
+            double alphaSchwarzBoundary = ComputeSchwarzschildNullDeflection(upperBoundaryEpsilon);
+
+            double relWithBoundary = Math.Abs(alphaWithBoundary - alphaSchwarzBoundary) / Math.Max(alphaSchwarzBoundary, 1e-16);
+            double relWithoutBoundary = Math.Abs(alphaWithoutBoundary - alphaSchwarzBoundary) / Math.Max(alphaSchwarzBoundary, 1e-16);
+
+            _output.WriteLine(
+                $"MEM02 boundary epsilon={upperBoundaryEpsilon:E} | relWithMemory={relWithBoundary:E6} | relWithoutMemory={relWithoutBoundary:E6}");
+
+            Assert.True(double.IsFinite(relWithBoundary));
+            Assert.True(double.IsFinite(relWithoutBoundary));
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
         public void EL09_CollectiveGamma_From_PhaseSynchronizationSolver_Should_Predict_ELBridgeScale()
         {
             const double G = 1.0;
