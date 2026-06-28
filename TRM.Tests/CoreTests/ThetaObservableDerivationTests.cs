@@ -3256,6 +3256,226 @@ public class ThetaObservableDerivationTests
         Assert.True(proxyLikeShare <= 0.20, $"Too many folds behave like per-galaxy proxy, share={proxyLikeShare:F3}");
     }
 
+    [Fact]
+    public void TOL01_ThetaField_Should_Emerge_From_CoarseGrained_LatticeState()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var baseProfile = CreateSyntheticThetaProfile(
+            r => 0.60 * Math.Sin(0.29 * r) + 0.30 * Math.Cos(0.19 * r),
+            count: 101,
+            spacing: 0.20);
+
+        var amplitudes = new[] { 0.10, 0.15, 0.20, 0.30, 0.40 };
+        var phaseEnergies = new List<double>();
+        var thetaEnergies = new List<double>();
+
+        foreach (double a in amplitudes)
+        {
+            var scaled = TransformThetaProfile(baseProfile, t => a * t);
+            double ePhase = ComputePhaseLatticeEnergy(scaled, halfWindow, "inverse", epsilon);
+            double eTheta = ComputeQuadraticCoherenceEnergy(scaled, halfWindow, "inverse", epsilon);
+
+            phaseEnergies.Add(ePhase);
+            thetaEnergies.Add(eTheta);
+            WriteTestLine("TOL01", $"amp={a:F2}, Ephase={ePhase:E6}, Etheta={eTheta:E6}, ratio={ePhase / Math.Max(eTheta, 1e-20):F4}");
+        }
+
+        double corr = ComputePearsonCorrelation(thetaEnergies, phaseEnergies);
+        var fit = ComputeLinearFit(thetaEnergies, phaseEnergies);
+
+        WriteTestLine("TOL01", $"corr={corr:F6}, slope={fit.Slope:F4}, intercept={fit.Intercept:E6}, R2={fit.RSquared:F6}");
+
+        Assert.True(corr >= 0.995, $"Coarse-grained lattice->Theta energy link too weak, corr={corr:F6}");
+        Assert.True(fit.RSquared >= 0.990, $"Theta coarse-graining fit too weak, R2={fit.RSquared:F6}");
+        Assert.True(fit.Slope >= 0.90 && fit.Slope <= 1.10, $"Expected near-unit proportionality, slope={fit.Slope:F4}");
+    }
+
+    [Fact]
+    public void TOL02_O5_Should_Follow_From_LatticeEnergyGradient()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var profiles = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 101, spacing: 0.20).Smooth,
+            CreateDefaultSyntheticProfiles(count: 101, spacing: 0.20).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 101, spacing: 0.20).NonLocalBreak
+        };
+
+        var o5Series = new List<double>();
+        var latticeGradientSeries = new List<double>();
+
+        foreach (var profile in profiles)
+        {
+            o5Series.AddRange(ComputeO5Series(profile, halfWindow));
+            latticeGradientSeries.AddRange(
+                ComputePhaseLatticeNegativeGradientSeries(profile, halfWindow, "inverse", epsilon, normalize: true));
+        }
+
+        Assert.Equal(o5Series.Count, latticeGradientSeries.Count);
+        Assert.True(o5Series.Count > 120, $"Too few TOL02 comparison points: {o5Series.Count}");
+
+        double corr = ComputePearsonCorrelation(o5Series, latticeGradientSeries);
+        var fit = ComputeLinearFit(latticeGradientSeries, o5Series);
+        double signAgreement = ComputeSignAgreement(o5Series, latticeGradientSeries);
+
+        WriteTestLine("TOL02", $"corr={corr:F4}, slope={fit.Slope:F4}, intercept={fit.Intercept:E6}, R2={fit.RSquared:F4}, sign={signAgreement:F3}");
+
+        Assert.True(corr >= 0.88, $"O5 should follow lattice-energy gradient, corr={corr:F4}");
+        Assert.True(fit.RSquared >= 0.70, $"Lattice-gradient explanatory power too weak, R2={fit.RSquared:F4}");
+        Assert.True(signAgreement >= 0.85, $"Lattice-gradient sign agreement too low: {signAgreement:F3}");
+    }
+
+    [Fact]
+    public void TOL03_LambdaTheta_Should_Map_To_RelaxationResponseScale()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+        var candidateSteps = new[] { 0.10, 0.05, 0.02, 0.01, 0.005, 0.002 };
+
+        var dataset = BuildDataset();
+        var samples = BuildLambdaSamples(dataset, p => p.O5W6InvDistance);
+        Assert.True(samples.Count > 400, $"Too few TOL03 samples: {samples.Count}");
+
+        double lambdaGlobal = FitGlobalLambda(samples);
+
+        var profiles = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).Smooth,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).NonLocalBreak
+        };
+
+        var bestSteps = new List<double>();
+        foreach (var p in profiles)
+        {
+            double e0 = ComputePhaseLatticeEnergy(p, halfWindow, "inverse", epsilon);
+            double bestStep = candidateSteps[0];
+            double bestDrop = double.NegativeInfinity;
+
+            foreach (double step in candidateSteps)
+            {
+                double e1 = ComputePhaseLatticeEnergy(
+                    RelaxProfileAlongPhaseLatticeOperator(p, halfWindow, "inverse", epsilon, step),
+                    halfWindow,
+                    "inverse",
+                    epsilon);
+                double relDrop = e0 > 0.0 ? (e0 - e1) / e0 : 0.0;
+                if (relDrop > bestDrop)
+                {
+                    bestDrop = relDrop;
+                    bestStep = step;
+                }
+            }
+
+            bestSteps.Add(bestStep);
+        }
+
+        double etaTheta = bestSteps.Average();
+        double tauSync = EstimatePhaseCorrelationLength(
+            CreateCorrelatedLatticePhaseProfile(correlationHalfWindow: 6, count: 151, spacing: 0.20),
+            maxLag: 20);
+        double o5Scale = Median(samples.Select(s => Math.Abs(s.X)));
+        double a0 = TrmDerivedParameters.GetA0_Ms2();
+        double lambdaResponse = etaTheta * tauSync * a0 / Math.Max(o5Scale, 1e-20);
+        double ratio = Math.Abs(lambdaGlobal) / Math.Max(Math.Abs(lambdaResponse), 1e-30);
+
+        WriteTestLine("TOL03", $"lambdaGlobal={lambdaGlobal:E6}, lambdaResponse={lambdaResponse:E6}, ratio={ratio:F4}, eta={etaTheta:F4}, tau={tauSync:F4}");
+
+        Assert.True(double.IsFinite(lambdaResponse) && Math.Abs(lambdaResponse) > 0.0, "Invalid relaxation-response lambda scale.");
+        Assert.True(ratio >= 0.05 && ratio <= 20.0, $"Lambda response scale mismatch too large: ratio={ratio:F4}");
+    }
+
+    [Fact]
+    public void TOL04_ThetaO5Chain_Should_Reproduce_HoldoutStable_Response()
+    {
+        const int halfWindow = 6;
+        const double epsilon = 1e-6;
+
+        var dataset = BuildDataset();
+        var samples = BuildLambdaSamples(dataset, p => p.O5W6InvDistance);
+        var groups = samples
+            .GroupBy(s => s.Galaxy)
+            .Where(g => g.Count() >= 8)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.True(groups.Count >= 8, $"Too few TOL04 galaxy groups: {groups.Count}");
+
+        int foldCount = Math.Min(5, groups.Count);
+        var foldMap = groups
+            .Select((g, idx) => new { g.Key, Fold = idx % foldCount })
+            .ToDictionary(x => x.Key, x => x.Fold);
+        var eligible = samples.Where(s => foldMap.ContainsKey(s.Galaxy)).ToList();
+
+        double tauSync = EstimatePhaseCorrelationLength(
+            CreateCorrelatedLatticePhaseProfile(correlationHalfWindow: halfWindow, count: 151, spacing: 0.20),
+            maxLag: 20);
+        var profilePool = new[]
+        {
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).Smooth,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).LocalContrast,
+            CreateDefaultSyntheticProfiles(count: 81, spacing: 0.25).NonLocalBreak
+        };
+        var steps = new[] { 0.10, 0.05, 0.02, 0.01, 0.005, 0.002 };
+        double etaTheta = profilePool
+            .Select(p =>
+            {
+                double e0 = ComputePhaseLatticeEnergy(p, halfWindow, "inverse", epsilon);
+                double bestStep = steps[0];
+                double bestDrop = double.NegativeInfinity;
+                foreach (double step in steps)
+                {
+                    double e1 = ComputePhaseLatticeEnergy(
+                        RelaxProfileAlongPhaseLatticeOperator(p, halfWindow, "inverse", epsilon, step),
+                        halfWindow,
+                        "inverse",
+                        epsilon);
+                    double relDrop = e0 > 0.0 ? (e0 - e1) / e0 : 0.0;
+                    if (relDrop > bestDrop)
+                    {
+                        bestDrop = relDrop;
+                        bestStep = step;
+                    }
+                }
+                return bestStep;
+            })
+            .Average();
+
+        double a0 = TrmDerivedParameters.GetA0_Ms2();
+        var foldImprovements = new List<double>();
+
+        for (int fold = 0; fold < foldCount; fold++)
+        {
+            var train = eligible.Where(s => foldMap[s.Galaxy] != fold).ToList();
+            var test = eligible.Where(s => foldMap[s.Galaxy] == fold).ToList();
+            if (train.Count < 120 || test.Count < 80)
+                continue;
+
+            double o5ScaleTrain = Median(train.Select(s => Math.Abs(s.X)));
+            double lambdaDerived = etaTheta * tauSync * a0 / Math.Max(o5ScaleTrain, 1e-20);
+            double improvement = ComputeLambdaImprovement(test, lambdaDerived);
+            foldImprovements.Add(improvement);
+
+            WriteTestLine("TOL04", $"fold={fold}, lambdaDerived={lambdaDerived:E6}, improvement={improvement:E6}");
+        }
+
+        Assert.True(foldImprovements.Count >= 3, $"Insufficient valid TOL04 folds: {foldImprovements.Count}");
+
+        double meanImprovement = foldImprovements.Average();
+        double positiveShare = foldImprovements.Count(i => i >= 0.0) / (double)foldImprovements.Count;
+        double worstFold = foldImprovements.Min();
+
+        WriteTestLine("TOL04", $"meanImprovement={meanImprovement:E6}, positiveShare={positiveShare:F3}, worstFold={worstFold:E6}");
+
+        Assert.True(meanImprovement >= -1e-5, $"Derived Theta->O5->lambda chain degrades holdout on average: {meanImprovement:E6}");
+        Assert.True(positiveShare >= 0.40, $"Too few non-negative holdout folds for derived chain: {positiveShare:F3}");
+        Assert.True(worstFold >= -0.03, $"Derived chain has too strong worst-fold degradation: {worstFold:E6}");
+    }
+
     private Dataset BuildDataset()
     {
         return BuildDataset(
