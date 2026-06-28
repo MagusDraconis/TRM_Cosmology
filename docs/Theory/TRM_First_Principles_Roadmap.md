@@ -89,16 +89,16 @@ Current synthesis:
 
 | Light | Status |
 |---|---|
-| green | **tested effective behavior:** FD01–FD15 support a structurally robust weak-field frame-dragging candidate sector (rotation-generated \(A_T/B_T\), spin-sign reversal, \(r^{-3}\) shape, effective \(k_T\) holdout/discretization stability, spin-zero scalar-limit preservation, prograde/retrograde light-path asymmetry). |
-| yellow | **candidate derivation:** vector/tensor extension path \(T\rightarrow(T,\vec A_T,Q_{ij})\) is formulated as a test-gated weak-field candidate sector. |
+| green | **tested effective behavior:** FD01–FD20 support a structurally robust weak-field frame-dragging candidate sector (rotation-generated \(A_T/B_T\), spin-sign reversal, \(r^{-3}\) shape, effective \(k_T\) holdout/discretization stability, spin-zero scalar-limit preservation, prograde/retrograde light-path asymmetry, non-fitted microscopic-response normalization proxy, cross-ablation derived-\(k_T\) robustness, quantitative weak-field LT-window compatibility with frozen derived \(k_T\), SI/dimension-aware unit-scaling compatibility, and explicit systematic-bias control audit without refit). |
+| yellow | **strongly hardened / not theorem-level:** vector/tensor extension path \(T\rightarrow(T,\vec A_T,Q_{ij})\) is test-gated up to FD20: \(k_T\) is estimated from microscopic response \(J/(\Omega_{\mathrm{raw}}r^3)\), kept frozen (no refit), validated against weak-field LT windows and physical-unit scaling, and audited for controlled small high-side bias. |
 | red | **still open / not derived:** first-principles derivation of \(k_T\), quantitative GR-amplitude equivalence windows, real LT benchmark windows, and strong-field rotating-source regime closure. |
 
 Current classification:
-- tested: yes (effective weak-field candidate level, FD01–FD15)
+- tested: yes (effective weak-field candidate level, FD01–FD20)
 - calibrated: yes (effective \(k_T\) normalization)
 - hypothesis-supported: yes
 - not derived yet: yes
-- limitation: not yet GR-equivalent and not first-principles-derived
+- limitation: not yet GR-equivalent and not first-principles-derived in microscopic theorem form
 
 ---
 
@@ -107,6 +107,6 @@ Current classification:
 1. **Memory-term derivation gate:** move from candidate selection to microscopic admissibility proof tests.  
 2. **m=3 closure gate:** move from operational minimality to microscopic uniqueness/non-uniqueness theorem statement.  
 3. **Theta-observable gate:** establish falsifiable observable selection with non-local identifiability.  
-4. **Vector frame-dragging gate:** move from weak-field structural/normalization compatibility to first-principles \(k_T\) derivation and quantitative GR-window benchmarks.
+4. **Unified-sector action gate:** formalize a shared effective action roadmap for scalar \(T\), vector \(\vec A_T\), and \(\Theta/O_5\) sectors before further theorem-level closure claims.
 
 No claim should be upgraded to "derived theorem" before its red items are explicitly closed.
