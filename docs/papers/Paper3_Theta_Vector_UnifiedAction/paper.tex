@@ -1,0 +1,139 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+
+\title{Theta, Vector, and Unified-Action Constraints in TRM/TQM V3.0}
+\author{
+Fabrice Wieser\\
+Independent Researcher\\
+\url{https://github.com/MagusDraconis/TRM_Cosmology}
+}
+\date{June 2026\\
+V3.0 Review Baseline\\
+Release tag: \texttt{trm-v3.0-review-release}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper isolates the TRM/TQM V3.0 theta-observable path, vector frame-dragging candidate sector, and unified effective-action roadmap \cite{theta_theorem_path,vector_extension,unified_action_roadmap,trm_status_v3}. The objective is to state what is currently tested-effective, what is structurally constrained, and what remains open at theorem level. The chain \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\) is strongly supported by guard tests; the vector sector is strongly hardened in weak-field candidate form through FD01-FD20; and unified-action guards UF01-UF09 preserve sector limits and bounded cross-couplings. These results remain below theorem-level first-principles closure and do not claim GR replacement.
+\end{abstract}
+
+\section{Introduction}
+
+TRM/TQM V3.0 uses sector-wise hardening and cross-sector consistency guards to constrain model freedom while keeping claim boundaries explicit \cite{trm_status_v3}. This paper focuses on the three tracks that define current cross-sector structure:
+\begin{enumerate}
+  \item the nonlocal theta-observable chain,
+  \item the vector rotational/frame-dragging candidate sector,
+  \item the unified effective-action roadmap that links scalar, vector, and theta sectors.
+\end{enumerate}
+
+\section{Theta-Observable Path}
+
+\subsection{Core chain}
+
+\[
+\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}.
+\]
+
+\subsection{Current test support}
+
+The theta path is currently hardened by TO01-TO28, TQK01-TQK04, LC01-LC08, and TOL01-TOL04 \cite{theta_theorem_path,trm_status_v3}. At this stage, the chain is treated as tested-effective with strong guard-level support for operator behavior, holdout discipline, anti-proxy safeguards, and lattice-energy consistency.
+
+\subsection{Claim boundary}
+
+\begin{itemize}
+  \item Supported: strongly constrained theorem path at tested-effective level.
+  \item Not claimed: theorem-level microscopic closure of the full \(\Theta \rightarrow g_{\mathrm{obs}}\) map.
+\end{itemize}
+
+\section{Vector Frame-Dragging Candidate Sector}
+
+\subsection{Core structure}
+
+The vector sector is based on:
+\[
+\vec A_T,\qquad \vec B_T=\nabla\times\vec A_T,
+\]
+with weak-field frame-dragging candidate interpretation \cite{vector_extension,lense_thirring}.
+
+\subsection{Current hardening status}
+
+FD01-FD20 currently support \cite{vector_extension,trm_status_v3}:
+\begin{enumerate}
+  \item rotational source generation and spin-sign reversal behavior,
+  \item weak-field scaling shape and null/spin-zero fallback consistency,
+  \item derived non-fitted effective \(k_T\) normalization discipline,
+  \item ablation/holdout/unit-scaling robustness,
+  \item controlled systematic-bias auditing under no-refit constraints.
+\end{enumerate}
+
+\subsection{Claim boundary}
+
+\begin{itemize}
+  \item Supported: tested-effective weak-field frame-dragging candidate sector.
+  \item Not claimed: theorem-level first-principles closure or full quantitative GR-equivalence.
+\end{itemize}
+
+\section{Unified Effective-Action Roadmap}
+
+\subsection{Canonical roadmap form}
+
+\[
+S_{\mathrm{eff}}[T,\vec A_T,\Theta]
+=
+S_T[T]+S_A[\vec A_T]+S_\Theta[\Theta]+S_{\mathrm{int}}[T,\vec A_T,\Theta].
+\]
+
+\subsection{Current guard status}
+
+UF01-UF09 currently support \cite{unified_action_roadmap,trm_status_v3}:
+\begin{enumerate}
+  \item scalar/vector/theta limit recovery,
+  \item zero-coupling additive decomposition,
+  \item bounded small cross-couplings,
+  \item global cross-coupling identifiability without per-group refit dependence,
+  \item preservation of MC/FD/TO guard behavior under small couplings.
+\end{enumerate}
+
+\subsection{Claim boundary}
+
+\begin{itemize}
+  \item Supported: candidate-level unified effective-action roadmap with guard preservation.
+  \item Not claimed: theorem-level unification.
+\end{itemize}
+
+\section{Cross-Sector Falsification Criteria}
+
+The current theta/vector/unified interpretation should be narrowed or rejected if:
+\begin{enumerate}
+  \item theta-chain anti-proxy or holdout guarantees collapse under independent tests;
+  \item vector weak-field guard behavior fails under robust ablation/benchmark stress;
+  \item unified-action interaction terms break sector-limit recovery or MC/FD/TO guard preservation;
+  \item claimed cross-coupling structure requires hidden per-dataset re-normalization.
+\end{enumerate}
+
+\section{Remaining First-Principles Gaps}
+
+Open items remain explicit \cite{theta_theorem_path,unified_action_roadmap,vector_extension}:
+\begin{itemize}
+  \item theorem-level microscopic closure for the theta chain,
+  \item theorem-level first-principles closure for vector-sector normalization and benchmark mapping,
+  \item theorem-level closure of unified cross-sector interaction structure.
+\end{itemize}
+
+\section{Conclusion}
+
+In V3.0, theta, vector, and unified-action blocks are strongly constrained at tested-effective level and form a coherent candidate multi-sector framework under explicit guard discipline. The status is review-ready and falsifiable, but it is not theorem-level complete and does not claim replacement of General Relativity.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

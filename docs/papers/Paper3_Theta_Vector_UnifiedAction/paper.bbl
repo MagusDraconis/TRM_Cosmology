@@ -1,0 +1,34 @@
+\begin{thebibliography}{1}
+
+\bibitem{lense_thirring}
+Josef Lense and Hans Thirring.
+\newblock On the influence of the proper rotation of central bodies on the
+  motions of planets and moons according to einstein's theory of gravitation.
+\newblock {\em Physikalische Zeitschrift}, 19:156--163, 1918.
+
+\bibitem{trm_status_v3}
+{TRM Project}.
+\newblock Trm current status for peer review, 2026.
+\newblock Repository document:
+  docs/review/TRM\_Current\_Status\_For\_PeerReview.md.
+
+\bibitem{theta_theorem_path}
+{TRM Project}.
+\newblock Trm theta-o5-lambda theorem path (gap 3), 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Theta\_O5\_Lambda\_Theorem\_Path.md.
+
+\bibitem{unified_action_roadmap}
+{TRM Project}.
+\newblock Trm unified field-action roadmap, 2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Unified\_Field\_Action\_Roadmap.md.
+
+\bibitem{vector_extension}
+{TRM Project}.
+\newblock Trm vector/tensor extension for frame-dragging (candidate sector),
+  2026.
+\newblock Repository document:
+  docs/Theory/TRM\_Vector\_Tensor\_Extension\_FrameDragging.md.
+
+\end{thebibliography}
