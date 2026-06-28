@@ -1,5 +1,9 @@
 # REVIEW PACKAGE
 
+## Zenodo archive (V3.0 Review Baseline)
+
+- DOI: https://doi.org/10.5281/zenodo.21012262
+
 ## 1. What is claimed
 
 - TRM photon transport is treated as a **weak-field effective model** with executable validation tracks.

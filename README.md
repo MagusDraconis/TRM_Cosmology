@@ -35,7 +35,7 @@ The repository implements the numerical models used to evaluate this framework a
 ---
 ## <img src="https://cdn.simpleicons.org/zenodo/0A7BBB" alt="Zenodo" width="18" /> Zenodo link
 
-[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20772292-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.20772292)
+[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21012262-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.21012262)
 
 ## 📊 Implemented Domains
 
