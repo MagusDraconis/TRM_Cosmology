@@ -10,6 +10,12 @@ T,\quad \vec A_T,\quad \Theta
 
 Status target of this roadmap: **strongly structured unification path / not theorem-level closure**.
 
+Current guard status:
+
+- UF01–UF05: sector-limit and additive-baseline consistency guards are passing.
+- UF06–UF07: bounded, limit-preserving small cross-coupling guards are passing.
+- UF08: globally identifiable cross-coupling guard (without per-group refit dependence) is passing.
+
 ---
 
 ## 1. Current sector baseline
@@ -90,6 +96,8 @@ At this stage, the unification is a **derive-or-falsify roadmap**, not a finishe
 Claim-safe statement:
 
 > TRM currently has strongly hardened effective sector paths for scalar transport, vector frame-dragging, and theta-response channels. A unified action-level framework is now structurally specified, but not yet closed as theorem-level first-principles derivation.
+>
+> UF01–UF08 support a unified effective action roadmap whose sector limits, additive baseline, bounded cross-terms, and globally identifiable cross-couplings are test-guarded. This remains a candidate action-level structure, not theorem-level unification.
 
 ---
 
@@ -104,12 +112,23 @@ The unification roadmap fails if any of the following occurs:
 
 ---
 
-## 7. Proposed next tests (UF-series)
+## 7. UF-series progression
 
-1. `UF01_UnifiedAction_Should_Recover_ScalarLimit_When_VectorThetaCouplings_Off`
-2. `UF02_UnifiedAction_Should_Recover_FD16ToFD20_VectorWindow_In_WeakField`
-3. `UF03_UnifiedAction_Should_Preserve_ThetaO5Chain_HoldoutStability`
-4. `UF04_UnifiedAction_Couplings_Should_Be_Identifiable_Without_PerDatasetRefit`
-5. `UF05_UnifiedAction_Should_Preserve_MemoryChannelHierarchy_MC09ToMC12`
+Completed:
 
-These tests should be implemented as guard-style derivation gates, with no theorem-level overclaiming.
+1. `UF01_UnifiedAction_Should_Reduce_To_ScalarSector_When_VectorAndThetaDisabled`
+2. `UF02_UnifiedAction_Should_Reduce_To_VectorSector_When_ScalarThetaCouplings_Off`
+3. `UF03_UnifiedAction_Should_Reduce_To_ThetaO5Sector_When_ScalarVectorCouplings_Off`
+4. `UF04_UnifiedAction_CrossTerms_Should_Vanish_When_CouplingsZero`
+5. `UF05_UnifiedAction_Should_Preserve_AllKnownLimits`
+6. `UF06_UnifiedAction_CrossTerms_Should_Remain_Bounded_For_SmallCouplings`
+7. `UF07_UnifiedAction_CrossTerms_Should_Not_Break_KnownSectorLimits`
+8. `UF08_AllowedCrossCouplings_Should_Be_Identifiable_Without_Refit`
+
+Next:
+
+1. `UF09_UnifiedAction_Should_Not_Break_MC_FD_TO_Guards`
+2. `UF10_UnifiedAction_CrossCouplings_Should_Show_HoldoutStable_Bounds`
+3. `UF11_UnifiedAction_Should_Keep_NoRefit_Identifiability_Under_Ablation`
+
+All UF tests are guard-style derivation gates; no theorem-level overclaiming is allowed.

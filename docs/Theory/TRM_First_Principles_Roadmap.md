@@ -109,4 +109,8 @@ Current classification:
 3. **Theta-observable gate:** establish falsifiable observable selection with non-local identifiability.  
 4. **Unified-sector action gate:** formalize a shared effective action roadmap for scalar \(T\), vector \(\vec A_T\), and \(\Theta/O_5\) sectors before further theorem-level closure claims.
 
+Unified-action progress note:
+- UF01–UF08 now establish sector-limit consistency, additive baseline, bounded cross-couplings, and no-refit cross-coupling identifiability.
+- Immediate next guard: `UF09_UnifiedAction_Should_Not_Break_MC_FD_TO_Guards`.
+
 No claim should be upgraded to "derived theorem" before its red items are explicitly closed.

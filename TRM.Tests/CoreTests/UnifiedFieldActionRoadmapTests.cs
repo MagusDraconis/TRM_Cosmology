@@ -337,6 +337,244 @@ public class UnifiedFieldActionRoadmapTests
         _output.WriteLine($"[UF05] all-limits summary: maxLimitDiff={maxLimitDiff:E6}");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF06_UnifiedAction_CrossTerms_Should_Remain_Bounded_For_SmallCouplings()
+    {
+        // Small-coupling cross-term guard:
+        // - no action explosion,
+        // - no sign/negativity breakdown,
+        // - controlled deviation from additive (zero-coupling) baseline.
+        const double alphaT = 1.3;
+        const double massT = 0.4;
+        const double alphaA = 0.9;
+        const double betaTheta = 0.7;
+
+        var epsSet = new[] { 0.005, 0.010, 0.020 };
+        var samples = new List<(double ScalarGrad, double ScalarValue, double VectorCurl, double ThetaGrad)>
+        {
+            ( 0.05,  0.08,  0.07, -0.04),
+            (-0.09, -0.03,  0.10,  0.06),
+            ( 0.12,  0.02, -0.11,  0.09),
+            (-0.14,  0.06,  0.13, -0.08),
+            ( 0.18, -0.05, -0.15,  0.11)
+        };
+
+        double maxRelDeviation = 0.0;
+        double maxRelCross = 0.0;
+        double minUnified = double.PositiveInfinity;
+
+        foreach (double eps in epsSet)
+        {
+            double gammaTA = eps;
+            double gammaTTheta = 0.8 * eps;
+            double gammaATheta = 1.1 * eps;
+
+            foreach (var (sGrad, sVal, vCurl, tGrad) in samples)
+            {
+                double sT = ScalarActionDensity(alphaT, massT, sGrad, sVal);
+                double sA = alphaA * vCurl * vCurl;
+                double sTheta = betaTheta * tGrad * tGrad;
+                double additive = sT + sA + sTheta;
+
+                double crossTerm =
+                    gammaTA * sGrad * vCurl +
+                    gammaTTheta * sGrad * tGrad +
+                    gammaATheta * vCurl * tGrad;
+
+                double unified = UnifiedActionDensity(
+                    alphaT, massT, alphaA, betaTheta,
+                    gammaTA, gammaTTheta, gammaATheta,
+                    sGrad, sVal, vCurl, tGrad);
+
+                double relDeviation = Math.Abs(unified - additive) / Math.Max(additive, 1e-18);
+                double relCross = Math.Abs(crossTerm) / Math.Max(additive, 1e-18);
+
+                maxRelDeviation = Math.Max(maxRelDeviation, relDeviation);
+                maxRelCross = Math.Max(maxRelCross, relCross);
+                minUnified = Math.Min(minUnified, unified);
+
+                _output.WriteLine(
+                    $"[UF06] eps={eps:E6}, additive={additive:E6}, cross={crossTerm:E6}, unified={unified:E6}, relDev={relDeviation:E6}, relCross={relCross:E6}");
+
+                Assert.True(double.IsFinite(unified), "UF06 unified action should remain finite.");
+                Assert.True(unified > 0.0, $"UF06 unified action should stay positive under small couplings, got {unified:E6}");
+                Assert.True(relDeviation < 0.08, $"UF06 relative deviation too large for small coupling: {relDeviation:E6}");
+                Assert.True(relCross < 0.08, $"UF06 relative cross-term contribution too large: {relCross:E6}");
+            }
+        }
+
+        _output.WriteLine(
+            $"[UF06] boundedness summary: maxRelDeviation={maxRelDeviation:E6}, maxRelCross={maxRelCross:E6}, minUnified={minUnified:E6}, sampleCount={samples.Count * epsSet.Length}");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF07_UnifiedAction_CrossTerms_Should_Not_Break_KnownSectorLimits()
+    {
+        // Limit-preservation guard under small cross-couplings.
+        const double alphaT = 1.3;
+        const double massT = 0.4;
+        const double alphaA = 0.9;
+        const double betaTheta = 0.7;
+        const double dx = 1.0;
+
+        // Small active couplings.
+        const double gammaTA = 0.01;
+        const double gammaTTheta = 0.008;
+        const double gammaATheta = 0.011;
+
+        // 1) Spin-zero remains vector-null even with active cross couplings.
+        double spinZero = UnifiedActionDensity(
+            alphaT, massT, alphaA, betaTheta,
+            gammaTA, gammaTTheta, gammaATheta,
+            scalarGrad: 0.0,
+            scalarValue: 0.0,
+            vectorCurl: 0.0,
+            thetaGrad: 0.0);
+        _output.WriteLine($"[UF07] spin-zero limit: unified={spinZero:E6}");
+        Assert.True(Math.Abs(spinZero) < 1e-12, "UF07 spin-zero limit should remain null.");
+
+        // 2) Constant-theta remains theta-null (O5=0, E_theta=0) with other sectors disabled.
+        var thetaConst = new[] { 0.77, 0.77, 0.77, 0.77, 0.77 };
+        var o5Const = ComputeThetaO5(thetaConst, betaTheta, dx);
+        double o5Max = 0.0;
+        foreach (double x in o5Const) o5Max = Math.Max(o5Max, Math.Abs(x));
+        double eConst = ComputeThetaEnergy(thetaConst, betaTheta, dx);
+        double eConstUnified = ComputeThetaEnergyFromUnified(thetaConst, alphaT, massT, alphaA, betaTheta, gammaTA, gammaTTheta, gammaATheta, dx);
+        _output.WriteLine($"[UF07] constant-theta limit: eTheta={eConst:E6}, eUnified={eConstUnified:E6}, o5Max={o5Max:E6}");
+        Assert.True(eConst < 1e-12 && eConstUnified < 1e-12, "UF07 constant-theta energy should remain null.");
+        Assert.True(o5Max < 1e-12, "UF07 constant-theta should keep O5 zero mode.");
+
+        // 3) Sector limits stay close to uncoupled baselines (tight bounds).
+        var samples = new List<(double ScalarGrad, double ScalarValue, double VectorCurl, double ThetaGrad)>
+        {
+            ( 0.06,  0.05,  0.00,  0.00), // scalar-dominant
+            ( 0.00,  0.00,  0.21,  0.00), // vector-dominant
+            ( 0.00,  0.00,  0.00, -0.12), // theta-dominant
+            ( 0.09, -0.02,  0.16,  0.00), // scalar+vector
+            ( 0.07,  0.03,  0.00,  0.11), // scalar+theta
+            ( 0.00,  0.00, -0.18,  0.10)  // vector+theta
+        };
+
+        double maxRelShift = 0.0;
+        double minUnified = double.PositiveInfinity;
+
+        foreach (var (sGrad, sVal, vCurl, tGrad) in samples)
+        {
+            double uncoupled = UnifiedActionDensity(
+                alphaT, massT, alphaA, betaTheta,
+                gammaTA: 0.0, gammaTTheta: 0.0, gammaATheta: 0.0,
+                sGrad, sVal, vCurl, tGrad);
+
+            double coupled = UnifiedActionDensity(
+                alphaT, massT, alphaA, betaTheta,
+                gammaTA, gammaTTheta, gammaATheta,
+                sGrad, sVal, vCurl, tGrad);
+
+            double relShift = Math.Abs(coupled - uncoupled) / Math.Max(uncoupled, 1e-18);
+            maxRelShift = Math.Max(maxRelShift, relShift);
+            minUnified = Math.Min(minUnified, coupled);
+
+            _output.WriteLine(
+                $"[UF07] sample: uncoupled={uncoupled:E6}, coupled={coupled:E6}, relShift={relShift:E6}, sGrad={sGrad:E6}, vCurl={vCurl:E6}, tGrad={tGrad:E6}");
+
+            Assert.True(double.IsFinite(coupled), "UF07 coupled action must remain finite.");
+            Assert.True(coupled > 0.0, $"UF07 coupled action should remain positive, got {coupled:E6}");
+            Assert.True(relShift < 0.03, $"UF07 relative limit shift too large under small couplings: {relShift:E6}");
+        }
+
+        _output.WriteLine($"[UF07] limit-preservation summary: maxRelShift={maxRelShift:E6}, minUnified={minUnified:E6}, sampleCount={samples.Count}");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF08_AllowedCrossCouplings_Should_Be_Identifiable_Without_Refit()
+    {
+        // Identifiability guard:
+        // estimate one global cross-coupling triplet from mixed samples and
+        // require it to explain grouped data without mandatory per-group refit.
+        const double gammaTA_True = 0.0100;
+        const double gammaTTheta_True = 0.0080;
+        const double gammaATheta_True = 0.0110;
+
+        var groups = new Dictionary<string, List<(double SGrad, double VCurl, double TGrad)>>()
+        {
+            ["mixed-a"] = new()
+            {
+                ( 0.05,  0.07, -0.04),
+                (-0.08,  0.10,  0.06),
+                ( 0.12, -0.11,  0.09),
+                (-0.10,  0.14, -0.07),
+                ( 0.16, -0.13,  0.08)
+            },
+            ["mixed-b"] = new()
+            {
+                ( 0.06,  0.09, -0.03),
+                (-0.09,  0.12,  0.05),
+                ( 0.11, -0.15,  0.07),
+                (-0.13,  0.16, -0.06),
+                ( 0.18, -0.14,  0.10)
+            },
+            ["mixed-c"] = new()
+            {
+                ( 0.04,  0.06, -0.05),
+                (-0.07,  0.11,  0.04),
+                ( 0.10, -0.12,  0.08),
+                (-0.12,  0.15, -0.09),
+                ( 0.15, -0.10,  0.11)
+            }
+        };
+
+        var all = new List<(double X1, double X2, double X3, double Y, string Group)>();
+        foreach (var (groupName, rows) in groups)
+        {
+            foreach (var (sGrad, vCurl, tGrad) in rows)
+            {
+                double x1 = sGrad * vCurl; // TA feature
+                double x2 = sGrad * tGrad; // TTheta feature
+                double x3 = vCurl * tGrad; // ATheta feature
+                double y = gammaTA_True * x1 + gammaTTheta_True * x2 + gammaATheta_True * x3;
+                all.Add((x1, x2, x3, y, groupName));
+            }
+        }
+
+        var globalFit = FitThreeFeatureLinearModel(all);
+        _output.WriteLine(
+            $"[UF08] global fit: gammaTA={globalFit.G1:E6}, gammaTTheta={globalFit.G2:E6}, gammaATheta={globalFit.G3:E6}, rms={globalFit.Rms:E6}");
+
+        // Global identifiability against known synthetic generating couplings.
+        Assert.InRange(Math.Abs(globalFit.G1 - gammaTA_True), 0.0, 1e-12);
+        Assert.InRange(Math.Abs(globalFit.G2 - gammaTTheta_True), 0.0, 1e-12);
+        Assert.InRange(Math.Abs(globalFit.G3 - gammaATheta_True), 0.0, 1e-12);
+
+        double worstGlobalGroupRms = 0.0;
+        double worstRmsRatio = 0.0;
+
+        foreach (var (groupName, _) in groups)
+        {
+            var groupRows = all.FindAll(r => r.Group == groupName);
+            double rmsGlobal = ComputeRms(groupRows, globalFit.G1, globalFit.G2, globalFit.G3);
+            var groupFit = FitThreeFeatureLinearModel(groupRows);
+            double rmsGroup = groupFit.Rms;
+            double ratio = rmsGlobal / Math.Max(rmsGroup, 1e-18);
+
+            worstGlobalGroupRms = Math.Max(worstGlobalGroupRms, rmsGlobal);
+            worstRmsRatio = Math.Max(worstRmsRatio, ratio);
+
+            _output.WriteLine(
+                $"[UF08] group={groupName}: rmsGlobal={rmsGlobal:E6}, rmsGroupRefit={rmsGroup:E6}, ratio={ratio:F6}");
+        }
+
+        _output.WriteLine(
+            $"[UF08] identifiability summary: worstGlobalGroupRms={worstGlobalGroupRms:E6}, worstRmsRatio={worstRmsRatio:F6}, n={all.Count}");
+
+        // "Without refit" criterion: global model remains as good as group refits
+        // up to tiny numerical tolerance.
+        Assert.True(worstGlobalGroupRms < 1e-12, "UF08 global coupling set should explain all groups to numerical precision.");
+        Assert.True(worstRmsRatio < 1.02, "UF08 should not require per-group refit to explain grouped samples.");
+    }
+
     private static double ScalarActionDensity(double alphaT, double massT, double scalarGrad, double scalarValue)
     {
         return alphaT * scalarGrad * scalarGrad + 0.5 * massT * scalarValue * scalarValue;
@@ -407,5 +645,80 @@ public class UnifiedFieldActionRoadmapTests
         }
 
         return o5;
+    }
+
+    private static (double G1, double G2, double G3, double Rms) FitThreeFeatureLinearModel(
+        List<(double X1, double X2, double X3, double Y, string Group)> rows)
+    {
+        double a11 = 0, a12 = 0, a13 = 0;
+        double a22 = 0, a23 = 0, a33 = 0;
+        double b1 = 0, b2 = 0, b3 = 0;
+
+        foreach (var r in rows)
+        {
+            a11 += r.X1 * r.X1;
+            a12 += r.X1 * r.X2;
+            a13 += r.X1 * r.X3;
+            a22 += r.X2 * r.X2;
+            a23 += r.X2 * r.X3;
+            a33 += r.X3 * r.X3;
+            b1 += r.X1 * r.Y;
+            b2 += r.X2 * r.Y;
+            b3 += r.X3 * r.Y;
+        }
+
+        // Symmetric normal matrix.
+        double[,] a = new[,]
+        {
+            { a11, a12, a13 },
+            { a12, a22, a23 },
+            { a13, a23, a33 }
+        };
+        double[] b = { b1, b2, b3 };
+        var x = Solve3x3(a, b);
+        double rms = ComputeRms(rows, x[0], x[1], x[2]);
+        return (x[0], x[1], x[2], rms);
+    }
+
+    private static double ComputeRms(
+        List<(double X1, double X2, double X3, double Y, string Group)> rows,
+        double g1, double g2, double g3)
+    {
+        double mse = 0.0;
+        foreach (var r in rows)
+        {
+            double yHat = g1 * r.X1 + g2 * r.X2 + g3 * r.X3;
+            double d = yHat - r.Y;
+            mse += d * d;
+        }
+
+        mse /= Math.Max(rows.Count, 1);
+        return Math.Sqrt(mse);
+    }
+
+    private static double[] Solve3x3(double[,] a, double[] b)
+    {
+        double detA = Determinant3x3(a);
+        if (Math.Abs(detA) < 1e-18)
+            return new[] { 0.0, 0.0, 0.0 };
+
+        double[,] a1 = { { b[0], a[0, 1], a[0, 2] }, { b[1], a[1, 1], a[1, 2] }, { b[2], a[2, 1], a[2, 2] } };
+        double[,] a2 = { { a[0, 0], b[0], a[0, 2] }, { a[1, 0], b[1], a[1, 2] }, { a[2, 0], b[2], a[2, 2] } };
+        double[,] a3 = { { a[0, 0], a[0, 1], b[0] }, { a[1, 0], a[1, 1], b[1] }, { a[2, 0], a[2, 1], b[2] } };
+
+        return new[]
+        {
+            Determinant3x3(a1) / detA,
+            Determinant3x3(a2) / detA,
+            Determinant3x3(a3) / detA
+        };
+    }
+
+    private static double Determinant3x3(double[,] m)
+    {
+        return
+            m[0, 0] * (m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1]) -
+            m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0]) +
+            m[0, 2] * (m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0]);
     }
 }
