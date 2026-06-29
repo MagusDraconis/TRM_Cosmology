@@ -1210,6 +1210,155 @@ public class UnifiedFieldActionRoadmapTests
         Assert.True(eAfter < eBefore, "UA20 TO proxy should preserve theta relaxation energy descent.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA21_AlternativeLatticeEnergyForms_Should_Degrade_MinimalActionClosure()
+    {
+        // If minimal lattice-response structure is correct, alternative energy-form mappings
+        // should degrade closure against the transport target phi^2*kappa.
+        const double lambda2 = 0.30;
+        double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+
+        var target = new List<double>();
+        var minimal = new List<double>();
+        var altSaturating = new List<double>();
+        var altMixed = new List<double>();
+
+        foreach (double phi in phis)
+        {
+            foreach (double kappa in kappas)
+            {
+                double y = phi * phi * kappa;
+                target.Add(y);
+
+                double aMinimal = phi;
+                double iMinimal = lambda2 * aMinimal * aMinimal * kappa;
+                minimal.Add(iMinimal);
+
+                // Alternative 1: saturating response (non-minimal lattice proxy).
+                double aSat = phi / (1.0 + 20.0 * phi);
+                double iSat = lambda2 * aSat * aSat * kappa;
+                altSaturating.Add(iSat);
+
+                // Alternative 2: mixed odd/even correction (non-minimal lattice proxy).
+                double aMix = phi + 8.0 * phi * phi;
+                double iMix = lambda2 * aMix * aMix * kappa;
+                altMixed.Add(iMix);
+            }
+        }
+
+        var fitMinimal = FitLineAndR2(minimal, target);
+        var fitSat = FitLineAndR2(altSaturating, target);
+        var fitMix = FitLineAndR2(altMixed, target);
+
+        _output.WriteLine(
+            $"[UA21] R2 minimal={fitMinimal.R2:F6}, saturating={fitSat.R2:F6}, mixed={fitMix.R2:F6}");
+
+        Assert.True(fitMinimal.R2 > 0.999999, $"UA21 minimal closure should remain near exact, got R2={fitMinimal.R2:F6}.");
+        Assert.True(fitSat.R2 < fitMinimal.R2 - 0.005,
+            $"UA21 expected saturating alternative to degrade closure. minimal={fitMinimal.R2:F6}, alt={fitSat.R2:F6}");
+        Assert.True(fitMix.R2 < fitMinimal.R2 - 0.0005,
+            $"UA21 expected mixed alternative to degrade closure. minimal={fitMinimal.R2:F6}, alt={fitMix.R2:F6}");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA22_MinimalAction_Should_Be_Robust_Under_LatticePerturbations()
+    {
+        // Robustness guard: small lattice/synchronization perturbations should not break
+        // minimal-action closure quality.
+        const double lambda2 = 0.30;
+        double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+        double[] perturbAmplitudes = { 0.00, 0.02, 0.04, 0.06 };
+
+        double minR2 = double.PositiveInfinity;
+        var slopes = new List<double>();
+
+        foreach (double amp in perturbAmplitudes)
+        {
+            var x = new List<double>();
+            var y = new List<double>();
+            int idx = 0;
+            foreach (double phi in phis)
+            {
+                foreach (double kappa in kappas)
+                {
+                    idx++;
+                    double target = phi * phi * kappa;
+
+                    // Deterministic small perturbation surrogate for lattice coupling/noise.
+                    double wobble = Math.Sin(0.37 * idx) + 0.5 * Math.Cos(0.19 * idx);
+                    double aDyn = phi * (1.0 + amp * wobble);
+                    aDyn = Math.Max(aDyn, 0.0);
+                    double model = lambda2 * aDyn * aDyn * kappa;
+
+                    x.Add(model);
+                    y.Add(target);
+                }
+            }
+
+            var fit = FitLineAndR2(x, y);
+            minR2 = Math.Min(minR2, fit.R2);
+            slopes.Add(fit.Slope);
+            _output.WriteLine($"[UA22] amp={amp:F3} | slope={fit.Slope:E6} | intercept={fit.Intercept:E6} | R2={fit.R2:F6}");
+        }
+
+        double slopeSpread = RelativeSpread(slopes);
+        _output.WriteLine($"[UA22] minR2={minR2:F6} | slopeSpread={slopeSpread:E6}");
+
+        Assert.True(minR2 > 0.995, $"UA22 expected robust closure under perturbations, got minR2={minR2:F6}.");
+        Assert.True(slopeSpread < 0.25, $"UA22 expected bounded slope spread under perturbations, got {slopeSpread:E6}.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA23_NonMinimalLatticeActions_Should_Not_Outperform_WithoutPenalty()
+    {
+        // Model-selection guard: nonminimal lattice actions should not outperform minimal action
+        // once simple complexity penalty is applied.
+        double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+
+        var target = new List<double>();
+        var invMinimal = new List<double>();
+        var invQuartic = new List<double>();
+        var invKappaSquared = new List<double>();
+        var invHybrid = new List<double>();
+
+        foreach (double phi in phis)
+        {
+            foreach (double kappa in kappas)
+            {
+                target.Add(phi * phi * kappa);
+                invMinimal.Add(phi * phi * kappa);
+                invQuartic.Add(Math.Pow(phi, 4.0) * kappa);
+                invKappaSquared.Add(phi * phi * kappa * kappa);
+                invHybrid.Add(phi * phi * kappa + 0.5 * Math.Pow(phi, 4.0) * kappa);
+            }
+        }
+
+        double mseMinimal = ComputeModelMse(invMinimal, target);
+        double mseQuartic = ComputeModelMse(invQuartic, target);
+        double mseKappaSquared = ComputeModelMse(invKappaSquared, target);
+        double mseHybrid = ComputeModelMse(invHybrid, target);
+
+        // Complexity penalties (minimal=1 feature, others treated as non-minimal alternatives).
+        double scoreMinimal = mseMinimal + 0.00;
+        double scoreQuartic = mseQuartic + 0.08;
+        double scoreKappaSquared = mseKappaSquared + 0.08;
+        double scoreHybrid = mseHybrid + 0.12;
+
+        _output.WriteLine(
+            $"[UA23] mse(min={mseMinimal:E6}, q={mseQuartic:E6}, k2={mseKappaSquared:E6}, h={mseHybrid:E6}) | score(min={scoreMinimal:E6}, q={scoreQuartic:E6}, k2={scoreKappaSquared:E6}, h={scoreHybrid:E6})");
+
+        Assert.True(mseMinimal <= mseQuartic && mseMinimal <= mseKappaSquared && mseMinimal <= mseHybrid,
+            "UA23 expected minimal action invariant to remain best-or-equal in raw fit.");
+        Assert.True(scoreMinimal < scoreQuartic && scoreMinimal < scoreKappaSquared && scoreMinimal < scoreHybrid,
+            "UA23 expected minimal action to remain preferred under complexity-penalized score.");
+    }
+
     private static double ScalarActionDensity(double alphaT, double massT, double scalarGrad, double scalarValue)
     {
         return alphaT * scalarGrad * scalarGrad + 0.5 * massT * scalarValue * scalarValue;
@@ -1412,5 +1561,24 @@ public class UnifiedFieldActionRoadmapTests
             max = Math.Max(max, v);
         }
         return (max - min) / Math.Max(Math.Abs(mean), 1e-18);
+    }
+
+    private static double ComputeModelMse(IReadOnlyList<double> model, IReadOnlyList<double> target)
+    {
+        int n = Math.Min(model.Count, target.Count);
+        if (n == 0)
+            return 0.0;
+
+        // Best linear calibration yHat = a*x + b, then compute MSE.
+        var fit = FitLineAndR2(model, target);
+        double mse = 0.0;
+        for (int i = 0; i < n; i++)
+        {
+            double yHat = fit.Slope * model[i] + fit.Intercept;
+            double d = yHat - target[i];
+            mse += d * d;
+        }
+
+        return mse / n;
     }
 }

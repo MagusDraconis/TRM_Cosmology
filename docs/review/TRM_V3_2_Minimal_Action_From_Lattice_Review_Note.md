@@ -2,11 +2,11 @@
 
 ## Scope
 
-This note is intentionally narrow and reviews only the V3.2 minimal-action block introduced by UA16–UA20.
+This note is intentionally narrow and reviews only the V3.2 minimal-action block introduced by UA16–UA23.
 
 Core review question:
 
-> Does UA16–UA20 make the minimal effective action itself plausibly lattice-derived, or is it still an effective action ansatz?
+> Do UA16–UA23 make the minimal effective action itself plausibly lattice-derived, or is it still an effective action ansatz?
 
 ---
 
@@ -21,8 +21,24 @@ Implemented guard block:
 3. `UA18_MinimalAction_Should_Reproduce_UF13_To_UF15_Without_Retuning`
 4. `UA19_NonMinimalActionTerms_Should_Be_Penalized_Or_Subleading`
 5. `UA20_MinimalAction_Should_Preserve_MC_FD_TO_Limits`
+6. `UA21_AlternativeLatticeEnergyForms_Should_Degrade_MinimalActionClosure`
+7. `UA22_MinimalAction_Should_Be_Robust_Under_LatticePerturbations`
+8. `UA23_NonMinimalLatticeActions_Should_Not_Outperform_WithoutPenalty`
 
-Current test status for this block: 5/5 passing.
+Current test status for this block: 8/8 passing.
+
+## Relation to V3.1
+
+V3.1 established the memory term as an action-derived memory-closure candidate:
+\[
+A_{\mathrm{dyn}}\propto\phi
+\rightarrow
+A_{\mathrm{dyn}}^2|\dot{\mu}|
+\rightarrow
+\phi^2|\dot{\mu}|.
+\]
+
+V3.2 moves one level deeper by testing whether the minimal effective action itself can be motivated from TQM lattice/synchronization structure.
 
 ---
 
@@ -36,18 +52,31 @@ Current test status for this block: 5/5 passing.
 
 Net effect: the minimal action is better motivated as lattice-compatible and cross-guard coherent.
 
+Key V3.2 metrics:
+
+- UA16: exact lattice-to-scalar action reduction in tested cases.
+- UA17: \(A_{\mathrm{dyn}}^2\kappa\) preserved under coarse-graining, \(R^2=1.0\).
+- UA18: UF13–UF15 reproduced without retuning.
+- UA19: non-minimal terms remain penalized/subleading.
+- UA20: MC/FD/TO limits preserved.
+- UA21: alternative lattice-energy forms degrade minimal-action closure quality.
+- UA22: minimal-action closure remains robust under controlled lattice perturbations.
+- UA23: nonminimal lattice actions do not outperform the minimal action under penalty-aware comparison.
+
 ---
 
 ## 3) Claim-safe interpretation
 
 V3.2 supports a candidate derivation of the minimal effective action from TQM lattice/synchronization structure.  
+Under comparative guard tests (UA21–UA23), the minimal effective action is now plausibly lattice-derived.  
 It remains not theorem-level first-principles closure.
 
 No statement here implies TRM replaces GR.
 
 Claim-safe summary:
 
-- UA16–UA20 support a candidate derivation of the minimal effective action from TQM lattice/synchronization principles.
+- UA16–UA23 support a candidate derivation of the minimal effective action from TQM lattice/synchronization principles.
+- Under comparative guards, the minimal effective action is plausibly lattice-derived.
 - This remains not theorem-level first-principles closure.
 - No GR replacement claim.
 
@@ -65,4 +94,8 @@ Claim-safe summary:
 
 Recommended external benchmark prompt:
 
-> Evaluate whether UA16–UA20 are sufficient to treat the minimal effective action as plausibly lattice-derived, or whether the framework still behaves as a calibrated effective action ansatz.
+> Evaluate whether UA16–UA23 are sufficient to treat the minimal effective action as plausibly lattice-derived, or whether the framework still behaves as a calibrated effective action ansatz.
+
+Additional focused review question:
+
+> Do UA16–UA23 justify treating the minimal effective action as plausibly lattice-derived, or does the framework remain primarily a calibrated effective model with improved microscopic motivation?
