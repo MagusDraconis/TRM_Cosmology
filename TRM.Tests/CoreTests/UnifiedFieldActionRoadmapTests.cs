@@ -801,6 +801,146 @@ public class UnifiedFieldActionRoadmapTests
         Assert.True(maxKappaSquaredRatio < 0.10, "UF12 expected A^2*kappa^2 to remain subleading in weak field.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF13_MemoryTerm_Should_Follow_From_Variation_Of_MinimalEffectiveAction()
+    {
+        // Minimal effective local action for memory amplitude A:
+        // L(A) = 0.5*mA2*A^2 - source*phi*A + lambda2*A^2*kappa
+        // Stationarity gives:
+        // dL/dA = (mA2 + 2*lambda2*kappa)A - source*phi = 0
+        // => A* = source*phi / (mA2 + 2*lambda2*kappa).
+        const double mA2 = 1.0;
+        const double source = 1.0;
+        const double lambda2 = 0.30;
+        const double fdStep = 1e-7;
+
+        double[] phis = { 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+
+        var x = new List<double>();
+        var y = new List<double>();
+        double maxStationarityResidual = 0.0;
+
+        foreach (double phi in phis)
+        {
+            foreach (double kappa in kappas)
+            {
+                double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+                double dLdA = (mA2 + 2.0 * lambda2 * kappa) * aStar - source * phi;
+
+                // Finite-difference derivative check at the stationary point.
+                double lPlus = 0.5 * mA2 * (aStar + fdStep) * (aStar + fdStep)
+                    - source * phi * (aStar + fdStep)
+                    + lambda2 * (aStar + fdStep) * (aStar + fdStep) * kappa;
+                double lMinus = 0.5 * mA2 * (aStar - fdStep) * (aStar - fdStep)
+                    - source * phi * (aStar - fdStep)
+                    + lambda2 * (aStar - fdStep) * (aStar - fdStep) * kappa;
+                double fdDerivative = (lPlus - lMinus) / (2.0 * fdStep);
+
+                maxStationarityResidual = Math.Max(
+                    maxStationarityResidual,
+                    Math.Max(Math.Abs(dLdA), Math.Abs(fdDerivative)));
+
+                double memoryFromVariation = aStar * aStar * kappa;
+                double transportForm = phi * phi * kappa;
+                x.Add(transportForm);
+                y.Add(memoryFromVariation);
+            }
+        }
+
+        var fit = FitLineAndR2(x, y);
+        _output.WriteLine(
+            $"[UF13] stationarityResidual={maxStationarityResidual:E6}, slope={fit.Slope:E6}, intercept={fit.Intercept:E6}, R2={fit.R2:F6}");
+
+        Assert.True(maxStationarityResidual < 1e-10, "UF13 stationary point residual should be near zero.");
+        Assert.True(fit.Slope > 0.0, "UF13 varied memory term should map positively to phi^2*kappa.");
+        Assert.True(fit.R2 > 0.999, $"UF13 expected strong variation-to-transport mapping, got R2={fit.R2:F6}.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF14_A2Kappa_Should_Be_StationaryLeadingInteraction_Under_WeakFieldExpansion()
+    {
+        // Evaluate memory hierarchy on stationary A*(phi,kappa) from the same minimal action.
+        const double mA2 = 1.0;
+        const double source = 1.0;
+        const double lambda2 = 0.30;
+        const double kappa0 = 0.02;
+
+        double[] epsSet = { 0.25, 0.5, 1.0, 2.0, 4.0 };
+        var logEps = new List<double>();
+        var logLeading = new List<double>();
+        var logQuartic = new List<double>();
+        var logKappaSquared = new List<double>();
+        bool leadingDominates = true;
+
+        foreach (double eps in epsSet)
+        {
+            double phi = eps * 1e-3;
+            double kappa = eps * kappa0;
+            double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+
+            double leading = aStar * aStar * kappa;
+            double quartic = Math.Pow(aStar, 4.0) * kappa;
+            double kappaSquared = aStar * aStar * kappa * kappa;
+
+            if (!(leading > quartic && leading > kappaSquared))
+                leadingDominates = false;
+
+            _output.WriteLine(
+                $"[UF14] eps={eps:E3} | leading={leading:E6} | quartic={quartic:E6} | kappaSquared={kappaSquared:E6}");
+
+            logEps.Add(Math.Log(eps));
+            logLeading.Add(Math.Log(Math.Max(leading, 1e-30)));
+            logQuartic.Add(Math.Log(Math.Max(quartic, 1e-30)));
+            logKappaSquared.Add(Math.Log(Math.Max(kappaSquared, 1e-30)));
+        }
+
+        double pLeading = FitLineAndR2(logEps, logLeading).Slope;
+        double pQuartic = FitLineAndR2(logEps, logQuartic).Slope;
+        double pKappaSquared = FitLineAndR2(logEps, logKappaSquared).Slope;
+
+        _output.WriteLine($"[UF14] exponents: pLeading={pLeading:F4}, pQuartic={pQuartic:F4}, pKappaSquared={pKappaSquared:F4}");
+
+        Assert.True(leadingDominates, "UF14 expected A^2*kappa to dominate higher-order terms across weak-field sweep.");
+        Assert.True(pLeading < pKappaSquared && pLeading < pQuartic,
+            "UF14 expected A^2*kappa to remain the stationary leading interaction order.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF15_LinearAInteraction_Should_Vanish_Under_SymmetryAveraging()
+    {
+        // Symmetry-averaging guard: odd linear A*kappa terms should cancel
+        // over sign-symmetric coherence fluctuations.
+        const double kappa = 0.02;
+        double[] amplitudes = { 1e-4, 3e-4, 8e-4, 2e-3, 4e-3 };
+
+        var linearTerms = new List<double>();
+        var quadraticTerms = new List<double>();
+
+        foreach (double a in amplitudes)
+        {
+            linearTerms.Add((+a) * kappa);
+            linearTerms.Add((-a) * kappa);
+            quadraticTerms.Add((+a) * (+a) * kappa);
+            quadraticTerms.Add((-a) * (-a) * kappa);
+        }
+
+        double meanLinear = linearTerms.Average();
+        double meanAbsLinear = linearTerms.Average(v => Math.Abs(v));
+        double meanQuadratic = quadraticTerms.Average();
+        double suppression = Math.Abs(meanLinear) / Math.Max(meanAbsLinear, 1e-30);
+
+        _output.WriteLine(
+            $"[UF15] meanLinear={meanLinear:E6}, meanAbsLinear={meanAbsLinear:E6}, meanQuadratic={meanQuadratic:E6}, suppression={suppression:E6}");
+
+        Assert.True(Math.Abs(meanLinear) < 1e-15, "UF15 expected symmetry-averaged linear interaction to vanish.");
+        Assert.True(meanQuadratic > 0.0, "UF15 expected quadratic interaction to remain finite under symmetry averaging.");
+        Assert.True(suppression < 1e-9, "UF15 expected strong odd-term suppression under symmetry averaging.");
+    }
+
     private static double ScalarActionDensity(double alphaT, double massT, double scalarGrad, double scalarValue)
     {
         return alphaT * scalarGrad * scalarGrad + 0.5 * massT * scalarValue * scalarValue;

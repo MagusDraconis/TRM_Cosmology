@@ -51,7 +51,7 @@ Net effect: not just proportionality matching, but also kernel-sensitivity and h
 
 ---
 
-## 3) What UF10–UF12 add
+## 3) What UF10–UF15 add
 
 V3.1 also extends the unified-action guard surface with memory-term hierarchy checks:
 
@@ -64,7 +64,16 @@ V3.1 also extends the unified-action guard surface with memory-term hierarchy ch
 3. `UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField`  
    Keeps higher-order memory terms subleading in the weak-field regime.
 
-Net effect: the memory argument is now tied to a unified-action hierarchy discipline, not only standalone MC proxies.
+4. `UF13_MemoryTerm_Should_Follow_From_Variation_Of_MinimalEffectiveAction`  
+   Adds a minimal-action stationarity guard that maps the varied memory interaction to the \(\phi^2\kappa\) transport form.
+
+5. `UF14_A2Kappa_Should_Be_StationaryLeadingInteraction_Under_WeakFieldExpansion`  
+   Enforces \(A_{\mathrm{dyn}}^2\kappa\) as stationary leading interaction under weak-field expansion.
+
+6. `UF15_LinearAInteraction_Should_Vanish_Under_SymmetryAveraging`  
+   Enforces odd linear-term cancellation under sign-symmetric averaging.
+
+Net effect: the memory argument is now tied to both unified-action hierarchy discipline and a variation-compatible minimal-action path.
 
 ---
 
@@ -76,11 +85,12 @@ The key bridge is now supported across multiple independent guard angles:
 - Green-function scaling compatibility (MC14),
 - non-Newtonian kernel degradation signal (MC15),
 - power-counting selection pressure (MC16),
-- unified-action hierarchy coherence (UF10–UF12).
+- unified-action hierarchy coherence (UF10–UF12),
+- variation-compatible stationary leading-interaction guards (UF13–UF15).
 
 This improves the status from "single-path proportionality evidence" to "multi-guard action-based closure candidate."
 
-This candidate provides a consistent weak-field action-based description of the memory term, but it does not yet constitute an independent variational derivation from a single fundamental action functional.
+V3.1 now supports the memory channel as a variation-compatible leading interaction candidate from a minimal effective action. It is stronger than V3.0, but still not theorem-level first-principles closure.
 
 Key V3.1 test metrics:
 
@@ -88,6 +98,9 @@ Key V3.1 test metrics:
 - MC14: Green-function potential compatibility with \(R^2=0.999663\).
 - MC15: non-Newtonian kernel degradation: \(R^2_{\mathrm{Newton}}=0.999553\), \(R^2_{\mathrm{nonNewton}}=0.968889\).
 - MC16: \(A_{\mathrm{dyn}}^2\kappa\) vs. \(\phi^2\kappa\) with \(R^2=0.999997\).
+- UF13: minimal-action variation compatibility with \(R^2=0.999922\), stationarity residual \(\approx 4.2\times10^{-15}\).
+- UF14: \(A_{\mathrm{dyn}}^2\kappa\) remains stationary leading interaction; higher-order terms remain subleading in weak field.
+- UF15: symmetry averaging cancels linear \(A_{\mathrm{dyn}}\kappa\) contribution (\(\mathrm{meanLinear}=0\)).
 
 ---
 

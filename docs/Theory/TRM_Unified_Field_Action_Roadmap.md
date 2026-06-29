@@ -126,11 +126,14 @@ Completed:
 7. `UF07_UnifiedAction_CrossTerms_Should_Not_Break_KnownSectorLimits`
 8. `UF08_AllowedCrossCouplings_Should_Be_Identifiable_Without_Refit`
 9. `UF09_UnifiedAction_Should_Not_Break_MC_FD_TO_Guards`
+10. `UF10_MemoryInteraction_Should_Yield_A2Kappa_As_LeadingTerm`
+11. `UF11_LinearAInteraction_Should_Be_Rejected_By_HierarchyOrSymmetry`
+12. `UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField`
 
 Next:
 
-1. `UF10_MemoryInteraction_Should_Yield_A2Kappa_As_LeadingTerm`
-2. `UF11_LinearAInteraction_Should_Be_Rejected_By_HierarchyOrSymmetry`
-3. `UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField`
+1. `UF13_MemoryTerm_Should_Follow_From_Variation_Of_MinimalEffectiveAction`
+2. `UF14_A2Kappa_Should_Be_StationaryLeadingInteraction_Under_WeakFieldExpansion`
+3. `UF15_LinearAInteraction_Should_Vanish_Under_SymmetryAveraging`
 
 All UF tests are guard-style derivation gates; no theorem-level overclaiming is allowed.
