@@ -45,6 +45,12 @@ It remains not theorem-level first-principles closure.
 
 No statement here implies TRM replaces GR.
 
+Claim-safe summary:
+
+- UA16–UA20 support a candidate derivation of the minimal effective action from TQM lattice/synchronization principles.
+- This remains not theorem-level first-principles closure.
+- No GR replacement claim.
+
 ---
 
 ## 4) What remains open
