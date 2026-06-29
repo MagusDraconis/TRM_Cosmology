@@ -129,8 +129,8 @@ Completed:
 
 Next:
 
-1. `UF10_UnifiedAction_CrossCouplings_Should_Show_HoldoutStable_Bounds`
-2. `UF11_UnifiedAction_Should_Keep_NoRefit_Identifiability_Under_Ablation`
-3. `UF12_UnifiedAction_Should_Preserve_GuardStability_Under_CouplingSweep`
+1. `UF10_MemoryInteraction_Should_Yield_A2Kappa_As_LeadingTerm`
+2. `UF11_LinearAInteraction_Should_Be_Rejected_By_HierarchyOrSymmetry`
+3. `UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField`
 
 All UF tests are guard-style derivation gates; no theorem-level overclaiming is allowed.

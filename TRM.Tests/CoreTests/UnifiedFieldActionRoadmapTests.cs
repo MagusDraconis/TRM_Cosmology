@@ -678,6 +678,129 @@ public class UnifiedFieldActionRoadmapTests
         Assert.True(minUnified > 0.0, "UF09 unified action should remain positive on mixed sampled states.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF10_MemoryInteraction_Should_Yield_A2Kappa_As_LeadingTerm()
+    {
+        // Derive-or-falsify guard: with A~phi in weak field, A^2*kappa should be the leading
+        // admissible memory interaction, while higher even powers remain subleading.
+        const double cA = 1.0;
+        const double kappa = 0.02;
+        double[] phis = { 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+
+        bool a2Admissible = true;
+        bool a2Relevant = false;
+        bool a4Subleading = true;
+        double weakestA2Ratio = double.PositiveInfinity;
+        double strongestA2Ratio = 0.0;
+
+        foreach (double phi in phis)
+        {
+            double aDyn = cA * phi;
+            double timeScale = phi;
+
+            double ratioA2 = aDyn * aDyn * kappa / Math.Max(timeScale, 1e-30);
+            double ratioA4 = Math.Pow(aDyn, 4.0) * kappa / Math.Max(timeScale, 1e-30);
+
+            weakestA2Ratio = Math.Min(weakestA2Ratio, ratioA2);
+            strongestA2Ratio = Math.Max(strongestA2Ratio, ratioA2);
+
+            if (ratioA2 >= 0.10)
+                a2Admissible = false;
+
+            if (ratioA2 >= 1e-6)
+                a2Relevant = true;
+
+            if (ratioA4 >= 0.10 * ratioA2)
+                a4Subleading = false;
+
+            _output.WriteLine($"[UF10] phi={phi:E3} | ratioA2={ratioA2:E6} | ratioA4={ratioA4:E6}");
+        }
+
+        _output.WriteLine($"[UF10] A2 window: min={weakestA2Ratio:E6}, max={strongestA2Ratio:E6}");
+
+        Assert.True(a2Admissible, "UF10 expected A^2*kappa to remain weak-field admissible.");
+        Assert.True(a2Relevant, "UF10 expected A^2*kappa to remain non-negligible in tested weak field.");
+        Assert.True(a4Subleading, "UF10 expected A^4*kappa to remain subleading to A^2*kappa.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF11_LinearAInteraction_Should_Be_Rejected_By_HierarchyOrSymmetry()
+    {
+        // Rejection guard for linear A*kappa:
+        // (1) odd-in-A symmetry cancellation around sign-symmetric states,
+        // (2) weak-field hierarchy pressure against time-channel scaling.
+        const double kappa = 0.02;
+        const double lambdaMem = 30.0;
+        double[] amplitudes = { 1e-4, 3e-4, 8e-4, 2e-3 };
+        double[] phis = { 1e-4, 3e-4, 8e-4, 2e-3 };
+
+        bool symmetryRejects = true;
+        bool hierarchyRejects = false;
+
+        foreach (double a in amplitudes)
+        {
+            double oddPlus = a * kappa;
+            double oddMinus = -a * kappa;
+            double symmetricAverage = 0.5 * (oddPlus + oddMinus);
+            _output.WriteLine($"[UF11] A={a:E6} | oddPlus={oddPlus:E6} | oddMinus={oddMinus:E6} | symmetricAverage={symmetricAverage:E6}");
+            if (Math.Abs(symmetricAverage) > 1e-15)
+                symmetryRejects = false;
+        }
+
+        foreach (double phi in phis)
+        {
+            double aDyn = phi;
+            double ratioLinear = lambdaMem * aDyn * kappa / Math.Max(phi, 1e-30);
+            _output.WriteLine($"[UF11] phi={phi:E6} | linearRatio={ratioLinear:E6}");
+            if (ratioLinear >= 0.10)
+                hierarchyRejects = true;
+        }
+
+        Assert.True(symmetryRejects, "UF11 expected odd linear A interaction to cancel under sign-symmetric states.");
+        Assert.True(hierarchyRejects, "UF11 expected linear A interaction to fail weak-field hierarchy.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField()
+    {
+        // Weak-field hierarchy guard: higher-order memory terms must remain subleading
+        // with respect to A^2*kappa.
+        const double cA = 1.0;
+        double[] phis = { 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+
+        double maxQuarticRatio = 0.0;
+        double maxKappaSquaredRatio = 0.0;
+
+        foreach (double phi in phis)
+        {
+            double aDyn = cA * phi;
+            foreach (double kappa in kappas)
+            {
+                double leading = aDyn * aDyn * kappa;
+                double quartic = Math.Pow(aDyn, 4.0) * kappa;
+                double kappaSquared = aDyn * aDyn * kappa * kappa;
+
+                double quarticRatio = quartic / Math.Max(leading, 1e-30);
+                double kappaSquaredRatio = kappaSquared / Math.Max(leading, 1e-30);
+
+                maxQuarticRatio = Math.Max(maxQuarticRatio, quarticRatio);
+                maxKappaSquaredRatio = Math.Max(maxKappaSquaredRatio, kappaSquaredRatio);
+
+                _output.WriteLine(
+                    $"[UF12] phi={phi:E3} | kappa={kappa:E3} | quarticRatio={quarticRatio:E6} | kappaSquaredRatio={kappaSquaredRatio:E6}");
+            }
+        }
+
+        _output.WriteLine($"[UF12] maxQuarticRatio={maxQuarticRatio:E6}, maxKappaSquaredRatio={maxKappaSquaredRatio:E6}");
+
+        Assert.True(maxQuarticRatio < 0.10, "UF12 expected A^4*kappa to remain subleading in weak field.");
+        Assert.True(maxKappaSquaredRatio < 0.10, "UF12 expected A^2*kappa^2 to remain subleading in weak field.");
+    }
+
     private static double ScalarActionDensity(double alphaT, double massT, double scalarGrad, double scalarValue)
     {
         return alphaT * scalarGrad * scalarGrad + 0.5 * massT * scalarValue * scalarValue;

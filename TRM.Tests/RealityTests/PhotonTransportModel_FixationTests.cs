@@ -836,6 +836,201 @@ namespace TRM.Tests.RealityTests
 
         [Trait("Category", "PhysicsValidation")]
         [Fact]
+        public void MC13_LatticeClockBias_Should_Produce_LinearPhiResponse()
+        {
+            // Weak-field guard: the lattice clock-bias source should induce an approximately
+            // linear dynamic coherence response A_dyn(phi) in the tested window.
+            double[] phis = { 0.0, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+            var amplitudes = phis.Select(SimulateCoherenceAmplitudeFromLatticeProxy).ToArray();
+            double baseline = amplitudes[0];
+            var aDyn = amplitudes.Select(a => a - baseline).ToArray();
+
+            var fitData = phis
+                .Skip(1)
+                .Select((phi, idx) => (X: phi, Y: aDyn[idx + 1]))
+                .ToArray();
+
+            var fit = FitLinear(fitData);
+            double meanY = fitData.Average(p => p.Y);
+            double ssTot = fitData.Sum(p => (p.Y - meanY) * (p.Y - meanY));
+            double ssRes = fitData.Sum(p =>
+            {
+                double yHat = fit.Slope * p.X + fit.Intercept;
+                double e = p.Y - yHat;
+                return e * e;
+            });
+            double r2 = ssTot > 0.0 ? 1.0 - ssRes / ssTot : 1.0;
+
+            var localSlopes = new List<double>();
+            for (int i = 2; i < phis.Length; i++)
+            {
+                double dPhi = phis[i] - phis[i - 1];
+                double dA = aDyn[i] - aDyn[i - 1];
+                localSlopes.Add(dA / Math.Max(dPhi, 1e-30));
+            }
+
+            double slopeMean = localSlopes.Average();
+            double slopeMin = localSlopes.Min();
+            double slopeMax = localSlopes.Max();
+            double slopeRelSpread = (slopeMax - slopeMin) / Math.Max(Math.Abs(slopeMean), 1e-18);
+
+            _output.WriteLine(
+                $"[MC13] slope={fit.Slope:E6}, intercept={fit.Intercept:E6}, R2={r2:F6}, localSlopeRelSpread={slopeRelSpread:E6}");
+
+            Assert.True(fit.Slope > 0.0, "Expected positive clock-bias coherence response.");
+            Assert.True(Math.Abs(fit.Intercept) < 1e-3, "Expected near-zero intercept after baseline subtraction.");
+            Assert.True(r2 > 0.95, $"Expected near-linear A_dyn(phi) response, got R2={r2:F6}.");
+            Assert.True(slopeRelSpread < 0.35,
+                $"Expected bounded local-slope variation for weak-field linear response, got {slopeRelSpread:E6}.");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
+        public void MC14_CoherenceAmplitude_Should_Follow_GreenFunctionPotential()
+        {
+            // Green-function potential proxy: for point-source weak field, phi(r) ~ 1/r.
+            // The lattice dynamic coherence response should track phi(r) approximately linearly.
+            const double G = 1.0;
+            const double c = 1.0;
+            const double M = 0.01;
+            double[] radii = { 8.0, 10.0, 12.0, 16.0, 20.0, 24.0, 30.0 };
+
+            double baseline = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+            var pairs = new List<(double X, double Y)>();
+
+            foreach (double r in radii)
+            {
+                double phi = PhotonTransportModel.Phi(G, M, c, r);
+                double aDyn = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phi) - baseline);
+                pairs.Add((X: phi, Y: aDyn));
+                _output.WriteLine($"[MC14] r={r:F2} | phi={phi:E6} | Adyn={aDyn:E6}");
+            }
+
+            var fit = FitLinear(pairs);
+            double meanY = pairs.Average(p => p.Y);
+            double ssTot = pairs.Sum(p => (p.Y - meanY) * (p.Y - meanY));
+            double ssRes = pairs.Sum(p =>
+            {
+                double yHat = fit.Slope * p.X + fit.Intercept;
+                double e = p.Y - yHat;
+                return e * e;
+            });
+            double r2 = ssTot > 0.0 ? 1.0 - ssRes / ssTot : 1.0;
+
+            double phiRatio = pairs[0].X / Math.Max(pairs[^1].X, 1e-30);
+            double aRatio = pairs[0].Y / Math.Max(pairs[^1].Y, 1e-30);
+            double ratioGap = Math.Abs(aRatio - phiRatio) / Math.Max(phiRatio, 1e-30);
+
+            _output.WriteLine(
+                $"[MC14] fitSlope={fit.Slope:E6}, fitIntercept={fit.Intercept:E6}, R2={r2:F6}, phiRatio={phiRatio:F6}, aRatio={aRatio:F6}, ratioGap={ratioGap:F6}");
+
+            Assert.True(fit.Slope > 0.0, "Expected positive A_dyn(phi) relation for Green-function potential.");
+            Assert.True(r2 > 0.95, $"Expected strong Green-function tracking, got R2={r2:F6}.");
+            Assert.True(ratioGap < 0.25, $"Expected near-ratio tracking of A_dyn and phi across radius, got gap={ratioGap:F6}.");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
+        public void MC15_AphiScaling_Should_Break_When_ResponseKernelIsNonNewtonian()
+        {
+            // Kernel falsification guard: if the lattice response uses a non-Newtonian kernel,
+            // the A-phi closure against Newtonian phi should degrade.
+            const double G = 1.0;
+            const double c = 1.0;
+            const double M = 0.01;
+            const double responseLength = 10.0;
+            double[] radii = { 8.0, 10.0, 12.0, 16.0, 20.0, 24.0, 30.0, 36.0 };
+
+            double baseline = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+            var newtonianPairs = new List<(double X, double Y)>();
+            var nonNewtonianPairs = new List<(double X, double Y)>();
+
+            foreach (double r in radii)
+            {
+                double phiNewton = PhotonTransportModel.Phi(G, M, c, r);
+                double phiKernel = phiNewton * Math.Exp(-r / responseLength);
+
+                double aDynNewton = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phiNewton) - baseline);
+                double aDynKernel = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phiKernel) - baseline);
+
+                newtonianPairs.Add((X: phiNewton, Y: aDynNewton));
+                nonNewtonianPairs.Add((X: phiNewton, Y: aDynKernel));
+            }
+
+            double r2Newton = ComputeLinearR2(newtonianPairs);
+            double r2NonNewton = ComputeLinearR2(nonNewtonianPairs);
+
+            _output.WriteLine($"[MC15] R2Newton={r2Newton:F6}, R2NonNewton={r2NonNewton:F6}");
+
+            Assert.True(r2Newton > 0.95, "Expected strong closure under Newtonian response kernel.");
+            Assert.True(r2NonNewton < 0.985 && (r2Newton - r2NonNewton) > 0.02,
+                $"Expected degraded A-phi closure under non-Newtonian kernel. Newton={r2Newton:F6}, NonNewton={r2NonNewton:F6}");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
+        public void MC16_MemoryTermPowerCounting_Should_Select_PhiSquaredKappa()
+        {
+            // Power-counting guard around weak field:
+            // linear A*kappa should be too large, A^2*kappa should stay admissible and relevant,
+            // higher A^3*kappa should remain subleading.
+            var parameters = new PhotonTransportModel.Parameters
+            {
+                LambdaTime = 1.0,
+                LambdaSpace = 30.0
+            };
+
+            const double kappa = 0.02;
+            const double weakFieldSubleadingThreshold = 0.10;
+            const double bridgeRelevanceThreshold = 1e-6;
+            double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4 };
+            double baseline = SimulateCoherenceAmplitudeFromLatticeProxy(0.0);
+
+            bool linearRejected = false;
+            bool quadraticAdmissible = true;
+            bool quadraticRelevant = false;
+            bool cubicSubleading = true;
+            var equivalencePairs = new List<(double X, double Y)>();
+
+            foreach (double phi in phis)
+            {
+                double aDyn = Math.Max(0.0, SimulateCoherenceAmplitudeFromLatticeProxy(phi) - baseline);
+                double timeContribution = parameters.LambdaTime * phi;
+
+                double ratioLinear = parameters.LambdaSpace * aDyn * kappa / Math.Max(timeContribution, 1e-30);
+                double ratioQuadratic = parameters.LambdaSpace * aDyn * aDyn * kappa / Math.Max(timeContribution, 1e-30);
+                double ratioCubic = parameters.LambdaSpace * aDyn * aDyn * aDyn * kappa / Math.Max(timeContribution, 1e-30);
+
+                _output.WriteLine(
+                    $"[MC16] phi={phi:E3} | Adyn={aDyn:E6} | linear={ratioLinear:E6} | quadratic={ratioQuadratic:E6} | cubic={ratioCubic:E6}");
+
+                if (ratioLinear >= weakFieldSubleadingThreshold)
+                    linearRejected = true;
+
+                if (ratioQuadratic >= weakFieldSubleadingThreshold)
+                    quadraticAdmissible = false;
+
+                if (parameters.LambdaSpace * aDyn * aDyn * kappa >= bridgeRelevanceThreshold)
+                    quadraticRelevant = true;
+
+                if (ratioCubic >= 0.25 * ratioQuadratic)
+                    cubicSubleading = false;
+
+                equivalencePairs.Add((X: phi * phi * kappa, Y: aDyn * aDyn * kappa));
+            }
+
+            double r2Equivalence = ComputeLinearR2(equivalencePairs);
+            _output.WriteLine($"[MC16] A2kappa_vs_phi2kappa R2={r2Equivalence:F6}");
+
+            Assert.True(linearRejected, "Expected linear A*kappa term to violate weak-field hierarchy.");
+            Assert.True(quadraticAdmissible, "Expected A^2*kappa term to remain weak-field admissible.");
+            Assert.True(quadraticRelevant, "Expected A^2*kappa term to remain bridge-relevant.");
+            Assert.True(cubicSubleading, "Expected A^3*kappa to remain subleading versus A^2*kappa in weak field.");
+            Assert.True(r2Equivalence > 0.995, $"Expected A^2*kappa to map strongly to phi^2*kappa, got R2={r2Equivalence:F6}.");
+        }
+
+        [Trait("Category", "PhysicsValidation")]
+        [Fact]
         public void HOA01_TransportIndex_Should_Depend_On_Position_Direction_And_DirectionalChange()
         {
             const double G = 1.0;
@@ -1216,6 +1411,20 @@ namespace TRM.Tests.RealityTests
             rms = Math.Sqrt(rms / n);
 
             return (slope, intercept, rms);
+        }
+
+        private static double ComputeLinearR2(IReadOnlyCollection<(double X, double Y)> data)
+        {
+            var fit = FitLinear(data);
+            double meanY = data.Average(p => p.Y);
+            double ssTot = data.Sum(p => (p.Y - meanY) * (p.Y - meanY));
+            double ssRes = data.Sum(p =>
+            {
+                double yHat = fit.Slope * p.X + fit.Intercept;
+                double e = p.Y - yHat;
+                return e * e;
+            });
+            return ssTot > 0.0 ? 1.0 - ssRes / ssTot : 1.0;
         }
 
         private static double SimulateCoherenceAmplitudeFromLatticeProxy(double phi)
