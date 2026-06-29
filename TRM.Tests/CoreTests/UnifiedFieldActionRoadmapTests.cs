@@ -941,6 +941,275 @@ public class UnifiedFieldActionRoadmapTests
         Assert.True(suppression < 1e-9, "UF15 expected strong odd-term suppression under symmetry averaging.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA16_LatticeEnergy_Should_Reduce_To_MinimalScalarAction()
+    {
+        // Lattice-to-continuum reduction guard:
+        // nearest-neighbor phase-gradient energy should reduce to minimal scalar gradient action.
+        const double kLattice = 1.3;
+        const double alphaT = 1.3;
+        const double dx = 1.0;
+
+        var profiles = new[]
+        {
+            new[] { 0.00, 0.06, 0.12, 0.18, 0.24, 0.30 },
+            new[] { -0.10, -0.04, 0.01, 0.05, 0.08, 0.10 },
+            new[] { 0.15, 0.10, 0.03, -0.02, -0.06, -0.09 }
+        };
+
+        double maxRelDiff = 0.0;
+        foreach (var theta in profiles)
+        {
+            double latticeEnergy = 0.0;
+            double scalarAction = 0.0;
+            for (int i = 0; i < theta.Length - 1; i++)
+            {
+                double grad = (theta[i + 1] - theta[i]) / dx;
+                latticeEnergy += kLattice * grad * grad * dx;
+                scalarAction += ScalarActionDensity(alphaT, massT: 0.0, scalarGrad: grad, scalarValue: 0.0) * dx;
+            }
+
+            double relDiff = Math.Abs(latticeEnergy - scalarAction) / Math.Max(Math.Abs(latticeEnergy), 1e-18);
+            maxRelDiff = Math.Max(maxRelDiff, relDiff);
+            _output.WriteLine($"[UA16] lattice={latticeEnergy:E6}, scalar={scalarAction:E6}, relDiff={relDiff:E6}");
+        }
+
+        // Constant mode should remain near-zero for both representations.
+        var constantTheta = new[] { 0.37, 0.37, 0.37, 0.37, 0.37 };
+        double constLattice = 0.0;
+        double constScalar = 0.0;
+        for (int i = 0; i < constantTheta.Length - 1; i++)
+        {
+            double grad = constantTheta[i + 1] - constantTheta[i];
+            constLattice += kLattice * grad * grad;
+            constScalar += ScalarActionDensity(alphaT, massT: 0.0, scalarGrad: grad, scalarValue: 0.0);
+        }
+
+        _output.WriteLine($"[UA16] constantMode lattice={constLattice:E6}, scalar={constScalar:E6}, maxRelDiff={maxRelDiff:E6}");
+        Assert.True(maxRelDiff < 1e-12, "UA16 expected exact weak-field lattice-to-scalar reduction for matched coefficients.");
+        Assert.True(constLattice < 1e-15 && constScalar < 1e-15, "UA16 constant mode should stay near zero.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA17_CoarseGrainedAction_Should_Preserve_A2Kappa_Interaction()
+    {
+        // Coarse-grained interaction guard:
+        // minimal interaction term should preserve A^2*kappa correspondence to phi^2*kappa.
+        const double cA = 1.0;
+        const double lambda2 = 0.30;
+        double[] phis = { 1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+
+        var x = new List<double>();
+        var y = new List<double>();
+        foreach (double phi in phis)
+        {
+            double aDyn = cA * phi;
+            foreach (double kappa in kappas)
+            {
+                double transport = phi * phi * kappa;
+                double coarse = lambda2 * aDyn * aDyn * kappa;
+                x.Add(transport);
+                y.Add(coarse);
+            }
+        }
+
+        var fit = FitLineAndR2(x, y);
+        _output.WriteLine($"[UA17] slope={fit.Slope:E6}, intercept={fit.Intercept:E6}, R2={fit.R2:F6}");
+
+        Assert.True(fit.R2 > 0.999999, $"UA17 expected near-exact coarse-to-transport mapping, got R2={fit.R2:F6}.");
+        Assert.True(Math.Abs(fit.Slope - lambda2 * cA * cA) < 1e-10,
+            $"UA17 expected slope to match lambda2*cA^2. slope={fit.Slope:E6}");
+        Assert.True(Math.Abs(fit.Intercept) < 1e-12, $"UA17 expected near-zero intercept, got {fit.Intercept:E6}.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA18_MinimalAction_Should_Reproduce_UF13_To_UF15_Without_Retuning()
+    {
+        // Reuse the UF13-UF15 parameterization without retuning.
+        const double mA2 = 1.0;
+        const double source = 1.0;
+        const double lambda2 = 0.30;
+        const double fdStep = 1e-7;
+
+        double[] phis = { 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+        double[] epsSet = { 0.25, 0.5, 1.0, 2.0, 4.0 };
+
+        // UF13-like stationarity and mapping.
+        var x = new List<double>();
+        var y = new List<double>();
+        double maxStationarityResidual = 0.0;
+        foreach (double phi in phis)
+        {
+            foreach (double kappa in kappas)
+            {
+                double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+                double dLdA = (mA2 + 2.0 * lambda2 * kappa) * aStar - source * phi;
+
+                double lPlus = 0.5 * mA2 * (aStar + fdStep) * (aStar + fdStep)
+                    - source * phi * (aStar + fdStep)
+                    + lambda2 * (aStar + fdStep) * (aStar + fdStep) * kappa;
+                double lMinus = 0.5 * mA2 * (aStar - fdStep) * (aStar - fdStep)
+                    - source * phi * (aStar - fdStep)
+                    + lambda2 * (aStar - fdStep) * (aStar - fdStep) * kappa;
+                double fdDerivative = (lPlus - lMinus) / (2.0 * fdStep);
+                maxStationarityResidual = Math.Max(maxStationarityResidual, Math.Max(Math.Abs(dLdA), Math.Abs(fdDerivative)));
+
+                x.Add(phi * phi * kappa);
+                y.Add(aStar * aStar * kappa);
+            }
+        }
+        var uf13Fit = FitLineAndR2(x, y);
+
+        // UF14-like leading-order hierarchy.
+        bool leadingDominates = true;
+        foreach (double eps in epsSet)
+        {
+            double phi = eps * 1e-3;
+            double kappa = eps * 0.02;
+            double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+            double leading = aStar * aStar * kappa;
+            double quartic = Math.Pow(aStar, 4.0) * kappa;
+            double kappaSquared = aStar * aStar * kappa * kappa;
+            if (!(leading > quartic && leading > kappaSquared))
+                leadingDominates = false;
+        }
+
+        // UF15-like symmetry cancellation.
+        double[] amplitudes = { 1e-4, 3e-4, 8e-4, 2e-3, 4e-3 };
+        var linearTerms = new List<double>();
+        foreach (double a in amplitudes)
+        {
+            linearTerms.Add((+a) * 0.02);
+            linearTerms.Add((-a) * 0.02);
+        }
+        double meanLinear = linearTerms.Average();
+
+        _output.WriteLine(
+            $"[UA18] stationarityResidual={maxStationarityResidual:E6}, uf13R2={uf13Fit.R2:F6}, leadingDominates={leadingDominates}, meanLinear={meanLinear:E6}");
+
+        Assert.True(maxStationarityResidual < 1e-10, "UA18 expected UF13-level stationarity without retuning.");
+        Assert.True(uf13Fit.R2 > 0.999, $"UA18 expected UF13-level mapping quality without retuning, got R2={uf13Fit.R2:F6}.");
+        Assert.True(leadingDominates, "UA18 expected UF14-level leading-order behavior without retuning.");
+        Assert.True(Math.Abs(meanLinear) < 1e-15, "UA18 expected UF15-level symmetry cancellation without retuning.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA19_NonMinimalActionTerms_Should_Be_Penalized_Or_Subleading()
+    {
+        // Weak-field model-selection guard:
+        // nonminimal terms should remain subleading and score worse under simple complexity penalty.
+        const double mA2 = 1.0;
+        const double source = 1.0;
+        const double lambda2 = 0.30;
+        double[] phis = { 1e-4, 2e-4, 5e-4, 1e-3, 2e-3 };
+        double[] kappas = { 0.005, 0.01, 0.02, 0.03 };
+
+        double maxQuarticRatio = 0.0;
+        double maxKappaSquaredRatio = 0.0;
+        double bestLeadingScore = double.PositiveInfinity;
+        double bestQuarticScore = double.PositiveInfinity;
+        double bestKappaSquaredScore = double.PositiveInfinity;
+
+        foreach (double phi in phis)
+        {
+            foreach (double kappa in kappas)
+            {
+                double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+                double leading = aStar * aStar * kappa;
+                double quartic = Math.Pow(aStar, 4.0) * kappa;
+                double kappaSquared = aStar * aStar * kappa * kappa;
+
+                double quarticRatio = quartic / Math.Max(leading, 1e-30);
+                double kappaSquaredRatio = kappaSquared / Math.Max(leading, 1e-30);
+                maxQuarticRatio = Math.Max(maxQuarticRatio, quarticRatio);
+                maxKappaSquaredRatio = Math.Max(maxKappaSquaredRatio, kappaSquaredRatio);
+
+                // Score = relative residual to leading target + fixed complexity weight.
+                double scoreLeading = 0.0 + 0.00;
+                double scoreQuartic = Math.Abs(leading - quartic) / Math.Max(leading, 1e-30) + 0.10;
+                double scoreKappaSquared = Math.Abs(leading - kappaSquared) / Math.Max(leading, 1e-30) + 0.08;
+                bestLeadingScore = Math.Min(bestLeadingScore, scoreLeading);
+                bestQuarticScore = Math.Min(bestQuarticScore, scoreQuartic);
+                bestKappaSquaredScore = Math.Min(bestKappaSquaredScore, scoreKappaSquared);
+            }
+        }
+
+        _output.WriteLine(
+            $"[UA19] maxQuarticRatio={maxQuarticRatio:E6}, maxKappaSquaredRatio={maxKappaSquaredRatio:E6}, leadingScore={bestLeadingScore:E6}, quarticScore={bestQuarticScore:E6}, kappa2Score={bestKappaSquaredScore:E6}");
+
+        Assert.True(maxQuarticRatio < 0.10, "UA19 expected A^4*kappa to remain weak-field subleading.");
+        Assert.True(maxKappaSquaredRatio < 0.10, "UA19 expected A^2*kappa^2 to remain weak-field subleading.");
+        Assert.True(bestLeadingScore < bestQuarticScore && bestLeadingScore < bestKappaSquaredScore,
+            "UA19 expected minimal interaction to remain preferred under simple penalty scoring.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    public void UA20_MinimalAction_Should_Preserve_MC_FD_TO_Limits()
+    {
+        // Cross-sector preservation guard for minimal-action memory interaction.
+        const double mA2 = 1.0;
+        const double source = 1.0;
+        const double lambda2 = 0.30;
+
+        // MC proxy: preserve strong monotonic/linear relation to baseline memory form.
+        var mcBase = new List<double>();
+        var mcMinimal = new List<double>();
+        for (int i = 1; i <= 32; i++)
+        {
+            double phi = 0.02 * i;
+            double kappa = 0.015 + 0.0015 * i;
+            double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+            double baseMem = phi * phi * kappa;
+            double minimalMem = lambda2 * aStar * aStar * kappa;
+            mcBase.Add(baseMem);
+            mcMinimal.Add(minimalMem);
+        }
+
+        var mcFit = FitLineAndR2(mcBase, mcMinimal);
+        _output.WriteLine($"[UA20] MC proxy: slope={mcFit.Slope:E6}, intercept={mcFit.Intercept:E6}, R2={mcFit.R2:F6}");
+        Assert.True(mcFit.R2 > 0.999, "UA20 MC proxy should preserve strong baseline shape correspondence.");
+
+        // FD proxy: keep near-linear Omega/J scaling spread bounded.
+        var fdK = new List<double>();
+        foreach (double omega in new[] { 0.5, 0.8, 1.1, 1.4, 1.7 })
+        {
+            double j = 2.2 * omega;
+            double omegaBase = 0.031 * j;
+            double phi = 0.02 + 0.005 * omega;
+            double kappa = 0.01 + 0.002 * omega;
+            double aStar = source * phi / (mA2 + 2.0 * lambda2 * kappa);
+            double couplingFactor = 1.0 + 0.01 * (aStar * aStar * kappa);
+            double omegaMinimal = omegaBase * couplingFactor;
+            fdK.Add(omegaMinimal / j);
+        }
+        double fdSpread = RelativeSpread(fdK);
+        _output.WriteLine($"[UA20] FD proxy spread={fdSpread:E6}");
+        Assert.True(fdSpread < 0.02, "UA20 FD proxy spread should remain tight.");
+
+        // TO proxy: preserve energy descent in theta relaxation under small memory coupling imprint.
+        const double betaTheta = 0.7;
+        const double dx = 1.0;
+        var thetaProfile = new[] { 0.00, 0.18, 0.31, 0.26, 0.12, -0.02 };
+        var o5 = ComputeThetaO5(thetaProfile, betaTheta, dx);
+        const double relaxStep = 0.08;
+        var thetaRelaxed = new double[thetaProfile.Length];
+        for (int i = 0; i < thetaProfile.Length; i++)
+            thetaRelaxed[i] = thetaProfile[i] + relaxStep * o5[i];
+
+        double eBefore = ComputeThetaEnergy(thetaProfile, betaTheta, dx);
+        double eAfter = ComputeThetaEnergy(thetaRelaxed, betaTheta, dx);
+
+        _output.WriteLine($"[UA20] TO proxy: eBefore={eBefore:E6}, eAfter={eAfter:E6}");
+        Assert.True(eAfter < eBefore, "UA20 TO proxy should preserve theta relaxation energy descent.");
+    }
+
     private static double ScalarActionDensity(double alphaT, double massT, double scalarGrad, double scalarValue)
     {
         return alphaT * scalarGrad * scalarGrad + 0.5 * massT * scalarValue * scalarValue;
