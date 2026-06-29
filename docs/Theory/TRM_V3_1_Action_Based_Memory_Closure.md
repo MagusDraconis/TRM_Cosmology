@@ -133,7 +133,7 @@ V3.1 tests enforce that these terms do not become the practical leading correcti
 
 ---
 
-## 9. Proposed V3.1 tests
+## 9. V3.1 guard set (finalized)
 
 Memory-channel block:
 
@@ -147,6 +147,9 @@ Unified-action block:
 1. `UF10_MemoryInteraction_Should_Yield_A2Kappa_As_LeadingTerm`
 2. `UF11_LinearAInteraction_Should_Be_Rejected_By_HierarchyOrSymmetry`
 3. `UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField`
+4. `UF13_MemoryTerm_Should_Follow_From_Variation_Of_MinimalEffectiveAction`
+5. `UF14_A2Kappa_Should_Be_StationaryLeadingInteraction_Under_WeakFieldExpansion`
+6. `UF15_LinearAInteraction_Should_Vanish_Under_SymmetryAveraging`
 
 All tests are derive-or-falsify guards with no new free fit-parameter introduction.
 
@@ -163,3 +166,17 @@ The V3.1 action-based closure path is rejected if any guard-consistent result sh
 5. higher-order terms become leading in weak field.
 
 Passing these guards strengthens the closure path; it does not convert it into theorem-level proof.
+
+---
+
+## 11. Final V3.1 claim-safe status
+
+Gap 1 status in V3.1:
+
+- **action-derived memory-closure candidate**
+- **not theorem-level first-principles closure**
+- **no GR replacement claim**
+
+Claim-safe statement:
+
+> V3.1 strengthens Gap 1 to an action-derived memory-closure candidate. The \(\phi^2|\dot{\mu}|\) term is variationally consistent with a minimal effective action and supported by multiple independent guards. It remains short of theorem-level first-principles microscopic derivation.

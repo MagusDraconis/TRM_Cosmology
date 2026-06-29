@@ -82,7 +82,7 @@ Roadmap requirement: interaction terms must preserve already-tested limits:
 
 The unified action path is acceptable only if it reproduces:
 
-1. Gap 1: \(\phi^2|\dot\mu|\) memory-channel path (MC09–MC12) as admissible low-order effective channel.
+1. Gap 1: \(\phi^2|\dot\mu|\) memory-channel path strengthened from MC09–MC12 through MC13–MC16 and UF10–UF15 as an action-derived memory-closure candidate (still not theorem-level first-principles closure).
 2. Gap 3: \(\Theta \rightarrow O_5 \rightarrow \lambda_\Theta \rightarrow g_{\mathrm{obs}}\) derivation chain behavior under TO/TQK/LC/TOL gates.
 3. Gap 4: FD16–FD20 behavior for derived \(k_T\), weak-field LT-window compatibility, SI scaling compatibility, and controlled bias.
 
@@ -129,11 +129,14 @@ Completed:
 10. `UF10_MemoryInteraction_Should_Yield_A2Kappa_As_LeadingTerm`
 11. `UF11_LinearAInteraction_Should_Be_Rejected_By_HierarchyOrSymmetry`
 12. `UF12_HigherOrderMemoryTerms_Should_Remain_Subleading_InWeakField`
+13. `UF13_MemoryTerm_Should_Follow_From_Variation_Of_MinimalEffectiveAction`
+14. `UF14_A2Kappa_Should_Be_StationaryLeadingInteraction_Under_WeakFieldExpansion`
+15. `UF15_LinearAInteraction_Should_Vanish_Under_SymmetryAveraging`
 
 Next:
 
-1. `UF13_MemoryTerm_Should_Follow_From_Variation_Of_MinimalEffectiveAction`
-2. `UF14_A2Kappa_Should_Be_StationaryLeadingInteraction_Under_WeakFieldExpansion`
-3. `UF15_LinearAInteraction_Should_Vanish_Under_SymmetryAveraging`
+1. `V3.2_MinimalAction_Should_Be_Derivable_From_TQMLatticeSynchronization`
+2. `V3.2_MemoryKernel_Should_Emerge_Without_FreeInteractionAnsatz`
+3. `V3.2_DerivedAction_Should_Preserve_UF_MC_Guards_Without_RenormalizedFits`
 
 All UF tests are guard-style derivation gates; no theorem-level overclaiming is allowed.

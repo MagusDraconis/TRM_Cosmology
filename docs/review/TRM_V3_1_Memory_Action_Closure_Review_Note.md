@@ -104,7 +104,16 @@ Key V3.1 test metrics:
 
 ---
 
-## 5) What remains open
+## 5) V3.1 status
+
+Current V3.1 status:
+
+- Gap 1: action-derived candidate level
+- not theorem-level closure
+
+---
+
+## 6) What remains open
 
 The following remains explicitly open:
 
@@ -114,4 +123,4 @@ The following remains explicitly open:
 
 Claim-safe status statement:
 
-> V3.1 strengthens Gap 1 from a strongly supported lattice-proxy derivation path toward an action-based memory-closure candidate. It remains not theorem-level first-principles closure.
+> V3.1 strengthens Gap 1 to an action-derived memory-closure candidate. The \(\phi^2|\dot{\mu}|\) term is now variationally consistent with a minimal effective action and supported by multiple independent guards. It remains short of theorem-level first-principles microscopic derivation.
