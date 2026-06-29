@@ -52,16 +52,18 @@ V3.2 moves one level deeper by testing whether the minimal effective action itse
 
 Net effect: the minimal action is better motivated as lattice-compatible and cross-guard coherent.
 
-Key V3.2 metrics:
+### Key V3.2 guard metrics
 
-- UA16: exact lattice-to-scalar action reduction in tested cases.
-- UA17: \(A_{\mathrm{dyn}}^2\kappa\) preserved under coarse-graining, \(R^2=1.0\).
-- UA18: UF13–UF15 reproduced without retuning.
-- UA19: non-minimal terms remain penalized/subleading.
-- UA20: MC/FD/TO limits preserved.
-- UA21: alternative lattice-energy forms degrade minimal-action closure quality.
-- UA22: minimal-action closure remains robust under controlled lattice perturbations.
-- UA23: nonminimal lattice actions do not outperform the minimal action under penalty-aware comparison.
+| Guard | Key metric | Interpretation |
+|---|---:|---|
+| UA16 | exact lattice-to-scalar action reduction | discrete lattice energy reduces to minimal scalar action |
+| UA17 | \(R^2 = 1.0\) | \(A_{\mathrm{dyn}}^2\kappa\) preserved under coarse-graining |
+| UA18 | UF13–UF15 reproduced without retuning | V3.1 memory-action result survives V3.2 action layer |
+| UA19 | non-minimal terms penalized/subleading | minimal action remains preferred |
+| UA20 | MC/FD/TO limits preserved | no cross-sector breakage |
+| UA21 | alternative lattice forms degrade closure | discriminates against arbitrary lattice energies |
+| UA22 | robust under lattice perturbations | stability of minimal-action path |
+| UA23 | non-minimal actions do not outperform without penalty | prevents complexity inflation |
 
 ---
 

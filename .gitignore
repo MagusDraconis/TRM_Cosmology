@@ -384,5 +384,6 @@ FodyWeavers.xsd
 !/docs/review/TRM_V3_1_Memory_Action_Closure_Review_Note.md
 !/docs/review/TRM_V3_1_Consolidated_Claim_Status.md
 !/docs/review/TRM_V3_2_Minimal_Action_From_Lattice_Review_Note.md
+!/docs/review/TRM_V3_0_to_V3_2_Progress_Summary.md
 # Local Zenodo source archive (do not commit)
 TRM_TQM_V3_0_Review_Baseline_Source.zip
