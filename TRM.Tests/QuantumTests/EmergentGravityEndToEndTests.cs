@@ -178,8 +178,22 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Diagnostic normalization check for the TRM quantum-to-macro bridge.
+    ///
+    /// Hypothesis:
+    /// A phase-gradient acceleration proxy can be normalized to the same effective G
+    /// obtained from the energy-based E/c^2 path.
+    ///
+    /// Status:
+    /// diagnostic + candidate (tested-effective for this controlled setup).
+    ///
+    /// Limitation:
+    /// This is not a theorem-level gravity derivation; it validates internal consistency.
+    /// </summary>
     public void E2E03_Normalization_Should_Align_EnergyBased_And_PhaseBased_Gravity()
     {
+        // Hypothesis block: build one concentrated state and compare energy-path vs phase-path gravity.
         double cEff = MeasureWavePropagationSpeed(SimulationLatticeSpacing, SimulationTimeTick);
 
         SpatialMassEmergenceMetrics concentrated = SimulateSpatialMassEmergence(
@@ -193,6 +207,7 @@ public class EmergentGravityEndToEndTests
             concentrated.TotalEnergy);
         var simDerived = new DerivedConstants(simPlanck);
 
+        // Fitted vs frozen: no fit is performed; normalization is a direct diagnostic transform.
         double gSimEnergy = simDerived.G;
         double expectedAcceleration = gSimEnergy * concentrated.EffectiveMass
             / (concentrated.EffectiveRadius * concentrated.EffectiveRadius);
@@ -219,6 +234,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E03] G alignment error           : {gAlignmentError:P6}");
         _output.WriteLine($"[E2E03] c_sim rel error vs SI-path  : {cRelError:P6}");
 
+        // Positive result => aligned G channels; negative result => missing bridge normalization term.
         Assert.True(concentrated.EffectiveMass > 0.0, "Effective mass must be positive.");
         Assert.True(expectedAcceleration > 0.0, "Expected gravitational acceleration must be positive.");
         Assert.True(rawAcceleration > 0.0, "Raw phase acceleration must be positive.");
@@ -229,8 +245,21 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Scaling/continuum diagnostic for spatial mass emergence across lattice size and resolution.
+    ///
+    /// Hypothesis:
+    /// The emergent gravity relation remains bounded under resolution and size changes.
+    ///
+    /// Status:
+    /// diagnostic (tested-effective scaling window).
+    ///
+    /// Limitation:
+    /// Finite sweeps only; not a proof of full continuum invariance.
+    /// </summary>
     public void E2E04_SpatialMassEmergence_Should_Show_ScalingInvariance_And_ResolutionConvergence()
     {
+        // Hypothesis block: vary lattice resolution/size and inspect invariant spread.
         var configs = new (string Name, int Oscillators, double SpacingScale)[]
         {
             ("base-129-s1", 129, 1.0),
@@ -331,6 +360,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E04] normalization rel spread : {normalizationSpread:E6}");
         _output.WriteLine($"[E2E04] a/rho rel spread         : {relationSpread:E6}");
 
+        // Positive result => robust scaling behavior; negative result => discretization sensitivity dominates.
         Assert.True(gSpread < 0.55, "Scaled phase-derived invariant should remain bounded across lattice sweeps.");
         Assert.True(gSimSpread < 0.12, "Energy-derived G (resolution-normalized) should remain approximately invariant.");
         Assert.True(normalizationSpread < 0.50, "Phase-coupling normalization should remain stable across sweeps.");
@@ -358,8 +388,21 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Frozen-k transfer diagnostic from one reference configuration to nearby unseen configurations.
+    ///
+    /// Hypothesis:
+    /// A single normalization k can predict across mild amplitude/radius/resolution shifts.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// No holdout split yet; this is pre-holdout transfer behavior.
+    /// </summary>
     public void E2E05_FrozenNormalizationK_Should_Predict_Across_Configurations()
     {
+        // Fit/freeze block: derive one reference k* once, then keep it frozen for all other cases.
         var reference = new
         {
             Name = "ref",
@@ -416,6 +459,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E05] reference G_eff(raw)  : {refRawGEff:E12}");
         _output.WriteLine($"[E2E05] frozen k              : {frozenK:E12}");
 
+        // Why no-refit matters: prevents per-case tuning from hiding structural model drift.
         for (int i = 0; i < cases.Length; i++)
         {
             var cfg = cases[i];
@@ -465,6 +509,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E05] mean rel error        : {meanError:E6}");
         _output.WriteLine($"[E2E05] max rel error         : {maxError:E6}");
 
+        // Positive result => transfer candidate; negative result => k must depend on hidden state variables.
         Assert.InRange(meanError, 0.0, 0.18);
         Assert.InRange(maxError, 0.0, 0.35);
         Assert.All(results, point => Assert.True(point.RelativeError < 0.36,
@@ -473,8 +518,21 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Holdout-style derived-k test with frozen exponents and no per-case refit.
+    ///
+    /// Hypothesis:
+    /// A baseline-derived corrected-k law generalizes to broader configurations.
+    ///
+    /// Status:
+    /// tested-effective candidate (within bounded error targets).
+    ///
+    /// Limitation:
+    /// Empirical fit quality only; no closed-form first-principles derivation yet.
+    /// </summary>
     public void E2E06_DerivedMedianK_Should_Generalize_Without_PerCaseRefit()
     {
+        // Hypothesis block: build baseline candidate manifold for corrected-k structure.
         var baselineConfigs = new[]
         {
             new { Name = "amp-0.85", Type = "amplitude", Concentration = 0.85, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 5101 },
@@ -646,6 +704,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E06] exponents             : p={p:E6}, q={q:E6}, a={a:E6}, b={b:E6}");
         _output.WriteLine($"[E2E06] candidate rel spread  : {candidateSpread:E6}");
 
+        // Holdout/no-refit block: validation set is evaluated with frozen baseline parameters only.
         var validationConfigs = new[]
         {
             new { Name = "val-amp-low", Concentration = 0.90, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 6101 },
@@ -722,6 +781,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E06] validation max rel error  : {maxError:E6}");
         _output.WriteLine($"[E2E06] used-k rel spread         : {usedKSpread:E6}");
 
+        // Positive result => robust bridge candidate; negative result => missing physics in corrected-k form.
         Assert.True(allKCandidates.Length >= 12, "Expected broad baseline candidate set for derived-k fitting.");
         Assert.True(double.IsFinite(kDerived) && kDerived > 0.0, "Derived k must be finite and positive.");
         Assert.True(candidateSpread < 0.60, "k-candidate heterogeneity should stay bounded on baseline.");
@@ -736,8 +796,21 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Holdout-only stress test for corrected-k families on stronger unseen configurations.
+    ///
+    /// Hypothesis:
+    /// Baseline-fitted corrected-k models remain predictive without holdout refit.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// Model family search is still exploratory and not uniqueness-proof.
+    /// </summary>
     public void E2E07_HoldoutOnly_CorrectedK_Should_Generalize_To_Unseen_StrongerCases()
     {
+        // Fit vs frozen: fit model coefficients on mild baseline cases only.
         var baselineConfigs = new[]
         {
             new { Name = "fit-amp-0.92", Concentration = 0.92, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 8101 },
@@ -752,6 +825,7 @@ public class EmergentGravityEndToEndTests
             new { Name = "fit-n-193", Concentration = 0.95, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 193, Seed = 8110 },
         };
 
+        // No-refit holdout: stronger/out-of-range cases are only evaluated, never refit.
         var holdoutConfigs = new[]
         {
             new { Name = "holdout-amp-low-0.80", Concentration = 0.80, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 9101 },
@@ -1311,6 +1385,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E07] elliptic combo2        : {bestGeom.Combo2Err:E6}");
         _output.WriteLine($"[E2E07] combo2 improvement     : {(sphericalGeom.Combo2Err - bestGeom.Combo2Err):E6}");
 
+        // Positive result => true generalization signal; negative result => overfit baseline envelope.
         Assert.True(double.IsFinite(modelBetas[0][0]), "Base holdout fit must be finite.");
         Assert.True(holdoutConfigs.Any(c => c.Oscillators == 257), "Holdout set must include N=257.");
         Assert.True(holdoutConfigs.Any(c => c.RadiusScale == 0.85) && holdoutConfigs.Any(c => c.RadiusScale == 1.15),
@@ -1322,8 +1397,21 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Tick-fluctuation diagnostic for holdout error response without retraining corrected-k.
+    ///
+    /// Hypothesis:
+    /// Controlled tick-field fluctuations expose nonlinear error structure in frozen models.
+    ///
+    /// Status:
+    /// diagnostic.
+    ///
+    /// Limitation:
+    /// Tests bounded response only; does not prove microscopic fluctuation law.
+    /// </summary>
     public void E2E08_TickFluctuations_Should_Probe_HoldoutNonlinearError_Without_Refit()
     {
+        // Fit/freeze block: coordinate and tick-radius corrected-k fits are learned once at sigmaTau=0.
         var baselineConfigs = new[]
         {
             new { Name = "fit-amp-0.92", Concentration = 0.92, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 10101 },
@@ -1423,6 +1511,7 @@ public class EmergentGravityEndToEndTests
             $"coord=[{string.Join(", ", Array.ConvertAll(betaCoord, v => v.ToString("E6")))}], " +
             $"tick=[{string.Join(", ", Array.ConvertAll(betaTick, v => v.ToString("E6")))}]");
 
+        // Holdout/no-refit block: fluctuation levels are probed without re-estimating any k-model.
         var fluctuationLevels = new[]
         {
             new { Name = "none", SigmaTau = 0.0 },
@@ -1576,6 +1665,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E08] best maxErr            : {bestMaxErrorAcross:E6} ({bestModelAcross}, {bestLevelAcross})");
         _output.WriteLine($"[E2E08] maxErr reduction vs coord baseline : {(baseMaxErrorCoord - bestMaxErrorAcross):E6}");
 
+        // Positive result => bounded nonlinear robustness; negative result => missing fluctuation coupling.
         Assert.True(double.IsFinite(betaCoord[0]) && double.IsFinite(betaTick[0]), "Frozen k fits must be finite.");
         Assert.True(baseMaxErrorCoord > 0.0, "Coordinate-radius baseline envelope must be measurable.");
         Assert.True(bestMaxErrorAcross <= 0.75, "Tick-field envelope should remain bounded.");
@@ -1583,8 +1673,21 @@ public class EmergentGravityEndToEndTests
 
     [Trait("Category", "PhysicsValidation")]
     [Fact]
+    /// <summary>
+    /// Conserved tick-matrix diagnostic comparing dynamic emergent-k variants to static frozen-k.
+    ///
+    /// Hypothesis:
+    /// Dynamic k responses driven by tick redistribution gradients improve difficult holdout cases.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// Exploratory effective-model comparison, not a final field-theory closure.
+    /// </summary>
     public void E2E09_ConservedTickMatrix_Should_Test_DynamicEmergentK_Against_StaticFrozenK()
     {
+        // Fit vs frozen: static corrected-k baseline is calibrated on baseline cases.
         var baselineConfigs = new[]
         {
             new { Name = "fit-amp-0.92", Concentration = 0.92, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 12101 },
@@ -1597,6 +1700,7 @@ public class EmergentGravityEndToEndTests
             new { Name = "fit-n-193", Concentration = 0.95, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 193, Seed = 12108 },
         };
 
+        // No-refit holdout: all dynamic/local/nonlocal comparisons run on unseen cases with frozen baseline fit.
         var holdoutConfigs = new[]
         {
             new { Name = "holdout-amp-low-0.80", Concentration = 0.80, RadiusScale = 1.0, SpacingScale = 1.0, Noise = 0.0, Oscillators = 129, Seed = 13101 },
@@ -2116,6 +2220,7 @@ public class EmergentGravityEndToEndTests
         _output.WriteLine($"[E2E09] elliptic combo2        : {bestCons.Combo2Err:E6}");
         _output.WriteLine($"[E2E09] combo2 improvement     : {(sphericalCons.Combo2Err - bestCons.Combo2Err):E6}");
 
+        // Positive result => dynamic tick terms are plausible candidates; negative result => static form remains preferable.
         Assert.True(staticEval.MaxErr > 0.0, "Static frozen-k envelope must be measurable.");
         Assert.True(double.IsFinite(bestAlpha), "Baseline-fitted dynamic model must be finite.");
         Assert.True(m4.MaxErr <= 1.10, "Dynamic gradient-based envelope should remain bounded.");

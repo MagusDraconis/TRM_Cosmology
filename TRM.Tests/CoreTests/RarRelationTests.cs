@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TRM.Core;
 using TRM.Core.Baryons;
 using Xunit;
@@ -25,7 +26,7 @@ public class RarRelationTests
 
 
     [Fact]
-    public void Test_TRM_Rar_ExponentialDisk_RadiusBins()
+    public void RAR01_TRM_Rar_ExponentialDisk_RadiusBins()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -110,10 +111,10 @@ public class RarRelationTests
         double rms3 = ComputeBinRms(bin3);
         double rms4 = ComputeBinRms(bin4);
 
-        _output.WriteLine($"Bin <1 Rd     : n={bin1.Count}, RMS={rms1:F4}, Mean={ComputeMean(bin1):F4}");
-        _output.WriteLine($"Bin 1-2 Rd    : n={bin2.Count}, RMS={rms2:F4}, Mean={ComputeMean(bin2):F4}");
-        _output.WriteLine($"Bin 2-4 Rd    : n={bin3.Count}, RMS={rms3:F4}, Mean={ComputeMean(bin3):F4}");
-        _output.WriteLine($"Bin >=4 Rd    : n={bin4.Count}, RMS={rms4:F4}, Mean={ComputeMean(bin4):F4}");
+        WriteLineWithTestPrefix($"Bin <1 Rd     : n={bin1.Count}, RMS={rms1:F4}, Mean={ComputeMean(bin1):F4}");
+        WriteLineWithTestPrefix($"Bin 1-2 Rd    : n={bin2.Count}, RMS={rms2:F4}, Mean={ComputeMean(bin2):F4}");
+        WriteLineWithTestPrefix($"Bin 2-4 Rd    : n={bin3.Count}, RMS={rms3:F4}, Mean={ComputeMean(bin3):F4}");
+        WriteLineWithTestPrefix($"Bin >=4 Rd    : n={bin4.Count}, RMS={rms4:F4}, Mean={ComputeMean(bin4):F4}");
 
 
 
@@ -130,7 +131,7 @@ public class RarRelationTests
 
 
     [Fact]
-    public void Test_TRM_Rar_ExponentialDiskImpact()
+    public void RAR02_TRM_Rar_ExponentialDiskImpact()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -152,10 +153,10 @@ public class RarRelationTests
         double rmsGR = ComputeRms(trmGR, fixedA0);
         double rmsDisk = ComputeRms(trmDisk, fixedA0);
 
-        _output.WriteLine($"RMS GR   = {rmsGR:F4}");
-        _output.WriteLine($"RMS DISK = {rmsDisk:F4}");
-        _output.WriteLine($"Delta    = {rmsDisk - rmsGR:F4}");
-        _output.WriteLine($"Ratio    = {rmsDisk / rmsGR:F4}");
+        WriteLineWithTestPrefix($"RMS GR   = {rmsGR:F4}");
+        WriteLineWithTestPrefix($"RMS DISK = {rmsDisk:F4}");
+        WriteLineWithTestPrefix($"Delta    = {rmsDisk - rmsGR:F4}");
+        WriteLineWithTestPrefix($"Ratio    = {rmsDisk / rmsGR:F4}");
 
         Assert.NotEmpty(trmGR);
         Assert.NotEmpty(trmDisk);
@@ -168,7 +169,7 @@ public class RarRelationTests
         //    $"ExponentialDisk model degrades too strongly: GR={rmsGR:F4}, DISK={rmsDisk:F4}");
     }
     [Fact]
-    public void Test_TRM_Rar_MassModelImpact()
+    public void RAR03_TRM_Rar_MassModelImpact()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -197,11 +198,11 @@ public class RarRelationTests
         var fitGR = SparcRarAnalysis.FitA0(trmGR, model: ModelType.ClockworkTRM);
         var fitMass = SparcRarAnalysis.FitA0(trmMass, model: ModelType.ClockworkTRM);
 
-        _output.WriteLine("=== GR CONSISTENT ===");
-        _output.WriteLine($"log10(a0)={fitGR.BestLogA0:F4} | a0={fitGR.BestA0:E4} | RMS={fitGR.RmsError:F4}");
+        WriteLineWithTestPrefix("=== GR CONSISTENT ===");
+        WriteLineWithTestPrefix($"log10(a0)={fitGR.BestLogA0:F4} | a0={fitGR.BestA0:E4} | RMS={fitGR.RmsError:F4}");
 
-        _output.WriteLine("=== MASS MODEL ===");
-        _output.WriteLine($"log10(a0)={fitMass.BestLogA0:F4} | a0={fitMass.BestA0:E4} | RMS={fitMass.RmsError:F4}");
+        WriteLineWithTestPrefix("=== MASS MODEL ===");
+        WriteLineWithTestPrefix($"log10(a0)={fitMass.BestLogA0:F4} | a0={fitMass.BestA0:E4} | RMS={fitMass.RmsError:F4}");
 
         // ✅ Grundchecks
         Assert.NotEmpty(trmMass);
@@ -229,7 +230,7 @@ public class RarRelationTests
 
 
     [Fact]
-    public void Test_TRM_Rar_MassModelConsistency()
+    public void RAR04_TRM_Rar_MassModelConsistency()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
 
@@ -251,13 +252,13 @@ public class RarRelationTests
             // sanity range
 
             double logG = Math.Log10(gBar);
-            _output.WriteLine($"log10(gBar) = {logG:F3}");
+            WriteLineWithTestPrefix($"log10(gBar) = {logG:F3}");
 
             Assert.InRange(logG, -13.5, -8.0);
         }
     }
     [Fact]
-    public void Test_TRM_Rar_BaryonBias()
+    public void RAR05_TRM_Rar_BaryonBias()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -282,13 +283,13 @@ public class RarRelationTests
         {
             double meanRatio = g.Average(p => p.GobsMs2 / p.GbarMs2);
 
-            _output.WriteLine($"{g.Key}: gObs/gBar = {meanRatio:F2}");
+            WriteLineWithTestPrefix($"{g.Key}: gObs/gBar = {meanRatio:F2}");
 
             Assert.InRange(meanRatio, 0.05, 50.0);
         }
     }
     [Fact]
-    public void Test_TRM_Rar_BaryonStatistics()
+    public void RAR06_TRM_Rar_BaryonStatistics()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -325,17 +326,17 @@ public class RarRelationTests
         double p90 = sorted[(int)(0.9 * n)];
 
         // ✅ Debug Output
-        _output.WriteLine($"Total ratios: {n}");
-        _output.WriteLine($"Median: {median:F3}");
-        _output.WriteLine($"P10:   {p10:F3}");
-        _output.WriteLine($"P90:   {p90:F3}");
+        WriteLineWithTestPrefix($"Total ratios: {n}");
+        WriteLineWithTestPrefix($"Median: {median:F3}");
+        WriteLineWithTestPrefix($"P10:   {p10:F3}");
+        WriteLineWithTestPrefix($"P90:   {p90:F3}");
 
         // Optional: zusätzliche Infos
         double mean = ratios.Average();
         double std = Math.Sqrt(ratios.Sum(x => Math.Pow(x - mean, 2)) / n);
 
-        _output.WriteLine($"Mean:  {mean:F3}");
-        _output.WriteLine($"Std:   {std:F3}");
+        WriteLineWithTestPrefix($"Mean:  {mean:F3}");
+        WriteLineWithTestPrefix($"Std:   {std:F3}");
 
         // ✅ Assertions (physikalisch sinnvoll gewählt)
 
@@ -352,7 +353,7 @@ public class RarRelationTests
         Assert.True(std < 20.0, "Scatter unexpectedly large.");
     }
     [Fact]
-    public void Test_TRM_Rar_BaryonDecoupling()
+    public void RAR07_TRM_Rar_BaryonDecoupling()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -378,11 +379,11 @@ public class RarRelationTests
         var fitLegacy = SparcRarAnalysis.FitA0(trmLegacy, model: ModelType.ClockworkTRM);
         var fitCorrected = SparcRarAnalysis.FitA0(trmCorrected, model: ModelType.ClockworkTRM);
 
-        _output.WriteLine("=== LEGACY ===");
-        _output.WriteLine($"log10(a0)={fitLegacy.BestLogA0:F4} RMS={fitLegacy.RmsError:F4}");
+        WriteLineWithTestPrefix("=== LEGACY ===");
+        WriteLineWithTestPrefix($"log10(a0)={fitLegacy.BestLogA0:F4} RMS={fitLegacy.RmsError:F4}");
 
-        _output.WriteLine("=== CORRECTED ===");
-        _output.WriteLine($"log10(a0)={fitCorrected.BestLogA0:F4} RMS={fitCorrected.RmsError:F4}");
+        WriteLineWithTestPrefix("=== CORRECTED ===");
+        WriteLineWithTestPrefix($"log10(a0)={fitCorrected.BestLogA0:F4} RMS={fitCorrected.RmsError:F4}");
 
         // ✅ Hauptaussagen:
 
@@ -401,7 +402,7 @@ public class RarRelationTests
         Assert.NotEmpty(trmCorrected);
     }
     [Fact]
-    public void Test_TRM_Rar_PhysicalScale()
+    public void RAR08_TRM_Rar_PhysicalScale()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -419,11 +420,11 @@ public class RarRelationTests
         var fitTrm = SparcRarAnalysis.FitA0(trmPoints, model: ModelType.ClockworkTRM);
         var fitMond = SparcRarAnalysis.FitA0(trmPoints, model: ModelType.MOND);
 
-        _output.WriteLine($"Raw points: {rawPoints.Count}");
-        _output.WriteLine($"Galaxy meta entries: {galaxyMeta.Count}");
-        _output.WriteLine($"TRM points: {trmPoints.Count}");
-        _output.WriteLine($"TRM  -> log10(a0)={fitTrm.BestLogA0:F4} | a0={fitTrm.BestA0:E4} | RMS={fitTrm.RmsError:F4}");
-        _output.WriteLine($"MOND -> log10(a0)={fitMond.BestLogA0:F4} | a0={fitMond.BestA0:E4} | RMS={fitMond.RmsError:F4}");
+        WriteLineWithTestPrefix($"Raw points: {rawPoints.Count}");
+        WriteLineWithTestPrefix($"Galaxy meta entries: {galaxyMeta.Count}");
+        WriteLineWithTestPrefix($"TRM points: {trmPoints.Count}");
+        WriteLineWithTestPrefix($"TRM  -> log10(a0)={fitTrm.BestLogA0:F4} | a0={fitTrm.BestA0:E4} | RMS={fitTrm.RmsError:F4}");
+        WriteLineWithTestPrefix($"MOND -> log10(a0)={fitMond.BestLogA0:F4} | a0={fitMond.BestA0:E4} | RMS={fitMond.RmsError:F4}");
 
         Assert.NotEmpty(trmPoints);
         Assert.True(galaxyMeta.Count >= 150, "Too few SPARC galaxy metadata entries were loaded.");
@@ -443,7 +444,7 @@ public class RarRelationTests
 
 
     [Fact]
-    public void Test_Parse_RotmodZip_And_Verify_AccelerationScale()
+    public void RAR09_Parse_RotmodZip_And_Verify_AccelerationScale()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         Assert.True(File.Exists(zipPath), "File Rotmod_LTG.zip was not found.");
@@ -452,16 +453,16 @@ public class RarRelationTests
         var rarData = SparcRarAnalysis.ParseRarFromZip(zipPath);
 
         // Diagnostic output for Visual Studio Test Explorer
-        _output.WriteLine($"Total radial data points loaded: {rarData.Count}");
+        WriteLineWithTestPrefix($"Total radial data points loaded: {rarData.Count}");
 
         // Validate that data was loaded
         Assert.NotEmpty(rarData);
 
         // Sample output: computed values in log10 space
         var sample = rarData.First();
-        _output.WriteLine($"Galaxy sample: {sample.GalaxyName} at R={sample.RadiusKpc} kpc");
-        _output.WriteLine($"  log10(g_bar): {Math.Log10(sample.GbarMs2):F4}");
-        _output.WriteLine($"  log10(g_obs): {Math.Log10(sample.GobsMs2):F4}");
+        WriteLineWithTestPrefix($"Galaxy sample: {sample.GalaxyName} at R={sample.RadiusKpc} kpc");
+        WriteLineWithTestPrefix($"  log10(g_bar): {Math.Log10(sample.GbarMs2):F4}");
+        WriteLineWithTestPrefix($"  log10(g_obs): {Math.Log10(sample.GobsMs2):F4}");
 
         // Verify values remain in a physically plausible range
         // Typical galactic accelerations are between 10^-12 and 10^-8 m/s^2
@@ -473,7 +474,7 @@ public class RarRelationTests
     }
 
     [Fact]
-    public void Test_Verify_Rar_Asymptotic_Limits()
+    public void RAR10_Verify_Rar_Asymptotic_Limits()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         var rarData = SparcRarAnalysis.ParseRarFromZip(zipPath);
@@ -481,12 +482,12 @@ public class RarRelationTests
         // Compute averaged profiles across all galaxies
         var bins = SparcRarAnalysis.ComputeRarProfiles(rarData);
 
-        _output.WriteLine("--- RADIAL ACCELERATION RELATION (RAR) PROFILE ---");
-        _output.WriteLine("log10(g_bar) | log10(g_obs) | StdDev | Points");
+        WriteLineWithTestPrefix("--- RADIAL ACCELERATION RELATION (RAR) PROFILE ---");
+        WriteLineWithTestPrefix("log10(g_bar) | log10(g_obs) | StdDev | Points");
 
         foreach (var bin in bins)
         {
-            _output.WriteLine($"{bin.LogGbarCenter:F2}       | {bin.MeanLogGobs:F2}        | {bin.StandardDeviation:F3}  | {bin.PointCount}");
+            WriteLineWithTestPrefix($"{bin.LogGbarCenter:F2}       | {bin.MeanLogGobs:F2}        | {bin.StandardDeviation:F3}  | {bin.PointCount}");
         }
 
         // 1) Validate Newtonian limit (high accelerations near -8.5)
@@ -510,11 +511,11 @@ public class RarRelationTests
             // log10(g_obs) = 0.5 * log10(g_bar) + 0.5 * log10(a_0)
             // => log10(a_0) = 2 * log10(g_obs) - log10(g_bar)
             double calculatedLogA0 = 2 * lowAccBin.MeanLogGobs - lowAccBin.LogGbarCenter;
-            _output.WriteLine($"\nDerived cosmic acceleration anchor log10(a_0): {calculatedLogA0:F4} m/s^2");
+            WriteLineWithTestPrefix($"\nDerived cosmic acceleration anchor log10(a_0): {calculatedLogA0:F4} m/s^2");
         }
     }
     [Fact]
-    public void Test_Global_NonLinear_Fit_For_A0()
+    public void RAR11_Global_NonLinear_Fit_For_A0()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -529,11 +530,11 @@ public class RarRelationTests
 
 
 
-        _output.WriteLine("--- GLOBAL RAR FIT RESULTS ---");
-        _output.WriteLine($"Optimized log10(a_0): {bestLogA0:F4} m/s^2");
-        _output.WriteLine($"Physical value a_0:    {bestA0:E4} m/s^2");
-        _output.WriteLine($"Mean error (RMS):      {rmsError:F4} dex");
-        _output.WriteLine($"Analyzed points:       {rarData.Count}");
+        WriteLineWithTestPrefix("--- GLOBAL RAR FIT RESULTS ---");
+        WriteLineWithTestPrefix($"Optimized log10(a_0): {bestLogA0:F4} m/s^2");
+        WriteLineWithTestPrefix($"Physical value a_0:    {bestA0:E4} m/s^2");
+        WriteLineWithTestPrefix($"Mean error (RMS):      {rmsError:F4} dex");
+        WriteLineWithTestPrefix($"Analyzed points:       {rarData.Count}");
 
         // Scientific validation:
         // The value should remain stable within the expected astrophysical window.
@@ -546,7 +547,7 @@ public class RarRelationTests
     }
 
     [Fact]
-    public void Test_Clockwork_vs_MOND_Global_Fit()
+    public void RAR12_Clockwork_vs_MOND_Global_Fit()
     {
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -560,13 +561,793 @@ public class RarRelationTests
         // 2) Fit Clockwork Cosmology TRM
         var (trmLogA0, trmA0, trmRms) = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
 
-        _output.WriteLine($"--- REAL SPARC COMPARISON RESULTS ---");
-        _output.WriteLine($"MOND      -> log10(a0): {mondLogA0:F4} | RMS: {mondRms:F4} dex");
-        _output.WriteLine($"CLOCKWORK -> log10(a0): {trmLogA0:F4} | RMS: {trmRms:F4} dex");
+        WriteLineWithTestPrefix($"--- REAL SPARC COMPARISON RESULTS ---");
+        WriteLineWithTestPrefix($"MOND      -> log10(a0): {mondLogA0:F4} | RMS: {mondRms:F4} dex");
+        WriteLineWithTestPrefix($"CLOCKWORK -> log10(a0): {trmLogA0:F4} | RMS: {trmRms:F4} dex");
 
         // Both models must remain within the expected physical window
         Assert.InRange(trmLogA0, -10.1, -9.6);
         Assert.True(trmRms < 0.15);
+    }
+
+    [Fact]
+    public void RAR13_TRM_Rar_NoRefit_TurningMemory_HoldoutBins()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        var rows = BuildTurningResidualRows(rarData, fit.BestA0);
+        Assert.NotEmpty(rows);
+
+        var holdoutRows = rows.Where(r => IsHoldoutGalaxy(r.GalaxyKey)).ToList();
+        var trainRows = rows.Where(r => !IsHoldoutGalaxy(r.GalaxyKey)).ToList();
+
+        Assert.True(trainRows.Count > 500, "Too few training points for turning-memory bins.");
+        Assert.True(holdoutRows.Count > 200, "Too few holdout points for robust diagnostics.");
+
+        var trainProxySorted = trainRows
+            .Select(r => r.TurningProxySigned)
+            .OrderBy(x => x)
+            .ToList();
+
+        double lowCut = trainProxySorted[trainProxySorted.Count / 3];
+        double highCut = trainProxySorted[(2 * trainProxySorted.Count) / 3];
+
+        int GetBin(double proxy) => proxy < lowCut ? 0 : proxy < highCut ? 1 : 2;
+
+        var trainResidualMeansByBin = trainRows
+            .GroupBy(r => GetBin(r.TurningProxySigned))
+            .ToDictionary(g => g.Key, g => g.Average(x => x.Residual));
+
+        var holdoutResidualsByBin = holdoutRows
+            .GroupBy(r => GetBin(r.TurningProxySigned))
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Residual).ToList());
+
+        Assert.True(
+            holdoutResidualsByBin.ContainsKey(0) &&
+            holdoutResidualsByBin.ContainsKey(1) &&
+            holdoutResidualsByBin.ContainsKey(2),
+            "Holdout split does not cover low/mid/high turning-memory bins.");
+
+        for (int bin = 0; bin < 3; bin++)
+        {
+            Assert.True(holdoutResidualsByBin[bin].Count > 30, $"Holdout bin {bin} is too small.");
+        }
+
+        var holdoutBaselineResiduals = holdoutRows.Select(r => r.Residual).ToList();
+        var holdoutCorrectedResiduals = holdoutRows
+            .Select(r => r.Residual - trainResidualMeansByBin[GetBin(r.TurningProxySigned)])
+            .ToList();
+
+        double baselineHoldoutRms = ComputeBinRms(holdoutBaselineResiduals);
+        double correctedHoldoutRms = ComputeBinRms(holdoutCorrectedResiduals);
+
+        WriteLineWithTestPrefix("--- NO-REFIT TURNING-MEMORY HOLDOUT DIAGNOSTIC ---");
+        WriteLineWithTestPrefix($"Fit log10(a0): {fit.BestLogA0:F4} | RMS(all): {fit.RmsError:F4} dex");
+        WriteLineWithTestPrefix($"Train/Holdout points: {trainRows.Count}/{holdoutRows.Count}");
+        WriteLineWithTestPrefix($"Turning-memory cuts (signed): low<{lowCut:E6}, mid<{highCut:E6}, high>=mid");
+
+        for (int bin = 0; bin < 3; bin++)
+        {
+            var baselineBin = holdoutResidualsByBin[bin];
+            var correctedBin = holdoutRows
+                .Where(r => GetBin(r.TurningProxySigned) == bin)
+                .Select(r => r.Residual - trainResidualMeansByBin[bin])
+                .ToList();
+
+            string label = bin switch
+            {
+                0 => "LOW",
+                1 => "MID",
+                _ => "HIGH"
+            };
+
+            WriteLineWithTestPrefix(
+                $"{label} bin: n={baselineBin.Count}, " +
+                $"mean={ComputeMean(baselineBin):F5}, " +
+                $"rms={ComputeBinRms(baselineBin):F5}, " +
+                $"rms_corrected={ComputeBinRms(correctedBin):F5}");
+        }
+
+        WriteLineWithTestPrefix(
+            $"Holdout RMS baseline={baselineHoldoutRms:F5} | corrected={correctedHoldoutRms:F5} | " +
+            $"delta={(baselineHoldoutRms - correctedHoldoutRms):F5}");
+
+        Assert.True(
+            correctedHoldoutRms <= baselineHoldoutRms,
+            $"Turning-memory correction did not improve holdout RMS: baseline={baselineHoldoutRms:F5}, corrected={correctedHoldoutRms:F5}");
+    }
+
+    [Fact]
+    public void RAR14_TRM_Rar_NoRefit_TurningMemory_VariantDiagnostics()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        var rows = BuildTurningResidualRows(rarData, fit.BestA0);
+        Assert.NotEmpty(rows);
+
+        var galaxyBrightness = rows
+            .GroupBy(r => r.GalaxyKey)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Average(x => x.LogGbar));
+
+        var brightnessValues = galaxyBrightness.Values.OrderBy(x => x).ToList();
+        double brightnessCut = brightnessValues[brightnessValues.Count / 2];
+
+        var splitConfigs = new (int Modulo, int Remainder, string Label)[]
+        {
+            (5, 0, "hash%5==0"),
+            (5, 1, "hash%5==1"),
+            (4, 0, "hash%4==0")
+        };
+
+        var binCounts = new[] { 3, 5 };
+        var proxyConfigs = new (string Label, Func<TurningResidualRow, double> Selector)[]
+        {
+            ("signed", r => r.TurningProxySigned),
+            ("absolute", r => r.TurningProxyAbs)
+        };
+
+        var sbGroups = new (string Label, Func<string, bool> GalaxyFilter)[]
+        {
+            ("all", _ => true),
+            ("lsb", galaxyKey => galaxyBrightness.TryGetValue(galaxyKey, out double value) && value <= brightnessCut),
+            ("hsb", galaxyKey => galaxyBrightness.TryGetValue(galaxyKey, out double value) && value > brightnessCut)
+        };
+
+        var results = new List<TurningDiagnosticResult>();
+
+        foreach (var split in splitConfigs)
+        {
+            foreach (var bins in binCounts)
+            {
+                foreach (var proxy in proxyConfigs)
+                {
+                    foreach (var sbGroup in sbGroups)
+                    {
+                        var result = EvaluateTurningDiagnostic(
+                            rows,
+                            proxy.Selector,
+                            bins,
+                            split.Modulo,
+                            split.Remainder,
+                            sbGroup.GalaxyFilter);
+
+                        if (result != null)
+                        {
+                            results.Add(result with
+                            {
+                                SplitLabel = split.Label,
+                                BinCount = bins,
+                                ProxyLabel = proxy.Label,
+                                SurfaceBrightnessLabel = sbGroup.Label
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        WriteLineWithTestPrefix("--- TURNING-MEMORY VARIANT DIAGNOSTICS (NO-REFIT, HOLDOUT-ONLY) ---");
+        WriteLineWithTestPrefix("Variant | split | bins | proxy | group | baseline RMS | corrected RMS | delta");
+
+        int variantIndex = 1;
+        foreach (var r in results
+            .OrderBy(r => r.SplitLabel)
+            .ThenBy(r => r.BinCount)
+            .ThenBy(r => r.ProxyLabel)
+            .ThenBy(r => r.SurfaceBrightnessLabel))
+        {
+            WriteLineWithTestPrefix(
+                $"{variantIndex:D2} | {r.SplitLabel} | {r.BinCount} | {r.ProxyLabel} | {r.SurfaceBrightnessLabel} | " +
+                $"{r.BaselineRms:F5} | {r.CorrectedRms:F5} | {r.DeltaRms:F5}");
+            variantIndex++;
+        }
+
+        Assert.True(results.Count >= 12, "Too few valid variant diagnostics.");
+        Assert.True(results.Any(r => r.DeltaRms > 0.0), "No holdout variant showed RMS improvement.");
+    }
+
+    [Fact]
+    public void RAR15_TRM_Rar_NoRefit_TurningMemory_SoftGatedHoldout()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        var rows = BuildTurningResidualRows(rarData, fit.BestA0);
+        Assert.NotEmpty(rows);
+
+        var splitConfigs = new (int Modulo, int Remainder, string Label)[]
+        {
+            (5, 0, "hash%5==0"),
+            (5, 1, "hash%5==1"),
+            (4, 0, "hash%4==0")
+        };
+
+        var results = new List<TurningGateResult>();
+        foreach (var split in splitConfigs)
+        {
+            var result = EvaluateHsbGatedTurningDiagnostic(
+                rows,
+                proxySelector: r => r.TurningProxySigned,
+                binCount: 3,
+                holdoutModulo: split.Modulo,
+                holdoutRemainder: split.Remainder);
+
+            if (result != null)
+            {
+                results.Add(result with { SplitLabel = split.Label });
+            }
+        }
+
+        WriteLineWithTestPrefix("--- SOFT-GATED TURNING-MEMORY DIAGNOSTIC (NO-REFIT, HOLDOUT-ONLY) ---");
+        WriteLineWithTestPrefix("split | baseline RMS | ungated RMS | hard-gated RMS | soft-gated RMS | delta ungated | delta hard | delta soft | gate threshold | gate width");
+        foreach (var r in results.OrderBy(r => r.SplitLabel))
+        {
+            WriteLineWithTestPrefix(
+                $"{r.SplitLabel} | {r.BaselineRms:F5} | {r.UngatedRms:F5} | {r.HardGatedRms:F5} | {r.SoftGatedRms:F5} | " +
+                $"{r.UngatedDelta:F5} | {r.HardGatedDelta:F5} | {r.SoftGatedDelta:F5} | {r.SoftGateThreshold:F5} | {r.SoftGateWidth:F5}");
+        }
+
+        Assert.True(results.Count >= 2, "Too few valid split results for soft-gate diagnostic.");
+        Assert.True(results.Any(r => r.SoftGatedDelta > 0.0), "Soft-gated correction did not improve holdout RMS in any split.");
+        Assert.True(
+            results.All(r => r.SoftGatedDelta > -0.01),
+            "Soft-gated correction degrades holdout RMS too strongly in at least one split.");
+    }
+
+    [Fact]
+    public void RAR16_TRM_Rar_ServiceLayer_TurningMemoryCorrection_NoRefit()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        var baseline = SparcRarAnalysis.EvaluateTurningMemoryCorrectionNoRefit(
+            rarData,
+            fit.BestA0,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.None,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        var binBased = SparcRarAnalysis.EvaluateTurningMemoryCorrectionNoRefit(
+            rarData,
+            fit.BestA0,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.BinBased,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        var interpolated = SparcRarAnalysis.EvaluateTurningMemoryCorrectionNoRefit(
+            rarData,
+            fit.BestA0,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.Interpolated,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        WriteLineWithTestPrefix("--- SPARC SERVICE TURNING-MEMORY (NO-REFIT) ---");
+        WriteLineWithTestPrefix($"Baseline:     RMS={baseline.BaselineRms:F5} -> {baseline.CorrectedRms:F5} | delta={baseline.DeltaRms:F5}");
+        WriteLineWithTestPrefix($"Bin-based:    RMS={binBased.BaselineRms:F5} -> {binBased.CorrectedRms:F5} | delta={binBased.DeltaRms:F5}");
+        WriteLineWithTestPrefix($"Interpolated: RMS={interpolated.BaselineRms:F5} -> {interpolated.CorrectedRms:F5} | delta={interpolated.DeltaRms:F5}");
+        WriteLineWithTestPrefix($"Soft-gate (bin) threshold={binBased.FittedGateThreshold:F5} width={binBased.FittedGateWidth:F5}");
+        WriteLineWithTestPrefix($"Soft-gate (int) threshold={interpolated.FittedGateThreshold:F5} width={interpolated.FittedGateWidth:F5}");
+
+        Assert.Equal(TurningMemoryCorrectionMode.None, baseline.Mode);
+        Assert.InRange(Math.Abs(baseline.DeltaRms), 0.0, 1e-12);
+
+        Assert.Equal(baseline.TrainPointCount, binBased.TrainPointCount);
+        Assert.Equal(baseline.HoldoutPointCount, binBased.HoldoutPointCount);
+        Assert.Equal(baseline.TrainPointCount, interpolated.TrainPointCount);
+        Assert.Equal(baseline.HoldoutPointCount, interpolated.HoldoutPointCount);
+
+        Assert.True(double.IsFinite(binBased.DeltaRms));
+        Assert.True(double.IsFinite(interpolated.DeltaRms));
+        Assert.True(binBased.PerGalaxyImprovement.Count > 10);
+        Assert.True(interpolated.PerGalaxyImprovement.Count > 10);
+
+        Assert.True(
+            binBased.PerGalaxyImprovement.Any(x => x.DeltaRms > 0.0) ||
+            interpolated.PerGalaxyImprovement.Any(x => x.DeltaRms > 0.0),
+            "No per-galaxy holdout improvement found for turning-memory corrected modes.");
+    }
+
+    [Fact]
+    /// <summary>
+    /// No-refit gradient-regime gate comparison for SPARC turning-memory residual correction.
+    ///
+    /// Hypothesis:
+    /// Residual turning-memory signal is stronger in specific gradient regimes than in global HSB-only gating.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// Optional residual-sector analysis; baseline TRM-RAR path is unchanged.
+    /// </summary>
+    public void RAR17_TRM_Rar_ServiceLayer_GradientRegimeGateDiagnostics_NoRefit()
+    {
+        // Baseline fit block: fit a0 once, then keep it frozen for all diagnostic variants.
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        // No-refit holdout block: train-only gate fitting, holdout-only scoring.
+        var report = SparcRarAnalysis.EvaluateTurningMemoryGateComparisonNoRefit(
+            rarData,
+            fit.BestA0,
+            TurningMemoryCorrectionMode.Interpolated,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.Interpolated,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        WriteLineWithTestPrefix($"Mode={report.Mode}");
+        WriteLineWithTestPrefix($"Baseline RMS(all)={report.Baseline.CorrectedRmsAll:F6}");
+        WriteLineWithTestPrefix($"Ungated RMS(all)={report.Ungated.CorrectedRmsAll:F6} delta={report.Ungated.DeltaRmsAll:F6}");
+        WriteLineWithTestPrefix($"HSB soft RMS(all)={report.HsbSoftGated.CorrectedRmsAll:F6} delta={report.HsbSoftGated.DeltaRmsAll:F6}");
+        foreach (var g in report.GradientSoftGated)
+        {
+            WriteLineWithTestPrefix(
+                $"Gradient gate {g.GateVariable}: RMS(all)={g.CorrectedRmsAll:F6}, " +
+                $"delta={g.DeltaRmsAll:F6}, thr={g.GateThreshold:F6}, width={g.GateWidth:F6}");
+        }
+        WriteLineWithTestPrefix(
+            $"Best gradient gate={report.BestGradientGate.GateVariable}, " +
+            $"delta={report.BestGradientGate.DeltaRmsAll:F6}, " +
+            $"thr={report.BestGradientGate.GateThreshold:F6}, width={report.BestGradientGate.GateWidth:F6}");
+
+        // Positive result => regime-gated candidate is plausible; negative result => signal is not robust.
+        Assert.Equal(TurningMemoryCorrectionMode.Interpolated, report.Mode);
+        Assert.Equal(4, report.GradientSoftGated.Count);
+        Assert.True(double.IsFinite(report.Baseline.CorrectedRmsAll));
+        Assert.True(double.IsFinite(report.Ungated.CorrectedRmsAll));
+        Assert.True(double.IsFinite(report.HsbSoftGated.CorrectedRmsAll));
+        Assert.True(report.GradientSoftGated.All(x => double.IsFinite(x.CorrectedRmsAll)));
+        Assert.True(double.IsFinite(report.BestGradientGate.GateThreshold));
+        Assert.True(double.IsFinite(report.BestGradientGate.GateWidth));
+        Assert.True(report.BestGradientGate.GateWidth > 0.0);
+
+        Assert.True(report.Baseline.TopImproved.Count == 0);
+        Assert.True(report.Baseline.TopWorsened.Count == 0);
+        Assert.True(report.Ungated.TopImproved.Count <= 10);
+        Assert.True(report.Ungated.TopWorsened.Count <= 10);
+    }
+
+    [Fact]
+    /// <summary>
+    /// Disk-edge/surface coupling diagnostic for no-refit turning-memory correction.
+    ///
+    /// Hypothesis:
+    /// Residual behavior tracks edge/inner gradient structure rather than only global brightness class.
+    ///
+    /// Status:
+    /// diagnostic.
+    ///
+    /// Limitation:
+    /// Correlational proxy test; not direct causal proof.
+    /// </summary>
+    public void RAR18_TRM_Rar_ServiceLayer_DiskEdgeSurfaceCoupling_NoRefit()
+    {
+        // Fit/freeze block: baseline a0 is fitted once and held fixed.
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        // Holdout/no-refit block: proxy gate parameters are fit on train and applied unchanged to holdout.
+        var report = SparcRarAnalysis.EvaluateDiskEdgeSurfaceCouplingNoRefit(
+            rarData,
+            fit.BestA0,
+            TurningMemoryCorrectionMode.Interpolated,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.Interpolated,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        WriteLineWithTestPrefix(
+            $"Mode={report.Mode} baseline={report.BaselineRmsAll:F6} " +
+            $"ungated={report.UngatedRmsAll:F6} deltaUngated={report.UngatedDeltaRmsAll:F6}");
+        WriteLineWithTestPrefix(
+            $"Best proxy={report.BestProxyName} threshold={report.BestProxyThreshold:F6} " +
+            $"width={report.BestProxyWidth:F6} corrected={report.BestProxyCorrectedRmsAll:F6} " +
+            $"delta={report.BestProxyDeltaRmsAll:F6} improved/worsened={report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+        foreach (var c in report.ProxyCorrelations)
+        {
+            WriteLineWithTestPrefix(
+                $"{c.ProxyName}: residual r/rho={c.ResidualPearson:F5}/{c.ResidualSpearman:F5}, " +
+                $"turningDelta r/rho={c.TurningDeltaPearson:F5}/{c.TurningDeltaSpearman:F5}");
+        }
+
+        // Positive result => disk-edge proxy candidate; negative result => weak or non-general disk-edge coupling.
+        Assert.Equal(TurningMemoryCorrectionMode.Interpolated, report.Mode);
+        Assert.True(report.TrainGalaxyCount > 30);
+        Assert.True(report.HoldoutGalaxyCount > 10);
+        Assert.Equal(6, report.ProxyCorrelations.Count);
+        Assert.True(double.IsFinite(report.BaselineRmsAll));
+        Assert.True(double.IsFinite(report.UngatedRmsAll));
+        Assert.True(double.IsFinite(report.BestProxyCorrectedRmsAll));
+        Assert.True(double.IsFinite(report.BestProxyThreshold));
+        Assert.True(double.IsFinite(report.BestProxyWidth));
+        Assert.True(report.BestProxyWidth > 0.0);
+        Assert.True(report.TopImproved.Count <= 10);
+        Assert.True(report.TopWorsened.Count <= 10);
+    }
+
+    [Fact]
+    /// <summary>
+    /// Forced outer/inner acceleration-contrast gate diagnostic without a0 refit.
+    ///
+    /// Hypothesis:
+    /// The physically relevant gate is inner-to-outer baryonic acceleration contrast, not transition radius alone.
+    ///
+    /// Status:
+    /// tested-effective candidate for this diagnostic family.
+    ///
+    /// Limitation:
+    /// Still optional diagnostic logic; not activated in core TRM-RAR baseline.
+    /// </summary>
+    public void RAR19_TRM_Rar_ServiceLayer_PhysicalDiskStructureCoupling_NoRefit()
+    {
+        // Fit/freeze block: establish baseline a0 only once.
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        // No-refit comparison block: evaluate direct, inverse, and log ratio gates with frozen baseline.
+        var report = SparcRarAnalysis.EvaluateOuterInnerContrastGateNoRefit(
+            rarData,
+            fit.BestA0,
+            TurningMemoryCorrectionMode.Interpolated,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.Interpolated,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        WriteLineWithTestPrefix(
+            $"Mode={report.Mode} baseline={report.Baseline.CorrectedRmsAll:F6} " +
+            $"ungated={report.Ungated.CorrectedRmsAll:F6} deltaUngated={report.Ungated.DeltaRmsAll:F6}");
+        WriteLineWithTestPrefix(
+            $"ratio gate corrected={report.OuterToInnerRatioGate.CorrectedRmsAll:F6} delta={report.OuterToInnerRatioGate.DeltaRmsAll:F6} " +
+            $"thr={report.OuterToInnerRatioGate.GateThreshold:F6} width={report.OuterToInnerRatioGate.GateWidth:F6}");
+        WriteLineWithTestPrefix(
+            $"inverse ratio gate corrected={report.InverseOuterToInnerRatioGate.CorrectedRmsAll:F6} delta={report.InverseOuterToInnerRatioGate.DeltaRmsAll:F6} " +
+            $"thr={report.InverseOuterToInnerRatioGate.GateThreshold:F6} width={report.InverseOuterToInnerRatioGate.GateWidth:F6}");
+        WriteLineWithTestPrefix(
+            $"log ratio gate corrected={report.LogOuterToInnerRatioGate.CorrectedRmsAll:F6} delta={report.LogOuterToInnerRatioGate.DeltaRmsAll:F6} " +
+            $"thr={report.LogOuterToInnerRatioGate.GateThreshold:F6} width={report.LogOuterToInnerRatioGate.GateWidth:F6}");
+        WriteLineWithTestPrefix($"Best variant={report.BestVariantLabel}");
+
+        // Positive result => contrast-direction carries signal; negative result => contrast gate is not stable.
+        Assert.Equal(TurningMemoryCorrectionMode.Interpolated, report.Mode);
+        Assert.True(double.IsFinite(report.Baseline.CorrectedRmsAll));
+        Assert.True(double.IsFinite(report.Ungated.CorrectedRmsAll));
+
+        Assert.True(double.IsFinite(report.OuterToInnerRatioGate.CorrectedRmsAll));
+        Assert.True(double.IsFinite(report.InverseOuterToInnerRatioGate.CorrectedRmsAll));
+        Assert.True(double.IsFinite(report.LogOuterToInnerRatioGate.CorrectedRmsAll));
+
+        Assert.True(report.OuterToInnerRatioGate.GateWidth > 0.0);
+        Assert.True(report.InverseOuterToInnerRatioGate.GateWidth > 0.0);
+        Assert.True(report.LogOuterToInnerRatioGate.GateWidth > 0.0);
+
+        Assert.Contains(
+            report.BestVariantLabel,
+            new[]
+            {
+                "OuterToInnerRatioGate",
+                "InverseOuterToInnerRatioGate",
+                "LogOuterToInnerRatioGate"
+            });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Outer-inner takt synchronization proxy diagnostic on SPARC holdout galaxies.
+    ///
+    /// Hypothesis:
+    /// A synchronization term combining outer Omega, outer/inner ratio, and gradient can explain residual structure.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// Proxy-level model only; not a full dynamical derivation.
+    /// </summary>
+    public void RAR20_TRM_Rar_ServiceLayer_OuterInnerTaktSynchronization_NoRefit()
+    {
+        // Baseline fit block: fit a0 once and freeze.
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        // No-refit holdout block: select gate on train only, validate on holdout only.
+        var report = SparcRarAnalysis.EvaluateOuterInnerTaktSynchronizationNoRefit(
+            rarData,
+            fit.BestA0,
+            TurningMemoryCorrectionMode.Interpolated,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.Interpolated,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        WriteLineWithTestPrefix(
+            $"Mode={report.Mode} baseline={report.BaselineRmsAll:F6} " +
+            $"ungated={report.UngatedRmsAll:F6} deltaUngated={report.UngatedDeltaRmsAll:F6}");
+        WriteLineWithTestPrefix(
+            $"Best proxy={report.BestProxyName} threshold={report.BestProxyThreshold:F6} width={report.BestProxyWidth:F6} " +
+            $"corrected={report.BestProxyCorrectedRmsAll:F6} delta={report.BestProxyDeltaRmsAll:F6} " +
+            $"improved/worsened={report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+        foreach (var c in report.ProxyCorrelations)
+        {
+            WriteLineWithTestPrefix(
+                $"{c.ProxyName}: residual r/rho={c.ResidualPearson:F5}/{c.ResidualSpearman:F5}, " +
+                $"turningDelta r/rho={c.TurningDeltaPearson:F5}/{c.TurningDeltaSpearman:F5}");
+        }
+
+        // Positive result => synchronization candidate; negative result => proxy family lacks stable predictive value.
+        Assert.Equal(TurningMemoryCorrectionMode.Interpolated, report.Mode);
+        Assert.True(report.TrainGalaxyCount > 30);
+        Assert.True(report.HoldoutGalaxyCount > 10);
+        Assert.Equal(3, report.ProxyCorrelations.Count);
+        Assert.True(double.IsFinite(report.BaselineRmsAll));
+        Assert.True(double.IsFinite(report.UngatedRmsAll));
+        Assert.True(double.IsFinite(report.BestProxyCorrectedRmsAll));
+        Assert.True(double.IsFinite(report.BestProxyThreshold));
+        Assert.True(double.IsFinite(report.BestProxyWidth));
+        Assert.True(report.BestProxyWidth > 0.0);
+        Assert.Contains(
+            report.BestProxyName,
+            new[]
+            {
+                "syncProxy",
+                "syncGradientProxy",
+                "syncContrastProxy"
+            });
+        Assert.True(report.TopImproved.Count <= 10);
+        Assert.True(report.TopWorsened.Count <= 10);
+    }
+
+    [Fact]
+    /// <summary>
+    /// Global disk-coherence residual diagnostic with train-fit/holdout-apply soft gates.
+    ///
+    /// Hypothesis:
+    /// Worst residual regimes are linked to profile smoothness/coherence and rotational shear structure.
+    ///
+    /// Status:
+    /// diagnostic.
+    ///
+    /// Limitation:
+    /// Exploratory proxy scan; no core-model replacement claim.
+    /// </summary>
+    public void RAR21_TRM_Rar_ServiceLayer_GlobalDiskCoherence_NoRefit()
+    {
+        // Fit/freeze block: baseline a0 remains fixed for all coherence variants.
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        // Holdout/no-refit block: best coherence gate is learned from train and frozen on holdout.
+        var report = SparcRarAnalysis.EvaluateGlobalDiskCoherenceNoRefit(
+            rarData,
+            fit.BestA0,
+            TurningMemoryCorrectionMode.Interpolated,
+            new TurningMemoryCorrectionOptions(
+                Mode: TurningMemoryCorrectionMode.Interpolated,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3));
+
+        WriteLineWithTestPrefix(
+            $"Mode={report.Mode} baseline={report.BaselineRmsAll:F6} " +
+            $"ungated={report.UngatedRmsAll:F6} deltaUngated={report.UngatedDeltaRmsAll:F6}");
+        WriteLineWithTestPrefix(
+            $"Best proxy={report.BestProxyName} threshold={report.BestProxyThreshold:F6} width={report.BestProxyWidth:F6} " +
+            $"corrected={report.BestProxyCorrectedRmsAll:F6} delta={report.BestProxyDeltaRmsAll:F6} " +
+            $"improved/worsened={report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+        foreach (var c in report.ProxyCorrelations)
+        {
+            WriteLineWithTestPrefix(
+                $"{c.ProxyName}: residual r/rho={c.ResidualPearson:F5}/{c.ResidualSpearman:F5}, " +
+                $"turningDelta r/rho={c.TurningDeltaPearson:F5}/{c.TurningDeltaSpearman:F5}");
+        }
+
+        // Positive result => coherence-sensitive correction candidate; negative result => coherence proxies are insufficient.
+        Assert.Equal(TurningMemoryCorrectionMode.Interpolated, report.Mode);
+        Assert.True(report.TrainGalaxyCount > 30);
+        Assert.True(report.HoldoutGalaxyCount > 10);
+        Assert.Equal(6, report.ProxyCorrelations.Count);
+        Assert.True(double.IsFinite(report.BaselineRmsAll));
+        Assert.True(double.IsFinite(report.UngatedRmsAll));
+        Assert.True(double.IsFinite(report.BestProxyCorrectedRmsAll));
+        Assert.True(double.IsFinite(report.BestProxyThreshold));
+        Assert.True(double.IsFinite(report.BestProxyWidth));
+        Assert.True(report.BestProxyWidth > 0.0);
+        Assert.Contains(
+            report.BestProxyName,
+            new[]
+            {
+                "profileSmoothness",
+                "varianceDlnGbarDr",
+                "innerToOuterCoherenceRatio",
+                "shearProxy",
+                "outerToInnerRatioTimesProfileSmoothness",
+                "outerToInnerRatioTimesShearProxy"
+            });
+        Assert.True(report.TopImproved.Count <= 10);
+        Assert.True(report.TopWorsened.Count <= 10);
+    }
+
+    [Fact]
+    /// <summary>
+    /// Worst-galaxy geometry-variation diagnostic with frozen-a0 and train-fitted smooth takt-field kernel.
+    ///
+    /// Hypothesis:
+    /// Part of the largest TRM failures comes from single-center geometry assumptions, improved by distributed fields.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// Exploratory geometry family; not a finalized production geometry model.
+    /// </summary>
+    public void RAR22_TRM_Rar_ServiceLayer_WorstGalaxyGeometryVariation_NoRefit()
+    {
+        // Baseline fit block: a0 is fitted once and then frozen for all geometry variants.
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        // Train/holdout discipline: smooth-kernel width is selected on train only and frozen for worst-galaxy evaluation.
+        var report = SparcRarAnalysis.EvaluateWorstGalaxyGeometryVariationNoRefit(
+            rarData,
+            fit.BestA0,
+            topGalaxyCount: 20);
+
+        WriteLineWithTestPrefix(
+            $"a0={report.FixedA0:E4} topN={report.TopGalaxyCount} bestVariant={report.BestVariantName} " +
+            $"smoothKernel={report.BestSmoothKernelKind}:{report.BestSmoothKernelWidthKpc:F2}kpc " +
+            $"smooth>single={report.SmoothBeatsSingleCount} smooth>toy={report.SmoothBeatsToyCount} " +
+            $"meanDeltaVsSingle={report.MeanSmoothDeltaVsSingle:F5} meanDeltaVsToy={report.MeanSmoothDeltaVsToy:F5}");
+        foreach (var c in report.VariantCorrelations)
+        {
+            WriteLineWithTestPrefix(
+                $"{c.VariantName}: outerInner r/rho={c.OuterInnerRatioPearson:F5}/{c.OuterInnerRatioSpearman:F5}, " +
+                $"gas r/rho={c.GasDominancePearson:F5}/{c.GasDominanceSpearman:F5}, " +
+                $"structureCorrelated={c.CorrelatesWithDiskStructure}");
+        }
+
+        foreach (var g in report.Galaxies.Take(5))
+        {
+            WriteLineWithTestPrefix(
+                $"{g.GalaxyKey}: baseline={g.BaselineRms:F5}, distributed={g.DiskDistributedRms:F5} " +
+                $"(d={g.DiskDistributedDelta:F5}), multi={g.MultiCenterToyRms:F5} (d={g.MultiCenterToyDelta:F5}), " +
+                $"smooth={g.SmoothDistributedFieldRms:F5} (d={g.SmoothDistributedFieldDelta:F5}), " +
+                $"outerInner={g.OuterInnerRatio:F4}, gas={g.GasDominance:F4}, span={g.RadialSpanKpc:F2}, n={g.PointCount}, " +
+                $"proxyAligned={g.ImprovementCorrelatesWithDiskStructure}");
+        }
+
+        // Positive result => distributed takt-field plausibly captures missing geometry; negative result => single-center remains sufficient.
+        Assert.True(double.IsFinite(report.FixedA0));
+        Assert.Contains(report.BestSmoothKernelKind, new[] { "gaussian", "exponential" });
+        Assert.True(double.IsFinite(report.BestSmoothKernelWidthKpc));
+        Assert.True(report.BestSmoothKernelWidthKpc > 0.0);
+        Assert.Equal(20, report.TopGalaxyCount);
+        Assert.Equal(20, report.Galaxies.Count);
+        Assert.Equal(4, report.VariantCorrelations.Count);
+        Assert.Contains(
+            report.BestVariantName,
+            new[]
+            {
+                "single-center radial TRM",
+                "disk-distributed outer/inner weighted TRM",
+                "off-center/multi-center toy geometry",
+                "smooth distributed takt-field"
+            });
+
+        Assert.All(report.Galaxies, g =>
+        {
+            Assert.True(double.IsFinite(g.BaselineRms));
+            Assert.True(double.IsFinite(g.SingleCenterRms));
+            Assert.True(double.IsFinite(g.DiskDistributedRms));
+            Assert.True(double.IsFinite(g.MultiCenterToyRms));
+            Assert.True(double.IsFinite(g.SmoothDistributedFieldRms));
+            Assert.True(double.IsFinite(g.OuterInnerRatio));
+            Assert.True(double.IsFinite(g.GasDominance));
+            Assert.True(double.IsFinite(g.RadialSpanKpc));
+            Assert.True(g.PointCount >= 4);
+        });
+    }
+
+    private void WriteLineWithTestPrefix(
+        string message,
+        [CallerMemberName] string memberName = "")
+    {
+        string prefix = ExtractTestPrefix(memberName);
+        _output.WriteLine($"[{prefix}] {message}");
+    }
+
+    private static string ExtractTestPrefix(string memberName)
+    {
+        if (string.IsNullOrWhiteSpace(memberName))
+            return "RAR";
+
+        int separator = memberName.IndexOf('_');
+        return separator > 0 ? memberName[..separator] : memberName;
     }
 
     private static double ComputeRms(List<RarPoint> points, double a0)
@@ -607,5 +1388,417 @@ public class RarRelationTests
 
         return values.Average();
     }
+
+    private static List<TurningResidualRow> BuildTurningResidualRows(List<RarPoint> points, double a0)
+    {
+        var rows = new List<TurningResidualRow>();
+
+        foreach (var galaxyGroup in points.GroupBy(p => NormalizeGalaxyKey(p.GalaxyName)))
+        {
+            var ordered = galaxyGroup.OrderBy(p => p.RadiusKpc).ToList();
+            if (ordered.Count < 3)
+                continue;
+
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                var p = ordered[i];
+                if (p.RadiusKpc <= 0 || p.Vobs <= 0 || p.GobsMs2 <= 0 || p.GbarMs2 <= 0)
+                    continue;
+
+                double gPred = SparcRarAnalysis.PredictGobs(p.GbarMs2, a0, ModelType.ClockworkTRM);
+                if (gPred <= 0 || !double.IsFinite(gPred))
+                    continue;
+
+                int leftIndex = i == 0 ? 0 : i - 1;
+                int rightIndex = i == ordered.Count - 1 ? ordered.Count - 1 : i + 1;
+                if (leftIndex == rightIndex)
+                    continue;
+
+                var pLeft = ordered[leftIndex];
+                var pRight = ordered[rightIndex];
+
+                if (pLeft.GbarMs2 <= 0 || pRight.GbarMs2 <= 0)
+                    continue;
+
+                double dr = pRight.RadiusKpc - pLeft.RadiusKpc;
+                if (dr <= 0)
+                    continue;
+
+                double dLogGbarDr = (Math.Log(pRight.GbarMs2) - Math.Log(pLeft.GbarMs2)) / dr;
+                double omegaSi = (p.Vobs * 1000.0) / (p.RadiusKpc * PhysicalConstants.KpcToM);
+                double turningProxySigned = omegaSi * dLogGbarDr;
+                double turningProxyAbs = Math.Abs(turningProxySigned);
+                double residual = Math.Log10(p.GobsMs2) - Math.Log10(gPred);
+                double logGbar = Math.Log10(p.GbarMs2);
+
+                rows.Add(new TurningResidualRow(
+                    galaxyGroup.Key,
+                    residual,
+                    turningProxySigned,
+                    turningProxyAbs,
+                    logGbar));
+            }
+        }
+
+        return rows;
+    }
+
+    private static bool IsHoldoutGalaxy(string galaxyKey)
+    {
+        int checksum = galaxyKey.Sum(c => c);
+        return checksum % 5 == 0;
+    }
+
+    private static bool IsHoldoutGalaxy(string galaxyKey, int modulo, int remainder)
+    {
+        int checksum = galaxyKey.Sum(c => c);
+        return checksum % modulo == remainder;
+    }
+
+    private static TurningDiagnosticResult? EvaluateTurningDiagnostic(
+        List<TurningResidualRow> rows,
+        Func<TurningResidualRow, double> proxySelector,
+        int binCount,
+        int holdoutModulo,
+        int holdoutRemainder,
+        Func<string, bool> galaxyFilter)
+    {
+        var selected = rows.Where(r => galaxyFilter(r.GalaxyKey)).ToList();
+        var holdout = selected.Where(r => IsHoldoutGalaxy(r.GalaxyKey, holdoutModulo, holdoutRemainder)).ToList();
+        var train = selected.Where(r => !IsHoldoutGalaxy(r.GalaxyKey, holdoutModulo, holdoutRemainder)).ToList();
+
+        if (train.Count < 150 || holdout.Count < 80)
+            return null;
+
+        var sortedProxy = train
+            .Select(proxySelector)
+            .OrderBy(x => x)
+            .ToList();
+
+        if (sortedProxy.Count < binCount * 20)
+            return null;
+
+        var cuts = new List<double>();
+        for (int i = 1; i < binCount; i++)
+        {
+            int index = (i * sortedProxy.Count) / binCount;
+            cuts.Add(sortedProxy[Math.Min(index, sortedProxy.Count - 1)]);
+        }
+
+        int GetBin(double value)
+        {
+            for (int i = 0; i < cuts.Count; i++)
+            {
+                if (value < cuts[i])
+                    return i;
+            }
+
+            return cuts.Count;
+        }
+
+        var trainMeans = train
+            .GroupBy(r => GetBin(proxySelector(r)))
+            .ToDictionary(g => g.Key, g => g.Average(x => x.Residual));
+
+        for (int bin = 0; bin < binCount; bin++)
+        {
+            if (!trainMeans.ContainsKey(bin))
+                return null;
+        }
+
+        var holdoutCounts = holdout
+            .GroupBy(r => GetBin(proxySelector(r)))
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        for (int bin = 0; bin < binCount; bin++)
+        {
+            if (!holdoutCounts.TryGetValue(bin, out int count) || count < 8)
+                return null;
+        }
+
+        var baselineResiduals = holdout.Select(r => r.Residual).ToList();
+        var correctedResiduals = holdout
+            .Select(r =>
+            {
+                int bin = GetBin(proxySelector(r));
+                return r.Residual - trainMeans[bin];
+            })
+            .ToList();
+
+        double baselineRms = ComputeBinRms(baselineResiduals);
+        double correctedRms = ComputeBinRms(correctedResiduals);
+
+        return new TurningDiagnosticResult(
+            SplitLabel: string.Empty,
+            BinCount: binCount,
+            ProxyLabel: string.Empty,
+            SurfaceBrightnessLabel: string.Empty,
+            TrainCount: train.Count,
+            HoldoutCount: holdout.Count,
+            BaselineRms: baselineRms,
+            CorrectedRms: correctedRms,
+            DeltaRms: baselineRms - correctedRms);
+    }
+
+    private static TurningGateResult? EvaluateHsbGatedTurningDiagnostic(
+        List<TurningResidualRow> rows,
+        Func<TurningResidualRow, double> proxySelector,
+        int binCount,
+        int holdoutModulo,
+        int holdoutRemainder)
+    {
+        var holdout = rows.Where(r => IsHoldoutGalaxy(r.GalaxyKey, holdoutModulo, holdoutRemainder)).ToList();
+        var train = rows.Where(r => !IsHoldoutGalaxy(r.GalaxyKey, holdoutModulo, holdoutRemainder)).ToList();
+
+        if (train.Count < 200 || holdout.Count < 100)
+            return null;
+
+        var trainGalaxyBrightness = train
+            .GroupBy(r => r.GalaxyKey)
+            .ToDictionary(g => g.Key, g => g.Average(x => x.LogGbar));
+
+        var holdoutGalaxyBrightness = holdout
+            .GroupBy(r => r.GalaxyKey)
+            .ToDictionary(g => g.Key, g => g.Average(x => x.LogGbar));
+
+        if (trainGalaxyBrightness.Count < 10 || holdoutGalaxyBrightness.Count < 5)
+            return null;
+
+        var sortedBrightness = trainGalaxyBrightness.Values.OrderBy(x => x).ToList();
+
+        var sortedProxy = train
+            .Select(proxySelector)
+            .OrderBy(x => x)
+            .ToList();
+
+        if (sortedProxy.Count < binCount * 20)
+            return null;
+
+        var cuts = new List<double>();
+        for (int i = 1; i < binCount; i++)
+        {
+            int index = (i * sortedProxy.Count) / binCount;
+            cuts.Add(sortedProxy[Math.Min(index, sortedProxy.Count - 1)]);
+        }
+
+        int GetBin(double value)
+        {
+            for (int i = 0; i < cuts.Count; i++)
+            {
+                if (value < cuts[i])
+                    return i;
+            }
+
+            return cuts.Count;
+        }
+
+        var trainMeansUngated = train
+            .GroupBy(r => GetBin(proxySelector(r)))
+            .ToDictionary(g => g.Key, g => g.Average(x => x.Residual));
+
+        for (int bin = 0; bin < binCount; bin++)
+        {
+            if (!trainMeansUngated.ContainsKey(bin))
+                return null;
+        }
+
+        var trainRowsWithBrightness = train
+            .Select(r => new
+            {
+                Row = r,
+                MeanLogGbar = trainGalaxyBrightness[r.GalaxyKey]
+            })
+            .ToList();
+
+        var holdoutRowsWithBrightness = holdout
+            .Select(r => new
+            {
+                Row = r,
+                MeanLogGbar = holdoutGalaxyBrightness[r.GalaxyKey]
+            })
+            .ToList();
+
+        double q20 = Percentile(sortedBrightness, 0.20);
+        double q80 = Percentile(sortedBrightness, 0.80);
+        if (q80 <= q20)
+            return null;
+
+        var hardThresholdCandidates = BuildLinearGrid(q20, q80, 13);
+        double bestHardThreshold = hardThresholdCandidates[0];
+        double bestTrainHardRms = double.MaxValue;
+
+        foreach (double threshold in hardThresholdCandidates)
+        {
+            var corrected = trainRowsWithBrightness
+                .Select(x =>
+                {
+                    int bin = GetBin(proxySelector(x.Row));
+                    double correction = trainMeansUngated[bin];
+                    double weight = x.MeanLogGbar > threshold ? 1.0 : 0.0;
+                    return x.Row.Residual - (weight * correction);
+                })
+                .ToList();
+
+            double rms = ComputeBinRms(corrected);
+            if (rms < bestTrainHardRms)
+            {
+                bestTrainHardRms = rms;
+                bestHardThreshold = threshold;
+            }
+        }
+
+        var softThresholdCandidates = BuildLinearGrid(q20, q80, 13);
+        var softWidthCandidates = new[] { 0.03, 0.05, 0.08, 0.12, 0.18, 0.26, 0.38, 0.55 };
+        double bestSoftThreshold = softThresholdCandidates[0];
+        double bestSoftWidth = softWidthCandidates[0];
+        double bestTrainSoftRms = double.MaxValue;
+
+        foreach (double threshold in softThresholdCandidates)
+        {
+            foreach (double width in softWidthCandidates)
+            {
+                var corrected = trainRowsWithBrightness
+                    .Select(x =>
+                    {
+                        int bin = GetBin(proxySelector(x.Row));
+                        double correction = trainMeansUngated[bin];
+                        double weight = Sigmoid((x.MeanLogGbar - threshold) / width);
+                        return x.Row.Residual - (weight * correction);
+                    })
+                    .ToList();
+
+                double rms = ComputeBinRms(corrected);
+                if (rms < bestTrainSoftRms)
+                {
+                    bestTrainSoftRms = rms;
+                    bestSoftThreshold = threshold;
+                    bestSoftWidth = width;
+                }
+            }
+        }
+
+        var baselineResiduals = holdoutRowsWithBrightness.Select(x => x.Row.Residual).ToList();
+        var ungatedResiduals = holdoutRowsWithBrightness
+            .Select(x =>
+            {
+                int bin = GetBin(proxySelector(x.Row));
+                return x.Row.Residual - trainMeansUngated[bin];
+            })
+            .ToList();
+
+        var hardGatedResiduals = holdoutRowsWithBrightness
+            .Select(x =>
+            {
+                int bin = GetBin(proxySelector(x.Row));
+                double correction = trainMeansUngated[bin];
+                double weight = x.MeanLogGbar > bestHardThreshold ? 1.0 : 0.0;
+                return x.Row.Residual - (weight * correction);
+            })
+            .ToList();
+
+        var softGatedResiduals = holdoutRowsWithBrightness
+            .Select(x =>
+            {
+                int bin = GetBin(proxySelector(x.Row));
+                double correction = trainMeansUngated[bin];
+                double weight = Sigmoid((x.MeanLogGbar - bestSoftThreshold) / bestSoftWidth);
+                return x.Row.Residual - (weight * correction);
+            })
+            .ToList();
+
+        double baselineRms = ComputeBinRms(baselineResiduals);
+        double ungatedRms = ComputeBinRms(ungatedResiduals);
+        double hardGatedRms = ComputeBinRms(hardGatedResiduals);
+        double softGatedRms = ComputeBinRms(softGatedResiduals);
+
+        return new TurningGateResult(
+            SplitLabel: string.Empty,
+            BaselineRms: baselineRms,
+            UngatedRms: ungatedRms,
+            HardGatedRms: hardGatedRms,
+            SoftGatedRms: softGatedRms,
+            UngatedDelta: baselineRms - ungatedRms,
+            HardGatedDelta: baselineRms - hardGatedRms,
+            SoftGatedDelta: baselineRms - softGatedRms,
+            SoftGateThreshold: bestSoftThreshold,
+            SoftGateWidth: bestSoftWidth);
+    }
+
+    private static double Percentile(List<double> sortedValues, double quantile)
+    {
+        if (sortedValues == null || sortedValues.Count == 0)
+            return double.NaN;
+
+        quantile = Math.Clamp(quantile, 0.0, 1.0);
+        double pos = quantile * (sortedValues.Count - 1);
+        int lower = (int)Math.Floor(pos);
+        int upper = (int)Math.Ceiling(pos);
+        if (lower == upper)
+            return sortedValues[lower];
+
+        double t = pos - lower;
+        return sortedValues[lower] + (t * (sortedValues[upper] - sortedValues[lower]));
+    }
+
+    private static List<double> BuildLinearGrid(double min, double max, int count)
+    {
+        var values = new List<double>();
+        if (count <= 1 || max <= min)
+        {
+            values.Add(min);
+            return values;
+        }
+
+        double step = (max - min) / (count - 1);
+        for (int i = 0; i < count; i++)
+        {
+            values.Add(min + (i * step));
+        }
+
+        return values;
+    }
+
+    private static double Sigmoid(double x)
+    {
+        x = Math.Clamp(x, -50.0, 50.0);
+        return 1.0 / (1.0 + Math.Exp(-x));
+    }
+
+    private static string NormalizeGalaxyKey(string name) =>
+        name
+            .Replace("_rotmod", "", StringComparison.OrdinalIgnoreCase)
+            .Replace(" ", "", StringComparison.Ordinal)
+            .Trim()
+            .ToUpperInvariant();
+
+    private sealed record TurningResidualRow(
+        string GalaxyKey,
+        double Residual,
+        double TurningProxySigned,
+        double TurningProxyAbs,
+        double LogGbar);
+
+    private sealed record TurningDiagnosticResult(
+        string SplitLabel,
+        int BinCount,
+        string ProxyLabel,
+        string SurfaceBrightnessLabel,
+        int TrainCount,
+        int HoldoutCount,
+        double BaselineRms,
+        double CorrectedRms,
+        double DeltaRms);
+
+    private sealed record TurningGateResult(
+        string SplitLabel,
+        double BaselineRms,
+        double UngatedRms,
+        double HardGatedRms,
+        double SoftGatedRms,
+        double UngatedDelta,
+        double HardGatedDelta,
+        double SoftGatedDelta,
+        double SoftGateThreshold,
+        double SoftGateWidth);
 
 }

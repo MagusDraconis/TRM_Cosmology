@@ -186,6 +186,89 @@ namespace TRM.CMD
                 Console.WriteLine($"TRM  -> log10(a_0): {trmLogA0:F4} | a_0: {trmA0:E4} | RMS: {trmRms:F4} dex");
                 Console.WriteLine($"MOND -> log10(a_0): {mondLogA0:F4} | a_0: {mondA0:E4} | RMS: {mondRms:F4} dex");
 
+                Console.WriteLine("\n--- TURNING-MEMORY (NO-REFIT, HOLDOUT-ONLY) ---");
+                PrintTurningMemoryModeReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.None,
+                    "None");
+                PrintTurningMemoryModeReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.BinBased,
+                    "BinBased");
+                PrintTurningMemoryModeReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.Interpolated,
+                    "Interpolated");
+
+                Console.WriteLine("\n--- TURNING-MEMORY GATE-COMPARISON (NO-REFIT, HOLDOUT-ONLY) ---");
+                PrintTurningMemoryGateComparisonReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.BinBased,
+                    "BinBased");
+                PrintTurningMemoryGateComparisonReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.Interpolated,
+                    "Interpolated");
+
+                Console.WriteLine("\n--- DISK EDGE / SURFACE-COUPLING DIAGNOSTIC (NO-REFIT, HOLDOUT-ONLY) ---");
+                PrintDiskEdgeSurfaceCouplingReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.BinBased,
+                    "BinBased");
+                PrintDiskEdgeSurfaceCouplingReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.Interpolated,
+                    "Interpolated");
+
+                Console.WriteLine("\n--- PHYSICAL DISK-STRUCTURE COUPLING DIAGNOSTIC (NO-REFIT, HOLDOUT-ONLY) ---");
+                PrintPhysicalDiskStructureCouplingReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.BinBased,
+                    "BinBased");
+                PrintPhysicalDiskStructureCouplingReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.Interpolated,
+                    "Interpolated");
+
+                Console.WriteLine("\n--- OUTER-INNER TAKT SYNCHRONIZATION DIAGNOSTIC (NO-REFIT, HOLDOUT-ONLY) ---");
+                PrintOuterInnerTaktSynchronizationReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.BinBased,
+                    "BinBased");
+                PrintOuterInnerTaktSynchronizationReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.Interpolated,
+                    "Interpolated");
+
+                Console.WriteLine("\n--- GLOBAL DISK-COHERENCE DIAGNOSTIC (NO-REFIT, HOLDOUT-ONLY) ---");
+                PrintGlobalDiskCoherenceReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.BinBased,
+                    "BinBased");
+                PrintGlobalDiskCoherenceReport(
+                    rarData,
+                    trmA0,
+                    TurningMemoryCorrectionMode.Interpolated,
+                    "Interpolated");
+
+                Console.WriteLine("\n--- WORST-GALAXY GEOMETRY-VARIATION DIAGNOSTIC (NO-REFIT) ---");
+                PrintWorstGalaxyGeometryVariationReport(
+                    rarData,
+                    trmA0,
+                    topGalaxyCount: 20);
+
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\n[SUCCESS] SPARC fit completed.");
                 Console.ResetColor();
@@ -205,6 +288,454 @@ namespace TRM.CMD
 
             Console.WriteLine("Press any key to return to the menu...");
             WaitForMenuReturn();
+        }
+
+        private static void PrintTurningMemoryModeReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            TurningMemoryCorrectionMode mode,
+            string modeLabel)
+        {
+            var options = new TurningMemoryCorrectionOptions(
+                Mode: mode,
+                HoldoutModulo: 5,
+                HoldoutRemainder: 0,
+                BinCount: 3);
+
+            var metrics = SparcRarAnalysis.EvaluateTurningMemoryCorrectionNoRefit(rarData, fixedA0, options);
+            var improvements = metrics.PerGalaxyImprovement;
+
+            int improvedCount = improvements.Count(x => x.DeltaRms > 0);
+            int worsenedCount = improvements.Count(x => x.DeltaRms < 0);
+
+            Console.WriteLine($"\n[{modeLabel}]");
+            Console.WriteLine($"Baseline RMS:  {metrics.BaselineRms:F6}");
+            Console.WriteLine($"Corrected RMS: {metrics.CorrectedRms:F6}");
+            Console.WriteLine($"Delta RMS:     {metrics.DeltaRms:F6}");
+            Console.WriteLine($"Improved galaxies: {improvedCount} | Worsened galaxies: {worsenedCount}");
+
+            var topImproved = improvements
+                .Where(x => x.DeltaRms > 0)
+                .OrderByDescending(x => x.DeltaRms)
+                .Take(10)
+                .ToList();
+
+            var topWorsened = improvements
+                .Where(x => x.DeltaRms < 0)
+                .OrderBy(x => x.DeltaRms)
+                .Take(10)
+                .ToList();
+
+            Console.WriteLine("Top 10 improved:");
+            if (topImproved.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in topImproved)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+
+            Console.WriteLine("Top 10 worsened:");
+            if (topWorsened.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in topWorsened)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+        }
+
+        private static void PrintTurningMemoryGateComparisonReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            TurningMemoryCorrectionMode mode,
+            string modeLabel)
+        {
+            var report = SparcRarAnalysis.EvaluateTurningMemoryGateComparisonNoRefit(
+                rarData,
+                fixedA0,
+                mode,
+                new TurningMemoryCorrectionOptions(
+                    Mode: mode,
+                    HoldoutModulo: 5,
+                    HoldoutRemainder: 0,
+                    BinCount: 3));
+
+            Console.WriteLine($"\n[{modeLabel}]");
+            PrintGateSummary(report.Baseline);
+            PrintGateSummary(report.Ungated);
+            PrintGateSummary(report.HsbSoftGated);
+
+            foreach (var gradient in report.GradientSoftGated)
+            {
+                PrintGateSummary(gradient);
+            }
+
+            Console.WriteLine(
+                $"Best gate: {report.BestGradientGate.GateVariable} | " +
+                $"threshold={report.BestGradientGate.GateThreshold:F6} | " +
+                $"width={report.BestGradientGate.GateWidth:F6} | " +
+                $"delta RMS all={report.BestGradientGate.DeltaRmsAll:F6}");
+        }
+
+        private static void PrintGateSummary(TurningMemoryDiagnosticSummary summary)
+        {
+            Console.WriteLine($"\n{summary.Label}:");
+            Console.WriteLine(
+                $"  RMS all  baseline/corrected/delta: {summary.BaselineRmsAll:F6} / {summary.CorrectedRmsAll:F6} / {summary.DeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"  RMS HSB  baseline/corrected/delta: {summary.BaselineRmsHsb:F6} / {summary.CorrectedRmsHsb:F6} / {summary.DeltaRmsHsb:F6}");
+            Console.WriteLine(
+                $"  RMS LSB  baseline/corrected/delta: {summary.BaselineRmsLsb:F6} / {summary.CorrectedRmsLsb:F6} / {summary.DeltaRmsLsb:F6}");
+            Console.WriteLine(
+                $"  Improved/Worsened galaxies: {summary.ImprovedGalaxyCount}/{summary.WorsenedGalaxyCount}");
+
+            if (summary.GateVariable.HasValue)
+            {
+                Console.WriteLine(
+                    $"  Gate: {summary.GateVariable} | threshold={summary.GateThreshold:F6} | width={summary.GateWidth:F6}");
+            }
+
+            Console.WriteLine("  Top improved:");
+            if (summary.TopImproved.Count == 0)
+            {
+                Console.WriteLine("   - none");
+            }
+            else
+            {
+                foreach (var g in summary.TopImproved)
+                {
+                    Console.WriteLine(
+                        $"   - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+
+            Console.WriteLine("  Top worsened:");
+            if (summary.TopWorsened.Count == 0)
+            {
+                Console.WriteLine("   - none");
+            }
+            else
+            {
+                foreach (var g in summary.TopWorsened)
+                {
+                    Console.WriteLine(
+                        $"   - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+        }
+
+        private static void PrintDiskEdgeSurfaceCouplingReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            TurningMemoryCorrectionMode mode,
+            string modeLabel)
+        {
+            var report = SparcRarAnalysis.EvaluateDiskEdgeSurfaceCouplingNoRefit(
+                rarData,
+                fixedA0,
+                mode,
+                new TurningMemoryCorrectionOptions(
+                    Mode: mode,
+                    HoldoutModulo: 5,
+                    HoldoutRemainder: 0,
+                    BinCount: 3));
+
+            Console.WriteLine($"\n[{modeLabel}]");
+            Console.WriteLine(
+                $"Baseline RMS(all): {report.BaselineRmsAll:F6} | " +
+                $"Ungated RMS(all): {report.UngatedRmsAll:F6} | " +
+                $"Ungated delta: {report.UngatedDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best proxy: {report.BestProxyName} | threshold={report.BestProxyThreshold:F6} | width={report.BestProxyWidth:F6}");
+            Console.WriteLine(
+                $"Best proxy corrected RMS(all): {report.BestProxyCorrectedRmsAll:F6} | " +
+                $"delta: {report.BestProxyDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best proxy improved/worsened galaxies: {report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+            Console.WriteLine("Proxy correlations (residual, turning-delta):");
+            foreach (var c in report.ProxyCorrelations)
+            {
+                Console.WriteLine(
+                    $" - {c.ProxyName}: residual r/rho={c.ResidualPearson:F4}/{c.ResidualSpearman:F4}, " +
+                    $"turning-delta r/rho={c.TurningDeltaPearson:F4}/{c.TurningDeltaSpearman:F4}");
+            }
+
+            Console.WriteLine("Top improved:");
+            if (report.TopImproved.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopImproved)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+
+            Console.WriteLine("Top worsened:");
+            if (report.TopWorsened.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopWorsened)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+        }
+
+        private static void PrintPhysicalDiskStructureCouplingReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            TurningMemoryCorrectionMode mode,
+            string modeLabel)
+        {
+            var report = SparcRarAnalysis.EvaluatePhysicalDiskStructureCouplingNoRefit(
+                rarData,
+                fixedA0,
+                mode,
+                new TurningMemoryCorrectionOptions(
+                    Mode: mode,
+                    HoldoutModulo: 5,
+                    HoldoutRemainder: 0,
+                    BinCount: 3));
+
+            Console.WriteLine($"\n[{modeLabel}]");
+            Console.WriteLine(
+                $"Baseline RMS(all): {report.BaselineRmsAll:F6} | Ungated RMS(all): {report.UngatedRmsAll:F6} | Ungated delta: {report.UngatedDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"RMS HSB baseline/ungated: {report.BaselineRmsHsb:F6}/{report.UngatedRmsHsb:F6}");
+            Console.WriteLine(
+                $"RMS LSB baseline/ungated: {report.BaselineRmsLsb:F6}/{report.UngatedRmsLsb:F6}");
+            Console.WriteLine(
+                $"Best physical proxy: {report.BestProxyName} | threshold={report.BestProxyThreshold:F6} | width={report.BestProxyWidth:F6}");
+            Console.WriteLine(
+                $"Best proxy corrected RMS(all): {report.BestProxyCorrectedRmsAll:F6} | delta: {report.BestProxyDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best proxy corrected RMS(HSB/LSB): {report.BestProxyCorrectedRmsHsb:F6}/{report.BestProxyCorrectedRmsLsb:F6}");
+            Console.WriteLine(
+                $"Best proxy improved/worsened galaxies: {report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+            Console.WriteLine("Physical proxy correlations (residual, turning-delta, HSB-LSB):");
+            foreach (var c in report.ProxyCorrelations)
+            {
+                Console.WriteLine(
+                    $" - {c.ProxyName}: residual r/rho={c.ResidualPearson:F4}/{c.ResidualSpearman:F4}, " +
+                    $"turning-delta r/rho={c.TurningDeltaPearson:F4}/{c.TurningDeltaSpearman:F4}, HSB-LSB={c.HsbMinusLsb:F4}");
+            }
+
+            Console.WriteLine("Top improved:");
+            if (report.TopImproved.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopImproved)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+
+            Console.WriteLine("Top worsened:");
+            if (report.TopWorsened.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopWorsened)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+        }
+
+        private static void PrintOuterInnerTaktSynchronizationReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            TurningMemoryCorrectionMode mode,
+            string modeLabel)
+        {
+            var report = SparcRarAnalysis.EvaluateOuterInnerTaktSynchronizationNoRefit(
+                rarData,
+                fixedA0,
+                mode,
+                new TurningMemoryCorrectionOptions(
+                    Mode: mode,
+                    HoldoutModulo: 5,
+                    HoldoutRemainder: 0,
+                    BinCount: 3));
+
+            Console.WriteLine($"\n[{modeLabel}]");
+            Console.WriteLine(
+                $"Baseline RMS(all): {report.BaselineRmsAll:F6} | Ungated RMS(all): {report.UngatedRmsAll:F6} | Ungated delta: {report.UngatedDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best sync proxy: {report.BestProxyName} | threshold={report.BestProxyThreshold:F6} | width={report.BestProxyWidth:F6}");
+            Console.WriteLine(
+                $"Best proxy corrected RMS(all): {report.BestProxyCorrectedRmsAll:F6} | delta: {report.BestProxyDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best proxy improved/worsened galaxies: {report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+            Console.WriteLine("Sync proxy correlations (residual, turning-delta):");
+            foreach (var c in report.ProxyCorrelations)
+            {
+                Console.WriteLine(
+                    $" - {c.ProxyName}: residual r/rho={c.ResidualPearson:F4}/{c.ResidualSpearman:F4}, " +
+                    $"turning-delta r/rho={c.TurningDeltaPearson:F4}/{c.TurningDeltaSpearman:F4}");
+            }
+
+            Console.WriteLine("Top improved:");
+            if (report.TopImproved.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopImproved)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+
+            Console.WriteLine("Top worsened:");
+            if (report.TopWorsened.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopWorsened)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+        }
+
+        private static void PrintGlobalDiskCoherenceReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            TurningMemoryCorrectionMode mode,
+            string modeLabel)
+        {
+            var report = SparcRarAnalysis.EvaluateGlobalDiskCoherenceNoRefit(
+                rarData,
+                fixedA0,
+                mode,
+                new TurningMemoryCorrectionOptions(
+                    Mode: mode,
+                    HoldoutModulo: 5,
+                    HoldoutRemainder: 0,
+                    BinCount: 3));
+
+            Console.WriteLine($"\n[{modeLabel}]");
+            Console.WriteLine(
+                $"Baseline RMS(all): {report.BaselineRmsAll:F6} | Ungated RMS(all): {report.UngatedRmsAll:F6} | Ungated delta: {report.UngatedDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best coherence proxy: {report.BestProxyName} | threshold={report.BestProxyThreshold:F6} | width={report.BestProxyWidth:F6}");
+            Console.WriteLine(
+                $"Best proxy corrected RMS(all): {report.BestProxyCorrectedRmsAll:F6} | delta: {report.BestProxyDeltaRmsAll:F6}");
+            Console.WriteLine(
+                $"Best proxy improved/worsened galaxies: {report.BestProxyImprovedGalaxyCount}/{report.BestProxyWorsenedGalaxyCount}");
+
+            Console.WriteLine("Coherence proxy correlations (residual, turning-delta):");
+            foreach (var c in report.ProxyCorrelations)
+            {
+                Console.WriteLine(
+                    $" - {c.ProxyName}: residual r/rho={c.ResidualPearson:F4}/{c.ResidualSpearman:F4}, " +
+                    $"turning-delta r/rho={c.TurningDeltaPearson:F4}/{c.TurningDeltaSpearman:F4}");
+            }
+
+            Console.WriteLine("Top improved:");
+            if (report.TopImproved.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopImproved)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+
+            Console.WriteLine("Top worsened:");
+            if (report.TopWorsened.Count == 0)
+            {
+                Console.WriteLine(" - none");
+            }
+            else
+            {
+                foreach (var g in report.TopWorsened)
+                {
+                    Console.WriteLine(
+                        $" - {g.GalaxyKey}: delta={g.DeltaRms:F5}, baseline={g.BaselineRms:F5}, corrected={g.CorrectedRms:F5}, n={g.PointCount}");
+                }
+            }
+        }
+
+        private static void PrintWorstGalaxyGeometryVariationReport(
+            List<RarPoint> rarData,
+            double fixedA0,
+            int topGalaxyCount)
+        {
+            var report = SparcRarAnalysis.EvaluateWorstGalaxyGeometryVariationNoRefit(
+                rarData,
+                fixedA0,
+                topGalaxyCount);
+
+            Console.WriteLine(
+                $"Fixed a0: {report.FixedA0:E4} | worst galaxies analyzed: {report.TopGalaxyCount} | best variant: {report.BestVariantName}");
+            Console.WriteLine(
+                $"Smooth kernel (train-fitted): {report.BestSmoothKernelKind} width={report.BestSmoothKernelWidthKpc:F2} kpc | " +
+                $"smooth>single: {report.SmoothBeatsSingleCount} | smooth>toy: {report.SmoothBeatsToyCount}");
+            Console.WriteLine(
+                $"Mean smooth delta vs single: {report.MeanSmoothDeltaVsSingle:F6} | " +
+                $"Mean smooth delta vs toy: {report.MeanSmoothDeltaVsToy:F6}");
+
+            Console.WriteLine("Variant vs disk-structure proxy correlations:");
+            foreach (var c in report.VariantCorrelations)
+            {
+                Console.WriteLine(
+                    $" - {c.VariantName}: outer/inner r/rho={c.OuterInnerRatioPearson:F4}/{c.OuterInnerRatioSpearman:F4}, " +
+                    $"gas r/rho={c.GasDominancePearson:F4}/{c.GasDominanceSpearman:F4}, " +
+                    $"span r/rho={c.RadialSpanPearson:F4}/{c.RadialSpanSpearman:F4}, " +
+                    $"n r/rho={c.PointCountPearson:F4}/{c.PointCountSpearman:F4}, " +
+                    $"structure-correlated={c.CorrelatesWithDiskStructure}");
+            }
+
+            Console.WriteLine("Per-galaxy worst-baseline geometry variation:");
+            foreach (var g in report.Galaxies)
+            {
+                Console.WriteLine(
+                    $" - {g.GalaxyKey}: baseline={g.BaselineRms:F5} | single={g.SingleCenterRms:F5} (d={g.SingleCenterDelta:F5}) | " +
+                    $"distributed={g.DiskDistributedRms:F5} (d={g.DiskDistributedDelta:F5}) | multi={g.MultiCenterToyRms:F5} (d={g.MultiCenterToyDelta:F5}) | " +
+                    $"smooth={g.SmoothDistributedFieldRms:F5} (d={g.SmoothDistributedFieldDelta:F5}) | " +
+                    $"outer/inner={g.OuterInnerRatio:F4} | gas={g.GasDominance:F4} | span={g.RadialSpanKpc:F2} | n={g.PointCount} | " +
+                    $"proxy-aligned={g.ImprovementCorrelatesWithDiskStructure}");
+            }
         }
 
         private static void RunCmbAnalysis()
