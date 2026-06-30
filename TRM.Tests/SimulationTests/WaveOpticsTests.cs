@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TRM.QuantumCore.Planck;
@@ -9,6 +9,7 @@ namespace TRM.Tests.SimulationTests;
 
 public class WaveOpticsTests
 {
+    private static readonly DerivedConstants _derivedConstants = new(PlanckConstants.FromPhysicalConstants());
     private readonly ITestOutputHelper _output;
     public WaveOpticsTests(ITestOutputHelper output)
     {
@@ -18,7 +19,7 @@ public class WaveOpticsTests
     [Fact]
     public void Wavefront_Should_Not_Deflect_Without_Mass()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double angle = tracer.Simulate(0.0, 6.9634e8);
         _output.WriteLine($"Sim angle     : {angle:E} rad");
@@ -28,7 +29,7 @@ public class WaveOpticsTests
     [Fact]
     public void Wavefront_Should_Deflect_Near_Mass()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M = PhysicalConstantsSI.M_Solar;
         double angle = tracer.Simulate(M, 6.9634e8);
@@ -40,10 +41,10 @@ public class WaveOpticsTests
     [Fact]
     public void Wavefront_Should_Reproduce_Newton_Level_Deflection()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = 6.9634e8;
 
@@ -67,14 +68,14 @@ public class WaveOpticsTests
     //[Fact]
     //public void SpatialCurvatureLikeGR_Should_Approximate_GR_Deflection()
     //{
-    //    var tracer = new WavefrontTracer();
+    //    var tracer = new WavefrontTracer(_derivedConstants);
 
     //    double M = PhysicalConstantsSI.M_Solar;
     //    double b = 6.9634e8;
 
     //    double angle = tracer.SimulateSpatialCurvatureLikeGR(M, b);
 
-    //    double alphaGR = 4 * PhysicalConstantsSI.G * M / (PhysicalConstantsSI.c * PhysicalConstantsSI.c * b);
+    //    double alphaGR = 4 * _derivedConstants.G * M / (_derivedConstants.SpeedOfLight * _derivedConstants.SpeedOfLight * b);
     //    double relError = Math.Abs(Math.Abs(angle) - alphaGR) / alphaGR;
 
     //    _output.WriteLine("=== Spatial Curvature Like GR Test ===");
@@ -90,10 +91,10 @@ public class WaveOpticsTests
     [Fact]
     public void SpatialCurvatureLikeGR_Should_Show_Convergence_With_Step_Size()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = 6.9634e8;
 
@@ -141,10 +142,10 @@ public class WaveOpticsTests
     [Fact]
     public void WaveOnly_Should_Be_Bounded_Relative_To_GR_Deflection()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = 6.9634e8;
 
@@ -166,10 +167,10 @@ public class WaveOpticsTests
     [Fact]
     public void SpatialCurvatureLikeGR_Should_Show_Convergence_With_Integration_Range()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = 6.9634e8;
 
@@ -220,7 +221,7 @@ public class WaveOpticsTests
     [Fact]
     public void SpatialCurvatureLikeGR_Should_Scale_Linearly_With_Mass()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M1 = PhysicalConstantsSI.M_Solar;
         double M2 = 2.0 * M1;
@@ -249,7 +250,7 @@ public class WaveOpticsTests
     [Fact]
     public void SpatialCurvatureLikeGR_Should_Scale_Inversely_With_Impact_Parameter()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M = PhysicalConstantsSI.M_Solar;
         double b1 = 6.9634e8;
@@ -279,7 +280,7 @@ public class WaveOpticsTests
     [Fact]
     public void SpatialCurvatureLikeGR_Should_Follow_M_Over_b_Scaling()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M1 = PhysicalConstantsSI.M_Solar;
         double M2 = 2.0 * M1;
@@ -317,7 +318,7 @@ public class WaveOpticsTests
     [Fact]
     public void SpatialCurvatureLikeGR_Should_Be_Symmetric_For_Positive_And_Negative_Impact_Parameter()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M = PhysicalConstantsSI.M_Solar;
         double b = 6.9634e8;
@@ -349,7 +350,7 @@ public class WaveOpticsTests
     [Fact]
     public void TRMBaseline_Should_Be_Consistently_Half_Of_SpatialGR_Across_Multiple_Mass_And_Impact_Parameter_Pairs()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M1 = PhysicalConstantsSI.M_Solar;
         double M2 = 2.0 * M1;
@@ -402,7 +403,7 @@ public class WaveOpticsTests
     [Fact]
     public void TRMBaseline_Should_Show_Global_HalfGR_Pattern_Across_Multiple_Mass_And_Impact_Parameter_Pairs()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M1 = PhysicalConstantsSI.M_Solar;
         double M2 = 2.0 * M1;
@@ -457,7 +458,7 @@ public class WaveOpticsTests
     [Fact]
     public void TRMBaseline_Should_Show_Ratio_Convergence_To_HalfGR_With_Integration_Range()
     {
-        var tracer = new WavefrontTracer();
+        var tracer = new WavefrontTracer(_derivedConstants);
 
         double M = PhysicalConstantsSI.M_Solar;
         double b = 6.9634e8;

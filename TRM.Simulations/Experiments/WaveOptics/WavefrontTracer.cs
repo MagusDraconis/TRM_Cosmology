@@ -7,8 +7,15 @@ namespace TRM.Simulations.Experiments.WaveOptics;
 
 public class WavefrontTracer
 {
-    private readonly double G = PhysicalConstantsSI.G;
-    private readonly double c = PhysicalConstantsSI.c;
+    private readonly DerivedConstants _constants;
+
+    public WavefrontTracer(DerivedConstants constants)
+    {
+        _constants = constants ?? throw new ArgumentNullException(nameof(constants));
+    }
+
+    private double G => _constants.G;
+    private double c => _constants.SpeedOfLight;
 
     public double Simulate(double M, double impactParameter)
     {

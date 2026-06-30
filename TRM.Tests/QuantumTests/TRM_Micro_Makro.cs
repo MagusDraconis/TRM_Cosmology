@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,6 +10,7 @@ namespace TRM.Tests.QuantumTests;
 
 public class TRM_Micro_Makro
 {
+    private static readonly DerivedConstants _derivedConstants = new(PlanckConstants.FromPhysicalConstants());
     private readonly ITestOutputHelper _output;
     public TRM_Micro_Makro(ITestOutputHelper output)
     {
@@ -20,8 +21,8 @@ public class TRM_Micro_Makro
     [Fact]
     public void TRM01_EmergentGravity_From_OrbitIntegral_FIXED()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = 5.972e24;
 
         double r = 6.371e6;
@@ -69,8 +70,8 @@ public class TRM_Micro_Makro
     [Fact]
     public void TRM02_EmergentGravity_From_PhaseSyncModel_FIXED()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = 5.972e24;
 
         double r = 6.371e6;
@@ -140,8 +141,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
 
         double M = PhysicalConstantsSI.M_Earth;
@@ -241,8 +242,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -326,8 +327,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -415,8 +416,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -505,8 +506,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         double radius = PhysicalConstantsSI.R_Earth;
@@ -585,8 +586,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -674,8 +675,8 @@ public class TRM_Micro_Makro
     {
         var planck = PlanckConstants.FromPhysicalConstants();
 
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -1116,8 +1117,8 @@ public class TRM_Micro_Makro
     [Fact]
     public void TRM15_Gravity_Perturbs_Intrinsic_System()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -1204,8 +1205,8 @@ public class TRM_Micro_Makro
     [Fact]
     public void TRM16_Gravity_In_NearCritical_System()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -1294,8 +1295,8 @@ public class TRM_Micro_Makro
     [Fact]
     public void TRM17_PhaseShift_Model()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         int N = 32;
@@ -1385,8 +1386,8 @@ public class TRM_Micro_Makro
     [Fact]
     public void TRM18_Gravity_From_Phase_Gradient()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Earth;
 
         double r = PhysicalConstantsSI.R_Earth;
@@ -1420,3 +1421,4 @@ public class TRM_Micro_Makro
         Assert.True(relError < 1e-6);
     }
 }
+

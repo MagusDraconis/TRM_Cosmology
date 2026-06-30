@@ -60,6 +60,72 @@ public class PlanckConsistencyTests
         Assert.InRange(d.SpeedOfLight, 2.9e8, 3.1e8);
     }
 
+    [Trait("Category", "CoreRegression")]
+    [Fact]
+    public void PlanckFromSimulation_Should_Propagate_Through_DerivedConstants_And_Match_SI_Baseline()
+    {
+        var siPlanck = PlanckConstants.FromPhysicalConstants();
+        var siDerived = new DerivedConstants(siPlanck);
+
+        double latticeSpacing = siPlanck.lP;
+        double timeTick = siPlanck.tP;
+        double energyScale = siPlanck.mP * siDerived.SpeedOfLight * siDerived.SpeedOfLight;
+
+        var simPlanck = PlanckConstants.FromSimulation(latticeSpacing, timeTick, energyScale);
+        var simDerived = new DerivedConstants(simPlanck);
+
+        double cSim = simDerived.SpeedOfLight;
+        double gSim = simDerived.G;
+
+        double cSi = siDerived.SpeedOfLight;
+        double gSi = siDerived.G;
+
+        double cRelError = Math.Abs(cSim - cSi) / cSi;
+        double gRelError = Math.Abs(gSim - gSi) / gSi;
+
+        _output.WriteLine($"c_sim: {cSim:E12}");
+        _output.WriteLine($"c_si : {cSi:E12}");
+        _output.WriteLine($"G_sim: {gSim:E12}");
+        _output.WriteLine($"G_si : {gSi:E12}");
+        _output.WriteLine($"c rel error: {cRelError:E6}");
+        _output.WriteLine($"G rel error: {gRelError:E6}");
+
+        Assert.True(cRelError < 1e-12);
+        Assert.True(gRelError < 1e-12);
+    }
+
+    [Trait("Category", "CoreRegression")]
+    [Fact]
+    public void PlanckFromSimulation_Should_Report_Emergent_Deltas_Against_SI()
+    {
+        var siPlanck = PlanckConstants.FromPhysicalConstants();
+        var siDerived = new DerivedConstants(siPlanck);
+
+        double latticeSpacing = siPlanck.lP * 1.01;
+        double timeTick = siPlanck.tP * 0.995;
+        double energyScale = siPlanck.mP * siDerived.SpeedOfLight * siDerived.SpeedOfLight * 0.99;
+
+        var simPlanck = PlanckConstants.FromSimulation(latticeSpacing, timeTick, energyScale);
+        var simDerived = new DerivedConstants(simPlanck);
+
+        double cSim = simDerived.SpeedOfLight;
+        double gSim = simDerived.G;
+
+        double cSi = siDerived.SpeedOfLight;
+        double gSi = siDerived.G;
+
+        double cRelDelta = Math.Abs(cSim - cSi) / cSi;
+        double gRelDelta = Math.Abs(gSim - gSi) / gSi;
+
+        _output.WriteLine($"emergent c_sim: {cSim:E12} | c_si: {cSi:E12} | rel delta: {cRelDelta:E6}");
+        _output.WriteLine($"emergent G_sim: {gSim:E12} | G_si: {gSi:E12} | rel delta: {gRelDelta:E6}");
+
+        Assert.True(cRelDelta > 0.0);
+        Assert.True(gRelDelta > 0.0);
+        Assert.True(cRelDelta < 0.05);
+        Assert.True(gRelDelta < 0.10);
+    }
+
 
     [Trait("Category", "LongRunning")]
     [Fact]

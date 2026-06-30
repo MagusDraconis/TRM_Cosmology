@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TRM.Core;
@@ -16,6 +16,7 @@ namespace TRM.Tests.RealityTests;
 /// </summary>
 public class TRM_Realtiy_Tests
 {
+    private static readonly DerivedConstants _derivedConstants = new(PlanckConstants.FromPhysicalConstants());
     private readonly ITestOutputHelper _output;
     private readonly bool _includeLonglasingTests;
 
@@ -37,8 +38,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM_Should_Reproduce_Newton_Gravity_PhaseModel()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
         double M = PhysicalConstantsSI.M_Earth;
         double r = PhysicalConstantsSI.R_Earth;
@@ -71,8 +72,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM_Should_Reproduce_Gravitational_Redshift_Phase()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
         double M = PhysicalConstantsSI.M_Earth;
         double r = PhysicalConstantsSI.R_Earth;
@@ -97,8 +98,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM_Should_Match_Redshift_Between_Two_Heights_Phase()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
         double M = PhysicalConstantsSI.M_Earth;
 
@@ -125,8 +126,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM_Should_Reproduce_Gravitational_Redshift_Phase_DIFFERENTIAL()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
         double M = PhysicalConstantsSI.M_Earth;
 
@@ -153,8 +154,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM_Should_Reproduce_Light_Deflection_Phase()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
         double M = PhysicalConstantsSI.M_Solar;
         double b = PhysicalConstantsSI.b;
@@ -176,8 +177,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM_Should_Reproduce_Mercury_Perihelion_Precession()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         // Merkur
@@ -199,7 +200,7 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM19_Mercury_Orbit_RK4_From_Phase_Field()
     {
-        double G = PhysicalConstantsSI.G;
+        double G = _derivedConstants.G;
         double M = PhysicalConstantsSI.M_Solar;
 
         // Merkur initial
@@ -306,8 +307,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM20_Mercury_Precession_With_Correction()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -371,8 +372,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM21_Mercury_Precession_From_Discrete_Phi_Model()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         // Merkur initial
@@ -451,8 +452,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM21_Stable_Mercury_Precession_From_Phase_Model()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -500,8 +501,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM22_Mercury_Precession_From_Phase_Dynamics()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -554,7 +555,7 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM23_Mercury_Precession_Measurement()
     {
-        double G = PhysicalConstantsSI.G;
+        double G = _derivedConstants.G;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -622,8 +623,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM24_Precession_From_Angular_Momentum_Structure()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -701,8 +702,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM25_HighPrecision_Mercury_Precession_RK4()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -807,8 +808,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM26_Precise_Mercury_Precession_MultiOrbit()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         // ✅ bessere Startwerte (Perihel + exzentrisch korrekt)
@@ -910,8 +911,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM27_Precession_Stable_Averaging()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.6e10;
@@ -991,8 +992,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM28_Perihelion_From_Field_Equation()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         // Merkur
@@ -1012,8 +1013,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM29_Mercury_Precession_Verlet()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.60012e10;
@@ -1110,8 +1111,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM30_Mercury_Precession_Corrected_Dynamics()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double r0 = 4.60012e10;
@@ -1198,8 +1199,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM31_Mercury_Precession_StableMeasurement()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         const double expectedArcsec = 0.103547853;
         const double tolerance = 0.035; // 3.5% tolerance
@@ -1300,8 +1301,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM32_RK4_Photon_Convergence_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
 
         double b = PhysicalConstantsSI.b;
@@ -1351,8 +1352,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM33_RK4_Photon_OpticalFactor2_Convergence_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = PhysicalConstantsSI.b;
 
@@ -1473,8 +1474,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM34_RK4_Photon_TQM_RefractiveIndex_Convergence_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = PhysicalConstantsSI.b;
 
@@ -1538,8 +1539,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM35_RK4_Photon_LatticeFromTimeRate_Convergence_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b = PhysicalConstantsSI.b;
 
@@ -1603,8 +1604,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM36_RK4_Photon_TRM35_Mass_ImpactScaling_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M0 = PhysicalConstantsSI.M_Solar;
         double b0 = PhysicalConstantsSI.b;
 
@@ -1678,8 +1679,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM37_RK4_Photon_TRM35_Symmetry_And_RangeConvergence_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M = PhysicalConstantsSI.M_Solar;
         double b0 = PhysicalConstantsSI.b;
 
@@ -1773,8 +1774,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM38_RK4_Photon_TRM35_StrongerField_Probe_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double M0 = PhysicalConstantsSI.M_Solar;
         double b0 = PhysicalConstantsSI.b;
 
@@ -1891,8 +1892,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM39_RK4_Photon_TRM35_CompactnessSweep_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
 
         // Wir wählen b frei und berechnen M so, dass epsilon = GM/(c²b) exakt gesetzt ist.
         double b = PhysicalConstantsSI.b;
@@ -2013,8 +2014,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM40_RK4_Photon_TRM35_Compare_2PN_GR_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double b = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2103,8 +2104,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM41_RK4_Photon_Compare_IndexModels_StrongFieldTrend_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double b = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2225,8 +2226,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM42_RK4_Photon_Extract_SecondOrderCoefficient_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double b = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2323,8 +2324,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM43_RK4_Photon_Analytic_A_From_GR_C2_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double b = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2397,8 +2398,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM44_RK4_Photon_TRM43_AStar_StrongerEpsilon_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double b = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2452,8 +2453,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM45_RK4_Photon_Analytic_B_From_Residual_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2521,8 +2522,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM46_RK4_Photon_SaturatedExponential_Index_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2594,8 +2595,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM47_RK4_Photon_NonlinearScaling_Fingerprint_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double b = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2679,8 +2680,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM48_RK4_Photon_Fingerprint_Benchmark_Candidates_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2778,8 +2779,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM49_RK4_Photon_TRM45AB_vs_SchwarzschildNullGeodesic_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double c = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double c = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2835,8 +2836,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM50_RK4_Photon_Analytic_C_From_SchwarzschildResidual_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2913,8 +2914,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM51_RK4_Photon_Resummed_Index_Q_From_SchwarzschildResidual_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -2990,8 +2991,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM52_RK4_Photon_Anisotropic_RadialTangential_Index_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3072,8 +3073,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM53_RK4_Photon_Nonlinear_Anisotropy_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3187,8 +3188,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM54_RK4_Photon_Damped_Nonlinear_Anisotropy_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3282,8 +3283,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM55_RK4_Photon_DirectionState_Diagnostic_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3336,8 +3337,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM56_RK4_Photon_DirectionState_Coupling_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3422,8 +3423,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM57_RK4_Photon_Nonlinear_DirectionState_Coupling_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3530,8 +3531,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM58_Residual_To_Transport_Function_Extraction_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3659,8 +3660,8 @@ public class TRM_Realtiy_Tests
     [Fact]
     public void TRM60_RK4_Photon_PowerLaw_DirectionState_Coupling_Test()
     {
-        double G = PhysicalConstantsSI.G;
-        double cLight = PhysicalConstantsSI.c;
+        double G = _derivedConstants.G;
+        double cLight = _derivedConstants.SpeedOfLight;
         double bImpact = PhysicalConstantsSI.b;
         double dt = 0.25;
 
@@ -3724,8 +3725,8 @@ public class TRM_Realtiy_Tests
     //[Fact]
     //public void TRM61_RK4_Photon_TransportMemory_Coupling_Test()
     //{
-    //    double G = PhysicalConstantsSI.G;
-    //    double cLight = PhysicalConstantsSI.c;
+    //    double G = _derivedConstants.G;
+    //    double cLight = _derivedConstants.SpeedOfLight;
     //    double bImpact = PhysicalConstantsSI.b;
     //    double dt = 0.25;
 
@@ -3839,8 +3840,8 @@ public class TRM_Realtiy_Tests
     //[Fact]
     //public void TRM62_RK4_Photon_WeightedTransportMemory_Test()
     //{
-    //    double G = PhysicalConstantsSI.G;
-    //    double cLight = PhysicalConstantsSI.c;
+    //    double G = _derivedConstants.G;
+    //    double cLight = _derivedConstants.SpeedOfLight;
     //    double bImpact = PhysicalConstantsSI.b;
     //    double dt = 0.25;
 
@@ -3961,8 +3962,8 @@ public class TRM_Realtiy_Tests
     //[Fact]
     //public void TRM63_RK4_Photon_WeightedMemory_LambdaRobustness_Test()
     //{
-    //    double G = PhysicalConstantsSI.G;
-    //    double cLight = PhysicalConstantsSI.c;
+    //    double G = _derivedConstants.G;
+    //    double cLight = _derivedConstants.SpeedOfLight;
     //    double bImpact = PhysicalConstantsSI.b;
     //    double dt = 0.25;
 
@@ -4095,8 +4096,8 @@ public class TRM_Realtiy_Tests
     //[Fact]
     //public void TRM64_RK4_Photon_GlobalLambda_For_M2_WeightedMemory_Test()
     //{
-    //    double G = PhysicalConstantsSI.G;
-    //    double cLight = PhysicalConstantsSI.c;
+    //    double G = _derivedConstants.G;
+    //    double cLight = _derivedConstants.SpeedOfLight;
     //    double bImpact = PhysicalConstantsSI.b;
     //    double dt = 0.25;
 
@@ -4234,8 +4235,8 @@ public class TRM_Realtiy_Tests
     //[Fact]
     //public void TRM65_RK4_Photon_GlobalLambda_M2_FineEpsilonValidation_Test()
     //{
-    //    double G = PhysicalConstantsSI.G;
-    //    double cLight = PhysicalConstantsSI.c;
+    //    double G = _derivedConstants.G;
+    //    double cLight = _derivedConstants.SpeedOfLight;
     //    double bImpact = PhysicalConstantsSI.b;
     //    double dt = 0.25;
 
@@ -4319,8 +4320,8 @@ public class TRM_Realtiy_Tests
     //[Fact]
     //public void TRM66_RK4_Photon_TransportModel_ConsolidatedValidation_Test()
     //{
-    //    double G = PhysicalConstantsSI.G;
-    //    double cLight = PhysicalConstantsSI.c;
+    //    double G = _derivedConstants.G;
+    //    double cLight = _derivedConstants.SpeedOfLight;
     //    double bImpact = PhysicalConstantsSI.b;
     //    double dt = 0.25;
 
@@ -8285,3 +8286,4 @@ public class TRM_Realtiy_Tests
     #endregion
 
 }
+

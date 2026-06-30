@@ -42,30 +42,27 @@ public class PlanckConstants
 
         return new PlanckConstants(lP, tP, mP);
     }
-    
+    /// <summary>
+    /// Builds Planck-like constants from intrinsic lattice simulation scales.
+    /// <paramref name="latticeSpacing"/> and <paramref name="timeTick"/> define c_sim = spacing / timestep.
+    /// <paramref name="energyScale"/> is converted to an effective mass scale via E = m c².
+    /// </summary>
+    public static PlanckConstants FromSimulation(
+        double latticeSpacing,
+        double timeTick,
+        double energyScale)
+    {
+        if (latticeSpacing <= 0.0)
+            throw new ArgumentOutOfRangeException(nameof(latticeSpacing), "Lattice spacing must be positive.");
+        if (timeTick <= 0.0)
+            throw new ArgumentOutOfRangeException(nameof(timeTick), "Time tick must be positive.");
+        if (energyScale <= 0.0)
+            throw new ArgumentOutOfRangeException(nameof(energyScale), "Energy scale must be positive.");
 
-}
+        double cSim = latticeSpacing / timeTick;
+        double mPSim = energyScale / (cSim * cSim);
 
-/// <summary>
-/// SI constants used by Planck conversion and related test scenarios.
-/// Status: calibrated/defined constants; tested indirectly by Planck consistency tests.
-/// </summary>
-public static class PhysicalConstantsSI
-{
-
-    public const double hbar = 1.054571817e-34;
-
-    public const double G = 6.67430e-11; // SI
-    public const double M_Solar = 1.989e30; // kg
-    public const double c = 299792458.0; // m/s
-    public const double b = 6.9634e8;    // m
-
-
-    // ✅ NEU: Erde
-    public const double M_Earth = 5.972e24;     // kg
-    public const double R_Earth = 6.371e6;      // m
-
-    // ✅ optional: typische Orbit-Höhe (low orbit)
-    public const double Earth_LowOrbit = R_Earth + 4.0e5;
+        return new PlanckConstants(latticeSpacing, timeTick, mPSim);
+    }
 
 }
