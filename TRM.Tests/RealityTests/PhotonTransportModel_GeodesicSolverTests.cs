@@ -114,8 +114,8 @@ namespace TRM.Tests.RealityTests
                 double relDiff = Math.Abs(alphaEuler - alphaTransport) / Math.Max(alphaTransport, 1e-16);
                 double ratio_TRM = alphaEuler / Math.Max(alphaTransport, 1e-16);
 
-                _output.WriteLine($"b={b:F2} transport={alphaTransport:E6} euler={alphaEuler:E6} relDiff={relDiff:E6}");
-                _output.WriteLine($"TRM ratio : {ratio_TRM:E}");
+                _output.WriteLine($"EL03 b={b:F2} transport={alphaTransport:E6} euler={alphaEuler:E6} relDiff={relDiff:E6}");
+                _output.WriteLine($"EL03 TRM ratio : {ratio_TRM:E}");
 
                 Assert.True(double.IsFinite(alphaTransport));
                 Assert.True(double.IsFinite(alphaEuler));
@@ -152,13 +152,13 @@ namespace TRM.Tests.RealityTests
                 double ratioEuler = alphaEuler / Math.Max(alphaSchwarz, 1e-16);
                 double relDelta = Math.Abs(alphaEuler - alphaTransport) / Math.Max(alphaSchwarz, 1e-16);
 
-                _output.WriteLine($"epsilon   : {epsilon:E}");
-                _output.WriteLine($"alpha_TRM : {alphaTransport:E}");
-                _output.WriteLine($"alpha_EL  : {alphaEuler:E}");
-                _output.WriteLine($"alpha_Schw: {alphaSchwarz:E}");
-                _output.WriteLine($"TRM ratio : {ratioTransport:E}");
-                _output.WriteLine($"EL ratio  : {ratioEuler:E}");
-                _output.WriteLine($"Delta ratio (|EL-TRM|/Schw) : {relDelta:E}");
+                _output.WriteLine($"EL04 epsilon   : {epsilon:E}");
+                _output.WriteLine($"EL04 alpha_TRM : {alphaTransport:E}");
+                _output.WriteLine($"EL04 alpha_EL  : {alphaEuler:E}");
+                _output.WriteLine($"EL04 alpha_Schw: {alphaSchwarz:E}");
+                _output.WriteLine($"EL04 TRM ratio : {ratioTransport:E}");
+                _output.WriteLine($"EL04 EL ratio  : {ratioEuler:E}");
+                _output.WriteLine($"EL04 Delta ratio (|EL-TRM|/Schw) : {relDelta:E}");
 
                 Assert.True(double.IsFinite(alphaTransport));
                 Assert.True(double.IsFinite(alphaEuler));
@@ -193,10 +193,10 @@ namespace TRM.Tests.RealityTests
             double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
             double ratioEuler = alphaEuler / Math.Max(alphaSchwarz, 1e-16);
 
-            _output.WriteLine($"Collective gamma peak : {gammaPeak:E6}");
+            _output.WriteLine($"EL05 collective gamma peak : {gammaPeak:E6}");
             _output.WriteLine($"EL05 alpha_EL         : {alphaEuler:E6}");
             _output.WriteLine($"EL05 alpha_Schw       : {alphaSchwarz:E6}");
-            _output.WriteLine($"EL ratio              : {ratioEuler:E6}");
+            _output.WriteLine($"EL05 EL ratio         : {ratioEuler:E6}");
 
             Assert.InRange(gammaPeak, 0.83, 0.87);
             Assert.InRange(ratioEuler, 0.85, 1.25);
@@ -244,16 +244,16 @@ namespace TRM.Tests.RealityTests
                 errorCollective += relErrorCollective;
                 errorLocal += relErrorLocal;
 
-                _output.WriteLine($"epsilon              : {epsilon:E}");
-                _output.WriteLine($"collective rel error : {relErrorCollective:E6}");
-                _output.WriteLine($"local(1.0) rel error : {relErrorLocal:E6}");
+                _output.WriteLine($"EL06 epsilon              : {epsilon:E}");
+                _output.WriteLine($"EL06 collective rel error : {relErrorCollective:E6}");
+                _output.WriteLine($"EL06 local(1.0) rel error : {relErrorLocal:E6}");
             }
 
             errorCollective /= epsilons.Length;
             errorLocal /= epsilons.Length;
 
-            _output.WriteLine($"Mean collective error : {errorCollective:E6}");
-            _output.WriteLine($"Mean local(1.0) error : {errorLocal:E6}");
+            _output.WriteLine($"EL06 mean collective error : {errorCollective:E6}");
+            _output.WriteLine($"EL06 mean local(1.0) error : {errorLocal:E6}");
 
             Assert.True(errorLocal > errorCollective,
                 $"Expected local gamma=1.0 to degrade weak-field fit. local={errorLocal}, collective={errorCollective}");
@@ -302,7 +302,7 @@ namespace TRM.Tests.RealityTests
 
                 bestScales[i] = bestScale;
 
-                _output.WriteLine($"epsilon={epsilon:E} | bestScale={bestScale:F3} | relError={bestRelError:E6}");
+                _output.WriteLine($"EL07 epsilon={epsilon:E} | bestScale={bestScale:F3} | relError={bestRelError:E6}");
             }
 
             double minScale = bestScales.Min();
@@ -347,9 +347,9 @@ namespace TRM.Tests.RealityTests
                 double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
                 double ratioEuler = alphaEuler / Math.Max(alphaSchwarz, 1e-16);
 
-                _output.WriteLine($"epsilon        : {epsilon:E}");
-                _output.WriteLine($"gamma_peak     : {gammaPeak:F3}");
-                _output.WriteLine($"EL ratio       : {ratioEuler:E6}");
+                _output.WriteLine($"EL08 epsilon        : {epsilon:E}");
+                _output.WriteLine($"EL08 gamma_peak     : {gammaPeak:F3}");
+                _output.WriteLine($"EL08 EL ratio       : {ratioEuler:E6}");
 
                 Assert.InRange(ratioEuler, 0.85, 1.25);
             }

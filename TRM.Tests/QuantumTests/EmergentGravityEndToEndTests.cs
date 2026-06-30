@@ -2226,6 +2226,1298 @@ public class EmergentGravityEndToEndTests
         Assert.True(m4.MaxErr <= 1.10, "Dynamic gradient-based envelope should remain bounded.");
     }
 
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    /// <summary>
+    /// Diagnostic compatibility check for tick-phase scale transfer in the TQM quantum-to-macro layer.
+    ///
+    /// Hypothesis:
+    /// A raw tick-phase scale proxy (localOmega*latticeRadius) transfers more robustly than normalized phase controls.
+    ///
+    /// Status:
+    /// diagnostic + candidate compatibility check.
+    ///
+    /// Limitation:
+    /// No theorem-level derivation, no gravity closure claim, and no baseline model-path activation.
+    /// </summary>
+    public void E2E10_TQM_TickPhaseScale_Should_Transfer_Under_NoRefit()
+    {
+        const int modulo = 5;
+        const int binCount = 5;
+
+        // Synthetic train/holdout configuration set with deterministic seeds.
+        var configs = new[]
+        {
+            new { Name = "cfg-amp-0.82", Concentration = 0.82, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20101 },
+            new { Name = "cfg-amp-0.88", Concentration = 0.88, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20102 },
+            new { Name = "cfg-amp-0.94", Concentration = 0.94, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20103 },
+            new { Name = "cfg-amp-1.00", Concentration = 1.00, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20104 },
+            new { Name = "cfg-amp-1.08", Concentration = 1.08, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20105 },
+            new { Name = "cfg-r-0.88", Concentration = 0.95, RadiusScale = 0.88, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20106 },
+            new { Name = "cfg-r-0.94", Concentration = 0.95, RadiusScale = 0.94, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20107 },
+            new { Name = "cfg-r-1.06", Concentration = 0.95, RadiusScale = 1.06, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20108 },
+            new { Name = "cfg-r-1.12", Concentration = 0.95, RadiusScale = 1.12, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20109 },
+            new { Name = "cfg-s-0.5", Concentration = 0.95, RadiusScale = 1.00, SpacingScale = 0.5, Noise = 0.000, Oscillators = 129, Seed = 20110 },
+            new { Name = "cfg-s-2.0", Concentration = 0.95, RadiusScale = 1.00, SpacingScale = 2.0, Noise = 0.000, Oscillators = 129, Seed = 20111 },
+            new { Name = "cfg-n-193", Concentration = 0.95, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 193, Seed = 20112 },
+            new { Name = "cfg-n-257", Concentration = 0.95, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.000, Oscillators = 257, Seed = 20113 },
+            new { Name = "cfg-noise-1", Concentration = 0.92, RadiusScale = 0.96, SpacingScale = 1.0, Noise = 0.003, Oscillators = 129, Seed = 20114 },
+            new { Name = "cfg-noise-2", Concentration = 1.02, RadiusScale = 1.04, SpacingScale = 1.0, Noise = 0.004, Oscillators = 129, Seed = 20115 },
+        };
+
+        var rows = new (string Name, double KTarget, double Radius, double LocalOmega, double RawTickPhase)[configs.Length];
+        for (int i = 0; i < configs.Length; i++)
+        {
+            var cfg = configs[i];
+            double spacing = SimulationLatticeSpacing * cfg.SpacingScale;
+            double tick = SimulationTimeTick * cfg.SpacingScale;
+            double cEff = MeasureWavePropagationSpeed(spacing, tick);
+
+            SpatialMassEmergenceMetrics metrics = SimulateSpatialMassEmergence(
+                concentrationAmplitude: cfg.Concentration,
+                cEff: cEff,
+                latticeSpacing: spacing,
+                oscillators: cfg.Oscillators,
+                steps: 6000,
+                burnIn: 2000,
+                radiusScale: cfg.RadiusScale,
+                noiseAmplitude: cfg.Noise,
+                randomSeed: cfg.Seed);
+
+            var simPlanck = PlanckConstants.FromSimulation(spacing, tick, metrics.TotalEnergy);
+            var simDerived = new DerivedConstants(simPlanck);
+            double gSim = simDerived.G;
+            double rawGEff = metrics.AccelerationProxy
+                * metrics.EffectiveRadius * metrics.EffectiveRadius
+                / Math.Max(metrics.EffectiveMass, 1e-30);
+            double kTarget = gSim / Math.Max(rawGEff, 1e-30);
+
+            // localOmega from local acceleration scale and c_eff (diagnostic proxy layer only).
+            double localOmega = metrics.AccelerationProxy / Math.Max(cEff, 1e-30);
+            double radius = metrics.EffectiveRadius;
+            double rawTickPhaseValue = localOmega * radius;
+
+            rows[i] = (cfg.Name, kTarget, radius, localOmega, rawTickPhaseValue);
+        }
+
+        (double MeanError, double MeanSpread, int ImprovedTransfers, int TransferCount) EvaluateProxy(
+            string proxyName,
+            Func<(string Name, double KTarget, double Radius, double LocalOmega, double RawTickPhase), double, double> selector)
+        {
+            var splitMeanErrors = new List<double>();
+            var splitSpreads = new List<double>();
+            int improvedTransfers = 0;
+            int transferCount = 0;
+
+            for (int holdoutRemainder = 0; holdoutRemainder < modulo; holdoutRemainder++)
+            {
+                var trainRows = rows
+                    .Where(r => Math.Abs(r.Name.Sum(c => c) % modulo) != holdoutRemainder)
+                    .ToArray();
+                var holdoutRows = rows
+                    .Where(r => Math.Abs(r.Name.Sum(c => c) % modulo) == holdoutRemainder)
+                    .ToArray();
+
+                Assert.True(trainRows.Length >= 10, $"Train set too small for {proxyName}, split {holdoutRemainder}.");
+                if (holdoutRows.Length < 2)
+                    continue;
+                Assert.True(trainRows.All(tr => holdoutRows.All(hr => hr.Name != tr.Name)),
+                    $"Train/holdout overlap detected in {proxyName}, split {holdoutRemainder}.");
+
+                double maxRadiusTrain = trainRows.Max(r => r.Radius);
+                double kBase = Median(Array.ConvertAll(trainRows, r => r.KTarget));
+
+                var sortedProxy = trainRows
+                    .Select(r => selector(r, maxRadiusTrain))
+                    .Where(double.IsFinite)
+                    .OrderBy(x => x)
+                    .ToList();
+                Assert.True(sortedProxy.Count >= binCount, $"Insufficient proxy rows for {proxyName}, split {holdoutRemainder}.");
+
+                var cuts = new double[binCount - 1];
+                for (int b = 1; b < binCount; b++)
+                {
+                    int idx = (b * sortedProxy.Count) / binCount;
+                    cuts[b - 1] = sortedProxy[Math.Min(idx, sortedProxy.Count - 1)];
+                }
+
+                int GetBin(double x)
+                {
+                    for (int i = 0; i < cuts.Length; i++)
+                    {
+                        if (x < cuts[i]) return i;
+                    }
+                    return cuts.Length;
+                }
+
+                var means = new double[binCount];
+                var counts = new int[binCount];
+                foreach (var r in trainRows)
+                {
+                    int bin = GetBin(selector(r, maxRadiusTrain));
+                    means[bin] += r.KTarget;
+                    counts[bin]++;
+                }
+                for (int b = 0; b < binCount; b++)
+                {
+                    means[b] = counts[b] > 0 ? means[b] / counts[b] : kBase;
+                }
+
+                var holdoutErrors = new double[holdoutRows.Length];
+                double baselineErrSum = 0.0;
+                double proxyErrSum = 0.0;
+                for (int i = 0; i < holdoutRows.Length; i++)
+                {
+                    var r = holdoutRows[i];
+                    double kBaseline = kBase;
+                    int bin = GetBin(selector(r, maxRadiusTrain));
+                    double kPred = means[bin];
+
+                    double baselineErr = Math.Abs(kBaseline - r.KTarget) / Math.Max(r.KTarget, 1e-30);
+                    double proxyErr = Math.Abs(kPred - r.KTarget) / Math.Max(r.KTarget, 1e-30);
+                    baselineErrSum += baselineErr;
+                    proxyErrSum += proxyErr;
+                    holdoutErrors[i] = proxyErr;
+                }
+
+                splitMeanErrors.Add(proxyErrSum / holdoutRows.Length);
+                splitSpreads.Add(RelativeSpread(holdoutErrors));
+                transferCount++;
+
+                if (proxyErrSum < baselineErrSum)
+                    improvedTransfers++;
+            }
+
+            return (Mean(splitMeanErrors.ToArray()), Mean(splitSpreads.ToArray()), improvedTransfers, transferCount);
+        }
+
+        // Frozen train->holdout comparison across proxy definitions.
+        var rawTickPhase = EvaluateProxy("rawTickPhase", (r, _) => r.RawTickPhase);
+        var normalizedTickPhase = EvaluateProxy("normalizedTickPhase", (r, rMax) => r.LocalOmega * (r.Radius / Math.Max(rMax, 1e-30)));
+        var radiusOnly = EvaluateProxy("radiusOnly", (r, _) => r.Radius);
+
+        var ranking = new[]
+        {
+            (Name: "rawTickPhase", MeanError: rawTickPhase.MeanError, MeanSpread: rawTickPhase.MeanSpread),
+            (Name: "normalizedTickPhase", MeanError: normalizedTickPhase.MeanError, MeanSpread: normalizedTickPhase.MeanSpread),
+            (Name: "radiusOnly", MeanError: radiusOnly.MeanError, MeanSpread: radiusOnly.MeanSpread)
+        };
+        var best = ranking
+            .OrderBy(x => x.MeanError)
+            .ThenBy(x => x.MeanSpread)
+            .First();
+        bool stableTransfer = rawTickPhase.MeanError <= normalizedTickPhase.MeanError && rawTickPhase.MeanError <= radiusOnly.MeanError;
+
+        _output.WriteLine("[E2E10] --- TQM TICK PHASE SCALE TRANSFER DIAGNOSTIC ---");
+        _output.WriteLine($"[E2E10] rawTickPhase error/spread       : {rawTickPhase.MeanError:E6} / {rawTickPhase.MeanSpread:E6}");
+        _output.WriteLine($"[E2E10] normalizedTickPhase error/spread: {normalizedTickPhase.MeanError:E6} / {normalizedTickPhase.MeanSpread:E6}");
+        _output.WriteLine($"[E2E10] radiusOnly error/spread         : {radiusOnly.MeanError:E6} / {radiusOnly.MeanSpread:E6}");
+        _output.WriteLine($"[E2E10] best proxy                      : {best.Name}");
+        _output.WriteLine($"[E2E10] transfer stability result       : {stableTransfer}");
+
+        // Candidate compatibility assertions only; no baseline E2E path changes.
+        Assert.True(double.IsFinite(rawTickPhase.MeanError) && double.IsFinite(rawTickPhase.MeanSpread));
+        Assert.True(double.IsFinite(normalizedTickPhase.MeanError) && double.IsFinite(normalizedTickPhase.MeanSpread));
+        Assert.True(double.IsFinite(radiusOnly.MeanError) && double.IsFinite(radiusOnly.MeanSpread));
+        Assert.True(rawTickPhase.TransferCount >= 3);
+        Assert.True(normalizedTickPhase.TransferCount >= 3);
+        Assert.True(radiusOnly.TransferCount >= 3);
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    /// <summary>
+    /// Diagnostic discrimination check for raw vs normalized tick-phase proxies under multi-scale lattice setups.
+    ///
+    /// Status:
+    /// diagnostic + candidate compatibility check only.
+    ///
+    /// Limitation:
+    /// No theorem-level derivation, no closure claim, and no baseline model-path activation.
+    /// </summary>
+    public void E2E11_TQM_TickPhaseNormalization_Should_Discriminate_ScaleDependence()
+    {
+        const int modulo = 5;
+        const int binCount = 5;
+
+        // Reuse E2E10-style synthetic setup, expanded with stronger multi-scale radius/spacing coverage.
+        var configs = new[]
+        {
+            new { Name = "ms-amp-0.84-r-0.72-s-0.6", Concentration = 0.84, RadiusScale = 0.72, SpacingScale = 0.6, Noise = 0.000, Oscillators = 129, Seed = 20201 },
+            new { Name = "ms-amp-0.90-r-0.80-s-0.8", Concentration = 0.90, RadiusScale = 0.80, SpacingScale = 0.8, Noise = 0.000, Oscillators = 129, Seed = 20202 },
+            new { Name = "ms-amp-0.96-r-0.88-s-1.0", Concentration = 0.96, RadiusScale = 0.88, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20203 },
+            new { Name = "ms-amp-1.02-r-0.96-s-1.2", Concentration = 1.02, RadiusScale = 0.96, SpacingScale = 1.2, Noise = 0.000, Oscillators = 129, Seed = 20204 },
+            new { Name = "ms-amp-1.08-r-1.04-s-1.4", Concentration = 1.08, RadiusScale = 1.04, SpacingScale = 1.4, Noise = 0.000, Oscillators = 129, Seed = 20205 },
+            new { Name = "ms-amp-1.14-r-1.12-s-1.6", Concentration = 1.14, RadiusScale = 1.12, SpacingScale = 1.6, Noise = 0.000, Oscillators = 129, Seed = 20206 },
+            new { Name = "ms-amp-1.20-r-1.20-s-1.8", Concentration = 1.20, RadiusScale = 1.20, SpacingScale = 1.8, Noise = 0.000, Oscillators = 129, Seed = 20207 },
+            new { Name = "ms-amp-1.26-r-1.28-s-2.0", Concentration = 1.26, RadiusScale = 1.28, SpacingScale = 2.0, Noise = 0.000, Oscillators = 129, Seed = 20208 },
+            new { Name = "ms-r-0.68", Concentration = 0.96, RadiusScale = 0.68, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20209 },
+            new { Name = "ms-r-0.76", Concentration = 0.96, RadiusScale = 0.76, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20210 },
+            new { Name = "ms-r-0.92", Concentration = 0.96, RadiusScale = 0.92, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20211 },
+            new { Name = "ms-r-1.08", Concentration = 0.96, RadiusScale = 1.08, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20212 },
+            new { Name = "ms-r-1.24", Concentration = 0.96, RadiusScale = 1.24, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20213 },
+            new { Name = "ms-r-1.36", Concentration = 0.96, RadiusScale = 1.36, SpacingScale = 1.0, Noise = 0.000, Oscillators = 129, Seed = 20214 },
+            new { Name = "ms-s-0.55", Concentration = 0.98, RadiusScale = 1.00, SpacingScale = 0.55, Noise = 0.002, Oscillators = 129, Seed = 20215 },
+            new { Name = "ms-s-0.70", Concentration = 0.98, RadiusScale = 1.00, SpacingScale = 0.70, Noise = 0.002, Oscillators = 129, Seed = 20216 },
+            new { Name = "ms-s-1.30", Concentration = 0.98, RadiusScale = 1.00, SpacingScale = 1.30, Noise = 0.003, Oscillators = 129, Seed = 20217 },
+            new { Name = "ms-s-1.70", Concentration = 0.98, RadiusScale = 1.00, SpacingScale = 1.70, Noise = 0.003, Oscillators = 129, Seed = 20218 },
+            new { Name = "ms-n-193", Concentration = 1.00, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.001, Oscillators = 193, Seed = 20219 },
+            new { Name = "ms-n-257", Concentration = 1.00, RadiusScale = 1.00, SpacingScale = 1.0, Noise = 0.001, Oscillators = 257, Seed = 20220 },
+        };
+
+        var rows = new (string Name, double KTarget, double Radius, double LocalOmega, double RawTickPhase)[configs.Length];
+        for (int i = 0; i < configs.Length; i++)
+        {
+            var cfg = configs[i];
+            double spacing = SimulationLatticeSpacing * cfg.SpacingScale;
+            double tick = SimulationTimeTick * cfg.SpacingScale;
+            double cEff = MeasureWavePropagationSpeed(spacing, tick);
+
+            SpatialMassEmergenceMetrics metrics = SimulateSpatialMassEmergence(
+                concentrationAmplitude: cfg.Concentration,
+                cEff: cEff,
+                latticeSpacing: spacing,
+                oscillators: cfg.Oscillators,
+                steps: 6000,
+                burnIn: 2000,
+                radiusScale: cfg.RadiusScale,
+                noiseAmplitude: cfg.Noise,
+                randomSeed: cfg.Seed);
+
+            var simPlanck = PlanckConstants.FromSimulation(spacing, tick, metrics.TotalEnergy);
+            var simDerived = new DerivedConstants(simPlanck);
+            double gSim = simDerived.G;
+            double rawGEff = metrics.AccelerationProxy
+                * metrics.EffectiveRadius * metrics.EffectiveRadius
+                / Math.Max(metrics.EffectiveMass, 1e-30);
+            double kTarget = gSim / Math.Max(rawGEff, 1e-30);
+
+            double localOmega = metrics.AccelerationProxy / Math.Max(cEff, 1e-30);
+            double radius = metrics.EffectiveRadius;
+            double rawTickPhaseValue = localOmega * radius;
+            rows[i] = (cfg.Name, kTarget, radius, localOmega, rawTickPhaseValue);
+        }
+
+        (double MeanError, double MeanSpread, int TransferCount) EvaluateProxy(
+            string proxyName,
+            Func<(string Name, double KTarget, double Radius, double LocalOmega, double RawTickPhase), double, double> selector)
+        {
+            var splitMeanErrors = new List<double>();
+            var splitSpreads = new List<double>();
+            int transferCount = 0;
+
+            for (int holdoutRemainder = 0; holdoutRemainder < modulo; holdoutRemainder++)
+            {
+                var trainRows = rows
+                    .Where(r => Math.Abs(r.Name.Sum(c => c) % modulo) != holdoutRemainder)
+                    .ToArray();
+                var holdoutRows = rows
+                    .Where(r => Math.Abs(r.Name.Sum(c => c) % modulo) == holdoutRemainder)
+                    .ToArray();
+
+                Assert.True(trainRows.Length >= 10, $"Train set too small for {proxyName}, split {holdoutRemainder}.");
+                Assert.True(holdoutRows.Length >= 2, $"Holdout set too small for {proxyName}, split {holdoutRemainder}.");
+                Assert.True(trainRows.All(tr => holdoutRows.All(hr => hr.Name != tr.Name)),
+                    $"Train/holdout overlap detected in {proxyName}, split {holdoutRemainder}.");
+
+                double maxRadiusTrain = trainRows.Max(r => r.Radius);
+                double kBase = Median(Array.ConvertAll(trainRows, r => r.KTarget));
+
+                var sortedProxy = trainRows
+                    .Select(r => selector(r, maxRadiusTrain))
+                    .Where(double.IsFinite)
+                    .OrderBy(x => x)
+                    .ToList();
+                Assert.True(sortedProxy.Count >= binCount, $"Insufficient proxy rows for {proxyName}, split {holdoutRemainder}.");
+
+                var cuts = new double[binCount - 1];
+                for (int b = 1; b < binCount; b++)
+                {
+                    int idx = (b * sortedProxy.Count) / binCount;
+                    cuts[b - 1] = sortedProxy[Math.Min(idx, sortedProxy.Count - 1)];
+                }
+
+                int GetBin(double x)
+                {
+                    for (int i = 0; i < cuts.Length; i++)
+                    {
+                        if (x < cuts[i]) return i;
+                    }
+                    return cuts.Length;
+                }
+
+                var means = new double[binCount];
+                var counts = new int[binCount];
+                foreach (var r in trainRows)
+                {
+                    int bin = GetBin(selector(r, maxRadiusTrain));
+                    means[bin] += r.KTarget;
+                    counts[bin]++;
+                }
+
+                for (int b = 0; b < binCount; b++)
+                    means[b] = counts[b] > 0 ? means[b] / counts[b] : kBase;
+
+                var holdoutErrors = new double[holdoutRows.Length];
+                for (int i = 0; i < holdoutRows.Length; i++)
+                {
+                    var r = holdoutRows[i];
+                    int bin = GetBin(selector(r, maxRadiusTrain));
+                    double kPred = means[bin];
+                    holdoutErrors[i] = Math.Abs(kPred - r.KTarget) / Math.Max(r.KTarget, 1e-30);
+                }
+
+                splitMeanErrors.Add(Mean(holdoutErrors));
+                splitSpreads.Add(RelativeSpread(holdoutErrors));
+                transferCount++;
+            }
+
+            return (Mean(splitMeanErrors.ToArray()), Mean(splitSpreads.ToArray()), transferCount);
+        }
+
+        // Train-only calibration + frozen holdout evaluation (no per-case refit).
+        var rawTickPhase = EvaluateProxy("rawTickPhase", (r, _) => r.RawTickPhase);
+        var normalizedTickPhase = EvaluateProxy("normalizedTickPhase", (r, rMax) => r.LocalOmega * (r.Radius / Math.Max(rMax, 1e-30)));
+        var radiusOnly = EvaluateProxy("radiusOnly", (r, _) => r.Radius);
+
+        double rawMinusNormalizedError = rawTickPhase.MeanError - normalizedTickPhase.MeanError;
+        double rawMinusNormalizedSpread = rawTickPhase.MeanSpread - normalizedTickPhase.MeanSpread;
+
+        _output.WriteLine("[E2E11] --- TQM TICK PHASE NORMALIZATION DISCRIMINATION DIAGNOSTIC ---");
+        _output.WriteLine($"[E2E11] raw error/spread       : {rawTickPhase.MeanError:E6} / {rawTickPhase.MeanSpread:E6}");
+        _output.WriteLine($"[E2E11] normalized error/spread: {normalizedTickPhase.MeanError:E6} / {normalizedTickPhase.MeanSpread:E6}");
+        _output.WriteLine($"[E2E11] radius error/spread    : {radiusOnly.MeanError:E6} / {radiusOnly.MeanSpread:E6}");
+        _output.WriteLine($"[E2E11] raw-minus-normalized delta: {rawMinusNormalizedError:E6} / {rawMinusNormalizedSpread:E6}");
+        _output.WriteLine($"[E2E11] normalization separation detected: {Math.Abs(rawMinusNormalizedError) > 1e-9 || Math.Abs(rawMinusNormalizedSpread) > 1e-9}");
+
+        // Diagnostic assertions only.
+        Assert.True(double.IsFinite(rawTickPhase.MeanError) && double.IsFinite(rawTickPhase.MeanSpread));
+        Assert.True(double.IsFinite(normalizedTickPhase.MeanError) && double.IsFinite(normalizedTickPhase.MeanSpread));
+        Assert.True(double.IsFinite(radiusOnly.MeanError) && double.IsFinite(radiusOnly.MeanSpread));
+        Assert.True(double.IsFinite(rawMinusNormalizedError) && double.IsFinite(rawMinusNormalizedSpread));
+        Assert.True(rawTickPhase.TransferCount == modulo);
+        Assert.True(normalizedTickPhase.TransferCount == modulo);
+        Assert.True(radiusOnly.TransferCount == modulo);
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    /// <summary>
+    /// Diagnostic scale-breaking transfer check for raw vs normalized tick-phase proxies.
+    ///
+    /// Status:
+    /// diagnostic + candidate compatibility check only.
+    ///
+    /// Limitation:
+    /// No theorem-level derivation, no closure claim, and no baseline model-path activation.
+    /// </summary>
+    public void E2E12_TQM_TickPhaseScaleBreaking_Should_Distinguish_Raw_From_Normalized()
+    {
+        const int binCount = 5;
+        const double separationTolerance = 1e-6;
+
+        var profileSet = new[]
+        {
+            new { Tag = "p1", Concentration = 0.86, RadiusScale = 0.86, SpacingScale = 0.9, Noise = 0.001, Oscillators = 129, Seed = 20301 },
+            new { Tag = "p2", Concentration = 0.92, RadiusScale = 0.92, SpacingScale = 1.0, Noise = 0.001, Oscillators = 129, Seed = 20302 },
+            new { Tag = "p3", Concentration = 0.98, RadiusScale = 0.98, SpacingScale = 1.1, Noise = 0.001, Oscillators = 129, Seed = 20303 },
+            new { Tag = "p4", Concentration = 1.04, RadiusScale = 1.04, SpacingScale = 0.9, Noise = 0.002, Oscillators = 129, Seed = 20304 },
+            new { Tag = "p5", Concentration = 1.10, RadiusScale = 1.10, SpacingScale = 1.0, Noise = 0.002, Oscillators = 129, Seed = 20305 },
+            new { Tag = "p6", Concentration = 1.16, RadiusScale = 1.16, SpacingScale = 1.1, Noise = 0.002, Oscillators = 129, Seed = 20306 },
+            new { Tag = "p7", Concentration = 0.94, RadiusScale = 0.90, SpacingScale = 1.2, Noise = 0.003, Oscillators = 193, Seed = 20307 },
+            new { Tag = "p8", Concentration = 1.06, RadiusScale = 1.08, SpacingScale = 0.8, Noise = 0.003, Oscillators = 193, Seed = 20308 },
+        };
+
+        var familyScales = new[]
+        {
+            new { Family = "small-scale", RadiusMultiplier = 0.25 },
+            new { Family = "large-scale", RadiusMultiplier = 3.00 },
+        };
+
+        var rowsRaw = new List<(string Family, string Tag, string Name, double KTarget, double Radius, double LocalOmegaRaw)>();
+        int seedOffset = 0;
+        foreach (var fam in familyScales)
+        {
+            foreach (var profile in profileSet)
+            {
+                double spacing = SimulationLatticeSpacing * profile.SpacingScale;
+                double tick = SimulationTimeTick * profile.SpacingScale;
+                double cEff = MeasureWavePropagationSpeed(spacing, tick);
+
+                SpatialMassEmergenceMetrics metrics = SimulateSpatialMassEmergence(
+                    concentrationAmplitude: profile.Concentration,
+                    cEff: cEff,
+                    latticeSpacing: spacing,
+                    oscillators: profile.Oscillators,
+                    steps: 6000,
+                    burnIn: 2000,
+                    radiusScale: profile.RadiusScale * fam.RadiusMultiplier,
+                    noiseAmplitude: profile.Noise,
+                    randomSeed: profile.Seed + seedOffset);
+
+                var simPlanck = PlanckConstants.FromSimulation(spacing, tick, metrics.TotalEnergy);
+                var simDerived = new DerivedConstants(simPlanck);
+                double gSim = simDerived.G;
+                double rawGEff = metrics.AccelerationProxy
+                    * metrics.EffectiveRadius * metrics.EffectiveRadius
+                    / Math.Max(metrics.EffectiveMass, 1e-30);
+                double kTarget = gSim / Math.Max(rawGEff, 1e-30);
+                double localOmegaRaw = metrics.AccelerationProxy / Math.Max(cEff, 1e-30);
+                double absoluteRadius = metrics.EffectiveRadius * fam.RadiusMultiplier;
+
+                rowsRaw.Add((
+                    fam.Family,
+                    profile.Tag,
+                    $"{fam.Family}-{profile.Tag}",
+                    kTarget,
+                    absoluteRadius,
+                    localOmegaRaw));
+            }
+
+            seedOffset += 1000;
+        }
+
+        Assert.True(rowsRaw.Count >= 12, "Scale-breaking diagnostic requires sufficient rows.");
+
+        // Keep localOmega comparable across families by fixing a per-profile omega anchor.
+        var tagOmegaAnchors = rowsRaw
+            .GroupBy(r => r.Tag)
+            .ToDictionary(g => g.Key, g => Median(g.Select(x => x.LocalOmegaRaw).ToArray()));
+        var familyRadiusMax = rowsRaw
+            .GroupBy(r => r.Family)
+            .ToDictionary(g => g.Key, g => g.Max(x => x.Radius));
+
+        var rows = rowsRaw
+            .Select(r =>
+            {
+                double comparableOmega = tagOmegaAnchors[r.Tag];
+                double rawTickPhase = comparableOmega * r.Radius;
+                double radiusNormFamily = r.Radius / Math.Max(familyRadiusMax[r.Family], 1e-30);
+                double kTargetScaleBroken = 1.0 + rawTickPhase;
+                return (
+                    r.Family,
+                    r.Tag,
+                    r.Name,
+                    KTarget: kTargetScaleBroken,
+                    r.Radius,
+                    LocalOmegaComparable: comparableOmega,
+                    RadiusNormFamily: radiusNormFamily,
+                    RawTickPhase: rawTickPhase);
+            })
+            .ToArray();
+
+        (double MeanError, double MeanSpread) EvaluateOneDirection(
+            string trainFamily,
+            string transferFamily,
+            string proxyName,
+            Func<(string Family, string Tag, string Name, double KTarget, double Radius, double LocalOmegaComparable, double RadiusNormFamily, double RawTickPhase), double, double> selector)
+        {
+            var trainRows = rows.Where(r => r.Family == trainFamily).ToArray();
+            var transferRows = rows.Where(r => r.Family == transferFamily).ToArray();
+            Assert.True(trainRows.Length >= 6, $"Train set too small for {proxyName} ({trainFamily}->{transferFamily}).");
+            Assert.True(transferRows.Length >= 6, $"Transfer set too small for {proxyName} ({trainFamily}->{transferFamily}).");
+
+            double maxRadiusTrain = trainRows.Max(r => r.Radius);
+            var xTrain = trainRows.Select(r => selector(r, maxRadiusTrain)).ToArray();
+            var yTrain = trainRows.Select(r => r.KTarget).ToArray();
+            Assert.True(xTrain.All(double.IsFinite), $"Non-finite train proxy values in {proxyName}.");
+            Assert.True(yTrain.All(double.IsFinite), $"Non-finite train targets in {proxyName}.");
+            Assert.True(xTrain.Length >= binCount, $"Insufficient train rows for {proxyName}.");
+
+            double xMean = Mean(xTrain);
+            double yMean = Mean(yTrain);
+            double varX = 0.0;
+            double covXY = 0.0;
+            for (int i = 0; i < xTrain.Length; i++)
+            {
+                double dx = xTrain[i] - xMean;
+                varX += dx * dx;
+                covXY += dx * (yTrain[i] - yMean);
+            }
+
+            double slope = varX > 1e-24 ? covXY / varX : 0.0;
+            double intercept = yMean - slope * xMean;
+
+            var transferErrors = new double[transferRows.Length];
+            for (int i = 0; i < transferRows.Length; i++)
+            {
+                var r = transferRows[i];
+                double x = selector(r, maxRadiusTrain);
+                double kPred = intercept + slope * x;
+                transferErrors[i] = Math.Abs(kPred - r.KTarget) / Math.Max(r.KTarget, 1e-30);
+            }
+
+            return (Mean(transferErrors), RelativeSpread(transferErrors));
+        }
+
+        (double MeanError, double MeanSpread) EvaluateProxy(
+            string proxyName,
+            Func<(string Family, string Tag, string Name, double KTarget, double Radius, double LocalOmegaComparable, double RadiusNormFamily, double RawTickPhase), double, double> selector)
+        {
+            return EvaluateOneDirection("small-scale", "large-scale", proxyName, selector);
+        }
+
+        // Calibration is frozen per train family and transferred to the other family without refit.
+        var rawTickPhase = EvaluateProxy("rawTickPhase", (r, _) => r.RawTickPhase);
+        var normalizedTickPhase = EvaluateProxy("normalizedTickPhase", (r, _) => r.LocalOmegaComparable * r.RadiusNormFamily);
+        var radiusOnly = EvaluateProxy("radiusOnly", (r, _) => r.Radius);
+
+        static bool IsInvalidDiagnosticValue(double v) =>
+            !double.IsFinite(v) ||
+            v == double.MaxValue ||
+            v == double.MinValue ||
+            Math.Abs(v) >= 1e300;
+
+        double rawError = rawTickPhase.MeanError;
+        double normalizedError = normalizedTickPhase.MeanError;
+        double rawSpread = rawTickPhase.MeanSpread;
+        double normalizedSpread = normalizedTickPhase.MeanSpread;
+        double deltaError = rawError - normalizedError;
+        double deltaSpread = rawSpread - normalizedSpread;
+        bool scaleSeparationDetected =
+            Math.Abs(deltaError) > separationTolerance ||
+            Math.Abs(deltaSpread) > separationTolerance;
+
+        _output.WriteLine("[E2E12] --- TQM TICK PHASE SCALE BREAKING DIAGNOSTIC ---");
+        _output.WriteLine($"[E2E12] rawError               : {rawError:E6}");
+        _output.WriteLine($"[E2E12] normalizedError        : {normalizedError:E6}");
+        _output.WriteLine($"[E2E12] rawSpread              : {rawSpread:E6}");
+        _output.WriteLine($"[E2E12] normalizedSpread       : {normalizedSpread:E6}");
+        _output.WriteLine($"[E2E12] deltaError             : {deltaError:E6}");
+        _output.WriteLine($"[E2E12] deltaSpread            : {deltaSpread:E6}");
+        _output.WriteLine($"[E2E12] raw error/spread       : {rawError:E6} / {rawSpread:E6}");
+        _output.WriteLine($"[E2E12] normalized error/spread: {normalizedError:E6} / {normalizedSpread:E6}");
+        _output.WriteLine($"[E2E12] radius error/spread    : {radiusOnly.MeanError:E6} / {radiusOnly.MeanSpread:E6}");
+        _output.WriteLine($"[E2E12] raw-minus-normalized delta: {deltaError:E6} / {deltaSpread:E6}");
+        _output.WriteLine($"[E2E12] scale separation detected: {scaleSeparationDetected}");
+
+        Assert.False(IsInvalidDiagnosticValue(rawError), "Invalid rawError diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(normalizedError), "Invalid normalizedError diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(rawSpread), "Invalid rawSpread diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(normalizedSpread), "Invalid normalizedSpread diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(radiusOnly.MeanError), "Invalid radius error diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(radiusOnly.MeanSpread), "Invalid radius spread diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(deltaError), "Invalid deltaError diagnostic value.");
+        Assert.False(IsInvalidDiagnosticValue(deltaSpread), "Invalid deltaSpread diagnostic value.");
+        Assert.True(Math.Abs(deltaError) > separationTolerance || Math.Abs(deltaSpread) > separationTolerance,
+            "Raw-minus-normalized delta is below tolerance.");
+        if (rawError == normalizedError && rawSpread == normalizedSpread)
+            Assert.False(scaleSeparationDetected, "Identical raw/normalized metrics must not report separation.");
+        Assert.True(scaleSeparationDetected,
+            "Scale-breaking diagnostic did not distinguish raw vs normalized phase metrics.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    /// <summary>
+    /// Diagnostic guard checking whether rawTickPhase gains are robust to directness controls.
+    ///
+    /// Status:
+    /// diagnostic only.
+    /// </summary>
+    public void E2E13_TQM_RawTickPhase_OverDirectnessGuard()
+    {
+        const int binCount = 5;
+
+        var profileSet = new[]
+        {
+            new { Tag = "p1", Concentration = 0.86, RadiusScale = 0.86, SpacingScale = 0.9, Noise = 0.001, Oscillators = 129, Seed = 20301 },
+            new { Tag = "p2", Concentration = 0.92, RadiusScale = 0.92, SpacingScale = 1.0, Noise = 0.001, Oscillators = 129, Seed = 20302 },
+            new { Tag = "p3", Concentration = 0.98, RadiusScale = 0.98, SpacingScale = 1.1, Noise = 0.001, Oscillators = 129, Seed = 20303 },
+            new { Tag = "p4", Concentration = 1.04, RadiusScale = 1.04, SpacingScale = 0.9, Noise = 0.002, Oscillators = 129, Seed = 20304 },
+            new { Tag = "p5", Concentration = 1.10, RadiusScale = 1.10, SpacingScale = 1.0, Noise = 0.002, Oscillators = 129, Seed = 20305 },
+            new { Tag = "p6", Concentration = 1.16, RadiusScale = 1.16, SpacingScale = 1.1, Noise = 0.002, Oscillators = 129, Seed = 20306 },
+            new { Tag = "p7", Concentration = 0.94, RadiusScale = 0.90, SpacingScale = 1.2, Noise = 0.003, Oscillators = 193, Seed = 20307 },
+            new { Tag = "p8", Concentration = 1.06, RadiusScale = 1.08, SpacingScale = 0.8, Noise = 0.003, Oscillators = 193, Seed = 20308 },
+        };
+
+        var familyScales = new[]
+        {
+            new { Family = "small-scale", RadiusMultiplier = 0.25 },
+            new { Family = "large-scale", RadiusMultiplier = 3.00 },
+        };
+
+        var rowsRaw = new List<(string Family, string Tag, string Name, double KTarget, double Radius, double LocalOmegaRaw)>();
+        int seedOffset = 0;
+        foreach (var fam in familyScales)
+        {
+            foreach (var profile in profileSet)
+            {
+                double spacing = SimulationLatticeSpacing * profile.SpacingScale;
+                double tick = SimulationTimeTick * profile.SpacingScale;
+                double cEff = MeasureWavePropagationSpeed(spacing, tick);
+
+                SpatialMassEmergenceMetrics metrics = SimulateSpatialMassEmergence(
+                    concentrationAmplitude: profile.Concentration,
+                    cEff: cEff,
+                    latticeSpacing: spacing,
+                    oscillators: profile.Oscillators,
+                    steps: 6000,
+                    burnIn: 2000,
+                    radiusScale: profile.RadiusScale * fam.RadiusMultiplier,
+                    noiseAmplitude: profile.Noise,
+                    randomSeed: profile.Seed + seedOffset);
+
+                var simPlanck = PlanckConstants.FromSimulation(spacing, tick, metrics.TotalEnergy);
+                var simDerived = new DerivedConstants(simPlanck);
+                double gSim = simDerived.G;
+                double rawGEff = metrics.AccelerationProxy
+                    * metrics.EffectiveRadius * metrics.EffectiveRadius
+                    / Math.Max(metrics.EffectiveMass, 1e-30);
+                double kTarget = gSim / Math.Max(rawGEff, 1e-30);
+                double localOmegaRaw = metrics.AccelerationProxy / Math.Max(cEff, 1e-30);
+                double absoluteRadius = metrics.EffectiveRadius * fam.RadiusMultiplier;
+
+                rowsRaw.Add((
+                    fam.Family,
+                    profile.Tag,
+                    $"{fam.Family}-{profile.Tag}",
+                    kTarget,
+                    absoluteRadius,
+                    localOmegaRaw));
+            }
+
+            seedOffset += 1000;
+        }
+
+        Assert.True(rowsRaw.Count >= 12, "Over-directness guard requires sufficient rows.");
+
+        var tagOmegaAnchors = rowsRaw
+            .GroupBy(r => r.Tag)
+            .ToDictionary(g => g.Key, g => Median(g.Select(x => x.LocalOmegaRaw).ToArray()));
+        var familyRadiusMax = rowsRaw
+            .GroupBy(r => r.Family)
+            .ToDictionary(g => g.Key, g => g.Max(x => x.Radius));
+
+        var rows = rowsRaw
+            .Select(r =>
+            {
+                double comparableOmega = tagOmegaAnchors[r.Tag];
+                double rawTickPhase = comparableOmega * r.Radius;
+                double radiusNormFamily = r.Radius / Math.Max(familyRadiusMax[r.Family], 1e-30);
+                double kTargetScaleBroken = 1.0 + rawTickPhase;
+                return (
+                    r.Family,
+                    r.Tag,
+                    r.Name,
+                    KTarget: kTargetScaleBroken,
+                    r.Radius,
+                    LocalOmegaComparable: comparableOmega,
+                    RadiusNormFamily: radiusNormFamily,
+                    RawTickPhase: rawTickPhase);
+            })
+            .ToArray();
+
+        var shuffledRadiusByName = new Dictionary<string, double>(rows.Length, StringComparer.Ordinal);
+        var shuffledOmegaByName = new Dictionary<string, double>(rows.Length, StringComparer.Ordinal);
+        var globallyOrdered = rows.OrderBy(r => r.Name, StringComparer.Ordinal).ToArray();
+        int globalCount = globallyOrdered.Length;
+        for (int i = 0; i < globalCount; i++)
+        {
+            shuffledRadiusByName[globallyOrdered[i].Name] = globallyOrdered[(i + 7) % globalCount].Radius;
+            shuffledOmegaByName[globallyOrdered[i].Name] = globallyOrdered[(i + 11) % globalCount].LocalOmegaComparable;
+        }
+
+        static double DeterministicNoise(string name)
+        {
+            int checksum = name.Sum(c => c);
+            return Math.Sin(checksum * 0.173) * 0.01;
+        }
+
+        (double MeanError, double MeanSpread) EvaluateOneDirection(
+            string trainFamily,
+            string transferFamily,
+            string proxyName,
+            Func<(string Family, string Tag, string Name, double KTarget, double Radius, double LocalOmegaComparable, double RadiusNormFamily, double RawTickPhase), double, double> selector)
+        {
+            var trainRows = rows.Where(r => r.Family == trainFamily).ToArray();
+            var transferRows = rows.Where(r => r.Family == transferFamily).ToArray();
+            Assert.True(trainRows.Length >= 6, $"Train set too small for {proxyName} ({trainFamily}->{transferFamily}).");
+            Assert.True(transferRows.Length >= 6, $"Transfer set too small for {proxyName} ({trainFamily}->{transferFamily}).");
+
+            double maxRadiusTrain = trainRows.Max(r => r.Radius);
+            var xTrain = trainRows.Select(r => selector(r, maxRadiusTrain)).ToArray();
+            var yTrain = trainRows.Select(r => r.KTarget).ToArray();
+            Assert.True(xTrain.All(double.IsFinite), $"Non-finite train proxy values in {proxyName}.");
+            Assert.True(yTrain.All(double.IsFinite), $"Non-finite train targets in {proxyName}.");
+            Assert.True(xTrain.Length >= binCount, $"Insufficient train rows for {proxyName}.");
+
+            double xMean = Mean(xTrain);
+            double yMean = Mean(yTrain);
+            double varX = 0.0;
+            double covXY = 0.0;
+            for (int i = 0; i < xTrain.Length; i++)
+            {
+                double dx = xTrain[i] - xMean;
+                varX += dx * dx;
+                covXY += dx * (yTrain[i] - yMean);
+            }
+
+            double slope = varX > 1e-24 ? covXY / varX : 0.0;
+            double intercept = yMean - slope * xMean;
+
+            var transferErrors = new double[transferRows.Length];
+            for (int i = 0; i < transferRows.Length; i++)
+            {
+                var r = transferRows[i];
+                double x = selector(r, maxRadiusTrain);
+                double kPred = intercept + slope * x;
+                transferErrors[i] = Math.Abs(kPred - r.KTarget) / Math.Max(r.KTarget, 1e-30);
+            }
+
+            return (Mean(transferErrors), RelativeSpread(transferErrors));
+        }
+
+        (double MeanError, double MeanSpread) EvaluateProxy(
+            string proxyName,
+            Func<(string Family, string Tag, string Name, double KTarget, double Radius, double LocalOmegaComparable, double RadiusNormFamily, double RawTickPhase), double, double> selector)
+        {
+            return EvaluateOneDirection("small-scale", "large-scale", proxyName, selector);
+        }
+
+        var raw = EvaluateProxy("rawTickPhase", (r, _) => r.RawTickPhase);
+        var noisyRaw = EvaluateProxy("noisyRawTickPhase", (r, _) => r.RawTickPhase * (1.0 + DeterministicNoise(r.Name)));
+        var shuffledRadiusRaw = EvaluateProxy("shuffledRadiusRaw", (r, _) => r.LocalOmegaComparable * shuffledRadiusByName[r.Name]);
+        var shuffledOmegaRaw = EvaluateProxy("shuffledOmegaRaw", (r, _) => shuffledOmegaByName[r.Name] * r.Radius);
+        var normalized = EvaluateProxy("normalizedTickPhase", (r, _) => r.LocalOmegaComparable * r.RadiusNormFamily);
+
+        _output.WriteLine("[E2E13] --- TQM RAW TICK PHASE OVER-DIRECTNESS GUARD ---");
+        _output.WriteLine($"[E2E13] raw error/spread               : {raw.MeanError:E6} / {raw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E13] noisyRaw error/spread          : {noisyRaw.MeanError:E6} / {noisyRaw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E13] shuffledRadiusRaw error/spread : {shuffledRadiusRaw.MeanError:E6} / {shuffledRadiusRaw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E13] shuffledOmegaRaw error/spread  : {shuffledOmegaRaw.MeanError:E6} / {shuffledOmegaRaw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E13] normalized error/spread        : {normalized.MeanError:E6} / {normalized.MeanSpread:E6}");
+
+        if (raw.MeanError == 0.0)
+            _output.WriteLine("[E2E13] rawTickPhase may be target-adjacent in this synthetic setup");
+
+        Assert.True(double.IsFinite(raw.MeanError) && double.IsFinite(raw.MeanSpread),
+            "Raw tick-phase metrics must be finite.");
+        Assert.True(noisyRaw.MeanError >= raw.MeanError - 1e-12,
+            "noisyRaw should degrade relative to raw.");
+        Assert.True(shuffledRadiusRaw.MeanError >= raw.MeanError - 1e-12,
+            "shuffledRadiusRaw should degrade relative to raw.");
+        Assert.True(shuffledOmegaRaw.MeanError >= raw.MeanError - 1e-12,
+            "shuffledOmegaRaw should degrade relative to raw.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    /// <summary>
+    /// Diagnostic guard testing rawTickPhase utility against an independently constructed target channel.
+    ///
+    /// Status:
+    /// diagnostic only; no closure claim.
+    /// </summary>
+    public void E2E14_TQM_TickPhase_IndependentTargetGuard()
+    {
+        const int binCount = 5;
+
+        var profileSet = new[]
+        {
+            new { Tag = "p1", Concentration = 0.86, RadiusScale = 0.86, SpacingScale = 0.9, Noise = 0.001, Oscillators = 129, Seed = 20301 },
+            new { Tag = "p2", Concentration = 0.92, RadiusScale = 0.92, SpacingScale = 1.0, Noise = 0.001, Oscillators = 129, Seed = 20302 },
+            new { Tag = "p3", Concentration = 0.98, RadiusScale = 0.98, SpacingScale = 1.1, Noise = 0.001, Oscillators = 129, Seed = 20303 },
+            new { Tag = "p4", Concentration = 1.04, RadiusScale = 1.04, SpacingScale = 0.9, Noise = 0.002, Oscillators = 129, Seed = 20304 },
+            new { Tag = "p5", Concentration = 1.10, RadiusScale = 1.10, SpacingScale = 1.0, Noise = 0.002, Oscillators = 129, Seed = 20305 },
+            new { Tag = "p6", Concentration = 1.16, RadiusScale = 1.16, SpacingScale = 1.1, Noise = 0.002, Oscillators = 129, Seed = 20306 },
+            new { Tag = "p7", Concentration = 0.94, RadiusScale = 0.90, SpacingScale = 1.2, Noise = 0.003, Oscillators = 193, Seed = 20307 },
+            new { Tag = "p8", Concentration = 1.06, RadiusScale = 1.08, SpacingScale = 0.8, Noise = 0.003, Oscillators = 193, Seed = 20308 },
+        };
+
+        var familyScales = new[]
+        {
+            new { Family = "small-scale", RadiusMultiplier = 0.25 },
+            new { Family = "large-scale", RadiusMultiplier = 3.00 },
+        };
+
+        var rowsRaw = new List<(string Family, string Tag, string Name, double Radius, double LocalOmegaRaw, double TotalEnergy, double EnergyWeightedRadius, double CenterDensity, double OuterDensity, double PhaseGradient)>();
+        int seedOffset = 0;
+        foreach (var fam in familyScales)
+        {
+            foreach (var profile in profileSet)
+            {
+                double spacing = SimulationLatticeSpacing * profile.SpacingScale;
+                double tick = SimulationTimeTick * profile.SpacingScale;
+                double cEff = MeasureWavePropagationSpeed(spacing, tick);
+
+                SpatialMassEmergenceMetrics metrics = SimulateSpatialMassEmergence(
+                    concentrationAmplitude: profile.Concentration,
+                    cEff: cEff,
+                    latticeSpacing: spacing,
+                    oscillators: profile.Oscillators,
+                    steps: 6000,
+                    burnIn: 2000,
+                    radiusScale: profile.RadiusScale * fam.RadiusMultiplier,
+                    noiseAmplitude: profile.Noise,
+                    randomSeed: profile.Seed + seedOffset);
+
+                rowsRaw.Add((
+                    fam.Family,
+                    profile.Tag,
+                    $"{fam.Family}-{profile.Tag}",
+                    Radius: metrics.EffectiveRadius * fam.RadiusMultiplier,
+                    LocalOmegaRaw: metrics.AccelerationProxy / Math.Max(cEff, 1e-30),
+                    metrics.TotalEnergy,
+                    metrics.EnergyWeightedRadius,
+                    metrics.CenterEnergyDensity,
+                    metrics.OuterEnergyDensity,
+                    metrics.PhaseGradient));
+            }
+
+            seedOffset += 1000;
+        }
+
+        Assert.True(rowsRaw.Count >= 12, "Independent-target guard requires sufficient rows.");
+
+        var tagOmegaAnchors = rowsRaw
+            .GroupBy(r => r.Tag)
+            .ToDictionary(g => g.Key, g => Median(g.Select(x => x.LocalOmegaRaw).ToArray()));
+        var familyRadiusMax = rowsRaw
+            .GroupBy(r => r.Family)
+            .ToDictionary(g => g.Key, g => g.Max(x => x.Radius));
+
+        double energyRef = Math.Max(Median(rowsRaw.Select(r => r.TotalEnergy).ToArray()), 1e-30);
+        double ewRadiusRef = Math.Max(Median(rowsRaw.Select(r => r.EnergyWeightedRadius).ToArray()), 1e-30);
+        double contrastRef = Math.Max(Median(rowsRaw.Select(r => r.CenterDensity / Math.Max(r.OuterDensity, 1e-30)).ToArray()), 1e-30);
+        double phaseRef = Math.Max(Median(rowsRaw.Select(r => Math.Abs(r.PhaseGradient)).ToArray()), 1e-30);
+        double omegaRef = Math.Max(Median(rowsRaw.Select(r => Math.Abs(r.LocalOmegaRaw)).ToArray()), 1e-30);
+
+        var rows = rowsRaw
+            .Select(r =>
+            {
+                double comparableOmega = tagOmegaAnchors[r.Tag];
+                double rawTickPhase = comparableOmega * r.Radius;
+                double radiusNormFamily = r.Radius / Math.Max(familyRadiusMax[r.Family], 1e-30);
+
+                // Independent target channel: energy/path/contrast blend (not omega*radius).
+                double energyTerm = Math.Log(1.0 + r.TotalEnergy / energyRef);
+                double pathTerm = Math.Log(1.0 + r.EnergyWeightedRadius / ewRadiusRef);
+                double contrast = r.CenterDensity / Math.Max(r.OuterDensity, 1e-30);
+                double contrastTerm = Math.Log(1.0 + contrast / contrastRef);
+                double phaseTerm = Math.Log(1.0 + Math.Abs(r.PhaseGradient) / phaseRef);
+                double phasePathTerm = Math.Log(1.0 + (Math.Abs(r.PhaseGradient) * r.EnergyWeightedRadius) / Math.Max(phaseRef * ewRadiusRef, 1e-30));
+                double omegaTerm = Math.Log(1.0 + Math.Abs(r.LocalOmegaRaw) / omegaRef);
+                double kTargetIndependent = 0.30 + 0.30 * phasePathTerm + 0.25 * omegaTerm + 0.12 * energyTerm + 0.06 * pathTerm + 0.05 * contrastTerm + 0.06 * phaseTerm;
+
+                return (
+                    r.Family,
+                    r.Name,
+                    KTarget: kTargetIndependent,
+                    r.Radius,
+                    LocalOmegaComparable: comparableOmega,
+                    RadiusNormFamily: radiusNormFamily,
+                    RawTickPhase: rawTickPhase);
+            })
+            .ToArray();
+
+        var orderedByName = rows.OrderBy(r => r.Name, StringComparer.Ordinal).ToArray();
+        int n = orderedByName.Length;
+        var shuffledRadiusByName = new Dictionary<string, double>(n, StringComparer.Ordinal);
+        var shuffledOmegaByName = new Dictionary<string, double>(n, StringComparer.Ordinal);
+        for (int i = 0; i < n; i++)
+        {
+            shuffledRadiusByName[orderedByName[i].Name] = orderedByName[(i + 3) % n].Radius;
+            shuffledOmegaByName[orderedByName[i].Name] = orderedByName[(i + 5) % n].LocalOmegaComparable;
+        }
+
+        (double MeanError, double MeanSpread) EvaluateOneDirection(
+            string trainFamily,
+            string transferFamily,
+            string proxyName,
+            Func<(string Family, string Name, double KTarget, double Radius, double LocalOmegaComparable, double RadiusNormFamily, double RawTickPhase), double, double> selector)
+        {
+            var trainRows = rows.Where(r => r.Family == trainFamily).ToArray();
+            var transferRows = rows.Where(r => r.Family == transferFamily).ToArray();
+            Assert.True(trainRows.Length >= 6, $"Train set too small for {proxyName} ({trainFamily}->{transferFamily}).");
+            Assert.True(transferRows.Length >= 6, $"Transfer set too small for {proxyName} ({trainFamily}->{transferFamily}).");
+
+            double maxRadiusTrain = trainRows.Max(r => r.Radius);
+            var xTrain = trainRows.Select(r => selector(r, maxRadiusTrain)).ToArray();
+            var yTrain = trainRows.Select(r => r.KTarget).ToArray();
+            Assert.True(xTrain.All(double.IsFinite), $"Non-finite train proxy values in {proxyName}.");
+            Assert.True(yTrain.All(double.IsFinite), $"Non-finite train targets in {proxyName}.");
+            Assert.True(xTrain.Length >= binCount, $"Insufficient train rows for {proxyName}.");
+            double kBase = Median(yTrain);
+
+            var sorted = xTrain.OrderBy(v => v).ToArray();
+            var cuts = new double[binCount - 1];
+            for (int b = 1; b < binCount; b++)
+            {
+                int idx = (b * sorted.Length) / binCount;
+                cuts[b - 1] = sorted[Math.Min(idx, sorted.Length - 1)];
+            }
+
+            int GetBin(double x)
+            {
+                for (int i = 0; i < cuts.Length; i++)
+                {
+                    if (x < cuts[i]) return i;
+                }
+
+                return cuts.Length;
+            }
+
+            var means = new double[binCount];
+            var counts = new int[binCount];
+            for (int i = 0; i < trainRows.Length; i++)
+            {
+                int bin = GetBin(xTrain[i]);
+                means[bin] += yTrain[i];
+                counts[bin]++;
+            }
+
+            for (int b = 0; b < binCount; b++)
+                means[b] = counts[b] > 0 ? means[b] / counts[b] : kBase;
+
+            var transferErrors = new double[transferRows.Length];
+            for (int i = 0; i < transferRows.Length; i++)
+            {
+                var r = transferRows[i];
+                double x = selector(r, maxRadiusTrain);
+                int bin = GetBin(x);
+                double kPred = means[bin];
+                transferErrors[i] = Math.Abs(kPred - r.KTarget) / Math.Max(Math.Abs(r.KTarget), 1e-30);
+            }
+
+            return (Mean(transferErrors), RelativeSpread(transferErrors));
+        }
+
+        (double MeanError, double MeanSpread) EvaluateProxy(
+            string proxyName,
+            Func<(string Family, string Name, double KTarget, double Radius, double LocalOmegaComparable, double RadiusNormFamily, double RawTickPhase), double, double> selector)
+        {
+            var forward = EvaluateOneDirection("small-scale", "large-scale", proxyName, selector);
+            var backward = EvaluateOneDirection("large-scale", "small-scale", proxyName, selector);
+            return ((forward.MeanError + backward.MeanError) * 0.5, (forward.MeanSpread + backward.MeanSpread) * 0.5);
+        }
+
+        var raw = EvaluateProxy("rawTickPhase", (r, _) => r.RawTickPhase);
+        var normalized = EvaluateProxy("normalizedTickPhase", (r, _) => r.LocalOmegaComparable * r.RadiusNormFamily);
+        var radius = EvaluateProxy("radiusOnly", (r, _) => r.Radius);
+        var shuffledRaw = EvaluateProxy("shuffledRaw", (r, _) =>
+        {
+            double sign = (r.Name.Sum(c => c) & 1) == 0 ? 1.0 : -1.0;
+            return shuffledOmegaByName[r.Name] * shuffledRadiusByName[r.Name] * sign;
+        });
+
+        bool shuffledDegrades = shuffledRaw.MeanError > raw.MeanError || shuffledRaw.MeanSpread > raw.MeanSpread;
+        bool independenceResult = shuffledDegrades && raw.MeanError > 0.0;
+
+        _output.WriteLine("[E2E14] --- TQM TICK PHASE INDEPENDENT TARGET GUARD ---");
+        _output.WriteLine($"[E2E14] raw error/spread         : {raw.MeanError:E6} / {raw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E14] normalized error/spread  : {normalized.MeanError:E6} / {normalized.MeanSpread:E6}");
+        _output.WriteLine($"[E2E14] radius error/spread      : {radius.MeanError:E6} / {radius.MeanSpread:E6}");
+        _output.WriteLine($"[E2E14] shuffledRaw error/spread : {shuffledRaw.MeanError:E6} / {shuffledRaw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E14] independence result      : {independenceResult}");
+
+        Assert.True(double.IsFinite(raw.MeanError) && double.IsFinite(raw.MeanSpread));
+        Assert.True(double.IsFinite(normalized.MeanError) && double.IsFinite(normalized.MeanSpread));
+        Assert.True(double.IsFinite(radius.MeanError) && double.IsFinite(radius.MeanSpread));
+        Assert.True(double.IsFinite(shuffledRaw.MeanError) && double.IsFinite(shuffledRaw.MeanSpread));
+        Assert.True(shuffledDegrades,
+            "shuffledRaw should degrade vs raw.");
+        Assert.True(raw.MeanError > 0.0,
+            "raw should not be exactly zero-error for independent target.");
+    }
+
+    [Trait("Category", "PhysicsValidation")]
+    [Fact]
+    /// <summary>
+    /// Diagnostic check whether tick-phase adds information beyond radius for an independent target channel.
+    ///
+    /// Status:
+    /// diagnostic only; no theorem-level or closure claim.
+    /// </summary>
+    public void E2E15_TQM_TickPhase_BeyondRadiusIndependentTarget()
+    {
+        const int binCount = 5;
+
+        var profileSet = new[]
+        {
+            new { Tag = "p1", Concentration = 0.86, RadiusScale = 0.86, SpacingScale = 0.9, Noise = 0.001, Oscillators = 129, Seed = 20301 },
+            new { Tag = "p2", Concentration = 0.92, RadiusScale = 0.92, SpacingScale = 1.0, Noise = 0.001, Oscillators = 129, Seed = 20302 },
+            new { Tag = "p3", Concentration = 0.98, RadiusScale = 0.98, SpacingScale = 1.1, Noise = 0.001, Oscillators = 129, Seed = 20303 },
+            new { Tag = "p4", Concentration = 1.04, RadiusScale = 1.04, SpacingScale = 0.9, Noise = 0.002, Oscillators = 129, Seed = 20304 },
+            new { Tag = "p5", Concentration = 1.10, RadiusScale = 1.10, SpacingScale = 1.0, Noise = 0.002, Oscillators = 129, Seed = 20305 },
+            new { Tag = "p6", Concentration = 1.16, RadiusScale = 1.16, SpacingScale = 1.1, Noise = 0.002, Oscillators = 129, Seed = 20306 },
+            new { Tag = "p7", Concentration = 0.94, RadiusScale = 0.90, SpacingScale = 1.2, Noise = 0.003, Oscillators = 193, Seed = 20307 },
+            new { Tag = "p8", Concentration = 1.06, RadiusScale = 1.08, SpacingScale = 0.8, Noise = 0.003, Oscillators = 193, Seed = 20308 },
+        };
+
+        var familyScales = new[]
+        {
+            new { Family = "small-scale", RadiusMultiplier = 0.25 },
+            new { Family = "large-scale", RadiusMultiplier = 3.00 },
+        };
+
+        var rowsRaw = new List<(string Family, string Tag, string Name, double Radius, double LocalOmegaRaw, double TotalEnergy, double EnergyWeightedRadius, double CenterDensity, double OuterDensity, double PhaseGradient)>();
+        int seedOffset = 0;
+        foreach (var fam in familyScales)
+        {
+            foreach (var profile in profileSet)
+            {
+                double spacing = SimulationLatticeSpacing * profile.SpacingScale;
+                double tick = SimulationTimeTick * profile.SpacingScale;
+                double cEff = MeasureWavePropagationSpeed(spacing, tick);
+
+                SpatialMassEmergenceMetrics metrics = SimulateSpatialMassEmergence(
+                    concentrationAmplitude: profile.Concentration,
+                    cEff: cEff,
+                    latticeSpacing: spacing,
+                    oscillators: profile.Oscillators,
+                    steps: 6000,
+                    burnIn: 2000,
+                    radiusScale: profile.RadiusScale * fam.RadiusMultiplier,
+                    noiseAmplitude: profile.Noise,
+                    randomSeed: profile.Seed + seedOffset);
+
+                rowsRaw.Add((
+                    fam.Family,
+                    profile.Tag,
+                    $"{fam.Family}-{profile.Tag}",
+                    Radius: metrics.EffectiveRadius * fam.RadiusMultiplier,
+                    LocalOmegaRaw: metrics.AccelerationProxy / Math.Max(cEff, 1e-30),
+                    metrics.TotalEnergy,
+                    metrics.EnergyWeightedRadius,
+                    metrics.CenterEnergyDensity,
+                    metrics.OuterEnergyDensity,
+                    metrics.PhaseGradient));
+            }
+
+            seedOffset += 1000;
+        }
+
+        Assert.True(rowsRaw.Count >= 12, "Beyond-radius diagnostic requires sufficient rows.");
+
+        var tagOmegaAnchors = rowsRaw
+            .GroupBy(r => r.Tag)
+            .ToDictionary(g => g.Key, g => Median(g.Select(x => x.LocalOmegaRaw).ToArray()));
+        var familyRadiusMax = rowsRaw
+            .GroupBy(r => r.Family)
+            .ToDictionary(g => g.Key, g => g.Max(x => x.Radius));
+
+        double energyRef = Math.Max(Median(rowsRaw.Select(r => r.TotalEnergy).ToArray()), 1e-30);
+        double ewRadiusRef = Math.Max(Median(rowsRaw.Select(r => r.EnergyWeightedRadius).ToArray()), 1e-30);
+        double contrastRef = Math.Max(Median(rowsRaw.Select(r => r.CenterDensity / Math.Max(r.OuterDensity, 1e-30)).ToArray()), 1e-30);
+        double phaseRef = Math.Max(Median(rowsRaw.Select(r => Math.Abs(r.PhaseGradient)).ToArray()), 1e-30);
+        double omegaRef = Math.Max(Median(rowsRaw.Select(r => Math.Abs(r.LocalOmegaRaw)).ToArray()), 1e-30);
+
+        var rows = rowsRaw
+            .Select(r =>
+            {
+                double comparableOmega = tagOmegaAnchors[r.Tag];
+                double rawTickPhase = comparableOmega * r.Radius;
+                double radiusNormFamily = r.Radius / Math.Max(familyRadiusMax[r.Family], 1e-30);
+
+                double energyTerm = Math.Log(1.0 + r.TotalEnergy / energyRef);
+                double pathTerm = Math.Log(1.0 + r.EnergyWeightedRadius / ewRadiusRef);
+                double contrast = r.CenterDensity / Math.Max(r.OuterDensity, 1e-30);
+                double contrastTerm = Math.Log(1.0 + contrast / contrastRef);
+                double phaseTerm = Math.Log(1.0 + Math.Abs(r.PhaseGradient) / phaseRef);
+                double phasePathTerm = Math.Log(1.0 + (Math.Abs(r.PhaseGradient) * r.EnergyWeightedRadius) / Math.Max(phaseRef * ewRadiusRef, 1e-30));
+                double omegaTerm = Math.Log(1.0 + Math.Abs(r.LocalOmegaRaw) / omegaRef);
+                double kTargetIndependent = 0.30 + 0.30 * phasePathTerm + 0.25 * omegaTerm + 0.12 * energyTerm + 0.06 * pathTerm + 0.05 * contrastTerm + 0.06 * phaseTerm;
+
+                return (
+                    r.Family,
+                    r.Name,
+                    KTarget: kTargetIndependent,
+                    r.Radius,
+                    LocalOmegaComparable: comparableOmega,
+                    RadiusNormFamily: radiusNormFamily,
+                    RawTickPhase: rawTickPhase);
+            })
+            .ToArray();
+
+        var shuffledRadiusByName = new Dictionary<string, double>(rows.Length, StringComparer.Ordinal);
+        var shuffledOmegaByName = new Dictionary<string, double>(rows.Length, StringComparer.Ordinal);
+        var globallyOrdered = rows.OrderBy(r => r.Name, StringComparer.Ordinal).ToArray();
+        int globalCount = globallyOrdered.Length;
+        for (int i = 0; i < globalCount; i++)
+        {
+            shuffledRadiusByName[globallyOrdered[i].Name] = globallyOrdered[(i + 7) % globalCount].Radius;
+            shuffledOmegaByName[globallyOrdered[i].Name] = globallyOrdered[(i + 11) % globalCount].LocalOmegaComparable;
+        }
+
+        static (double[] Cuts, double[] Means, double Fallback) FitBinnedModel(
+            double[] xValues,
+            double[] yValues,
+            int bins)
+        {
+            double fallback = Median(yValues);
+            var sorted = xValues.OrderBy(v => v).ToArray();
+            var cuts = new double[bins - 1];
+            for (int b = 1; b < bins; b++)
+            {
+                int idx = (b * sorted.Length) / bins;
+                cuts[b - 1] = sorted[Math.Min(idx, sorted.Length - 1)];
+            }
+
+            int GetBin(double x)
+            {
+                for (int i = 0; i < cuts.Length; i++)
+                {
+                    if (x < cuts[i]) return i;
+                }
+
+                return cuts.Length;
+            }
+
+            var means = new double[bins];
+            var counts = new int[bins];
+            for (int i = 0; i < xValues.Length; i++)
+            {
+                int bin = GetBin(xValues[i]);
+                means[bin] += yValues[i];
+                counts[bin]++;
+            }
+
+            for (int b = 0; b < bins; b++)
+                means[b] = counts[b] > 0 ? means[b] / counts[b] : fallback;
+
+            return (cuts, means, fallback);
+        }
+
+        static double PredictBinned(
+            (double[] Cuts, double[] Means, double Fallback) model,
+            double x)
+        {
+            if (!double.IsFinite(x))
+                return model.Fallback;
+
+            for (int i = 0; i < model.Cuts.Length; i++)
+            {
+                if (x < model.Cuts[i]) return model.Means[i];
+            }
+
+            return model.Means[model.Means.Length - 1];
+        }
+
+        (
+            (double MeanError, double MeanSpread) Radius,
+            (double MeanError, double MeanSpread) Raw,
+            (double MeanError, double MeanSpread) Normalized,
+            (double MeanError, double MeanSpread) RadiusPlusRaw,
+            (double MeanError, double MeanSpread) RadiusPlusNormalized,
+            (double MeanError, double MeanSpread) ShuffledControl
+        ) EvaluateOneDirection(
+            string trainFamily,
+            string transferFamily)
+        {
+            var trainRows = rows.Where(r => r.Family == trainFamily).ToArray();
+            var transferRows = rows.Where(r => r.Family == transferFamily).ToArray();
+            Assert.True(trainRows.Length >= 6, $"Train set too small ({trainFamily}->{transferFamily}).");
+            Assert.True(transferRows.Length >= 6, $"Transfer set too small ({trainFamily}->{transferFamily}).");
+
+            double maxRadiusTrain = trainRows.Max(r => r.Radius);
+
+            double[] xRadiusTrain = trainRows.Select(r => r.Radius).ToArray();
+            double[] xRawTrain = trainRows.Select(r => r.RawTickPhase).ToArray();
+            double[] xNormTrain = trainRows.Select(r => r.LocalOmegaComparable * r.RadiusNormFamily).ToArray();
+            double[] xShuffleTrain = trainRows.Select(r =>
+            {
+                double sign = (r.Name.Sum(c => c) & 1) == 0 ? 1.0 : -1.0;
+                return shuffledOmegaByName[r.Name] * shuffledRadiusByName[r.Name] * sign;
+            }).ToArray();
+            double[] yTrain = trainRows.Select(r => r.KTarget).ToArray();
+
+            Assert.True(xRadiusTrain.All(double.IsFinite));
+            Assert.True(xRawTrain.All(double.IsFinite));
+            Assert.True(xNormTrain.All(double.IsFinite));
+            Assert.True(xShuffleTrain.All(double.IsFinite));
+            Assert.True(yTrain.All(double.IsFinite));
+
+            var modelRadius = FitBinnedModel(xRadiusTrain, yTrain, binCount);
+            var modelRaw = FitBinnedModel(xRawTrain, yTrain, binCount);
+            var modelNorm = FitBinnedModel(xNormTrain, yTrain, binCount);
+            var modelShuffle = FitBinnedModel(xShuffleTrain, yTrain, binCount);
+
+            double[] radiusResidualTrain = trainRows
+                .Select(r => r.KTarget - PredictBinned(modelRadius, r.Radius))
+                .ToArray();
+            var modelResidualRaw = FitBinnedModel(xRawTrain, radiusResidualTrain, binCount);
+            var modelResidualNorm = FitBinnedModel(xNormTrain, radiusResidualTrain, binCount);
+            var modelResidualShuffle = FitBinnedModel(xShuffleTrain, radiusResidualTrain, binCount);
+
+            var radiusErrors = new double[transferRows.Length];
+            var rawErrors = new double[transferRows.Length];
+            var normalizedErrors = new double[transferRows.Length];
+            var radiusPlusRawErrors = new double[transferRows.Length];
+            var radiusPlusNormalizedErrors = new double[transferRows.Length];
+            var shuffledControlErrors = new double[transferRows.Length];
+
+            for (int i = 0; i < transferRows.Length; i++)
+            {
+                var r = transferRows[i];
+                double xRaw = r.RawTickPhase;
+                double xNorm = r.LocalOmegaComparable * r.RadiusNormFamily;
+                double xShuffle = shuffledOmegaByName[r.Name] * shuffledRadiusByName[r.Name] * (((r.Name.Sum(c => c) & 1) == 0) ? 1.0 : -1.0);
+
+                double predRadius = PredictBinned(modelRadius, r.Radius);
+                double predRaw = PredictBinned(modelRaw, xRaw);
+                double predNorm = PredictBinned(modelNorm, xNorm);
+                double predRadiusPlusRaw = predRadius + PredictBinned(modelResidualRaw, xRaw);
+                double predRadiusPlusNorm = predRadius + PredictBinned(modelResidualNorm, xNorm);
+                double predShuffleControl = predRadius + PredictBinned(modelResidualShuffle, xShuffle);
+
+                double denom = Math.Max(Math.Abs(r.KTarget), 1e-30);
+                radiusErrors[i] = Math.Abs(predRadius - r.KTarget) / denom;
+                rawErrors[i] = Math.Abs(predRaw - r.KTarget) / denom;
+                normalizedErrors[i] = Math.Abs(predNorm - r.KTarget) / denom;
+                radiusPlusRawErrors[i] = Math.Abs(predRadiusPlusRaw - r.KTarget) / denom;
+                radiusPlusNormalizedErrors[i] = Math.Abs(predRadiusPlusNorm - r.KTarget) / denom;
+                shuffledControlErrors[i] = Math.Abs(predShuffleControl - r.KTarget) / denom;
+            }
+
+            return (
+                Radius: (Mean(radiusErrors), RelativeSpread(radiusErrors)),
+                Raw: (Mean(rawErrors), RelativeSpread(rawErrors)),
+                Normalized: (Mean(normalizedErrors), RelativeSpread(normalizedErrors)),
+                RadiusPlusRaw: (Mean(radiusPlusRawErrors), RelativeSpread(radiusPlusRawErrors)),
+                RadiusPlusNormalized: (Mean(radiusPlusNormalizedErrors), RelativeSpread(radiusPlusNormalizedErrors)),
+                ShuffledControl: (Mean(shuffledControlErrors), RelativeSpread(shuffledControlErrors))
+            );
+        }
+
+        var forward = EvaluateOneDirection("small-scale", "large-scale");
+        var backward = EvaluateOneDirection("large-scale", "small-scale");
+
+        static (double MeanError, double MeanSpread) MeanMetric(
+            (double MeanError, double MeanSpread) a,
+            (double MeanError, double MeanSpread) b) =>
+            ((a.MeanError + b.MeanError) * 0.5, (a.MeanSpread + b.MeanSpread) * 0.5);
+
+        var radius = MeanMetric(forward.Radius, backward.Radius);
+        var raw = MeanMetric(forward.Raw, backward.Raw);
+        var normalized = MeanMetric(forward.Normalized, backward.Normalized);
+        var radiusPlusRaw = MeanMetric(forward.RadiusPlusRaw, backward.RadiusPlusRaw);
+        var radiusPlusNormalized = MeanMetric(forward.RadiusPlusNormalized, backward.RadiusPlusNormalized);
+        var shuffledControl = MeanMetric(forward.ShuffledControl, backward.ShuffledControl);
+        double extraGainOverRadius = radius.MeanError - radiusPlusRaw.MeanError;
+        bool shuffledControlNotOutperform =
+            shuffledControl.MeanError >= radiusPlusRaw.MeanError ||
+            shuffledControl.MeanSpread >= radiusPlusRaw.MeanSpread;
+
+        _output.WriteLine("[E2E15] --- TQM TICK PHASE BEYOND RADIUS INDEPENDENT TARGET ---");
+        _output.WriteLine($"[E2E15] radius error/spread                : {radius.MeanError:E6} / {radius.MeanSpread:E6}");
+        _output.WriteLine($"[E2E15] raw error/spread                   : {raw.MeanError:E6} / {raw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E15] normalized error/spread            : {normalized.MeanError:E6} / {normalized.MeanSpread:E6}");
+        _output.WriteLine($"[E2E15] radiusPlusRaw error/spread         : {radiusPlusRaw.MeanError:E6} / {radiusPlusRaw.MeanSpread:E6}");
+        _output.WriteLine($"[E2E15] radiusPlusNormalized error/spread  : {radiusPlusNormalized.MeanError:E6} / {radiusPlusNormalized.MeanSpread:E6}");
+        _output.WriteLine($"[E2E15] shuffled control error/spread      : {shuffledControl.MeanError:E6} / {shuffledControl.MeanSpread:E6}");
+        _output.WriteLine($"[E2E15] extra gain over radius             : {extraGainOverRadius:E6}");
+
+        Assert.True(double.IsFinite(radius.MeanError) && double.IsFinite(radius.MeanSpread));
+        Assert.True(double.IsFinite(raw.MeanError) && double.IsFinite(raw.MeanSpread));
+        Assert.True(double.IsFinite(normalized.MeanError) && double.IsFinite(normalized.MeanSpread));
+        Assert.True(double.IsFinite(radiusPlusRaw.MeanError) && double.IsFinite(radiusPlusRaw.MeanSpread));
+        Assert.True(double.IsFinite(radiusPlusNormalized.MeanError) && double.IsFinite(radiusPlusNormalized.MeanSpread));
+        Assert.True(double.IsFinite(shuffledControl.MeanError) && double.IsFinite(shuffledControl.MeanSpread));
+        Assert.True(shuffledControlNotOutperform,
+            "Shuffled control should not outperform radiusPlusRaw.");
+    }
+
     private static double[] SolveLinearSystem(double[,] matrix, double[] vector)
     {
         int n = vector.Length;

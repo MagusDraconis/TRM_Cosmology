@@ -43,6 +43,20 @@ All statements below are review-safe: **diagnostic**, **candidate**, or **tested
 - Gains are often concentrated in specific stress cases rather than uniform.
 - First-principles closure is still open.
 
+### E2E10–E2E15 tick-phase micro compatibility checks
+
+- E2E10–E2E12 showed **raw tick-phase compatibility** in synthetic setups.
+- E2E13 detected a **possible target-adjacency risk** in direct proxy construction.
+- E2E14 independent-target guard removed the **zero-error artifact**.
+- E2E15 showed tickPhase does **not** improve beyond `radiusOnly` for the independent target channel.
+- Interpretation: **diagnostic compatibility only**, not a micro-derivation.
+
+Claim boundaries:
+- no theorem-level derivation
+- no emergent gravity closure claim
+- no baseline activation
+- SPARC `PhaseProxy` remains residual diagnostic only
+
 ---
 
 ## RAR17–RAR22 (SPARC residual diagnostics)
@@ -55,6 +69,26 @@ All statements below are review-safe: **diagnostic**, **candidate**, or **tested
 | **RAR20** outer-inner takt synchronization | diagnostic + candidate | Synchronization proxy family shows non-trivial residual structure signal. | Proxy-level evidence only. |
 | **RAR21** global disk-coherence scan | diagnostic | Coherence/shear proxies capture part of residual variation, with mixed net impact. | Exploratory proxy scan. |
 | **RAR22** worst-galaxy geometry variation | candidate (exploratory) | Distributed/multi-center variants can help specific worst galaxies; smooth distributed field is now train-width-fitted and frozen for evaluation. | Exploratory geometry diagnostics; not core TRM path. |
+
+### RAR32–RAR43 PhaseProxy residual diagnostics
+
+- `rawPhase = omega * radiusKpc` organizes SPARC residuals more effectively than `radiusOnly` and tested normalized phase controls.
+- Strongest summary guard (RAR43):
+  - `rawPhase delta = 0.017804`
+  - `radiusOnly delta = 0.013962`
+  - `best normalized phase delta = 0.015825`
+  - `improved transfers = 20/20`
+  - `train-transfer gap = -0.000143`
+- Interpretation: **diagnostic candidate** for a **radial-orbital synchronization** residual structure.
+- **Baseline TRM-RAR law remains unchanged:**  
+  `g_pred = g_bar + sqrt(g_bar * a0)`
+
+Claim boundaries:
+- diagnostic candidate only
+- no time-wave proof
+- no theorem-level derivation
+- no GR replacement
+- no production activation
 
 ### What improved (SPARC)
 
@@ -98,4 +132,3 @@ These remain optional diagnostics and are intentionally outside the core TRM-RAR
 4. **Cross-diagnostic transfer test:** train gate/kernel in one split family, evaluate on disjoint split family without retuning.
 5. **Uncertainty-aware reporting:** bootstrap confidence bands for delta-RMS and proxy correlations.
 6. **Model-selection guardrails:** require consistent gain across splits/subgroups before any candidate graduates from exploratory to tested-effective.
-
