@@ -5067,6 +5067,278 @@ public class RarRelationTests
 
     [Fact]
     /// <summary>
+    /// RawPhase residual diagnostic with an outer/inner acceleration-ratio soft gate under strict no-refit transfer.
+    ///
+    /// Hypothesis:
+    /// rawPhase offsets become more transfer-reliable when activated through a train-fitted outer/inner ratio gate.
+    ///
+    /// Status:
+    /// diagnostic + candidate.
+    ///
+    /// Limitation:
+    /// No production activation; no theorem-level derivation.
+    /// </summary>
+    public void RAR44_TRM_Rar_PhaseProxy_WithOuterInnerGate_NoRefit()
+    {
+        const int modulo = 5;
+        const int binCount = 5;
+        const double degradeEpsilon = 0.01;
+
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        // Fit/freeze baseline once; baseline TRM-RAR law remains unchanged.
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        var fitRecheck = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        Assert.True(Math.Abs(fit.BestA0 - fitRecheck.BestA0) < 1e-15, "Baseline a0 changed unexpectedly.");
+        Assert.True(Math.Abs(fit.RmsError - fitRecheck.RmsError) < 1e-15, "Baseline RMS changed unexpectedly.");
+
+        var residualRows = BuildTurningResidualRows(rarData, fit.BestA0);
+        var galaxyPhysical = BuildGalaxyPhysicalProxyStats(rarData);
+
+        var rows = residualRows
+            .Where(r => galaxyPhysical.ContainsKey(r.GalaxyKey))
+            .Select(r =>
+            {
+                double ratio = galaxyPhysical[r.GalaxyKey].OuterToInnerBaryonicAccelerationRatio;
+                return (
+                    r.GalaxyKey,
+                    r.RadiusKpc,
+                    Omega: r.OmegaSi,
+                    RawPhase: r.OmegaSi * r.RadiusKpc,
+                    r.Residual,
+                    OuterToInnerBaryonicAccelerationRatio: ratio);
+            })
+            .Where(r =>
+                double.IsFinite(r.RadiusKpc) &&
+                double.IsFinite(r.Omega) &&
+                double.IsFinite(r.RawPhase) &&
+                double.IsFinite(r.Residual) &&
+                double.IsFinite(r.OuterToInnerBaryonicAccelerationRatio))
+            .ToList();
+
+        Assert.True(rows.Count >= binCount * 80, "Insufficient rows for gated rawPhase diagnostic.");
+
+        var trainDeltasGatedRawPhase = new List<double>();
+        var transferDeltasRawPhase = new List<double>();
+        var transferDeltasOuterInnerGate = new List<double>();
+        var transferDeltasGatedRawPhase = new List<double>();
+        int improvedTransfers = 0;
+
+        for (int trainRemainder = 0; trainRemainder < modulo; trainRemainder++)
+        {
+            var trainRows = rows
+                .Where(r => (r.GalaxyKey.Sum(c => c) % modulo) != trainRemainder)
+                .ToList();
+            Assert.True(trainRows.Count >= binCount * 30, $"Insufficient train rows for train remainder {trainRemainder}.");
+
+            var sortedRawPhase = trainRows
+                .Select(r => r.RawPhase)
+                .Where(double.IsFinite)
+                .OrderBy(x => x)
+                .ToList();
+            Assert.True(sortedRawPhase.Count >= binCount * 20, $"Insufficient rawPhase rows for train remainder {trainRemainder}.");
+
+            var cuts = new List<double>();
+            for (int i = 1; i < binCount; i++)
+            {
+                int index = (i * sortedRawPhase.Count) / binCount;
+                cuts.Add(sortedRawPhase[Math.Min(index, sortedRawPhase.Count - 1)]);
+            }
+
+            int GetBin(double value)
+            {
+                for (int i = 0; i < cuts.Count; i++)
+                {
+                    if (value < cuts[i])
+                        return i;
+                }
+
+                return cuts.Count;
+            }
+
+            var trainOffsetsRaw = new Dictionary<int, List<double>>();
+            foreach (var row in trainRows)
+            {
+                int bin = GetBin(row.RawPhase);
+                if (!trainOffsetsRaw.ContainsKey(bin))
+                    trainOffsetsRaw[bin] = new List<double>();
+                trainOffsetsRaw[bin].Add(row.Residual);
+            }
+
+            var trainOffsets = new Dictionary<int, double>();
+            for (int b = 0; b < binCount; b++)
+            {
+                Assert.True(trainOffsetsRaw.ContainsKey(b), $"Missing rawPhase bin {b} for train remainder {trainRemainder}.");
+                trainOffsets[b] = trainOffsetsRaw[b].Average();
+                Assert.True(double.IsFinite(trainOffsets[b]));
+            }
+
+            var ratioTrainSorted = trainRows
+                .Select(r => r.OuterToInnerBaryonicAccelerationRatio)
+                .Where(double.IsFinite)
+                .OrderBy(x => x)
+                .ToList();
+            Assert.True(ratioTrainSorted.Count >= 80, $"Insufficient ratio rows for train remainder {trainRemainder}.");
+
+            double q20 = Percentile(ratioTrainSorted, 0.20);
+            double q80 = Percentile(ratioTrainSorted, 0.80);
+            if (!double.IsFinite(q20) || !double.IsFinite(q80) || q80 <= q20)
+            {
+                q20 = ratioTrainSorted.First();
+                q80 = ratioTrainSorted.Last();
+            }
+            if (q80 <= q20)
+                q80 = q20 + 1e-6;
+
+            var thresholdGrid = BuildLinearGrid(q20, q80, 13);
+            var widthGrid = new[] { 0.03, 0.05, 0.08, 0.12, 0.18, 0.26, 0.38, 0.55 };
+            double bestThreshold = thresholdGrid[0];
+            double bestWidth = widthGrid[0];
+            double bestTrainGatedRawRms = double.MaxValue;
+
+            foreach (double threshold in thresholdGrid)
+            {
+                foreach (double width in widthGrid)
+                {
+                    var correctedTrain = trainRows
+                        .Select(r =>
+                        {
+                            int bin = GetBin(r.RawPhase);
+                            double gateWeight = Sigmoid((r.OuterToInnerBaryonicAccelerationRatio - threshold) / width);
+                            return r.Residual - (gateWeight * trainOffsets[bin]);
+                        })
+                        .ToList();
+
+                    double rms = ComputeBinRms(correctedTrain);
+                    if (rms < bestTrainGatedRawRms)
+                    {
+                        bestTrainGatedRawRms = rms;
+                        bestThreshold = threshold;
+                        bestWidth = width;
+                    }
+                }
+            }
+
+            Assert.True(double.IsFinite(bestThreshold));
+            Assert.True(double.IsFinite(bestWidth));
+            Assert.True(bestWidth > 0.0);
+
+            double trainGlobalOffset = trainRows.Average(r => r.Residual);
+            Assert.True(double.IsFinite(trainGlobalOffset));
+
+            var trainBaselineResiduals = trainRows.Select(r => r.Residual).ToList();
+            var trainGatedRawResiduals = trainRows
+                .Select(r =>
+                {
+                    int bin = GetBin(r.RawPhase);
+                    double gateWeight = Sigmoid((r.OuterToInnerBaryonicAccelerationRatio - bestThreshold) / bestWidth);
+                    return r.Residual - (gateWeight * trainOffsets[bin]);
+                })
+                .ToList();
+            double trainGatedRawDelta = ComputeBinRms(trainBaselineResiduals) - ComputeBinRms(trainGatedRawResiduals);
+            Assert.True(double.IsFinite(trainGatedRawDelta));
+            trainDeltasGatedRawPhase.Add(trainGatedRawDelta);
+
+            for (int transferRemainder = 0; transferRemainder < modulo; transferRemainder++)
+            {
+                if (transferRemainder == trainRemainder)
+                    continue;
+
+                var transferRows = rows
+                    .Where(r => (r.GalaxyKey.Sum(c => c) % modulo) == transferRemainder)
+                    .ToList();
+                Assert.True(transferRows.Count >= 20, $"Insufficient transfer rows for train={trainRemainder}, transfer={transferRemainder}.");
+
+                var baselineResiduals = transferRows.Select(r => r.Residual).ToList();
+                var rawPhaseResiduals = transferRows
+                    .Select(r =>
+                    {
+                        int bin = GetBin(r.RawPhase);
+                        return r.Residual - trainOffsets[bin];
+                    })
+                    .ToList();
+                var outerInnerGateResiduals = transferRows
+                    .Select(r =>
+                    {
+                        double gateWeight = Sigmoid((r.OuterToInnerBaryonicAccelerationRatio - bestThreshold) / bestWidth);
+                        return r.Residual - (gateWeight * trainGlobalOffset);
+                    })
+                    .ToList();
+                var gatedRawPhaseResiduals = transferRows
+                    .Select(r =>
+                    {
+                        int bin = GetBin(r.RawPhase);
+                        double gateWeight = Sigmoid((r.OuterToInnerBaryonicAccelerationRatio - bestThreshold) / bestWidth);
+                        return r.Residual - (gateWeight * trainOffsets[bin]);
+                    })
+                    .ToList();
+
+                double baselineRms = ComputeBinRms(baselineResiduals);
+                double rawPhaseRms = ComputeBinRms(rawPhaseResiduals);
+                double outerInnerGateRms = ComputeBinRms(outerInnerGateResiduals);
+                double gatedRawPhaseRms = ComputeBinRms(gatedRawPhaseResiduals);
+
+                double rawPhaseDelta = baselineRms - rawPhaseRms;
+                double outerInnerGateDelta = baselineRms - outerInnerGateRms;
+                double gatedRawPhaseDelta = baselineRms - gatedRawPhaseRms;
+
+                Assert.True(double.IsFinite(baselineRms));
+                Assert.True(double.IsFinite(rawPhaseRms));
+                Assert.True(double.IsFinite(outerInnerGateRms));
+                Assert.True(double.IsFinite(gatedRawPhaseRms));
+                Assert.True(double.IsFinite(rawPhaseDelta));
+                Assert.True(double.IsFinite(outerInnerGateDelta));
+                Assert.True(double.IsFinite(gatedRawPhaseDelta));
+
+                Assert.True(rawPhaseRms <= baselineRms + degradeEpsilon,
+                    $"rawPhase degraded beyond epsilon={degradeEpsilon:F3} for train={trainRemainder}, transfer={transferRemainder}.");
+                Assert.True(outerInnerGateRms <= baselineRms + degradeEpsilon,
+                    $"outerInnerGate degraded beyond epsilon={degradeEpsilon:F3} for train={trainRemainder}, transfer={transferRemainder}.");
+                Assert.True(gatedRawPhaseRms <= baselineRms + degradeEpsilon,
+                    $"gatedRawPhase degraded beyond epsilon={degradeEpsilon:F3} for train={trainRemainder}, transfer={transferRemainder}.");
+
+                transferDeltasRawPhase.Add(rawPhaseDelta);
+                transferDeltasOuterInnerGate.Add(outerInnerGateDelta);
+                transferDeltasGatedRawPhase.Add(gatedRawPhaseDelta);
+                if (gatedRawPhaseDelta > 0.0)
+                    improvedTransfers++;
+            }
+        }
+
+        double meanDeltaRawPhase = transferDeltasRawPhase.Average();
+        double meanDeltaOuterInnerGate = transferDeltasOuterInnerGate.Average();
+        double meanDeltaGatedRawPhase = transferDeltasGatedRawPhase.Average();
+        double extraGatedGainOverRawPhase = meanDeltaGatedRawPhase - meanDeltaRawPhase;
+        double trainTransferGap = trainDeltasGatedRawPhase.Average() - meanDeltaGatedRawPhase;
+
+        WriteLineWithTestPrefix("--- PHASE PROXY WITH OUTER-INNER GATE DIAGNOSTIC ---");
+        WriteLineWithTestPrefix($"mean delta rawPhase={meanDeltaRawPhase:F6}");
+        WriteLineWithTestPrefix($"mean delta outerInnerGate={meanDeltaOuterInnerGate:F6}");
+        WriteLineWithTestPrefix($"mean delta gatedRawPhase={meanDeltaGatedRawPhase:F6}");
+        WriteLineWithTestPrefix($"extra gated gain over rawPhase={extraGatedGainOverRawPhase:F6}");
+        WriteLineWithTestPrefix($"improved transfers={improvedTransfers}/{transferDeltasGatedRawPhase.Count}");
+        WriteLineWithTestPrefix($"train-transfer gap={trainTransferGap:F6}");
+        WriteLineWithTestPrefix("Diagnostic/candidate only. Baseline TRM-RAR law unchanged.");
+        WriteLineWithTestPrefix("No production activation. No theorem-level derivation. No GR replacement claim.");
+
+        Assert.True(double.IsFinite(meanDeltaRawPhase));
+        Assert.True(double.IsFinite(meanDeltaOuterInnerGate));
+        Assert.True(double.IsFinite(meanDeltaGatedRawPhase));
+        Assert.True(double.IsFinite(extraGatedGainOverRawPhase));
+        Assert.True(double.IsFinite(trainTransferGap));
+        Assert.True(transferDeltasRawPhase.Count == modulo * (modulo - 1));
+        Assert.True(transferDeltasOuterInnerGate.Count == modulo * (modulo - 1));
+        Assert.True(transferDeltasGatedRawPhase.Count == modulo * (modulo - 1));
+    }
+
+    [Fact]
+    /// <summary>
     /// Cross-split diagnostic for raw phase proxy robustness under alternative deterministic partition schemes.
     ///
     /// Hypothesis:
@@ -5078,7 +5350,7 @@ public class RarRelationTests
     /// Limitation:
     /// Partition-robustness check only; no baseline-model activation.
     /// </summary>
-    public void RAR44_TRM_Rar_PhaseProxyAlternativeSplits_NoRefit()
+    public void RAR45_TRM_Rar_PhaseProxyAlternativeSplits_NoRefit()
     {
         const int binCount = 5;
         const double degradeEpsilon = 0.01;
@@ -5304,6 +5576,281 @@ public class RarRelationTests
             int minImproved = (int)Math.Ceiling(0.70 * s.TransferCount);
             Assert.True(s.ImprovedTransfers >= minImproved,
                 $"Scheme {s.Scheme} improved only {s.ImprovedTransfers}/{s.TransferCount}, below 70% threshold.");
+        });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Cluster diagnostic for galaxy-level success/failure structure under rawPhase-only residual correction.
+    ///
+    /// Hypothesis:
+    /// Improvement/worsening under rawPhase transfer is associated with distinct galaxy proxy regimes.
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// Correlative cluster reading only; baseline model path remains unchanged.
+    /// </summary>
+    public void RAR46_TRM_Rar_RawPhaseSuccessFailureCluster_NoRefit()
+    {
+        const int modulo = 5;
+        const int binCount = 5;
+
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        // Fit/freeze baseline once; keep baseline TRM-RAR law unchanged.
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        var fitRecheck = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        Assert.True(Math.Abs(fit.BestA0 - fitRecheck.BestA0) < 1e-15, "Baseline a0 changed unexpectedly.");
+        Assert.True(Math.Abs(fit.RmsError - fitRecheck.RmsError) < 1e-15, "Baseline RMS changed unexpectedly.");
+
+        var rows = BuildTurningResidualRows(rarData, fit.BestA0);
+        var physicalByGalaxy = BuildGalaxyPhysicalProxyStats(rarData);
+
+        var galaxyBaseStats = rows
+            .GroupBy(r => r.GalaxyKey)
+            .ToDictionary(
+                g => g.Key,
+                g =>
+                {
+                    var radius = g.Select(x => x.RadiusKpc).Where(double.IsFinite).ToList();
+                    var omega = g.Select(x => x.OmegaSi).Where(double.IsFinite).ToList();
+                    var rawPhase = g.Select(x => x.OmegaSi * x.RadiusKpc).Where(double.IsFinite).ToList();
+                    return (
+                        MeanRadiusKpc: radius.Count > 0 ? radius.Average() : double.NaN,
+                        MeanOmega: omega.Count > 0 ? omega.Average() : double.NaN,
+                        MeanRawPhase: rawPhase.Count > 0 ? rawPhase.Average() : double.NaN);
+                },
+                StringComparer.OrdinalIgnoreCase);
+
+        var galaxyEvaluations = new List<(
+            string GalaxyKey,
+            double BaselineRms,
+            double RawPhaseCorrectedRms,
+            double DeltaRms,
+            double MeanLogGbar,
+            double OuterToInnerBaryonicAccelerationRatio,
+            double GasDominanceProxy,
+            double RadialSpanKpc,
+            int PointCount,
+            double MeanRadiusKpc,
+            double MeanOmega,
+            double MeanRawPhase)>();
+
+        for (int trainRemainder = 0; trainRemainder < modulo; trainRemainder++)
+        {
+            var trainRows = rows
+                .Where(r => (r.GalaxyKey.Sum(c => c) % modulo) != trainRemainder)
+                .ToList();
+            Assert.True(trainRows.Count >= binCount * 30, $"Insufficient train rows for train remainder {trainRemainder}.");
+
+            var sortedRawPhase = trainRows
+                .Select(r => r.OmegaSi * r.RadiusKpc)
+                .Where(double.IsFinite)
+                .OrderBy(x => x)
+                .ToList();
+            Assert.True(sortedRawPhase.Count >= binCount * 20, $"Insufficient train rawPhase rows for train remainder {trainRemainder}.");
+
+            var cuts = new List<double>();
+            for (int i = 1; i < binCount; i++)
+            {
+                int index = (i * sortedRawPhase.Count) / binCount;
+                cuts.Add(sortedRawPhase[Math.Min(index, sortedRawPhase.Count - 1)]);
+            }
+
+            int GetBin(double value)
+            {
+                for (int i = 0; i < cuts.Count; i++)
+                {
+                    if (value < cuts[i])
+                        return i;
+                }
+
+                return cuts.Count;
+            }
+
+            var trainOffsetsRaw = new Dictionary<int, List<double>>();
+            foreach (var row in trainRows)
+            {
+                int bin = GetBin(row.OmegaSi * row.RadiusKpc);
+                if (!trainOffsetsRaw.ContainsKey(bin))
+                    trainOffsetsRaw[bin] = new List<double>();
+                trainOffsetsRaw[bin].Add(row.Residual);
+            }
+
+            var trainOffsets = new Dictionary<int, double>();
+            for (int b = 0; b < binCount; b++)
+            {
+                Assert.True(trainOffsetsRaw.ContainsKey(b), $"Missing rawPhase bin {b} for train remainder {trainRemainder}.");
+                trainOffsets[b] = trainOffsetsRaw[b].Average();
+                Assert.True(double.IsFinite(trainOffsets[b]));
+            }
+
+            for (int transferRemainder = 0; transferRemainder < modulo; transferRemainder++)
+            {
+                if (transferRemainder == trainRemainder)
+                    continue;
+
+                var transferRows = rows
+                    .Where(r => (r.GalaxyKey.Sum(c => c) % modulo) == transferRemainder)
+                    .ToList();
+                Assert.True(transferRows.Count >= 20, $"Insufficient transfer rows for train={trainRemainder}, transfer={transferRemainder}.");
+
+                foreach (var galaxy in transferRows.GroupBy(r => r.GalaxyKey))
+                {
+                    if (galaxy.Count() < 3)
+                        continue;
+                    if (!physicalByGalaxy.TryGetValue(galaxy.Key, out var physical))
+                        continue;
+                    if (!galaxyBaseStats.TryGetValue(galaxy.Key, out var baseStats))
+                        continue;
+
+                    var baselineResiduals = galaxy.Select(x => x.Residual).ToList();
+                    var correctedResiduals = galaxy
+                        .Select(x =>
+                        {
+                            int bin = GetBin(x.OmegaSi * x.RadiusKpc);
+                            return x.Residual - trainOffsets[bin];
+                        })
+                        .ToList();
+
+                    double baselineRms = ComputeBinRms(baselineResiduals);
+                    double correctedRms = ComputeBinRms(correctedResiduals);
+                    double delta = baselineRms - correctedRms;
+
+                    galaxyEvaluations.Add((
+                        GalaxyKey: galaxy.Key,
+                        BaselineRms: baselineRms,
+                        RawPhaseCorrectedRms: correctedRms,
+                        DeltaRms: delta,
+                        MeanLogGbar: physical.MeanLogGbar,
+                        OuterToInnerBaryonicAccelerationRatio: physical.OuterToInnerBaryonicAccelerationRatio,
+                        GasDominanceProxy: physical.GasDominanceProxy,
+                        RadialSpanKpc: physical.RadialSpanKpc,
+                        PointCount: physical.PointCount,
+                        MeanRadiusKpc: baseStats.MeanRadiusKpc,
+                        MeanOmega: baseStats.MeanOmega,
+                        MeanRawPhase: baseStats.MeanRawPhase));
+                }
+            }
+        }
+
+        Assert.True(galaxyEvaluations.Count > 0, "No galaxy-level transfer evaluations were produced.");
+
+        var galaxySummary = galaxyEvaluations
+            .GroupBy(x => x.GalaxyKey)
+            .Select(g => new
+            {
+                GalaxyKey = g.Key,
+                BaselineRms = g.Average(x => x.BaselineRms),
+                RawPhaseCorrectedRms = g.Average(x => x.RawPhaseCorrectedRms),
+                DeltaRms = g.Average(x => x.DeltaRms),
+                MeanLogGbar = g.Average(x => x.MeanLogGbar),
+                OuterToInnerBaryonicAccelerationRatio = g.Average(x => x.OuterToInnerBaryonicAccelerationRatio),
+                GasDominanceProxy = g.Average(x => x.GasDominanceProxy),
+                RadialSpanKpc = g.Average(x => x.RadialSpanKpc),
+                PointCount = (int)Math.Round(g.Average(x => x.PointCount)),
+                MeanRadiusKpc = g.Average(x => x.MeanRadiusKpc),
+                MeanOmega = g.Average(x => x.MeanOmega),
+                MeanRawPhase = g.Average(x => x.MeanRawPhase)
+            })
+            .ToList();
+
+        Assert.True(galaxySummary.Count >= 20, "Too few galaxy summaries for success/failure clustering.");
+
+        var improvedTop10 = galaxySummary
+            .OrderByDescending(x => x.DeltaRms)
+            .Take(10)
+            .ToList();
+        var worsenedTop10 = galaxySummary
+            .OrderBy(x => x.DeltaRms)
+            .Take(10)
+            .ToList();
+
+        var improvedGroup = galaxySummary.Where(x => x.DeltaRms > 0.0).ToList();
+        var worsenedGroup = galaxySummary.Where(x => x.DeltaRms <= 0.0).ToList();
+        Assert.True(improvedGroup.Count > 0, "No improved galaxies found.");
+        Assert.True(worsenedGroup.Count > 0, "No worsened galaxies found.");
+
+        var improvedMeans = new
+        {
+            MeanLogGbar = improvedGroup.Average(x => x.MeanLogGbar),
+            OuterToInnerBaryonicAccelerationRatio = improvedGroup.Average(x => x.OuterToInnerBaryonicAccelerationRatio),
+            GasDominanceProxy = improvedGroup.Average(x => x.GasDominanceProxy),
+            RadialSpanKpc = improvedGroup.Average(x => x.RadialSpanKpc),
+            PointCount = improvedGroup.Average(x => x.PointCount),
+            MeanRadiusKpc = improvedGroup.Average(x => x.MeanRadiusKpc),
+            MeanOmega = improvedGroup.Average(x => x.MeanOmega),
+            MeanRawPhase = improvedGroup.Average(x => x.MeanRawPhase)
+        };
+
+        var worsenedMeans = new
+        {
+            MeanLogGbar = worsenedGroup.Average(x => x.MeanLogGbar),
+            OuterToInnerBaryonicAccelerationRatio = worsenedGroup.Average(x => x.OuterToInnerBaryonicAccelerationRatio),
+            GasDominanceProxy = worsenedGroup.Average(x => x.GasDominanceProxy),
+            RadialSpanKpc = worsenedGroup.Average(x => x.RadialSpanKpc),
+            PointCount = worsenedGroup.Average(x => x.PointCount),
+            MeanRadiusKpc = worsenedGroup.Average(x => x.MeanRadiusKpc),
+            MeanOmega = worsenedGroup.Average(x => x.MeanOmega),
+            MeanRawPhase = worsenedGroup.Average(x => x.MeanRawPhase)
+        };
+
+        WriteLineWithTestPrefix("--- RAW PHASE SUCCESS/FAILURE CLUSTER DIAGNOSTIC ---");
+        WriteLineWithTestPrefix("top 10 improved galaxies:");
+        foreach (var g in improvedTop10)
+        {
+            WriteLineWithTestPrefix(
+                $"{g.GalaxyKey}: baseline={g.BaselineRms:F6} rawPhase={g.RawPhaseCorrectedRms:F6} delta={g.DeltaRms:F6}");
+        }
+
+        WriteLineWithTestPrefix("top 10 worsened galaxies:");
+        foreach (var g in worsenedTop10)
+        {
+            WriteLineWithTestPrefix(
+                $"{g.GalaxyKey}: baseline={g.BaselineRms:F6} rawPhase={g.RawPhaseCorrectedRms:F6} delta={g.DeltaRms:F6}");
+        }
+
+        WriteLineWithTestPrefix(
+            $"mean proxy values improved: meanLogGbar={improvedMeans.MeanLogGbar:F6} outerInnerRatio={improvedMeans.OuterToInnerBaryonicAccelerationRatio:F6} " +
+            $"gasDominance={improvedMeans.GasDominanceProxy:F6} radialSpanKpc={improvedMeans.RadialSpanKpc:F6} pointCount={improvedMeans.PointCount:F2} " +
+            $"meanRadiusKpc={improvedMeans.MeanRadiusKpc:F6} meanOmega={improvedMeans.MeanOmega:E6} meanRawPhase={improvedMeans.MeanRawPhase:E6}");
+        WriteLineWithTestPrefix(
+            $"mean proxy values worsened: meanLogGbar={worsenedMeans.MeanLogGbar:F6} outerInnerRatio={worsenedMeans.OuterToInnerBaryonicAccelerationRatio:F6} " +
+            $"gasDominance={worsenedMeans.GasDominanceProxy:F6} radialSpanKpc={worsenedMeans.RadialSpanKpc:F6} pointCount={worsenedMeans.PointCount:F2} " +
+            $"meanRadiusKpc={worsenedMeans.MeanRadiusKpc:F6} meanOmega={worsenedMeans.MeanOmega:E6} meanRawPhase={worsenedMeans.MeanRawPhase:E6}");
+
+        WriteLineWithTestPrefix(
+            $"improved-minus-worsened: meanLogGbar={improvedMeans.MeanLogGbar - worsenedMeans.MeanLogGbar:F6} " +
+            $"outerInnerRatio={improvedMeans.OuterToInnerBaryonicAccelerationRatio - worsenedMeans.OuterToInnerBaryonicAccelerationRatio:F6} " +
+            $"gasDominance={improvedMeans.GasDominanceProxy - worsenedMeans.GasDominanceProxy:F6} " +
+            $"radialSpanKpc={improvedMeans.RadialSpanKpc - worsenedMeans.RadialSpanKpc:F6} " +
+            $"pointCount={improvedMeans.PointCount - worsenedMeans.PointCount:F2} " +
+            $"meanRadiusKpc={improvedMeans.MeanRadiusKpc - worsenedMeans.MeanRadiusKpc:F6} " +
+            $"meanOmega={improvedMeans.MeanOmega - worsenedMeans.MeanOmega:E6} " +
+            $"meanRawPhase={improvedMeans.MeanRawPhase - worsenedMeans.MeanRawPhase:E6}");
+        WriteLineWithTestPrefix("Diagnostic only. Baseline TRM-RAR law unchanged.");
+
+        Assert.All(galaxySummary, g =>
+        {
+            Assert.True(double.IsFinite(g.BaselineRms));
+            Assert.True(double.IsFinite(g.RawPhaseCorrectedRms));
+            Assert.True(double.IsFinite(g.DeltaRms));
+            Assert.True(double.IsFinite(g.MeanLogGbar));
+            Assert.True(double.IsFinite(g.OuterToInnerBaryonicAccelerationRatio));
+            Assert.True(double.IsFinite(g.GasDominanceProxy));
+            Assert.True(double.IsFinite(g.RadialSpanKpc));
+            Assert.True(double.IsFinite(g.MeanRadiusKpc));
+            Assert.True(double.IsFinite(g.MeanOmega));
+            Assert.True(double.IsFinite(g.MeanRawPhase));
+            Assert.True(g.PointCount > 0);
         });
     }
 
