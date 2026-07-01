@@ -132,3 +132,11 @@ These remain optional diagnostics and are intentionally outside the core TRM-RAR
 4. **Cross-diagnostic transfer test:** train gate/kernel in one split family, evaluate on disjoint split family without retuning.
 5. **Uncertainty-aware reporting:** bootstrap confidence bands for delta-RMS and proxy correlations.
 6. **Model-selection guardrails:** require consistent gain across splits/subgroups before any candidate graduates from exploratory to tested-effective.
+
+---
+
+## Lessons learned from V3.3 exploratory diagnostics
+
+V3.3 indicates that several residual structures are real enough to survive no-refit and transfer checks, but most remain regime-dependent and do not justify activation in the baseline model. The strongest SPARC diagnostic signal is currently the rawPhase residual structure, which improves over radius-only and normalized controls, but remains a diagnostic candidate. E2E tick-phase checks show compatibility signals but no independent micro-derivation beyond radius structure.
+
+Overall, V3.3 improves falsification discipline and identifies candidate residual regimes, while confirming that the baseline TRM-RAR path should remain unchanged.
