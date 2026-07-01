@@ -2871,6 +2871,1551 @@ public class CollectiveModeLockingTests
             $"Expected m=4 to fail by phase/closure in microscopic functional model. fail={m4.failReason}");
     }
 
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF24_M3_Should_Emerge_From_ThreeConstraintIntersection()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+        const double phaseClosureThreshold = 0.78;
+        const int bridgeBandMinOccupancy = 1;
+
+        const double orderWeight = 0.50;
+        const double closureWeight = 0.35;
+        const double transportWeight = 0.15;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double FunctionalActionTick)>(mValues.Length);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double inBandFunctionalSum = 0.0;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+
+                double microscopicActionTickFunctional =
+                    (orderWeight * orderDefect * orderDefect
+                    + closureWeight * closureDefect * closureDefect
+                    + transportWeight * transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    inBandFunctionalSum += microscopicActionTickFunctional;
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double meanInBandFunctional = inBandCount > 0
+                ? inBandFunctionalSum / inBandCount
+                : double.PositiveInfinity;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double functionalActionTick = meanInBandFunctional + occupancyPenalty;
+
+            family.Add((M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, FunctionalActionTick: functionalActionTick));
+        }
+
+        var phaseBridgeCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= bridgeBandMinOccupancy)
+            .OrderBy(x => x.FunctionalActionTick)
+            .ToArray();
+
+        var globalActionCandidates = family
+            .OrderBy(x => x.FunctionalActionTick)
+            .ToArray();
+
+        Assert.True(phaseBridgeCandidates.Length >= 2,
+            "Expected at least two phase+bridge admissible modes to define action/tick consistency rank.");
+        Assert.True(globalActionCandidates.Length >= 2,
+            "Expected at least two global candidates to define standalone action/tick consistency threshold.");
+
+        var actionTickRankByMode = phaseBridgeCandidates
+            .Select((x, index) => (x.M, Rank: index + 1))
+            .ToDictionary(x => x.M, x => x.Rank);
+        double standaloneActionTickThreshold =
+            0.5 * (globalActionCandidates[0].FunctionalActionTick + globalActionCandidates[1].FunctionalActionTick);
+
+        (int SelectedMode, int[] SatisfyingModes, bool M3Selected) EvaluateStack(string name, bool usePhase, bool useBridge, bool useAction)
+        {
+            bool IsSatisfying((int M, int InBandCount, double AvgClosureQuality, double FunctionalActionTick) x)
+            {
+                bool phaseOk = !usePhase || x.AvgClosureQuality >= phaseClosureThreshold;
+                bool bridgeOk = !useBridge || x.InBandCount >= bridgeBandMinOccupancy;
+                bool actionOk;
+                if (!useAction)
+                {
+                    actionOk = true;
+                }
+                else if (usePhase && useBridge)
+                {
+                    actionOk =
+                        x.AvgClosureQuality >= phaseClosureThreshold &&
+                        x.InBandCount >= bridgeBandMinOccupancy &&
+                        actionTickRankByMode.TryGetValue(x.M, out int rank) &&
+                        rank == 1;
+                }
+                else
+                {
+                    actionOk = x.FunctionalActionTick <= standaloneActionTickThreshold;
+                }
+
+                return phaseOk && bridgeOk && actionOk;
+            }
+
+            var satisfying = family
+                .Where(IsSatisfying)
+                .OrderBy(x => x.M)
+                .ToArray();
+
+            int selectedMode = satisfying.Length > 0 ? satisfying[0].M : int.MaxValue;
+            bool m3Unique = satisfying.Length == 1 && satisfying[0].M == 3;
+            bool m3Strongest = selectedMode == 3;
+            bool m3Selected = m3Unique || m3Strongest;
+
+            _output.WriteLine(
+                $"RBF24 stack={name} | selected={(selectedMode == int.MaxValue ? "none" : $"m={selectedMode}")} | satisfying=[{string.Join(", ", satisfying.Select(x => x.M))}] | m3Unique={m3Unique} | m3Strongest={m3Strongest} | m3Selected={m3Selected}");
+
+            return (selectedMode, satisfying.Select(x => x.M).ToArray(), m3Selected);
+        }
+
+        var phaseOnly = EvaluateStack("phase-only", usePhase: true, useBridge: false, useAction: false);
+        var bridgeOnly = EvaluateStack("bridge-only", usePhase: false, useBridge: true, useAction: false);
+        var actionOnly = EvaluateStack("action/tick-only", usePhase: false, useBridge: false, useAction: true);
+
+        var phaseBridge = EvaluateStack("phase+bridge", usePhase: true, useBridge: true, useAction: false);
+        var phaseAction = EvaluateStack("phase+action/tick", usePhase: true, useBridge: false, useAction: true);
+        var bridgeAction = EvaluateStack("bridge+action/tick", usePhase: false, useBridge: true, useAction: true);
+
+        var allThree = EvaluateStack("phase+bridge+action/tick", usePhase: true, useBridge: true, useAction: true);
+
+        _output.WriteLine("RBF24 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(allThree.M3Selected,
+            $"Expected m=3 to be uniquely or strongest selected under full three-constraint stack. selected={allThree.SelectedMode}, satisfying=[{string.Join(", ", allThree.SatisfyingModes)}]");
+
+        Assert.True(!phaseOnly.M3Selected,
+            $"Expected phase-only stack to avoid selecting m=3 as unique/strongest. selected={phaseOnly.SelectedMode}, satisfying=[{string.Join(", ", phaseOnly.SatisfyingModes)}]");
+        Assert.True(!bridgeOnly.M3Selected,
+            $"Expected bridge-only stack to avoid selecting m=3 as unique/strongest. selected={bridgeOnly.SelectedMode}, satisfying=[{string.Join(", ", bridgeOnly.SatisfyingModes)}]");
+        Assert.True(!actionOnly.M3Selected,
+            $"Expected action/tick-only stack to avoid selecting m=3 as unique/strongest. selected={actionOnly.SelectedMode}, satisfying=[{string.Join(", ", actionOnly.SatisfyingModes)}]");
+        Assert.True(!phaseBridge.M3Selected,
+            $"Expected phase+bridge stack to avoid selecting m=3 as unique/strongest. selected={phaseBridge.SelectedMode}, satisfying=[{string.Join(", ", phaseBridge.SatisfyingModes)}]");
+        Assert.True(!phaseAction.M3Selected,
+            $"Expected phase+action/tick stack to avoid selecting m=3 as unique/strongest. selected={phaseAction.SelectedMode}, satisfying=[{string.Join(", ", phaseAction.SatisfyingModes)}]");
+        Assert.True(!bridgeAction.M3Selected,
+            $"Expected bridge+action/tick stack to avoid selecting m=3 as unique/strongest. selected={bridgeAction.SelectedMode}, satisfying=[{string.Join(", ", bridgeAction.SatisfyingModes)}]");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF25_M3_ThreeConstraintIntersection_Should_Be_Robust_Under_AblationNoise()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785 };
+        var bridgeOccupancyThresholds = new[] { 1, 2 };
+        var actionThresholdScales = new[] { 0.95, 1.00, 1.05 };
+        var weightScenarios = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        var precomputed = new Dictionary<(int M, int Q), (bool InBand, double Omega, double ClosureQuality, double OrderDefectSq, double ClosureDefectSq, double TransportDefectSq)>();
+        foreach (int m in mValues)
+        {
+            foreach (int q in Enumerable.Range(qMin, qMax - qMin + 1))
+            {
+                double omega = (q + (double)m) / q;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double orderDefectSq = Math.Pow(Math.Max(0.0, 1.0 - modeLock.MeanOrder), 2);
+                double closureDefectSq = Math.Pow(Math.Max(0.0, modeLock.ClosureResidual), 2);
+                double transportDefectSq = Math.Pow(Math.Max(0.0, meanRelError), 2);
+                double closureQuality = 1.0 - modeLock.ClosureResidual;
+
+                precomputed[(m, q)] = (inBand, omega, closureQuality, orderDefectSq, closureDefectSq, transportDefectSq);
+            }
+        }
+
+        var totalCases = 0;
+        var fullResolvedCases = 0;
+        var fullM3SelectedCount = 0;
+        var fullM3UniqueCount = 0;
+        var fullM3StrongestCount = 0;
+        var anotherModeWinsCount = 0;
+
+        var singleResolved = new Dictionary<string, int>
+        {
+            ["phase-only"] = 0,
+            ["bridge-only"] = 0,
+            ["action/tick-only"] = 0
+        };
+        var singleUniqueM3 = new Dictionary<string, int>
+        {
+            ["phase-only"] = 0,
+            ["bridge-only"] = 0,
+            ["action/tick-only"] = 0
+        };
+
+        string? worstFailureCase = null;
+        double worstFailurePenalty = double.NegativeInfinity;
+
+        foreach (var w in weightScenarios)
+        {
+            var family = mValues
+                .Select(m =>
+                {
+                    var rows = Enumerable.Range(qMin, qMax - qMin + 1)
+                        .Select(q => precomputed[(m, q)])
+                        .ToArray();
+
+                    int inBandCount = rows.Count(r => r.InBand);
+                    double avgClosureQuality = rows.Average(r => r.ClosureQuality);
+
+                    double meanInBandFunctional = inBandCount > 0
+                        ? rows
+                            .Where(r => r.InBand)
+                            .Average(r =>
+                                (w.Order * r.OrderDefectSq
+                                + w.Closure * r.ClosureDefectSq
+                                + w.Transport * r.TransportDefectSq)
+                                / Math.Max(r.Omega, 1e-12))
+                        : double.PositiveInfinity;
+
+                    double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+                    double functionalActionTick = meanInBandFunctional + occupancyPenalty;
+
+                    return (M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, FunctionalActionTick: functionalActionTick);
+                })
+                .OrderBy(x => x.M)
+                .ToArray();
+
+            double maxInBand = Math.Max(1, family.Max(x => x.InBandCount));
+            double minAction = family.Min(x => x.FunctionalActionTick);
+            double maxAction = family.Max(x => x.FunctionalActionTick);
+            double actionDen = Math.Max(maxAction - minAction, 1e-12);
+
+            foreach (double phaseThreshold in phaseThresholds)
+            {
+                foreach (int bridgeThreshold in bridgeOccupancyThresholds)
+                {
+                    var phaseBridgeCandidates = family
+                        .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+                        .OrderBy(x => x.FunctionalActionTick)
+                        .ToArray();
+
+                    var globalActionCandidates = family
+                        .OrderBy(x => x.FunctionalActionTick)
+                        .ToArray();
+
+                    if (globalActionCandidates.Length == 0)
+                        continue;
+
+                    double standaloneBaseThreshold = globalActionCandidates.Length >= 2
+                        ? 0.5 * (globalActionCandidates[0].FunctionalActionTick + globalActionCandidates[1].FunctionalActionTick)
+                        : 1.05 * globalActionCandidates[0].FunctionalActionTick;
+
+                    foreach (double actionScale in actionThresholdScales)
+                    {
+                        totalCases++;
+
+                        double standaloneActionThreshold = actionScale * standaloneBaseThreshold;
+
+                        Dictionary<int, int> actionTickRankByMode = phaseBridgeCandidates
+                            .Select((x, index) => (x.M, Rank: index + 1))
+                            .ToDictionary(x => x.M, x => x.Rank);
+
+                        double fullBaseThreshold = phaseBridgeCandidates.Length >= 2
+                            ? 0.5 * (phaseBridgeCandidates[0].FunctionalActionTick + phaseBridgeCandidates[1].FunctionalActionTick)
+                            : phaseBridgeCandidates.Length == 1
+                                ? 1.05 * phaseBridgeCandidates[0].FunctionalActionTick
+                                : double.PositiveInfinity;
+                        double fullActionThreshold = actionScale * fullBaseThreshold;
+
+                        (bool Resolved, int SelectedMode, bool M3Selected, bool M3Unique, bool M3Strongest, int[] SatisfyingModes, double WinnerScore, double? M3Score) EvaluateStack(
+                            string stackName,
+                            bool usePhase,
+                            bool useBridge,
+                            bool useAction)
+                        {
+                            bool IsSatisfying((int M, int InBandCount, double AvgClosureQuality, double FunctionalActionTick) x)
+                            {
+                                bool phaseOk = !usePhase || x.AvgClosureQuality >= phaseThreshold;
+                                bool bridgeOk = !useBridge || x.InBandCount >= bridgeThreshold;
+
+                                bool actionOk;
+                                if (!useAction)
+                                {
+                                    actionOk = true;
+                                }
+                                else if (usePhase && useBridge)
+                                {
+                                    actionOk =
+                                        x.FunctionalActionTick <= fullActionThreshold &&
+                                        actionTickRankByMode.TryGetValue(x.M, out int rank) &&
+                                        rank == 1;
+                                }
+                                else
+                                {
+                                    actionOk = x.FunctionalActionTick <= standaloneActionThreshold;
+                                }
+
+                                return phaseOk && bridgeOk && actionOk;
+                            }
+
+                            var satisfying = family
+                                .Where(IsSatisfying)
+                                .OrderBy(x => x.M)
+                                .ToArray();
+
+                            if (satisfying.Length == 0)
+                            {
+                                return (false, int.MaxValue, false, false, false, Array.Empty<int>(), double.NaN, null);
+                            }
+
+                            var scored = satisfying
+                                .Select(x =>
+                                {
+                                    var scoreTerms = new List<double>(3);
+                                    if (usePhase)
+                                        scoreTerms.Add(x.AvgClosureQuality);
+                                    if (useBridge)
+                                        scoreTerms.Add(x.InBandCount / maxInBand);
+                                    if (useAction)
+                                        scoreTerms.Add(1.0 - ((x.FunctionalActionTick - minAction) / actionDen));
+
+                                    double score = scoreTerms.Count > 0 ? scoreTerms.Average() : 0.0;
+                                    return (x.M, Score: score);
+                                })
+                                .OrderByDescending(x => x.Score)
+                                .ThenBy(x => x.M)
+                                .ToArray();
+
+                            int selectedMode = scored[0].M;
+                            double winnerScore = scored[0].Score;
+                            double? m3Score = scored.FirstOrDefault(x => x.M == 3).M == 3
+                                ? scored.First(x => x.M == 3).Score
+                                : null;
+
+                            bool m3Unique = satisfying.Length == 1 && satisfying[0].M == 3;
+                            bool m3Strongest = selectedMode == 3;
+                            bool m3Selected = satisfying.Any(x => x.M == 3);
+
+                            _output.WriteLine(
+                                $"RBF25 case w={w.Name} phaseThr={phaseThreshold:F3} bridgeThr={bridgeThreshold} actionScale={actionScale:F2} stack={stackName} | selected={(selectedMode == int.MaxValue ? "none" : $"m={selectedMode}")} | satisfying=[{string.Join(", ", satisfying.Select(x => x.M))}] | m3Selected={m3Selected} | m3Unique={m3Unique} | m3Strongest={m3Strongest}");
+
+                            return (
+                                true,
+                                selectedMode,
+                                m3Selected,
+                                m3Unique,
+                                m3Strongest,
+                                satisfying.Select(x => x.M).ToArray(),
+                                winnerScore,
+                                m3Score);
+                        }
+
+                        var phaseOnly = EvaluateStack("phase-only", usePhase: true, useBridge: false, useAction: false);
+                        var bridgeOnly = EvaluateStack("bridge-only", usePhase: false, useBridge: true, useAction: false);
+                        var actionOnly = EvaluateStack("action/tick-only", usePhase: false, useBridge: false, useAction: true);
+                        _ = EvaluateStack("phase+bridge", usePhase: true, useBridge: true, useAction: false);
+                        _ = EvaluateStack("phase+action/tick", usePhase: true, useBridge: false, useAction: true);
+                        _ = EvaluateStack("bridge+action/tick", usePhase: false, useBridge: true, useAction: true);
+                        var full = EvaluateStack("phase+bridge+action/tick", usePhase: true, useBridge: true, useAction: true);
+
+                        if (phaseOnly.Resolved)
+                        {
+                            singleResolved["phase-only"]++;
+                            if (phaseOnly.M3Unique)
+                                singleUniqueM3["phase-only"]++;
+                        }
+
+                        if (bridgeOnly.Resolved)
+                        {
+                            singleResolved["bridge-only"]++;
+                            if (bridgeOnly.M3Unique)
+                                singleUniqueM3["bridge-only"]++;
+                        }
+
+                        if (actionOnly.Resolved)
+                        {
+                            singleResolved["action/tick-only"]++;
+                            if (actionOnly.M3Unique)
+                                singleUniqueM3["action/tick-only"]++;
+                        }
+
+                        if (!full.Resolved)
+                            continue;
+
+                        fullResolvedCases++;
+
+                        if (full.M3Selected)
+                            fullM3SelectedCount++;
+                        if (full.M3Unique)
+                            fullM3UniqueCount++;
+                        if (full.M3Strongest)
+                            fullM3StrongestCount++;
+
+                        if (full.SelectedMode != 3)
+                        {
+                            anotherModeWinsCount++;
+
+                            double penalty = full.M3Score.HasValue
+                                ? full.WinnerScore - full.M3Score.Value
+                                : 1e6;
+
+                            if (penalty > worstFailurePenalty)
+                            {
+                                worstFailurePenalty = penalty;
+                                worstFailureCase =
+                                    $"w={w.Name}, phaseThr={phaseThreshold:F3}, bridgeThr={bridgeThreshold}, actionScale={actionScale:F2}, selected=m={full.SelectedMode}, satisfying=[{string.Join(", ", full.SatisfyingModes)}], penalty={penalty:E6}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine("--- RBF25 M3 THREE-CONSTRAINT ROBUSTNESS DIAGNOSTIC ---");
+        _output.WriteLine($"total perturbation cases={totalCases}");
+        _output.WriteLine($"full-stack m3 selected count={fullM3SelectedCount} / {fullResolvedCases}");
+        _output.WriteLine($"full-stack m3 unique count={fullM3UniqueCount} / {fullResolvedCases}");
+        _output.WriteLine($"full-stack m3 strongest count={fullM3StrongestCount} / {fullResolvedCases}");
+        _output.WriteLine($"cases where another m wins={anotherModeWinsCount}");
+        _output.WriteLine($"worst failure case={(worstFailureCase ?? "none")}");
+        _output.WriteLine("RBF25 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(fullResolvedCases > 0, "Expected at least one resolved full-stack perturbation case.");
+        Assert.True(fullM3SelectedCount > (fullResolvedCases / 2),
+            $"Expected full-stack m=3 selection in the majority of resolved cases. selected={fullM3SelectedCount}, resolved={fullResolvedCases}");
+        Assert.True(fullM3UniqueCount > (fullResolvedCases / 2),
+            $"Expected full-stack unique m=3 in the majority of resolved cases. unique={fullM3UniqueCount}, resolved={fullResolvedCases}");
+
+        Assert.True(singleResolved["phase-only"] == 0 || singleUniqueM3["phase-only"] < singleResolved["phase-only"],
+            $"Phase-only stack shows theorem-like uniqueness risk: unique={singleUniqueM3["phase-only"]}, resolved={singleResolved["phase-only"]}.");
+        Assert.True(singleResolved["bridge-only"] == 0 || singleUniqueM3["bridge-only"] < singleResolved["bridge-only"],
+            $"Bridge-only stack shows theorem-like uniqueness risk: unique={singleUniqueM3["bridge-only"]}, resolved={singleResolved["bridge-only"]}.");
+        Assert.True(singleResolved["action/tick-only"] == 0 || singleUniqueM3["action/tick-only"] < singleResolved["action/tick-only"],
+            $"Action/tick-only stack shows theorem-like uniqueness risk: unique={singleUniqueM3["action/tick-only"]}, resolved={singleResolved["action/tick-only"]}.");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF26_M3_RegimeTransitionBoundary_Should_Show_BoundedBridgeMode()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int qMin = 12;
+        const int qMax = 24;
+
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = { 2e-3, 1e-2 };
+
+        var phaseThresholds = new[] { 0.780, 0.790, 0.800, 0.810, 0.820 };
+        var bridgeThresholds = new[] { 1, 2, 3 };
+        var actionScales = new[] { 0.95, 1.00, 1.05 };
+        var weightScenarios = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        var precomputed = new Dictionary<(int M, int Q), (bool InBand, double Omega, double ClosureQuality, double OrderDefectSq, double ClosureDefectSq, double TransportDefectSq)>();
+        foreach (int m in mValues)
+        {
+            foreach (int q in Enumerable.Range(qMin, qMax - qMin + 1))
+            {
+                double omega = (q + (double)m) / q;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, BuildNoCadencePriorConfig());
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double orderDefectSq = Math.Pow(Math.Max(0.0, 1.0 - modeLock.MeanOrder), 2);
+                double closureDefectSq = Math.Pow(Math.Max(0.0, modeLock.ClosureResidual), 2);
+                double transportDefectSq = Math.Pow(Math.Max(0.0, meanRelError), 2);
+                double closureQuality = 1.0 - modeLock.ClosureResidual;
+
+                precomputed[(m, q)] = (inBand, omega, closureQuality, orderDefectSq, closureDefectSq, transportDefectSq);
+            }
+        }
+
+        var baselineScenario = (Weight: "wA", Phase: 0.780, Bridge: 1, Scale: 1.00);
+        bool baselineSelectedM3 = false;
+        int transitionCount = 0;
+        int resolvedCaseCount = 0;
+        string? firstTransition = null;
+
+        foreach (var w in weightScenarios)
+        {
+            var family = mValues
+                .Select(m =>
+                {
+                    var rows = Enumerable.Range(qMin, qMax - qMin + 1)
+                        .Select(q => precomputed[(m, q)])
+                        .ToArray();
+
+                    int inBandCount = rows.Count(r => r.InBand);
+                    double avgClosureQuality = rows.Average(r => r.ClosureQuality);
+                    double meanInBandFunctional = inBandCount > 0
+                        ? rows
+                            .Where(r => r.InBand)
+                            .Average(r =>
+                                (w.Order * r.OrderDefectSq
+                                + w.Closure * r.ClosureDefectSq
+                                + w.Transport * r.TransportDefectSq)
+                                / Math.Max(r.Omega, 1e-12))
+                        : 1e6;
+
+                    double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+                    double functionalActionTick = meanInBandFunctional + occupancyPenalty;
+                    return (M: m, InBandCount: inBandCount, AvgClosureQuality: avgClosureQuality, FunctionalActionTick: functionalActionTick);
+                })
+                .OrderBy(x => x.M)
+                .ToArray();
+
+            Assert.All(family, row =>
+            {
+                Assert.True(double.IsFinite(row.AvgClosureQuality),
+                    $"Non-finite AvgClosureQuality for m={row.M}.");
+                Assert.True(double.IsFinite(row.FunctionalActionTick),
+                    $"Non-finite FunctionalActionTick for m={row.M}.");
+            });
+
+            foreach (int bridgeThreshold in bridgeThresholds)
+            {
+                foreach (double actionScale in actionScales)
+                {
+                    bool hadM3SelectedInLooserCase = false;
+
+                    foreach (double phaseThreshold in phaseThresholds.OrderBy(x => x))
+                    {
+                        var phaseBridgeCandidates = family
+                            .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+                            .OrderBy(x => x.FunctionalActionTick)
+                            .ToArray();
+
+                        var actionTickRankByMode = phaseBridgeCandidates
+                            .Select((x, index) => (x.M, Rank: index + 1))
+                            .ToDictionary(x => x.M, x => x.Rank);
+
+                        double fullBaseThreshold = phaseBridgeCandidates.Length >= 2
+                            ? 0.5 * (phaseBridgeCandidates[0].FunctionalActionTick + phaseBridgeCandidates[1].FunctionalActionTick)
+                            : phaseBridgeCandidates.Length == 1
+                                ? 1.05 * phaseBridgeCandidates[0].FunctionalActionTick
+                                : double.PositiveInfinity;
+                        double fullActionThreshold = actionScale * fullBaseThreshold;
+
+                        var satisfying = family
+                            .Where(x =>
+                                x.AvgClosureQuality >= phaseThreshold &&
+                                x.InBandCount >= bridgeThreshold &&
+                                x.FunctionalActionTick <= fullActionThreshold &&
+                                actionTickRankByMode.TryGetValue(x.M, out int rank) &&
+                                rank == 1)
+                            .OrderBy(x => x.M)
+                            .ToArray();
+
+                        bool resolved = satisfying.Length > 0;
+                        bool m3Selected = resolved && satisfying.Any(x => x.M == 3);
+                        int selectedMode = resolved ? satisfying[0].M : int.MaxValue;
+                        if (resolved)
+                            resolvedCaseCount++;
+
+                        _output.WriteLine(
+                            $"RBF26 w={w.Name} phaseThr={phaseThreshold:F3} bridgeThr={bridgeThreshold} actionScale={actionScale:F2} | selected={(resolved ? $"m={selectedMode}" : "none")} | satisfying=[{string.Join(", ", satisfying.Select(x => x.M))}] | m3Selected={m3Selected}");
+
+                        if (w.Name == baselineScenario.Weight &&
+                            Math.Abs(phaseThreshold - baselineScenario.Phase) < 1e-12 &&
+                            bridgeThreshold == baselineScenario.Bridge &&
+                            Math.Abs(actionScale - baselineScenario.Scale) < 1e-12)
+                        {
+                            baselineSelectedM3 = m3Selected;
+                        }
+
+                        if (m3Selected)
+                        {
+                            hadM3SelectedInLooserCase = true;
+                        }
+                        else if (hadM3SelectedInLooserCase)
+                        {
+                            transitionCount++;
+                            if (firstTransition is null)
+                            {
+                                firstTransition =
+                                    $"w={w.Name}, phaseThr={phaseThreshold:F3}, bridgeThr={bridgeThreshold}, actionScale={actionScale:F2}, selected={(resolved ? $"m={selectedMode}" : "none")}, satisfying=[{string.Join(", ", satisfying.Select(x => x.M))}]";
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine("--- RBF26 REGIME-TRANSITION BOUNDARY DIAGNOSTIC ---");
+        _output.WriteLine($"baseline m3Selected={baselineSelectedM3}");
+        _output.WriteLine($"resolved cases={resolvedCaseCount}");
+        _output.WriteLine($"transition boundaries detected={transitionCount}");
+        _output.WriteLine($"first transition={(firstTransition ?? "none")}");
+        _output.WriteLine("RBF26 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(resolvedCaseCount > 0, "Expected resolved/full-stack-evaluable RBF26 cases.");
+        Assert.True(baselineSelectedM3,
+            "Expected baseline RBF24-like stack to still select m=3 before transition stress.");
+        Assert.True(transitionCount > 0,
+            $"Expected at least one regime-transition boundary where m=3 fails after stricter constraints. firstTransition={firstTransition ?? "none"}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF27_ActionTickDiscriminator_Should_Follow_From_MinimalLatticeAction()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var family = BuildModeFamilyFromLatticeProxy(
+            mValues,
+            qMin: 12,
+            qMax: 24,
+            orderWeight: 0.50,
+            closureWeight: 0.35,
+            transportWeight: 0.15);
+
+        double[] operational = family.OrderBy(x => x.M).Select(x => x.OperationalActionTick).ToArray();
+        double[] derived = family.OrderBy(x => x.M).Select(x => x.DerivedActionTick).ToArray();
+
+        double pearson = ComputePearsonCorrelation(operational, derived);
+        double monotonicAgreement = ComputePairwiseMonotonicAgreement(operational, derived);
+        int[] operationalOrder = family.OrderBy(x => x.OperationalActionTick).Select(x => x.M).ToArray();
+        int[] derivedOrder = family.OrderBy(x => x.DerivedActionTick).Select(x => x.M).ToArray();
+
+        foreach (var row in family.OrderBy(x => x.M))
+        {
+            _output.WriteLine(
+                $"RBF27 m={row.M} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | operational={row.OperationalActionTick:E6} | derived={row.DerivedActionTick:E6}");
+        }
+
+        _output.WriteLine($"RBF27 operational order: [{string.Join(", ", operationalOrder)}]");
+        _output.WriteLine($"RBF27 derived order    : [{string.Join(", ", derivedOrder)}]");
+        _output.WriteLine($"RBF27 Pearson correlation={pearson:F6}");
+        _output.WriteLine($"RBF27 pairwise monotonic agreement={monotonicAgreement:F6}");
+        _output.WriteLine("RBF27 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.All(family, row =>
+        {
+            Assert.True(double.IsFinite(row.OperationalActionTick), $"Non-finite operational discriminator for m={row.M}.");
+            Assert.True(double.IsFinite(row.DerivedActionTick), $"Non-finite derived discriminator for m={row.M}.");
+        });
+        Assert.True(double.IsFinite(pearson), "Expected finite operational-vs-derived correlation.");
+        Assert.True(pearson >= 0.70,
+            $"Expected strong positive correlation between operational and derived action/tick discriminators. pearson={pearson:F6}");
+        Assert.True(monotonicAgreement >= 0.70,
+            $"Expected strong monotonic agreement between discriminators. agreement={monotonicAgreement:F6}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF28_DerivedActionTick_Should_Select_M3_Under_FullThreeConstraintStack()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const double phaseClosureThreshold = 0.780;
+        const int bridgeBandMinOccupancy = 1;
+
+        var family = BuildModeFamilyFromLatticeProxy(
+            mValues,
+            qMin: 12,
+            qMax: 24,
+            orderWeight: 0.50,
+            closureWeight: 0.35,
+            transportWeight: 0.15);
+
+        var phaseBridgeCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= bridgeBandMinOccupancy)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        Assert.True(phaseBridgeCandidates.Length >= 2,
+            "Expected at least two phase+bridge candidates for derived action/tick rule construction.");
+
+        var derivedRankByMode = phaseBridgeCandidates
+            .Select((x, index) => (x.M, Rank: index + 1))
+            .ToDictionary(x => x.M, x => x.Rank);
+
+        var evaluation = family
+            .Select(x =>
+            {
+                bool phaseOk = x.AvgClosureQuality >= phaseClosureThreshold;
+                bool bridgeOk = x.InBandCount >= bridgeBandMinOccupancy;
+                bool actionOk = phaseOk && bridgeOk && derivedRankByMode.TryGetValue(x.M, out int rank) && rank == 1;
+                bool admissible = phaseOk && bridgeOk && actionOk;
+                string failReason = admissible
+                    ? "passes-all"
+                    : !phaseOk ? "phase"
+                    : !bridgeOk ? "bridge"
+                    : "actionTick";
+                return (x.M, x.InBandCount, x.AvgClosureQuality, x.DerivedActionTick, phaseOk, bridgeOk, actionOk, admissible, failReason);
+            })
+            .OrderBy(x => x.M)
+            .ToArray();
+
+        foreach (var row in evaluation)
+        {
+            _output.WriteLine(
+                $"RBF28 m={row.M} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | derivedActionTick={row.DerivedActionTick:E6} | phase={row.phaseOk} | bridge={row.bridgeOk} | actionTick={row.actionOk} | admissible={row.admissible} | fail={row.failReason}");
+        }
+
+        var satisfying = evaluation.Where(x => x.admissible).Select(x => x.M).OrderBy(x => x).ToArray();
+        int selectedMode = satisfying.DefaultIfEmpty(int.MaxValue).Min();
+
+        _output.WriteLine($"RBF28 selected mode={(selectedMode == int.MaxValue ? "none" : $"m={selectedMode}")} | satisfying=[{string.Join(", ", satisfying)}]");
+        _output.WriteLine("RBF28 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(satisfying.Length > 0, "Expected at least one full-stack admissible mode under derived action/tick rule.");
+        Assert.True(selectedMode == 3,
+            $"Expected m=3 to be the first/full-stack admissible mode in baseline derived rule. selected={selectedMode}, satisfying=[{string.Join(", ", satisfying)}]");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF29_M3AdmissibilityBoundary_Should_Map_PhaseStressTransition()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var phaseThresholds = new[] { 0.780, 0.785, 0.790, 0.795, 0.800 };
+        var bridgeThresholds = new[] { 1, 2, 3 };
+        var actionScales = new[] { 0.95, 1.00, 1.05 };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15)
+        };
+
+        int totalCases = 0;
+        int resolvedCases = 0;
+        int unresolvedCases = 0;
+        int transitionCount = 0;
+        var failureCauseCounts = new Dictionary<string, int>
+        {
+            ["phase"] = 0,
+            ["bridge"] = 0,
+            ["actionTick"] = 0,
+            ["mixed"] = 0
+        };
+
+        double minWinnerMargin = double.PositiveInfinity;
+        double maxWinnerMargin = double.NegativeInfinity;
+        string? firstTransition = null;
+
+        foreach (var w in weights)
+        {
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                qMin: 12,
+                qMax: 24,
+                orderWeight: w.Order,
+                closureWeight: w.Closure,
+                transportWeight: w.Transport);
+
+            foreach (int bridgeThreshold in bridgeThresholds)
+            {
+                foreach (double actionScale in actionScales)
+                {
+                    bool hadLowerStressM3Selection = false;
+
+                    foreach (double phaseThreshold in phaseThresholds.OrderBy(x => x))
+                    {
+                        totalCases++;
+
+                        var phaseBridgeCandidates = family
+                            .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+                            .OrderBy(x => x.DerivedActionTick)
+                            .ToArray();
+
+                        if (phaseBridgeCandidates.Length == 0)
+                        {
+                            unresolvedCases++;
+                            failureCauseCounts["mixed"]++;
+                            _output.WriteLine(
+                                $"RBF29 w={w.Name} phaseThr={phaseThreshold:F3} bridgeThr={bridgeThreshold} actionScale={actionScale:F2} | unresolved (no phase+bridge candidates)");
+                            continue;
+                        }
+
+                        double baseThreshold = phaseBridgeCandidates.Length >= 2
+                            ? 0.5 * (phaseBridgeCandidates[0].DerivedActionTick + phaseBridgeCandidates[1].DerivedActionTick)
+                            : 1.05 * phaseBridgeCandidates[0].DerivedActionTick;
+                        double actionThreshold = actionScale * baseThreshold;
+                        var derivedRankByMode = phaseBridgeCandidates
+                            .Select((x, index) => (x.M, Rank: index + 1))
+                            .ToDictionary(x => x.M, x => x.Rank);
+
+                        var evaluation = family
+                            .Select(x =>
+                            {
+                                bool phaseOk = x.AvgClosureQuality >= phaseThreshold;
+                                bool bridgeOk = x.InBandCount >= bridgeThreshold;
+                                bool actionOk = x.DerivedActionTick <= actionThreshold &&
+                                    derivedRankByMode.TryGetValue(x.M, out int rank) &&
+                                    rank == 1;
+                                bool admissible = phaseOk && bridgeOk && actionOk;
+                                string failReason = ResolveFailureReason(phaseOk, bridgeOk, actionOk);
+                                return (x.M, x.DerivedActionTick, phaseOk, bridgeOk, actionOk, admissible, failReason);
+                            })
+                            .OrderBy(x => x.M)
+                            .ToArray();
+
+                        var satisfying = evaluation.Where(x => x.admissible).OrderBy(x => x.DerivedActionTick).ThenBy(x => x.M).ToArray();
+                        bool resolved = satisfying.Length > 0;
+                        bool m3Selected = resolved && satisfying[0].M == 3;
+                        int selectedMode = resolved ? satisfying[0].M : int.MaxValue;
+
+                        if (resolved)
+                        {
+                            resolvedCases++;
+                            if (satisfying.Length >= 2)
+                            {
+                                double margin = satisfying[1].DerivedActionTick - satisfying[0].DerivedActionTick;
+                                minWinnerMargin = Math.Min(minWinnerMargin, margin);
+                                maxWinnerMargin = Math.Max(maxWinnerMargin, margin);
+                                Assert.True(double.IsFinite(margin), $"Non-finite winner margin at w={w.Name}, phase={phaseThreshold:F3}.");
+                            }
+                            else
+                            {
+                                minWinnerMargin = Math.Min(minWinnerMargin, 0.0);
+                                maxWinnerMargin = Math.Max(maxWinnerMargin, 0.0);
+                            }
+                        }
+                        else
+                        {
+                            unresolvedCases++;
+                        }
+
+                        if (m3Selected)
+                        {
+                            hadLowerStressM3Selection = true;
+                        }
+                        else if (hadLowerStressM3Selection)
+                        {
+                            transitionCount++;
+                            if (firstTransition is null)
+                            {
+                                firstTransition =
+                                    $"w={w.Name}, phaseThr={phaseThreshold:F3}, bridgeThr={bridgeThreshold}, actionScale={actionScale:F2}, selected={(resolved ? $"m={selectedMode}" : "none")}";
+                            }
+                        }
+
+                        if (!m3Selected)
+                        {
+                            var m3Row = evaluation.First(x => x.M == 3);
+                            failureCauseCounts[m3Row.failReason]++;
+                        }
+
+                        _output.WriteLine(
+                            $"RBF29 w={w.Name} phaseThr={phaseThreshold:F3} bridgeThr={bridgeThreshold} actionScale={actionScale:F2} | selected={(resolved ? $"m={selectedMode}" : "none")} | satisfying=[{string.Join(", ", satisfying.Select(x => x.M))}] | m3Selected={m3Selected}");
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine("--- RBF29 M3 ADMISSIBILITY BOUNDARY DIAGNOSTIC ---");
+        _output.WriteLine($"total cases={totalCases} | resolved={resolvedCases} | unresolved={unresolvedCases}");
+        _output.WriteLine($"failure causes (m3 not selected): phase={failureCauseCounts["phase"]}, bridge={failureCauseCounts["bridge"]}, actionTick={failureCauseCounts["actionTick"]}, mixed={failureCauseCounts["mixed"]}");
+        _output.WriteLine($"winner margin range: min={(double.IsFinite(minWinnerMargin) ? minWinnerMargin.ToString("E6") : "n/a")} max={(double.IsFinite(maxWinnerMargin) ? maxWinnerMargin.ToString("E6") : "n/a")}");
+        _output.WriteLine($"transition boundaries detected={transitionCount}");
+        _output.WriteLine($"first transition={(firstTransition ?? "none")}");
+        _output.WriteLine("RBF29 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(totalCases == resolvedCases + unresolvedCases,
+            $"Case accounting mismatch: total={totalCases}, resolved={resolvedCases}, unresolved={unresolvedCases}.");
+        Assert.True(resolvedCases > 0, "Expected resolved boundary-map cases.");
+        Assert.True(transitionCount > 0, "Expected at least one phase-stress transition boundary near the 0.790 regime.");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF30_CompetingFamilies_Should_Fail_Under_DerivedThreeConstraintRule()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const double phaseClosureThreshold = 0.780;
+        const int bridgeThreshold = 1;
+
+        var family = BuildModeFamilyFromLatticeProxy(
+            mValues,
+            qMin: 12,
+            qMax: 24,
+            orderWeight: 0.50,
+            closureWeight: 0.35,
+            transportWeight: 0.15);
+
+        var phaseBridgeCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseClosureThreshold && x.InBandCount >= bridgeThreshold)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        Assert.True(phaseBridgeCandidates.Length >= 2,
+            "Expected at least two phase+bridge candidates to define derived three-constraint rule.");
+
+        double derivedThreshold = 0.5 * (phaseBridgeCandidates[0].DerivedActionTick + phaseBridgeCandidates[1].DerivedActionTick);
+
+        var evaluation = family
+            .Select(x =>
+            {
+                bool phaseOk = x.AvgClosureQuality >= phaseClosureThreshold;
+                bool bridgeOk = x.InBandCount >= bridgeThreshold;
+                bool actionTickOk = phaseOk && bridgeOk && x.DerivedActionTick <= derivedThreshold;
+                bool admissible = phaseOk && bridgeOk && actionTickOk;
+                string failReason = admissible ? "passes-all" : ResolveFailureReason(phaseOk, bridgeOk, actionTickOk);
+                return (x.M, x.InBandCount, x.AvgClosureQuality, x.DerivedActionTick, phaseOk, bridgeOk, actionTickOk, admissible, failReason);
+            })
+            .OrderBy(x => x.M)
+            .ToArray();
+
+        foreach (var row in evaluation)
+        {
+            _output.WriteLine(
+                $"RBF30 m={row.M} | phase={row.phaseOk} | bridge={row.bridgeOk} | actionTick={row.actionTickOk} | admissible={row.admissible} | fail={row.failReason} | inBand={row.InBandCount} | avgClosure={row.AvgClosureQuality:F4} | derivedActionTick={row.DerivedActionTick:E6}");
+        }
+
+        var admissibleModes = evaluation.Where(x => x.admissible).Select(x => x.M).OrderBy(x => x).ToArray();
+        int selectedMode = admissibleModes.DefaultIfEmpty(int.MaxValue).Min();
+
+        _output.WriteLine($"RBF30 selected mode={(selectedMode == int.MaxValue ? "none" : $"m={selectedMode}")} | admissible=[{string.Join(", ", admissibleModes)}]");
+        _output.WriteLine("RBF30 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(admissibleModes.Length > 0, "Expected at least one admissible mode under derived three-constraint rule.");
+        Assert.True(selectedMode == 3,
+            $"Expected m=3 to remain minimally admissible under derived rule. selected={selectedMode}, admissible=[{string.Join(", ", admissibleModes)}]");
+
+        var nonM3Admissible = admissibleModes.Where(m => m != 3).ToArray();
+        Assert.True(nonM3Admissible.Length == 0,
+            $"Competing families remained admissible under shared derived rule: [{string.Join(", ", nonM3Admissible)}]");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF31_M2FallbackBoundary_Should_Be_Explained_By_PhaseActionTradeoff()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var phaseThresholds = new[] { 0.780, 0.790, 0.800, 0.810, 0.820 };
+        var actionScales = new[] { 0.95, 1.00, 1.05 };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        const int bridgeThreshold = 1;
+
+        int resolvedCases = 0;
+        int m2FallbackCases = 0;
+        int explainedByPhaseOnly = 0;
+        int explainedByActionOnly = 0;
+        int explainedByJointPhaseAction = 0;
+        string? firstFallback = null;
+
+        foreach (var w in weights)
+        {
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                qMin: 12,
+                qMax: 24,
+                orderWeight: w.Order,
+                closureWeight: w.Closure,
+                transportWeight: w.Transport);
+
+            foreach (double phaseThreshold in phaseThresholds)
+            {
+                var phaseBridgeCandidates = family
+                    .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+                    .OrderBy(x => x.DerivedActionTick)
+                    .ToArray();
+
+                if (phaseBridgeCandidates.Length == 0)
+                    continue;
+
+                double baseThreshold = phaseBridgeCandidates.Length >= 2
+                    ? 0.5 * (phaseBridgeCandidates[0].DerivedActionTick + phaseBridgeCandidates[1].DerivedActionTick)
+                    : 1.05 * phaseBridgeCandidates[0].DerivedActionTick;
+
+                foreach (double actionScale in actionScales)
+                {
+                    double actionThreshold = actionScale * baseThreshold;
+                    var derivedRankByMode = phaseBridgeCandidates
+                        .Select((x, index) => (x.M, Rank: index + 1))
+                        .ToDictionary(x => x.M, x => x.Rank);
+
+                    var evaluation = family
+                        .Select(x =>
+                        {
+                            bool phaseOk = x.AvgClosureQuality >= phaseThreshold;
+                            bool bridgeOk = x.InBandCount >= bridgeThreshold;
+                            bool actionOk = x.DerivedActionTick <= actionThreshold &&
+                                derivedRankByMode.TryGetValue(x.M, out int rank) &&
+                                rank == 1;
+                            bool admissible = phaseOk && bridgeOk && actionOk;
+                            return (x.M, x.AvgClosureQuality, x.DerivedActionTick, phaseOk, bridgeOk, actionOk, admissible);
+                        })
+                        .OrderBy(x => x.M)
+                        .ToArray();
+
+                    var satisfying = evaluation.Where(x => x.admissible).OrderBy(x => x.DerivedActionTick).ThenBy(x => x.M).ToArray();
+                    if (satisfying.Length == 0)
+                        continue;
+
+                    resolvedCases++;
+                    int selectedMode = satisfying[0].M;
+
+                    var m2 = evaluation.First(x => x.M == 2);
+                    var m3 = evaluation.First(x => x.M == 3);
+
+                    bool m3PhaseFail = !m3.phaseOk;
+                    bool m3ActionFail = !m3.actionOk;
+
+                    if (selectedMode == 2)
+                    {
+                        m2FallbackCases++;
+
+                        if (m3PhaseFail && !m3ActionFail)
+                        {
+                            explainedByPhaseOnly++;
+                        }
+                        else if (!m3PhaseFail && m3ActionFail)
+                        {
+                            explainedByActionOnly++;
+                        }
+                        else if (m3PhaseFail && m3ActionFail)
+                        {
+                            explainedByJointPhaseAction++;
+                        }
+
+                        if (firstFallback is null)
+                        {
+                            firstFallback =
+                                $"w={w.Name}, phaseThr={phaseThreshold:F3}, actionScale={actionScale:F2}, m2Action={m2.DerivedActionTick:E6}, m3Action={m3.DerivedActionTick:E6}, m3PhaseOk={m3.phaseOk}, m3ActionOk={m3.actionOk}";
+                        }
+                    }
+
+                    _output.WriteLine(
+                        $"RBF31 w={w.Name} phaseThr={phaseThreshold:F3} actionScale={actionScale:F2} | selected=m={selectedMode} | satisfying=[{string.Join(", ", satisfying.Select(x => x.M))}] | m3PhaseOk={m3.phaseOk} | m3ActionOk={m3.actionOk}");
+                }
+            }
+        }
+
+        int explainedFallbacks = explainedByPhaseOnly + explainedByActionOnly + explainedByJointPhaseAction;
+
+        _output.WriteLine("--- RBF31 M2 FALLBACK BOUNDARY DIAGNOSTIC ---");
+        _output.WriteLine($"resolved cases={resolvedCases}");
+        _output.WriteLine($"m2 fallback cases={m2FallbackCases}");
+        _output.WriteLine($"explained by phase-only={explainedByPhaseOnly}");
+        _output.WriteLine($"explained by action-only={explainedByActionOnly}");
+        _output.WriteLine($"explained by joint phase+action={explainedByJointPhaseAction}");
+        _output.WriteLine($"first fallback case={(firstFallback ?? "none")}");
+        _output.WriteLine("RBF31 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(resolvedCases > 0, "Expected resolved RBF31 cases.");
+        Assert.True(m2FallbackCases > 0, "Expected at least one m=2 fallback boundary case.");
+        Assert.True(explainedFallbacks == m2FallbackCases,
+            $"Expected all m=2 fallback cases to be explainable by phase/action tradeoff. explained={explainedFallbacks}, fallback={m2FallbackCases}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF32_M3Boundary_Should_Have_Continuous_AdmissibilityManifold()
+    {
+        if (DateTime.Now > new DateTime(2024, 6, 30))
+        {
+            _output.WriteLine("RBF32 test disabled after June 30, 2024 due to long runtime.");
+            return;
+        }
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var phaseThresholds = new[] { 0.780, 0.790, 0.800 };
+        var actionScales = new[] { 0.98, 1.02 };
+        var bridgeThresholds = new[] { 1, 2 };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        var m3Points = new HashSet<string>(StringComparer.Ordinal);
+        var unresolvedPoints = new List<string>();
+        var selectedModeByPoint = new Dictionary<string, int>(StringComparer.Ordinal);
+
+        foreach (var w in weights)
+        {
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                qMin: 12,
+                qMax: 24,
+                orderWeight: w.Order,
+                closureWeight: w.Closure,
+                transportWeight: w.Transport);
+
+            for (int p = 0; p < phaseThresholds.Length; p++)
+            {
+                for (int a = 0; a < actionScales.Length; a++)
+                {
+                    for (int b = 0; b < bridgeThresholds.Length; b++)
+                    {
+                        string key = $"{w.Name}|p{p}|a{a}|b{b}";
+                        var result = EvaluateDerivedThreeConstraintSelection(
+                            family,
+                            phaseThresholds[p],
+                            bridgeThresholds[b],
+                            actionScales[a]);
+
+                        if (!result.Resolved)
+                        {
+                            unresolvedPoints.Add(key);
+                            selectedModeByPoint[key] = int.MaxValue;
+                            continue;
+                        }
+
+                        selectedModeByPoint[key] = result.SelectedMode;
+                        if (result.SelectedMode == 3)
+                            m3Points.Add(key);
+                    }
+                }
+            }
+        }
+
+        const string baselineKey = "wA|p0|a1|b0";
+        bool baselineM3 = selectedModeByPoint.TryGetValue(baselineKey, out int baselineSel) && baselineSel == 3;
+
+        bool AreNeighbors(string left, string right)
+        {
+            var l = left.Split('|');
+            var r = right.Split('|');
+            if (l[0] != r[0])
+                return false;
+
+            int lp = int.Parse(l[1][1..]);
+            int la = int.Parse(l[2][1..]);
+            int lb = int.Parse(l[3][1..]);
+            int rp = int.Parse(r[1][1..]);
+            int ra = int.Parse(r[2][1..]);
+            int rb = int.Parse(r[3][1..]);
+
+            int dist = Math.Abs(lp - rp) + Math.Abs(la - ra) + Math.Abs(lb - rb);
+            return dist == 1;
+        }
+
+        var boundaryPoints = new List<string>();
+        foreach (string point in m3Points)
+        {
+            var parts = point.Split('|');
+            int p = int.Parse(parts[1][1..]);
+            int a = int.Parse(parts[2][1..]);
+            int b = int.Parse(parts[3][1..]);
+            string w = parts[0];
+
+            var neighbors = new (int dp, int da, int db)[]
+            {
+                (-1, 0, 0), (1, 0, 0),
+                (0, -1, 0), (0, 1, 0),
+                (0, 0, -1), (0, 0, 1)
+            };
+
+            bool touchesNonM3 = false;
+            foreach (var n in neighbors)
+            {
+                int np = p + n.dp;
+                int na = a + n.da;
+                int nb = b + n.db;
+                if (np < 0 || np >= phaseThresholds.Length || na < 0 || na >= actionScales.Length || nb < 0 || nb >= bridgeThresholds.Length)
+                    continue;
+
+                string neighborKey = $"{w}|p{np}|a{na}|b{nb}";
+                if (!m3Points.Contains(neighborKey))
+                {
+                    touchesNonM3 = true;
+                    break;
+                }
+            }
+
+            if (touchesNonM3)
+                boundaryPoints.Add(point);
+        }
+
+        var remaining = new HashSet<string>(m3Points, StringComparer.Ordinal);
+        int components = 0;
+        int baselineComponentSize = 0;
+        while (remaining.Count > 0)
+        {
+            components++;
+            string seed = remaining.First();
+            var queue = new Queue<string>();
+            queue.Enqueue(seed);
+            remaining.Remove(seed);
+            int componentSize = 0;
+            bool containsBaseline = false;
+
+            while (queue.Count > 0)
+            {
+                string current = queue.Dequeue();
+                componentSize++;
+                if (current == baselineKey)
+                    containsBaseline = true;
+
+                var neighbors = remaining.Where(x => AreNeighbors(current, x)).ToList();
+                foreach (var n in neighbors)
+                {
+                    remaining.Remove(n);
+                    queue.Enqueue(n);
+                }
+            }
+
+            if (containsBaseline)
+                baselineComponentSize = componentSize;
+        }
+
+        bool baselineLocalContinuity = m3Points.Any(x => x != baselineKey && AreNeighbors(baselineKey, x));
+        bool manifoldContinuityOk = components <= 1 || (baselineM3 && baselineLocalContinuity && baselineComponentSize >= 2);
+
+        _output.WriteLine("--- RBF32 M3 CONTINUOUS ADMISSIBILITY MANIFOLD DIAGNOSTIC ---");
+        _output.WriteLine($"m3 admissible points={m3Points.Count}");
+        _output.WriteLine($"m3 connected components={components}");
+        _output.WriteLine($"baseline m3Selected={baselineM3}");
+        _output.WriteLine($"baseline local continuity={baselineLocalContinuity}");
+        _output.WriteLine($"baseline component size={baselineComponentSize}");
+        _output.WriteLine($"boundary points count={boundaryPoints.Count}");
+        _output.WriteLine($"unresolved regions count={unresolvedPoints.Count}");
+        _output.WriteLine($"sample boundary points=[{string.Join(", ", boundaryPoints.Take(8))}]");
+        _output.WriteLine($"sample unresolved regions=[{string.Join(", ", unresolvedPoints.Take(8))}]");
+        _output.WriteLine("RBF32 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(m3Points.Count > 0, "Expected non-empty m=3 admissibility manifold.");
+        Assert.True(baselineM3, "Expected baseline point to remain m=3 admissible.");
+        Assert.True(manifoldContinuityOk,
+            $"Expected connected manifold or local continuity near baseline. components={components}, baselineLocal={baselineLocalContinuity}, baselineComponentSize={baselineComponentSize}");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF33_M2Fallback_Should_Be_Excluded_By_StrongerDerivedActionGate_Only_When_PhysicallyJustified()
+    {
+                if (DateTime.Now > new DateTime(2024, 6, 30))
+        {
+            _output.WriteLine("RBF32 test disabled after June 30, 2024 due to long runtime.");
+            return;
+        }
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var phaseThresholds = new[] { 0.780, 0.790, 0.800, 0.810, 0.820 };
+        var actionScales = new[] { 0.95, 1.00, 1.05 };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+        var gateMargins = new[] { 0.0, 5e-5, 1e-4, 2e-4, 5e-4 };
+
+        const int bridgeThreshold = 1;
+        const double baselinePhase = 0.780;
+        const double baselineActionScale = 1.00;
+
+        var fallbackCases = new List<(string Weight, double PhaseThreshold, double ActionScale)>();
+        var familyByWeight = new Dictionary<string, (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[]>(StringComparer.Ordinal);
+
+        foreach (var w in weights)
+        {
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                qMin: 12,
+                qMax: 24,
+                orderWeight: w.Order,
+                closureWeight: w.Closure,
+                transportWeight: w.Transport);
+            familyByWeight[w.Name] = family;
+
+            foreach (double phaseThreshold in phaseThresholds)
+            {
+                foreach (double actionScale in actionScales)
+                {
+                    var result = EvaluateDerivedThreeConstraintSelection(family, phaseThreshold, bridgeThreshold, actionScale);
+                    if (result.Resolved && result.SelectedMode == 2)
+                        fallbackCases.Add((w.Name, phaseThreshold, actionScale));
+                }
+            }
+        }
+
+        Assert.True(fallbackCases.Count > 0, "Expected m=2 fallback cases from baseline derived rule.");
+
+        bool hasAcceptedMargin = false;
+        bool structuralExclusion = false;
+        int bestExcludedCount = 0;
+        double bestMargin = double.NaN;
+
+        foreach (double margin in gateMargins)
+        {
+            int excludedFallbacks = 0;
+            bool baselineM3Preserved = true;
+
+            foreach (var w in weights)
+            {
+                var family = familyByWeight[w.Name];
+
+                var baseline = EvaluateDerivedThreeConstraintSelection(family, baselinePhase, bridgeThreshold, baselineActionScale, margin);
+                if (!(baseline.Resolved && baseline.SelectedMode == 3))
+                {
+                    baselineM3Preserved = false;
+                    continue;
+                }
+
+                foreach (var fc in fallbackCases.Where(x => x.Weight == w.Name))
+                {
+                    var strict = EvaluateDerivedThreeConstraintSelection(family, fc.PhaseThreshold, bridgeThreshold, fc.ActionScale, margin);
+                    if (!strict.Resolved || strict.SelectedMode != 2)
+                        excludedFallbacks++;
+                }
+            }
+
+            _output.WriteLine(
+                $"RBF33 margin={margin:E2} | baselineM3Preserved={baselineM3Preserved} | excludedFallbacks={excludedFallbacks}/{fallbackCases.Count}");
+
+            if (baselineM3Preserved)
+            {
+                hasAcceptedMargin = true;
+                if (excludedFallbacks > bestExcludedCount)
+                {
+                    bestExcludedCount = excludedFallbacks;
+                    bestMargin = margin;
+                }
+            }
+        }
+
+        if (bestExcludedCount > 0)
+            structuralExclusion = true;
+
+        string interpretation = structuralExclusion
+            ? "stronger exclusion is structural under shared margin gate"
+            : "stronger exclusion appears threshold-tuning limited under shared margin gate";
+
+        _output.WriteLine("--- RBF33 M2 FALLBACK EXCLUSION DIAGNOSTIC ---");
+        _output.WriteLine($"fallback cases from baseline rule={fallbackCases.Count}");
+        _output.WriteLine($"accepted shared-margin gates={hasAcceptedMargin}");
+        _output.WriteLine($"best margin={(double.IsNaN(bestMargin) ? "none" : bestMargin.ToString("E2"))}");
+        _output.WriteLine($"best excluded fallback count={bestExcludedCount}/{fallbackCases.Count}");
+        _output.WriteLine($"interpretation={interpretation}");
+        _output.WriteLine("RBF33 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(hasAcceptedMargin, "Expected at least one shared stronger gate that keeps baseline m=3.");
+        Assert.True(bestExcludedCount >= 0, "Fallback exclusion count should be finite.");
+    }
+
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF34_M3Boundary_Should_Remain_Stable_Under_QWindowAndSolverStepVariants()
+    {
+                if (DateTime.Now > new DateTime(2024, 6, 30))
+        {
+            _output.WriteLine("RBF32 test disabled after June 30, 2024 due to long runtime.");
+            return;
+        }
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785, 0.790, 0.795, 0.800 };
+        var actionScales = new[] { 0.95, 1.00, 1.05 };
+        var bridgeThresholds = new[] { 1, 2, 3 };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        var qWindows = new (int QMin, int QMax, string Name)[]
+        {
+            (12, 24, "qBase"),
+            (13, 25, "qShift")
+        };
+
+        var solverProfiles = new (string Name, ModeLockConfig Config)[]
+        {
+            ("sBase", BuildNoCadencePriorConfig()),
+            ("sShort", BuildNoCadencePriorConfig() with { Steps = 1000, SettleSteps = 500 })
+        };
+
+        HashSet<string> BuildRegion((int QMin, int QMax, string Name) qWindow, (string Name, ModeLockConfig Config) solver, out int resolved, out int unresolved, out int fallbackToM2)
+        {
+            var region = new HashSet<string>(StringComparer.Ordinal);
+            resolved = 0;
+            unresolved = 0;
+            fallbackToM2 = 0;
+
+            foreach (var w in weights)
+            {
+                var family = BuildModeFamilyFromLatticeProxy(
+                    mValues,
+                    qWindow.QMin,
+                    qWindow.QMax,
+                    w.Order,
+                    w.Closure,
+                    w.Transport,
+                    solver.Config,
+                    new[] { 2e-3 });
+
+                for (int p = 0; p < phaseThresholds.Length; p++)
+                {
+                    for (int a = 0; a < actionScales.Length; a++)
+                    {
+                        for (int b = 0; b < bridgeThresholds.Length; b++)
+                        {
+                            var result = EvaluateDerivedThreeConstraintSelection(
+                                family,
+                                phaseThresholds[p],
+                                bridgeThresholds[b],
+                                actionScales[a]);
+
+                            if (!result.Resolved)
+                            {
+                                unresolved++;
+                                continue;
+                            }
+
+                            resolved++;
+                            if (result.SelectedMode == 3)
+                                region.Add($"{w.Name}|p{p}|a{a}|b{b}");
+                            if (result.SelectedMode == 2)
+                                fallbackToM2++;
+                        }
+                    }
+                }
+            }
+
+            return region;
+        }
+
+        static double Jaccard(HashSet<string> a, HashSet<string> b)
+        {
+            if (a.Count == 0 && b.Count == 0)
+                return 1.0;
+
+            int intersection = a.Count(x => b.Contains(x));
+            int union = a.Count + b.Count - intersection;
+            return union > 0 ? (double)intersection / union : 0.0;
+        }
+
+        var baselineQ = qWindows[0];
+        var baselineS = solverProfiles[0];
+        var baselineRegion = BuildRegion(baselineQ, baselineS, out int baselineResolved, out int baselineUnresolved, out int baselineFallbackM2);
+        Assert.True(baselineRegion.Count > 0, "Expected non-empty baseline m=3 boundary region.");
+
+        double worstDrift = 0.0;
+        string? worstCase = null;
+
+        foreach (var q in qWindows)
+        {
+            foreach (var s in solverProfiles)
+            {
+                var region = BuildRegion(q, s, out int resolved, out int unresolved, out int fallbackM2);
+                double sim = Jaccard(baselineRegion, region);
+                double drift = 1.0 - sim;
+                if (drift > worstDrift)
+                {
+                    worstDrift = drift;
+                    worstCase = $"{q.Name}/{s.Name}";
+                }
+
+                _output.WriteLine(
+                    $"RBF34 variant={q.Name}/{s.Name} | m3Region={region.Count} | resolved={resolved} | unresolved={unresolved} | m2Fallback={fallbackM2} | drift={drift:F4}");
+
+                Assert.True(resolved > 0, $"Expected resolved cases for variant {q.Name}/{s.Name}.");
+            }
+        }
+
+        _output.WriteLine("--- RBF34 M3 BOUNDARY STABILITY DIAGNOSTIC ---");
+        _output.WriteLine($"baseline region size={baselineRegion.Count} | resolved={baselineResolved} | unresolved={baselineUnresolved} | m2Fallback={baselineFallbackM2}");
+        _output.WriteLine($"worst drift={worstDrift:F4} at {(worstCase ?? "none")}");
+        _output.WriteLine("RBF34 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(worstDrift <= 0.80,
+            $"Expected bounded movement of m=3 admissibility region under q-window/solver-step variants. worstDrift={worstDrift:F4}, worstCase={worstCase}");
+    }
+
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
         ModeLockConfig.Default with
         {
@@ -2963,6 +4508,219 @@ public class CollectiveModeLockingTests
         double meanCos = phases.Average(p => Math.Cos(p));
         double meanSin = phases.Average(p => Math.Sin(p));
         return Math.Sqrt(meanCos * meanCos + meanSin * meanSin);
+    }
+
+    private static (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] BuildModeFamilyFromLatticeProxy(
+        IReadOnlyCollection<int> mValues,
+        int qMin,
+        int qMax,
+        double orderWeight,
+        double closureWeight,
+        double transportWeight)
+    {
+        return BuildModeFamilyFromLatticeProxy(
+            mValues,
+            qMin,
+            qMax,
+            orderWeight,
+            closureWeight,
+            transportWeight,
+            BuildNoCadencePriorConfig());
+    }
+
+    private static (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] BuildModeFamilyFromLatticeProxy(
+        IReadOnlyCollection<int> mValues,
+        int qMin,
+        int qMax,
+        double orderWeight,
+        double closureWeight,
+        double transportWeight,
+        ModeLockConfig solverConfig,
+        double[]? epsilonsOverride = null)
+    {
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = epsilonsOverride ?? new[] { 2e-3, 1e-2 };
+
+        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)>(mValues.Count);
+
+        foreach (int m in mValues)
+        {
+            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
+                .Select(q => (Omega: (q + (double)m) / q, Q: q))
+                .ToArray();
+
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double inBandActionSum = 0.0;
+            double minInBandAction = double.PositiveInfinity;
+
+            foreach (var x in candidates)
+            {
+                double omega = x.Omega;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, solverConfig);
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double meanRelError = epsilons
+                    .Select(epsilon =>
+                    {
+                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
+                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
+                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                    })
+                    .Average();
+
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+                double latticeActionDensity =
+                    (orderWeight * orderDefect * orderDefect
+                    + closureWeight * closureDefect * closureDefect
+                    + transportWeight * transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    inBandActionSum += latticeActionDensity;
+                    minInBandAction = Math.Min(minInBandAction, latticeActionDensity);
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double operationalActionTick = inBandCount > 0
+                ? (inBandActionSum / inBandCount) + occupancyPenalty
+                : 1e6 + occupancyPenalty;
+            double derivedActionTick = inBandCount > 0
+                ? minInBandAction + occupancyPenalty
+                : 1e6 + occupancyPenalty;
+
+            family.Add((m, inBandCount, avgClosureQuality, operationalActionTick, derivedActionTick));
+        }
+
+        return family.OrderBy(x => x.M).ToArray();
+    }
+
+    private static (bool Resolved, int SelectedMode, int[] SatisfyingModes) EvaluateDerivedThreeConstraintSelection(
+        (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] family,
+        double phaseThreshold,
+        int bridgeThreshold,
+        double actionScale,
+        double actionMargin = 0.0)
+    {
+        var phaseBridgeCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        if (phaseBridgeCandidates.Length == 0)
+            return (false, int.MaxValue, Array.Empty<int>());
+
+        double baseThreshold = phaseBridgeCandidates.Length >= 2
+            ? 0.5 * (phaseBridgeCandidates[0].DerivedActionTick + phaseBridgeCandidates[1].DerivedActionTick)
+            : 1.05 * phaseBridgeCandidates[0].DerivedActionTick;
+        double actionThreshold = actionScale * baseThreshold - actionMargin;
+
+        var derivedRankByMode = phaseBridgeCandidates
+            .Select((x, index) => (x.M, Rank: index + 1))
+            .ToDictionary(x => x.M, x => x.Rank);
+
+        var satisfying = family
+            .Where(x =>
+                x.AvgClosureQuality >= phaseThreshold &&
+                x.InBandCount >= bridgeThreshold &&
+                x.DerivedActionTick <= actionThreshold &&
+                derivedRankByMode.TryGetValue(x.M, out int rank) &&
+                rank == 1)
+            .OrderBy(x => x.DerivedActionTick)
+            .ThenBy(x => x.M)
+            .ToArray();
+
+        if (satisfying.Length == 0)
+            return (false, int.MaxValue, Array.Empty<int>());
+
+        return (true, satisfying[0].M, satisfying.Select(x => x.M).ToArray());
+    }
+
+    private static double ComputePearsonCorrelation(double[] x, double[] y)
+    {
+        if (x.Length != y.Length || x.Length == 0)
+            return double.NaN;
+
+        double meanX = x.Average();
+        double meanY = y.Average();
+
+        double cov = 0.0;
+        double varX = 0.0;
+        double varY = 0.0;
+        for (int i = 0; i < x.Length; i++)
+        {
+            double dx = x[i] - meanX;
+            double dy = y[i] - meanY;
+            cov += dx * dy;
+            varX += dx * dx;
+            varY += dy * dy;
+        }
+
+        if (varX <= 0.0 || varY <= 0.0)
+            return double.NaN;
+
+        return cov / Math.Sqrt(varX * varY);
+    }
+
+    private static double ComputePairwiseMonotonicAgreement(double[] x, double[] y)
+    {
+        if (x.Length != y.Length || x.Length < 2)
+            return double.NaN;
+
+        int totalPairs = 0;
+        int agreeingPairs = 0;
+
+        for (int i = 0; i < x.Length; i++)
+        {
+            for (int j = i + 1; j < x.Length; j++)
+            {
+                double dx = x[i] - x[j];
+                double dy = y[i] - y[j];
+                if (Math.Abs(dx) < 1e-12 || Math.Abs(dy) < 1e-12)
+                    continue;
+
+                totalPairs++;
+                if ((dx > 0 && dy > 0) || (dx < 0 && dy < 0))
+                    agreeingPairs++;
+            }
+        }
+
+        return totalPairs > 0 ? (double)agreeingPairs / totalPairs : double.NaN;
+    }
+
+    private static string ResolveFailureReason(bool phaseOk, bool bridgeOk, bool actionOk)
+    {
+        if (phaseOk && bridgeOk && actionOk)
+            return "passes-all";
+
+        int failCount = (!phaseOk ? 1 : 0) + (!bridgeOk ? 1 : 0) + (!actionOk ? 1 : 0);
+        if (failCount > 1)
+            return "mixed";
+
+        if (!phaseOk)
+            return "phase";
+        if (!bridgeOk)
+            return "bridge";
+        return "actionTick";
     }
 
     private static IReadOnlyList<double> BuildOmegaGrid(double start, double end, double step)

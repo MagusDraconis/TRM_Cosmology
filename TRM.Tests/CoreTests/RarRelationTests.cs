@@ -17,6 +17,7 @@ namespace TRM.Tests.CoreTests;
 public class RarRelationTests
 {
     private readonly ITestOutputHelper _output;
+    private const double degradeEpsilon = 0.01;
 
     public RarRelationTests(ITestOutputHelper output)
     {
@@ -570,6 +571,7 @@ public class RarRelationTests
         Assert.True(trmRms < 0.15);
     }
 
+ 
     [Fact]
     public void RAR13_TRM_Rar_NoRefit_TurningMemory_HoldoutBins()
     {
@@ -1353,7 +1355,6 @@ public class RarRelationTests
         const int trainRemainder = 0;
         const int transferRemainder = 1;
         const int binCount = 3;
-        const double degradeEpsilon = 0.01;
 
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
@@ -1511,8 +1512,8 @@ public class RarRelationTests
         Assert.True(double.IsFinite(bestThreshold));
         Assert.True(double.IsFinite(bestWidth));
         Assert.True(bestWidth > 0.0);
-        Assert.True(correctedRms <= baselineRms + degradeEpsilon,
-            $"Cross-split transfer degraded beyond epsilon={degradeEpsilon:F3}.");
+        Assert.True(correctedRms <= baselineRms + 0.01,
+            "Cross-split transfer degraded beyond epsilon=0.010.");
     }
 
     [Fact]
@@ -1830,8 +1831,6 @@ public class RarRelationTests
         const int trainRemainder = 0;
         const int transferRemainder = 1;
         const int binCount = 3;
-        const double degradeEpsilon = 0.01;
-
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
 
@@ -1937,10 +1936,10 @@ public class RarRelationTests
         Assert.True(double.IsFinite(offsetSlopeRms));
         Assert.True(double.IsFinite(deltaOffset));
         Assert.True(double.IsFinite(deltaSlope));
-        Assert.True(offsetOnlyRms <= baselineRms + degradeEpsilon,
-            $"Offset-only transfer degraded beyond epsilon={degradeEpsilon:F3}.");
-        Assert.True(offsetSlopeRms <= baselineRms + degradeEpsilon,
-            $"Offset+slope transfer degraded beyond epsilon={degradeEpsilon:F3}.");
+        Assert.True(offsetOnlyRms <= baselineRms + 0.01,
+            "Offset-only transfer degraded beyond epsilon=0.010.");
+        Assert.True(offsetSlopeRms <= baselineRms + 0.01,
+            "Offset+slope transfer degraded beyond epsilon=0.010.");
     }
 
     [Fact]
@@ -1960,8 +1959,6 @@ public class RarRelationTests
     {
         const int modulo = 5;
         const int binCount = 3;
-        const double degradeEpsilon = 0.01;
-
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
 
@@ -2072,8 +2069,8 @@ public class RarRelationTests
             Assert.True(double.IsFinite(row.BaselineRms));
             Assert.True(double.IsFinite(row.OffsetRms));
             Assert.True(double.IsFinite(row.DeltaRms));
-            Assert.True(row.OffsetRms <= row.BaselineRms + degradeEpsilon,
-                $"Case train={row.TrainRemainder}, transfer={row.TransferRemainder} degraded beyond epsilon={degradeEpsilon:F3}.");
+            Assert.True(row.OffsetRms <= row.BaselineRms + 0.01,
+                $"Case train={row.TrainRemainder}, transfer={row.TransferRemainder} degraded beyond epsilon=0.010.");
         });
 
         Assert.True(improvedCount >= matrixResults.Count / 2,
@@ -2339,8 +2336,6 @@ public class RarRelationTests
     {
         const int modulo = 5;
         const int binCount = 3;
-        const double degradeEpsilon = 0.01;
-
         string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
         string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
 
@@ -5854,6 +5849,1484 @@ public class RarRelationTests
         });
     }
 
+    [Fact]
+    /// <summary>
+    /// Cluster-gated rawPhase transfer diagnostic based on RAR46 success/failure proxy structure.
+    ///
+    /// Hypothesis:
+    /// rawPhase offsets transfer more reliably when activated only in train-fitted low-gas / low-outer-inner / high-span regimes.
+    ///
+    /// Status:
+    /// diagnostic candidate only.
+    ///
+    /// Limitation:
+    /// No baseline TRM-RAR model-path activation; no theorem-level claim.
+    /// </summary>
+    public void RAR47_TRM_Rar_RawPhaseClusterGate_NoRefit()
+    {
+        const int modulo = 5;
+        const int binCount = 5;
+        const double degradeEpsilon = 0.01;
+
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        // Freeze baseline once; keep production TRM-RAR law unchanged.
+        var fit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        var rows = BuildTurningResidualRows(rarData, fit.BestA0);
+        var physicalByGalaxy = BuildGalaxyPhysicalProxyStats(rarData);
+        Assert.True(rows.Count >= binCount * 120, "Insufficient residual rows for cluster-gated rawPhase diagnostic.");
+
+        var deltaRaw = new List<double>();
+        var deltaGated = new List<double>();
+        int improvedRaw = 0;
+        int improvedGated = 0;
+        int transferCount = 0;
+        var gateActivationShares = new List<double>();
+        var trainThresholds = new List<(double Gas, double OuterInner, double Span)>();
+
+        for (int trainRemainder = 0; trainRemainder < modulo; trainRemainder++)
+        {
+            var trainRows = rows
+                .Where(r => (r.GalaxyKey.Sum(c => c) % modulo) != trainRemainder)
+                .ToList();
+            Assert.True(trainRows.Count >= binCount * 30, $"Insufficient train rows for train remainder {trainRemainder}.");
+
+            var sortedRawPhase = trainRows
+                .Select(r => r.OmegaSi * r.RadiusKpc)
+                .Where(double.IsFinite)
+                .OrderBy(x => x)
+                .ToList();
+            Assert.True(sortedRawPhase.Count >= binCount * 20, $"Insufficient train rawPhase rows for train remainder {trainRemainder}.");
+
+            var cuts = new List<double>();
+            for (int i = 1; i < binCount; i++)
+            {
+                int index = (i * sortedRawPhase.Count) / binCount;
+                cuts.Add(sortedRawPhase[Math.Min(index, sortedRawPhase.Count - 1)]);
+            }
+
+            int GetBin(double value)
+            {
+                for (int i = 0; i < cuts.Count; i++)
+                {
+                    if (value < cuts[i])
+                        return i;
+                }
+                return cuts.Count;
+            }
+
+            var trainOffsetsRaw = new Dictionary<int, List<double>>();
+            foreach (var row in trainRows)
+            {
+                int bin = GetBin(row.OmegaSi * row.RadiusKpc);
+                if (!trainOffsetsRaw.ContainsKey(bin))
+                    trainOffsetsRaw[bin] = new List<double>();
+                trainOffsetsRaw[bin].Add(row.Residual);
+            }
+
+            var trainOffsets = new Dictionary<int, double>();
+            for (int b = 0; b < binCount; b++)
+            {
+                Assert.True(trainOffsetsRaw.ContainsKey(b), $"Missing rawPhase bin {b} for train remainder {trainRemainder}.");
+                trainOffsets[b] = trainOffsetsRaw[b].Average();
+                Assert.True(double.IsFinite(trainOffsets[b]));
+            }
+
+            var trainGalaxyKeys = trainRows
+                .Select(r => r.GalaxyKey)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Where(k => physicalByGalaxy.ContainsKey(k))
+                .ToList();
+            Assert.True(trainGalaxyKeys.Count >= 20, $"Insufficient train galaxies with physical proxies for train remainder {trainRemainder}.");
+
+            double gasThreshold = Median(trainGalaxyKeys.Select(k => physicalByGalaxy[k].GasDominanceProxy).ToList());
+            double outerInnerThreshold = Median(trainGalaxyKeys.Select(k => physicalByGalaxy[k].OuterToInnerBaryonicAccelerationRatio).ToList());
+            double spanThreshold = Median(trainGalaxyKeys.Select(k => physicalByGalaxy[k].RadialSpanKpc).ToList());
+            trainThresholds.Add((gasThreshold, outerInnerThreshold, spanThreshold));
+
+            bool IsGateActive(string galaxyKey)
+            {
+                if (!physicalByGalaxy.TryGetValue(galaxyKey, out var p))
+                    return false;
+                return p.GasDominanceProxy <= gasThreshold
+                    && p.OuterToInnerBaryonicAccelerationRatio <= outerInnerThreshold
+                    && p.RadialSpanKpc >= spanThreshold;
+            }
+
+            for (int transferRemainder = 0; transferRemainder < modulo; transferRemainder++)
+            {
+                if (transferRemainder == trainRemainder)
+                    continue;
+
+                var transferRows = rows
+                    .Where(r => (r.GalaxyKey.Sum(c => c) % modulo) == transferRemainder)
+                    .ToList();
+                Assert.True(transferRows.Count >= 20, $"Insufficient transfer rows for train={trainRemainder}, transfer={transferRemainder}.");
+
+                var baselineResiduals = transferRows.Select(r => r.Residual).ToList();
+                var rawCorrectedResiduals = transferRows
+                    .Select(r =>
+                    {
+                        int bin = GetBin(r.OmegaSi * r.RadiusKpc);
+                        return r.Residual - trainOffsets[bin];
+                    })
+                    .ToList();
+                var gatedCorrectedResiduals = transferRows
+                    .Select(r =>
+                    {
+                        if (!IsGateActive(r.GalaxyKey))
+                            return r.Residual;
+                        int bin = GetBin(r.OmegaSi * r.RadiusKpc);
+                        return r.Residual - trainOffsets[bin];
+                    })
+                    .ToList();
+
+                double baselineRms = ComputeBinRms(baselineResiduals);
+                double rawRms = ComputeBinRms(rawCorrectedResiduals);
+                double gatedRms = ComputeBinRms(gatedCorrectedResiduals);
+                double dRaw = baselineRms - rawRms;
+                double dGated = baselineRms - gatedRms;
+
+                Assert.True(double.IsFinite(baselineRms));
+                Assert.True(double.IsFinite(rawRms));
+                Assert.True(double.IsFinite(gatedRms));
+                Assert.True(double.IsFinite(dRaw));
+                Assert.True(double.IsFinite(dGated));
+                Assert.True(rawRms <= baselineRms + degradeEpsilon,
+                    $"rawPhase degraded beyond epsilon={degradeEpsilon:F3} for train={trainRemainder}, transfer={transferRemainder}.");
+                Assert.True(gatedRms <= baselineRms + degradeEpsilon,
+                    $"gated rawPhase degraded beyond epsilon={degradeEpsilon:F3} for train={trainRemainder}, transfer={transferRemainder}.");
+
+                deltaRaw.Add(dRaw);
+                deltaGated.Add(dGated);
+                if (dRaw > 0.0) improvedRaw++;
+                if (dGated > 0.0) improvedGated++;
+                transferCount++;
+
+                int activeCount = transferRows.Count(r => IsGateActive(r.GalaxyKey));
+                gateActivationShares.Add(activeCount / (double)transferRows.Count);
+            }
+        }
+
+        Assert.True(transferCount > 0, "No transfer evaluations were produced.");
+
+        double meanDeltaRaw = deltaRaw.Average();
+        double meanDeltaGated = deltaGated.Average();
+        double extraGatedGain = meanDeltaGated - meanDeltaRaw;
+        double meanGateActivationShare = gateActivationShares.Average();
+        double meanGasThreshold = trainThresholds.Average(x => x.Gas);
+        double meanOuterInnerThreshold = trainThresholds.Average(x => x.OuterInner);
+        double meanSpanThreshold = trainThresholds.Average(x => x.Span);
+
+        WriteLineWithTestPrefix("--- RAW PHASE CLUSTER GATE DIAGNOSTIC ---");
+        WriteLineWithTestPrefix($"mean delta rawPhase={meanDeltaRaw:F6}");
+        WriteLineWithTestPrefix($"mean delta gatedRawPhase={meanDeltaGated:F6}");
+        WriteLineWithTestPrefix($"extra gated gain over rawPhase={extraGatedGain:F6}");
+        WriteLineWithTestPrefix($"improved transfers rawPhase={improvedRaw}/{transferCount}");
+        WriteLineWithTestPrefix($"improved transfers gatedRawPhase={improvedGated}/{transferCount}");
+        WriteLineWithTestPrefix($"mean gate activation share={meanGateActivationShare:F6}");
+        WriteLineWithTestPrefix(
+            $"mean train gate thresholds: gasDominance<={meanGasThreshold:F6} outerInnerRatio<={meanOuterInnerThreshold:F6} radialSpanKpc>={meanSpanThreshold:F6}");
+        WriteLineWithTestPrefix("Diagnostic candidate only. Baseline TRM-RAR law unchanged.");
+
+        Assert.True(double.IsFinite(meanDeltaRaw));
+        Assert.True(double.IsFinite(meanDeltaGated));
+        Assert.True(double.IsFinite(extraGatedGain));
+        Assert.True(double.IsFinite(meanGateActivationShare));
+        Assert.True(meanGateActivationShare > 0.0 && meanGateActivationShare < 1.0);
+    }
+
+    [Fact]
+    /// <summary>
+    /// Distance/radius-mapping sensitivity diagnostic for SPARC residuals under global-only a0 fitting.
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// No production mapping changes and no baseline activation.
+    /// </summary>
+    public void RAR48_TRM_Rar_DistanceMappingSensitivity_NoRefit()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rawPoints = SparcRarAnalysis.ParseRarFromZip(zipPath);
+        var galaxyMeta = SparcRarAnalysis.LoadGalaxyMetaFromMrt(mrtPath);
+        var scaling = TrmCosmologyParameters.Current();
+
+        Assert.NotEmpty(rawPoints);
+        Assert.NotEmpty(galaxyMeta);
+
+        static Dictionary<string, (double DistanceMpc, double InclinationDeg, int Quality)> ScaleMetaDistance(
+            Dictionary<string, (double DistanceMpc, double InclinationDeg, int Quality)> meta,
+            double factor)
+        {
+            return meta.ToDictionary(
+                kvp => kvp.Key,
+                kvp => (DistanceMpc: kvp.Value.DistanceMpc * factor, kvp.Value.InclinationDeg, kvp.Value.Quality),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        List<RarPoint> BuildNormalizedRadiusPoints(List<RarPoint> source)
+        {
+            var result = new List<RarPoint>();
+            foreach (var g in source.GroupBy(p => NormalizeGalaxyKey(p.GalaxyName)))
+            {
+                var ordered = g.OrderBy(p => p.RadiusKpc).ToList();
+                if (ordered.Count < 3)
+                    continue;
+
+                double rMax = Math.Max(ordered.Max(p => p.RadiusKpc), 1e-12);
+                foreach (var p in ordered)
+                {
+                    if (p.RadiusKpc <= 0 || p.Vobs <= 0)
+                        continue;
+
+                    double rNorm = p.RadiusKpc / rMax;
+                    if (!(rNorm > 0.0) || !double.IsFinite(rNorm))
+                        continue;
+
+                    double vDiskSq = p.Vdisk > 0 ? p.Vdisk * p.Vdisk : 0.0;
+                    double vBulgeSq = p.Vbulge > 0 ? p.Vbulge * p.Vbulge : 0.0;
+                    double vGasSq = p.Vgas > 0 ? p.Vgas * p.Vgas : 0.0;
+                    double vBarSq = vGasSq + (0.5 * vDiskSq) + (0.7 * vBulgeSq);
+                    if (vBarSq <= 0.0)
+                        continue;
+
+                    double gObs = (p.Vobs * p.Vobs / rNorm) * PhysicalConstants.Kms2KpcToMs2;
+                    double gBar = (vBarSq / rNorm) * PhysicalConstants.Kms2KpcToMs2;
+
+                    if (!(gObs > 0.0) || !(gBar > 0.0) || !double.IsFinite(gObs) || !double.IsFinite(gBar))
+                        continue;
+
+                    result.Add(new RarPoint(
+                        p.GalaxyName,
+                        rNorm,
+                        p.Vobs,
+                        p.Vgas,
+                        p.Vdisk,
+                        p.Vbulge,
+                        gObs,
+                        gBar));
+                }
+            }
+
+            return result;
+        }
+
+        var mappingSpecs = new[]
+        {
+            new
+            {
+                Name = "rawRadius",
+                Points = rawPoints,
+                Distances = galaxyMeta.ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            },
+            new
+            {
+                Name = "currentTrmLocalRadius",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, galaxyMeta, scaling, BaryonMode.GR_Consistent),
+                Distances = galaxyMeta.ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            },
+            new
+            {
+                Name = "noDistanceCorrectionCatalogGrouping",
+                Points = rawPoints
+                    .Select(p => new RarPoint(p.GalaxyName, p.RadiusKpc, p.Vobs, p.Vgas, p.Vdisk, p.Vbulge, p.GobsMs2, p.GbarMs2))
+                    .ToList(),
+                Distances = galaxyMeta.ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            },
+            new
+            {
+                Name = "distanceScale0p9",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, ScaleMetaDistance(galaxyMeta, 0.9), scaling, BaryonMode.GR_Consistent),
+                Distances = ScaleMetaDistance(galaxyMeta, 0.9).ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            },
+            new
+            {
+                Name = "distanceScale1p0",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, ScaleMetaDistance(galaxyMeta, 1.0), scaling, BaryonMode.GR_Consistent),
+                Distances = ScaleMetaDistance(galaxyMeta, 1.0).ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            },
+            new
+            {
+                Name = "distanceScale1p1",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, ScaleMetaDistance(galaxyMeta, 1.1), scaling, BaryonMode.GR_Consistent),
+                Distances = ScaleMetaDistance(galaxyMeta, 1.1).ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            },
+            new
+            {
+                Name = "normalizedRadiusOverRmax",
+                Points = BuildNormalizedRadiusPoints(rawPoints),
+                Distances = galaxyMeta.ToDictionary(k => NormalizeGalaxyKey(k.Key), k => k.Value.DistanceMpc, StringComparer.OrdinalIgnoreCase)
+            }
+        };
+
+        static double Pearson(IReadOnlyList<double> xs, IReadOnlyList<double> ys)
+        {
+            if (xs.Count != ys.Count || xs.Count < 3)
+                return double.NaN;
+
+            double mx = xs.Average();
+            double my = ys.Average();
+            double num = 0.0, dx2 = 0.0, dy2 = 0.0;
+            for (int i = 0; i < xs.Count; i++)
+            {
+                double dx = xs[i] - mx;
+                double dy = ys[i] - my;
+                num += dx * dy;
+                dx2 += dx * dx;
+                dy2 += dy * dy;
+            }
+
+            if (dx2 <= 0.0 || dy2 <= 0.0)
+                return 0.0;
+            return num / Math.Sqrt(dx2 * dy2);
+        }
+
+        var summaries = new List<(
+            string Mapping,
+            double BestA0,
+            double Rms,
+            double MeanResidual,
+            double CorrDistance,
+            double CorrRadialSpan,
+            double CorrMeanRadius,
+            double CorrPointCount)>();
+
+        foreach (var mapping in mappingSpecs)
+        {
+            Assert.NotEmpty(mapping.Points);
+            Assert.All(mapping.Points, p =>
+            {
+                Assert.True(p.RadiusKpc > 0 && double.IsFinite(p.RadiusKpc));
+                Assert.True(p.GobsMs2 > 0 && double.IsFinite(p.GobsMs2));
+                Assert.True(p.GbarMs2 > 0 && double.IsFinite(p.GbarMs2));
+            });
+
+            var fit = SparcRarAnalysis.FitA0(mapping.Points, model: ModelType.ClockworkTRM);
+            Assert.True(fit.BestA0 > 0 && double.IsFinite(fit.BestA0));
+            Assert.True(double.IsFinite(fit.RmsError));
+
+            var perPointResiduals = mapping.Points
+                .Select(p =>
+                {
+                    double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, fit.BestA0, ModelType.ClockworkTRM);
+                    Assert.True(pred > 0 && double.IsFinite(pred), $"Invalid prediction for mapping={mapping.Name} galaxy={p.GalaxyName}.");
+                    double residual = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                    Assert.True(double.IsFinite(residual));
+                    return (GalaxyKey: NormalizeGalaxyKey(p.GalaxyName), p.RadiusKpc, Residual: residual);
+                })
+                .ToList();
+
+            double rms = ComputeBinRms(perPointResiduals.Select(x => x.Residual).ToList());
+            double meanResidual = perPointResiduals.Average(x => x.Residual);
+
+            var perGalaxy = perPointResiduals
+                .GroupBy(x => x.GalaxyKey)
+                .Select(g =>
+                {
+                    double minR = g.Min(x => x.RadiusKpc);
+                    double maxR = g.Max(x => x.RadiusKpc);
+                    double span = Math.Max(0.0, maxR - minR);
+                    double meanR = g.Average(x => x.RadiusKpc);
+                    double meanRes = g.Average(x => x.Residual);
+                    int n = g.Count();
+                    mapping.Distances.TryGetValue(g.Key, out double dMpc);
+                    return (g.Key, MeanResidual: meanRes, DistanceMpc: dMpc, RadialSpanKpc: span, MeanRadiusKpc: meanR, PointCount: (double)n);
+                })
+                .Where(x =>
+                    double.IsFinite(x.MeanResidual) &&
+                    double.IsFinite(x.DistanceMpc) &&
+                    double.IsFinite(x.RadialSpanKpc) &&
+                    double.IsFinite(x.MeanRadiusKpc) &&
+                    double.IsFinite(x.PointCount))
+                .ToList();
+
+            Assert.True(perGalaxy.Count >= 20, $"Too few galaxy aggregates for mapping={mapping.Name}.");
+
+            var y = perGalaxy.Select(x => x.MeanResidual).ToList();
+            double corrDist = Pearson(perGalaxy.Select(x => x.DistanceMpc).ToList(), y);
+            double corrSpan = Pearson(perGalaxy.Select(x => x.RadialSpanKpc).ToList(), y);
+            double corrMeanR = Pearson(perGalaxy.Select(x => x.MeanRadiusKpc).ToList(), y);
+            double corrCount = Pearson(perGalaxy.Select(x => x.PointCount).ToList(), y);
+
+            summaries.Add((
+                mapping.Name,
+                fit.BestA0,
+                rms,
+                meanResidual,
+                corrDist,
+                corrSpan,
+                corrMeanR,
+                corrCount));
+        }
+
+        WriteLineWithTestPrefix("--- DISTANCE MAPPING SENSITIVITY DIAGNOSTIC ---");
+        foreach (var s in summaries)
+        {
+            WriteLineWithTestPrefix($"mapping={s.Mapping}");
+            WriteLineWithTestPrefix($"best a0={s.BestA0:E6}");
+            WriteLineWithTestPrefix($"RMS={s.Rms:F6}");
+            WriteLineWithTestPrefix($"mean residual={s.MeanResidual:F6}");
+            WriteLineWithTestPrefix($"corr residual vs distance={s.CorrDistance:F6}");
+            WriteLineWithTestPrefix($"corr residual vs radialSpan={s.CorrRadialSpan:F6}");
+            WriteLineWithTestPrefix($"corr residual vs meanRadius={s.CorrMeanRadius:F6}");
+            WriteLineWithTestPrefix($"corr residual vs pointCount={s.CorrPointCount:F6}");
+        }
+        WriteLineWithTestPrefix("Diagnostic only. No baseline mapping logic changed.");
+
+        Assert.Equal(mappingSpecs.Length, summaries.Count);
+        Assert.All(summaries, s =>
+        {
+            Assert.True(double.IsFinite(s.BestA0));
+            Assert.True(double.IsFinite(s.Rms));
+            Assert.True(double.IsFinite(s.MeanResidual));
+            Assert.True(double.IsFinite(s.CorrDistance));
+            Assert.True(double.IsFinite(s.CorrRadialSpan));
+            Assert.True(double.IsFinite(s.CorrMeanRadius));
+            Assert.True(double.IsFinite(s.CorrPointCount));
+        });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Baryonic normalization sensitivity diagnostic for SPARC residual bias under global-only scaling.
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// No baseline baryon-logic changes and no per-galaxy refit.
+    /// </summary>
+    public void RAR49_TRM_Rar_BaryonScaleSensitivity_NoRefit()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rawPoints = SparcRarAnalysis.ParseRarFromZip(zipPath);
+        var galaxyMeta = SparcRarAnalysis.LoadGalaxyMetaFromMrt(mrtPath);
+        var scaling = TrmCosmologyParameters.Current();
+
+        Assert.NotEmpty(rawPoints);
+        Assert.NotEmpty(galaxyMeta);
+
+        var distanceByGalaxy = galaxyMeta.ToDictionary(
+            k => NormalizeGalaxyKey(k.Key),
+            k => k.Value.DistanceMpc,
+            StringComparer.OrdinalIgnoreCase);
+
+        var mappingSpecs = new[]
+        {
+            new
+            {
+                Name = "rawRadius",
+                Points = rawPoints
+            },
+            new
+            {
+                Name = "currentTrmLocalRadius",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, galaxyMeta, scaling, BaryonMode.GR_Consistent)
+            }
+        };
+
+        var baryonScales = new[] { 0.70, 0.80, 0.90, 1.00, 1.10, 1.20, 1.30 };
+
+        static double Pearson(IReadOnlyList<double> xs, IReadOnlyList<double> ys)
+        {
+            if (xs.Count != ys.Count || xs.Count < 3)
+                return double.NaN;
+
+            double mx = xs.Average();
+            double my = ys.Average();
+            double num = 0.0, dx2 = 0.0, dy2 = 0.0;
+            for (int i = 0; i < xs.Count; i++)
+            {
+                double dx = xs[i] - mx;
+                double dy = ys[i] - my;
+                num += dx * dy;
+                dx2 += dx * dx;
+                dy2 += dy * dy;
+            }
+
+            if (dx2 <= 0.0 || dy2 <= 0.0)
+                return 0.0;
+            return num / Math.Sqrt(dx2 * dy2);
+        }
+
+        var summaries = new List<(
+            string Mapping,
+            double BaryonScale,
+            double BestA0,
+            double Rms,
+            double MeanResidual,
+            double CorrDistance,
+            double CorrRadialSpan,
+            double CorrMeanRadius,
+            double CorrPointCount)>();
+
+        foreach (var mapping in mappingSpecs)
+        {
+            Assert.NotEmpty(mapping.Points);
+
+            foreach (double s in baryonScales)
+            {
+                var scaledPoints = mapping.Points
+                    .Select(p =>
+                    {
+                        double gBarScaled = s * p.GbarMs2;
+                        return new RarPoint(
+                            p.GalaxyName,
+                            p.RadiusKpc,
+                            p.Vobs,
+                            p.Vgas,
+                            p.Vdisk,
+                            p.Vbulge,
+                            p.GobsMs2,
+                            gBarScaled);
+                    })
+                    .Where(p =>
+                        p.RadiusKpc > 0 &&
+                        p.GobsMs2 > 0 &&
+                        p.GbarMs2 > 0 &&
+                        double.IsFinite(p.RadiusKpc) &&
+                        double.IsFinite(p.GobsMs2) &&
+                        double.IsFinite(p.GbarMs2))
+                    .ToList();
+
+                Assert.NotEmpty(scaledPoints);
+
+                var fit = SparcRarAnalysis.FitA0(scaledPoints, model: ModelType.ClockworkTRM);
+                Assert.True(fit.BestA0 > 0 && double.IsFinite(fit.BestA0));
+                Assert.True(double.IsFinite(fit.RmsError));
+
+                var perPointResiduals = scaledPoints
+                    .Select(p =>
+                    {
+                        double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, fit.BestA0, ModelType.ClockworkTRM);
+                        Assert.True(pred > 0 && double.IsFinite(pred), $"Invalid prediction mapping={mapping.Name} scale={s:F2} galaxy={p.GalaxyName}.");
+                        double residual = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                        Assert.True(double.IsFinite(residual));
+                        return (GalaxyKey: NormalizeGalaxyKey(p.GalaxyName), p.RadiusKpc, Residual: residual);
+                    })
+                    .ToList();
+
+                double rms = ComputeBinRms(perPointResiduals.Select(x => x.Residual).ToList());
+                double meanResidual = perPointResiduals.Average(x => x.Residual);
+
+                var perGalaxy = perPointResiduals
+                    .GroupBy(x => x.GalaxyKey)
+                    .Select(g =>
+                    {
+                        double minR = g.Min(x => x.RadiusKpc);
+                        double maxR = g.Max(x => x.RadiusKpc);
+                        double span = Math.Max(0.0, maxR - minR);
+                        double meanR = g.Average(x => x.RadiusKpc);
+                        double meanRes = g.Average(x => x.Residual);
+                        int n = g.Count();
+                        distanceByGalaxy.TryGetValue(g.Key, out double dMpc);
+                        return (MeanResidual: meanRes, DistanceMpc: dMpc, RadialSpanKpc: span, MeanRadiusKpc: meanR, PointCount: (double)n);
+                    })
+                    .Where(x =>
+                        double.IsFinite(x.MeanResidual) &&
+                        double.IsFinite(x.DistanceMpc) &&
+                        double.IsFinite(x.RadialSpanKpc) &&
+                        double.IsFinite(x.MeanRadiusKpc) &&
+                        double.IsFinite(x.PointCount))
+                    .ToList();
+
+                Assert.True(perGalaxy.Count >= 20, $"Too few galaxy aggregates mapping={mapping.Name} scale={s:F2}.");
+
+                var y = perGalaxy.Select(x => x.MeanResidual).ToList();
+                double corrDist = Pearson(perGalaxy.Select(x => x.DistanceMpc).ToList(), y);
+                double corrSpan = Pearson(perGalaxy.Select(x => x.RadialSpanKpc).ToList(), y);
+                double corrMeanR = Pearson(perGalaxy.Select(x => x.MeanRadiusKpc).ToList(), y);
+                double corrCount = Pearson(perGalaxy.Select(x => x.PointCount).ToList(), y);
+
+                summaries.Add((
+                    mapping.Name,
+                    s,
+                    fit.BestA0,
+                    rms,
+                    meanResidual,
+                    corrDist,
+                    corrSpan,
+                    corrMeanR,
+                    corrCount));
+            }
+        }
+
+        WriteLineWithTestPrefix("--- BARYON SCALE SENSITIVITY DIAGNOSTIC ---");
+        foreach (var s in summaries.OrderBy(x => x.Mapping).ThenBy(x => x.BaryonScale))
+        {
+            WriteLineWithTestPrefix(
+                $"mapping={s.Mapping} baryonScale={s.BaryonScale:F2} best a0={s.BestA0:E6} RMS={s.Rms:F6} mean residual={s.MeanResidual:F6} " +
+                $"corr distance={s.CorrDistance:F6} corr radialSpan={s.CorrRadialSpan:F6} corr meanRadius={s.CorrMeanRadius:F6} corr pointCount={s.CorrPointCount:F6}");
+        }
+
+        foreach (var mappingGroup in summaries.GroupBy(x => x.Mapping))
+        {
+            var bestRms = mappingGroup.OrderBy(x => x.Rms).First();
+            var closestZeroMean = mappingGroup.OrderBy(x => Math.Abs(x.MeanResidual)).First();
+            var baselineScale = mappingGroup.First(x => Math.Abs(x.BaryonScale - 1.0) < 1e-12);
+            bool rmsImprovesVs1 = bestRms.Rms < baselineScale.Rms;
+
+            WriteLineWithTestPrefix(
+                $"mapping={mappingGroup.Key} best scale by RMS={bestRms.BaryonScale:F2} (RMS={bestRms.Rms:F6}, a0={bestRms.BestA0:E6})");
+            WriteLineWithTestPrefix(
+                $"mapping={mappingGroup.Key} scale closest to zero mean residual={closestZeroMean.BaryonScale:F2} (mean residual={closestZeroMean.MeanResidual:F6})");
+            WriteLineWithTestPrefix(
+                $"mapping={mappingGroup.Key} RMS improves vs scale=1.0: {rmsImprovesVs1}");
+        }
+
+        WriteLineWithTestPrefix("Diagnostic only. No baseline baryon logic changed.");
+
+        Assert.Equal(mappingSpecs.Length * baryonScales.Length, summaries.Count);
+        Assert.All(summaries, s =>
+        {
+            Assert.True(double.IsFinite(s.BaryonScale));
+            Assert.True(double.IsFinite(s.BestA0));
+            Assert.True(double.IsFinite(s.Rms));
+            Assert.True(double.IsFinite(s.MeanResidual));
+            Assert.True(double.IsFinite(s.CorrDistance));
+            Assert.True(double.IsFinite(s.CorrRadialSpan));
+            Assert.True(double.IsFinite(s.CorrMeanRadius));
+            Assert.True(double.IsFinite(s.CorrPointCount));
+        });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Cross-split no-refit diagnostic for global baryon-scale transfer stability.
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// Global-only scaling; no per-galaxy refit and no baseline-logic activation.
+    /// </summary>
+    public void RAR50_TRM_Rar_BaryonScaleCrossSplit_NoRefit()
+    {
+        const int modulo = 5;
+
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rawPoints = SparcRarAnalysis.ParseRarFromZip(zipPath);
+        var galaxyMeta = SparcRarAnalysis.LoadGalaxyMetaFromMrt(mrtPath);
+        var scaling = TrmCosmologyParameters.Current();
+
+        Assert.NotEmpty(rawPoints);
+        Assert.NotEmpty(galaxyMeta);
+
+        var mappingSpecs = new[]
+        {
+            new { Name = "rawRadius", Points = rawPoints },
+            new
+            {
+                Name = "currentTrmLocalRadius",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, galaxyMeta, scaling, BaryonMode.GR_Consistent)
+            }
+        };
+        var baryonScales = new[] { 0.70, 0.80, 0.90, 1.00, 1.10, 1.20, 1.30 };
+
+        List<RarPoint> ApplyGlobalBaryonScale(List<RarPoint> points, double scaleValue)
+        {
+            return points
+                .Select(p => new RarPoint(
+                    p.GalaxyName,
+                    p.RadiusKpc,
+                    p.Vobs,
+                    p.Vgas,
+                    p.Vdisk,
+                    p.Vbulge,
+                    p.GobsMs2,
+                    p.GbarMs2 * scaleValue))
+                .Where(p =>
+                    p.RadiusKpc > 0 &&
+                    p.GobsMs2 > 0 &&
+                    p.GbarMs2 > 0 &&
+                    double.IsFinite(p.RadiusKpc) &&
+                    double.IsFinite(p.GobsMs2) &&
+                    double.IsFinite(p.GbarMs2))
+                .ToList();
+        }
+
+        var summaries = new List<(
+            string Mapping,
+            double MeanTransferDelta,
+            int ImprovedTransfers,
+            int TransferCount,
+            double MeanSelectedScale,
+            double MeanSelectedA0,
+            double MeanBaselineA0,
+            double MeanTrainGap)>();
+
+        foreach (var mapping in mappingSpecs)
+        {
+            Assert.NotEmpty(mapping.Points);
+
+            var transferDeltas = new List<double>();
+            var selectedScales = new List<double>();
+            var selectedA0s = new List<double>();
+            var baselineA0s = new List<double>();
+            var trainGaps = new List<double>();
+            int improvedTransfers = 0;
+            int transferCount = 0;
+
+            for (int trainRemainder = 0; trainRemainder < modulo; trainRemainder++)
+            {
+                var trainRowsBase = mapping.Points
+                    .Where(p => (NormalizeGalaxyKey(p.GalaxyName).Sum(c => c) % modulo) != trainRemainder)
+                    .ToList();
+                Assert.True(trainRowsBase.Count >= 200, $"Insufficient train rows mapping={mapping.Name}, train={trainRemainder}.");
+
+                // Train-only selection of best global baryon scale.
+                var trainScaleFits = new List<(double Scale, double TrainRms, double A0)>();
+                foreach (double scaleValue in baryonScales)
+                {
+                    var trainScaled = ApplyGlobalBaryonScale(trainRowsBase, scaleValue);
+                    Assert.True(trainScaled.Count >= 100, $"Insufficient scaled train rows mapping={mapping.Name}, train={trainRemainder}, scale={scaleValue:F2}.");
+
+                    var fitTrain = SparcRarAnalysis.FitA0(trainScaled, model: ModelType.ClockworkTRM);
+                    Assert.True(fitTrain.BestA0 > 0 && double.IsFinite(fitTrain.BestA0));
+                    Assert.True(double.IsFinite(fitTrain.RmsError));
+                    trainScaleFits.Add((scaleValue, fitTrain.RmsError, fitTrain.BestA0));
+                }
+
+                var bestTrain = trainScaleFits.OrderBy(x => x.TrainRms).First();
+                var trainBaseline = trainScaleFits.First(x => Math.Abs(x.Scale - 1.0) < 1e-12);
+                selectedScales.Add(bestTrain.Scale);
+                selectedA0s.Add(bestTrain.A0);
+                baselineA0s.Add(trainBaseline.A0);
+                trainGaps.Add(trainBaseline.TrainRms - bestTrain.TrainRms);
+
+                for (int transferRemainder = 0; transferRemainder < modulo; transferRemainder++)
+                {
+                    if (transferRemainder == trainRemainder)
+                        continue;
+
+                    var transferRowsBase = mapping.Points
+                        .Where(p => (NormalizeGalaxyKey(p.GalaxyName).Sum(c => c) % modulo) == transferRemainder)
+                        .ToList();
+                    Assert.True(transferRowsBase.Count >= 40, $"Insufficient transfer rows mapping={mapping.Name}, train={trainRemainder}, transfer={transferRemainder}.");
+
+                    var transferScaledSelected = ApplyGlobalBaryonScale(transferRowsBase, bestTrain.Scale);
+                    var transferScaledBaseline = ApplyGlobalBaryonScale(transferRowsBase, 1.0);
+                    Assert.True(transferScaledSelected.Count >= 30);
+                    Assert.True(transferScaledBaseline.Count >= 30);
+
+                    var residualsSelected = transferScaledSelected
+                        .Select(p =>
+                        {
+                            double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, bestTrain.A0, ModelType.ClockworkTRM);
+                            Assert.True(pred > 0 && double.IsFinite(pred));
+                            double res = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                            Assert.True(double.IsFinite(res));
+                            return res;
+                        })
+                        .ToList();
+
+                    var residualsBaseline = transferScaledBaseline
+                        .Select(p =>
+                        {
+                            double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, trainBaseline.A0, ModelType.ClockworkTRM);
+                            Assert.True(pred > 0 && double.IsFinite(pred));
+                            double res = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                            Assert.True(double.IsFinite(res));
+                            return res;
+                        })
+                        .ToList();
+
+                    double rmsSelected = ComputeBinRms(residualsSelected);
+                    double rmsBaseline = ComputeBinRms(residualsBaseline);
+                    double delta = rmsBaseline - rmsSelected;
+
+                    Assert.True(double.IsFinite(rmsSelected));
+                    Assert.True(double.IsFinite(rmsBaseline));
+                    Assert.True(double.IsFinite(delta));
+                    transferDeltas.Add(delta);
+                    if (delta > 0.0)
+                        improvedTransfers++;
+                    transferCount++;
+                }
+            }
+
+            summaries.Add((
+                mapping.Name,
+                transferDeltas.Average(),
+                improvedTransfers,
+                transferCount,
+                selectedScales.Average(),
+                selectedA0s.Average(),
+                baselineA0s.Average(),
+                trainGaps.Average()));
+        }
+
+        WriteLineWithTestPrefix("--- BARYON SCALE CROSS-SPLIT NO-REFIT DIAGNOSTIC ---");
+        foreach (var s in summaries)
+        {
+            WriteLineWithTestPrefix($"mapping={s.Mapping}");
+            WriteLineWithTestPrefix($"mean transfer delta={s.MeanTransferDelta:F6}");
+            WriteLineWithTestPrefix($"improved transfers={s.ImprovedTransfers}/{s.TransferCount}");
+            WriteLineWithTestPrefix($"mean selected scale={s.MeanSelectedScale:F6}");
+            WriteLineWithTestPrefix($"mean selected a0={s.MeanSelectedA0:E6}");
+            WriteLineWithTestPrefix($"mean baseline a0 (scale=1.0)={s.MeanBaselineA0:E6}");
+            WriteLineWithTestPrefix($"mean train RMS gain vs scale=1.0={s.MeanTrainGap:F6}");
+        }
+        WriteLineWithTestPrefix("Diagnostic only. Global baryon scale only; no per-galaxy refit.");
+
+        Assert.Equal(mappingSpecs.Length, summaries.Count);
+        Assert.All(summaries, s =>
+        {
+            Assert.True(double.IsFinite(s.MeanTransferDelta));
+            Assert.True(double.IsFinite(s.MeanSelectedScale));
+            Assert.True(double.IsFinite(s.MeanSelectedA0));
+            Assert.True(double.IsFinite(s.MeanBaselineA0));
+            Assert.True(double.IsFinite(s.MeanTrainGap));
+            Assert.True(s.TransferCount > 0);
+            Assert.InRange(s.MeanSelectedScale, baryonScales.Min(), baryonScales.Max());
+        });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Baryon-scale diagnostic with frozen baseline a0 (no re-fit per scale).
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// Uses one globally fitted a0 per mapping at baryonScale=1.0 and applies it frozen to all scales.
+    /// </summary>
+    public void RAR51_BaryonScale_WithFrozenA0_NoRefit()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rawPoints = SparcRarAnalysis.ParseRarFromZip(zipPath);
+        var galaxyMeta = SparcRarAnalysis.LoadGalaxyMetaFromMrt(mrtPath);
+        var scaling = TrmCosmologyParameters.Current();
+
+        Assert.NotEmpty(rawPoints);
+        Assert.NotEmpty(galaxyMeta);
+
+        var mappingSpecs = new[]
+        {
+            new { Name = "rawRadius", Points = rawPoints },
+            new
+            {
+                Name = "currentTrmLocalRadius",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, galaxyMeta, scaling, BaryonMode.GR_Consistent)
+            }
+        };
+        var baryonScales = new[] { 0.70, 0.80, 0.90, 1.00, 1.10, 1.20, 1.30 };
+
+        List<RarPoint> ApplyGlobalBaryonScale(List<RarPoint> points, double scaleValue)
+        {
+            return points
+                .Select(p => new RarPoint(
+                    p.GalaxyName,
+                    p.RadiusKpc,
+                    p.Vobs,
+                    p.Vgas,
+                    p.Vdisk,
+                    p.Vbulge,
+                    p.GobsMs2,
+                    p.GbarMs2 * scaleValue))
+                .Where(p =>
+                    p.RadiusKpc > 0 &&
+                    p.GobsMs2 > 0 &&
+                    p.GbarMs2 > 0 &&
+                    double.IsFinite(p.RadiusKpc) &&
+                    double.IsFinite(p.GobsMs2) &&
+                    double.IsFinite(p.GbarMs2))
+                .ToList();
+        }
+
+        var summaries = new List<(string Mapping, double BaryonScale, double FrozenA0, double Rms, double MeanResidual)>();
+
+        foreach (var mapping in mappingSpecs)
+        {
+            Assert.NotEmpty(mapping.Points);
+
+            var baselinePoints = ApplyGlobalBaryonScale(mapping.Points, 1.0);
+            Assert.NotEmpty(baselinePoints);
+            var fitBaseline = SparcRarAnalysis.FitA0(baselinePoints, model: ModelType.ClockworkTRM);
+            double frozenA0 = fitBaseline.BestA0;
+            Assert.True(frozenA0 > 0 && double.IsFinite(frozenA0));
+
+            foreach (double scaleValue in baryonScales)
+            {
+                var scaledPoints = ApplyGlobalBaryonScale(mapping.Points, scaleValue);
+                Assert.NotEmpty(scaledPoints);
+
+                var residuals = scaledPoints
+                    .Select(p =>
+                    {
+                        double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, frozenA0, ModelType.ClockworkTRM);
+                        Assert.True(pred > 0 && double.IsFinite(pred), $"Invalid prediction mapping={mapping.Name} scale={scaleValue:F2}.");
+                        double res = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                        Assert.True(double.IsFinite(res));
+                        return res;
+                    })
+                    .ToList();
+
+                double rms = ComputeBinRms(residuals);
+                double meanResidual = residuals.Average();
+                summaries.Add((mapping.Name, scaleValue, frozenA0, rms, meanResidual));
+            }
+        }
+
+        WriteLineWithTestPrefix("--- BARYON SCALE WITH FROZEN A0 DIAGNOSTIC ---");
+        foreach (var s in summaries.OrderBy(x => x.Mapping).ThenBy(x => x.BaryonScale))
+        {
+            WriteLineWithTestPrefix(
+                $"mapping={s.Mapping} baryonScale={s.BaryonScale:F2} frozen a0={s.FrozenA0:E6} RMS={s.Rms:F6} mean residual={s.MeanResidual:F6}");
+        }
+
+        foreach (var g in summaries.GroupBy(x => x.Mapping))
+        {
+            var bestRms = g.OrderBy(x => x.Rms).First();
+            var closestMean = g.OrderBy(x => Math.Abs(x.MeanResidual)).First();
+            WriteLineWithTestPrefix($"mapping={g.Key} best RMS scale (frozen a0)={bestRms.BaryonScale:F2} RMS={bestRms.Rms:F6}");
+            WriteLineWithTestPrefix($"mapping={g.Key} mean residual closest to zero (frozen a0) scale={closestMean.BaryonScale:F2} mean={closestMean.MeanResidual:F6}");
+        }
+        WriteLineWithTestPrefix("Diagnostic only. Frozen global a0; no per-scale/per-galaxy refit.");
+
+        Assert.Equal(mappingSpecs.Length * baryonScales.Length, summaries.Count);
+        Assert.All(summaries, s =>
+        {
+            Assert.True(double.IsFinite(s.FrozenA0));
+            Assert.True(double.IsFinite(s.Rms));
+            Assert.True(double.IsFinite(s.MeanResidual));
+        });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Alias test with full TRM/RAR naming for frozen-a0 global baryon-scale diagnostic.
+    /// </summary>
+    public void RAR51_TRM_Rar_BaryonScale_WithFrozenA0_NoRefit()
+    {
+        RAR51_BaryonScale_WithFrozenA0_NoRefit();
+    }
+
+    [Fact]
+    /// <summary>
+    /// Component-wise baryonic scaling sensitivity diagnostic (gas/disk/bulge) with global-only fitting.
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// Global component scales only; no per-galaxy refit and no baseline-logic activation.
+    /// </summary>
+    public void RAR52_TRM_Rar_ComponentScaleSensitivity_NoRefit()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rawPoints = SparcRarAnalysis.ParseRarFromZip(zipPath);
+        var galaxyMeta = SparcRarAnalysis.LoadGalaxyMetaFromMrt(mrtPath);
+        var scaling = TrmCosmologyParameters.Current();
+
+        Assert.NotEmpty(rawPoints);
+        Assert.NotEmpty(galaxyMeta);
+
+        var distanceByGalaxy = galaxyMeta.ToDictionary(
+            k => NormalizeGalaxyKey(k.Key),
+            k => k.Value.DistanceMpc,
+            StringComparer.OrdinalIgnoreCase);
+
+        var mappingSpecs = new[]
+        {
+            new { Name = "rawRadius", Points = rawPoints },
+            new
+            {
+                Name = "currentTrmLocalRadius",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, galaxyMeta, scaling, BaryonMode.GR_Consistent)
+            }
+        };
+
+        var componentScenarios = new[]
+        {
+            (Name: "baseline", GasScale: 1.00, DiskScale: 1.00, BulgeScale: 1.00),
+            (Name: "gas0p8", GasScale: 0.80, DiskScale: 1.00, BulgeScale: 1.00),
+            (Name: "gas1p2", GasScale: 1.20, DiskScale: 1.00, BulgeScale: 1.00),
+            (Name: "disk0p8", GasScale: 1.00, DiskScale: 0.80, BulgeScale: 1.00),
+            (Name: "disk1p2", GasScale: 1.00, DiskScale: 1.20, BulgeScale: 1.00),
+            (Name: "bulge0p8", GasScale: 1.00, DiskScale: 1.00, BulgeScale: 0.80),
+            (Name: "bulge1p2", GasScale: 1.00, DiskScale: 1.00, BulgeScale: 1.20),
+            (Name: "all0p9", GasScale: 0.90, DiskScale: 0.90, BulgeScale: 0.90),
+            (Name: "all1p1", GasScale: 1.10, DiskScale: 1.10, BulgeScale: 1.10)
+        };
+
+        static double Pearson(IReadOnlyList<double> xs, IReadOnlyList<double> ys)
+        {
+            if (xs.Count != ys.Count || xs.Count < 3)
+                return double.NaN;
+
+            double mx = xs.Average();
+            double my = ys.Average();
+            double num = 0.0, dx2 = 0.0, dy2 = 0.0;
+            for (int i = 0; i < xs.Count; i++)
+            {
+                double dx = xs[i] - mx;
+                double dy = ys[i] - my;
+                num += dx * dy;
+                dx2 += dx * dx;
+                dy2 += dy * dy;
+            }
+
+            if (dx2 <= 0.0 || dy2 <= 0.0)
+                return 0.0;
+            return num / Math.Sqrt(dx2 * dy2);
+        }
+
+        List<RarPoint> ApplyComponentScales(List<RarPoint> points, double gasScale, double diskScale, double bulgeScale)
+        {
+            var scaled = new List<RarPoint>(points.Count);
+            foreach (var p in points)
+            {
+                if (p.GbarMs2 <= 0 || p.GobsMs2 <= 0 || p.RadiusKpc <= 0)
+                    continue;
+
+                double vGasSq = p.Vgas > 0 ? p.Vgas * p.Vgas : 0.0;
+                double vDiskSq = p.Vdisk > 0 ? p.Vdisk * p.Vdisk : 0.0;
+                double vBulgeSq = p.Vbulge > 0 ? p.Vbulge * p.Vbulge : 0.0;
+
+                double baseNumerator = vGasSq + (0.5 * vDiskSq) + (0.7 * vBulgeSq);
+                if (baseNumerator <= 0.0)
+                    continue;
+
+                double scaledNumerator =
+                    (gasScale * vGasSq) +
+                    (0.5 * diskScale * vDiskSq) +
+                    (0.7 * bulgeScale * vBulgeSq);
+                if (scaledNumerator <= 0.0 || !double.IsFinite(scaledNumerator))
+                    continue;
+
+                double scaledGbar = p.GbarMs2 * (scaledNumerator / baseNumerator);
+                if (!(scaledGbar > 0.0) || !double.IsFinite(scaledGbar))
+                    continue;
+
+                scaled.Add(new RarPoint(
+                    p.GalaxyName,
+                    p.RadiusKpc,
+                    p.Vobs,
+                    p.Vgas,
+                    p.Vdisk,
+                    p.Vbulge,
+                    p.GobsMs2,
+                    scaledGbar));
+            }
+
+            return scaled;
+        }
+
+        var summaries = new List<(
+            string Mapping,
+            string Scenario,
+            double GasScale,
+            double DiskScale,
+            double BulgeScale,
+            double BestA0,
+            double Rms,
+            double MeanResidual,
+            double CorrDistance,
+            double CorrRadialSpan,
+            double CorrMeanRadius,
+            double CorrPointCount)>();
+
+        foreach (var mapping in mappingSpecs)
+        {
+            Assert.NotEmpty(mapping.Points);
+
+            foreach (var scenario in componentScenarios)
+            {
+                var scaledPoints = ApplyComponentScales(mapping.Points, scenario.GasScale, scenario.DiskScale, scenario.BulgeScale);
+                Assert.NotEmpty(scaledPoints);
+
+                var fit = SparcRarAnalysis.FitA0(scaledPoints, model: ModelType.ClockworkTRM);
+                Assert.True(fit.BestA0 > 0 && double.IsFinite(fit.BestA0));
+                Assert.True(double.IsFinite(fit.RmsError));
+
+                var perPointResiduals = scaledPoints
+                    .Select(p =>
+                    {
+                        double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, fit.BestA0, ModelType.ClockworkTRM);
+                        Assert.True(pred > 0 && double.IsFinite(pred), $"Invalid prediction mapping={mapping.Name} scenario={scenario.Name}.");
+                        double residual = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                        Assert.True(double.IsFinite(residual));
+                        return (GalaxyKey: NormalizeGalaxyKey(p.GalaxyName), p.RadiusKpc, Residual: residual);
+                    })
+                    .ToList();
+
+                double rms = ComputeBinRms(perPointResiduals.Select(x => x.Residual).ToList());
+                double meanResidual = perPointResiduals.Average(x => x.Residual);
+
+                var perGalaxy = perPointResiduals
+                    .GroupBy(x => x.GalaxyKey)
+                    .Select(g =>
+                    {
+                        double minR = g.Min(x => x.RadiusKpc);
+                        double maxR = g.Max(x => x.RadiusKpc);
+                        double span = Math.Max(0.0, maxR - minR);
+                        double meanR = g.Average(x => x.RadiusKpc);
+                        double meanRes = g.Average(x => x.Residual);
+                        int n = g.Count();
+                        distanceByGalaxy.TryGetValue(g.Key, out double dMpc);
+                        return (MeanResidual: meanRes, DistanceMpc: dMpc, RadialSpanKpc: span, MeanRadiusKpc: meanR, PointCount: (double)n);
+                    })
+                    .Where(x =>
+                        double.IsFinite(x.MeanResidual) &&
+                        double.IsFinite(x.DistanceMpc) &&
+                        double.IsFinite(x.RadialSpanKpc) &&
+                        double.IsFinite(x.MeanRadiusKpc) &&
+                        double.IsFinite(x.PointCount))
+                    .ToList();
+
+                Assert.True(perGalaxy.Count >= 20, $"Too few galaxy aggregates mapping={mapping.Name} scenario={scenario.Name}.");
+
+                var y = perGalaxy.Select(x => x.MeanResidual).ToList();
+                double corrDist = Pearson(perGalaxy.Select(x => x.DistanceMpc).ToList(), y);
+                double corrSpan = Pearson(perGalaxy.Select(x => x.RadialSpanKpc).ToList(), y);
+                double corrMeanR = Pearson(perGalaxy.Select(x => x.MeanRadiusKpc).ToList(), y);
+                double corrCount = Pearson(perGalaxy.Select(x => x.PointCount).ToList(), y);
+
+                summaries.Add((
+                    mapping.Name,
+                    scenario.Name,
+                    scenario.GasScale,
+                    scenario.DiskScale,
+                    scenario.BulgeScale,
+                    fit.BestA0,
+                    rms,
+                    meanResidual,
+                    corrDist,
+                    corrSpan,
+                    corrMeanR,
+                    corrCount));
+            }
+        }
+
+        WriteLineWithTestPrefix("--- COMPONENT SCALE SENSITIVITY DIAGNOSTIC ---");
+        foreach (var s in summaries.OrderBy(x => x.Mapping).ThenBy(x => x.Scenario, StringComparer.Ordinal))
+        {
+            WriteLineWithTestPrefix(
+                $"mapping={s.Mapping} scenario={s.Scenario} gas/disk/bulge={s.GasScale:F2}/{s.DiskScale:F2}/{s.BulgeScale:F2} " +
+                $"best a0={s.BestA0:E6} RMS={s.Rms:F6} mean residual={s.MeanResidual:F6} " +
+                $"corr distance={s.CorrDistance:F6} corr radialSpan={s.CorrRadialSpan:F6} corr meanRadius={s.CorrMeanRadius:F6} corr pointCount={s.CorrPointCount:F6}");
+        }
+
+        foreach (var g in summaries.GroupBy(x => x.Mapping))
+        {
+            var bestRms = g.OrderBy(x => x.Rms).First();
+            var closestMean = g.OrderBy(x => Math.Abs(x.MeanResidual)).First();
+            var baseline = g.First(x => x.Scenario == "baseline");
+            bool rmsImprovesVsBaseline = bestRms.Rms < baseline.Rms;
+
+            WriteLineWithTestPrefix(
+                $"mapping={g.Key} best scenario by RMS={bestRms.Scenario} (RMS={bestRms.Rms:F6}, a0={bestRms.BestA0:E6})");
+            WriteLineWithTestPrefix(
+                $"mapping={g.Key} scenario closest to zero mean residual={closestMean.Scenario} (mean residual={closestMean.MeanResidual:F6})");
+            WriteLineWithTestPrefix(
+                $"mapping={g.Key} RMS improves vs baseline scenario: {rmsImprovesVsBaseline}");
+        }
+
+        WriteLineWithTestPrefix("Diagnostic only. Component scales are global and no per-galaxy refit is used.");
+
+        Assert.Equal(mappingSpecs.Length * componentScenarios.Length, summaries.Count);
+        Assert.All(summaries, s =>
+        {
+            Assert.True(double.IsFinite(s.BestA0));
+            Assert.True(double.IsFinite(s.Rms));
+            Assert.True(double.IsFinite(s.MeanResidual));
+            Assert.True(double.IsFinite(s.CorrDistance));
+            Assert.True(double.IsFinite(s.CorrRadialSpan));
+            Assert.True(double.IsFinite(s.CorrMeanRadius));
+            Assert.True(double.IsFinite(s.CorrPointCount));
+        });
+    }
+
+    [Fact]
+    /// <summary>
+    /// Global component-scale grid audit with frozen baseline a0 and no per-galaxy refit.
+    ///
+    /// Status:
+    /// diagnostic only.
+    ///
+    /// Limitation:
+    /// Global scaling only; no baseline activation.
+    /// </summary>
+    public void RAR53_TRM_Rar_ComponentScaleGridAudit_NoRefit()
+    {
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        var rawPoints = SparcRarAnalysis.ParseRarFromZip(zipPath);
+        var galaxyMeta = SparcRarAnalysis.LoadGalaxyMetaFromMrt(mrtPath);
+        var scaling = TrmCosmologyParameters.Current();
+
+        Assert.NotEmpty(rawPoints);
+        Assert.NotEmpty(galaxyMeta);
+
+        var mappingSpecs = new[]
+        {
+            new { Name = "rawRadius", Points = rawPoints },
+            new
+            {
+                Name = "currentTrmLocalRadius",
+                Points = SparcRarAnalysis.ApplyTrmDistanceMapping(rawPoints, galaxyMeta, scaling, BaryonMode.GR_Consistent)
+            }
+        };
+
+        var gasScales = new[] { 0.8, 0.9, 1.0 };
+        var diskScales = new[] { 0.7, 0.8, 0.9, 1.0 };
+        var bulgeScales = new[] { 0.8, 0.9, 1.0 };
+
+        List<RarPoint> ApplyComponentScales(List<RarPoint> points, double gasScale, double diskScale, double bulgeScale)
+        {
+            var scaled = new List<RarPoint>(points.Count);
+            foreach (var p in points)
+            {
+                if (p.GbarMs2 <= 0 || p.GobsMs2 <= 0 || p.RadiusKpc <= 0)
+                    continue;
+
+                double vGasSq = p.Vgas > 0 ? p.Vgas * p.Vgas : 0.0;
+                double vDiskSq = p.Vdisk > 0 ? p.Vdisk * p.Vdisk : 0.0;
+                double vBulgeSq = p.Vbulge > 0 ? p.Vbulge * p.Vbulge : 0.0;
+
+                double baseNumerator = vGasSq + (0.5 * vDiskSq) + (0.7 * vBulgeSq);
+                if (baseNumerator <= 0.0)
+                    continue;
+
+                double scaledNumerator =
+                    (gasScale * vGasSq) +
+                    (0.5 * diskScale * vDiskSq) +
+                    (0.7 * bulgeScale * vBulgeSq);
+                if (scaledNumerator <= 0.0 || !double.IsFinite(scaledNumerator))
+                    continue;
+
+                double scaledGbar = p.GbarMs2 * (scaledNumerator / baseNumerator);
+                if (!(scaledGbar > 0.0) || !double.IsFinite(scaledGbar))
+                    continue;
+
+                scaled.Add(new RarPoint(
+                    p.GalaxyName,
+                    p.RadiusKpc,
+                    p.Vobs,
+                    p.Vgas,
+                    p.Vdisk,
+                    p.Vbulge,
+                    p.GobsMs2,
+                    scaledGbar));
+            }
+
+            return scaled;
+        }
+
+        List<RarPoint> ApplyGlobalScale(List<RarPoint> points, double scaleValue)
+        {
+            return points
+                .Select(p => new RarPoint(
+                    p.GalaxyName,
+                    p.RadiusKpc,
+                    p.Vobs,
+                    p.Vgas,
+                    p.Vdisk,
+                    p.Vbulge,
+                    p.GobsMs2,
+                    p.GbarMs2 * scaleValue))
+                .Where(p =>
+                    p.RadiusKpc > 0 &&
+                    p.GobsMs2 > 0 &&
+                    p.GbarMs2 > 0 &&
+                    double.IsFinite(p.RadiusKpc) &&
+                    double.IsFinite(p.GobsMs2) &&
+                    double.IsFinite(p.GbarMs2))
+                .ToList();
+        }
+
+        (double Rms, double MeanResidual) EvaluateWithFrozenA0(List<RarPoint> points, double frozenA0)
+        {
+            var residuals = points
+                .Select(p =>
+                {
+                    double pred = SparcRarAnalysis.PredictGobs(p.GbarMs2, frozenA0, ModelType.ClockworkTRM);
+                    Assert.True(pred > 0 && double.IsFinite(pred));
+                    double res = Math.Log10(p.GobsMs2) - Math.Log10(pred);
+                    Assert.True(double.IsFinite(res));
+                    return res;
+                })
+                .ToList();
+
+            return (ComputeBinRms(residuals), residuals.Average());
+        }
+
+        WriteLineWithTestPrefix("--- COMPONENT SCALE GRID AUDIT DIAGNOSTIC ---");
+
+        foreach (var mapping in mappingSpecs)
+        {
+            Assert.NotEmpty(mapping.Points);
+
+            var baselinePoints = ApplyGlobalScale(mapping.Points, 1.0);
+            Assert.NotEmpty(baselinePoints);
+            var fitBaseline = SparcRarAnalysis.FitA0(baselinePoints, model: ModelType.ClockworkTRM);
+            double frozenA0 = fitBaseline.BestA0;
+            Assert.True(frozenA0 > 0 && double.IsFinite(frozenA0));
+
+            var gridResults = new List<(double Gas, double Disk, double Bulge, double Rms, double MeanResidual)>();
+            foreach (double g in gasScales)
+            {
+                foreach (double d in diskScales)
+                {
+                    foreach (double b in bulgeScales)
+                    {
+                        var scaledPoints = ApplyComponentScales(mapping.Points, g, d, b);
+                        if (scaledPoints.Count == 0)
+                            continue;
+                        var metrics = EvaluateWithFrozenA0(scaledPoints, frozenA0);
+                        gridResults.Add((g, d, b, metrics.Rms, metrics.MeanResidual));
+                    }
+                }
+            }
+
+            Assert.True(gridResults.Count == gasScales.Length * diskScales.Length * bulgeScales.Length);
+            Assert.All(gridResults, r =>
+            {
+                Assert.True(double.IsFinite(r.Rms));
+                Assert.True(double.IsFinite(r.MeanResidual));
+            });
+
+            var bestRms = gridResults.OrderBy(x => x.Rms).First();
+            var bestMeanResidual = gridResults.OrderBy(x => Math.Abs(x.MeanResidual)).First();
+
+            var global80Points = ApplyGlobalScale(mapping.Points, 0.8);
+            Assert.NotEmpty(global80Points);
+            var global80 = EvaluateWithFrozenA0(global80Points, frozenA0);
+
+            WriteLineWithTestPrefix($"mapping={mapping.Name} frozen a0={frozenA0:E6}");
+            WriteLineWithTestPrefix(
+                $"best RMS scenario gas/disk/bulge={bestRms.Gas:F2}/{bestRms.Disk:F2}/{bestRms.Bulge:F2} RMS={bestRms.Rms:F6} mean residual={bestRms.MeanResidual:F6}");
+            WriteLineWithTestPrefix(
+                $"best mean-residual scenario gas/disk/bulge={bestMeanResidual.Gas:F2}/{bestMeanResidual.Disk:F2}/{bestMeanResidual.Bulge:F2} RMS={bestMeanResidual.Rms:F6} mean residual={bestMeanResidual.MeanResidual:F6}");
+            WriteLineWithTestPrefix(
+                $"global baryonScale=0.80 comparator RMS={global80.Rms:F6} mean residual={global80.MeanResidual:F6}");
+        }
+
+        WriteLineWithTestPrefix("Diagnostic only. Frozen global a0 and global component scales; no per-galaxy refit.");
+    }
+   [Fact]
+    /// <summary>
+    /// Apples-to-apples reproduction guard for the historical global SPARC co-fit benchmark.
+    ///
+    /// Status:
+    /// diagnostic reproduction check only.
+    /// </summary>
+    public void RAR54_TRM_Rar_ReproduceOriginalGlobalCoFit()
+    {
+        const int expectedPointCount = 2839;
+        const double expectedTrmRms = 0.1412;
+        const double expectedMondRms = 0.1340;
+        const double rmsTolerance = 0.02;
+
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        // Original benchmark path: fixed-width+inclination parser + global co-fit.
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        var mondFit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.MOND);
+        var trmFit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+
+        double trmDelta = trmFit.RmsError - expectedTrmRms;
+        double mondDelta = mondFit.RmsError - expectedMondRms;
+
+        WriteLineWithTestPrefix("--- ORIGINAL GLOBAL CO-FIT REPRODUCTION DIAGNOSTIC ---");
+        WriteLineWithTestPrefix($"Analyzed points={rarData.Count} (expected {expectedPointCount})");
+        WriteLineWithTestPrefix($"TRM RMS={trmFit.RmsError:F4} (expected {expectedTrmRms:F4}, delta={trmDelta:+0.0000;-0.0000;0.0000})");
+        WriteLineWithTestPrefix($"MOND RMS={mondFit.RmsError:F4} (expected {expectedMondRms:F4}, delta={mondDelta:+0.0000;-0.0000;0.0000})");
+        WriteLineWithTestPrefix($"TRM log10(a0)={trmFit.BestLogA0:F4} | MOND log10(a0)={mondFit.BestLogA0:F4}");
+        WriteLineWithTestPrefix("Diagnostic only. Baseline TRM-RAR law unchanged.");
+
+        Assert.NotEmpty(rarData);
+        Assert.True(double.IsFinite(trmFit.RmsError));
+        Assert.True(double.IsFinite(mondFit.RmsError));
+        Assert.True(double.IsFinite(trmFit.BestA0));
+        Assert.True(double.IsFinite(mondFit.BestA0));
+        Assert.Equal(expectedPointCount, rarData.Count);
+        Assert.True(Math.Abs(trmDelta) <= rmsTolerance,
+            $"TRM RMS reproduction drift exceeded tolerance {rmsTolerance:F3}: got {trmFit.RmsError:F4}, expected {expectedTrmRms:F4}.");
+        Assert.True(Math.Abs(mondDelta) <= rmsTolerance,
+            $"MOND RMS reproduction drift exceeded tolerance {rmsTolerance:F3}: got {mondFit.RmsError:F4}, expected {expectedMondRms:F4}.");
+    }
+
+    [Fact]
+    /// <summary>
+    /// Diagnostic-only baryons-only weak-field GR baseline comparator against TRM and MOND
+    /// on the original SPARC global co-fit path.
+    /// </summary>
+    public void RAR55_TRM_Rar_BaryonsOnly_GRWeakField_BaselineComparison()
+    {
+        const int expectedPointCount = 2839;
+        const double expectedTrmRms = 0.1412;
+        const double expectedMondRms = 0.1340;
+        const double rmsTolerance = 0.02;
+
+        string zipPath = WorkspaceFileLocator.GetFilePath("Rotmod_LTG.zip");
+        string mrtPath = WorkspaceFileLocator.GetFilePath("SPARC_Lelli2016c.mrt");
+
+        // Keep the exact parser/filter path used by RAR54.
+        var rarData = SparcRarAnalysis.ParseRarWithFixedWidthInclinationFilter(zipPath, mrtPath);
+        var inclinations = SparcMrtParser
+            .ParseFile(mrtPath)
+            .ToDictionary(g => g.Name, g => g.Inc, StringComparer.OrdinalIgnoreCase);
+
+        // Existing comparators from the original global co-fit path.
+        var trmFit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.ClockworkTRM);
+        var mondFit = SparcRarAnalysis.FitA0(rarData, inclinations, ModelType.MOND);
+
+        // Weak-field/Newtonian baryons-only baseline: g_pred = g_bar.
+        double baryonsOnlyWeakFieldGrRms = ComputeWeightedBaryonsOnlyWeakFieldGrRms(rarData, inclinations);
+
+        double trmDelta = trmFit.RmsError - expectedTrmRms;
+        double mondDelta = mondFit.RmsError - expectedMondRms;
+        double trmImprovementVsBaryonsOnly = baryonsOnlyWeakFieldGrRms - trmFit.RmsError;
+        double mondImprovementVsBaryonsOnly = baryonsOnlyWeakFieldGrRms - mondFit.RmsError;
+
+        WriteLineWithTestPrefix("--- BARYONS-ONLY WEAK-FIELD GR BASELINE COMPARISON ---");
+        WriteLineWithTestPrefix($"analyzed points={rarData.Count} (expected {expectedPointCount})");
+        WriteLineWithTestPrefix($"baryonsOnlyWeakFieldGR RMS={baryonsOnlyWeakFieldGrRms:F4}");
+        WriteLineWithTestPrefix($"TRM RMS={trmFit.RmsError:F4} (expected {expectedTrmRms:F4}, delta={trmDelta:+0.0000;-0.0000;0.0000})");
+        WriteLineWithTestPrefix($"MOND RMS={mondFit.RmsError:F4} (expected {expectedMondRms:F4}, delta={mondDelta:+0.0000;-0.0000;0.0000})");
+        WriteLineWithTestPrefix($"TRM log10(a0)={trmFit.BestLogA0:F4}");
+        WriteLineWithTestPrefix($"MOND log10(a0)={mondFit.BestLogA0:F4}");
+        WriteLineWithTestPrefix($"improvement TRM vs baryonsOnly={trmImprovementVsBaryonsOnly:+0.0000;-0.0000;0.0000}");
+        WriteLineWithTestPrefix($"improvement MOND vs baryonsOnly={mondImprovementVsBaryonsOnly:+0.0000;-0.0000;0.0000}");
+        WriteLineWithTestPrefix("Diagnostic only. No baseline logic changed.");
+
+        Assert.Equal(expectedPointCount, rarData.Count);
+        Assert.True(double.IsFinite(baryonsOnlyWeakFieldGrRms));
+        Assert.True(double.IsFinite(trmFit.RmsError));
+        Assert.True(double.IsFinite(mondFit.RmsError));
+        Assert.True(Math.Abs(trmDelta) <= rmsTolerance,
+            $"TRM RMS reproduction drift exceeded tolerance {rmsTolerance:F3}: got {trmFit.RmsError:F4}, expected {expectedTrmRms:F4}.");
+        Assert.True(Math.Abs(mondDelta) <= rmsTolerance,
+            $"MOND RMS reproduction drift exceeded tolerance {rmsTolerance:F3}: got {mondFit.RmsError:F4}, expected {expectedMondRms:F4}.");
+    }
+
     private static double EvaluateCrossSplitOffsetMeanDelta(
         List<TurningResidualRow> rows,
         int modulo,
@@ -6063,6 +7536,45 @@ public class RarRelationTests
         }
 
         return Math.Sqrt(sum / count);
+    }
+
+    private static double ComputeWeightedBaryonsOnlyWeakFieldGrRms(
+        List<RarPoint> points,
+        Dictionary<string, double> inclinations)
+    {
+        var normalizedInclinations = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var kvp in inclinations)
+        {
+            string key = NormalizeGalaxyKey(kvp.Key);
+            if (!normalizedInclinations.ContainsKey(key))
+                normalizedInclinations[key] = kvp.Value;
+        }
+
+        double weightedSsr = 0.0;
+        double totalWeight = 0.0;
+
+        foreach (var p in points)
+        {
+            if (p.GobsMs2 <= 0.0 || p.GbarMs2 <= 0.0)
+                continue;
+
+            string galaxyKey = NormalizeGalaxyKey(p.GalaxyName);
+            double inc = normalizedInclinations.GetValueOrDefault(galaxyKey, 60.0);
+            double sinI = Math.Sin(inc * Math.PI / 180.0);
+            double weight = sinI * sinI;
+            if (!double.IsFinite(weight) || weight <= 0.0)
+                continue;
+
+            double gPred = p.GbarMs2; // baryons-only weak-field/Newtonian baseline
+            double residual = Math.Log10(p.GobsMs2) - Math.Log10(gPred);
+            if (!double.IsFinite(residual))
+                continue;
+
+            weightedSsr += weight * (residual * residual);
+            totalWeight += weight;
+        }
+
+        return totalWeight > 0.0 ? Math.Sqrt(weightedSsr / totalWeight) : double.NaN;
     }
 
     private static double ComputeBinRms(List<double> residuals)

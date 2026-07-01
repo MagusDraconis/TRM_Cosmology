@@ -70,7 +70,7 @@ Claim boundaries:
 | **RAR21** global disk-coherence scan | diagnostic | Coherence/shear proxies capture part of residual variation, with mixed net impact. | Exploratory proxy scan. |
 | **RAR22** worst-galaxy geometry variation | candidate (exploratory) | Distributed/multi-center variants can help specific worst galaxies; smooth distributed field is now train-width-fitted and frozen for evaluation. | Exploratory geometry diagnostics; not core TRM path. |
 
-### RAR32–RAR43 PhaseProxy residual diagnostics
+### RAR32–RAR47 PhaseProxy residual diagnostics
 
 - `rawPhase = omega * radiusKpc` organizes SPARC residuals more effectively than `radiusOnly` and tested normalized phase controls.
 - Strongest summary guard (RAR43):
@@ -79,6 +79,8 @@ Claim boundaries:
   - `best normalized phase delta = 0.015825`
   - `improved transfers = 20/20`
   - `train-transfer gap = -0.000143`
+- RAR46 adds a **success/failure cluster insight**: rawPhase gains are structurally clustered (mean acceleration, gas dominance, outer/inner ratio, radial span), not universal.
+- RAR47 is a **negative guard** for hard cluster activation: a strict train-fitted gate was too restrictive and removed most of the rawPhase transfer gain.
 - Interpretation: **diagnostic candidate** for a **radial-orbital synchronization** residual structure.
 - **Baseline TRM-RAR law remains unchanged:**  
   `g_pred = g_bar + sqrt(g_bar * a0)`
@@ -89,6 +91,49 @@ Claim boundaries:
 - no theorem-level derivation
 - no GR replacement
 - no production activation
+- cluster structure is for interpretation, not hard activation
+
+### RAR49–RAR53 baryonic normalization audit
+
+- RAR49–RAR53 test global baryonic normalization before any new-physics interpretation of SPARC residual structure.
+- Current best diagnostic correction is a near-uniform global rescaling around `0.8`.
+- RAR53 component-grid result is consistent with a global effect (`gas/disk/bulge = 0.80/0.80/0.80`), not a uniquely component-specific correction.
+- Mean residual bias is strongly reduced and RMS improves under this global normalization audit path.
+- Interpretation: baryonic normalization must be audited first; residual proxy signals remain diagnostic/candidate-level until this baseline bias is controlled.
+
+Status: diagnostic only.  
+Baseline TRM-RAR law remains unchanged: `g_pred = g_bar + sqrt(g_bar * a0)`.
+
+### RAR48–RAR55 distance/baryon normalization audit
+
+- RAR48 tested distance/radius mapping sensitivity.
+- Result: current TRM local radius mapping and `rawRadius` give very similar RMS; no strong distance-mapping bias was found.
+- RAR49–RAR53 tested baryonic normalization/component-scale sensitivity in the diagnostic path.
+- Result: a global `baryonScale` around `0.8` reduces mean residual bias and improves RMS in that diagnostic path.
+- RAR53 found no component-specific winner; `gas/disk/bulge = 0.8/0.8/0.8` matched the global `baryonScale=0.8` comparator.
+- RAR54 reproduced the original global SPARC co-fit:
+  - `2839` points
+  - `TRM RMS = 0.1412`
+  - `MOND RMS = 0.1340`
+  - `TRM log10(a0) = -9.9914`
+  - `MOND log10(a0) = -9.9268`
+- RAR55 added a baryons-only weak-field GR (Newtonian, no halo) comparator on the exact same original co-fit path:
+  - `baryonsOnlyWeakFieldGR RMS = 0.5243`
+  - `TRM RMS = 0.1412`
+  - `MOND RMS = 0.1340`
+  - Interpretation: TRM and MOND outperform the baryons-only weak-field baseline on this path; this is not a claim against full GR+dark-matter halo modeling.
+
+Interpretation:
+- The original SPARC baseline has not degraded.
+- RAR48–RAR53 are diagnostic-path audits and are not directly comparable to the original `0.1412` co-fit unless the same parser/filter/weighting path is used.
+- Baryonic normalization should be audited before interpreting residual corrections as new TRM physics.
+
+Claim boundaries:
+- diagnostic only
+- no baseline activation
+- no per-galaxy refit
+- no theorem-level claim
+- no GR replacement claim
 
 ### What improved (SPARC)
 
