@@ -149,6 +149,7 @@ Quellen:
     - RBF62–RBF64: `RBF62_FormalSelectionRule_Should_Follow_FromEnergyMarginDominance`, `RBF63_SelectionRule_Should_Remain_Stable_UnderAdmissibleMarginPerturbations`, `RBF64_SelectionRule_Should_Fail_Gracefully_OutsideDomain` (formal margin-based selection rule, margin perturbation stability, graceful domain failure/abstention)
     - RBF65–RBF67: `RBF65_SelectionRule_Should_Be_Minimal_NotOverparameterized`, `RBF66_SelectionRule_Should_RejectAlternativeFunctionalForms`, `RBF67_SelectionRule_Should_ReportFormalTheoremReadinessChecklist` (minimality/ablation diagnostic, alternative functional form rejection, theorem-readiness checklist)
     - RBF68–RBF70: `RBF68_PhaseClosureDefect_Should_Define_StructuralInvariant`, `RBF69_BridgeQCore_Should_Be_Invariant_UnderBandEquivalentParameterization`, `RBF70_ActionStationarity_Should_Be_Invariant_UnderSharedEnergyNormalization` (structural invariant scaffolding for phase closure, bridge qCore, and action-stationarity normalization)
+    - RBF71–RBF73: `RBF71_PhaseThreshold_Should_Converge_To_IntegerClosureDefectLimit`, `RBF72_ActionTolerance_Should_Converge_To_StationarityResidualLimit`, `RBF73_FormalSelectionRule_Should_Define_ContinuousValidityEnvelope` (continuous domain-limit diagnostics and multi-dimensional validity envelope mapping)
     - wiederkehrende Gamma-Grid-Werte inkl. `0.85`
 - **Modellbezug:**
   - Phase-Lock/Synchronisationsscans (Kuramoto-artige Auswertungslinien) plus isolierter 20:17-Kadenz-Block ohne Photon-Transport-Zirkularität.

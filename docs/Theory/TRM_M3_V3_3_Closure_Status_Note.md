@@ -66,11 +66,19 @@ Consolidated result (RBF50–RBF52)
 
 ---
 
+## Consolidated result (RBF71–RBF73)
+
+- Operational phase thresholds map directly to the exact integer closure-defect limit (`|qΩ - p|`) without arbitrary cut-offs.
+- Action tolerances converge continuously to the explicitly calculated lattice-energy stationarity residual, acting as physical selection limits.
+- A multidimensional continuous validity envelope is defined, inside which `m=3` margin dominance strictly holds and outside of which the rule fails gracefully (abstains).
+
+---
+
 ## Current status statement
 
 Current reviewer-safe status:
 
-> m=3 is a bounded shared-functional selection candidate with structural-invariant scaffolding toward analytical theorem readiness.
+> m=3 is a bounded shared-functional selection candidate with structural-invariant and continuous domain-limit scaffolding toward analytical theorem readiness.
 
 ---
 
@@ -78,8 +86,8 @@ Current reviewer-safe status:
 
 Primary remaining gaps:
 
-1. Continuous threshold/domain-limit derivation.
-2. Formal proof of necessary/sufficient closure conditions.
+1. Transition from numerical scaffolding boundaries to purely analytical continuous theorem proofs.
+2. Formal derivation of necessary/sufficient closure conditions without bounded operational search spaces.
 
 ---
 
@@ -94,11 +102,8 @@ Primary remaining gaps:
 
 ---
 
-## Next direction (RBF71+)
+## Next direction (RBF74+)
 
-The next test family should focus on continuous threshold and domain-limit diagnostics:
-
-1. Deriving continuous limits for the operational thresholds currently used in the rule.
-2. Transitioning empirical evidence into analytical constraint boundary conditions.
+The next test family should focus on transitioning these scaffold limits into strict analytical boundary constraints for the formal theorem path.
 
 

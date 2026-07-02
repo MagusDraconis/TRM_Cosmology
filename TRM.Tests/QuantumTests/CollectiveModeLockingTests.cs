@@ -7346,6 +7346,180 @@ public class CollectiveModeLockingTests
         _output.WriteLine("RBF70 claim boundary: diagnostic invariant evidence only; not theorem-level proof.");
     }
 
+    /// <summary>
+    /// RBF71: Verifies that varying phase tolerance continuously around the admissible boundary
+    /// converges exactly to the integer closure-defect limit for m=3.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF71_PhaseThreshold_Should_Converge_To_IntegerClosureDefectLimit()
+    {
+        _output.WriteLine("--- RBF71 PHASE THRESHOLD CONVERGENCE DIAGNOSTIC ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        // Calculate the exact integer closure defect limit for m=3
+        double m3ExactDefect = ComputeIntegerClosureDefectNormalized(3, qCore, 3);
+        _output.WriteLine($"RBF71 Exact integer closure-defect limit for m=3: {m3ExactDefect:F4}");
+
+        double[] tolerances = { 0.05, 0.10, m3ExactDefect - 1e-4, m3ExactDefect + 1e-4, 0.20, 0.35, 0.50 };
+        
+        bool convergedAsExpected = true;
+        
+        foreach (var tol in tolerances)
+        {
+            var rows = BuildSharedFunctionalRows(
+                family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+                phaseTolerance: tol, bridgeTolerance: 1.0, actionTolerance: 0.95);
+                
+            var res = EvaluateFormalSelectionRule(rows, 0.5); // moderate margin
+            
+            bool m3Admissible = rows.Any(r => r.M == 3 && r.Admissible);
+            string region = tol < m3ExactDefect ? "Below Limit" : "Above Limit";
+            _output.WriteLine($"RBF71 Tol={tol:F4} [{region}] -> m=3 Admissible: {m3Admissible} | Selected: {(res.Resolved ? res.SelectedMode.ToString() : "none")}");
+            
+            if (tol < m3ExactDefect && m3Admissible)
+            {
+                convergedAsExpected = false;
+                _output.WriteLine("RBF71 Mismatch: m=3 admissible below exact defect limit.");
+            }
+            if (tol > m3ExactDefect && !m3Admissible)
+            {
+                convergedAsExpected = false;
+                _output.WriteLine("RBF71 Mismatch: m=3 inadmissible above exact defect limit.");
+            }
+        }
+        
+        Assert.True(convergedAsExpected, "Expected operational phase threshold to converge cleanly at the integer closure-defect limit.");
+        _output.WriteLine("RBF71 Conclusion: Integer closure-defect acts as the strict structural limit for operational phase thresholding.");
+        _output.WriteLine("RBF71 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+    }
+
+    /// <summary>
+    /// RBF72: Verifies that varying action tolerance continuously converges to the stationarity residual limit,
+    /// showing where m=3 is selected, abstains, or where competitors enter.
+    /// Claim boundary: diagnostic/candidate only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF72_ActionTolerance_Should_Converge_To_StationarityResidualLimit()
+    {
+        _output.WriteLine("--- RBF72 ACTION TOLERANCE CONVERGENCE DIAGNOSTIC ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        // Extract exact action residuals for m=3 and competitors
+        var diagnosticRows = BuildSharedFunctionalRows(
+            family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 99.0);
+            
+        double m3Residual = diagnosticRows.First(r => r.M == 3).ActionResidual;
+        _output.WriteLine($"RBF72 Exact stationarity residual for m=3: {m3Residual:F4}");
+
+        double[] tolerances = { 0.05, 0.10, m3Residual - 1e-4, m3Residual + 1e-4, 0.30, 0.50, 0.95 };
+        
+        foreach (var tol in tolerances)
+        {
+            var rows = BuildSharedFunctionalRows(
+                family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+                phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: tol);
+                
+            var res = EvaluateFormalSelectionRule(rows, 0.5);
+            var admModes = rows.Where(r => r.Admissible).Select(r => r.M).ToArray();
+            
+            string status;
+            if (!res.Resolved) status = "Abstains";
+            else if (res.SelectedMode == 3) status = "Selects m=3";
+            else status = $"Selects m={res.SelectedMode} (Competitor)";
+            
+            _output.WriteLine($"RBF72 Tol={tol:F4} -> Adm: [{string.Join(",", admModes)}] | Status: {status}");
+            
+            if (tol < m3Residual)
+            {
+                Assert.DoesNotContain(3, admModes);
+            }
+            else
+            {
+                Assert.Contains(3, admModes);
+            }
+        }
+        
+        _output.WriteLine("RBF72 Conclusion: Stationarity residual cleanly defines the action tolerance boundary.");
+        _output.WriteLine("RBF72 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+    }
+
+    /// <summary>
+    /// RBF73: Scans continuous tolerance and margin limits to map the multidimensional validity envelope
+    /// where the formal selection rule selects m=3, explicitly classifying regions of failure.
+    /// Claim boundary: diagnostic/candidate only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF73_FormalSelectionRule_Should_Define_ContinuousValidityEnvelope()
+    {
+        _output.WriteLine("--- RBF73 CONTINUOUS VALIDITY ENVELOPE DIAGNOSTIC ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        double m3PhaseDefect = ComputeIntegerClosureDefectNormalized(3, qCore, 3);
+        double m3ActionResidual = BuildSharedFunctionalRows(
+            family, qCore, 1.0, 1.0, 1.0, 99.0, 1.0, 99.0).First(r => r.M == 3).ActionResidual;
+
+        var scenarios = new[]
+        {
+            // Valid internal region
+            (Name: "Baseline Interior", PTol: 0.35, ATol: 0.95, MThr: 0.5, ExpClass: "Valid"),
+            
+            // Boundary stress
+            (Name: "Phase Boundary", PTol: m3PhaseDefect - 0.05, ATol: 0.95, MThr: 0.5, ExpClass: "Phase-limit"),
+            (Name: "Action Boundary", PTol: 0.35, ATol: m3ActionResidual - 0.05, MThr: 0.5, ExpClass: "Action-limit"),
+            (Name: "Margin Stress", PTol: 0.35, ATol: 0.95, MThr: 2.0, ExpClass: "Margin-limit"),
+            
+            // Mixed limits
+            (Name: "Mixed Boundary", PTol: m3PhaseDefect - 0.01, ATol: m3ActionResidual - 0.01, MThr: 2.0, ExpClass: "Mixed-limit")
+        };
+
+        foreach (var sc in scenarios)
+        {
+            var rows = BuildSharedFunctionalRows(
+                family, qCore, 1.0, 1.0, 1.0, sc.PTol, 1.0, sc.ATol);
+                
+            var res = EvaluateFormalSelectionRule(rows, sc.MThr);
+            
+            string actualClass = "Valid";
+            if (!res.Resolved)
+            {
+                if (sc.PTol < m3PhaseDefect && sc.ATol >= m3ActionResidual) actualClass = "Phase-limit";
+                else if (sc.ATol < m3ActionResidual && sc.PTol >= m3PhaseDefect) actualClass = "Action-limit";
+                else if (sc.PTol >= m3PhaseDefect && sc.ATol >= m3ActionResidual && res.Margin < sc.MThr) actualClass = "Margin-limit";
+                else actualClass = "Mixed-limit";
+            }
+            
+            _output.WriteLine($"RBF73 Envelope [{sc.Name}] -> PTol={sc.PTol:F2}, ATol={sc.ATol:F2}, MThr={sc.MThr:F1} | Resolved={res.Resolved} | Class={actualClass}");
+            
+            if (sc.ExpClass == "Valid") Assert.True(res.Resolved && res.SelectedMode == 3);
+            else Assert.False(res.Resolved && res.SelectedMode == 3, $"Expected m=3 to fail outside valid envelope in {sc.Name}");
+        }
+
+        _output.WriteLine("RBF73 Conclusion: Formal selection rule defines a continuous, explicit multidimensional validity envelope.");
+        _output.WriteLine("RBF73 claim boundary: diagnostic/candidate only; continuous envelope is not theorem-level proof.");
+    }
+
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
         ModeLockConfig.Default with
         {

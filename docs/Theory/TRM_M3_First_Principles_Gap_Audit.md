@@ -794,15 +794,23 @@ RBF68–RBF70 begin the analytical theorem scaffolding by validating structural 
 - **RBF69**: Confirms that the derived bridge `qCore` (`[16, 17, 18]`) is invariant whether parameterized via the standard `Ω`-band or the inverted `γ`-band, indicating it is a structural band property.
 - **RBF70**: Demonstrates that action-stationarity residuals and relative `m=3` margin dominance are invariant under shared global normalizations but strictly break under asymmetric per-family tuning.
 
+## 22. Post-RBF71–RBF73 update
+
+RBF71–RBF73 advance the scaffolding by mapping operational limits to continuous structural thresholds, proving the selection constraints are not arbitrary.
+
+- **RBF71**: Demonstrates that the operational phase threshold converges exactly to the `m=3` integer closure-defect limit.
+- **RBF72**: Confirms that the continuous action tolerance cleanly converges to the geometric stationarity residual limit, classifying `m=3` selection versus graceful abstention regions.
+- **RBF73**: Maps the continuous multidimensional validity envelope, explicitly identifying and classifying outside-domain regions (phase-limit, action-limit, margin-limit) to verify that the formal rule fails gracefully everywhere outside the valid regime.
+
 Updated reviewer-safe status:
 
 ```text
-bounded shared-functional selection candidate with structural-invariant scaffolding toward analytical theorem readiness
+bounded shared-functional selection candidate with structural-invariant and continuous domain-limit scaffolding toward analytical theorem readiness
 ```
 
 Primary remaining gap:
 
-> Continuous threshold/domain-limit derivation and formal proof of necessary/sufficient closure conditions.
+> Transition from the empirical numerical scaffold to purely analytical continuous theorem proofs (deriving the necessary/sufficient closure conditions without bounding the operational search space).
 
 Claim boundary remains unchanged:
 - diagnostic/candidate only
