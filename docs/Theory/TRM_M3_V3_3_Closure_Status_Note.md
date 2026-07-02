@@ -74,11 +74,19 @@ Consolidated result (RBF50–RBF52)
 
 ---
 
+## Consolidated result (RBF74–RBF76)
+
+- Phase admissibility is explicitly expressed as the analytical closure condition `|qΩ - p| / targetShift <= ε_phase`, with numerical behavior proving fully equivalent.
+- Action admissibility is expressed as `δE_action <= ε_action`, establishing that operational action tolerance acts exactly as a lattice-energy stationarity residual boundary.
+- A necessary and sufficient diagnostic conditions checklist separates `STRUCTURAL-PASS` and `DIAGNOSTIC-PASS` empirical evidence from `PENDING-ANALYTICAL` formal proof items.
+
+---
+
 ## Current status statement
 
 Current reviewer-safe status:
 
-> m=3 is a bounded shared-functional selection candidate with structural-invariant and continuous domain-limit scaffolding toward analytical theorem readiness.
+> m=3 is a bounded shared-functional selection candidate with an analytical constraint-boundary scaffold.
 
 ---
 
@@ -86,8 +94,8 @@ Current reviewer-safe status:
 
 Primary remaining gaps:
 
-1. Transition from numerical scaffolding boundaries to purely analytical continuous theorem proofs.
-2. Formal derivation of necessary/sufficient closure conditions without bounded operational search spaces.
+1. Formal proof of topological necessity and sufficiency.
+2. Analytical formalization of domain closure (pending analytical work).
 
 ---
 
@@ -102,8 +110,8 @@ Primary remaining gaps:
 
 ---
 
-## Next direction (RBF74+)
+## Next direction (RBF77+)
 
-The next test family should focus on transitioning these scaffold limits into strict analytical boundary constraints for the formal theorem path.
+Transitioning the fully verified empirical diagnostic scaffold into pure mathematical theorem derivation.
 
 

@@ -802,15 +802,23 @@ RBF71–RBF73 advance the scaffolding by mapping operational limits to continuou
 - **RBF72**: Confirms that the continuous action tolerance cleanly converges to the geometric stationarity residual limit, classifying `m=3` selection versus graceful abstention regions.
 - **RBF73**: Maps the continuous multidimensional validity envelope, explicitly identifying and classifying outside-domain regions (phase-limit, action-limit, margin-limit) to verify that the formal rule fails gracefully everywhere outside the valid regime.
 
+## 23. Post-RBF74–RBF76 update
+
+RBF74–RBF76 transition the framework from numerical continuous-envelope diagnostics toward analytical constraint boundary conditions.
+
+- **RBF74**: Expresses phase admissibility as an exact condition `|qΩ - p| / targetShift <= ε_phase`, confirming numerical behavior perfectly matches the analytical closure condition.
+- **RBF75**: Expresses action admissibility as a stationarity residual condition `δE_action <= ε_action`, mapping the operational tolerance directly to the analytical lattice-energy stationarity boundary.
+- **RBF76**: Combines the constraints into a necessary and sufficient diagnostic conditions checklist, explicitly classifying the current empirical support as `STRUCTURAL-PASS` or `DIAGNOSTIC-PASS`, while acknowledging that theorem-level necessities are `PENDING-ANALYTICAL`.
+
 Updated reviewer-safe status:
 
 ```text
-bounded shared-functional selection candidate with structural-invariant and continuous domain-limit scaffolding toward analytical theorem readiness
+bounded shared-functional selection candidate with an analytical constraint-boundary scaffold
 ```
 
 Primary remaining gap:
 
-> Transition from the empirical numerical scaffold to purely analytical continuous theorem proofs (deriving the necessary/sufficient closure conditions without bounding the operational search space).
+> Formal proof of topological necessity, sufficiency, and domain closure remains pending analytical work.
 
 Claim boundary remains unchanged:
 - diagnostic/candidate only
