@@ -623,3 +623,91 @@ Until those are met, the correct status remains:
 bounded / diagnostic / action-derived candidate path,
 not theorem-level proof.
 ```
+
+---
+
+## 13. Post-RBF38–RBF40 update
+
+RBF38–RBF40 add a structural q-core layer on top of the existing action-derived three-constraint path:
+
+- **RBF38**: from `Omega = (q + m)/q` with `m=3` and bridge-band constraints, the tested bridge-core set is:
+
+  ```text
+  qCore(m=3) = [16, 17, 18]
+  ```
+
+- **RBF39**: using only derived q-core support (no manual q-window choice), baseline shared-rule diagnostics select `m=3`.
+- **RBF40**: `m=2` fallback separates into two bounded regime classes:
+  1. phase/action boundary stress,
+  2. weakened or missing bridge-core geometry support.
+
+Updated reviewer-safe status:
+
+```text
+action-derived bounded three-constraint bridge-mode candidate
+with structurally derived bridge-core q-window.
+```
+
+Interpretation update:
+
+> The main open gap has shifted from basic action/tick construction quality toward deeper structural derivation and generalization of bridge-core/q-window emergence across broader admissible model classes.
+
+Claim boundary remains unchanged:
+
+- diagnostic/candidate only
+- no theorem-level proof
+- no universal m=3 selection
+- no first-principles closure claim
+- no GR replacement claim
+
+---
+
+## 14. Post-RBF44–RBF46 update
+
+RBF44–RBF46 extend the qCore path by testing bridge-constraint independence explicitly.
+
+- **RBF44**: indicates that bridge occupancy may be partly encoded by derived qCore in bounded baseline diagnostics; double-counting risk is now explicitly monitored.
+- **RBF45**: shows bridge gating remains necessary outside qCore to suppress structurally irrelevant/non-core candidates in wider-support evaluations.
+- **RBF46**: classifies derived qCore as a structural bridge prior, not as theorem-level domain closure.
+
+Updated interpretation:
+
+> The main open gap shifts from qCore derivation itself toward microscopic necessity of the phase/action/bridge-prior structure under one shared lattice/action rationale.
+
+Bridge status clarification:
+
+> bridge is not discarded; it is partially absorbed by qCore in local diagnostics but remains necessary for broad-support rejection discipline.
+
+Claim boundary remains unchanged:
+
+- diagnostic/candidate only
+- no theorem-level proof
+- no universal m=3 selection
+- no first-principles closure claim
+- no GR replacement claim
+
+---
+
+## 15. Post-RBF47–RBF49 update
+
+RBF47–RBF49 were implemented to test whether the three constraints can be traced toward one shared lattice/action rationale.
+
+- **RBF47**: replaces phase threshold proxy with an integer closure-defect criterion based on `qΩ-p` compatibility and reports mismatch/boundary behavior.
+- **RBF48**: replaces action-scale thresholding with lattice-energy stationarity/minimality diagnostics and reports per-mode stationarity residuals/energy gaps.
+- **RBF49**: builds a shared diagnostic functional with phase-defect, bridge-prior, and action-stationarity components and reports component contributions and total ranking.
+
+Updated interpretation:
+
+> The stack is now supported as a shared-lattice/action-rationale candidate path, while remaining below theorem-level closure.
+
+Main open gap after RBF47–RBF49:
+
+> mathematical necessity/uniqueness for the shared functional and explicit theorem-path constraints remain open.
+
+Claim boundary remains unchanged:
+
+- candidate/diagnostic only
+- no theorem-level proof
+- no first-principles closure claim
+- no universal m=3 selection
+- no GR replacement claim

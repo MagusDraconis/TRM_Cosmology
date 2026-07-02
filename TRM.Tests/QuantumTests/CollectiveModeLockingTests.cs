@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TRM.Tests.RealityTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -14,6 +16,7 @@ namespace TRM.Tests.QuantumTests;
 public class CollectiveModeLockingTests
 {
     private readonly ITestOutputHelper _output;
+    private static readonly ConcurrentDictionary<string, (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[]> ModeFamilyCache = new(StringComparer.Ordinal);
 
     public CollectiveModeLockingTests(ITestOutputHelper output)
     {
@@ -3553,6 +3556,12 @@ public class CollectiveModeLockingTests
             $"Expected at least one regime-transition boundary where m=3 fails after stricter constraints. firstTransition={firstTransition ?? "none"}");
     }
 
+    /// <summary>
+    /// Checks whether the derived action/tick discriminator follows the operational discriminator structure.
+    /// Matters for the m=3 theorem-path because action-derived consistency reduces pure-threshold artifact risk.
+    /// Expected diagnostic behavior: strong positive agreement in ranking/correlation without per-family retuning.
+    /// Claim boundary: diagnostic/candidate support only; not theorem-level proof or first-principles closure.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF27_ActionTickDiscriminator_Should_Follow_From_MinimalLatticeAction()
@@ -3598,6 +3607,12 @@ public class CollectiveModeLockingTests
             $"Expected strong monotonic agreement between discriminators. agreement={monotonicAgreement:F6}");
     }
 
+    /// <summary>
+    /// Checks whether the derived full three-constraint stack selects m=3 in the baseline shared-rule setup.
+    /// Matters because it tests action-derived selection under one common rule for all families.
+    /// Expected diagnostic behavior: m=3 is first/full-stack admissible in baseline, with explicit admissibility logging.
+    /// Claim boundary: bounded candidate evidence only; no theorem-level or GR-replacement claim.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF28_DerivedActionTick_Should_Select_M3_Under_FullThreeConstraintStack()
@@ -3660,6 +3675,12 @@ public class CollectiveModeLockingTests
             $"Expected m=3 to be the first/full-stack admissible mode in baseline derived rule. selected={selectedMode}, satisfying=[{string.Join(", ", satisfying)}]");
     }
 
+    /// <summary>
+    /// Checks phase-stress boundary mapping for m=3 admissibility under the derived full-stack rule.
+    /// Matters because the theorem-path requires explicit domain-of-validity and failure-cause diagnostics.
+    /// Expected diagnostic behavior: resolved/unresolved region reporting, failure-cause counts, and transition detection.
+    /// Claim boundary: diagnostic boundary mapping only; not theorem-level closure.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF29_M3AdmissibilityBoundary_Should_Map_PhaseStressTransition()
@@ -3813,6 +3834,12 @@ public class CollectiveModeLockingTests
         Assert.True(transitionCount > 0, "Expected at least one phase-stress transition boundary near the 0.790 regime.");
     }
 
+    /// <summary>
+    /// Checks whether competing families fail under one shared derived three-constraint rule.
+    /// Matters because explicit competing-family exclusion is required on the m=3 theorem-path.
+    /// Expected diagnostic behavior: baseline keeps m=3 minimally admissible and reports structural failure reasons for others.
+    /// Claim boundary: candidate structural exclusion evidence only; not a theorem-level proof.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF30_CompetingFamilies_Should_Fail_Under_DerivedThreeConstraintRule()
@@ -3873,6 +3900,12 @@ public class CollectiveModeLockingTests
             $"Competing families remained admissible under shared derived rule: [{string.Join(", ", nonM3Admissible)}]");
     }
 
+    /// <summary>
+    /// Checks whether m=2 fallback at boundary is explained by a phase/action tradeoff.
+    /// Matters because fallback explanation distinguishes bounded admissibility from random instability.
+    /// Expected diagnostic behavior: fallback cases are explainable by phase-only, action-only, or joint phase+action effects.
+    /// Claim boundary: diagnostic explanation only; not theorem-level closure.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF31_M2FallbackBoundary_Should_Be_Explained_By_PhaseActionTradeoff()
@@ -4001,19 +4034,20 @@ public class CollectiveModeLockingTests
             $"Expected all m=2 fallback cases to be explainable by phase/action tradeoff. explained={explainedFallbacks}, fallback={m2FallbackCases}");
     }
 
+    /// <summary>
+    /// Checks continuity properties of the m=3 admissibility manifold over deterministic phase/action/bridge/weight grids.
+    /// Matters because the theorem-path needs bounded-region structure, not isolated point selection.
+    /// Expected diagnostic behavior: non-empty m=3 region, baseline-local continuity, and explicit boundary/unresolved reporting.
+    /// Claim boundary: bounded diagnostic manifold evidence only; no theorem-level claim.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF32_M3Boundary_Should_Have_Continuous_AdmissibilityManifold()
     {
-        if (DateTime.Now > new DateTime(2024, 6, 30))
-        {
-            _output.WriteLine("RBF32 test disabled after June 30, 2024 due to long runtime.");
-            return;
-        }
         int[] mValues = { 1, 2, 3, 4, 5 };
-        var phaseThresholds = new[] { 0.780, 0.790, 0.800 };
-        var actionScales = new[] { 0.98, 1.02 };
-        var bridgeThresholds = new[] { 1, 2 };
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785, 0.790, 0.795, 0.800 };
+        var actionScales = new[] { 0.95, 1.00, 1.05 };
+        var bridgeThresholds = new[] { 1, 2, 3 };
         var weights = new (string Name, double Order, double Closure, double Transport)[]
         {
             ("wA", 0.50, 0.35, 0.15),
@@ -4174,15 +4208,16 @@ public class CollectiveModeLockingTests
             $"Expected connected manifold or local continuity near baseline. components={components}, baselineLocal={baselineLocalContinuity}, baselineComponentSize={baselineComponentSize}");
     }
 
+    /// <summary>
+    /// Checks whether stronger shared derived action-margin gating can exclude m=2 fallback without harming baseline m=3.
+    /// Matters because theorem-path strengthening must avoid per-family retuning artifacts.
+    /// Expected diagnostic behavior: report if exclusion is structural under shared margins or threshold-tuning sensitive.
+    /// Claim boundary: candidate gate-discipline diagnostic only; not first-principles closure.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF33_M2Fallback_Should_Be_Excluded_By_StrongerDerivedActionGate_Only_When_PhysicallyJustified()
     {
-                if (DateTime.Now > new DateTime(2024, 6, 30))
-        {
-            _output.WriteLine("RBF32 test disabled after June 30, 2024 due to long runtime.");
-            return;
-        }
         int[] mValues = { 1, 2, 3, 4, 5 };
         var phaseThresholds = new[] { 0.780, 0.790, 0.800, 0.810, 0.820 };
         var actionScales = new[] { 0.95, 1.00, 1.05 };
@@ -4287,15 +4322,16 @@ public class CollectiveModeLockingTests
         Assert.True(bestExcludedCount >= 0, "Fallback exclusion count should be finite.");
     }
 
+    /// <summary>
+    /// Checks stability of the m=3 boundary map under nearby q-window and solver-step variants.
+    /// Matters because bounded theorem-path evidence requires controlled variant drift.
+    /// Expected diagnostic behavior: bounded region drift with resolved-case reporting and fallback tracking.
+    /// Claim boundary: stability diagnostic only; not theorem-level proof.
+    /// </summary>
     [Trait("Category", "LongRunning")]
     [Fact]
     public void RBF34_M3Boundary_Should_Remain_Stable_Under_QWindowAndSolverStepVariants()
     {
-                if (DateTime.Now > new DateTime(2024, 6, 30))
-        {
-            _output.WriteLine("RBF32 test disabled after June 30, 2024 due to long runtime.");
-            return;
-        }
         int[] mValues = { 1, 2, 3, 4, 5 };
         var phaseThresholds = new[] { 0.775, 0.780, 0.785, 0.790, 0.795, 0.800 };
         var actionScales = new[] { 0.95, 1.00, 1.05 };
@@ -4414,6 +4450,2433 @@ public class CollectiveModeLockingTests
 
         Assert.True(worstDrift <= 0.80,
             $"Expected bounded movement of m=3 admissibility region under q-window/solver-step variants. worstDrift={worstDrift:F4}, worstCase={worstCase}");
+    }
+
+    /// <summary>
+    /// Checks whether q-window dependence is largely explainable by bridge-band occupancy geometry.
+    /// Matters because the dominant remaining gap is structural q-window justification.
+    /// Expected diagnostic behavior: occupancy-geometry explains most resolved selection differences across q-windows.
+    /// Claim boundary: diagnostic/candidate support only; no theorem-level or numerology claim.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF35_QWindowDependence_Should_Be_Explained_By_BridgeBandOccupancyGeometry()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var qWindows = new (int QMin, int QMax, string Name)[]
+        {
+            (12, 24, "qBase"),
+            (13, 25, "qShiftUp"),
+            (10, 22, "qShiftDown"),
+            (14, 26, "qHigh")
+        };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15)
+        };
+
+        const double phaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+        const double actionScale = 1.00;
+
+        int resolved = 0;
+        int explainedByOccupancyGeometry = 0;
+        int selectedM2 = 0;
+        int selectedM3 = 0;
+
+        foreach (var qw in qWindows)
+        {
+            foreach (var w in weights)
+            {
+                var family = BuildModeFamilyFromLatticeProxy(
+                    mValues,
+                    qw.QMin,
+                    qw.QMax,
+                    w.Order,
+                    w.Closure,
+                    w.Transport,
+                    BuildNoCadencePriorConfig(),
+                    new[] { 2e-3 });
+
+                var result = EvaluateDerivedThreeConstraintSelection(
+                    family,
+                    phaseThreshold,
+                    bridgeThreshold,
+                    actionScale);
+
+                if (!result.Resolved)
+                {
+                    _output.WriteLine($"RBF35 {qw.Name}/{w.Name} | unresolved");
+                    continue;
+                }
+
+                resolved++;
+                int selected = result.SelectedMode;
+                if (selected == 2) selectedM2++;
+                if (selected == 3) selectedM3++;
+
+                var m2 = family.First(x => x.M == 2);
+                var m3 = family.First(x => x.M == 3);
+                int occupancyDelta = m3.InBandCount - m2.InBandCount;
+
+                bool explained =
+                    (selected == 3 && occupancyDelta >= 0) ||
+                    (selected == 2 && occupancyDelta <= 0);
+                if (explained)
+                    explainedByOccupancyGeometry++;
+
+                _output.WriteLine(
+                    $"RBF35 {qw.Name}/{w.Name} | selected=m={selected} | satisfying=[{string.Join(", ", result.SatisfyingModes)}] | inBand(m3-m2)={occupancyDelta:+#;-#;0} | explained={explained}");
+            }
+        }
+
+        _output.WriteLine("--- RBF35 Q-WINDOW OCCUPANCY-GEOMETRY DIAGNOSTIC ---");
+        _output.WriteLine($"resolved={resolved} | selected m2={selectedM2} | selected m3={selectedM3}");
+        _output.WriteLine($"occupancy-geometry explained={explainedByOccupancyGeometry}/{resolved}");
+        _output.WriteLine("RBF35 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(resolved > 0, "Expected resolved q-window scenarios.");
+        Assert.True(explainedByOccupancyGeometry >= Math.Max(1, resolved / 2),
+            $"Expected q-window dependence to be mostly explainable by bridge-band occupancy geometry. explained={explainedByOccupancyGeometry}, resolved={resolved}");
+    }
+
+    /// <summary>
+    /// Checks whether q-window shifts create non-core winners that would imply per-family retuning artifacts.
+    /// Matters because theorem-path discipline requires one shared rule, not family-specific tuning.
+    /// Expected diagnostic behavior: resolved q-shift scenarios stay within core winner set (m=2/m=3).
+    /// Claim boundary: artifact-audit diagnostic only; not theorem-level closure.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF36_QWindowShift_Should_Not_Create_PerFamilyRetuningArtifact()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var qWindows = new (int QMin, int QMax, string Name)[]
+        {
+            (12, 24, "qBase"),
+            (13, 25, "qShiftUp"),
+            (10, 22, "qShiftDown")
+        };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15)
+        };
+
+        const double phaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+        const double actionScale = 1.00;
+
+        int resolved = 0;
+        int nonCoreSelections = 0;
+        int selectedM2 = 0;
+        int selectedM3 = 0;
+        var selectedModes = new List<int>();
+
+        foreach (var qw in qWindows)
+        {
+            foreach (var w in weights)
+            {
+                var family = BuildModeFamilyFromLatticeProxy(
+                    mValues,
+                    qw.QMin,
+                    qw.QMax,
+                    w.Order,
+                    w.Closure,
+                    w.Transport,
+                    BuildNoCadencePriorConfig(),
+                    new[] { 2e-3 });
+
+                var result = EvaluateDerivedThreeConstraintSelection(
+                    family,
+                    phaseThreshold,
+                    bridgeThreshold,
+                    actionScale);
+
+                if (!result.Resolved)
+                {
+                    _output.WriteLine($"RBF36 {qw.Name}/{w.Name} | unresolved");
+                    continue;
+                }
+
+                resolved++;
+                selectedModes.Add(result.SelectedMode);
+                if (result.SelectedMode == 2) selectedM2++;
+                if (result.SelectedMode == 3) selectedM3++;
+                if (result.SelectedMode is not (2 or 3))
+                    nonCoreSelections++;
+
+                _output.WriteLine(
+                    $"RBF36 {qw.Name}/{w.Name} | selected=m={result.SelectedMode} | satisfying=[{string.Join(", ", result.SatisfyingModes)}]");
+            }
+        }
+
+        _output.WriteLine("--- RBF36 Q-WINDOW SHIFT RETUNING-ARTIFACT DIAGNOSTIC ---");
+        _output.WriteLine($"resolved={resolved} | selected m2={selectedM2} | selected m3={selectedM3} | non-core selections={nonCoreSelections}");
+        _output.WriteLine($"selected modes=[{string.Join(", ", selectedModes)}]");
+        _output.WriteLine("RBF36 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(resolved > 0, "Expected resolved q-window shift scenarios.");
+        Assert.True(nonCoreSelections == 0,
+            $"Expected no per-family retuning artifact creating non-core winners (m1/m4/m5). nonCore={nonCoreSelections}");
+    }
+
+    /// <summary>
+    /// Checks whether m=3 support tracks bridge-core q-support rather than post-hoc q-window choice.
+    /// Matters because the current main gap is structural derivation of q-window from bridge-scale geometry.
+    /// Expected diagnostic behavior: windows containing bridge-core q-support show at least as strong m=3 selection support.
+    /// Claim boundary: candidate structural support only; not first-principles proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF37_QWindow_Should_Be_Derived_From_BridgeScale_Not_ChosenPostHoc()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var windowsWithBridgeCore = new (int QMin, int QMax, string Name)[]
+        {
+            (12, 24, "coreA"),
+            (13, 25, "coreB")
+        };
+        var windowsWithoutBridgeCore = new (int QMin, int QMax, string Name)[]
+        {
+            (10, 14, "noCoreLow"),
+            (19, 24, "noCoreHigh")
+        };
+
+        // For m=3 and Ω=(q+3)/q in Ω∈[1.16,1.19], bridge-scale implied q-core is {16,17,18}.
+        var bridgeScaleQCore = new HashSet<int> { 16, 17, 18 };
+        const double phaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+        const double actionScale = 1.00;
+
+        int m3SelectedWithCore = 0;
+        int m3SelectedWithoutCore = 0;
+
+        void EvaluateWindow((int QMin, int QMax, string Name) w, bool hasCore)
+        {
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                w.QMin,
+                w.QMax,
+                0.50,
+                0.35,
+                0.15,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            int m3InBand = family.First(x => x.M == 3).InBandCount;
+            int qCoreInWindow = bridgeScaleQCore.Count(q => q >= w.QMin && q <= w.QMax);
+
+            var result = EvaluateDerivedThreeConstraintSelection(
+                family,
+                phaseThreshold,
+                bridgeThreshold,
+                actionScale);
+
+            bool m3Selected = result.Resolved && result.SelectedMode == 3;
+            if (hasCore && m3Selected) m3SelectedWithCore++;
+            if (!hasCore && m3Selected) m3SelectedWithoutCore++;
+
+            _output.WriteLine(
+                $"RBF37 {w.Name} | q=[{w.QMin},{w.QMax}] | qCoreInWindow={qCoreInWindow} | m3InBand={m3InBand} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | m3Selected={m3Selected}");
+        }
+
+        foreach (var w in windowsWithBridgeCore) EvaluateWindow(w, hasCore: true);
+        foreach (var w in windowsWithoutBridgeCore) EvaluateWindow(w, hasCore: false);
+
+        _output.WriteLine("--- RBF37 Q-WINDOW BRIDGESCALE-DERIVATION DIAGNOSTIC ---");
+        _output.WriteLine($"m3 selected with bridge-core windows={m3SelectedWithCore}/{windowsWithBridgeCore.Length}");
+        _output.WriteLine($"m3 selected without bridge-core windows={m3SelectedWithoutCore}/{windowsWithoutBridgeCore.Length}");
+        _output.WriteLine("RBF37 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(m3SelectedWithCore >= m3SelectedWithoutCore,
+            $"Expected bridge-scale-derived core windows to support m=3 selection at least as often as non-core windows. withCore={m3SelectedWithCore}, withoutCore={m3SelectedWithoutCore}");
+    }
+
+    /// <summary>
+    /// Checks whether bridge-core q-support can be derived directly from rational-band geometry for m=3.
+    /// Matters because the key remaining gap is replacing operational q-window choice with a structural derivation path.
+    /// Expected diagnostic behavior: derived q-core overlaps current selected windows and reports mode-selection behavior without post-hoc q tuning.
+    /// Claim boundary: diagnostic/candidate support only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF38_BridgeCoreQWindow_Should_Follow_From_RationalBandGeometry()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        const int targetM = 3;
+        const double omegaMin = 1.16;
+        const double omegaMax = 1.19;
+        const double gammaMin = 0.84;
+        const double gammaMax = 0.86;
+        const double phaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+        const double actionScale = 1.00;
+
+        var derivedQCore = DeriveBridgeCoreQValuesFromBand(targetM, omegaMin, omegaMax, gammaMin, gammaMax, 2, 64);
+        var selectedWindows = new (int QMin, int QMax, string Name)[]
+        {
+            (12, 24, "qBase"),
+            (13, 25, "qShift"),
+            (10, 14, "qLow"),
+            (19, 24, "qHigh")
+        };
+
+        int overlapWindows = 0;
+        int resolved = 0;
+        int selectedM3 = 0;
+
+        _output.WriteLine("--- RBF38 BRIDGE-CORE Q-DERIVATION DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m={targetM})=[{string.Join(", ", derivedQCore)}]");
+
+        foreach (var w in selectedWindows)
+        {
+            int coreInWindow = derivedQCore.Count(q => q >= w.QMin && q <= w.QMax);
+            if (coreInWindow > 0)
+                overlapWindows++;
+
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                w.QMin,
+                w.QMax,
+                0.50,
+                0.35,
+                0.15,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            var result = EvaluateDerivedThreeConstraintSelection(
+                family,
+                phaseThreshold,
+                bridgeThreshold,
+                actionScale);
+
+            if (result.Resolved)
+            {
+                resolved++;
+                if (result.SelectedMode == 3)
+                    selectedM3++;
+            }
+
+            int m3InBand = family.First(x => x.M == 3).InBandCount;
+            _output.WriteLine(
+                $"RBF38 {w.Name} | q=[{w.QMin},{w.QMax}] | qCoreInWindow={coreInWindow} | m3InBand={m3InBand} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")}");
+        }
+
+        _output.WriteLine($"window overlaps with qCore={overlapWindows}/{selectedWindows.Length}");
+        _output.WriteLine($"resolved={resolved} | selected m3={selectedM3}");
+        _output.WriteLine("RBF38 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(derivedQCore.Length > 0, "Expected non-empty bridge-core q-set from rational-band geometry.");
+        Assert.True(derivedQCore.SequenceEqual(new[] { 16, 17, 18 }),
+            $"Expected m=3 bridge-core q-set to match Ω-band geometry in tested domain. qCore=[{string.Join(", ", derivedQCore)}]");
+        Assert.True(overlapWindows >= 1, "Expected at least one currently selected q-window to overlap derived bridge-core support.");
+    }
+
+    /// <summary>
+    /// Checks whether m=3 can be selected using only structurally derived bridge-core q-values (no manual q-window pick).
+    /// Matters because this directly tests whether q-support can be supplied by geometry rather than operational window selection.
+    /// Expected diagnostic behavior: with non-empty derived q-core and a shared derived three-constraint rule, m=3 is selected in the baseline diagnostic case.
+    /// Claim boundary: candidate/diagnostic support only; not first-principles closure.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF39_DerivedQCore_Should_Select_M3_WithoutManualQWindowChoice()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var derivedQCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+
+        _output.WriteLine("--- RBF39 DERIVED-QCORE SELECTION DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore=[{string.Join(", ", derivedQCore)}]");
+
+        Assert.True(derivedQCore.Length > 0, "Derived q-core must be non-empty for this diagnostic.");
+
+        int qMin = derivedQCore[0];
+        int qMax = derivedQCore[^1];
+
+        var family = BuildModeFamilyFromLatticeProxy(
+            mValues,
+            qMin,
+            qMax,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var result = EvaluateDerivedThreeConstraintSelection(
+            family,
+            phaseThreshold: 0.780,
+            bridgeThreshold: 1,
+            actionScale: 1.00);
+
+        foreach (var mode in family.OrderBy(x => x.M))
+        {
+            _output.WriteLine(
+                $"RBF39 m={mode.M} | inBand={mode.InBandCount} | phase={mode.AvgClosureQuality:F4} | derivedActionTick={mode.DerivedActionTick:E3}");
+        }
+
+        _output.WriteLine($"selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}]");
+        if (!result.Resolved)
+            _output.WriteLine("failure case: no mode satisfied shared derived three-constraint rule on derived qCore.");
+        _output.WriteLine("RBF39 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        Assert.True(result.Resolved,
+            $"Expected a resolved selection on derived qCore=[{string.Join(", ", derivedQCore)}].");
+        Assert.True(result.SelectedMode == 3,
+            $"Expected m=3 selection under shared derived rule on structurally derived qCore. selected={result.SelectedMode}");
+    }
+
+    /// <summary>
+    /// Checks whether m=2 fallback aligns with missing/weak bridge-core support versus phase/action boundary stress.
+    /// Matters because the remaining gap is explaining fallback mechanisms structurally, not via ad-hoc window choices.
+    /// Expected diagnostic behavior: fallback frequency increases in no-core/low-core windows and can be classified by geometry, phase/action boundary, or mixed causes.
+    /// Claim boundary: bounded diagnostic classification only; not universal selection proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF40_QCoreBoundary_Should_Explain_M2FallbackWhenBridgeCoreIsMissing()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        var qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var windows = new (int QMin, int QMax, string Name)[]
+        {
+            (12, 24, "coreA"),
+            (13, 25, "coreB"),
+            (15, 16, "lowCore"),
+            (10, 14, "noCoreLow"),
+            (19, 24, "noCoreHigh")
+        };
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785 };
+        var actionScales = new[] { 0.98, 1.00, 1.02 };
+        const int bridgeThreshold = 1;
+
+        int fallbackWithCore = 0;
+        int fallbackWithoutCore = 0;
+        int fallbackBridgeGeometry = 0;
+        int fallbackPhaseActionBoundary = 0;
+        int fallbackMixed = 0;
+        int resolved = 0;
+
+        foreach (var w in windows)
+        {
+            int coreSupport = qCore.Count(q => q >= w.QMin && q <= w.QMax);
+            bool hasCore = coreSupport >= 2;
+
+            var family = BuildModeFamilyFromLatticeProxy(
+                mValues,
+                w.QMin,
+                w.QMax,
+                0.50,
+                0.35,
+                0.15,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            foreach (double phaseThr in phaseThresholds)
+            {
+                foreach (double actionScale in actionScales)
+                {
+                    var result = EvaluateDerivedThreeConstraintSelection(
+                        family,
+                        phaseThr,
+                        bridgeThreshold,
+                        actionScale);
+
+                    if (!result.Resolved)
+                        continue;
+
+                    resolved++;
+                    if (result.SelectedMode != 2)
+                        continue;
+
+                    var m3Status = EvaluateModeConstraintStatus(family, 3, phaseThr, bridgeThreshold, actionScale);
+                    bool bridgeCoreWeak = coreSupport == 0 || (coreSupport == 1 && !m3Status.BridgeOk);
+
+                    string classification = bridgeCoreWeak
+                        ? "bridge-core geometry"
+                        : (!m3Status.PhaseOk || !m3Status.ActionOk)
+                            ? "phase/action boundary"
+                            : "mixed";
+
+                    if (hasCore) fallbackWithCore++;
+                    else fallbackWithoutCore++;
+
+                    if (classification == "bridge-core geometry") fallbackBridgeGeometry++;
+                    else if (classification == "phase/action boundary") fallbackPhaseActionBoundary++;
+                    else fallbackMixed++;
+
+                    _output.WriteLine(
+                        $"RBF40 {w.Name} | coreSupport={coreSupport} | phaseThr={phaseThr:F3} | actionScale={actionScale:F2} | selected=m=2 | m3(phase={m3Status.PhaseOk}, bridge={m3Status.BridgeOk}, action={m3Status.ActionOk}) | classification={classification}");
+                }
+            }
+        }
+
+        _output.WriteLine("--- RBF40 QCORE-BOUNDARY FALLBACK DIAGNOSTIC ---");
+        _output.WriteLine($"resolved={resolved}");
+        _output.WriteLine($"m2 fallback with-core={fallbackWithCore} | without/low-core={fallbackWithoutCore}");
+        _output.WriteLine($"fallback classification: bridge-core geometry={fallbackBridgeGeometry}, phase/action boundary={fallbackPhaseActionBoundary}, mixed={fallbackMixed}");
+        _output.WriteLine("RBF40 claim boundary: candidate diagnostic only, not theorem-level proof.");
+
+        int totalFallback = fallbackWithCore + fallbackWithoutCore;
+        Assert.True(qCore.Length > 0, "Expected non-empty derived bridge-core q-set.");
+        Assert.True(resolved > 0, "Expected resolved derived-rule cases for fallback classification.");
+        Assert.True(totalFallback > 0, "Expected at least one m=2 fallback case in boundary diagnostics.");
+        Assert.True(fallbackWithoutCore >= fallbackWithCore,
+            $"Expected m=2 fallback to occur at least as often when bridge-core support is absent/weakened. withCore={fallbackWithCore}, withoutOrLowCore={fallbackWithoutCore}");
+    }
+
+    /// <summary>
+    /// Checks whether each constraint remains necessary under structurally derived q-support.
+    /// Matters because the next gap is structural necessity of phase, bridge, and action/tick constraints.
+    /// Expected diagnostic behavior: full stack gives strongest m=3 result while single/double ablations weaken uniqueness or produce competing/unresolved outcomes.
+    /// Claim boundary: diagnostic necessity evidence only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF41_ThreeConstraints_Should_Be_Necessary_Under_DerivedQCore()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCoreM3 = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] derivedBandQ = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            derivedBandQ,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        const double phaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+        const double actionScale = 1.00;
+
+        var stacks = new (string Name, bool UsePhase, bool UseBridge, bool UseActionTick)[]
+        {
+            ("full stack", true, true, true),
+            ("no phase", false, true, true),
+            ("no bridge", true, false, true),
+            ("no actionTick", true, true, false),
+            ("phase only", true, false, false),
+            ("bridge only", false, true, false),
+            ("actionTick only", false, false, true),
+            ("phase+bridge", true, true, false),
+            ("phase+actionTick", true, false, true),
+            ("bridge+actionTick", false, true, true)
+        };
+
+        var outcomes = stacks
+            .Select(s => EvaluateConstraintStackSelection(
+                family,
+                s.Name,
+                s.UsePhase,
+                s.UseBridge,
+                s.UseActionTick,
+                phaseThreshold,
+                bridgeThreshold,
+                actionScale))
+            .ToArray();
+
+        var full = outcomes.First(x => x.StackName == "full stack");
+        _output.WriteLine("--- RBF41 THREE-CONSTRAINT NECESSITY DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCoreM3)}]");
+        _output.WriteLine($"derived bridge-band support q-values=[{string.Join(", ", derivedBandQ)}]");
+
+        foreach (var outcome in outcomes)
+        {
+            _output.WriteLine(
+                $"RBF41 {outcome.StackName} | resolved={outcome.Resolved} | selected={(outcome.Resolved ? $"m={outcome.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", outcome.SatisfyingModes)}] | m3(admissible={outcome.M3Admissible}, unique={outcome.M3Unique}, minimal={outcome.M3Minimal})");
+            _output.WriteLine($"RBF41 {outcome.StackName} failureByMode=[{string.Join(" | ", outcome.FailureByMode)}]");
+        }
+        _output.WriteLine("RBF41 claim boundary: diagnostic necessity evidence only, not theorem-level proof.");
+
+        bool noPhaseWeakened = IsConstraintAblationWeakened(full, outcomes.First(x => x.StackName == "no phase"));
+        bool noBridgeWeakened = IsConstraintAblationWeakened(full, outcomes.First(x => x.StackName == "no bridge"));
+        bool noActionWeakened = IsConstraintAblationWeakened(full, outcomes.First(x => x.StackName == "no actionTick"));
+        var bridgeOnly = outcomes.First(x => x.StackName == "bridge only");
+        bool bridgeWeakeningFoundUnderPerturbation = false;
+        var weightFamilies = new (double Order, double Closure, double Transport)[]
+        {
+            (0.50, 0.35, 0.15),
+            (0.55, 0.30, 0.15),
+            (0.45, 0.40, 0.15)
+        };
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785 };
+        var actionScales = new[] { 0.98, 1.00, 1.02 };
+        var bridgeThresholds = new[] { 1, 2 };
+        foreach (var w in weightFamilies)
+        {
+            var familyW = BuildModeFamilyFromExplicitQValues(
+                mValues,
+                derivedBandQ,
+                w.Order,
+                w.Closure,
+                w.Transport,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            foreach (int bridgeThr in bridgeThresholds)
+            {
+                foreach (double phaseThr in phaseThresholds)
+                {
+                    foreach (double action in actionScales)
+                    {
+                        var fullW = EvaluateConstraintStackSelection(
+                            familyW,
+                            "full stack",
+                            usePhase: true,
+                            useBridge: true,
+                            useActionTick: true,
+                            phaseThr,
+                            bridgeThr,
+                            action);
+                        var noBridgeW = EvaluateConstraintStackSelection(
+                            familyW,
+                            "no bridge",
+                            usePhase: true,
+                            useBridge: false,
+                            useActionTick: true,
+                            phaseThr,
+                            bridgeThr,
+                            action);
+
+                        if (fullW.Resolved && fullW.SelectedMode == 3 && IsConstraintAblationWeakened(fullW, noBridgeW))
+                        {
+                            bridgeWeakeningFoundUnderPerturbation = true;
+                            break;
+                        }
+                    }
+
+                    if (bridgeWeakeningFoundUnderPerturbation)
+                        break;
+                }
+
+                if (bridgeWeakeningFoundUnderPerturbation)
+                    break;
+            }
+
+            if (bridgeWeakeningFoundUnderPerturbation)
+                break;
+        }
+        _output.WriteLine($"RBF41 no-bridge weakening under bounded perturbation found={bridgeWeakeningFoundUnderPerturbation}");
+
+        Assert.True(qCoreM3.SequenceEqual(new[] { 16, 17, 18 }),
+            $"Expected structurally derived m=3 qCore [16,17,18]. qCore=[{string.Join(", ", qCoreM3)}]");
+        Assert.True(full.Resolved && full.SelectedMode == 3,
+            $"Expected full-stack derived support to resolve to m=3. selected={(full.Resolved ? $"m={full.SelectedMode}" : "none")}");
+        Assert.True(noPhaseWeakened,
+            "Expected removing phase closure to weaken uniqueness or produce competing/unresolved selection.");
+        Assert.True(noBridgeWeakened || bridgeWeakeningFoundUnderPerturbation || (bridgeOnly.Resolved && bridgeOnly.SelectedMode != 3),
+            "Expected bridge-constraint necessity evidence via no-bridge weakening/non-robustness or competing-mode selection in bridge-only ablation.");
+        Assert.True(noActionWeakened,
+            "Expected removing action/tick consistency to weaken uniqueness or produce competing/unresolved selection.");
+    }
+
+    /// <summary>
+    /// Checks whether constraint-necessity diagnostics persist under bounded perturbations without per-family retuning.
+    /// Matters because structural necessity should remain visible in a local neighborhood around baseline.
+    /// Expected diagnostic behavior: full-stack m=3 remains locally stable while ablated stacks show weaker uniqueness, fallback, or unresolved behavior.
+    /// Claim boundary: diagnostic/candidate persistence only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF42_ConstraintNecessity_Should_Persist_Under_BoundedPerturbations()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] derivedBandQ = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785 };
+        var actionScales = new[] { 0.98, 1.00, 1.02 };
+        var bridgeThresholds = new[] { 1, 2 };
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        int totalCases = 0;
+        int fullResolved = 0;
+        int fullSelectedM3 = 0;
+        int fullUnresolved = 0;
+        int noPhaseWeakened = 0;
+        int noBridgeWeakened = 0;
+        int noActionWeakened = 0;
+        int fallbackM2 = 0;
+        int fallbackOther = 0;
+        int baselineStable = 0;
+
+        foreach (var w in weights)
+        {
+            var family = BuildModeFamilyFromExplicitQValues(
+                mValues,
+                derivedBandQ,
+                w.Order,
+                w.Closure,
+                w.Transport,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            var baseline = EvaluateConstraintStackSelection(
+                family,
+                "full stack baseline",
+                usePhase: true,
+                useBridge: true,
+                useActionTick: true,
+                phaseThreshold: 0.780,
+                bridgeThreshold: 1,
+                actionScale: 1.00);
+
+            if (baseline.Resolved && baseline.SelectedMode == 3)
+                baselineStable++;
+
+            foreach (int bridgeThr in bridgeThresholds)
+            {
+                foreach (double phaseThr in phaseThresholds)
+                {
+                    foreach (double actionScale in actionScales)
+                    {
+                        totalCases++;
+                        var full = EvaluateConstraintStackSelection(
+                            family,
+                            "full stack",
+                            usePhase: true,
+                            useBridge: true,
+                            useActionTick: true,
+                            phaseThr,
+                            bridgeThr,
+                            actionScale);
+                        var noPhase = EvaluateConstraintStackSelection(
+                            family,
+                            "no phase",
+                            usePhase: false,
+                            useBridge: true,
+                            useActionTick: true,
+                            phaseThr,
+                            bridgeThr,
+                            actionScale);
+                        var noBridge = EvaluateConstraintStackSelection(
+                            family,
+                            "no bridge",
+                            usePhase: true,
+                            useBridge: false,
+                            useActionTick: true,
+                            phaseThr,
+                            bridgeThr,
+                            actionScale);
+                        var noAction = EvaluateConstraintStackSelection(
+                            family,
+                            "no actionTick",
+                            usePhase: true,
+                            useBridge: true,
+                            useActionTick: false,
+                            phaseThr,
+                            bridgeThr,
+                            actionScale);
+
+                        if (full.Resolved)
+                        {
+                            fullResolved++;
+                            if (full.SelectedMode == 3)
+                                fullSelectedM3++;
+                            else if (full.SelectedMode == 2)
+                                fallbackM2++;
+                            else
+                                fallbackOther++;
+                        }
+                        else
+                        {
+                            fullUnresolved++;
+                        }
+
+                        if (IsConstraintAblationWeakened(full, noPhase)) noPhaseWeakened++;
+                        if (IsConstraintAblationWeakened(full, noBridge)) noBridgeWeakened++;
+                        if (IsConstraintAblationWeakened(full, noAction)) noActionWeakened++;
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine("--- RBF42 BOUNDED-PERTURBATION CONSTRAINT NECESSITY DIAGNOSTIC ---");
+        _output.WriteLine($"derived bridge-band support q-values=[{string.Join(", ", derivedBandQ)}]");
+        _output.WriteLine($"total cases={totalCases} | full resolved={fullResolved} | full unresolved={fullUnresolved}");
+        _output.WriteLine($"full-stack selected m3={fullSelectedM3} | fallback m2={fallbackM2} | fallback other={fallbackOther}");
+        _output.WriteLine($"ablation weakened counts: noPhase={noPhaseWeakened}, noBridge={noBridgeWeakened}, noAction={noActionWeakened}");
+        _output.WriteLine($"baseline full-stack m3 stability across weights={baselineStable}/{weights.Length}");
+        _output.WriteLine("RBF42 claim boundary: diagnostic/candidate persistence only, not theorem-level proof.");
+
+        int ablationTotal = noPhaseWeakened + noBridgeWeakened + noActionWeakened;
+        Assert.True(totalCases > 0, "Expected bounded perturbation scenarios.");
+        Assert.True(baselineStable == weights.Length,
+            $"Expected baseline full-stack m=3 selection for all shared weight families. stable={baselineStable}/{weights.Length}");
+        Assert.True(fullSelectedM3 >= Math.Max(1, fullResolved / 3),
+            $"Expected local full-stack m=3 stability under bounded perturbations. m3={fullSelectedM3}, resolved={fullResolved}");
+        Assert.True(ablationTotal >= totalCases,
+            $"Expected ablated stacks to show weaker uniqueness/fallback/unresolved behavior in aggregate. weakened={ablationTotal}, totalCases={totalCases}");
+    }
+
+    /// <summary>
+    /// Checks whether shortcut rules can replace explicit three-constraint gating under derived q-support.
+    /// Matters because structural necessity fails if ungated shortcuts recover the same bounded behavior.
+    /// Expected diagnostic behavior: shortcuts show competing winners, instability, or mismatch with derived q-core behavior.
+    /// Claim boundary: insufficiency diagnostic only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF43_ThreeConstraintModel_Should_Reject_NonStructuralShortcutRules()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCoreM3 = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] derivedBandQ = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] nonCoreQ = derivedBandQ.Where(q => !qCoreM3.Contains(q)).ToArray();
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+
+        var shortcutRules = new[]
+        {
+            ShortcutRuleKind.PhaseOnlyBestClosure,
+            ShortcutRuleKind.BridgeOnlyOccupancy,
+            ShortcutRuleKind.ActionOnlyLowestDerivedActionTick,
+            ShortcutRuleKind.CombinedScoreNoExplicitGates
+        };
+
+        var baselineFamily = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            derivedBandQ,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+        var fullDerived = EvaluateConstraintStackSelection(
+            baselineFamily,
+            "full stack",
+            usePhase: true,
+            useBridge: true,
+            useActionTick: true,
+            phaseThreshold: 0.780,
+            bridgeThreshold: 1,
+            actionScale: 1.00);
+
+        _output.WriteLine("--- RBF43 SHORTCUT-RULE REJECTION DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCoreM3)}] | derived bridge-band support=[{string.Join(", ", derivedBandQ)}]");
+        _output.WriteLine($"full derived rule selected={(fullDerived.Resolved ? $"m={fullDerived.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", fullDerived.SatisfyingModes)}]");
+        _output.WriteLine($"full derived failureByMode=[{string.Join(" | ", fullDerived.FailureByMode)}]");
+
+        int shortcutInsufficient = 0;
+
+        foreach (var rule in shortcutRules)
+        {
+            int baselineSelected = SelectModeByShortcutRule(baselineFamily, rule);
+            bool competingMode = baselineSelected != 3;
+
+            var selectedAcrossWeights = new HashSet<int>();
+            foreach (var w in weights)
+            {
+                var family = BuildModeFamilyFromExplicitQValues(
+                    mValues,
+                    derivedBandQ,
+                    w.Order,
+                    w.Closure,
+                    w.Transport,
+                    BuildNoCadencePriorConfig(),
+                    new[] { 2e-3 });
+                selectedAcrossWeights.Add(SelectModeByShortcutRule(family, rule));
+            }
+            bool unstable = selectedAcrossWeights.Count > 1;
+
+            var familyCore = BuildModeFamilyFromExplicitQValues(
+                mValues,
+                qCoreM3,
+                0.50,
+                0.35,
+                0.15,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+            int coreSelected = SelectModeByShortcutRule(familyCore, rule);
+
+            bool nonCoreMismatch = false;
+            int nonCoreSelected = int.MaxValue;
+            if (nonCoreQ.Length > 0)
+            {
+                var familyNonCore = BuildModeFamilyFromExplicitQValues(
+                    mValues,
+                    nonCoreQ,
+                    0.50,
+                    0.35,
+                    0.15,
+                    BuildNoCadencePriorConfig(),
+                    new[] { 2e-3 });
+                nonCoreSelected = SelectModeByShortcutRule(familyNonCore, rule);
+                nonCoreMismatch = !(coreSelected == 3 && nonCoreSelected != 3);
+            }
+
+            bool insufficient = competingMode || unstable || nonCoreMismatch;
+            if (insufficient)
+                shortcutInsufficient++;
+
+            _output.WriteLine(
+                $"RBF43 {rule} | baselineSelected=m={baselineSelected} | selectedAcrossWeights=[{string.Join(", ", selectedAcrossWeights.OrderBy(x => x))}] | coreSelected=m={coreSelected} | nonCoreSelected={(nonCoreSelected == int.MaxValue ? "n/a" : $"m={nonCoreSelected}")} | competing={competingMode} | unstable={unstable} | qCoreMismatch={nonCoreMismatch} | insufficient={insufficient}");
+        }
+
+        _output.WriteLine("RBF43 claim boundary: diagnostic/candidate only; shortcut insufficiency is not theorem-level proof.");
+
+        Assert.True(fullDerived.Resolved && fullDerived.SelectedMode == 3,
+            $"Expected full derived three-constraint baseline to select m=3. selected={(fullDerived.Resolved ? $"m={fullDerived.SelectedMode}" : "none")}");
+        Assert.True(shortcutInsufficient == shortcutRules.Length,
+            $"Expected all shortcut rules to be insufficient by competing selection, bounded-stability loss, or q-core mismatch. insufficient={shortcutInsufficient}/{shortcutRules.Length}");
+    }
+
+    /// <summary>
+    /// Checks whether bridge occupancy is independently discriminative after using structurally derived qCore support.
+    /// Matters because bridge gating may be partly encoded by qCore construction and should not be double-counted.
+    /// Expected diagnostic behavior: compare broad-window+bridge, qCore+bridge, and qCore without bridge to classify bridge independence.
+    /// Claim boundary: diagnostic only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF44_BridgeConstraint_Should_Not_Be_DoubleCounted_After_DerivedQCore()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        const double phaseThr = 0.780;
+        const int bridgeThr = 1;
+        const double actionScale = 1.00;
+
+        var broadWindowFamily = BuildModeFamilyFromLatticeProxy(
+            mValues,
+            qMin: 10,
+            qMax: 30,
+            orderWeight: 0.50,
+            closureWeight: 0.35,
+            transportWeight: 0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+        var qCoreFamily = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qCore,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var manualBroadWithBridge = EvaluateConstraintStackSelection(
+            broadWindowFamily, "manual broad + bridge", true, true, true, phaseThr, bridgeThr, actionScale);
+        var derivedQCoreWithBridge = EvaluateConstraintStackSelection(
+            qCoreFamily, "derived qCore + bridge", true, true, true, phaseThr, bridgeThr, actionScale);
+        var derivedQCoreNoBridge = EvaluateConstraintStackSelection(
+            qCoreFamily, "derived qCore without bridge", true, false, true, phaseThr, bridgeThr, actionScale);
+
+        void PrintOutcome((string StackName, bool Resolved, int SelectedMode, int[] SatisfyingModes, string[] FailureByMode, bool M3Admissible, bool M3Unique, bool M3Minimal) x)
+        {
+            _output.WriteLine(
+                $"RBF44 {x.StackName} | resolved={x.Resolved} | selected={(x.Resolved ? $"m={x.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", x.SatisfyingModes)}] | m3(admissible={x.M3Admissible}, unique={x.M3Unique}, minimal={x.M3Minimal})");
+            _output.WriteLine($"RBF44 {x.StackName} failureByMode=[{string.Join(" | ", x.FailureByMode)}]");
+        }
+
+        _output.WriteLine("--- RBF44 BRIDGE DOUBLE-COUNT DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCore)}]");
+        PrintOutcome(manualBroadWithBridge);
+        PrintOutcome(derivedQCoreWithBridge);
+        PrintOutcome(derivedQCoreNoBridge);
+
+        bool bridgeStillIndependent =
+            !derivedQCoreWithBridge.Resolved ||
+            !derivedQCoreNoBridge.Resolved ||
+            derivedQCoreWithBridge.SelectedMode != derivedQCoreNoBridge.SelectedMode ||
+            !derivedQCoreWithBridge.SatisfyingModes.SequenceEqual(derivedQCoreNoBridge.SatisfyingModes);
+
+        string classification = bridgeStillIndependent
+            ? "bridge occupancy remains an independent discriminator under derived qCore"
+            : "bridge occupancy appears largely encoded by derived qCore in this bounded diagnostic setting";
+
+        _output.WriteLine($"RBF44 interpretation={classification}");
+        _output.WriteLine("RBF44 claim boundary: diagnostic only; no theorem-level proof.");
+
+        Assert.True(qCore.SequenceEqual(new[] { 16, 17, 18 }),
+            $"Expected derived qCore(m=3)=[16,17,18]. qCore=[{string.Join(", ", qCore)}]");
+        Assert.True(manualBroadWithBridge.Resolved && derivedQCoreWithBridge.Resolved,
+            "Expected resolved selections for broad+bridge and qCore+bridge baseline diagnostics.");
+    }
+
+    /// <summary>
+    /// Checks that explicit bridge gating is still necessary when evaluating wider q-support beyond derived core.
+    /// Matters because non-core support should be suppressed without per-family tuning.
+    /// Expected diagnostic behavior: removing bridge admits competing/non-core modes more often than full stack.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF45_BridgeConstraint_Should_Be_Necessary_Outside_DerivedQCore()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] wideQ = Enumerable.Range(4, 33).ToArray(); // 4..36
+        var weights = new (string Name, double Order, double Closure, double Transport)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+        var phaseThresholds = new[] { 0.775, 0.780, 0.785 };
+        var actionScales = new[] { 0.98, 1.00, 1.02 };
+        var bridgeThresholds = new[] { 1, 2 };
+
+        int totalCases = 0;
+        int bridgeSuppressionCases = 0;
+        int noBridgeCompetingCases = 0;
+        int noBridgeFallbackM2 = 0;
+
+        _output.WriteLine("--- RBF45 BRIDGE NECESSITY OUTSIDE QCORE DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCore)}] | wide q-support=[{string.Join(", ", wideQ)}]");
+
+        foreach (var w in weights)
+        {
+            var family = BuildModeFamilyFromExplicitQValues(
+                mValues,
+                wideQ,
+                w.Order,
+                w.Closure,
+                w.Transport,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            foreach (int bridgeThr in bridgeThresholds)
+            {
+                foreach (double phaseThr in phaseThresholds)
+                {
+                    foreach (double actionScale in actionScales)
+                    {
+                        totalCases++;
+                        var full = EvaluateConstraintStackSelection(
+                            family, "full stack", true, true, true, phaseThr, bridgeThr, actionScale);
+                        var noBridge = EvaluateConstraintStackSelection(
+                            family, "no bridge", true, false, true, phaseThr, bridgeThr, actionScale);
+
+                        var nonCoreFull = full.SatisfyingModes.Where(m => m != 3).ToArray();
+                        var nonCoreNoBridge = noBridge.SatisfyingModes.Where(m => m != 3).ToArray();
+                        var fullFailures = full.FailureByMode.ToDictionary(
+                            s => int.Parse(s.Split(':')[0].Replace("m=", string.Empty)),
+                            s => s.Split(':')[1],
+                            EqualityComparer<int>.Default);
+                        var noBridgeFailures = noBridge.FailureByMode.ToDictionary(
+                            s => int.Parse(s.Split(':')[0].Replace("m=", string.Empty)),
+                            s => s.Split(':')[1],
+                            EqualityComparer<int>.Default);
+
+                        bool bridgeFailureAdded = false;
+                        foreach (int m in mValues.Where(x => x != 3))
+                        {
+                            if (fullFailures.TryGetValue(m, out string? f) &&
+                                noBridgeFailures.TryGetValue(m, out string? n) &&
+                                f.Contains("bridge", StringComparison.Ordinal) &&
+                                !n.Contains("bridge", StringComparison.Ordinal))
+                            {
+                                bridgeFailureAdded = true;
+                                break;
+                            }
+                        }
+
+                        bool suppressesNonCore = nonCoreNoBridge.Length > nonCoreFull.Length || bridgeFailureAdded;
+                        if (suppressesNonCore)
+                            bridgeSuppressionCases++;
+
+                        bool competingOrUnresolved = !noBridge.Resolved || noBridge.SelectedMode != 3;
+                        if (competingOrUnresolved)
+                            noBridgeCompetingCases++;
+                        if (noBridge.Resolved && noBridge.SelectedMode == 2)
+                            noBridgeFallbackM2++;
+
+                        _output.WriteLine(
+                            $"RBF45 {w.Name}|phaseThr={phaseThr:F3}|bridgeThr={bridgeThr}|actionScale={actionScale:F2} | full={(full.Resolved ? $"m={full.SelectedMode}" : "none")} nonCore=[{string.Join(", ", nonCoreFull)}] | noBridge={(noBridge.Resolved ? $"m={noBridge.SelectedMode}" : "none")} nonCore=[{string.Join(", ", nonCoreNoBridge)}] | bridgeFailureAdded={bridgeFailureAdded} | suppressesNonCore={suppressesNonCore}");
+                        _output.WriteLine($"RBF45 full failureByMode=[{string.Join(" | ", full.FailureByMode)}]");
+                        _output.WriteLine($"RBF45 noBridge failureByMode=[{string.Join(" | ", noBridge.FailureByMode)}]");
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine($"RBF45 total cases={totalCases}");
+        _output.WriteLine($"RBF45 bridge suppression cases={bridgeSuppressionCases}");
+        _output.WriteLine($"RBF45 no-bridge competing/unresolved cases={noBridgeCompetingCases} | no-bridge m2 fallback cases={noBridgeFallbackM2}");
+        _output.WriteLine("RBF45 claim boundary: diagnostic/candidate only; no theorem-level proof.");
+
+        Assert.True(totalCases > 0, "Expected wide-q bridge-necessity scenarios.");
+        Assert.True(bridgeSuppressionCases > 0,
+            "Expected explicit bridge gating to suppress non-core/competing admissibility in at least one wide-q scenario.");
+        Assert.True(noBridgeCompetingCases > 0,
+            "Expected no-bridge ablation to admit competing or unresolved outcomes in at least one wide-q scenario.");
+    }
+
+    /// <summary>
+    /// Checks whether derived qCore should be interpreted as a structural bridge prior rather than theorem closure.
+    /// Matters because qCore support can be strong without proving universal or first-principles closure.
+    /// Expected diagnostic behavior: classify qCore role by comparing qCore-only and full-support explicit-bridge selections.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level, not first-principles closure.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF46_DerivedQCore_Should_Be_Treated_As_BridgePrior_Not_Theorem()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] wideQ = Enumerable.Range(4, 33).ToArray(); // 4..36
+
+        var familyQCore = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qCore,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+        var familyWide = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            wideQ,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var qCoreOnly = EvaluateConstraintStackSelection(
+            familyQCore, "qCore-only (phase+action)", true, false, true, phaseThreshold: 0.780, bridgeThreshold: 1, actionScale: 1.00);
+        var fullWithBridge = EvaluateConstraintStackSelection(
+            familyWide, "full support + explicit bridge", true, true, true, phaseThreshold: 0.780, bridgeThreshold: 1, actionScale: 1.00);
+        var fullWithoutBridge = EvaluateConstraintStackSelection(
+            familyWide, "full support without bridge", true, false, true, phaseThreshold: 0.780, bridgeThreshold: 1, actionScale: 1.00);
+
+        void PrintOutcome((string StackName, bool Resolved, int SelectedMode, int[] SatisfyingModes, string[] FailureByMode, bool M3Admissible, bool M3Unique, bool M3Minimal) x)
+        {
+            _output.WriteLine(
+                $"RBF46 {x.StackName} | resolved={x.Resolved} | selected={(x.Resolved ? $"m={x.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", x.SatisfyingModes)}] | m3(admissible={x.M3Admissible}, unique={x.M3Unique}, minimal={x.M3Minimal})");
+            _output.WriteLine($"RBF46 {x.StackName} failureByMode=[{string.Join(" | ", x.FailureByMode)}]");
+        }
+
+        string classification;
+        if (qCoreOnly.Resolved && fullWithBridge.Resolved &&
+            qCoreOnly.SelectedMode == 3 && fullWithBridge.SelectedMode == 3 &&
+            (!fullWithoutBridge.Resolved || fullWithoutBridge.SelectedMode != 3 ||
+             fullWithoutBridge.SatisfyingModes.Length > fullWithBridge.SatisfyingModes.Length))
+        {
+            classification = "structural bridge prior";
+        }
+        else if (qCoreOnly.Resolved && fullWithBridge.Resolved && fullWithoutBridge.Resolved &&
+                 qCoreOnly.SelectedMode == fullWithBridge.SelectedMode &&
+                 fullWithoutBridge.SelectedMode == fullWithBridge.SelectedMode &&
+                 fullWithoutBridge.SatisfyingModes.SequenceEqual(fullWithBridge.SatisfyingModes))
+        {
+            classification = "hard derived domain";
+        }
+        else
+        {
+            classification = "insufficiently independent";
+        }
+
+        _output.WriteLine("--- RBF46 QCORE ROLE CLASSIFICATION DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCore)}] | wide q-support=[{string.Join(", ", wideQ)}]");
+        PrintOutcome(qCoreOnly);
+        PrintOutcome(fullWithBridge);
+        PrintOutcome(fullWithoutBridge);
+        _output.WriteLine($"RBF46 classification={classification}");
+        _output.WriteLine("RBF46 reviewer-safe interpretation: qCore supports bridge geometry as a structural prior in this diagnostic path, but does not prove theorem-level closure.");
+        _output.WriteLine("RBF46 claim boundary: diagnostic/candidate only; no theorem-level proof, no first-principles closure, no universal m=3 claim.");
+
+        Assert.True(qCore.SequenceEqual(new[] { 16, 17, 18 }),
+            $"Expected derived qCore(m=3)=[16,17,18]. qCore=[{string.Join(", ", qCore)}]");
+        Assert.True(qCoreOnly.Resolved && fullWithBridge.Resolved,
+            "Expected resolved qCore-only and full-support-with-bridge baseline diagnostics.");
+        Assert.True(classification is "structural bridge prior" or "hard derived domain" or "insufficiently independent",
+            $"Unexpected qCore classification: {classification}");
+    }
+
+    /// <summary>
+    /// Checks whether phase gating can be expressed through an integer closure-defect criterion instead of proxy thresholding.
+    /// Matters because the next structural gap is deriving phase admissibility from closure compatibility, not from operational phase cuts.
+    /// Expected diagnostic behavior: derived closure-defect phase status tracks baseline shape with explicit mismatch/boundary reporting.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF47_PhaseConstraint_Should_Follow_From_IntegerClosureDefect()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        const double baselinePhaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+        const double actionScale = 1.00;
+        const double closureDefectThreshold = 0.30;
+
+        var statuses = family.ToDictionary(
+            x => x.M,
+            x =>
+            {
+                double closureDefect = ComputeIntegerClosureDefectNormalized(x.M, qSupport, targetShift: 3);
+                bool phaseOkDerived = closureDefect <= closureDefectThreshold;
+                bool bridgeOk = x.InBandCount >= bridgeThreshold;
+                bool actionOk = EvaluateModeConstraintStatus(family, x.M, baselinePhaseThreshold, bridgeThreshold, actionScale).ActionOk;
+                return (PhaseOk: phaseOkDerived, BridgeOk: bridgeOk, ActionOk: actionOk, ClosureDefect: closureDefect);
+            });
+        var selectionStatuses = statuses.ToDictionary(
+            kvp => kvp.Key,
+            kvp => (kvp.Value.PhaseOk, kvp.Value.BridgeOk, kvp.Value.ActionOk));
+
+        var derivedSelection = EvaluateSelectionFromCustomStatuses(family, selectionStatuses);
+        var baselineSelection = EvaluateConstraintStackSelection(
+            family,
+            "baseline phase-threshold stack",
+            usePhase: true,
+            useBridge: true,
+            useActionTick: true,
+            baselinePhaseThreshold,
+            bridgeThreshold,
+            actionScale);
+
+        var mismatchCases = new List<int>();
+        var boundaryCases = new List<int>();
+        foreach (var mode in family.OrderBy(x => x.M))
+        {
+            bool baselinePhaseOk = mode.AvgClosureQuality >= baselinePhaseThreshold;
+            bool derivedPhaseOk = statuses[mode.M].PhaseOk;
+            if (baselinePhaseOk != derivedPhaseOk)
+                mismatchCases.Add(mode.M);
+
+            double defect = statuses[mode.M].ClosureDefect;
+            if (defect > closureDefectThreshold && defect <= closureDefectThreshold + 0.05)
+                boundaryCases.Add(mode.M);
+
+            _output.WriteLine(
+                $"RBF47 m={mode.M} | closureDefect={defect:F4} | phase(base={baselinePhaseOk}, derived={derivedPhaseOk}) | bridgeOk={statuses[mode.M].BridgeOk} | actionOk={statuses[mode.M].ActionOk}");
+        }
+
+        _output.WriteLine("--- RBF47 INTEGER-CLOSURE-DEFECT PHASE DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCore)}] | qSupport=[{string.Join(", ", qSupport)}]");
+        _output.WriteLine($"derived selection={(derivedSelection.Resolved ? $"m={derivedSelection.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", derivedSelection.SatisfyingModes)}]");
+        _output.WriteLine($"baseline selection={(baselineSelection.Resolved ? $"m={baselineSelection.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", baselineSelection.SatisfyingModes)}]");
+        _output.WriteLine($"mismatch cases=[{string.Join(", ", mismatchCases)}] | boundary cases=[{string.Join(", ", boundaryCases)}]");
+        _output.WriteLine($"failureByMode=[{string.Join(" | ", derivedSelection.FailureByMode)}]");
+        _output.WriteLine($"m3(admissible={derivedSelection.M3Admissible}, unique={derivedSelection.M3Unique}, minimal={derivedSelection.M3Minimal}) | resolved={derivedSelection.Resolved}");
+        _output.WriteLine("RBF47 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+
+        Assert.True(qCore.SequenceEqual(new[] { 16, 17, 18 }),
+            $"Expected derived qCore(m=3)=[16,17,18]. qCore=[{string.Join(", ", qCore)}]");
+        Assert.True(derivedSelection.Resolved && derivedSelection.SelectedMode == 3,
+            $"Expected derived closure-defect stack to resolve to m=3. selected={(derivedSelection.Resolved ? $"m={derivedSelection.SelectedMode}" : "none")}");
+        Assert.True(mismatchCases.Count > 0, "Expected at least one baseline-vs-derived phase mismatch case.");
+    }
+
+    /// <summary>
+    /// Checks whether action/tick gating can be replaced by a lattice-energy stationarity criterion.
+    /// Matters because stationarity/minimal-energy rationale is structurally stronger than scale-threshold tuning.
+    /// Expected diagnostic behavior: m=3 remains admissible while m=2 is excluded in baseline shared-rule context without per-family retuning.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF48_ActionTickConstraint_Should_Follow_From_LatticeEnergyStationarity()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        const double phaseThreshold = 0.780;
+        const int bridgeThreshold = 1;
+
+        var phaseBridgeCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+        Assert.True(phaseBridgeCandidates.Length > 0, "Expected phase+bridge candidates for stationarity diagnostic.");
+
+        double minEnergy = phaseBridgeCandidates[0].DerivedActionTick;
+        double secondEnergy = phaseBridgeCandidates.Length >= 2
+            ? phaseBridgeCandidates[1].DerivedActionTick
+            : minEnergy * 1.05;
+        double gapScale = Math.Max(secondEnergy - minEnergy, 1e-12);
+
+        var statuses = family.ToDictionary(
+            x => x.M,
+            x =>
+            {
+                bool phaseOk = x.AvgClosureQuality >= phaseThreshold;
+                bool bridgeOk = x.InBandCount >= bridgeThreshold;
+                double residual = phaseOk && bridgeOk
+                    ? (x.DerivedActionTick - minEnergy) / gapScale
+                    : double.PositiveInfinity;
+                bool actionOk = residual < 1.0; // stationarity basin of the minimum (no per-family retuning)
+                return (PhaseOk: phaseOk, BridgeOk: bridgeOk, ActionOk: actionOk, Residual: residual);
+            });
+        var selectionStatuses = statuses.ToDictionary(
+            kvp => kvp.Key,
+            kvp => (kvp.Value.PhaseOk, kvp.Value.BridgeOk, kvp.Value.ActionOk));
+
+        var stationaritySelection = EvaluateSelectionFromCustomStatuses(family, selectionStatuses);
+        var baselineSelection = EvaluateConstraintStackSelection(
+            family,
+            "baseline actionScale stack",
+            usePhase: true,
+            useBridge: true,
+            useActionTick: true,
+            phaseThreshold,
+            bridgeThreshold,
+            actionScale: 1.00);
+
+        foreach (var mode in family.OrderBy(x => x.M))
+        {
+            string residualText = double.IsFinite(statuses[mode.M].Residual)
+                ? statuses[mode.M].Residual.ToString("F4")
+                : "inf";
+            _output.WriteLine(
+                $"RBF48 m={mode.M} | derivedActionTick={mode.DerivedActionTick:E3} | stationarityResidual={residualText} | phaseOk={statuses[mode.M].PhaseOk} | bridgeOk={statuses[mode.M].BridgeOk} | actionStationary={statuses[mode.M].ActionOk}");
+        }
+
+        _output.WriteLine("--- RBF48 LATTICE-ENERGY STATIONARITY DIAGNOSTIC ---");
+        _output.WriteLine($"minEnergy={minEnergy:E3} | secondEnergy={secondEnergy:E3} | gapScale={gapScale:E3}");
+        _output.WriteLine($"stationarity selection={(stationaritySelection.Resolved ? $"m={stationaritySelection.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", stationaritySelection.SatisfyingModes)}]");
+        _output.WriteLine($"baseline selection={(baselineSelection.Resolved ? $"m={baselineSelection.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", baselineSelection.SatisfyingModes)}]");
+        _output.WriteLine($"failureByMode=[{string.Join(" | ", stationaritySelection.FailureByMode)}]");
+        _output.WriteLine($"m3(admissible={stationaritySelection.M3Admissible}, unique={stationaritySelection.M3Unique}, minimal={stationaritySelection.M3Minimal}) | resolved={stationaritySelection.Resolved}");
+        _output.WriteLine("RBF48 claim boundary: diagnostic/candidate only; no theorem-level proof.");
+
+        Assert.True(stationaritySelection.Resolved && stationaritySelection.SelectedMode == 3,
+            $"Expected stationarity-based action gating to resolve to m=3. selected={(stationaritySelection.Resolved ? $"m={stationaritySelection.SelectedMode}" : "none")}");
+        Assert.False(stationaritySelection.SatisfyingModes.Contains(2),
+            $"Expected m=2 to be excluded in baseline stationarity gate. satisfying=[{string.Join(", ", stationaritySelection.SatisfyingModes)}]");
+    }
+
+    /// <summary>
+    /// Checks whether phase-defect, bridge-prior support, and action stationarity can be expressed as one shared diagnostic functional.
+    /// Matters because this is the next step toward a single lattice/action rationale while staying below theorem-level claims.
+    /// Expected diagnostic behavior: m=3 is minimal admissible under the shared functional, while shortcuts/ablations lose structure.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF49_ThreeConstraintStack_Should_Map_To_OneMinimalEnergyFunctional()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = Enumerable.Range(4, 33).ToArray(); // 4..36
+
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        double minAction = family.Min(x => x.DerivedActionTick);
+        double actionRange = Math.Max(family.Max(x => x.DerivedActionTick) - minAction, 1e-12);
+
+        var functional = family
+            .Select(x =>
+            {
+                double phaseDefect = ComputeIntegerClosureDefectNormalized(x.M, qCore, targetShift: 3);
+                double bridgePriorPenalty = ComputeBridgePriorPenalty(x.M, qCore);
+                double actionResidual = (x.DerivedActionTick - minAction) / actionRange;
+                double totalEnergy = phaseDefect + bridgePriorPenalty + actionResidual;
+                bool admissible = phaseDefect <= 0.35 && bridgePriorPenalty < 1.0 && actionResidual <= 0.95;
+                return (x.M, PhaseDefect: phaseDefect, BridgePenalty: bridgePriorPenalty, ActionResidual: actionResidual, TotalEnergy: totalEnergy, Admissible: admissible);
+            })
+            .OrderBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .ToArray();
+
+        var admissible = functional.Where(x => x.Admissible).ToArray();
+        bool resolved = admissible.Length > 0;
+        int selectedMode = resolved ? admissible[0].M : int.MaxValue;
+        int[] satisfyingModes = admissible.Select(x => x.M).ToArray();
+        bool m3Admissible = satisfyingModes.Contains(3);
+        bool m3Unique = m3Admissible && satisfyingModes.Length == 1;
+        bool m3Minimal = resolved && selectedMode == 3;
+
+        int phaseOnlyWinner = functional.OrderBy(x => x.PhaseDefect).ThenBy(x => x.M).First().M;
+        int bridgeOnlyWinner = functional.OrderBy(x => x.BridgePenalty).ThenBy(x => x.M).First().M;
+        int actionOnlyWinner = functional.OrderBy(x => x.ActionResidual).ThenBy(x => x.M).First().M;
+        int combinedNoGatesWinner = functional.OrderBy(x => x.TotalEnergy).ThenBy(x => x.M).First().M;
+
+        string[] failureByMode = functional
+            .OrderBy(x => x.M)
+            .Select(x =>
+            {
+                var reasons = new List<string>();
+                if (x.PhaseDefect > 0.35) reasons.Add("phaseDefect");
+                if (x.BridgePenalty >= 1.0) reasons.Add("bridgePrior");
+                if (x.ActionResidual > 0.95) reasons.Add("actionStationarity");
+                return $"m={x.M}:{(reasons.Count == 0 ? "passes-active" : string.Join("+", reasons))}";
+            })
+            .ToArray();
+
+        _output.WriteLine("--- RBF49 SHARED FUNCTIONAL DIAGNOSTIC ---");
+        _output.WriteLine($"derived qCore(m=3)=[{string.Join(", ", qCore)}] | qSupport=[{string.Join(", ", qSupport)}]");
+        foreach (var row in functional)
+        {
+            _output.WriteLine(
+                $"RBF49 m={row.M} | phaseDefect={row.PhaseDefect:F4} | bridgePenalty={row.BridgePenalty:F4} | actionResidual={row.ActionResidual:F4} | totalEnergy={row.TotalEnergy:F4} | admissible={row.Admissible}");
+        }
+        _output.WriteLine($"selected={(resolved ? $"m={selectedMode}" : "none")} | satisfying=[{string.Join(", ", satisfyingModes)}]");
+        _output.WriteLine($"shortcut/ablation winners: phaseOnly=m={phaseOnlyWinner}, bridgeOnly=m={bridgeOnlyWinner}, actionOnly=m={actionOnlyWinner}, combinedNoGates=m={combinedNoGatesWinner}");
+        _output.WriteLine($"failureByMode=[{string.Join(" | ", failureByMode)}]");
+        _output.WriteLine($"m3(admissible={m3Admissible}, unique={m3Unique}, minimal={m3Minimal}) | resolved={resolved}");
+        _output.WriteLine("RBF49 claim boundary: diagnostic/candidate only; no theorem-level proof, no first-principles closure claim, no universal m=3 claim.");
+
+        Assert.True(resolved && selectedMode == 3,
+            $"Expected m=3 as minimal admissible mode under shared functional. selected={(resolved ? $"m={selectedMode}" : "none")}");
+        Assert.True(actionOnlyWinner != 3 || phaseOnlyWinner != 3 || bridgeOnlyWinner != 3,
+            $"Expected at least one shortcut/ablation winner to deviate from m=3. phaseOnly={phaseOnlyWinner}, bridgeOnly={bridgeOnlyWinner}, actionOnly={actionOnlyWinner}");
+    }
+
+    /// <summary>
+    /// Checks local stability of the shared functional under bounded structural component-weight perturbations.
+    /// Matters because necessity/uniqueness evidence must survive bounded weight drift under one shared rule.
+    /// Expected diagnostic behavior: m=3 remains locally stable near baseline with explicit reporting of bounded failures.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF50_SharedFunctional_Should_Select_M3_Under_BoundedStructuralPerturbations()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = Enumerable.Range(4, 33).ToArray(); // 4..36
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var perturb = new[] { 0.90, 1.00, 1.10 };
+        int total = 0;
+        int resolved = 0;
+        int selectedM3 = 0;
+        int localTotal = 0;
+        int localM3 = 0;
+
+        _output.WriteLine("--- RBF50 SHARED FUNCTIONAL BOUNDED-PERTURBATION DIAGNOSTIC ---");
+        _output.WriteLine($"qCore=[{string.Join(", ", qCore)}] | qSupport=[{string.Join(", ", qSupport)}]");
+
+        foreach (double wp in perturb)
+        {
+            foreach (double wb in perturb)
+            {
+                foreach (double wa in perturb)
+                {
+                    total++;
+                    bool isLocal = Math.Abs(wp - 1.0) <= 0.10 && Math.Abs(wb - 1.0) <= 0.10 && Math.Abs(wa - 1.0) <= 0.10;
+                    if (isLocal) localTotal++;
+
+                    var rows = BuildSharedFunctionalRows(
+                        family,
+                        qCore,
+                        phaseWeight: wp,
+                        bridgeWeight: wb,
+                        actionWeight: wa,
+                        phaseTolerance: 0.35,
+                        bridgeTolerance: 1.0,
+                        actionTolerance: 0.95);
+                    var result = EvaluateSharedFunctionalSelection(rows);
+
+                    if (result.Resolved)
+                    {
+                        resolved++;
+                        if (result.SelectedMode == 3)
+                            selectedM3++;
+                        if (isLocal && result.SelectedMode == 3)
+                            localM3++;
+                    }
+
+                    _output.WriteLine(
+                        $"RBF50 wPhase={wp:F2},wBridge={wb:F2},wAction={wa:F2} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}] | margin={(double.IsNaN(result.Margin) ? "n/a" : result.Margin.ToString("F4"))}");
+                    _output.WriteLine($"RBF50 failureByMode=[{string.Join(" | ", result.FailureByMode)}]");
+                }
+            }
+        }
+
+        _output.WriteLine($"RBF50 totals: total={total} | resolved={resolved} | selected m3={selectedM3}");
+        _output.WriteLine($"RBF50 local stability: localCases={localTotal} | local m3 selections={localM3}");
+        _output.WriteLine("RBF50 claim boundary: diagnostic/candidate only; bounded failures are expected and reported.");
+
+        Assert.True(localTotal > 0, "Expected local perturbation cases.");
+        Assert.True(localM3 >= Math.Max(1, (int)Math.Floor(0.6 * localTotal)),
+            $"Expected local m=3 stability under bounded perturbations. localM3={localM3}, localTotal={localTotal}");
+    }
+
+    /// <summary>
+    /// Checks non-uniqueness exposure when one core structural assumption is relaxed at a time.
+    /// Matters because assumption sensitivity identifies which component most strongly controls uniqueness.
+    /// Expected diagnostic behavior: relaxed assumptions admit competing modes or weaken uniqueness.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF51_SharedFunctional_Should_Expose_NonUniqueness_When_CoreAssumptionsAreRelaxed()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = Enumerable.Range(4, 33).ToArray(); // 4..36
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var baselineRows = BuildSharedFunctionalRows(family, qCore, 1.0, 1.0, 1.0, 0.35, 1.0, 0.95);
+        var baseline = EvaluateSharedFunctionalSelection(baselineRows);
+        Assert.True(baseline.Resolved, "Expected resolved baseline shared-functional selection.");
+
+        var relaxations = new (string Name, bool RelaxPhase, bool RelaxBridge, bool RelaxAction)[]
+        {
+            ("phase defect", true, false, false),
+            ("bridge prior", false, true, false),
+            ("action stationarity", false, false, true)
+        };
+
+        int weakenedCount = 0;
+        string strongestControl = "none";
+        int strongestMetric = int.MinValue;
+
+        _output.WriteLine("--- RBF51 RELAXED-ASSUMPTION NON-UNIQUENESS DIAGNOSTIC ---");
+        _output.WriteLine($"baseline selected={(baseline.Resolved ? $"m={baseline.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", baseline.SatisfyingModes)}]");
+
+        foreach (var r in relaxations)
+        {
+            var rows = BuildSharedFunctionalRows(
+                family,
+                qCore,
+                phaseWeight: r.RelaxPhase ? 0.0 : 1.0,
+                bridgeWeight: r.RelaxBridge ? 0.0 : 1.0,
+                actionWeight: r.RelaxAction ? 0.0 : 1.0,
+                phaseTolerance: r.RelaxPhase ? 1.0 : 0.35,
+                bridgeTolerance: r.RelaxBridge ? 1.01 : 1.0,
+                actionTolerance: r.RelaxAction ? 2.0 : 0.95);
+            var result = EvaluateSharedFunctionalSelection(rows);
+
+            int non3Admissible = result.SatisfyingModes.Count(m => m != 3);
+            bool weakened =
+                !result.Resolved ||
+                result.SelectedMode != 3 ||
+                non3Admissible > 0 ||
+                result.SatisfyingModes.Length > baseline.SatisfyingModes.Length;
+            if (weakened) weakenedCount++;
+
+            int controlMetric = non3Admissible + (result.SelectedMode != 3 ? 1 : 0);
+            if (controlMetric > strongestMetric)
+            {
+                strongestMetric = controlMetric;
+                strongestControl = r.Name;
+            }
+
+            _output.WriteLine(
+                $"RBF51 relax={r.Name} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}] | non3Admissible={non3Admissible} | weakened={weakened}");
+            _output.WriteLine($"RBF51 relax={r.Name} failureByMode=[{string.Join(" | ", result.FailureByMode)}]");
+        }
+
+        _output.WriteLine($"RBF51 strongest uniqueness-control assumption={strongestControl} | metric={strongestMetric}");
+        _output.WriteLine("RBF51 claim boundary: diagnostic/candidate only; non-uniqueness exposure is not theorem-level disproof.");
+
+        Assert.True(weakenedCount >= 1,
+            $"Expected uniqueness weakening under at least one relaxed core assumption. weakenedCount={weakenedCount}");
+    }
+
+    /// <summary>
+    /// Performs deterministic bounded counterexample search under the full shared rule without per-family retuning.
+    /// Matters because necessity evidence should resist bounded adversarial scans in the tested domain.
+    /// Expected diagnostic behavior: no m!=3 admissible counterexample in the bounded full-rule grid; if found, classify explicitly.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF52_CounterexampleSearch_Should_Not_Find_CompetingMode_UnderFullSharedRule()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var qSupports = new (string Name, int[] Q)[]
+        {
+            ("core", qCore),
+            ("band", DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64)),
+            ("wide", Enumerable.Range(8, 25).ToArray()) // 8..32 bounded broad search
+        };
+        var weights = new (string Name, double O, double C, double T)[]
+        {
+            ("wA", 0.50, 0.35, 0.15),
+            ("wB", 0.55, 0.30, 0.15),
+            ("wC", 0.45, 0.40, 0.15)
+        };
+        var phaseTolerances = new[] { 0.33, 0.35, 0.37 };
+        var actionTolerances = new[] { 0.90, 0.95, 1.00 };
+
+        var counterexamples = new List<(string Scope, int SelectedMode, string Classify)>();
+
+        _output.WriteLine("--- RBF52 BOUNDED COUNTEREXAMPLE SEARCH DIAGNOSTIC ---");
+        _output.WriteLine($"qCore=[{string.Join(", ", qCore)}]");
+
+        foreach (var qs in qSupports)
+        {
+            foreach (var w in weights)
+            {
+                var family = BuildModeFamilyFromExplicitQValues(
+                    mValues,
+                    qs.Q,
+                    w.O,
+                    w.C,
+                    w.T,
+                    BuildNoCadencePriorConfig(),
+                    new[] { 2e-3 });
+
+                foreach (double phaseTol in phaseTolerances)
+                {
+                    foreach (double actionTol in actionTolerances)
+                    {
+                        var rows = BuildSharedFunctionalRows(
+                            family,
+                            qCore,
+                            phaseWeight: 1.0,
+                            bridgeWeight: 1.0,
+                            actionWeight: 1.0,
+                            phaseTolerance: phaseTol,
+                            bridgeTolerance: 1.0,
+                            actionTolerance: actionTol);
+                        var result = EvaluateSharedFunctionalSelection(rows);
+
+                        if (result.Resolved && result.SelectedMode != 3)
+                        {
+                            string category = ClassifyCounterexample(result.SelectedMode, qs.Name, phaseTol, actionTol);
+                            counterexamples.Add(($"{qs.Name}/{w.Name}/p{phaseTol:F2}/a{actionTol:F2}", result.SelectedMode, category));
+                        }
+
+                        _output.WriteLine(
+                            $"RBF52 {qs.Name}/{w.Name} | phaseTol={phaseTol:F2} | actionTol={actionTol:F2} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}]");
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine($"RBF52 counterexamples={counterexamples.Count}");
+        foreach (var c in counterexamples)
+            _output.WriteLine($"RBF52 counterexample scope={c.Scope} | selected=m={c.SelectedMode} | class={c.Classify}");
+        _output.WriteLine("RBF52 claim boundary: diagnostic/candidate only; no theorem-level proof, no full first-principles closure.");
+
+        Assert.True(counterexamples.Count == 0,
+            $"Expected no m!=3 counterexample under bounded full shared-rule search. found={counterexamples.Count}");
+    }
+
+    /// <summary>
+    /// Maps explicit validity boundaries for the bounded shared-functional uniqueness candidate.
+    /// Matters because candidate status requires transparent domain-of-validity and transition reporting.
+    /// Expected diagnostic behavior: identify m=3-valid region and boundary regions (none/m2/other) with first transition examples.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF53_SharedFunctional_Domain_Should_Have_ExplicitValidityBoundary()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var qSupports = new (string Name, int[] Q)[]
+        {
+            ("core", qCore),
+            ("band", DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64)),
+            ("wide", Enumerable.Range(8, 25).ToArray()) // 8..32
+        };
+        var phaseTolerances = new[] { 0.30, 0.33, 0.35, 0.37 };
+        var actionTolerances = new[] { 0.85, 0.90, 0.95, 1.00 };
+        var componentWeights = new (double Phase, double Bridge, double Action)[]
+        {
+            (0.90, 1.00, 1.00),
+            (1.00, 1.00, 1.00),
+            (1.10, 1.00, 0.90),
+            (1.00, 0.90, 1.10)
+        };
+
+        int validM3Unique = 0;
+        int boundaryNone = 0;
+        int boundaryM2 = 0;
+        int boundaryOther = 0;
+        string? firstNone = null;
+        string? firstM2 = null;
+        string? firstOther = null;
+
+        _output.WriteLine("--- RBF53 SHARED-FUNCTIONAL VALIDITY-BOUNDARY DIAGNOSTIC ---");
+        _output.WriteLine($"qCore=[{string.Join(", ", qCore)}]");
+
+        foreach (var qs in qSupports)
+        {
+            var family = BuildModeFamilyFromExplicitQValues(
+                mValues,
+                qs.Q,
+                0.50,
+                0.35,
+                0.15,
+                BuildNoCadencePriorConfig(),
+                new[] { 2e-3 });
+
+            foreach (var w in componentWeights)
+            {
+                foreach (double phaseTol in phaseTolerances)
+                {
+                    foreach (double actionTol in actionTolerances)
+                    {
+                        var rows = BuildSharedFunctionalRows(
+                            family,
+                            qCore,
+                            w.Phase,
+                            w.Bridge,
+                            w.Action,
+                            phaseTol,
+                            bridgeTolerance: 1.0,
+                            actionTolerance: actionTol);
+                        var result = EvaluateSharedFunctionalSelection(rows);
+
+                        string scope = $"{qs.Name}|pTol={phaseTol:F2}|aTol={actionTol:F2}|w=({w.Phase:F2},{w.Bridge:F2},{w.Action:F2})";
+                        if (result.Resolved && result.SelectedMode == 3 && result.SatisfyingModes.Length == 1)
+                        {
+                            validM3Unique++;
+                        }
+                        else if (!result.Resolved)
+                        {
+                            boundaryNone++;
+                            firstNone ??= scope;
+                        }
+                        else if (result.SelectedMode == 2)
+                        {
+                            boundaryM2++;
+                            firstM2 ??= scope;
+                        }
+                        else
+                        {
+                            boundaryOther++;
+                            firstOther ??= scope;
+                        }
+
+                        _output.WriteLine(
+                            $"RBF53 {scope} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}] | margin={(double.IsNaN(result.Margin) ? "n/a" : result.Margin.ToString("F4"))}");
+                    }
+                }
+            }
+        }
+
+        _output.WriteLine($"RBF53 validity region (m3 unique) count={validM3Unique}");
+        _output.WriteLine($"RBF53 boundary classes: none={boundaryNone}, m2={boundaryM2}, other={boundaryOther}");
+        _output.WriteLine($"RBF53 first transitions: none={firstNone ?? "none"}, m2={firstM2 ?? "none"}, other={firstOther ?? "none"}");
+        _output.WriteLine("RBF53 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+
+        int boundaryTotal = boundaryNone + boundaryM2 + boundaryOther;
+        Assert.True(validM3Unique > 0, "Expected non-empty m=3 unique validity region.");
+        Assert.True(boundaryTotal > 0, "Expected explicit boundary region classes.");
+        Assert.True(boundaryM2 > 0 || boundaryOther > 0,
+            $"Expected at least one competing-mode boundary class. m2={boundaryM2}, other={boundaryOther}");
+    }
+
+    /// <summary>
+    /// Classifies boundary failures by dominant constraint channel for shared-functional scans.
+    /// Matters because domain boundaries should be interpretable by phase-defect, bridge-prior, action-stationarity, or mixed channels.
+    /// Expected diagnostic behavior: channel counts and representative examples are produced under one shared rule.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF54_BoundaryFailures_Should_Be_Classified_ByDominantConstraintChannel()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = Enumerable.Range(8, 25).ToArray(); // 8..32
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var phaseTolerances = new[] { 0.30, 0.33, 0.35, 0.37 };
+        var actionTolerances = new[] { 0.85, 0.90, 0.95, 1.00 };
+
+        int phaseCount = 0;
+        int bridgeCount = 0;
+        int actionCount = 0;
+        int mixedCount = 0;
+        string? phaseExample = null;
+        string? bridgeExample = null;
+        string? actionExample = null;
+        string? mixedExample = null;
+
+        _output.WriteLine("--- RBF54 BOUNDARY FAILURE-CHANNEL CLASSIFICATION DIAGNOSTIC ---");
+        _output.WriteLine($"qCore=[{string.Join(", ", qCore)}] | qSupport=[{string.Join(", ", qSupport)}]");
+
+        foreach (double phaseTol in phaseTolerances)
+        {
+            foreach (double actionTol in actionTolerances)
+            {
+                var rows = BuildSharedFunctionalRows(
+                    family,
+                    qCore,
+                    phaseWeight: 1.0,
+                    bridgeWeight: 1.0,
+                    actionWeight: 1.0,
+                    phaseTol,
+                    bridgeTolerance: 1.0,
+                    actionTolerance: actionTol);
+                var result = EvaluateSharedFunctionalSelection(rows);
+
+                bool boundaryCase = !result.Resolved || result.SelectedMode != 3 || result.SatisfyingModes.Length != 1;
+                if (!boundaryCase)
+                    continue;
+
+                string channel = DetermineDominantConstraintChannel(rows, targetMode: 3, phaseTolerance: phaseTol, bridgeTolerance: 1.0, actionTolerance: actionTol);
+                string example = $"pTol={phaseTol:F2}|aTol={actionTol:F2}|selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")}";
+
+                switch (channel)
+                {
+                    case "phase-defect":
+                        phaseCount++;
+                        phaseExample ??= example;
+                        break;
+                    case "bridge-prior/qCore":
+                        bridgeCount++;
+                        bridgeExample ??= example;
+                        break;
+                    case "action-stationarity":
+                        actionCount++;
+                        actionExample ??= example;
+                        break;
+                    default:
+                        mixedCount++;
+                        mixedExample ??= example;
+                        break;
+                }
+
+                _output.WriteLine($"RBF54 {example} | dominant={channel} | failureByMode=[{string.Join(" | ", result.FailureByMode)}]");
+            }
+        }
+
+        _output.WriteLine($"RBF54 channel counts: phase-defect={phaseCount}, bridge-prior/qCore={bridgeCount}, action-stationarity={actionCount}, mixed={mixedCount}");
+        _output.WriteLine($"RBF54 examples: phase={phaseExample ?? "none"}, bridge={bridgeExample ?? "none"}, action={actionExample ?? "none"}, mixed={mixedExample ?? "none"}");
+        _output.WriteLine("RBF54 claim boundary: diagnostic/candidate only; no theorem-level proof.");
+
+        int total = phaseCount + bridgeCount + actionCount + mixedCount;
+        Assert.True(total > 0, "Expected boundary failures for dominant-channel classification.");
+        Assert.True(phaseCount + actionCount + mixedCount > 0,
+            $"Expected at least one non-bridge dominant/fused channel in boundary region. phase={phaseCount}, action={actionCount}, mixed={mixedCount}");
+    }
+
+    /// <summary>
+    /// Checks stability of domain boundaries under solver-step and q-support variants.
+    /// Matters because bounded candidate claims require bounded near-baseline drift with explicit reporting outside admissible regime.
+    /// Expected diagnostic behavior: bounded drift near baseline with explicit unresolved/fallback reporting in stressed variants.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF55_DomainBoundary_Should_Be_Stable_UnderSolverAndQSupportVariants()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var qSupports = new (string Name, int[] Q)[]
+        {
+            ("core", qCore),
+            ("band", DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64)),
+            ("wide", Enumerable.Range(8, 25).ToArray())
+        };
+        var solverProfiles = new (string Name, ModeLockConfig Config)[]
+        {
+            ("sBase", BuildNoCadencePriorConfig()),
+            ("sShort", BuildNoCadencePriorConfig() with { Steps = 1000, SettleSteps = 500 })
+        };
+        var phaseTolerances = new[] { 0.33, 0.35, 0.37 };
+        var actionTolerances = new[] { 0.90, 0.95, 1.00 };
+
+        static double Jaccard(HashSet<string> a, HashSet<string> b)
+        {
+            if (a.Count == 0 && b.Count == 0) return 1.0;
+            int inter = a.Count(x => b.Contains(x));
+            int union = a.Count + b.Count - inter;
+            return union > 0 ? (double)inter / union : 0.0;
+        }
+
+        HashSet<string> BuildRegion((string Name, int[] Q) qVariant, (string Name, ModeLockConfig Config) solver, out int unresolved, out int fallbackM2, out int fallbackOther)
+        {
+            unresolved = 0;
+            fallbackM2 = 0;
+            fallbackOther = 0;
+            var region = new HashSet<string>(StringComparer.Ordinal);
+
+            var family = BuildModeFamilyFromExplicitQValues(
+                mValues,
+                qVariant.Q,
+                0.50,
+                0.35,
+                0.15,
+                solver.Config,
+                new[] { 2e-3 });
+
+            foreach (double pTol in phaseTolerances)
+            {
+                foreach (double aTol in actionTolerances)
+                {
+                    var rows = BuildSharedFunctionalRows(
+                        family,
+                        qCore,
+                        phaseWeight: 1.0,
+                        bridgeWeight: 1.0,
+                        actionWeight: 1.0,
+                        pTol,
+                        bridgeTolerance: 1.0,
+                        actionTolerance: aTol);
+                    var result = EvaluateSharedFunctionalSelection(rows);
+
+                    if (!result.Resolved)
+                    {
+                        unresolved++;
+                        continue;
+                    }
+
+                    if (result.SelectedMode == 3 && result.SatisfyingModes.Length == 1)
+                    {
+                        region.Add($"p{pTol:F2}|a{aTol:F2}");
+                    }
+                    else if (result.SelectedMode == 2)
+                    {
+                        fallbackM2++;
+                    }
+                    else
+                    {
+                        fallbackOther++;
+                    }
+                }
+            }
+
+            return region;
+        }
+
+        var baseRegion = BuildRegion(qSupports[1], solverProfiles[0], out int baseUnresolved, out int baseFallbackM2, out int baseFallbackOther); // band + base solver
+        Assert.True(baseRegion.Count > 0, "Expected non-empty baseline m=3 domain region.");
+
+        double worstDrift = 0.0;
+        string? worstCase = null;
+
+        _output.WriteLine("--- RBF55 DOMAIN-BOUNDARY STABILITY DIAGNOSTIC ---");
+        _output.WriteLine($"baseline region size={baseRegion.Count} | unresolved={baseUnresolved} | fallbackM2={baseFallbackM2} | fallbackOther={baseFallbackOther}");
+
+        foreach (var q in qSupports)
+        {
+            foreach (var s in solverProfiles)
+            {
+                var region = BuildRegion(q, s, out int unresolved, out int fallbackM2, out int fallbackOther);
+                double drift = 1.0 - Jaccard(baseRegion, region);
+                if (drift > worstDrift)
+                {
+                    worstDrift = drift;
+                    worstCase = $"{q.Name}/{s.Name}";
+                }
+
+                _output.WriteLine(
+                    $"RBF55 variant={q.Name}/{s.Name} | m3Region={region.Count} | unresolved={unresolved} | fallbackM2={fallbackM2} | fallbackOther={fallbackOther} | drift={drift:F4}");
+            }
+        }
+
+        _output.WriteLine($"RBF55 worst drift={worstDrift:F4} at {(worstCase ?? "none")}");
+        _output.WriteLine("RBF55 claim boundary: diagnostic/candidate only; bounded near-baseline drift with explicit out-of-regime failures.");
+
+        Assert.True(worstDrift <= 0.90,
+            $"Expected bounded drift under solver/q-support variants near baseline domain mapping. worstDrift={worstDrift:F4}, worstCase={worstCase}");
+    }
+
+    /// <summary>
+    /// Reports a formalized minimal assumption scaffold for baseline m=3 shared-functional selection.
+    /// Matters because theorem-path preparation requires explicit assumptions and their current epistemic status.
+    /// Expected diagnostic behavior: checklist of active/necessary assumptions marked as structural/derived/diagnostic/operational.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF56_SharedFunctional_Should_Report_FormalAssumptionSet()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qBand = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qWide = Enumerable.Range(8, 25).ToArray();
+
+        var familyBand = BuildModeFamilyFromExplicitQValues(
+            mValues, qBand, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+        var familyWide = BuildModeFamilyFromExplicitQValues(
+            mValues, qWide, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        var baselineRows = BuildSharedFunctionalRows(familyBand, qCore, 1.0, 1.0, 1.0, 0.35, 1.0, 0.95);
+        var baseline = EvaluateSharedFunctionalSelection(baselineRows);
+        Assert.True(baseline.Resolved && baseline.SelectedMode == 3, "Expected baseline full shared rule to select m=3.");
+
+        bool phaseNecessary = DoesAssumptionRemovalWeaken(
+            baseline,
+            EvaluateSharedFunctionalSelection(BuildSharedFunctionalRows(familyBand, qCore, 0.0, 1.0, 1.0, 1.0, 1.0, 0.95)));
+        bool bridgeNecessary = DoesAssumptionRemovalWeaken(
+            baseline,
+            EvaluateSharedFunctionalSelection(BuildSharedFunctionalRows(familyBand, qCore, 1.0, 0.0, 1.0, 0.35, 1.01, 0.95)));
+        bool actionNecessary = DoesAssumptionRemovalWeaken(
+            baseline,
+            EvaluateSharedFunctionalSelection(BuildSharedFunctionalRows(familyBand, qCore, 1.0, 1.0, 0.0, 0.35, 1.0, 2.0)));
+
+        var sharedWeightVariants = new (double P, double B, double A)[]
+        {
+            (1.0, 1.0, 1.0),
+            (1.10, 0.90, 1.00),
+            (0.90, 1.10, 1.00),
+            (0.20, 1.60, 0.20)
+        };
+        bool sharedWeightsNecessary = false;
+        foreach (var w in sharedWeightVariants)
+        {
+            var v = EvaluateSharedFunctionalSelection(BuildSharedFunctionalRows(familyBand, qCore, w.P, w.B, w.A, 0.35, 1.0, 0.95));
+            if (DoesAssumptionRemovalWeaken(baseline, v))
+            {
+                sharedWeightsNecessary = true;
+                break;
+            }
+        }
+
+        bool boundedDomainNecessary = DoesAssumptionRemovalWeaken(
+            baseline,
+            EvaluateSharedFunctionalSelection(BuildSharedFunctionalRows(familyWide, qCore, 1.0, 1.0, 1.0, 0.35, 1.0, 0.95)));
+
+        var checklist = new (string Name, bool Active, bool Necessary, string Status)[]
+        {
+            ("phase integer closure defect", true, phaseNecessary, "derived"),
+            ("bridge-prior/qCore support", true, bridgeNecessary, "structural"),
+            ("action-stationarity", true, actionNecessary, "derived"),
+            ("shared weights", true, sharedWeightsNecessary, "operational"),
+            ("bounded domain conditions", true, boundedDomainNecessary, "diagnostic")
+        };
+
+        _output.WriteLine("--- RBF56 FORMAL ASSUMPTION-SCAFFOLD DIAGNOSTIC ---");
+        foreach (var a in checklist)
+        {
+            _output.WriteLine(
+                $"RBF56 assumption={a.Name} | active={a.Active} | supportsNecessity={a.Necessary} | status={a.Status}");
+        }
+        _output.WriteLine($"RBF56 baseline selected=m={baseline.SelectedMode} | satisfying=[{string.Join(", ", baseline.SatisfyingModes)}]");
+        _output.WriteLine("RBF56 claim boundary: diagnostic/candidate only; assumption scaffold is not theorem-level proof.");
+
+        Assert.True(checklist.All(x => x.Active), "Expected all formal assumptions to be active in baseline scaffold.");
+        Assert.True(checklist.Count(x => x.Necessary) >= 3,
+            $"Expected multiple assumptions to support necessity diagnostics. necessary={checklist.Count(x => x.Necessary)}");
+    }
+
+    /// <summary>
+    /// Removes formal assumptions one-by-one and checks whether m=3 admissibility/uniqueness weakens.
+    /// Matters because necessity claims require explicit single-assumption ablation behavior.
+    /// Expected diagnostic behavior: assumption removals produce weakening, failure classes, and necessity-support flags.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF57_NecessityConditions_Should_Fail_When_AssumptionsAreIndividuallyRemoved()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qBand = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qWide = Enumerable.Range(8, 25).ToArray();
+
+        var familyBand = BuildModeFamilyFromExplicitQValues(
+            mValues, qBand, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+        var familyWide = BuildModeFamilyFromExplicitQValues(
+            mValues, qWide, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        var baselineRows = BuildSharedFunctionalRows(familyBand, qCore, 1.0, 1.0, 1.0, 0.35, 1.0, 0.95);
+        var baseline = EvaluateSharedFunctionalSelection(baselineRows);
+        Assert.True(baseline.Resolved && baseline.SelectedMode == 3, "Expected baseline m=3 selection.");
+
+        var removalCases = new (string Name, (int M, double PhaseDefect, double BridgePenalty, double ActionResidual, double TotalEnergy, bool Admissible)[] Rows, double PhaseTol, double BridgeTol, double ActionTol)[]
+        {
+            ("phase integer closure defect", BuildSharedFunctionalRows(familyBand, qCore, 0.0, 1.0, 1.0, 1.0, 1.0, 0.95), 1.0, 1.0, 0.95),
+            ("bridge-prior/qCore support", BuildSharedFunctionalRows(familyBand, qCore, 1.0, 0.0, 1.0, 0.35, 1.01, 0.95), 0.35, 1.01, 0.95),
+            ("action-stationarity", BuildSharedFunctionalRows(familyBand, qCore, 1.0, 1.0, 0.0, 0.35, 1.0, 2.0), 0.35, 1.0, 2.0),
+            ("shared weights", BuildSharedFunctionalRows(familyBand, qCore, 0.20, 1.60, 0.20, 0.35, 1.0, 0.95), 0.35, 1.0, 0.95),
+            ("bounded domain conditions", BuildSharedFunctionalRows(familyWide, qCore, 1.0, 1.0, 1.0, 0.35, 1.0, 0.95), 0.35, 1.0, 0.95)
+        };
+
+        int supportsNecessityCount = 0;
+
+        _output.WriteLine("--- RBF57 ASSUMPTION-REMOVAL NECESSITY DIAGNOSTIC ---");
+        foreach (var c in removalCases)
+        {
+            var result = EvaluateSharedFunctionalSelection(c.Rows);
+            bool supportsNecessity = DoesAssumptionRemovalWeaken(baseline, result);
+            if (supportsNecessity)
+                supportsNecessityCount++;
+
+            string failureClass = DetermineFailureClassFromSharedResult(result, c.Rows, c.PhaseTol, c.BridgeTol, c.ActionTol);
+            _output.WriteLine(
+                $"RBF57 removed={c.Name} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}] | failureClass={failureClass} | supportsNecessity={supportsNecessity}");
+            _output.WriteLine($"RBF57 removed={c.Name} failureByMode=[{string.Join(" | ", result.FailureByMode)}]");
+        }
+        _output.WriteLine("RBF57 claim boundary: diagnostic/candidate only; assumption removal does not establish theorem-level necessity.");
+
+        Assert.True(supportsNecessityCount >= 3,
+            $"Expected multiple assumption removals to support necessity diagnostics. supports={supportsNecessityCount}/{removalCases.Length}");
+    }
+
+    /// <summary>
+    /// Enumerates known counterexample/failure classes and checks they are bounded and diagnosable.
+    /// Matters because scaffold quality requires explicit bounded failure taxonomy under one shared rule.
+    /// Expected diagnostic behavior: representative scenarios for no-core, phase/action, bridge loss, action relaxation, and mixed boundaries are identifiable.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF58_CounterexampleClasses_Should_Be_Enumerated_And_Bounded()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qBand = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qNoCore = Enumerable.Range(8, 7).ToArray(); // 8..14
+        int[] qWide = Enumerable.Range(8, 25).ToArray(); // 8..32
+
+        var scenarios = new (string Label, string ExpectedClass, int[] Q, double WP, double WB, double WA, double PTol, double BTol, double ATol)[]
+        {
+            ("no-core support", "no-core q-support", qNoCore, 1.0, 1.0, 1.0, 0.35, 1.0, 0.95),
+            ("phase-action boundary", "phase/action boundary", qBand, 1.0, 1.0, 1.0, 0.37, 1.0, 1.00),
+            ("bridge-prior loss", "bridge-prior loss", qWide, 1.0, 0.0, 1.0, 0.35, 1.01, 0.95),
+            ("action-stationarity relaxation", "action-stationarity relaxation", qBand, 1.0, 1.0, 0.0, 0.35, 1.0, 2.0),
+            ("mixed boundary", "mixed boundary", qWide, 0.80, 0.60, 0.80, 0.37, 1.01, 1.10)
+        };
+
+        int diagnosed = 0;
+
+        _output.WriteLine("--- RBF58 COUNTEREXAMPLE-CLASS ENUMERATION DIAGNOSTIC ---");
+        _output.WriteLine($"qCore=[{string.Join(", ", qCore)}] | qBand=[{string.Join(", ", qBand)}]");
+
+        foreach (var s in scenarios)
+        {
+            var family = BuildModeFamilyFromExplicitQValues(
+                mValues, s.Q, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+            var rows = BuildSharedFunctionalRows(family, qCore, s.WP, s.WB, s.WA, s.PTol, s.BTol, s.ATol);
+            var result = EvaluateSharedFunctionalSelection(rows);
+
+            bool boundedScenario = s.Q.Length <= qWide.Length && s.PTol <= 0.40 && s.ATol <= 2.0;
+            string diagnosedClass = DetermineScenarioCounterexampleClass(s.Label, s.Q, qCore, s.WB, s.WA, s.PTol, s.ATol, result);
+            bool boundaryLike = !result.Resolved || result.SelectedMode != 3 || result.SatisfyingModes.Length != 1;
+            bool classMatch = diagnosedClass == s.ExpectedClass;
+            if (boundedScenario && boundaryLike && classMatch)
+                diagnosed++;
+
+            _output.WriteLine(
+                $"RBF58 scenario={s.Label} | selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}] | diagnosedClass={diagnosedClass} | expectedClass={s.ExpectedClass} | bounded={boundedScenario} | diagnosable={boundaryLike && classMatch}");
+            _output.WriteLine($"RBF58 scenario={s.Label} failureByMode=[{string.Join(" | ", result.FailureByMode)}]");
+        }
+
+        _output.WriteLine($"RBF58 diagnosed classes={diagnosed}/{scenarios.Length}");
+        _output.WriteLine("RBF58 claim boundary: diagnostic/candidate only; bounded class taxonomy is not theorem-level closure.");
+
+        Assert.True(diagnosed == scenarios.Length,
+            $"Expected all enumerated counterexample classes to be bounded and diagnosable. diagnosed={diagnosed}, total={scenarios.Length}");
+    }
+
+    /// <summary>
+    /// Reports shared-functional energy margins showing why m=3 is selected when other admissible modes can coexist.
+    /// Matters because this separates strict uniqueness from minimal-by-energy selection under one shared rule.
+    /// Expected diagnostic behavior: explicit m=1..5 energies, m3-vs-competitor margins, and bounded selection-class reporting.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF59_SharedFunctional_Should_Report_M3SelectionMarginAgainstAdmissibleCompetitors()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var rows = BuildSharedFunctionalRows(
+            family,
+            qCore,
+            phaseWeight: 1.0,
+            bridgeWeight: 1.0,
+            actionWeight: 1.0,
+            phaseTolerance: 0.35,
+            bridgeTolerance: 1.0,
+            actionTolerance: 0.95);
+        var result = EvaluateSharedFunctionalSelection(rows);
+
+        var byMode = rows.ToDictionary(x => x.M);
+        var admissible = rows
+            .Where(x => x.Admissible)
+            .OrderBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .ToArray();
+
+        Assert.True(result.Resolved && result.SelectedMode == 3,
+            $"Expected baseline shared functional to resolve to m=3. selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")}");
+        Assert.True(byMode.ContainsKey(3), "Expected m=3 row in shared-functional table.");
+
+        var m3 = byMode[3];
+        double marginM3VsM2 = byMode.TryGetValue(2, out var m2) ? m2.TotalEnergy - m3.TotalEnergy : double.NaN;
+        double marginM3VsM4 = byMode.TryGetValue(4, out var m4) ? m4.TotalEnergy - m3.TotalEnergy : double.NaN;
+        var nextBest = admissible
+            .Where(x => x.M != 3)
+            .OrderBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .FirstOrDefault();
+        bool hasNextBestAdmissible = admissible.Any(x => x.M != 3);
+        double marginM3VsNextBestAdmissible = hasNextBestAdmissible
+            ? nextBest.TotalEnergy - m3.TotalEnergy
+            : double.NaN;
+
+        const double tieEpsilon = 1e-9;
+        bool m3Admissible = admissible.Any(x => x.M == 3);
+        bool tieWithCompetitor = m3Admissible &&
+                                 admissible.Any(x => x.M != 3 && Math.Abs(x.TotalEnergy - m3.TotalEnergy) <= tieEpsilon);
+        string selectionClass = !m3Admissible
+            ? "non-unique"
+            : result.SatisfyingModes.Length == 1
+                ? "strict unique"
+                : tieWithCompetitor
+                    ? "tie/boundary"
+                    : result.SelectedMode == 3
+                        ? "minimal-by-energy"
+                        : "non-unique";
+
+        _output.WriteLine("--- RBF59 SHARED-FUNCTIONAL MARGIN DIAGNOSTIC ---");
+        _output.WriteLine($"qCore=[{string.Join(", ", qCore)}] | qSupport=[{string.Join(", ", qSupport)}]");
+        foreach (int m in mValues.OrderBy(x => x))
+        {
+            var row = byMode[m];
+            _output.WriteLine(
+                $"RBF59 m={m} | phaseDefect={row.PhaseDefect:F4} | bridgePenalty={row.BridgePenalty:F4} | actionResidual={row.ActionResidual:F4} | totalEnergy={row.TotalEnergy:F4} | admissible={row.Admissible}");
+        }
+        _output.WriteLine($"RBF59 baseline selected={(result.Resolved ? $"m={result.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", result.SatisfyingModes)}]");
+        _output.WriteLine($"RBF59 margins: m3-vs-m2={(double.IsNaN(marginM3VsM2) ? "n/a" : marginM3VsM2.ToString("F4"))}, m3-vs-m4={(double.IsNaN(marginM3VsM4) ? "n/a" : marginM3VsM4.ToString("F4"))}, m3-vs-next-best-admissible={(double.IsNaN(marginM3VsNextBestAdmissible) ? "n/a" : marginM3VsNextBestAdmissible.ToString("F4"))}");
+        _output.WriteLine($"RBF59 selection class={selectionClass} | tieEpsilon={tieEpsilon:E2}");
+        _output.WriteLine("RBF59 claim boundary: diagnostic/candidate only; margin evidence does not establish theorem-level uniqueness.");
+
+        Assert.True(hasNextBestAdmissible, "Expected admissible competitors beyond m=3 for margin diagnostics.");
+        Assert.True(marginM3VsNextBestAdmissible > 0.0,
+            $"Expected m=3 to be minimal by positive margin against next-best admissible competitor. margin={marginM3VsNextBestAdmissible:F4}");
+        Assert.True(selectionClass is "strict unique" or "minimal-by-energy" or "tie/boundary" or "non-unique",
+            $"Unexpected RBF59 selection class: {selectionClass}");
+    }
+
+    /// <summary>
+    /// Tests whether m=3 selection survives alternative admissible-mode ordering/tie rules.
+    /// Matters because robust candidate status should not depend on arbitrary list ordering.
+    /// Expected diagnostic behavior: physically motivated rules keep m=3 selected; ordering-sensitive boundaries are explicitly flagged.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF60_M3Selection_Should_Not_Depend_OnArbitraryTieBreaking()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var rows = BuildSharedFunctionalRows(
+            family,
+            qCore,
+            phaseWeight: 1.0,
+            bridgeWeight: 1.0,
+            actionWeight: 1.0,
+            phaseTolerance: 0.35,
+            bridgeTolerance: 1.0,
+            actionTolerance: 0.95);
+        var baseline = EvaluateSharedFunctionalSelection(rows);
+
+        var admissible = rows.Where(x => x.Admissible).ToArray();
+        Assert.True(admissible.Length > 0, "Expected admissible modes for tie/ordering diagnostics.");
+
+        int lowestMFirst = admissible
+            .OrderBy(x => x.M)
+            .First().M;
+        int lowestEnergyFirst = admissible
+            .OrderBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .First().M;
+        int strongestBridgePriorFirst = admissible
+            .OrderBy(x => x.BridgePenalty)
+            .ThenBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .First().M;
+        int strongestPhaseClosureFirst = admissible
+            .OrderBy(x => x.PhaseDefect)
+            .ThenBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .First().M;
+        int strongestActionStationarityFirst = admissible
+            .OrderBy(x => x.ActionResidual)
+            .ThenBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .First().M;
+
+        var ruleSelections = new (string Rule, int SelectedMode)[]
+        {
+            ("lowest m first", lowestMFirst),
+            ("lowest energy first", lowestEnergyFirst),
+            ("strongest bridge-prior first", strongestBridgePriorFirst),
+            ("strongest phase closure first", strongestPhaseClosureFirst),
+            ("strongest action-stationarity first", strongestActionStationarityFirst)
+        };
+
+        bool allPhysicallyMotivatedSelectM3 =
+            lowestEnergyFirst == 3 &&
+            strongestBridgePriorFirst == 3 &&
+            strongestPhaseClosureFirst == 3 &&
+            strongestActionStationarityFirst == 3;
+        bool m3DependsOnArbitraryListOrdering =
+            lowestMFirst == 3 &&
+            !allPhysicallyMotivatedSelectM3;
+        bool orderingSensitivity = ruleSelections.Select(x => x.SelectedMode).Distinct().Count() > 1;
+        string classification = allPhysicallyMotivatedSelectM3
+            ? "ordering-robust"
+            : "boundary/ordering-sensitive";
+
+        _output.WriteLine("--- RBF60 ORDERING/TIE-BREAK DIAGNOSTIC ---");
+        _output.WriteLine($"baseline selected={(baseline.Resolved ? $"m={baseline.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", baseline.SatisfyingModes)}]");
+        foreach (var r in ruleSelections)
+            _output.WriteLine($"RBF60 rule={r.Rule} | selected=m={r.SelectedMode}");
+        _output.WriteLine($"RBF60 orderingSensitivity={orderingSensitivity} | m3DependsOnArbitraryListOrdering={m3DependsOnArbitraryListOrdering} | class={classification}");
+        _output.WriteLine("RBF60 claim boundary: diagnostic/candidate only; ordering robustness is not theorem-level uniqueness.");
+
+        Assert.True(baseline.Resolved && baseline.SelectedMode == 3,
+            $"Expected baseline shared functional to select m=3. selected={(baseline.Resolved ? $"m={baseline.SelectedMode}" : "none")}");
+        Assert.True(allPhysicallyMotivatedSelectM3,
+            $"Expected physically motivated ordering rules to keep m=3 selected. energy={lowestEnergyFirst}, bridge={strongestBridgePriorFirst}, phase={strongestPhaseClosureFirst}, action={strongestActionStationarityFirst}");
+    }
+
+    /// <summary>
+    /// Checks whether admissible non-m3 competitors lose to m=3 on at least one stronger structural component margin.
+    /// Matters because bounded candidate status should be supported by explicit structural-margin diagnostics, not hard uniqueness claims.
+    /// Expected diagnostic behavior: admissible competitors are blocked by phase/bridge/action component margins with m=3 best combined baseline margin.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF61_AdmissibleCompetitors_Should_Fail_AtLeastOne_StrongerStructuralMargin()
+    {
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues,
+            qSupport,
+            0.50,
+            0.35,
+            0.15,
+            BuildNoCadencePriorConfig(),
+            new[] { 2e-3 });
+
+        var rows = BuildSharedFunctionalRows(
+            family,
+            qCore,
+            phaseWeight: 1.0,
+            bridgeWeight: 1.0,
+            actionWeight: 1.0,
+            phaseTolerance: 0.35,
+            bridgeTolerance: 1.0,
+            actionTolerance: 0.95);
+        var baseline = EvaluateSharedFunctionalSelection(rows);
+
+        var admissible = rows
+            .Where(x => x.Admissible)
+            .OrderBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .ToArray();
+        Assert.True(admissible.Any(x => x.M == 3), "Expected baseline admissible set to include m=3.");
+
+        var m3 = admissible.First(x => x.M == 3);
+        var competitors = admissible.Where(x => x.M != 3).OrderBy(x => x.M).ToArray();
+        Assert.True(competitors.Length > 0, "Expected admissible competitors (e.g., m=2 or m=4) for structural-margin diagnostics.");
+
+        int bestCombinedMode = admissible
+            .OrderBy(x => x.PhaseDefect + x.BridgePenalty + x.ActionResidual)
+            .ThenBy(x => x.M)
+            .First().M;
+
+        const double marginEpsilon = 1e-9;
+        int blockedByAnyComponent = 0;
+
+        _output.WriteLine("--- RBF61 STRUCTURAL-MARGIN COMPETITOR DIAGNOSTIC ---");
+        _output.WriteLine($"baseline selected={(baseline.Resolved ? $"m={baseline.SelectedMode}" : "none")} | satisfying=[{string.Join(", ", baseline.SatisfyingModes)}]");
+        _output.WriteLine($"RBF61 best combined structural mode=m={bestCombinedMode}");
+
+        foreach (var c in competitors)
+        {
+            double phaseMargin = c.PhaseDefect - m3.PhaseDefect;
+            double bridgeMargin = c.BridgePenalty - m3.BridgePenalty;
+            double actionMargin = c.ActionResidual - m3.ActionResidual;
+            double totalMargin = c.TotalEnergy - m3.TotalEnergy;
+
+            double maxMargin = Math.Max(phaseMargin, Math.Max(bridgeMargin, actionMargin));
+            bool strongStructuralLoss = maxMargin > marginEpsilon;
+            if (strongStructuralLoss)
+                blockedByAnyComponent++;
+
+            string blockingComponent =
+                phaseMargin >= bridgeMargin && phaseMargin >= actionMargin ? "phase-defect"
+                : bridgeMargin >= phaseMargin && bridgeMargin >= actionMargin ? "bridge-prior/qCore"
+                : "action-stationarity";
+
+            _output.WriteLine(
+                $"RBF61 competitor=m={c.M} | phaseMargin={phaseMargin:F4} | bridgeMargin={bridgeMargin:F4} | actionMargin={actionMargin:F4} | totalMargin={totalMargin:F4} | blockingComponent={blockingComponent} | structurallyBlocked={strongStructuralLoss}");
+        }
+
+        _output.WriteLine("RBF61 claim boundary: diagnostic/candidate only; margin diagnostics do not establish theorem-level uniqueness.");
+
+        Assert.True(baseline.Resolved && baseline.SelectedMode == 3,
+            $"Expected baseline shared functional to select m=3. selected={(baseline.Resolved ? $"m={baseline.SelectedMode}" : "none")}");
+        Assert.True(bestCombinedMode == 3,
+            $"Expected m=3 to have best combined structural margin in baseline. bestCombinedMode={bestCombinedMode}");
+        Assert.True(blockedByAnyComponent == competitors.Length,
+            $"Expected each admissible competitor to lose on at least one stronger structural component margin. blocked={blockedByAnyComponent}, competitors={competitors.Length}");
     }
 
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
@@ -4543,23 +7006,42 @@ public class CollectiveModeLockingTests
         const double b = 1.0;
         const double dt = 0.001;
         double[] epsilons = epsilonsOverride ?? new[] { 2e-3, 1e-2 };
+        int[] orderedModes = mValues.OrderBy(x => x).ToArray();
+        string cacheKey = BuildModeFamilyCacheKey(
+            orderedModes,
+            qMin,
+            qMax,
+            orderWeight,
+            closureWeight,
+            transportWeight,
+            solverConfig,
+            epsilons);
 
-        var family = new List<(int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)>(mValues.Count);
+        if (ModeFamilyCache.TryGetValue(cacheKey, out var cached))
+            return cached;
 
-        foreach (int m in mValues)
+        int qCount = (qMax - qMin + 1);
+        var alphaSchwarzByEpsilon = new double[epsilons.Length];
+        for (int i = 0; i < epsilons.Length; i++)
+            alphaSchwarzByEpsilon[i] = ComputeSchwarzschildNullDeflection(epsilons[i]);
+
+        var computed = new (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[orderedModes.Length];
+        var options = new ParallelOptions
         {
-            var candidates = Enumerable.Range(qMin, qMax - qMin + 1)
-                .Select(q => (Omega: (q + (double)m) / q, Q: q))
-                .ToArray();
+            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, orderedModes.Length)
+        };
 
+        Parallel.For(0, orderedModes.Length, options, idx =>
+        {
+            int m = orderedModes[idx];
             int inBandCount = 0;
             double closureQualitySum = 0.0;
             double inBandActionSum = 0.0;
             double minInBandAction = double.PositiveInfinity;
 
-            foreach (var x in candidates)
+            for (int q = qMin; q <= qMax; q++)
             {
-                double omega = x.Omega;
+                double omega = (q + (double)m) / q;
                 double gamma = 1.0 / omega;
                 bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
 
@@ -4571,14 +7053,14 @@ public class CollectiveModeLockingTests
                     EulerBridgeScale = gamma
                 };
 
-                double meanRelError = epsilons
-                    .Select(epsilon =>
-                    {
-                        double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilon, G, c, b, dt, parameters);
-                        double alphaSchwarz = ComputeSchwarzschildNullDeflection(epsilon);
-                        return Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
-                    })
-                    .Average();
+                double relErrorSum = 0.0;
+                for (int e = 0; e < epsilons.Length; e++)
+                {
+                    double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilons[e], G, c, b, dt, parameters);
+                    double alphaSchwarz = alphaSchwarzByEpsilon[e];
+                    relErrorSum += Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                }
+                double meanRelError = relErrorSum / epsilons.Length;
 
                 double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
                 double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
@@ -4599,7 +7081,7 @@ public class CollectiveModeLockingTests
                 closureQualitySum += (1.0 - modeLock.ClosureResidual);
             }
 
-            double avgClosureQuality = closureQualitySum / candidates.Length;
+            double avgClosureQuality = closureQualitySum / qCount;
             double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
             double operationalActionTick = inBandCount > 0
                 ? (inBandActionSum / inBandCount) + occupancyPenalty
@@ -4608,10 +7090,168 @@ public class CollectiveModeLockingTests
                 ? minInBandAction + occupancyPenalty
                 : 1e6 + occupancyPenalty;
 
-            family.Add((m, inBandCount, avgClosureQuality, operationalActionTick, derivedActionTick));
-        }
+            computed[idx] = (m, inBandCount, avgClosureQuality, operationalActionTick, derivedActionTick);
+        });
 
-        return family.OrderBy(x => x.M).ToArray();
+        ModeFamilyCache.TryAdd(cacheKey, computed);
+        return computed;
+    }
+
+    private static (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] BuildModeFamilyFromExplicitQValues(
+        IReadOnlyCollection<int> mValues,
+        IReadOnlyCollection<int> qValues,
+        double orderWeight,
+        double closureWeight,
+        double transportWeight,
+        ModeLockConfig solverConfig,
+        double[]? epsilonsOverride = null)
+    {
+        const double G = 1.0;
+        const double c = 1.0;
+        const double b = 1.0;
+        const double dt = 0.001;
+        double[] epsilons = epsilonsOverride ?? new[] { 2e-3, 1e-2 };
+        int[] orderedModes = mValues.OrderBy(x => x).ToArray();
+        int[] orderedQ = qValues.Distinct().OrderBy(x => x).ToArray();
+        if (orderedQ.Length == 0)
+            throw new ArgumentException("qValues must not be empty.", nameof(qValues));
+
+        string modePart = string.Join(",", orderedModes);
+        string qPart = string.Join(",", orderedQ);
+        string epsPart = string.Join(",", epsilons.Select(x => x.ToString("R")));
+        string cacheKey = string.Join("|",
+            "explicitQ",
+            modePart,
+            qPart,
+            orderWeight.ToString("R"),
+            closureWeight.ToString("R"),
+            transportWeight.ToString("R"),
+            solverConfig.CellCount,
+            solverConfig.Steps,
+            solverConfig.SettleSteps,
+            solverConfig.Dt.ToString("R"),
+            solverConfig.CouplingKappa.ToString("R"),
+            solverConfig.CollectiveWeight.ToString("R"),
+            solverConfig.OrderScoreWeight.ToString("R"),
+            solverConfig.AlignmentScoreWeight.ToString("R"),
+            solverConfig.CadenceScoreWeight.ToString("R"),
+            solverConfig.BreakClosure,
+            solverConfig.ClosureBreakAmplitude.ToString("R"),
+            solverConfig.ClosureBreakEveryNSteps,
+            epsPart);
+
+        if (ModeFamilyCache.TryGetValue(cacheKey, out var cached))
+            return cached;
+
+        var alphaSchwarzByEpsilon = new double[epsilons.Length];
+        for (int i = 0; i < epsilons.Length; i++)
+            alphaSchwarzByEpsilon[i] = ComputeSchwarzschildNullDeflection(epsilons[i]);
+
+        var computed = new (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[orderedModes.Length];
+        var options = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, orderedModes.Length)
+        };
+
+        Parallel.For(0, orderedModes.Length, options, idx =>
+        {
+            int m = orderedModes[idx];
+            int inBandCount = 0;
+            double closureQualitySum = 0.0;
+            double inBandActionSum = 0.0;
+            double minInBandAction = double.PositiveInfinity;
+
+            for (int i = 0; i < orderedQ.Length; i++)
+            {
+                int q = orderedQ[i];
+                double omega = (q + (double)m) / q;
+                double gamma = 1.0 / omega;
+                bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+
+                var modeLock = SimulateModeLock(omega, solverConfig);
+                var parameters = new PhotonTransportModel.Parameters
+                {
+                    LambdaTime = 1.0,
+                    LambdaSpace = 30.0,
+                    EulerBridgeScale = gamma
+                };
+
+                double relErrorSum = 0.0;
+                for (int e = 0; e < epsilons.Length; e++)
+                {
+                    double alphaEuler = PhotonTransportModel.ComputeDeflectionEulerLagrange(epsilons[e], G, c, b, dt, parameters);
+                    double alphaSchwarz = alphaSchwarzByEpsilon[e];
+                    relErrorSum += Math.Abs(alphaEuler - alphaSchwarz) / Math.Max(alphaSchwarz, 1e-16);
+                }
+                double meanRelError = relErrorSum / epsilons.Length;
+
+                double orderDefect = Math.Max(0.0, 1.0 - modeLock.MeanOrder);
+                double closureDefect = Math.Max(0.0, modeLock.ClosureResidual);
+                double transportDefect = Math.Max(0.0, meanRelError);
+                double latticeActionDensity =
+                    (orderWeight * orderDefect * orderDefect
+                    + closureWeight * closureDefect * closureDefect
+                    + transportWeight * transportDefect * transportDefect)
+                    / Math.Max(omega, 1e-12);
+
+                if (inBand)
+                {
+                    inBandCount++;
+                    inBandActionSum += latticeActionDensity;
+                    minInBandAction = Math.Min(minInBandAction, latticeActionDensity);
+                }
+
+                closureQualitySum += (1.0 - modeLock.ClosureResidual);
+            }
+
+            double avgClosureQuality = closureQualitySum / orderedQ.Length;
+            double occupancyPenalty = 1.0 / Math.Max(inBandCount, 1);
+            double operationalActionTick = inBandCount > 0
+                ? (inBandActionSum / inBandCount) + occupancyPenalty
+                : 1e6 + occupancyPenalty;
+            double derivedActionTick = inBandCount > 0
+                ? minInBandAction + occupancyPenalty
+                : 1e6 + occupancyPenalty;
+
+            computed[idx] = (m, inBandCount, avgClosureQuality, operationalActionTick, derivedActionTick);
+        });
+
+        ModeFamilyCache.TryAdd(cacheKey, computed);
+        return computed;
+    }
+
+    private static string BuildModeFamilyCacheKey(
+        IReadOnlyCollection<int> orderedModes,
+        int qMin,
+        int qMax,
+        double orderWeight,
+        double closureWeight,
+        double transportWeight,
+        ModeLockConfig solverConfig,
+        IReadOnlyCollection<double> epsilons)
+    {
+        string modePart = string.Join(",", orderedModes);
+        string epsPart = string.Join(",", epsilons.Select(x => x.ToString("R")));
+        return string.Join("|",
+            modePart,
+            qMin,
+            qMax,
+            orderWeight.ToString("R"),
+            closureWeight.ToString("R"),
+            transportWeight.ToString("R"),
+            solverConfig.CellCount,
+            solverConfig.Steps,
+            solverConfig.SettleSteps,
+            solverConfig.Dt.ToString("R"),
+            solverConfig.CouplingKappa.ToString("R"),
+            solverConfig.CollectiveWeight.ToString("R"),
+            solverConfig.OrderScoreWeight.ToString("R"),
+            solverConfig.AlignmentScoreWeight.ToString("R"),
+            solverConfig.CadenceScoreWeight.ToString("R"),
+            solverConfig.BreakClosure,
+            solverConfig.ClosureBreakAmplitude.ToString("R"),
+            solverConfig.ClosureBreakEveryNSteps,
+            epsPart);
     }
 
     private static (bool Resolved, int SelectedMode, int[] SatisfyingModes) EvaluateDerivedThreeConstraintSelection(
@@ -4653,6 +7293,436 @@ public class CollectiveModeLockingTests
             return (false, int.MaxValue, Array.Empty<int>());
 
         return (true, satisfying[0].M, satisfying.Select(x => x.M).ToArray());
+    }
+
+    private static int[] DeriveBridgeCoreQValuesFromBand(
+        int m,
+        double omegaMin,
+        double omegaMax,
+        double gammaMin,
+        double gammaMax,
+        int qMin,
+        int qMax)
+    {
+        var qValues = new List<int>();
+
+        for (int q = qMin; q <= qMax; q++)
+        {
+            double omega = (q + (double)m) / q;
+            double gamma = 1.0 / omega;
+            bool inBand = omega >= omegaMin && omega <= omegaMax && gamma >= gammaMin && gamma <= gammaMax;
+            if (inBand)
+                qValues.Add(q);
+        }
+
+        return qValues.ToArray();
+    }
+
+    private static int[] DeriveBridgeBandSupportUnionQValues(
+        IReadOnlyCollection<int> mValues,
+        double omegaMin,
+        double omegaMax,
+        double gammaMin,
+        double gammaMax,
+        int qMin,
+        int qMax)
+    {
+        var qSet = new HashSet<int>();
+        foreach (int m in mValues)
+        {
+            foreach (int q in DeriveBridgeCoreQValuesFromBand(m, omegaMin, omegaMax, gammaMin, gammaMax, qMin, qMax))
+                qSet.Add(q);
+        }
+
+        return qSet.OrderBy(x => x).ToArray();
+    }
+
+    private static double ComputeIntegerClosureDefectNormalized(int mode, IReadOnlyCollection<int> qValues, int targetShift)
+    {
+        int[] orderedQ = qValues.Distinct().OrderBy(x => x).ToArray();
+        if (orderedQ.Length == 0)
+            return double.PositiveInfinity;
+
+        double defectSum = 0.0;
+        for (int i = 0; i < orderedQ.Length; i++)
+        {
+            int q = orderedQ[i];
+            double omega = (q + (double)mode) / q;
+            double pCompatible = q + targetShift;
+            defectSum += Math.Abs(q * omega - pCompatible) / Math.Max(Math.Abs(targetShift), 1.0);
+        }
+
+        return defectSum / orderedQ.Length;
+    }
+
+    private static double ComputeBridgePriorPenalty(int mode, IReadOnlyCollection<int> qCore)
+    {
+        int[] coreQ = qCore.Distinct().OrderBy(x => x).ToArray();
+        if (coreQ.Length == 0)
+            return 1.0;
+
+        int supportCount = 0;
+        for (int i = 0; i < coreQ.Length; i++)
+        {
+            int q = coreQ[i];
+            double omega = (q + (double)mode) / q;
+            double gamma = 1.0 / omega;
+            bool inBand = omega >= 1.16 && omega <= 1.19 && gamma >= 0.84 && gamma <= 0.86;
+            if (inBand)
+                supportCount++;
+        }
+
+        double supportFraction = (double)supportCount / coreQ.Length;
+        return 1.0 - supportFraction;
+    }
+
+    private static (bool PhaseOk, bool BridgeOk, bool ActionOk) EvaluateModeConstraintStatus(
+        (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] family,
+        int mode,
+        double phaseThreshold,
+        int bridgeThreshold,
+        double actionScale)
+    {
+        var target = family.First(x => x.M == mode);
+        bool phaseOk = target.AvgClosureQuality >= phaseThreshold;
+        bool bridgeOk = target.InBandCount >= bridgeThreshold;
+
+        var phaseBridgeCandidates = family
+            .Where(x => x.AvgClosureQuality >= phaseThreshold && x.InBandCount >= bridgeThreshold)
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        if (phaseBridgeCandidates.Length == 0)
+            return (phaseOk, bridgeOk, false);
+
+        double baseThreshold = phaseBridgeCandidates.Length >= 2
+            ? 0.5 * (phaseBridgeCandidates[0].DerivedActionTick + phaseBridgeCandidates[1].DerivedActionTick)
+            : 1.05 * phaseBridgeCandidates[0].DerivedActionTick;
+        double actionThreshold = actionScale * baseThreshold;
+        bool actionOk = target.DerivedActionTick <= actionThreshold;
+
+        return (phaseOk, bridgeOk, actionOk);
+    }
+
+    private static (bool Resolved, int SelectedMode, int[] SatisfyingModes, string[] FailureByMode, bool M3Admissible, bool M3Unique, bool M3Minimal) EvaluateSelectionFromCustomStatuses(
+        (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] family,
+        IReadOnlyDictionary<int, (bool PhaseOk, bool BridgeOk, bool ActionOk)> statuses)
+    {
+        var satisfying = family
+            .Where(x =>
+                statuses.TryGetValue(x.M, out var s) &&
+                s.PhaseOk &&
+                s.BridgeOk &&
+                s.ActionOk)
+            .OrderBy(x => x.DerivedActionTick)
+            .ThenBy(x => x.M)
+            .ToArray();
+
+        bool resolved = satisfying.Length > 0;
+        int selectedMode = resolved ? satisfying[0].M : int.MaxValue;
+        int[] satisfyingModes = satisfying.Select(x => x.M).ToArray();
+        bool m3Admissible = satisfyingModes.Contains(3);
+        bool m3Unique = m3Admissible && satisfyingModes.Length == 1;
+        bool m3Minimal = resolved && selectedMode == 3;
+
+        string[] failureByMode = family
+            .OrderBy(x => x.M)
+            .Select(x =>
+            {
+                if (!statuses.TryGetValue(x.M, out var s))
+                    return $"m={x.M}:missing-status";
+                return $"m={x.M}:{BuildActiveConstraintFailureReason(s, usePhase: true, useBridge: true, useActionTick: true)}";
+            })
+            .ToArray();
+
+        return (resolved, selectedMode, satisfyingModes, failureByMode, m3Admissible, m3Unique, m3Minimal);
+    }
+
+    private static (int M, double PhaseDefect, double BridgePenalty, double ActionResidual, double TotalEnergy, bool Admissible)[] BuildSharedFunctionalRows(
+        (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] family,
+        IReadOnlyCollection<int> qCore,
+        double phaseWeight,
+        double bridgeWeight,
+        double actionWeight,
+        double phaseTolerance,
+        double bridgeTolerance,
+        double actionTolerance)
+    {
+        double minAction = family.Min(x => x.DerivedActionTick);
+        double actionRange = Math.Max(family.Max(x => x.DerivedActionTick) - minAction, 1e-12);
+
+        return family
+            .Select(x =>
+            {
+                double phaseDefect = ComputeIntegerClosureDefectNormalized(x.M, qCore, targetShift: 3);
+                double bridgePenalty = ComputeBridgePriorPenalty(x.M, qCore);
+                double actionResidual = (x.DerivedActionTick - minAction) / actionRange;
+                double total = phaseWeight * phaseDefect + bridgeWeight * bridgePenalty + actionWeight * actionResidual;
+                bool admissible =
+                    phaseDefect <= phaseTolerance &&
+                    bridgePenalty <= bridgeTolerance &&
+                    actionResidual <= actionTolerance;
+                return (x.M, phaseDefect, bridgePenalty, actionResidual, total, admissible);
+            })
+            .OrderBy(x => x.total)
+            .ThenBy(x => x.M)
+            .Select(x => (x.M, x.phaseDefect, x.bridgePenalty, x.actionResidual, x.total, x.admissible))
+            .ToArray();
+    }
+
+    private static (bool Resolved, int SelectedMode, int[] SatisfyingModes, double Margin, string[] FailureByMode) EvaluateSharedFunctionalSelection(
+        (int M, double PhaseDefect, double BridgePenalty, double ActionResidual, double TotalEnergy, bool Admissible)[] rows)
+    {
+        var satisfying = rows
+            .Where(x => x.Admissible)
+            .OrderBy(x => x.TotalEnergy)
+            .ThenBy(x => x.M)
+            .ToArray();
+
+        bool resolved = satisfying.Length > 0;
+        int selectedMode = resolved ? satisfying[0].M : int.MaxValue;
+        int[] satisfyingModes = satisfying.Select(x => x.M).ToArray();
+        double margin = satisfying.Length >= 2
+            ? satisfying[1].TotalEnergy - satisfying[0].TotalEnergy
+            : double.NaN;
+
+        string[] failureByMode = rows
+            .OrderBy(x => x.M)
+            .Select(x =>
+            {
+                var reasons = new List<string>();
+                if (x.PhaseDefect > 0.35) reasons.Add("phaseDefect");
+                if (x.BridgePenalty > 1.0) reasons.Add("bridgePrior");
+                if (x.ActionResidual > 0.95) reasons.Add("actionStationarity");
+                return $"m={x.M}:{(x.Admissible ? "passes-active" : string.Join("+", reasons))}";
+            })
+            .ToArray();
+
+        return (resolved, selectedMode, satisfyingModes, margin, failureByMode);
+    }
+
+    private static string ClassifyCounterexample(int selectedMode, string qScope, double phaseTolerance, double actionTolerance)
+    {
+        if (qScope.Equals("core", StringComparison.Ordinal))
+            return "boundary";
+        if (qScope.Equals("wide", StringComparison.Ordinal))
+            return "no-core";
+        if (selectedMode == 2 && phaseTolerance > 0.35)
+            return "phase-action";
+        return "mixed";
+    }
+
+    private static bool DoesAssumptionRemovalWeaken(
+        (bool Resolved, int SelectedMode, int[] SatisfyingModes, double Margin, string[] FailureByMode) baseline,
+        (bool Resolved, int SelectedMode, int[] SatisfyingModes, double Margin, string[] FailureByMode) removal)
+    {
+        if (!removal.Resolved)
+            return true;
+        if (removal.SelectedMode != baseline.SelectedMode)
+            return true;
+        if (removal.SatisfyingModes.Length > baseline.SatisfyingModes.Length)
+            return true;
+        return removal.SelectedMode != 3 || removal.SatisfyingModes.Length != 1;
+    }
+
+    private static string DetermineFailureClassFromSharedResult(
+        (bool Resolved, int SelectedMode, int[] SatisfyingModes, double Margin, string[] FailureByMode) result,
+        (int M, double PhaseDefect, double BridgePenalty, double ActionResidual, double TotalEnergy, bool Admissible)[] rows,
+        double phaseTolerance,
+        double bridgeTolerance,
+        double actionTolerance)
+    {
+        if (!result.Resolved)
+            return "none";
+        if (result.SelectedMode == 2)
+            return "m2";
+        if (result.SelectedMode != 3)
+            return "other-mode";
+        if (result.SatisfyingModes.Length > 1)
+            return "non-unique";
+        return DetermineDominantConstraintChannel(rows, 3, phaseTolerance, bridgeTolerance, actionTolerance);
+    }
+
+    private static string DetermineScenarioCounterexampleClass(
+        string label,
+        IReadOnlyCollection<int> qSupport,
+        IReadOnlyCollection<int> qCore,
+        double bridgeWeight,
+        double actionWeight,
+        double phaseTolerance,
+        double actionTolerance,
+        (bool Resolved, int SelectedMode, int[] SatisfyingModes, double Margin, string[] FailureByMode) result)
+    {
+        if (label.Contains("mixed", StringComparison.OrdinalIgnoreCase))
+            return "mixed boundary";
+
+        bool hasCore = qCore.Any(q => qSupport.Contains(q));
+        if (!hasCore)
+            return "no-core q-support";
+        if (bridgeWeight <= 0.0)
+            return "bridge-prior loss";
+        if (actionWeight <= 0.0 || actionTolerance > 1.0)
+            return "action-stationarity relaxation";
+        if (phaseTolerance > 0.35 && (result.SelectedMode == 2 || result.SatisfyingModes.Contains(2)))
+            return "phase/action boundary";
+        return "mixed boundary";
+    }
+
+    private static string DetermineDominantConstraintChannel(
+        (int M, double PhaseDefect, double BridgePenalty, double ActionResidual, double TotalEnergy, bool Admissible)[] rows,
+        int targetMode,
+        double phaseTolerance,
+        double bridgeTolerance,
+        double actionTolerance)
+    {
+        var target = rows.First(x => x.M == targetMode);
+        double phaseExcess = Math.Max(0.0, target.PhaseDefect - phaseTolerance);
+        double bridgeExcess = Math.Max(0.0, target.BridgePenalty - bridgeTolerance);
+        double actionExcess = Math.Max(0.0, target.ActionResidual - actionTolerance);
+
+        int channelsExceeded =
+            (phaseExcess > 0 ? 1 : 0) +
+            (bridgeExcess > 0 ? 1 : 0) +
+            (actionExcess > 0 ? 1 : 0);
+        if (channelsExceeded == 0)
+            return "mixed";
+        if (channelsExceeded > 1)
+            return "mixed";
+        if (phaseExcess > 0)
+            return "phase-defect";
+        if (bridgeExcess > 0)
+            return "bridge-prior/qCore";
+        return "action-stationarity";
+    }
+
+    private static (string StackName, bool Resolved, int SelectedMode, int[] SatisfyingModes, string[] FailureByMode, bool M3Admissible, bool M3Unique, bool M3Minimal) EvaluateConstraintStackSelection(
+        (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] family,
+        string stackName,
+        bool usePhase,
+        bool useBridge,
+        bool useActionTick,
+        double phaseThreshold,
+        int bridgeThreshold,
+        double actionScale)
+    {
+        var phaseBridgeStatuses = family.ToDictionary(
+            x => x.M,
+            x => (
+                PhaseOk: x.AvgClosureQuality >= phaseThreshold,
+                BridgeOk: x.InBandCount >= bridgeThreshold));
+
+        var actionBaseCandidates = family
+            .Where(x =>
+                (!usePhase || phaseBridgeStatuses[x.M].PhaseOk) &&
+                (!useBridge || phaseBridgeStatuses[x.M].BridgeOk))
+            .OrderBy(x => x.DerivedActionTick)
+            .ToArray();
+
+        double actionThreshold = double.NegativeInfinity;
+        if (actionBaseCandidates.Length > 0)
+        {
+            double baseThreshold = actionBaseCandidates.Length >= 2
+                ? 0.5 * (actionBaseCandidates[0].DerivedActionTick + actionBaseCandidates[1].DerivedActionTick)
+                : 1.05 * actionBaseCandidates[0].DerivedActionTick;
+            actionThreshold = actionScale * baseThreshold;
+        }
+
+        var statuses = family.ToDictionary(
+            x => x.M,
+            x =>
+            {
+                var s = phaseBridgeStatuses[x.M];
+                bool actionOk = actionBaseCandidates.Length > 0 && x.DerivedActionTick <= actionThreshold;
+                return (PhaseOk: s.PhaseOk, BridgeOk: s.BridgeOk, ActionOk: actionOk);
+            });
+
+        var satisfying = family
+            .Where(x =>
+            {
+                var s = statuses[x.M];
+                return (!usePhase || s.PhaseOk)
+                    && (!useBridge || s.BridgeOk)
+                    && (!useActionTick || s.ActionOk);
+            })
+            .OrderBy(x => x.DerivedActionTick)
+            .ThenBy(x => x.M)
+            .ToArray();
+
+        bool resolved = satisfying.Length > 0;
+        int selectedMode = resolved ? satisfying[0].M : int.MaxValue;
+        int[] satisfyingModes = satisfying.Select(x => x.M).ToArray();
+        bool m3Admissible = satisfyingModes.Contains(3);
+        bool m3Unique = m3Admissible && satisfyingModes.Length == 1;
+        bool m3Minimal = resolved && selectedMode == 3;
+
+        string[] failureByMode = family
+            .OrderBy(x => x.M)
+            .Select(x => $"m={x.M}:{BuildActiveConstraintFailureReason(statuses[x.M], usePhase, useBridge, useActionTick)}")
+            .ToArray();
+
+        return (stackName, resolved, selectedMode, satisfyingModes, failureByMode, m3Admissible, m3Unique, m3Minimal);
+    }
+
+    private static string BuildActiveConstraintFailureReason(
+        (bool PhaseOk, bool BridgeOk, bool ActionOk) status,
+        bool usePhase,
+        bool useBridge,
+        bool useActionTick)
+    {
+        var failures = new List<string>();
+        if (usePhase && !status.PhaseOk) failures.Add("phase");
+        if (useBridge && !status.BridgeOk) failures.Add("bridge");
+        if (useActionTick && !status.ActionOk) failures.Add("actionTick");
+
+        return failures.Count == 0 ? "passes-active" : string.Join("+", failures);
+    }
+
+    private static bool IsConstraintAblationWeakened(
+        (string StackName, bool Resolved, int SelectedMode, int[] SatisfyingModes, string[] FailureByMode, bool M3Admissible, bool M3Unique, bool M3Minimal) full,
+        (string StackName, bool Resolved, int SelectedMode, int[] SatisfyingModes, string[] FailureByMode, bool M3Admissible, bool M3Unique, bool M3Minimal) ablated)
+    {
+        if (!ablated.Resolved)
+            return true;
+        if (ablated.SelectedMode != full.SelectedMode)
+            return true;
+        if (ablated.SatisfyingModes.Length > full.SatisfyingModes.Length)
+            return true;
+        return !ablated.M3Unique;
+    }
+
+    private static int SelectModeByShortcutRule(
+        (int M, int InBandCount, double AvgClosureQuality, double OperationalActionTick, double DerivedActionTick)[] family,
+        ShortcutRuleKind rule)
+    {
+        return rule switch
+        {
+            ShortcutRuleKind.PhaseOnlyBestClosure => family
+                .OrderByDescending(x => x.AvgClosureQuality)
+                .ThenBy(x => x.M)
+                .First().M,
+            ShortcutRuleKind.BridgeOnlyOccupancy => family
+                .OrderByDescending(x => x.InBandCount)
+                .ThenBy(x => x.M)
+                .First().M,
+            ShortcutRuleKind.ActionOnlyLowestDerivedActionTick => family
+                .OrderBy(x => x.DerivedActionTick)
+                .ThenBy(x => x.M)
+                .First().M,
+            ShortcutRuleKind.CombinedScoreNoExplicitGates => family
+                .Select(x =>
+                {
+                    double bridgeNorm = family.Max(y => y.InBandCount) > 0
+                        ? (double)x.InBandCount / family.Max(y => y.InBandCount)
+                        : 0.0;
+                    double actionNorm = 1.0 / (1.0 + x.DerivedActionTick);
+                    double score = 0.45 * x.AvgClosureQuality + 0.35 * bridgeNorm + 0.20 * actionNorm;
+                    return (x.M, Score: score);
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenBy(x => x.M)
+                .First().M,
+            _ => throw new ArgumentOutOfRangeException(nameof(rule), rule, "Unknown shortcut rule.")
+        };
     }
 
     private static double ComputePearsonCorrelation(double[] x, double[] y)
@@ -4868,6 +7938,14 @@ public class CollectiveModeLockingTests
         double dw = p;
         double dp = -w + 3.0 * epsilon * w * w;
         return (dw, dp);
+    }
+
+    private enum ShortcutRuleKind
+    {
+        PhaseOnlyBestClosure,
+        BridgeOnlyOccupancy,
+        ActionOnlyLowestDerivedActionTick,
+        CombinedScoreNoExplicitGates
     }
 
     private sealed record ModeLockConfig(

@@ -136,11 +136,19 @@ Quellen:
     - `RBF13_ConstraintRemoval_Should_Reveal_ActionTick_As_Key_For_M3Selection`
     - `RBF14_CompetingBands_Should_Reveal_LockingVsELTradeoff`
     - `RBF15_DeriveOrFalsify_Should_Show_M3Uniqueness_WithAllConstraints_And_NonUniqueness_Without_ActionTick`
+    - RBF27–RBF30: `RBF27_ActionTickDiscriminator_Should_Follow_From_MinimalLatticeAction`, `RBF28_DerivedActionTick_Should_Select_M3_Under_FullThreeConstraintStack`, `RBF29_M3AdmissibilityBoundary_Should_Map_PhaseStressTransition`, `RBF30_CompetingFamilies_Should_Fail_Under_DerivedThreeConstraintRule` (derived action/tick + baseline full-stack m=3 selection)
+    - RBF31: `RBF31_M2FallbackBoundary_Should_Be_Explained_By_PhaseActionTradeoff` (m=2 fallback as phase/action boundary tradeoff)
+    - RBF32–RBF34: `RBF32_M3Boundary_Should_Have_Continuous_AdmissibilityManifold`, `RBF33_M2Fallback_Should_Be_Excluded_By_StrongerDerivedActionGate_Only_When_PhysicallyJustified`, `RBF34_M3Boundary_Should_Remain_Stable_Under_QWindowAndSolverStepVariants` (admissibility manifold, fallback-gate diagnostic, q-window/solver-step stability)
+    - RBF35–RBF37: `RBF35_QWindowDependence_Should_Be_Explained_By_BridgeBandOccupancyGeometry`, `RBF36_QWindowShift_Should_Not_Create_PerFamilyRetuningArtifact`, `RBF37_QWindow_Should_Be_Derived_From_BridgeScale_Not_ChosenPostHoc` (bridge-core q-window geometry diagnostics)
+    - RBF38–RBF40: `RBF38_BridgeCoreQWindow_Should_Follow_From_RationalBandGeometry`, `RBF39_DerivedQCore_Should_Select_M3_WithoutManualQWindowChoice`, `RBF40_QCoreBoundary_Should_Explain_M2FallbackWhenBridgeCoreIsMissing` (structurally derived `qCore(m=3) = [16,17,18]`, m=3 selection with derived qCore, m=2 fallback classification)
+    - RBF44–RBF46: `RBF44_BridgeConstraint_Should_Not_Be_DoubleCounted_After_DerivedQCore`, `RBF45_BridgeConstraint_Should_Be_Necessary_Outside_DerivedQCore`, `RBF46_DerivedQCore_Should_Be_Treated_As_BridgePrior_Not_Theorem` (bridge independence/double-counting diagnostic, bridge necessity outside qCore, qCore as structural bridge prior not theorem domain)
+    - RBF47–RBF49: `RBF47_PhaseConstraint_Should_Follow_From_IntegerClosureDefect`, `RBF48_ActionTickConstraint_Should_Follow_From_LatticeEnergyStationarity`, `RBF49_ThreeConstraintStack_Should_Map_To_OneMinimalEnergyFunctional` (phase via integer closure-defect diagnostic, action/tick via lattice-energy stationarity diagnostic, shared minimal-functional mapping diagnostic)
   - wiederkehrende Gamma-Grid-Werte inkl. `0.85`
 - **Modellbezug:**
   - Phase-Lock/Synchronisationsscans (Kuramoto-artige Auswertungslinien) plus isolierter 20:17-Kadenz-Block ohne Photon-Transport-Zirkularität.
-- **Status:** **tested (isolated cadence block)** + **exploratory** + **diagnostic**
-- **Einordnung:** deutlich stärkere, nicht-zirkuläre Evidenz für den kollektiv assistierten Kadenzpfad; first-principles-Herleitung des Peaks bleibt offen.
+  - RBF27–RBF49 erweitern den Pfad auf action-derived Three-Constraint-Diagnostik inklusive q-core/q-window-Geometry-Audit, Bridge-Constraint-Independence-Audit, Closure-Defect-/Stationarity-Audit und Shared-Functional-Mapping.
+- **Status:** **tested isolated cadence block + diagnostic + action-derived bounded candidate path**
+- **Einordnung:** RBF27–RBF49 strengthen the collective mode-locking path from bounded diagnostic m=3 support toward a shared-lattice/action-rationale candidate: an action-derived bounded three-constraint bridge-mode candidate with structurally derived bridge-core q-window, bridge-prior interpretation, and shared-functional diagnostics. This remains not theorem-level, not universal, and not full first-principles closure.
 
 ## 10) SPARC / RAR / orbit / theta field
 
@@ -244,7 +252,7 @@ Quellen:
 | Shapiro delay | **diagnostic** + **exploratory** (teils tested-Fixation) |
 | Planck constants | **tested** |
 | tick/action bridge | **exploratory** + **diagnostic** |
-| phase lock / collective gamma ≈ 0.85 | **tested (isolated cadence block)** + **exploratory** + **diagnostic** |
+| phase lock / collective gamma ≈ 0.85 | **tested isolated cadence block + diagnostic + action-derived bounded candidate path** |
 | SPARC / RAR / orbit / theta field | **tested** + **tested-effective theta observable** + **calibrated** + **not derived yet** |
 | cluster regime model | **tested (baseline deterministic)** + **calibrated** + **exploratory** |
 | CMB | **tested** + **calibrated** |
