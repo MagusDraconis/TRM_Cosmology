@@ -82,11 +82,19 @@ Consolidated result (RBF50–RBF52)
 
 ---
 
+## Consolidated result (RBF77–RBF79)
+
+- A Topological Necessity Lemma Scaffold is established, isolating the open analytical proof that `|qΩ - p|` is uniquely minimized by `m=3` inside `qCore`.
+- A Sufficiency Lemma Scaffold defines the formal requirement to prove `ΔE > 0` universally across the defined valid domain.
+- A Domain-Closure Boundary Lemma Scaffold establishes the requirement to analytically derive limits `ε_phase` and `ε_action` from energy normalization.
+
+---
+
 ## Current status statement
 
 Current reviewer-safe status:
 
-> m=3 is a bounded shared-functional selection candidate with an analytical constraint-boundary scaffold.
+> m=3 is a bounded shared-functional selection candidate with analytical constraint-boundary and lemma-scaffold support.
 
 ---
 
@@ -94,8 +102,8 @@ Current reviewer-safe status:
 
 Primary remaining gaps:
 
-1. Formal proof of topological necessity and sufficiency.
-2. Analytical formalization of domain closure (pending analytical work).
+1. Formal analytical proof of topological necessity and sufficiency.
+2. Formal analytical derivation of domain closure.
 
 ---
 
@@ -110,8 +118,8 @@ Primary remaining gaps:
 
 ---
 
-## Next direction (RBF77+)
+## Next direction
 
-Transitioning the fully verified empirical diagnostic scaffold into pure mathematical theorem derivation.
+End of empirical diagnostic scaffolding. The next phase must transition into pure mathematical theorem derivation outside the operational test suite.
 
 

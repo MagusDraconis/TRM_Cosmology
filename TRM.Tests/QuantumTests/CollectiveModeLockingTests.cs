@@ -7657,6 +7657,120 @@ public class CollectiveModeLockingTests
         _output.WriteLine("RBF76 claim boundary: diagnostic/candidate only; not theorem-level proof.");
     }
 
+    private sealed record LemmaScaffold(
+        string Title,
+        string Statement,
+        string[] Prerequisites,
+        string[] CounterexampleClasses,
+        string[] OpenProofSteps,
+        string ClaimBoundary);
+
+    private void ReportLemma(LemmaScaffold lemma)
+    {
+        _output.WriteLine($"--- LEMMA SCAFFOLD: {lemma.Title} ---");
+        _output.WriteLine($"STATEMENT:\n  {lemma.Statement}");
+        _output.WriteLine($"PREREQUISITES:\n  - {string.Join("\n  - ", lemma.Prerequisites)}");
+        _output.WriteLine($"COUNTEREXAMPLE CLASSES:\n  - {string.Join("\n  - ", lemma.CounterexampleClasses)}");
+        _output.WriteLine($"OPEN PROOF STEPS (PENDING-ANALYTICAL):\n  - {string.Join("\n  - ", lemma.OpenProofSteps)}");
+        _output.WriteLine($"CLAIM BOUNDARY:\n  {lemma.ClaimBoundary}\n");
+
+        Assert.False(string.IsNullOrWhiteSpace(lemma.Statement), "Lemma statement must be defined.");
+        Assert.NotEmpty(lemma.Prerequisites);
+        Assert.NotEmpty(lemma.CounterexampleClasses);
+        Assert.NotEmpty(lemma.OpenProofSteps);
+    }
+
+    /// <summary>
+    /// RBF77: Generates a formal Lemma Scaffold for Topological Necessity based on the Closure Defect limit.
+    /// Claim boundary: diagnostic/candidate only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF77_TopologicalNecessity_Should_Be_Formulated_AsClosureDefectLemma()
+    {
+        var lemma = new LemmaScaffold(
+            Title: "Topological Necessity (Closure Defect Lemma)",
+            Statement: "Selection of m=3 is topologically necessary if and only if the phase closure defect |qΩ - p| / targetShift <= ε_phase is exclusively minimized by m=3 over the structurally derived qCore domain.",
+            Prerequisites: new[] 
+            { 
+                "Rational phase lattice assumption (Ω = (q+m)/q)", 
+                "Integer winding cycle constraint (p = q + m)", 
+                "Structurally derived bridge qCore domain" 
+            },
+            CounterexampleClasses: new[] 
+            { 
+                "Alternative m-modes satisfying the defect bound within qCore without incurring heavier action penalties" 
+            },
+            OpenProofSteps: new[] 
+            { 
+                "Analytically derive the uniqueness of the phase defect minimum for m=3 across the bounded qCore space." 
+            },
+            ClaimBoundary: "diagnostic/candidate only; not theorem-level proof; no GR replacement."
+        );
+
+        ReportLemma(lemma);
+    }
+
+    /// <summary>
+    /// RBF78: Generates a formal Lemma Scaffold for Sufficiency based on Energy Margin Dominance.
+    /// Claim boundary: diagnostic/candidate only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF78_Sufficiency_Should_Be_Formulated_AsEnergyMarginLemma()
+    {
+        var lemma = new LemmaScaffold(
+            Title: "Sufficiency (Energy Margin Lemma)",
+            Statement: "The joint satisfaction of phase closure, bridge prior, and action stationarity is mathematically sufficient to uniquely select m=3 if the shared energy margin ΔE = E_competitor - E_m3 is strictly greater than 0 for all admissible competitors.",
+            Prerequisites: new[] 
+            { 
+                "Formulation of the shared minimal functional evaluating Phase, Bridge, and Action components", 
+                "Bounded action-stationarity residual ε_action limiting admissibility" 
+            },
+            CounterexampleClasses: new[] 
+            { 
+                "Admissible competitors (e.g., m=2, m=4) achieving a lower or equal shared functional energy (ΔE <= 0)" 
+            },
+            OpenProofSteps: new[] 
+            { 
+                "Prove analytically that ΔE > 0 is universally guaranteed within the valid domain limits." 
+            },
+            ClaimBoundary: "diagnostic/candidate only; not theorem-level proof; no full first-principles closure."
+        );
+
+        ReportLemma(lemma);
+    }
+
+    /// <summary>
+    /// RBF79: Generates a formal Lemma Scaffold for Domain Closure based on explicit Boundary Conditions.
+    /// Claim boundary: diagnostic/candidate only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF79_DomainClosure_Should_Be_Formulated_AsBoundaryLemma()
+    {
+        var lemma = new LemmaScaffold(
+            Title: "Domain Closure (Boundary Lemma)",
+            Statement: "The domain of validity for the m=3 selection rule is strictly bounded by the analytical constraint limits ε_phase and ε_action; the formal rule must gracefully abstain everywhere outside this continuous envelope.",
+            Prerequisites: new[] 
+            { 
+                "Continuous parameterization of operational selection limits", 
+                "Explicit classification map of boundary failure regimes (phase, action, margin, mixed)" 
+            },
+            CounterexampleClasses: new[] 
+            { 
+                "Parameter regimes where the formal selection rule generates confident false-positive selections outside the physically valid domain" 
+            },
+            OpenProofSteps: new[] 
+            { 
+                "Derive the absolute asymptotic limits of ε_phase and ε_action directly from lattice-energy normalization principles." 
+            },
+            ClaimBoundary: "diagnostic/candidate only; not universal m=3 selection; no numerology."
+        );
+
+        ReportLemma(lemma);
+    }
+
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
         ModeLockConfig.Default with
         {

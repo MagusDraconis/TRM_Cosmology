@@ -810,15 +810,23 @@ RBF74–RBF76 transition the framework from numerical continuous-envelope diagno
 - **RBF75**: Expresses action admissibility as a stationarity residual condition `δE_action <= ε_action`, mapping the operational tolerance directly to the analytical lattice-energy stationarity boundary.
 - **RBF76**: Combines the constraints into a necessary and sufficient diagnostic conditions checklist, explicitly classifying the current empirical support as `STRUCTURAL-PASS` or `DIAGNOSTIC-PASS`, while acknowledging that theorem-level necessities are `PENDING-ANALYTICAL`.
 
+## 24. Post-RBF77–RBF79 update
+
+RBF77–RBF79 finalize the diagnostic scaffolding by formalizing the required mathematical proofs into structured Lemma Scaffolds.
+
+- **RBF77 (Topological Necessity)**: Structures the requirement to analytically prove the uniqueness of the `|qΩ - p|` minimum for `m=3` within the `qCore` domain.
+- **RBF78 (Sufficiency)**: Structures the requirement to prove the energy margin `ΔE > 0` against all admissible competitors universally across the defined valid domain.
+- **RBF79 (Domain Closure)**: Structures the requirement to derive the absolute asymptotic limits `ε_phase` and `ε_action` directly from lattice-energy normalization principles.
+
 Updated reviewer-safe status:
 
 ```text
-bounded shared-functional selection candidate with an analytical constraint-boundary scaffold
+bounded shared-functional selection candidate with analytical constraint-boundary and lemma-scaffold support
 ```
 
 Primary remaining gap:
 
-> Formal proof of topological necessity, sufficiency, and domain closure remains pending analytical work.
+> Formal analytical proof of topological necessity, sufficiency, and domain closure.
 
 Claim boundary remains unchanged:
 - diagnostic/candidate only

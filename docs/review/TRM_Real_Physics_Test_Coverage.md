@@ -151,6 +151,7 @@ Quellen:
     - RBF68–RBF70: `RBF68_PhaseClosureDefect_Should_Define_StructuralInvariant`, `RBF69_BridgeQCore_Should_Be_Invariant_UnderBandEquivalentParameterization`, `RBF70_ActionStationarity_Should_Be_Invariant_UnderSharedEnergyNormalization` (structural invariant scaffolding for phase closure, bridge qCore, and action-stationarity normalization)
     - RBF71–RBF73: `RBF71_PhaseThreshold_Should_Converge_To_IntegerClosureDefectLimit`, `RBF72_ActionTolerance_Should_Converge_To_StationarityResidualLimit`, `RBF73_FormalSelectionRule_Should_Define_ContinuousValidityEnvelope` (continuous domain-limit diagnostics and multi-dimensional validity envelope mapping)
     - RBF74–RBF76: `RBF74_PhaseBoundary_Should_Be_Expressible_AsAnalyticalClosureCondition`, `RBF75_ActionBoundary_Should_Be_Expressible_AsAnalyticalStationarityCondition`, `RBF76_FormalSelectionRule_Should_Be_Expressible_AsNecessarySufficientDiagnosticConditions` (analytical constraint boundaries and necessary/sufficient diagnostic conditions)
+    - RBF77–RBF79: `RBF77_TopologicalNecessity_Should_Be_Formulated_AsClosureDefectLemma`, `RBF78_Sufficiency_Should_Be_Formulated_AsEnergyMarginLemma`, `RBF79_DomainClosure_Should_Be_Formulated_AsBoundaryLemma` (lemma scaffolds structuring open analytical proofs for necessity, sufficiency, and domain limits)
     - wiederkehrende Gamma-Grid-Werte inkl. `0.85`
 - **Modellbezug:**
   - Phase-Lock/Synchronisationsscans (Kuramoto-artige Auswertungslinien) plus isolierter 20:17-Kadenz-Block ohne Photon-Transport-Zirkularität.
