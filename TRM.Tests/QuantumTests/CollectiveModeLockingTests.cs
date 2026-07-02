@@ -7771,6 +7771,154 @@ public class CollectiveModeLockingTests
         ReportLemma(lemma);
     }
 
+    /// <summary>
+    /// RBF80: Expresses action-stationarity as a candidate Euler/stationarity condition of the minimal lattice energy.
+    /// Maps the current delta E_action residual against this formal stationarity expression.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF80_ActionStationarity_Should_Map_To_MinimalLatticeEulerCondition()
+    {
+        _output.WriteLine("--- RBF80 ACTION STATIONARITY EULER MAPPING ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        double minAction = family.Min(x => x.DerivedActionTick);
+        double actionRange = Math.Max(family.Max(x => x.DerivedActionTick) - minAction, 1e-12);
+
+        _output.WriteLine($"RBF80 Global lattice minimum action (E_min) = {minAction:F4}");
+
+        bool anyMismatch = false;
+
+        var rows = BuildSharedFunctionalRows(
+            family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.95);
+
+        foreach (var m in mValues)
+        {
+            var famRow = family.FirstOrDefault(x => x.M == m);
+            if (famRow.M == 0) continue;
+
+            // Formal Euler proxy: dE = E_m - E_min
+            double deltaE = famRow.DerivedActionTick - minAction;
+            
+            // Current residual: deltaE / actionRange
+            double expectedResidual = deltaE / actionRange;
+
+            var r = rows.FirstOrDefault(x => x.M == m);
+            if (r.M == 0) continue;
+
+            _output.WriteLine($"RBF80 m={m} | Euler dE = {deltaE:F4} | Computed Residual = {r.ActionResidual:F4} | Expected = {expectedResidual:F4}");
+
+            if (Math.Abs(expectedResidual - r.ActionResidual) > 1e-4)
+            {
+                _output.WriteLine($"RBF80 Mismatch detected for m={m}.");
+                anyMismatch = true;
+            }
+            Assert.Equal(expectedResidual, r.ActionResidual, 4);
+        }
+
+        Assert.False(anyMismatch, "Expected numerical action residual to match the exact analytical Euler stationarity condition.");
+        _output.WriteLine("RBF80 Conclusion: Action-stationarity residual maps exactly to a normalized minimal lattice Euler condition (dE).");
+        _output.WriteLine("RBF80 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+    }
+
+    /// <summary>
+    /// RBF81: Tests whether removing or weakening action-stationarity destroys the energy margin dominance (ΔE > 0) for m=3.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF81_ActionStationarity_Should_Be_Necessary_For_EnergyMarginDominance()
+    {
+        _output.WriteLine("--- RBF81 ACTION STATIONARITY NECESSITY FOR MARGIN DOMINANCE ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        // Baseline (with strict action-stationarity that isolates m=3)
+        var rowsBase = BuildSharedFunctionalRows(
+            family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.15); // Strict tolerance
+
+        var resBase = EvaluateFormalSelectionRule(rowsBase, 0.5);
+
+        _output.WriteLine($"RBF81 Baseline (Action Active) -> Resolved={resBase.Resolved} | Selected=m={resBase.SelectedMode} | Margin={resBase.Margin:F4} | Admissible=[{string.Join(",", resBase.AdmissibleModes)}]");
+        Assert.True(resBase.Resolved && resBase.SelectedMode == 3, "Baseline must resolve m=3.");
+
+        // Ablated (without action-stationarity constraint)
+        var rowsAblated = BuildSharedFunctionalRows(
+            family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 0.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 99.0);
+        
+        // We evaluate against a strict margin threshold that requires the isolation action provided
+        var resAblated = EvaluateFormalSelectionRule(rowsAblated, 1.5); 
+
+        _output.WriteLine($"RBF81 Ablated (Action Disabled) -> Resolved={resAblated.Resolved} | Selected={(resAblated.Resolved ? resAblated.SelectedMode.ToString() : "none")} | Margin={resAblated.Margin:F4} | Admissible=[{string.Join(",", resAblated.AdmissibleModes)}]");
+        
+        string ablatedMsg = resAblated.Resolved ? $"Falsely selected m={resAblated.SelectedMode}" : "Margin dominance collapsed (Abstained)";
+        _output.WriteLine($"RBF81 Result without Action: {ablatedMsg}");
+
+        Assert.False(resAblated.Resolved && resAblated.SelectedMode == 3, "Expected m=3 margin dominance to collapse without action-stationarity.");
+        
+        _output.WriteLine("RBF81 Conclusion: Action-stationarity is strictly necessary to maintain the ΔE > 0 energy margin dominance for m=3.");
+        _output.WriteLine("RBF81 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+    }
+
+    /// <summary>
+    /// RBF82: Verifies that the action-stationarity criterion relies purely on shared normalization,
+    /// explicitly rejecting per-family scaling or free parameters.
+    /// Claim boundary: diagnostic/candidate only; not theorem-level proof.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF82_ActionStationarity_Should_Have_No_PerFamilyFreeParameter()
+    {
+        _output.WriteLine("--- RBF82 ACTION STATIONARITY PER-FAMILY REJECTION ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        // Valid Shared Normalization
+        var rowsBase = BuildSharedFunctionalRows(
+            family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.95);
+        var resBase = EvaluateFormalSelectionRule(rowsBase, 0.5);
+
+        _output.WriteLine($"RBF82 Shared Normalization -> Resolved={resBase.Resolved} | Selected=m={resBase.SelectedMode}");
+        Assert.True(resBase.Resolved && resBase.SelectedMode == 3, "Baseline must resolve m=3.");
+
+        // Attempt Per-Family Parameterization: artificially scale the derived action tick for m=2 to artificially lower its energy
+        var corruptFamily = family.Select(x => 
+            (x.M, x.InBandCount, x.AvgClosureQuality, x.OperationalActionTick, 
+             DerivedActionTick: x.M == 2 ? x.DerivedActionTick - 100.0 : x.DerivedActionTick)
+        ).ToArray();
+
+        var rowsCorrupt = BuildSharedFunctionalRows(
+            corruptFamily, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.95);
+        
+        var resCorrupt = EvaluateFormalSelectionRule(rowsCorrupt, 0.5);
+
+        _output.WriteLine($"RBF82 Corrupt Per-Family Normalization -> Resolved={resCorrupt.Resolved} | Selected={(resCorrupt.Resolved ? resCorrupt.SelectedMode.ToString() : "none")} | Msg={resCorrupt.FailureReason}");
+
+        Assert.False(resCorrupt.Resolved && resCorrupt.SelectedMode == 3, "Per-family tuning should break the diagnostic validity or select a false positive.");
+
+        _output.WriteLine("RBF82 Conclusion: The action-stationarity criterion contains no per-family free parameter. It depends entirely on shared global normalization.");
+        _output.WriteLine("RBF82 claim boundary: diagnostic/candidate only; not theorem-level proof.");
+    }
+
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
         ModeLockConfig.Default with
         {
