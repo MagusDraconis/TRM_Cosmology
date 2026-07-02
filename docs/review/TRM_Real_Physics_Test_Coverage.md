@@ -148,7 +148,8 @@ Quellen:
     - RBF59–RBF61: `RBF59_SharedFunctional_Should_Report_M3SelectionMarginAgainstAdmissibleCompetitors`, `RBF60_SharedFunctional_Selection_Should_Be_Robust_Against_PhysicallyMotivated_TieBreaks`, `RBF61_AdmissibleCompetitors_Should_Fail_AtLeastOne_StrongerStructuralMargin` (explicit energy margins, tie-break ordering robustness, structural margin blocking)
     - RBF62–RBF64: `RBF62_FormalSelectionRule_Should_Follow_FromEnergyMarginDominance`, `RBF63_SelectionRule_Should_Remain_Stable_UnderAdmissibleMarginPerturbations`, `RBF64_SelectionRule_Should_Fail_Gracefully_OutsideDomain` (formal margin-based selection rule, margin perturbation stability, graceful domain failure/abstention)
     - RBF65–RBF67: `RBF65_SelectionRule_Should_Be_Minimal_NotOverparameterized`, `RBF66_SelectionRule_Should_RejectAlternativeFunctionalForms`, `RBF67_SelectionRule_Should_ReportFormalTheoremReadinessChecklist` (minimality/ablation diagnostic, alternative functional form rejection, theorem-readiness checklist)
-  - wiederkehrende Gamma-Grid-Werte inkl. `0.85`
+    - RBF68–RBF70: `RBF68_PhaseClosureDefect_Should_Define_StructuralInvariant`, `RBF69_BridgeQCore_Should_Be_Invariant_UnderBandEquivalentParameterization`, `RBF70_ActionStationarity_Should_Be_Invariant_UnderSharedEnergyNormalization` (structural invariant scaffolding for phase closure, bridge qCore, and action-stationarity normalization)
+    - wiederkehrende Gamma-Grid-Werte inkl. `0.85`
 - **Modellbezug:**
   - Phase-Lock/Synchronisationsscans (Kuramoto-artige Auswertungslinien) plus isolierter 20:17-Kadenz-Block ohne Photon-Transport-Zirkularität.
   - RBF27–RBF49 erweitern den Pfad auf action-derived Three-Constraint-Diagnostik inklusive q-core/q-window-Geometry-Audit, Bridge-Constraint-Independence-Audit, Closure-Defect-/Stationarity-Audit und Shared-Functional-Mapping.

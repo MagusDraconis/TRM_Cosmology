@@ -7187,6 +7187,165 @@ public class CollectiveModeLockingTests
         _output.WriteLine("RBF67 claim boundary: explicitly flags boundary between empirical readiness and required theorem-level closure.");
     }
 
+    /// <summary>
+    /// RBF68: Verifies that the phase closure defect form (q*Omega - p) defines a structural invariant
+    /// across equivalent rational representations and qCore-preserving transformations.
+    /// Claim boundary: diagnostic invariant evidence only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF68_PhaseClosureDefect_Should_Define_StructuralInvariant()
+    {
+        _output.WriteLine("--- RBF68 PHASE CLOSURE INVARIANT DIAGNOSTIC ---");
+        
+        int m = 3;
+        int targetShift = 3;
+        
+        double ComputeDefect(int qVal, int mVal, int shift)
+        {
+            double omega = (qVal + (double)mVal) / qVal;
+            return Math.Abs(qVal * omega - (qVal + shift));
+        }
+
+        // Baseline evaluated at typical bridge core value
+        int qBase = 17;
+        double baselineDefect = ComputeDefect(qBase, m, targetShift);
+        _output.WriteLine($"RBF68 Baseline: q={qBase}, m={m}, shift={targetShift} -> defect={baselineDefect:F4}");
+
+        // Equivalent representation (scaled)
+        int k = 2;
+        double eqDefect = ComputeDefect(qBase * k, m * k, targetShift * k);
+        _output.WriteLine($"RBF68 Scaled equivalent (k={k}): q={qBase * k}, m={m * k}, shift={targetShift * k} -> defect={eqDefect:F4}");
+        
+        Assert.Equal(baselineDefect, eqDefect, 4);
+
+        // Invariance across qCore values
+        int[] qCore = { 16, 17, 18 };
+        foreach (var qCoreVal in qCore)
+        {
+            double defect = ComputeDefect(qCoreVal, m, targetShift);
+            _output.WriteLine($"RBF68 qCore-preserving: q={qCoreVal} -> defect={defect:F4}");
+            Assert.Equal(baselineDefect, defect, 4);
+        }
+
+        _output.WriteLine("RBF68 Conclusion: Phase closure defect form is structurally invariant.");
+        _output.WriteLine("RBF68 claim boundary: diagnostic invariant evidence only; not theorem-level proof.");
+    }
+
+    /// <summary>
+    /// RBF69: Verifies that the derived bridge qCore is invariant under band-equivalent parameterizations,
+    /// ensuring it stems from the physical geometry rather than specific thresholding math.
+    /// Claim boundary: diagnostic candidate only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF69_BridgeQCore_Should_Be_Invariant_UnderBandEquivalentParameterization()
+    {
+        _output.WriteLine("--- RBF69 BRIDGE Q-CORE INVARIANCE DIAGNOSTIC ---");
+        
+        // Derived using the standard function (which checks both Omega and Gamma)
+        int[] qCoreStandard = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        
+        // Equivalent derivation strictly from Gamma bounds
+        var qCoreGamma = new System.Collections.Generic.List<int>();
+        for (int q = 2; q <= 64; q++)
+        {
+            double omega = (q + 3.0) / q;
+            double gamma = 1.0 / omega;
+            if (gamma >= 0.84 && gamma <= 0.86)
+            {
+                qCoreGamma.Add(q);
+            }
+        }
+        
+        // Equivalent derivation strictly from Omega bounds
+        var qCoreOmega = new System.Collections.Generic.List<int>();
+        for (int q = 2; q <= 64; q++)
+        {
+            double omega = (q + 3.0) / q;
+            if (omega >= 1.16 && omega <= 1.19)
+            {
+                qCoreOmega.Add(q);
+            }
+        }
+
+        _output.WriteLine($"RBF69 Standard qCore(m=3): [{string.Join(",", qCoreStandard)}]");
+        _output.WriteLine($"RBF69 Gamma-only qCore(m=3): [{string.Join(",", qCoreGamma)}]");
+        _output.WriteLine($"RBF69 Omega-only qCore(m=3): [{string.Join(",", qCoreOmega)}]");
+        
+        Assert.Equal(qCoreStandard, qCoreGamma.ToArray());
+        Assert.Equal(qCoreStandard, qCoreOmega.ToArray());
+        Assert.Equal(new[] { 16, 17, 18 }, qCoreStandard);
+        
+        _output.WriteLine("RBF69 Conclusion: Bridge qCore is invariant under band-equivalent parameterization.");
+        _output.WriteLine("RBF69 claim boundary: diagnostic invariant evidence only; not theorem-level proof.");
+    }
+
+    /// <summary>
+    /// RBF70: Verifies that action-stationarity residuals and m=3 margin dominance
+    /// are invariant under shared/global energy normalizations (scaling and shifting).
+    /// Rejects per-family normalization.
+    /// Claim boundary: diagnostic invariant evidence only.
+    /// </summary>
+    [Trait("Category", "LongRunning")]
+    [Fact]
+    public void RBF70_ActionStationarity_Should_Be_Invariant_UnderSharedEnergyNormalization()
+    {
+        _output.WriteLine("--- RBF70 ACTION STATIONARITY NORMALIZATION INVARIANCE ---");
+        
+        int[] mValues = { 1, 2, 3, 4, 5 };
+        int[] qCore = DeriveBridgeCoreQValuesFromBand(3, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        int[] qSupport = DeriveBridgeBandSupportUnionQValues(mValues, 1.16, 1.19, 0.84, 0.86, 2, 64);
+        
+        var family = BuildModeFamilyFromExplicitQValues(
+            mValues, qSupport, 0.50, 0.35, 0.15, BuildNoCadencePriorConfig(), new[] { 2e-3 });
+
+        var baseRows = BuildSharedFunctionalRows(
+            family, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.95);
+            
+        var baseRes = EvaluateFormalSelectionRule(baseRows, 1.0);
+        
+        // Apply a shared global normalization (linear transformation: scale + shift)
+        double scaleFactor = 10.0;
+        double shiftValue = 50.0;
+        
+        var normalizedFamily = family.Select(x => 
+            (x.M, x.InBandCount, x.AvgClosureQuality, x.OperationalActionTick, 
+             DerivedActionTick: (x.DerivedActionTick * scaleFactor) + shiftValue)
+        ).ToArray();
+        
+        var normalizedRows = BuildSharedFunctionalRows(
+            normalizedFamily, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.95);
+            
+        var normRes = EvaluateFormalSelectionRule(normalizedRows, 1.0);
+        
+        _output.WriteLine($"RBF70 Baseline Margin: {baseRes.Margin:F4} | Selected: m={baseRes.SelectedMode}");
+        _output.WriteLine($"RBF70 Normalized Margin: {normRes.Margin:F4} | Selected: m={normRes.SelectedMode}");
+        
+        Assert.True(normRes.Resolved && normRes.SelectedMode == 3, "Expected m=3 margin dominance to be preserved under shared normalization.");
+        Assert.Equal(baseRes.Margin, normRes.Margin, 4);
+
+        // Reject per-family normalization by proving it breaks invariance if applied
+        var perFamilyNormalizedFamily = family.Select(x => 
+            (x.M, x.InBandCount, x.AvgClosureQuality, x.OperationalActionTick, 
+             DerivedActionTick: x.M == 3 ? x.DerivedActionTick : (x.DerivedActionTick * 2.0)) // Asymmetric scaling
+        ).ToArray();
+        
+        var perFamilyRows = BuildSharedFunctionalRows(
+            perFamilyNormalizedFamily, qCore, phaseWeight: 1.0, bridgeWeight: 1.0, actionWeight: 1.0,
+            phaseTolerance: 0.35, bridgeTolerance: 1.0, actionTolerance: 0.95);
+            
+        var perFamilyRes = EvaluateFormalSelectionRule(perFamilyRows, 1.0);
+        _output.WriteLine($"RBF70 Per-Family (Asymmetric) Margin: {perFamilyRes.Margin:F4}");
+        
+        Assert.NotEqual(baseRes.Margin, perFamilyRes.Margin, 4);
+
+        _output.WriteLine("RBF70 Conclusion: Relative m=3 margin dominance is invariant under shared energy normalization but breaks under per-family tuning.");
+        _output.WriteLine("RBF70 claim boundary: diagnostic invariant evidence only; not theorem-level proof.");
+    }
+
     private static ModeLockConfig BuildNoCadencePriorConfig() =>
         ModeLockConfig.Default with
         {

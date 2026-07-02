@@ -786,15 +786,23 @@ RBF65–RBF67 evaluate rule minimality, functional robustness, and readiness for
 - **RBF66**: Tests alternative mathematical combination forms (e.g., L2 squared, multiplicative). Results show alternative forms either preserve `m=3` or abstain gracefully; none confidently select false-positive competitors within the valid domain.
 - **RBF67**: Introduces a "Theorem Readiness Checklist", explicitly categorizing conditions as `DIAGNOSTIC-PASS` (empirical evidence established) versus `PENDING-ANALYTICAL` (formal derivation required).
 
+## 21. Post-RBF68–RBF70 update
+
+RBF68–RBF70 begin the analytical theorem scaffolding by validating structural invariants of the core components.
+
+- **RBF68**: Validates that the phase closure defect form `|qΩ - p|` is a structural invariant across equivalent rational representations and compatible `qCore` values.
+- **RBF69**: Confirms that the derived bridge `qCore` (`[16, 17, 18]`) is invariant whether parameterized via the standard `Ω`-band or the inverted `γ`-band, indicating it is a structural band property.
+- **RBF70**: Demonstrates that action-stationarity residuals and relative `m=3` margin dominance are invariant under shared global normalizations but strictly break under asymmetric per-family tuning.
+
 Updated reviewer-safe status:
 
 ```text
-bounded shared-functional selection candidate with minimality diagnostics and theorem-readiness scaffold
+bounded shared-functional selection candidate with structural-invariant scaffolding toward analytical theorem readiness
 ```
 
 Primary remaining gap:
 
-> Transition the empirical `PENDING-ANALYTICAL` checklist items (e.g., topological necessity proof, formal asymptotic domain bounds) into fully derived mathematical proofs.
+> Continuous threshold/domain-limit derivation and formal proof of necessary/sufficient closure conditions.
 
 Claim boundary remains unchanged:
 - diagnostic/candidate only

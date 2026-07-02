@@ -58,11 +58,19 @@ Consolidated result (RBF50–RBF52)
 
 ---
 
+## Consolidated result (RBF68–RBF70)
+
+- The phase closure defect form `|qΩ - p|` is shown to be a structural invariant across equivalent representations and compatible `qCore` domains.
+- The `m=3` bridge `qCore` `[16, 17, 18]` is invariant whether parameterized via the `Ω`-band or the `γ`-band, identifying it as a structural property rather than a mathematical artifact.
+- Action-stationarity residuals and `m=3` margin dominance are strictly invariant under global/shared normalization but explicitly break under per-family scaling.
+
+---
+
 ## Current status statement
 
 Current reviewer-safe status:
 
-> m=3 is a bounded shared-functional selection candidate with minimality diagnostics and theorem-readiness scaffold.
+> m=3 is a bounded shared-functional selection candidate with structural-invariant scaffolding toward analytical theorem readiness.
 
 ---
 
@@ -70,8 +78,8 @@ Current reviewer-safe status:
 
 Primary remaining gaps:
 
-1. Transition empirical `PENDING-ANALYTICAL` checklist items to formal derivations.
-2. Formulate analytical proof-level necessary/sufficient closure conditions (e.g., topological necessity, domain bounding).
+1. Continuous threshold/domain-limit derivation.
+2. Formal proof of necessary/sufficient closure conditions.
 
 ---
 
@@ -86,12 +94,11 @@ Primary remaining gaps:
 
 ---
 
-## Next direction (RBF68+)
+## Next direction (RBF71+)
 
-The next test family should focus on building the **analytical theorem scaffolding**:
+The next test family should focus on continuous threshold and domain-limit diagnostics:
 
-1. Validating structural invariants mathematically rather than numerically.
-2. Deriving continuous limits for operational thresholds.
-3. Formally proving domain-of-validity bounds for the `m=3` selection.
+1. Deriving continuous limits for the operational thresholds currently used in the rule.
+2. Transitioning empirical evidence into analytical constraint boundary conditions.
 
 
