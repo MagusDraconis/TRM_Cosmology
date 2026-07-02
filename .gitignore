@@ -366,24 +366,9 @@ FodyWeavers.xsd
 !/docs/review/
 
 /docs/Theory/*
-!/docs/Theory/TRM_Geodesic_Derivation.md
-!/docs/Theory/TRM_Collective_Mode_Locking_BridgeScale.md
-!/docs/Theory/TRM_Finsler_Optical_Action.md
-!/docs/Theory/TRM_Rational_Band_First_Principles.md
-!/docs/Theory/TRM_V3_1_Action_Based_Memory_Closure.md
-!/docs/Theory/TRM_V3_2_Minimal_Action_From_TQM_Lattice.md
+!/docs/Theory/**
 
 /docs/review/*
-!/docs/review/REVIEW_PACKAGE.md
-!/docs/review/TRM_Peer_Review_Request.md
-!/docs/review/TRM_Current_Status_For_PeerReview.md
-!/docs/review/TRM_Service_Test_Consolidation.md
-!/docs/review/TRM_TestSuite_Classification.md
-!/docs/review/TRM_Real_Physics_Test_Coverage.md
-!/docs/review/TRM_Code_To_Theory_Audit.md
-!/docs/review/TRM_V3_1_Memory_Action_Closure_Review_Note.md
-!/docs/review/TRM_V3_1_Consolidated_Claim_Status.md
-!/docs/review/TRM_V3_2_Minimal_Action_From_Lattice_Review_Note.md
-!/docs/review/TRM_V3_0_to_V3_2_Progress_Summary.md
+!/docs/review/**
 # Local Zenodo source archive (do not commit)
 TRM_TQM_V3_0_Review_Baseline_Source.zip

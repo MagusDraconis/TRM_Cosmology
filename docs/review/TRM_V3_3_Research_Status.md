@@ -135,6 +135,29 @@ Claim boundaries:
 - no theorem-level claim
 - no GR replacement claim
 
+### RBF27–RBF37 m=3 action-derived boundary diagnostics
+
+- RBF27: derived action/tick reproduces the operational discriminator structure (strong agreement/ordering consistency).
+- RBF28 and RBF30: baseline derived full-stack selects `m=3` as the only admissible mode under the shared rule.
+- RBF29 and RBF31: `m=3` shows a phase/action boundary, and `m=2` fallback appears under stress as a boundary tradeoff.
+- RBF32: `m=3` has local baseline continuity but multiple admissibility components across the scanned grid.
+- RBF33: a stronger shared action margin does not cleanly remove `m=2` fallback without threshold-tuning risk.
+- RBF34: solver-step variation remains stable in the scanned setup; q-window shifts can move admissibility strongly.
+- RBF35–RBF37: bridge-core q-window geometry explains a large part of `m=3` selection behavior; `m=3` support is strongest when q-window includes bridge-core support.
+
+Status:
+
+> action-derived bounded three-constraint bridge-mode candidate.
+
+Claim boundaries:
+
+- diagnostic/candidate only
+- not theorem-level proof
+- not first-principles closure
+- not universal `m=3` selection
+- not GR replacement
+- no numerology
+
 ### What improved (SPARC)
 
 - Service-layer diagnostics now consistently enforce **fixed a0** and **no per-mode/per-galaxy refit**.

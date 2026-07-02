@@ -1,0 +1,395 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{physics}
+\usepackage{bm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{enumitem}
+\geometry{margin=2.5cm}
+
+\title{\textbf{Clockwork Cosmology}\\
+An Effective Weak-Field Theory with Lagrangian Density, Field Equations, and a Falsifiable Test Strategy}
+\author{Fabrice Wieser}
+\date{June 14, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper formulates Clockwork Cosmology as an effective weak-field theory of a flat Euclidean space described by two coupled scalar fields: a local clock-rate field $T(\mathbf{x},t)$ and an optical-spatial field $N(\mathbf{x},t)$. The framework is intentionally presented as an \emph{effective model theory}: its aim is not yet to replace general relativity as a complete microscopic theory, but to provide a consistent medium-based description of weak-field solar-system phenomena, namely gravitational redshift, light deflection, Shapiro time delay, and perihelion precession.
+
+The key structural claim is that time-comparison observables probe primarily the sector $T$, while path and optical observables probe primarily the combination $N/T$. On that basis the paper introduces an effective Lagrangian density, derives linearized field equations and the Newtonian limit, and shows how the classical weak-field tests can be reproduced at first post-Newtonian order. Cosmological redshift is interpreted as a change in the effective time scale along the photon trajectory rather than as a necessary consequence of metric space expansion. The theory is explicitly framed as a falsifiable effective model.
+\end{abstract}
+
+\section{Motivation and guiding idea}
+The present work does not claim to replace general relativity in the strong-field regime. Its aim is narrower and therefore more precise: to construct an effective weak-field theory that reproduces the classical solar-system tests of gravitation in a medium language, without presupposing that physical space itself must be dynamically curved in an ontological sense.
+
+The standard test set in the solar system comprises gravitational redshift, solar light deflection, and Mercury's perihelion precession; Shapiro time delay is commonly treated as an additional high-precision weak-field test. Any alternative weak-field model should therefore first be measured against exactly these observations. The central lesson of the present analysis is that a single scalar field is not sufficient. Gravitational redshift is primarily a clock-comparison effect, whereas light deflection and time delay are path and optical effects. This motivates the introduction of two fields: the local clock-rate field $T$ and an optical-spatial factor $N$.
+
+\section{Kinematical framework}
+\subsection{Basic assumptions}
+We work with the following assumptions:
+\begin{enumerate}[label=\arabic*.]
+    \item Physical space is globally Euclidean, flat, and non-dynamical.
+    \item Local gravitational effects are interpreted not as curvature of this space but as changes in two fields:
+    \begin{itemize}
+        \item $T(\mathbf{x},t)$: local relative clock rate,
+        \item $N(\mathbf{x},t)$: local optical-spatial scaling factor.
+    \end{itemize}
+    \item In the unperturbed vacuum,
+    \begin{equation}
+      T \to 1, \qquad N \to 1.
+    \end{equation}
+    \item The fundamental speed constant of the unperturbed medium is
+    \begin{equation}
+      c = 299\,792\,458\;\mathrm{m/s}.
+    \end{equation}
+\end{enumerate}
+
+\subsection{Effective line element}
+As an effective description of measurement relations we define
+\begin{equation}
+\boxed{
+ ds^2 = -T(\mathbf{x},t)^2 c^2 dt^2 + N(\mathbf{x},t)^2\,\delta_{ij}dx^i dx^j
+}
+\label{eq:metricENG}
+\end{equation}
+with $\delta_{ij}$ the Euclidean background tensor.
+
+\paragraph{Interpretation.}
+Equation \eqref{eq:metricENG} is not intended as an ontological claim that space itself is curved. It is an effective measurement rule: if local clocks tick differently and light fronts propagate differently, then measured time intervals and optical path lengths differ from their values in the unperturbed vacuum. The fields $T$ and $N$ are the physical carriers of those deviations.
+
+\section{Lagrangian density of the effective theory}
+\subsection{Why two fields?}
+One of the main lessons of the model analysis is that one field is not enough if one wants to reproduce gravitational redshift, light deflection, and Shapiro delay simultaneously in a clean way. Gravitational redshift reacts primarily to clock rate, while light deflection and signal delay react to the combination of clock rate and optical path structure. Hence the split into $T$ and $N$ is conceptually necessary.
+
+\subsection{Weak-field potential}
+We define the dimensionless weak-field quantity
+\begin{equation}
+ U(\mathbf{x}) = \frac{\Phi(\mathbf{x})}{c^2},
+\end{equation}
+where for a static point mass $M$
+\begin{equation}
+ \Phi(r) = \frac{GM}{r},
+ \qquad
+ U(r)=\frac{GM}{rc^2}.
+\end{equation}
+In the solar system one has $U\ll1$, so an expansion in small potentials is justified.
+
+\subsection{Proposed field Lagrangian}
+As a minimal effective field theory I propose the Lagrangian density
+\begin{equation}
+\boxed{
+\mathcal L_{\text{field}} =
+\frac{c^4}{8\pi G}\left[
+-\frac{\lambda_T}{2}\,\frac{(\nabla T)^2}{T^2}
+-\frac{\lambda_N}{2}\,\frac{(\nabla N)^2}{N^2}
+- V(T,N)
+\right]
+- \rho\,c^2\,\mathcal C(T,N)
+}
+\label{eq:LfieldENG}
+\end{equation}
+with
+\begin{itemize}
+    \item $\lambda_T,\lambda_N$ dimensionless stiffness parameters,
+    \item $V(T,N)$ an effective coupling potential,
+    \item $\rho$ the ordinary mass density,
+    \item $\mathcal C(T,N)$ the matter-coupling function.
+\end{itemize}
+
+\paragraph{Why this form?}
+The terms $(\nabla T)^2/T^2$ and $(\nabla N)^2/N^2$ penalize relative, rather than absolute, field changes. This matches the idea of a medium whose observable dynamics is driven mainly by gradients. The matter term makes explicit that matter is not merely a test probe but a source of local field structure.
+
+\subsection{Minimal potential choice}
+The simplest potential that reproduces the static weak-field sector is
+\begin{equation}
+\boxed{
+V(T,N)=\frac{\kappa}{2}\,(N-T^{-1})^2
+}
+\end{equation}
+with $\kappa>0$.
+
+\paragraph{Meaning.}
+This potential enforces the approximate weak-field relation
+\begin{equation}
+N \approx T^{-1}.
+\end{equation}
+To first order in $U$ this yields
+\begin{equation}
+ T \approx 1-U,
+ \qquad
+ N \approx 1+U,
+\end{equation}
+which is precisely the weak-field structure used throughout the model.
+
+\subsection{Minimal matter coupling}
+As the simplest linear matter coupling we choose
+\begin{equation}
+\boxed{
+\mathcal C(T,N)=\alpha_T(1-T)+\alpha_N(N-1)
+}
+\end{equation}
+with dimensionless couplings $\alpha_T,\alpha_N$.
+
+\paragraph{Why linear?}
+In the weak-field sector one wants $T$ and $N$ to be sourced proportionally to the source mass. A linear coupling to the deviations from $T=1$ and $N=1$ is the simplest way to realize that.
+
+\section{Field equations}
+The Euler-Lagrange equations associated with \eqref{eq:LfieldENG} provide the effective field equations. In the stationary weak-field regime a linearized treatment is sufficient.
+
+Setting
+\begin{equation}
+ T = 1-\tau, \qquad N = 1+\nu,
+ \qquad \tau,\nu \ll 1,
+\end{equation}
+the Lagrangian reduces to a standard quadratic form with sources. The linearized field equations are then approximately
+\begin{equation}
+\boxed{
+\lambda_T\,\nabla^2 \tau - \kappa(\tau-\nu)= 4\pi G\,\alpha_T \frac{\rho}{c^2}
+}
+\label{eq:tauENG}
+\end{equation}
+and
+\begin{equation}
+\boxed{
+\lambda_N\,\nabla^2 \nu - \kappa(\nu-\tau)= 4\pi G\,\alpha_N \frac{\rho}{c^2}.
+}
+\label{eq:nuENG}
+\end{equation}
+
+\paragraph{Remark.}
+These equations should be read explicitly as effective weak-field field equations. They state: matter density sources both fields, while the coupling potential ties them together so that they do not drift independently.
+
+\subsection{Static point-mass solution}
+Outside a point mass ($\rho=0$ for $r>0$) and for strong coupling $\kappa\gg0$, Eqs.~\eqref{eq:tauENG} and \eqref{eq:nuENG} imply approximately
+\begin{equation}
+ \tau \approx \nu,
+\end{equation}
+and both satisfy Laplace equations with spherical solution
+\begin{equation}
+ \tau(r) \propto \frac{1}{r},
+ \qquad
+ \nu(r) \propto \frac{1}{r}.
+\end{equation}
+Normalization to the Newtonian limit then fixes
+\begin{equation}
+\boxed{
+T(r)=1-\frac{GM}{rc^2},
+\qquad
+N(r)=1+\frac{GM}{rc^2}.
+}
+\label{eq:TNENG}
+\end{equation}
+
+\section{Matter dynamics and Newtonian limit}
+\subsection{Test-particle Lagrangian}
+A massive test body of mass $m$ is described by the action
+\begin{equation}
+ S_m=-mc\int ds,
+\end{equation}
+with $ds$ defined by Eq.~\eqref{eq:metricENG}.
+
+For small velocities $v\ll c$, one obtains the effective particle Lagrangian
+\begin{equation}
+ L_m \approx -mc^2 T + \frac{m}{2} N^2 \vb*{v}^2.
+\end{equation}
+Using Eq.~\eqref{eq:TNENG} to first order in $U$ gives
+\begin{equation}
+ L_m \approx -mc^2 + m\Phi + \frac{m}{2}\vb*{v}^2.
+\end{equation}
+Dropping the irrelevant additive constant $-mc^2$, one finds
+\begin{equation}
+ L_m^{\text{eff}} = \frac{m}{2}\vb*{v}^2 + m\Phi.
+\end{equation}
+The Euler-Lagrange equation then yields
+\begin{equation}
+ \bm a = -\nabla \Phi = -\frac{GM}{r^2}\bm e_r,
+\end{equation}
+which is exactly Newton's law.
+
+\section{Light, optical index, and travel time}
+\subsection{Effective light speed}
+For light one has $ds^2=0$. From Eq.~\eqref{eq:metricENG} one obtains for radial propagation
+\begin{equation}
+ \frac{dr}{dt} = c\,\frac{T(r)}{N(r)}.
+\end{equation}
+This defines an effective coordinate propagation speed
+\begin{equation}
+ c_{\text{eff}}(r)= c\,\frac{T(r)}{N(r)}.
+\end{equation}
+With Eq.~\eqref{eq:TNENG} one finds to first order
+\begin{equation}
+ c_{\text{eff}}(r)\approx c\left(1-2\frac{GM}{rc^2}\right).
+\end{equation}
+
+\subsection{Effective refractive index}
+Equivalently, one may introduce an optical index
+\begin{equation}
+\boxed{
+ n_{\text{eff}}(r) = \frac{N(r)}{T(r)} \approx 1+2\frac{GM}{rc^2}.
+}
+\end{equation}
+
+\paragraph{Why this matters.}
+This expression immediately explains why light deflection and Shapiro delay share the same extra factor of $2$: both are path and optical phenomena and therefore respond to $N/T$, not to $T$ alone.
+
+\section{The four classical weak-field tests}
+\subsection{Gravitational redshift}
+Two stationary clocks or atomic transitions at radii $r_e$ and $r_o$ compare their local time rates through $T(r)$. Hence
+\begin{equation}
+ 1+z = \frac{T(r_o)}{T(r_e)}.
+\end{equation}
+For an observer in the asymptotic far field ($r_o\to\infty$, so $T\to1$),
+\begin{equation}
+ 1+z = \frac{1}{T(r_e)} \approx 1+\frac{GM}{r_e c^2},
+\end{equation}
+thus
+\begin{equation}
+\boxed{
+ z \approx \frac{GM}{r_e c^2}.
+}
+\end{equation}
+
+\subsection{Light deflection}
+With the gradient index $n_{\text{eff}}(r)\approx1+2GM/(rc^2)$, standard weak-field integration for a ray with impact parameter $b$ gives
+\begin{equation}
+\boxed{
+ \hat\alpha \approx \frac{4GM}{b c^2}.
+}
+\end{equation}
+
+\subsection{Shapiro time delay}
+The excess travel time is obtained from the optical line integral
+\begin{equation}
+ \Delta t = \frac{1}{c}\int\left(n_{\text{eff}}-1\right)d\ell.
+\end{equation}
+Using $n_{\text{eff}}-1\approx2GM/(rc^2)$, this yields
+\begin{equation}
+\boxed{
+ \Delta t \approx \frac{2GM}{c^3}\ln\left(\frac{4r_1r_2}{b^2}\right).
+}
+\end{equation}
+
+\subsection{Mercury perihelion precession}
+Perihelion precession is the most delicate test because it cannot be attributed to pure clock effects alone; it depends on the full orbital dynamics implied by the effective line element.
+
+Starting from Eq.~\eqref{eq:metricENG} and the massive-particle action,
+\begin{equation}
+ S = -mc\int ds,
+\end{equation}
+one obtains in the weak field an effective equation of motion governed by the combination of $T(r)$ and $N(r)$. In Binet form for $u=1/r$, the first post-Newtonian correction gives
+\begin{equation}
+\frac{d^2u}{d\phi^2} + u = \frac{GM}{L^2} + \frac{3GM}{c^2}u^2,
+\end{equation}
+where $L$ is the specific angular momentum.
+
+The extra term
+\begin{equation}
+\frac{3GM}{c^2}u^2
+\end{equation}
+is the 1PN correction generated by the nonlinear combination of the clock and spatial sectors. It makes the orbit non-closed, producing a small perihelion shift per revolution,
+\begin{equation}
+\boxed{
+\Delta \varphi \approx \frac{6\pi GM}{a(1-e^2)c^2}.
+}
+\end{equation}
+
+\section{Cosmological redshift without space expansion}
+\subsection{Guiding idea}
+Cosmological redshift is interpreted here not as stretching of space itself but as a change in the effective time scale along the photon's trajectory. If photon frequency is tied to the local clock rate, then a slow drift of that clock rate automatically induces a frequency drift.
+
+\subsection{Differential law}
+We postulate the relational coupling
+\begin{equation}
+ \frac{d\nu}{\nu} = \frac{dT}{T}.
+\end{equation}
+Integration along the trajectory gives
+\begin{equation}
+\boxed{
+ 1+z = \frac{T_{\text{receiver}}}{T_{\text{emitter}}}.
+}
+\end{equation}
+
+\paragraph{Why this is preferable to classical tired light.}
+In this formulation the redshift is not caused by stochastic scattering on discrete particles and not by an unspecified dissipative loss in a granular medium. Therefore no lateral diffusion and no image blurring are implied. The wavefront remains coherent; only its global time scale changes.
+
+\subsection{A minimal cosmological example}
+For a slowly drifting cosmological background field,
+\begin{equation}
+ T_{\text{cosmo}}(t)=e^{-Ht},
+\end{equation}
+one obtains immediately
+\begin{equation}
+ 1+z = e^{H\Delta t}.
+\end{equation}
+For small redshifts,
+\begin{equation}
+ z \approx H\Delta t,
+\end{equation}
+which is a linear Hubble relation without metric space expansion.
+
+\section{Falsifiable test strategy}
+The value of an alternative effective gravitation theory should be judged not by philosophical appeal but by the sharpness of its possible refutation. Clockwork Cosmology is therefore scientifically meaningful only if it makes sector-specific predictions that can be checked and, in case of conflict, rejected.
+
+\subsection{Test class I: time sector}
+Gravitational redshift probes primarily the clock-rate field $T(r)$. High-precision frequency comparisons between clocks or atomic transitions in different gravitational potentials therefore test the time sector directly. If the observed frequency shift deviates systematically from the weak-field form derived from $T(r)$, the time sector of the model is falsified.
+
+\subsection{Test class II: optical/path sector}
+Light deflection and Shapiro delay depend primarily on
+\begin{equation}
+ n_{\text{eff}}(r)=\frac{N(r)}{T(r)}.
+\end{equation}
+These two phenomena therefore form an internal consistency test of the optical sector. A model that reproduces the factor $4GM/(bc^2)$ for light bending but fails to reproduce the logarithmic Shapiro prefactor is internally inconsistent.
+
+\subsection{Test class III: mixed 1PN sector}
+Mercury's perihelion precession probes the combined post-Newtonian structure of the model and therefore tests neither the pure time sector nor the pure optical sector in isolation, but their joint 1PN behavior. Hence perihelion precession is a decisive cross-check: a parameter set that reproduces redshift and light-path phenomena but fails for Mercury cannot be regarded as a consistent weak-field 1PN theory.
+
+\subsection{Strong falsification criterion}
+The theory is therefore tested against three independent requirements:
+\begin{enumerate}
+    \item The time sector must reproduce gravitational redshift.
+    \item The optical sector must reproduce \emph{both} light deflection and Shapiro delay.
+    \item The combined 1PN sector must reproduce perihelion precession.
+\end{enumerate}
+Failure of any one of these three requirements falsifies the present effective weak-field theory form.
+
+\subsection{Practically relevant measurement class: precision clock comparisons}
+A particularly important experimental channel is the comparison of high-precision clocks in different gravitational potentials. Such measurements address the time sector $T(r)$ directly. Space-based clock-comparison concepts of the ACES/PHARAO type are therefore not merely auxiliary experiments in the present framework but central tests of the theory form.
+
+The decisive question is not only whether a redshift is observed, but whether the same function $T(r)$ that passes the clock-comparison test remains compatible with the parameter level inferred from light deflection, Shapiro delay, and perihelion precession.
+
+\section{Energy and interpretation}
+A natural objection is: if the clock rate changes, where is the associated energy stored? In the present model the cleanest answer is to treat $T$ and $N$ like other physical fields: variations of these fields carry field energy encoded in the gradient and potential terms of the effective Lagrangian. Energy differences therefore do not disappear; they are interpreted as transfers between matter and field sectors.
+
+\section{Limits and outlook}
+The present version provides a complete weak-field effective theory form, including
+\begin{itemize}
+    \item a clear kinematical framework,
+    \item a Lagrangian density,
+    \item linearized field equations,
+    \item the Newtonian limit,
+    \item and the four classical solar-system tests.
+\end{itemize}
+It is, however, not yet a full microscopic theory. In particular, the following remain open:
+\begin{enumerate}[label=\arabic*.]
+    \item the nonlinear strong-field structure,
+    \item a fully developed global cosmology,
+    \item a closed derivation of Mercury's result directly from the field action through to the final orbital formula,
+    \item and the microscopic nature of the time-ether itself.
+\end{enumerate}
+
+\section{Conclusion}
+Clockwork Cosmology can be formulated as a weak-field effective field theory in which two scalar fields --- the local clock factor $T$ and the optical-spatial factor $N$ --- carry the observable gravitational effects. This form is mathematically clearer than a purely qualitative medium picture and at the same time more intuitive than a purely ontological curvature language. In the static weak-field regime it reproduces Newtonian gravity and provides a unified effective description of redshift, light deflection, Shapiro delay, and perihelion precession.
+
+The next stage of development is not primarily more rhetoric but a stricter nonlinear field analysis, a fuller cosmological dynamics, and confrontation with precision astrophysical data.
+
+\bibliographystyle{plain}
+\bibliography{Uhrwerk_Kosmologie_Referenzen}
+
+\end{document}

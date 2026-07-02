@@ -1,0 +1,579 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+\usepackage{enumitem}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+
+\title{Clockwork Cosmology\\
+	\large A Temporal Rate Matrix Framework for Unified Gravitational and Cosmological Dynamics}
+\author{Fabrice Wieser}
+\date{\today}
+
+\begin{document}
+
+	\maketitle
+	\vspace{-1em}
+	\begin{center}
+		\textit{Version: TRM Framework V2.2}
+	\end{center}
+	%--------------------------------------------------
+\begin{abstract}
+	The standard cosmological model ($\Lambda$CDM) successfully describes a wide range of observational phenomena, but relies on the introduction of dark matter and dark energy, which have not yet been directly detected. In this work, we investigate an alternative framework based on the concept of a scalar temporal rate field, referred to as the Temporal Rate Matrix (TRM).
+
+	Within the TRM framework, gravitational dynamics and cosmological evolution are interpreted as kinematic drifts induced by spatial and temporal gradients of a dimensionless field $\mathcal{T}(x,t)$. This approach enables a unified description of phenomena traditionally attributed to separate dark sector components.
+
+	The model is evaluated across four independent observational domains: galactic rotation curves (SPARC database), galaxy cluster dynamics (ACCEPT catalog), the angular scale of the cosmic microwave background (Planck data), and the luminosity--redshift relation of Type Ia supernovae (Pantheon+ dataset). In each domain, the TRM framework reproduces the leading observational characteristics through domain-specific boundary conditions of the same underlying scalar field.
+
+	While the current formulation does not yet achieve the precision of the standard cosmological model, it provides a consistent and testable alternative interpretation that links gravitational and cosmological phenomena within a single kinematic framework.
+
+	The results suggest that temporal-rate dynamics may contribute to the interpretation of large-scale structure and cosmic evolution, motivating further theoretical and observational investigation.
+\end{abstract}
+
+	%--------------------------------------------------
+	\section{Introduction}
+
+	The standard cosmological model ($\Lambda$CDM) stands as one of the most successful parameterizations of the observable universe, accurately describing a wide array of phenomena from the formation of large-scale structures to the temperature anisotropies of the Cosmic Microwave Background (CMB). However, this success relies on the introduction of the so-called ``dark sector''—specifically, Cold Dark Matter (CDM) and Dark Energy ($\Lambda$)—which together are presumed to constitute approximately 95\% of the universe's total mass-energy content. Despite decades of dedicated experimental searches, these components have not yet been directly detected, prompting the ongoing exploration of alternative gravitational and cosmological frameworks.
+
+	In earlier conceptual developments, a temporal background was proposed as a potential alternative to the dark sector. The present work develops this idea into a quantitative and testable framework known as the Temporal Rate Matrix (TRM). By redefining the underlying terminology to reflect a rigorous scalar field, the TRM framework explores whether the kinematic discrepancies observed across the cosmos can be described without explicitly invoking non-baryonic mass or vacuum energy components.
+
+	The core postulate of the TRM framework is that gravitational dynamics and cosmic expansion are not exclusively attributed to spacetime curvature or localized dark halos, but instead arise as kinematic drifts induced by macroscopic gradients within a ubiquitous, dimensionless time-rate field $\mathcal{T}(x,t)$.
+
+	This paper evaluates the TRM framework across four distinct astrophysical regimes using observational data:
+
+	\begin{itemize}
+		\item \textbf{Section 2} establishes the core axioms and mathematical observables of the TRM field.
+		\item \textbf{Section 3} applies the framework to the intracluster medium using the ACCEPT database, proposing a pressure-driven regime transition.
+		\item \textbf{Section 4} evaluates the TRM boundary relation against the SPARC database of galactic rotation curves.
+		\item \textbf{Section 5} examines the early universe, reproducing the angular scale of the CMB acoustic peaks via primordial temporal phase coherence.
+		\item \textbf{Section 6} analyzes the Pantheon+ supernova dataset, interpreting cosmological expansion as an effective temporal damping process.
+		\item Finally, \textbf{Sections 7 and 8} provide a unified interpretation of these phenomena and outline the current structural limitations of the model.
+	\end{itemize}
+
+	The goal of this work is not to replace the standard model, but to investigate whether a unified temporal framework can consistently reproduce key observational phenomena.
+
+	%--------------------------------------------------
+\section{The Temporal Rate Matrix (TRM) Framework}
+
+\subsection{Core Axioms and the Temporal Field}
+
+The traditional cosmological consensus relies on the introduction of non-baryonic cold dark matter (CDM) and dark energy ($\Lambda$) to resolve discrepancies between observable luminous matter and the dynamical behavior of galaxies, clusters, and the universe at large. The Temporal Rate Matrix (TRM) framework proposes a unified alternative physical framework by defining a fundamental kinematic background.
+
+The TRM is modeled as a ubiquitous, emergent structure governing the local rate of physical processes. Rather than treating spacetime as a purely geometric manifold warped by mass-energy, the TRM introduces a dimensionless scalar field, $\mathcal{T}(x,t)$, which represents the local time-rate factor relative to a cosmic baseline.
+
+Within this framework, gravitational dynamics are not exclusively attributed to spacetime curvature but are interpreted as a kinematic drift induced by macroscopic gradients of the temporal rate field. The fundamental acceleration law is defined as:
+
+\begin{equation}
+	\bm{a} = -c_A^2 \nabla \mathcal{T}
+\end{equation}
+
+where $c_A$ acts as an effective speed-of-action coupling constant, and $\nabla \mathcal{T}$ denotes the spatial gradient of the temporal rate. This single field equation yields scale-dependent effective accelerations when applied to different astrophysical regimes.
+
+The scalar field $\mathcal{T}(x,t)$ thus acts as the fundamental dynamical variable from which all subsequent observable relations are derived.
+
+%--------------------------------------------------
+\subsection{Defining the Observables Across Cosmic Scales}
+
+To ensure that the TRM framework remains directly testable against empirical data, we define the leading observable relations for each astrophysical domain. These relations represent domain-specific boundary conditions of the same underlying temporal field dynamics.
+
+%--------------------------------------------------
+\subsubsection{The Galactic Domain (Rotation Curves)}
+
+At galactic scales, the TRM framework reproduces the phenomenology commonly described by Modified Newtonian Dynamics (MOND) or dark matter halos. The effective radial acceleration $g_{\mathrm{eff}}(r)$ is given by the asymptotic boundary relation:
+
+\begin{equation}
+	g_{\mathrm{eff}}(r) = g_{\mathrm{bar}} + \sqrt{g_{\mathrm{bar}}\, a_0}
+\end{equation}
+
+where $g_{\mathrm{bar}}$ denotes the baryonic acceleration and $a_0$ represents the characteristic TRM acceleration scale emerging from the global temporal background dynamics.
+
+This expression corresponds to the asymptotic limit of the underlying temporal-gradient formulation and allows the model to reproduce flat rotation curves and the baryonic Tully-Fisher relation (BTFR).
+
+%--------------------------------------------------
+\subsubsection{The Galaxy Cluster Domain (Intracluster Medium)}
+
+At cluster scales, the temporal field exhibits a regime-dependent behavior. The effective gravitational acceleration is modified according to:
+
+\begin{equation}
+	g_{\mathrm{eff}}(r,z) = g_N(r)\left(1 + K(z)\,z\right)
+\end{equation}
+
+where $g_N(r)$ is the Newtonian acceleration derived from baryonic mass, and $K(z)$ is a redshift-dependent scaling coefficient.
+
+This modification is governed by a pressure-driven regime transition, defined through the scalar quantity:
+
+\begin{equation}
+	\Xi = \|\nabla P\|
+\end{equation}
+
+where $\Xi$ represents the magnitude of the pressure gradient in the intracluster medium. The transition occurs at a critical threshold:
+
+\begin{equation}
+	\Xi_{\mathrm{crit}} \approx 6.0 \times 10^{-34}\ \mathrm{dyn/cm^3}
+\end{equation}
+
+Below this threshold, the temporal field couples to the cosmological background, leading to enhanced effective acceleration.
+
+%--------------------------------------------------
+\subsubsection{Cosmological Expansion (Type Ia Supernovae)}
+
+At cosmological scales, the TRM framework interprets the luminosity-redshift relation as arising from a cumulative temporal drift within the background field. The luminosity distance is given by:
+
+\begin{equation}
+	D_L(z) = \frac{c}{H_{\mathcal{T}}} \, z (1+z) \, e^{\beta_{\mathcal{T}} z}
+\end{equation}
+
+where $H_{\mathcal{T}}$ represents the base temporal pacing (analogous to the Hubble parameter), and $\beta_{\mathcal{T}}$ is the temporal drift coefficient.
+
+The observable distance modulus is:
+
+\begin{equation}
+	\mu(z) = 5 \log_{10}(D_L) + 25
+\end{equation}
+
+This formulation encodes cosmological deviations as an effective temporal damping accumulated along photon trajectories.
+
+%--------------------------------------------------
+\subsubsection{The Cosmic Microwave Background (CMB)}
+
+In the early universe, the characteristic angular scale of the acoustic peaks is described by:
+
+\begin{equation}
+	\ell \approx \pi \frac{D_A}{r_s}
+\end{equation}
+
+where $D_A$ is the angular diameter distance and $r_s$ is the comoving sound horizon.
+
+Within the TRM framework, these scales arise from global temporal phase coherence rather than solely from gravitational potential wells. The sound horizon is governed by plasma physics and temporal synchronization, while $D_A$ is evaluated under an effective Euclidean background approximation.
+
+%--------------------------------------------------
+\subsection{Unified Interpretation of Observables}
+
+Across all four domains, the TRM framework preserves a single underlying mechanism: observable dynamics arise from spatial or temporal gradients of the same scalar time-rate field $\mathcal{T}(x,t)$, evaluated under domain-specific boundary conditions.
+
+This unification forms the conceptual basis for interpreting gravitational and cosmological phenomena within a single scalar-field framework.
+
+	%--------------------------------------------------
+
+
+\section{The Galaxy Cluster Domain}
+
+\subsection{Mass Discrepancy in the Intracluster Medium}
+
+Galaxy clusters represent a critical testing ground for gravitational frameworks. Standard analyses of the intracluster medium (ICM) via X-ray emissions consistently reveal a dynamical mass discrepancy: the observable baryonic mass—primarily in the form of hot gas and stellar components—is insufficient to maintain hydrostatic equilibrium under purely Newtonian dynamics. This deficit is typically interpreted within the standard cosmological model ($\Lambda$CDM) through the introduction of extended collisionless dark matter halos.
+
+The TRM framework, conversely, interprets this behavior as a macroscopic manifestation of temporal field dynamics, in which the effective gravitational response emerges from scale-dependent variations of the temporal rate field.
+
+%--------------------------------------------------
+\subsection{The Pressure-Driven Regime Transition}
+
+Rather than introducing non-baryonic mass, the TRM framework models the deep potential wells of galaxy clusters as regions where the temporal field undergoes a localized regime transition. In this domain, the effective gravitational acceleration $g_{\mathrm{eff}}$ deviates systematically from the classical baryonic expectation $g_N$.
+
+As introduced in Section 2, the cluster-scale acceleration is defined as:
+
+\begin{equation}
+	g_{\mathrm{eff}}(r,z) = g_N(r)\left(1 + K(z)\,z\right)
+\end{equation}
+
+In the application to the intracluster medium, the scaling coefficient $K(z)$ is not treated as a free parameter for individual clusters. Instead, the system is governed by a bimodal classification triggered by the thermodynamic state of the gas.
+
+This regime transition is characterized by the scalar quantity:
+
+\begin{equation}
+	\Xi = \|\nabla P\|
+\end{equation}
+
+where $\Xi$ represents the magnitude of the local pressure gradient within the ICM. The transition occurs at a critical threshold:
+
+\begin{equation}
+	\Xi_{\mathrm{crit}} \approx 6.0 \times 10^{-34}\ \mathrm{dyn/cm^3}
+\end{equation}
+
+Above this threshold, the system remains effectively Newtonian. Below it, the temporal field couples to the cosmological background, enhancing the effective gravitational response.
+
+This pressure-driven transition represents the cluster-scale realization of the general TRM principle, where macroscopic dynamics are governed by gradients and stability conditions of the temporal rate field.
+
+%--------------------------------------------------
+\subsection{Empirical Validation (ACCEPT Catalog)}
+
+To test the viability of this regime transition, the TRM framework was applied to the ACCEPT (Archive of Chandra Cluster Entropy Profile Tables) database. This catalog provides high-resolution X-ray profiles, enabling direct extraction of temperature, density, and pressure gradients required to compute both $g_N(r)$ and $\Xi$.
+
+Applying the TRM model strictly via the predefined physical threshold yields a quantitative alternative description of the observed mass discrepancy across the cluster sample.
+
+A blind bimodal classification based solely on the pressure threshold achieves:
+
+\begin{itemize}
+	\item Predictive accuracy: $\sim 62.7\%$
+	\item Global geometric mass-error improvement: $\sim 1.10 \times$
+\end{itemize}
+
+Here, predictive accuracy refers to the fraction of clusters correctly assigned to either the Newtonian or TRM-supported regime using only the scalar pressure criterion.
+
+%--------------------------------------------------
+\subsection{Post-Merger Dynamics}
+
+A notable advantage of the pressure-triggered temporal transition is its dynamic response to highly disturbed systems. In dynamically young or post-merger clusters—such as the Bullet Cluster or Abell 2744—the spatial offset between the X-ray emitting gas and the inferred gravitational potential presents a challenge for many modified gravity models.
+
+Within the TRM framework, the effective acceleration is not tied to a static mass distribution but instead follows the evolving thermodynamic gradients of the system. As a result, the temporal regime transition adapts dynamically to disturbed pressure profiles.
+
+Consequently, the model mitigates systematic over-corrections commonly encountered in simplified treatments of non-equilibrium cluster environments, allowing for a more flexible description of complex morphologies.
+
+	%--------------------------------------------------
+
+	\section{The Galactic Domain}
+
+	\subsection{The Kinematic Discrepancy at Galactic Scales}
+
+	At the scale of individual galaxies, the observed rotation curves of late-type and spiral galaxies remain asymptotically flat well beyond their luminous baryonic radii. In addition, observational data reveals a tight correlation between the total baryonic mass and the asymptotic rotation velocity, known as the Baryonic Tully--Fisher Relation (BTFR).
+
+	Within the standard $\Lambda$CDM framework, these kinematic features are typically modeled by invoking extended cold dark matter halos, which are adjusted individually for each galaxy. Phenomenological alternatives, most notably Modified Newtonian Dynamics (MOND), reproduce these observations through empirical interpolation functions that modify the Newtonian force law below a characteristic acceleration scale.
+
+	The TRM framework approaches this problem differently, interpreting the observed behavior as the asymptotic limit of temporal field gradients, rather than introducing additional matter components or ad-hoc interpolation functions.
+
+	%--------------------------------------------------
+	\subsection{The TRM Asymptotic Boundary}
+
+	As defined in Section 2, the TRM framework derives an effective asymptotic boundary relation for radial accelerations. In the weak-field regime of a galaxy, where the baryonic acceleration $g_{\mathrm{bar}}$ becomes small compared to a characteristic scale, the temporal field develops a non-linear contribution that dominates over the classical Newtonian term.
+
+	The resulting effective acceleration is given by:
+
+	\begin{equation}
+		g_{\mathrm{eff}}(r) = g_{\mathrm{bar}} + \sqrt{g_{\mathrm{bar}}\, a_0}
+	\end{equation}
+
+	where $a_0$ represents the characteristic TRM acceleration scale emerging from the global temporal background dynamics.
+
+	This expression corresponds to the asymptotic limit of the underlying temporal-gradient formulation and defines the effective boundary between the Newtonian and modified regimes.
+
+	In contrast to MOND, which relies on a family of empirical interpolation functions, the TRM relation is algebraic and deterministic, arising directly from the structure of the scalar temporal field.
+
+	%--------------------------------------------------
+	\subsection{Implications for Rotation Curves and the BTFR}
+
+	In the regime where $g_{\mathrm{bar}} \ll a_0$, the second term dominates, yielding:
+
+	\begin{equation}
+		g_{\mathrm{eff}}(r) \approx \sqrt{g_{\mathrm{bar}}\, a_0}
+	\end{equation}
+
+	For circular motion, the radial acceleration is related to the rotation velocity $V(r)$ by:
+
+	\begin{equation}
+		\frac{V^2}{r} = g_{\mathrm{eff}}(r)
+	\end{equation}
+
+	Substituting the asymptotic form of $g_{\mathrm{eff}}$ and solving for $V$ yields:
+
+	\begin{equation}
+		V^2 \approx \sqrt{G M a_0}
+	\end{equation}
+
+	which leads directly to:
+
+	\begin{equation}
+		V^4 = G M a_0
+	\end{equation}
+
+	This recovers the baryonic Tully--Fisher relation as a natural consequence of the TRM framework.
+
+	%--------------------------------------------------
+	\subsection{Empirical Validation (SPARC Database)}
+
+	To test this relation, the TRM model was evaluated against the SPARC (Spitzer Photometry and Accurate Rotation Curves) dataset, which provides high-quality rotation curves and baryonic mass distributions for a large sample of galaxies.
+
+	A global non-linear co-fit was performed across $2839$ resolved data points. The TRM framework recovers a characteristic acceleration scale of:
+
+	\begin{equation}
+		a_0 \approx 1.02 \times 10^{-10}\ \mathrm{m/s^2}
+	\end{equation}
+
+	with a residual scatter of approximately:
+
+	\begin{equation}
+		\sigma \approx 0.141\ \mathrm{dex}
+	\end{equation}
+
+	Within observational uncertainties, this fit quality is comparable to that obtained with optimized MOND models, which typically yield $\sigma \approx 0.134\ \mathrm{dex}$.
+
+	Notably, the TRM framework achieves this without invoking interpolation functions, instead relying on the asymptotic behavior of the temporal field.
+
+	%--------------------------------------------------
+	\subsection{Physical Interpretation of the Acceleration Scale}
+
+	Within the TRM framework, the acceleration scale $a_0$ is not introduced phenomenologically, but emerges naturally from the global temporal dynamics.
+
+	Because the scalar field $\mathcal{T}(x,t)$ is globally defined, the same underlying temporal structure governs both local galactic dynamics and large-scale cosmological evolution. In this interpretation, $a_0$ reflects a local manifestation of the global temporal background drift characterized by $\beta_{\mathcal{T}}$.
+
+	This provides a unified perspective in which the acceleration scale in galaxies and the expansion dynamics of the universe are related through the same scalar field, rather than treated as independent phenomena.
+	%--------------------------------------------------
+
+	\section{The Cosmic Microwave Background}
+
+	\subsection{The Acoustic Peak Challenge}
+
+	The Cosmic Microwave Background (CMB) provides one of the most stringent tests for any cosmological model. In the standard $\Lambda$CDM paradigm, the characteristic acoustic peaks in the CMB temperature power spectrum are produced by photon--baryon oscillations evolving within gravitational potential wells, typically associated with early structure formation involving cold dark matter.
+
+	Models without cold dark matter generally encounter difficulties reproducing both the amplitude and angular positions of these peaks. The TRM framework approaches this problem by proposing an alternative mechanism based on global temporal phase coherence rather than static mass-induced potentials.
+
+	%--------------------------------------------------
+	\subsection{The TRM Acoustic Mechanism}
+
+	As introduced in Section 2, the angular scale of the acoustic peaks is characterized by the multipole moment:
+
+	\begin{equation}
+		\ell \approx \pi \frac{D_A}{r_s}
+	\end{equation}
+
+	where $D_A$ is the angular diameter distance to the surface of last scattering, and $r_s$ is the comoving sound horizon.
+
+	Within the TRM framework, acoustic oscillations arise from the interplay between pressure forces in the photon--baryon plasma and spatial gradients of the temporal field. Rather than being dominated by static gravitational potential wells, the dynamics are influenced by temporal phase gradients across the background field $\mathcal{T}(x,t)$.
+
+	The sound horizon $r_s$ is determined by the standard plasma physics of the early universe, combined with an effective temporal synchronization epoch that modifies the timing of recombination processes.
+
+	The angular diameter distance $D_A$ is evaluated using an effective Euclidean background approximation. This avoids the need for explicit curved-space integrations while maintaining consistency with the global temporal pacing defined by $H_{\mathcal{T}}$.
+
+	%--------------------------------------------------
+	\subsection{Numerical Evaluation (Planck Constraints)}
+
+	To assess the viability of this mechanism, the photon--baryon fluid was modeled using a simplified linear perturbation approach embedded in the TRM background.
+
+	A high-resolution Runge--Kutta (RK4) Fourier-space solver was implemented to evolve acoustic oscillations under the influence of temporal field gradients. In this formulation, the oscillatory behavior is driven by dynamic phase-synchronization effects rather than static dark matter potentials.
+
+	The solver computes the expected multipole structure of the temperature fluctuations, allowing direct comparison with observational constraints from Planck data.
+
+	%--------------------------------------------------
+	\subsection{Peak Alignment and Effective Distance Scale}
+
+	The TRM framework reproduces the position of the first acoustic peak at:
+
+	\begin{equation}
+		\ell_1 \approx 220
+	\end{equation}
+
+	within observational accuracy, and captures key features of higher-order peaks, including the second peak:
+
+	\begin{equation}
+		\ell_2 \approx 540
+	\end{equation}
+
+	The numerical integration yields an effective angular diameter distance of approximately:
+
+	\begin{equation}
+		D_A \approx 26.2\ \mathrm{Gpc}
+	\end{equation}
+
+	to the surface of last scattering.
+
+	This alignment indicates that the characteristic acoustic scale can be reproduced through the kinematic properties of the temporal field without requiring explicit dark matter-driven potential wells.
+
+	This high-redshift consistency complements the galactic and cluster-scale behavior, suggesting that temporal rate dynamics may influence both early-universe plasma oscillations and late-time structure formation within a unified framework.
+
+	%-------------------------------------------------
+	\section{Cosmological Expansion}
+
+	\subsection{The Accelerated Expansion Challenge}
+
+	Observations of high-redshift Type Ia supernovae reveal a non-linear relationship between luminosity distance and redshift, indicating an apparent accelerated expansion of the universe. Within the standard cosmological model ($\Lambda$CDM), this behavior is typically attributed to Dark Energy ($\Lambda$), often modeled as a vacuum energy component driving accelerated expansion of the metric.
+
+	Alternative approaches frequently attempt to modify General Relativity or introduce new dynamical fields at cosmological scales. In contrast, the TRM framework interprets the observed expansion phenomenology as a kinematic consequence of the evolution of the temporal rate field, rather than as an intrinsic acceleration of space itself.
+
+	%--------------------------------------------------
+	\subsection{The Temporal Distance Relation}
+
+	Within the TRM framework, the observed luminosity--redshift relation is interpreted as a cumulative temporal drift effect evaluated within an effective Euclidean background approximation.
+
+	The luminosity distance is defined as:
+
+	\begin{equation}
+		D_L(z) = \frac{c}{H_{\mathcal{T}}} \, z (1+z) \, e^{\beta_{\mathcal{T}} z}
+	\end{equation}
+
+	where $H_{\mathcal{T}}$ represents the base temporal pacing of the universe (analogous to the Hubble parameter), and $\beta_{\mathcal{T}}$ is the temporal drift coefficient.
+
+	In this formulation, the leading $z(1+z)$ term captures the baseline kinematic expansion, while the exponential term encodes the cumulative temporal drift of the background field along photon trajectories.
+
+	The observable distance modulus is given by:
+
+	\begin{equation}
+		\mu(z) = 5 \log_{10}(D_L) + 25
+	\end{equation}
+
+	This representation should be understood as an effective TRM parameterization of the luminosity distance, in which deviations from linear expansion arise from the integrated dynamics of the temporal field.
+
+	%--------------------------------------------------
+	\subsection{Empirical Validation (Pantheon+ Dataset)}
+
+	To constrain the global temporal parameters, the TRM framework was evaluated against the Pantheon+ SH0ES dataset, which provides high-precision distance moduli for Type Ia supernovae across a wide redshift range.
+
+	A filtered subset of $1590$ supernovae in the Hubble flow regime ($z > 0.01$) was analyzed in order to minimize local gravitational effects and isolate the dominant cosmological contribution.
+
+	A two-dimensional parameter sweep over $H_{\mathcal{T}}$ and $\beta_{\mathcal{T}}$ was performed to determine the best-fit parameters within the TRM framework.
+
+	%--------------------------------------------------
+	\subsection{Results and Constraints}
+
+	The optimization procedure yields a base temporal pacing of:
+
+	\begin{equation}
+		H_{\mathcal{T}} \approx 72.93 \ \mathrm{km/s/Mpc}
+	\end{equation}
+
+	This value is consistent with local measurements of the Hubble parameter obtained through distance ladder methods.
+
+	In addition, the analysis identifies a temporal drift coefficient of:
+
+	\begin{equation}
+		\beta_{\mathcal{T}} \approx -0.284
+	\end{equation}
+
+	Within this interpretation, the observed deviation from linear expansion can be associated with an effective temporal damping accumulated along photon trajectories.
+
+	The TRM model successfully reproduces the global Hubble scale, but exhibits a broader residual scatter compared to optimized $\Lambda$CDM fits:
+
+	\begin{equation}
+		\sigma \approx 0.656
+	\end{equation}
+
+	This indicates that while the primary large-scale behavior is captured, further refinements—such as improved treatment of astrophysical systematics or additional structure in the temporal model—may be required to achieve full precision agreement.
+
+	Nevertheless, the ability to reproduce the observed expansion scale within a single scalar-field framework, without explicitly introducing a vacuum energy component, supports the viability of the temporal-rate interpretation.
+
+	This cosmological behavior is consistent with the broader TRM framework, in which galactic, cluster, and cosmological phenomena arise from different manifestations of the same underlying temporal field dynamics.
+
+	%-------------------------------------------------
+
+	\section{Unified Interpretation}
+
+	\subsection{The Single-Field Paradigm}
+
+	The standard cosmological model ($\Lambda$CDM) requires the introduction of multiple distinct components within the so-called dark sector to reconcile theory with observation. In particular, it invokes a non-baryonic, collisionless matter component (Cold Dark Matter) to account for structure formation and galactic dynamics, as well as a separate vacuum energy component (Dark Energy) to describe the observed expansion behavior of the universe.
+
+	While highly successful as a phenomenological framework, these components have not yet been directly detected and do not arise from a unified underlying physical mechanism.
+
+	In contrast, the TRM framework proposes that a broad class of observational phenomena may be interpreted within a single dynamical scalar field: the Temporal Rate Matrix, $\mathcal{T}(x,t)$. This approach emphasizes theoretical parsimony by attributing scale-dependent behavior to variations in a single underlying field, rather than introducing multiple independent components.
+
+	%--------------------------------------------------
+	\subsection{Scale-Dependent Manifestations of the Temporal Field}
+
+	Rather than introducing additional forms of matter or energy, the TRM framework models the observed universe through the scale-dependent behavior of temporal field gradients and their associated boundary conditions:
+
+	\begin{itemize}
+
+		\item \textbf{Galactic Scales:}
+		In the low-acceleration regime ($g_{\mathrm{bar}} \ll a_0$), the spatial gradient of the temporal field introduces a non-linear asymptotic boundary condition. This leads to flat rotation curves and reproduces the baryonic Tully--Fisher relation without requiring individually tuned dark matter halos.
+
+		\item \textbf{Cluster Scales:}
+		Within the intracluster medium, the temporal field couples to the macroscopic thermodynamic state of the gas. A pressure-gradient threshold ($\Xi_{\mathrm{crit}}$) triggers a regime transition, introducing an additional dynamical contribution that is consistent with hydrostatic equilibrium, without explicitly invoking collisionless mass.
+
+		\item \textbf{Cosmological Scales:}
+		On large scales, the temporal field exhibits a cumulative drift characterized by the coefficient $\beta_{\mathcal{T}}$. This behavior can account for observed deviations in the luminosity--redshift relation, providing an alternative kinematic interpretation of cosmological expansion without explicitly introducing a vacuum energy component.
+
+		\item \textbf{Early Universe (CMB):}
+		In the primordial plasma, the characteristic scales of the acoustic peaks emerge from global phase coherence in the temporal field. These dynamics guide fluid oscillations independently of static dark-matter-dominated potential wells, while remaining consistent with observed angular scales.
+
+	\end{itemize}
+
+	%--------------------------------------------------
+	\subsection{Conceptual Continuity}
+
+	A central feature of the TRM framework is its conceptual continuity across scales. Quantities such as the galactic acceleration scale $a_0$ and the cosmological drift parameter $\beta_{\mathcal{T}}$ are not treated as independent anomalies, but as different manifestations of the same underlying temporal field dynamics.
+
+	In this interpretation, phenomena that are traditionally modeled separately—galactic rotation curves, cluster stability, expansion dynamics, and early-universe oscillations—can be viewed as arising from a unified scalar field with domain-dependent boundary conditions.
+
+	By reducing the number of independent assumptions, the TRM framework offers a coherent interpretative structure in which gravitational and cosmological behavior are linked through a common kinematic mechanism.
+
+	While further refinement is required to achieve full quantitative agreement across all domains, the ability of the TRM framework to reproduce key observational features suggests that temporal-rate dynamics may play a relevant role in cosmological modeling.
+
+
+
+	%--------------------------------------------------
+\section{Current Limitations and Future Work}
+
+While the TRM framework exhibits predictive capability across multiple astrophysical domains, several structural and numerical limitations remain. Addressing these limitations is essential for advancing the framework toward a fully consistent physical theory.
+
+%--------------------------------------------------
+\subsection{Relativistic Generalization}
+
+The current formulation of the TRM framework is based on a scalar field approximation within an effective Euclidean background. While this approach is sufficient to capture key phenomenological features across multiple domains, it does not yet provide a fully consistent relativistic description.
+
+A complete theoretical extension would require the development of a tensorial generalization of the Temporal Rate Matrix, compatible with the formal structure of General Relativity. Such a formulation would enable rigorous testing against relativistic phenomena, including strong gravitational lensing, time-delay effects, and binary pulsar dynamics.
+
+%--------------------------------------------------
+\subsection{Cosmological Scatter}
+
+Although the TRM model successfully reproduces the global Hubble scale and captures the dominant behavior of the luminosity--redshift relation, the analysis of the Pantheon+ dataset exhibits a broader residual scatter compared to optimized $\Lambda$CDM models:
+
+\begin{equation}
+	\sigma \approx 0.656
+\end{equation}
+
+This indicates that additional refinements may be required. Possible improvements include:
+
+\begin{itemize}
+	\item Incorporating host-galaxy correlations and astrophysical calibration effects
+	\item Introducing higher-order temporal corrections
+	\item Refining the functional form of the luminosity distance relation
+\end{itemize}
+
+These extensions may improve precision while preserving the core TRM structure.
+
+%--------------------------------------------------
+\subsection{Advanced CMB Modeling}
+
+The current treatment of the Cosmic Microwave Background relies on a simplified Fourier-space solver, focused primarily on reproducing the angular position of the acoustic peaks.
+
+A more complete validation requires embedding the TRM framework within a full Einstein--Boltzmann formalism, comparable in scope to established tools such as CAMB or CLASS. This would allow for the calculation of:
+
+\begin{itemize}
+	\item Full temperature power spectrum
+	\item Polarization spectra (TE, EE)
+	\item High-$\ell$ damping behavior
+\end{itemize}
+
+Such an extension is necessary for achieving quantitative agreement with high-precision cosmological data.
+
+%--------------------------------------------------
+\subsection{Model Completeness and Predictive Scope}
+
+The TRM framework is currently best understood as a structured, unifying interpretation of multiple observational domains, rather than a fully complete fundamental theory.
+
+Further work is required to:
+
+\begin{itemize}
+	\item Establish consistency across all scales within a single formalism
+	\item Derive all effective relations directly from first principles
+	\item Test robustness against independent datasets and alternative fitting strategies
+\end{itemize}
+
+These steps will determine whether the temporal-rate interpretation can be extended into a comprehensive cosmological model.
+
+	%--------------------------------------------------
+\section{Conclusion}
+
+The standard cosmological framework has achieved remarkable success in describing a wide range of observational phenomena, but does so through the introduction of multiple independent components within the dark sector, including cold dark matter and dark energy.
+
+The Temporal Rate Matrix (TRM) framework proposes an alternative interpretation in which gravitational and cosmological effects are understood as manifestations of a single scalar time-rate field, $\mathcal{T}(x,t)$. In this approach, both gravitational dynamics and cosmic expansion are modeled as kinematic drifts induced by spatial and temporal gradients of this field.
+
+Within this framework, several key observational features can be described under a unified structure:
+\begin{itemize}
+	\item Galactic rotation curves and the baryonic Tully--Fisher relation arise from an asymptotic boundary condition of the temporal field.
+	\item Galaxy cluster dynamics are influenced by a pressure-driven regime transition, linking thermodynamic stability to effective gravitational behavior.
+	\item The angular scale of the CMB acoustic peaks can be reproduced through temporal phase coherence in the early universe.
+	\item The luminosity--redshift relation of Type Ia supernovae can be interpreted as a cumulative temporal drift effect within the background field.
+\end{itemize}
+
+Across all investigated domains, the TRM framework demonstrates the capability to reproduce the leading observational characteristics using a consistent set of relations derived from a single scalar field. While the current formulation does not yet achieve the full precision of the standard model, it provides a unified interpretative structure that connects phenomena typically treated independently.
+
+Crucially, the framework achieves this without explicitly introducing additional non-baryonic matter components or vacuum energy, instead attributing the observed behavior to the dynamics of the temporal field itself. This suggests that at least part of the phenomenology associated with the dark sector may be reinterpreted within a temporal kinematic context.
+
+The TRM framework is therefore presented not as a finalized replacement for existing cosmological models, but as a testable and extendable theoretical approach. Further work, including relativistic generalization, improved numerical modeling, and broader empirical validation, will be required to assess its full scope and limitations.
+
+Continued investigation and independent verification will determine whether temporal-rate dynamics can contribute meaningfully to the understanding of gravitational and cosmological processes.
+
+\end{document}
