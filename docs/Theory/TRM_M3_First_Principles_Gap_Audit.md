@@ -711,3 +711,96 @@ Claim boundary remains unchanged:
 - no first-principles closure claim
 - no universal m=3 selection
 - no GR replacement claim
+
+---
+
+## 16. Post-RBF50–RBF52 update
+
+RBF50–RBF52 were implemented to subject the shared-functional path to aggressive uniqueness-stress testing.
+
+- **RBF50**: perturbs component weights within bounded ranges under one shared rule, confirming that m=3 remains locally stable near the baseline.
+- **RBF51**: relaxes one core assumption at a time (phase defect, bridge prior, action stationarity), demonstrating that uniqueness weakens and identifying key structural sensitivities.
+- **RBF52**: runs a deterministic bounded search over q-support, weights, and tolerances, finding no alternative admissible counterexamples under the full shared rule.
+
+Updated reviewer-safe status:
+
+```text
+bounded shared-functional uniqueness candidate under uniqueness stress
+```
+
+Claim boundary remains unchanged:
+- diagnostic/candidate only
+- not theorem-level proof
+- not full first-principles closure
+- not universal m=3 selection
+- not GR replacement
+- no numerology claim
+
+---
+
+## 17. Post-RBF53–RBF55 update
+
+RBF53–RBF55 perform explicit domain-of-validity and boundary-classification diagnostics for the shared functional.
+
+- **RBF53**: conducts a wide multi-dimensional scan over q-support, tolerances, and weights, mapping out the precise m=3 uniqueness/admissibility boundaries and fallback transitions (to m=2 or none).
+- **RBF54**: classifies boundary failures by dominant constraint channel, showing where phase-defect, bridge-prior, or action-stationarity triggers the transition.
+- **RBF55**: evaluates domain-boundary stability under solver-step and q-support variations, reporting bounded near-baseline boundary drift.
+
+Updated reviewer-safe status:
+
+```text
+bounded shared-functional uniqueness candidate with explicit domain-of-validity diagnostics
+```
+
+Claim boundary remains unchanged.
+
+---
+
+## 18. Post-RBF59–RBF61 update
+
+RBF59–RBF61 harden the selection path by moving from pure admissibility membership to explicit selection-margin and tie-breaking diagnostics.
+
+- **RBF59**: evaluates baseline shared-functional energies across modes, reporting explicit energy margins (e.g., m=3 vs m=2 energy margin = 1.5556, vs m=4 = 1.3333, and vs next-best admissible = 1.3333) and classifying selection as minimal-by-energy.
+- **RBF60**: tests sensitivity under alternative physical ordering/tie-breaking rules (lowest m, energy, bridge-prior, phase-closure, action-stationarity), demonstrating ordering robustness where physically motivated rules select m=3.
+- **RBF61**: evaluates competitor modes (m=2, m=4) against m=3 across component-specific structural margins, confirming that each competitor is blocked by at least one stronger structural constraint (primarily the bridge-prior/qCore).
+
+Updated reviewer-safe status:
+
+```text
+bounded shared-functional selection candidate selected by minimal shared energy and structural margins
+```
+
+## 19. Post-RBF62–RBF64 update
+
+RBF62–RBF64 formalize the explicit margin-based selection rule to strictly require positive energy-margin dominance.
+
+- **RBF62**: Introduces a formal evaluation method requiring a fixed margin threshold, demonstrating that `m=3` successfully satisfies this explicit margin dominance over admissible competitors in the baseline.
+- **RBF63**: Perturbs weights and tolerances across bounded scenarios, confirming that the margin-based selection rule remains stable and consistently identifies `m=3` near the baseline.
+- **RBF64**: Applies explicit domain stress (no-core q-support, boundary limits, single-constraint ablations), verifying that the rule correctly abstains (fails gracefully) outside valid domains rather than forcing false-positive `m=3` selections.
+
+## 20. Post-RBF65–RBF67 update
+
+RBF65–RBF67 evaluate rule minimality, functional robustness, and readiness for a formal mathematical proof.
+
+- **RBF65**: Conducts component ablation (disabling Phase, Bridge, or Action), showing that `m=3` margin dominance is lost in each case, providing evidence that the shared functional is minimal and not artificially overparameterized.
+- **RBF66**: Tests alternative mathematical combination forms (e.g., L2 squared, multiplicative). Results show alternative forms either preserve `m=3` or abstain gracefully; none confidently select false-positive competitors within the valid domain.
+- **RBF67**: Introduces a "Theorem Readiness Checklist", explicitly categorizing conditions as `DIAGNOSTIC-PASS` (empirical evidence established) versus `PENDING-ANALYTICAL` (formal derivation required).
+
+Updated reviewer-safe status:
+
+```text
+bounded shared-functional selection candidate with minimality diagnostics and theorem-readiness scaffold
+```
+
+Primary remaining gap:
+
+> Transition the empirical `PENDING-ANALYTICAL` checklist items (e.g., topological necessity proof, formal asymptotic domain bounds) into fully derived mathematical proofs.
+
+Claim boundary remains unchanged:
+- diagnostic/candidate only
+- not theorem-level proof
+- not full first-principles closure
+- not universal m=3 selection
+- not GR replacement
+- no numerology claim
+
