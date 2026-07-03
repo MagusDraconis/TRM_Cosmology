@@ -50,14 +50,17 @@ public static class ReportWriter
     }
 
     /// <summary>
-    /// Optionally saves the detailed log of the proof to a local markdown or text file.
+    /// Saves the detailed proof log to docs/results/FormalProofs/.
     /// </summary>
     public static void SaveReportToFile(string filename, string details)
     {
         try
         {
-            File.WriteAllText(filename, details);
-            Console.WriteLine($"Saved detailed proof log to: {Path.GetFullPath(filename)}");
+            string dir = Path.Combine("docs", "results", "FormalProofs");
+            Directory.CreateDirectory(dir);
+            string fullPath = Path.Combine(dir, filename);
+            File.WriteAllText(fullPath, details);
+            Console.WriteLine($"Saved detailed proof log to: {Path.GetFullPath(fullPath)}");
         }
         catch (Exception ex)
         {

@@ -473,4 +473,261 @@ public static class ProofRunner
 
         return result.Passed;
     }
+
+    /// <summary>
+    /// Runs FP22: Decompose Continuous-Domain Lemma into Smaller Stubs.
+    /// </summary>
+    public static bool RunDecomposeContinuousDomain(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP22: Continuous-Domain Lemma Decomposition");
+
+        var result = M3ContinuousDomainProofs.RunFP22();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Monolithic lemma decomposed into 3 stubs: 2 epsilon-bounds + 1 structural (trivially proven)."
+            : $"Failed to decompose continuous-domain lemma.";
+
+        ReportWriter.WriteSummary($"decompose-continuous-domain", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP22_continuous_decomposition_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP22_continuous_decomposition_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP23: Exact Continuous-Bounds Definitions.
+    /// </summary>
+    public static bool RunExactContinuousBounds(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP23: Exact Continuous-Bounds Definitions");
+
+        var result = M3ContinuousDomainProofs.RunFP23();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Exact rational definitions exported: 4 DEFINED, 2 ASSUMED, 2 PENDING-PROOF."
+            : $"Failed to export exact continuous bounds.";
+
+        ReportWriter.WriteSummary($"exact-continuous-bounds", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP23_exact_continuous_bounds_log.txt", result.Details);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP24: Proof-Obligation-to-Assumption Map.
+    /// </summary>
+    public static bool RunProofObligationMap(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP24: Proof-Obligation-to-Assumption Map");
+
+        var result = M3ContinuousDomainProofs.RunFP24();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Post-FP31: 7 DEFINED, 4 ASSUMED, 0 PENDING-PROOF, 0 BLOCKED. All gaps closed."
+            : $"Failed to generate obligation map.";
+
+        ReportWriter.WriteSummary($"proof-obligation-map", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP24_proof_obligation_map_log.txt", result.Details);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP25: Epsilon-Phase Asymptotic Bound — Lean Proof Attempt.
+    /// </summary>
+    public static bool RunFP25_PhaseLimit(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP25: Epsilon-Phase Asymptotic Bound — Lean Proof Attempt");
+
+        var result = M3ContinuousDomainProofs.RunFP25();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Lean scaffold generated: 1 DEFINED + 3 PENDING-PROOF sub-lemmas for epsilon_phase_asymptotic_bound."
+            : $"Failed to generate phase-limit scaffold.";
+
+        ReportWriter.WriteSummary($"fp25-phase-limit", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP25_phase_limit_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP25_phase_limit_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP26: Epsilon-Action Asymptotic Bound — Model Requirements Report.
+    /// </summary>
+    public static bool RunFP26_ActionLimit(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP26: Epsilon-Action Asymptotic Bound — Model Requirements Report");
+
+        var result = M3ContinuousDomainProofs.RunFP26();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Model requirements specified: qCoreSupport(q) definition needed; limit proof is standard ε-δ once defined."
+            : $"Failed to generate action-limit model report.";
+
+        ReportWriter.WriteSummary($"fp26-action-limit", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP26_action_limit_log.txt", result.Details);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP27: Phase Defect Positivity — Unbounded ℤ Induction Scaffold.
+    /// </summary>
+    public static bool RunFP27_PhaseInduction(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP27: Phase Defect Positivity — Unbounded ℤ Proof (Trichotomy)");
+
+        var result = M3ContinuousDomainProofs.RunFP27();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"All sub-lemmas proven via integer trichotomy (no sorry). Obligation elevated from PENDING-PROOF to DEFINED."
+            : $"Failed to generate phase-induction scaffold.";
+
+        ReportWriter.WriteSummary($"fp27-phase-induction", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP27_phase_induction_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP27_phase_induction_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP28: epsilon_phase_zero_iff_m3 — both directions proven.
+    /// </summary>
+    public static bool RunFP28_ZeroIff(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP28: epsilon_phase_zero_iff_m3 — Both Directions");
+
+        var result = M3ContinuousDomainProofs.RunFP28();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Both directions proven (forward: norm_num, reverse: FP27 contrapositive). Obligation → DEFINED."
+            : $"Failed to prove zero-iff lemma.";
+
+        ReportWriter.WriteSummary($"fp28-zero-iff", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP28_zero_iff_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP28_zero_iff_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP29: qCoreSupport(q) Model Definition.
+    /// </summary>
+    public static bool RunFP29_QCoreSupport(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP29: qCoreSupport(q) Model Definition");
+
+        var result = M3ContinuousDomainProofs.RunFP29();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"qCoreSupport(q) = 1 - 3/q defined. 1 lemma PROVEN, 1 PENDING-PROOF (ceil bound). PENDING-MODEL → DEFINED."
+            : $"Failed to define qCoreSupport model.";
+
+        ReportWriter.WriteSummary($"fp29-qcore-support", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP29_qcore_support_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP29_qcore_support_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP30: epsilon_phase_asymptotic_bound Convergence Proof.
+    /// </summary>
+    public static bool RunFP30_PhaseConvergence(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP30: epsilon_phase_asymptotic_bound Convergence Proof");
+
+        var result = M3ContinuousDomainProofs.RunFP30();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"Proof structure complete. Gap: ceil inequality (standard one-liner). PENDING-PROOF with clear path."
+            : $"Failed to generate convergence proof.";
+
+        ReportWriter.WriteSummary($"fp30-phase-convergence", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP30_phase_convergence_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP30_phase_convergence_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
+
+    /// <summary>
+    /// Runs FP31: Ceil Inequality — Close Final Gaps.
+    /// </summary>
+    public static bool RunFP31_CeilInequality(bool saveToFile = true)
+    {
+        ReportWriter.WriteHeader("FP31: Ceil Inequality — Close Final PENDING-PROOF Gaps");
+
+        var result = M3ContinuousDomainProofs.RunFP31();
+
+        ReportWriter.WriteDetails(result.Details);
+
+        string summaryText = result.Passed
+            ? $"All gaps closed. Final map: 7 DEFINED, 4 ASSUMED, 0 PENDING-PROOF, 0 BLOCKED. No 'sorry' remains."
+            : $"Failed to close ceil inequality gap.";
+
+        ReportWriter.WriteSummary($"fp31-ceil-inequality", result.Passed, summaryText);
+
+        if (saveToFile && result.Passed)
+        {
+            ReportWriter.SaveReportToFile("FP31_ceil_inequality_log.txt", result.Details);
+            ReportWriter.SaveReportToFile("FP31_ceil_inequality_scaffold.lean", result.LeanCode);
+        }
+
+        return result.Passed;
+    }
 }

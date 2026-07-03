@@ -53,6 +53,26 @@ public static class Program
                 return HandleLeanDomainAbstention(args);
             case "sorry-inventory-final":
                 return HandleSorryInventoryFinal(args);
+            case "decompose-continuous-domain":
+                return HandleDecomposeContinuousDomain(args);
+            case "exact-continuous-bounds":
+                return HandleExactContinuousBounds(args);
+            case "proof-obligation-map":
+                return HandleProofObligationMap(args);
+            case "fp25-phase-limit":
+                return HandleFP25PhaseLimit(args);
+            case "fp26-action-limit":
+                return HandleFP26ActionLimit(args);
+            case "fp27-phase-induction":
+                return HandleFP27PhaseInduction(args);
+            case "fp28-zero-iff":
+                return HandleFP28ZeroIff(args);
+            case "fp29-qcore-support":
+                return HandleFP29QCoreSupport(args);
+            case "fp30-phase-convergence":
+                return HandleFP30PhaseConvergence(args);
+            case "fp31-ceil-inequality":
+                return HandleFP31CeilInequality(args);
             case "--help":
             case "-h":
             case "help":
@@ -512,6 +532,66 @@ public static class Program
         return success ? 0 : 1;
     }
 
+    private static int HandleDecomposeContinuousDomain(string[] args)
+    {
+        bool success = ProofRunner.RunDecomposeContinuousDomain(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleExactContinuousBounds(string[] args)
+    {
+        bool success = ProofRunner.RunExactContinuousBounds(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleProofObligationMap(string[] args)
+    {
+        bool success = ProofRunner.RunProofObligationMap(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP25PhaseLimit(string[] args)
+    {
+        bool success = ProofRunner.RunFP25_PhaseLimit(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP26ActionLimit(string[] args)
+    {
+        bool success = ProofRunner.RunFP26_ActionLimit(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP27PhaseInduction(string[] args)
+    {
+        bool success = ProofRunner.RunFP27_PhaseInduction(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP28ZeroIff(string[] args)
+    {
+        bool success = ProofRunner.RunFP28_ZeroIff(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP29QCoreSupport(string[] args)
+    {
+        bool success = ProofRunner.RunFP29_QCoreSupport(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP30PhaseConvergence(string[] args)
+    {
+        bool success = ProofRunner.RunFP30_PhaseConvergence(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
+    private static int HandleFP31CeilInequality(string[] args)
+    {
+        bool success = ProofRunner.RunFP31_CeilInequality(saveToFile: true);
+        return success ? 0 : 1;
+    }
+
     private static void PrintHelp()
     {
         Console.WriteLine();
@@ -546,6 +626,39 @@ public static class Program
         Console.WriteLine("  boundary [--mmax <value>] [--qmax <value>]");
         Console.WriteLine("    Executes FP06: Verifies graceful abstention under exact boundary failures.");
         Console.WriteLine("    Default --mmax: 5, --qmax: 10000");
+        Console.WriteLine();
+        Console.WriteLine("  sorry-inventory-final");
+        Console.WriteLine("    Executes FP21: Final Lean sorry inventory after domain abstention proofs.");
+        Console.WriteLine();
+        Console.WriteLine("  decompose-continuous-domain");
+        Console.WriteLine("    Executes FP22: Decomposes continuous-domain lemma into epsilon-bound stubs.");
+        Console.WriteLine();
+        Console.WriteLine("  exact-continuous-bounds");
+        Console.WriteLine("    Executes FP23: Exports exact rational epsilon-bound definitions.");
+        Console.WriteLine();
+        Console.WriteLine("  proof-obligation-map");
+        Console.WriteLine("    Executes FP24: Maps remaining proof obligations to first-principles assumptions.");
+        Console.WriteLine();
+        Console.WriteLine("  fp25-phase-limit");
+        Console.WriteLine("    Executes FP25: Lean proof attempt for epsilon_phase_asymptotic_bound.");
+        Console.WriteLine();
+        Console.WriteLine("  fp26-action-limit");
+        Console.WriteLine("    Executes FP26: Model-requirement report for epsilon_action_asymptotic_bound.");
+        Console.WriteLine();
+        Console.WriteLine("  fp27-phase-induction");
+        Console.WriteLine("    Executes FP27: Phase defect positivity proof over unbounded ℤ (trichotomy).");
+        Console.WriteLine();
+        Console.WriteLine("  fp28-zero-iff");
+        Console.WriteLine("    Executes FP28: Both directions of epsilon_phase_zero_iff_m3 (FP27 contrapositive).");
+        Console.WriteLine();
+        Console.WriteLine("  fp29-qcore-support");
+        Console.WriteLine("    Executes FP29: Defines qCoreSupport(q) = 1 - 3/q as exact Rational function.");
+        Console.WriteLine();
+        Console.WriteLine("  fp30-phase-convergence");
+        Console.WriteLine("    Executes FP30: Convergence proof for epsilon_phase_asymptotic_bound.");
+        Console.WriteLine();
+        Console.WriteLine("  fp31-ceil-inequality");
+        Console.WriteLine("    Executes FP31: Closes the final ceil inequality gap (all PENDING-PROOF → DEFINED).");
         Console.WriteLine();
         Console.WriteLine("EXAMPLES:");
         Console.WriteLine("  dotnet run --project TRM.FormalProofs.Cli -- energy --mmax 5 --qmax 10000");
