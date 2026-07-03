@@ -90,11 +90,45 @@ Consolidated result (RBF50–RBF52)
 
 ---
 
+## Consolidated result (RBF80–RBF82)
+
+- **RBF80 (Euler Residual Mapping)**: Action-stationarity residual `δE_action` is verified to map exactly to the normalized minimal lattice Euler condition `dE = E_m - E_min`, mapping the operational tolerance directly to this physical/structural stationarity residual proxy.
+- **RBF81 (Necessity for Margin Dominance)**: Action-stationarity is verified as strictly necessary for `m=3` energy-margin dominance. Disabling or weakening the action-stationarity constraint collapses the margin, allowing competitors to enter.
+- **RBF82 (Rejection of Per-Family Scaling)**: Shows that per-family tuning/scaling is structurally rejected and destroys diagnostic validity, confirming that the action-stationarity criterion relies purely on shared global normalization discipline without per-mode free parameters.
+
+---
+
+## Consolidated result (FP01–FP21)
+
+- **FP01 (Exact qCore Derivation)**: Confirms the exact derivation of `qCore = [16, 17, 18]` under the exact rational bounds `Omega ∈ [116/100, 119/100]` and `Gamma ∈ [84/100, 86/100]` for `m=3` within the configurable domain `q <= 10000`.
+- **FP02 (Phase Defect Minimization)**: Mathematically verifies using exact-rational calculations that the closure defect for `m=3` is exactly `0` over `qCore`, and that `m=3` is the strict and unique minimizer across all modes `m ∈ [1, 5]`.
+- **FP03 (Finite Domain Selection Uniqueness)**: Conducts a finite-domain search (`m = 1..5`, `q <= 10000`) and proves that no competitor mode is admissible inside the `m=3` `qCore` domain, establishing an exact finite-domain proof of uniqueness.
+- **FP04 (Exact Shared Functional)**: Computes `PhaseDefect`, `BridgePenalty`, and `ActionResidual` exactly using rational mathematics. Confirms `m=3` is uniquely admissible under exact constraints.
+- **FP05 (Exact Energy Margin)**: Proves `m=3` strictly maintains a positive energy margin (`ΔE > 0`) against all admissible neighboring competitors (`m=2`, `m=4`).
+- **FP06 (Domain Boundary Abstention)**: Verifies that the mathematical diagnostic rule fails gracefully (abstains safely) at structural boundaries without generating false-positive mode selections.
+- **FP07 (Export Symbolic Inequalities)**: Exports exact machine-readable symbolic inequalities verifying `E_3 < E_2`, `E_3 < E_4`, and `PhaseDefect(m=3) == 0`.
+- **FP08 (Lemma Proof Obligations)**: Decomposes proof obligations explicitly into Lemmas (Necessity, Sufficiency, Closure), distinguishing `[EXACT-FINITE-PASS]` from pending symbolic derivations.
+- **FP09 (Counterexamples and Witnesses)**: Conducts strict counterexample searches over the finite domain, exporting minimal valid witnesses (e.g., margins for `m=2` and `m=4`) demonstrating strict dominance.
+- **FP10 (Proof Assistant Definitions Export)**: Exports Lean 4 equivalents of exact mathematical definitions (`Omega`, `Gamma`, `PhaseDefect`, `qCore`).
+- **FP11 (Proof Assistant Lemmas Export)**: Scaffolds the missing formal analytical theorems as strict mathematical stubs (marked with `sorry`).
+- **FP12 (Verify Proof Assistant Export)**: Computationally guarantees that the hard-coded Lean constants (witnesses) perfectly match the exact arbitrary-precision arithmetic values generated dynamically by the CLI.
+- **FP13 (Lean Export Typecheck)**: Structurally verifies the generated Lean definition syntax and mathlib imports directly against compilation parsers.
+- **FP14 (Lean Constants Proven)**: Successfully proves simple finite constants (`Margin > 0`, `qCore` matches) explicitly using Lean tactics (`rfl`, `norm_num`), demonstrating operational readiness.
+- **FP15 (Lean Sorry Inventory)**: Identifies exactly 3 remaining `sorry` placeholders and rigorously maps them back to their formal analytical Lemma assignments.
+- **FP16 (Lean Phase Defect m=3 Zero)**: Proves `PhaseDefect` is perfectly zero for `m=3` over the exact finite `qCore` inside Lean natively via finite-case evaluation (`rcases`) and `norm_num`, successfully removing the placeholder.
+- **FP17 (Lean Competitor Phase Defects Positive)**: Formally proves that all competitor phase defects within the exact domain and finite structural bounds are strictly positive, removing the corresponding `sorry` placeholder.
+- **FP18 (Lean Sorry Inventory Updated)**: Verifies that only 1 `sorry` placeholder (`lemma_domain_abstention`) remains, isolating the final analytical proof requirement to domain closure limits.
+- **FP19 (Lean Domain Abstention Decomposed)**: Structurally decomposes the final placeholder into discrete analytical boundary limit failures (e.g., phase/action violations).
+- **FP20 (Lean Finite Boundary Cases Proven)**: Formally proves the finite boundary abstention limits natively in Lean using structural evaluation (`norm_num`), successfully replacing the discrete `sorry` placeholders.
+- **FP21 (Final Lean Sorry Inventory)**: Concludes the exact-finite proof scaffold, identifying exactly 1 remaining formal placeholder (`lemma_continuous_domain_asymptotic_limits_derived`), mapping the final proof gap exclusively to the continuous limit derivation.
+
+---
+
 ## Current status statement
 
 Current reviewer-safe status:
 
-> m=3 is a bounded shared-functional selection candidate with analytical constraint-boundary and lemma-scaffold support.
+> exact-rational finite-domain / proof-assistant scaffold (finite boundaries proven natively, continuous limits pending).
 
 ---
 
@@ -102,18 +136,18 @@ Current reviewer-safe status:
 
 Primary remaining gaps:
 
-1. Formal analytical proof of topological necessity and sufficiency.
-2. Formal analytical derivation of domain closure.
+1. Formal analytical proof of topological necessity and sufficiency across the infinite domain.
+2. Formal analytical derivation of the bridge-scale coupling limits from microscopic lattice-energy principles.
 
 ---
 
 ## Claim boundaries
 
-- diagnostic/candidate only
-- not theorem-level proof
+- finite-domain only
+- not universal theorem
 - not full first-principles closure
 - not universal m=3 selection
-- not GR replacement
+- no GR replacement
 - no numerology claim
 
 ---

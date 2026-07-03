@@ -818,21 +818,52 @@ RBF77–RBF79 finalize the diagnostic scaffolding by formalizing the required ma
 - **RBF78 (Sufficiency)**: Structures the requirement to prove the energy margin `ΔE > 0` against all admissible competitors universally across the defined valid domain.
 - **RBF79 (Domain Closure)**: Structures the requirement to derive the absolute asymptotic limits `ε_phase` and `ε_action` directly from lattice-energy normalization principles.
 
+## 25. Post-RBF80–RBF82 update
+
+RBF80–RBF82 anchor the action-stationarity criterion empirically to its exact minimal lattice-energy Euler residual, necessity, and shared global normalization discipline.
+
+- **RBF80**: Maps the action-stationarity residual `δE_action` directly to the normalized minimal lattice Euler condition `dE = E_m - E_min`, mapping the operational tolerance directly to this physical/structural stationarity residual proxy.
+- **RBF81**: Establishes that action-stationarity is strictly necessary to maintain the `ΔE > 0` energy-margin dominance for `m=3`. Disabling or weakening the action constraint collapses margin selection.
+- **RBF82**: Rejects per-family scaling or tuning of parameters, verifying that the action-stationarity criterion relies strictly on shared global normalization discipline.
+
+## 26. Post-FP01–FP18 update
+
+FP01–FP18 establish the exact-rational mathematical proof scaffolding for finite domains, transitioning the core proof obligations from numerical diagnostics to exact rational arithmetic, generating explicit proof-assistant transition layers, and formally reducing theorem placeholders:
+
+- **FP01**: Derives the `qCore = [16, 17, 18]` interval exactly using arbitrary-precision rational arithmetic with exact rational bounds `Omega ∈ [116/100, 119/100]` and `Gamma ∈ [84/100, 86/100]` for `m=3` within `q <= 10000`.
+- **FP02**: Verifies that the normalized phase closure defect is exactly `0` for `m=3` over `qCore`, proving it is the strict, unique minimizer compared to neighboring modes `m ∈ [1, 5]`.
+- **FP03**: Performs a finite-domain search (`m = 1..5`, `q <= 10000`) and proves that no competitor mode is admissible inside the `m=3` `qCore` domain, establishing an exact finite-domain proof of uniqueness.
+- **FP04**: Computes the shared functional components (`PhaseDefect`, `BridgePenalty`, `ActionResidual`) exactly using rational arithmetic, proving `m=3` remains uniquely admissible under exact constraints.
+- **FP05**: Proves that the exact rational energy margin `ΔE = E_competitor - E_m3` is strictly positive (`> 0`) against admissible structural competitors (`m=2`, `m=4`).
+- **FP06**: Verifies that the formal rule safely and gracefully abstains under exact mathematical boundary violations (phase-defect failure, missing core, margin <= 0) rather than false-selecting a mode.
+- **FP07**: Exports exact symbolic inequalities (`E_3 < E_2`, `PhaseDefect(m=3) == 0`) into machine-readable JSON for integration with formal proof environments.
+- **FP08**: Decomposes proof obligations explicitly into Lemmas (Necessity, Sufficiency, Closure), distinguishing `[EXACT-FINITE-PASS]` from `[PENDING-SYMBOLIC]` and `[PENDING-PROOF-ASSISTANT]`.
+- **FP09**: Conducts counterexample searches over the finite domain, exporting minimal valid witnesses (e.g., margins for `m=2` and `m=4`) proving strict dominance.
+- **FP10**: Exports Lean-style definitions matching the exact operational logic (`Omega`, `Gamma`, `PhaseDefect`, `qCore`).
+- **FP11**: Generates theorem stubs (`lemma_qcore_exact`, `lemma_energy_margin_m2_positive`, etc.) bounded with `sorry` to establish the proof-assistant interface.
+- **FP12**: Computationally verifies that the exported proof-assistant constants (`Margin_m2 = 14/9`, `PhaseDefect_m3 = 0`, etc.) exactly match the dynamically calculated CLI witnesses.
+- **FP13**: Syntactically validates the generated Lean code to ensure robust parser structure (supporting `Mathlib.Data.Rat.Basic`).
+- **FP14**: Successfully formally proves simple finite constants directly within the Lean scaffold using mathematical tactics (`rfl`, `norm_num`), officially beginning the `sorry` reduction phase.
+- **FP15**: Computes a precise inventory of all remaining analytical theorem stubs (3 placeholders), cleanly mapping each remaining `sorry` to its parent Formal Lemma.
+- **FP16**: Fully proves `lemma_phase_defect_m3_zero` inside Lean using `norm_num` over the finite explicit `qCore` domain, successfully removing the `sorry` placeholder.
+- **FP17**: Fully proves `lemma_phase_defect_competitors_positive` for finite alternatives (`m ∈ [1,2,4,5]`) inside Lean via finite-case mapping and `norm_num`, removing its `sorry`.
+- **FP18**: Re-evaluates the Lean `sorry` inventory, verifying that only 1 strict mathematical placeholder remains (`lemma_domain_abstention`).
+
 Updated reviewer-safe status:
 
 ```text
-bounded shared-functional selection candidate with analytical constraint-boundary and lemma-scaffold support
+exact-rational finite-domain / proof-assistant scaffold (finite-qCore phase lemmas proven natively, domain abstention pending).
 ```
 
 Primary remaining gap:
 
-> Formal analytical proof of topological necessity, sufficiency, and domain closure.
+> Formal analytical proof of topological necessity and sufficiency across the infinite domain.
 
 Claim boundary remains unchanged:
-- diagnostic/candidate only
-- not theorem-level proof
+- finite-domain only
+- not universal theorem
 - not full first-principles closure
 - not universal m=3 selection
-- not GR replacement
+- no GR replacement
 - no numerology claim
 
