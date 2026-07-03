@@ -6,6 +6,15 @@ This document formalizes the open mathematical proof obligations required to tra
 
 ---
 
+## Post-RBF80–RBF82 Action-Stationarity Anchoring
+
+Before proceeding to formal analytical derivation, RBF80–RBF82 established the final empirical anchoring for the action-stationarity criterion:
+- **RBF80**: The action stationarity residual maps directly to the minimal lattice action Euler/stationarity proxy: `δE_action = (E_m - E_min) / energyRange`. The operational action tolerance corresponds explicitly to this residual.
+- **RBF81**: Action-stationarity is strictly necessary for energy-margin dominance. Disabling action allows competitors to enter the admissible space and can collapse the strict margin selection.
+- **RBF82**: Action-stationarity uses exclusively shared/global normalization. Per-family scaling is structurally rejected as invalid tuning, confirming no hidden per-mode free parameters.
+
+---
+
 ## Lemma 1: Topological Necessity
 
 **Statement:**
@@ -32,13 +41,14 @@ The joint satisfaction of phase closure, bridge prior, and action stationarity i
 
 **Prerequisites:**
 - Formulation of the shared minimal functional evaluating Phase, Bridge, and Action components.
-- Bounded action-stationarity residual `ε_action` limiting overall admissibility.
+- Bounded action-stationarity residual `ε_action` limiting overall admissibility based on the shared lattice-energy stationarity residual.
+- Shared global normalization applied consistently across all modes.
 
 **Allowed Counterexamples:**
-- Admissible competitors (e.g., `m=2`, `m=4`) achieving a lower or equal shared functional energy (`ΔE <= 0`) within the defined operational space.
+- Admissible competitors (e.g., `m=2`, `m=4`) achieving a lower or equal shared functional energy (`ΔE <= 0`) within the defined operational space under shared global normalization.
 
 **Open Proof Steps (PENDING-ANALYTICAL):**
-1. Prove analytically that `ΔE > 0` is universally guaranteed within the valid domain limits, without relying on numerical scans.
+1. Derive `δE_action` and `ΔE > 0` directly from the microscopic TQM lattice action without relying on numerical scans.
 2. Formulate the stationarity condition analytically to demonstrate that energy descent naturally traps `m=3` over alternatives.
 
 ---
