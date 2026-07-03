@@ -852,8 +852,12 @@ FP01–FP18 establish the exact-rational mathematical proof scaffolding for fini
 Updated reviewer-safe status:
 
 ```text
-exact-rational finite-domain / proof-assistant scaffold (finite-qCore phase lemmas proven natively, domain abstention pending).
+exact-rational finite-domain / proof-assistant scaffold (finite boundaries proven natively, continuous limits pending).
 ```
+
+## 27. Double-Slit Phase-Coherence Diagnostic Track (DS01–DS05)
+
+A parallel diagnostic track evaluating phase-coherence applications using simple interference physics has been established (DS01–DS05). It validates that TRM/TQM phase-synchronization rules accurately reproduce interference, continuous intensity envelopes from discrete hits, visibility destruction via which-path decoherence, and standard quantum complementarity limits. This remains strictly a diagnostic candidate evaluation and does not claim replacement of standard QM.
 
 Primary remaining gap:
 

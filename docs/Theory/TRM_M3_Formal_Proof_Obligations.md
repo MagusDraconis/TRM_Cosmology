@@ -42,6 +42,16 @@ Moving beyond numerical double-precision diagnostics, FP01–FP21 established an
 
 ---
 
+## Double-Slit Phase-Coherence Diagnostic Track (DS01–DS05)
+
+While the formal `m=3` scaffold targets closure verification, a parallel diagnostic track has been initiated to evaluate phase-coherence applications using simple interference physics.
+
+- **DS01–DS05**: Confirm that basic TRM/TQM phase-synchronization rules accurately reproduce two-path interference fringes, deterministic discrete-hit envelopes, the destruction of visibility via a which-path decoherence scalar, and the quantum complementarity bound (`V^2 + D^2 <= 1`). 
+
+*Note: The DS track operates strictly under candidate/diagnostic boundaries and does not claim replacement of standard QM nor provide theorem-level proofs of wave-function collapse.*
+
+---
+
 ## Lemma 1: Topological Necessity
 
 **Statement:**
