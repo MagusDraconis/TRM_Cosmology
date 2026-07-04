@@ -1,0 +1,76 @@
+UTCr_1906
+2019 FEBRUARY 13, 09h UTC
+
+                      BUREAU INTERNATIONAL DES POIDS ET MESURES
+              THE INTERGOVERNMENTAL ORGANIZATION ESTABLISHED BY THE METRE CONVENTION
+   PAVILLON DE BRETEUIL F-92312 SEVRES CEDEX TEL. +33 1 45 07 70 70   tai@bipm.org
+
+                            Computed values of [UTCr-UTC(k)]
+
+Date 2019       0h UTC      FEB  4   FEB  5   FEB  6   FEB  7   FEB  8   FEB  9   FEB 10
+       MJD                   58518    58519    58520    58521    58522    58523    58524
+Laboratory k                                        [UTCr-UTC(k)]/ns
+
+AOS  (Borowiec)                4.6      4.8      4.6      4.7      4.7      4.6      4.3
+AUS  (Sydney)                -40.7    -40.5    -40.6    -43.6    -46.0    -44.1    -46.3
+BEV  (Wien)                    5.3      5.8      6.5      8.2     10.1     10.7     12.7
+BIRM (Beijing)                -7.5     -8.5     -9.4     -9.9    -10.4    -10.4    -10.8
+BOM  (Skopje)              -1542.9  -1550.9  -1557.7  -1566.7  -1571.9  -1580.2  -1583.7
+CH   (Bern-Wabern)            -6.8     -7.4     -7.9     -8.4     -8.5     -7.9     -7.9
+CNM  (Queretaro)              -5.5     -4.5     -6.3    -10.5    -11.8     -7.6     -3.5
+CNMP (Panama)                  5.7      3.0      1.6      5.7     -1.4      0.2     -0.5
+DLR  (Oberpfaffenhofen)      -18.6    -24.7    -54.0    -64.3    -64.5    -62.5    -65.0
+DMDM (Belgrade)               -7.3     -9.0     -8.8    -11.2    -10.3    -16.0    -16.2
+DTAG (Frankfurt/M)          -205.0   -205.8   -205.1   -204.1   -209.0   -206.9   -208.7
+ESTC (Noordwijk)              -3.4     -4.1     -5.0     -5.9     -5.8     -5.7     -6.2
+HKO  (Hong Kong)             891.3    894.6    900.9    904.4    910.9    918.4    926.4
+ICE  (San Jose)               86.0     87.5     83.9     84.8     88.1     89.8     88.3
+IFAG (Wettzell)            -1007.1  -1009.1  -1012.8  -1015.9  -1016.5  -1019.9  -1023.2
+IGNA (Buenos Aires)            5.9      5.9      5.7      5.4      7.3     10.1      7.8
+IMBH (Sarajevo)                1.1      0.6      0.3     -0.8      2.0     -1.6      1.3
+INTI (Buenos Aires)          -88.6    -86.2    -83.1    -87.0    -86.9    -84.3    -77.3
+INXE (Rio de Janeiro)        -32.4    -22.5    -17.6    -14.1    -15.9    -16.8    -16.6
+IPQ  (Caparica)              106.3    107.1    109.9    109.4    112.0    117.0    119.0
+IT   (Torino)                  0.5      0.5      0.4      0.3      0.0      0.0     -0.4
+JV   (Kjeller)                28.2     28.7     27.6     24.2     28.2     28.6     36.4
+KRIS (Daejeon)                 7.7      6.8      5.5      4.4      3.9      4.2      3.8
+LRTE (Sao Carlos)            -30.4    -26.8    -25.5    -22.9    -23.1    -20.5    -19.6
+LT   (Vilnius)               578.0    567.2    564.2    565.0    571.9    579.8    581.8
+MASM (Bayanzurkh)           -222.2   -235.7   -249.7   -259.3   -271.8   -284.6   -297.1
+MIKE (Espoo)                  -3.3     -3.3     -3.5     -3.5     -3.6     -3.6     -3.6
+MSL  (Lower Hutt)            364.4    356.7    367.0    364.7    381.8    387.3    390.0
+NAO  (Mizusawa)             -406.5   -409.4   -411.3   -413.9   -415.3   -417.3   -419.8
+NICT (Tokyo)                   1.3      1.1      1.3      1.8      1.7      1.6      1.8
+NIM  (Beijing)                -2.1     -2.1     -0.6     -0.9     -1.2     -1.0     -1.7
+NIMB (Bucharest)            4718.5   4726.2   4738.7   4747.8   4760.2   4769.4   4780.3
+NIMT (Pathumthani)          -172.7   -169.0   -168.6   -169.1   -168.8   -169.5   -169.2
+NIS  (Cairo)                     -        -     16.7     15.3     14.6     11.6     10.4
+NIST (Boulder)                -2.7     -2.9     -3.5     -3.6     -3.8     -4.0     -4.3
+NMIJ (Tsukuba)                 2.6      2.4      1.9      1.9      1.5      1.2      1.0
+NMLS (Sepang)              -3149.1  -3156.3  -3165.5  -3176.6  -3182.4  -3189.0  -3195.3
+NPL  (Teddington)             -2.4     -2.3     -2.6     -2.2     -2.4     -2.3     -2.5
+NPLI (New-Delhi)               9.0      8.6      7.7      7.7      7.8      7.8      7.6
+NRC  (Ottawa)                -25.3    -27.2    -30.3    -30.0    -30.7    -26.8    -28.6
+NTSC (Lintong)                -1.5     -1.2     -1.5     -1.0     -1.3     -1.9     -2.1
+ONRJ (Rio de Janeiro)          6.2      0.7     -3.1     -3.0     -2.7      0.7      3.0
+OP   (Paris)                   0.3      0.5      0.5      0.6      0.3      0.6      0.4
+ORB  (Bruxelles)               1.2      1.2      0.9      0.9      1.0      1.3      1.1
+PL   (Warszawa)                8.0      8.1      7.9      7.8      7.6      7.9      7.4
+PTB  (Braunschweig)            0.4      0.5      0.3      0.3      0.3      0.5      0.5
+ROA  (San Fernando)           -4.1     -3.7     -4.0     -3.6     -3.8     -3.7     -3.7
+SASO (Riyadh)               -165.7   -167.6   -168.2   -171.1   -171.4   -174.3   -177.7
+SCL  (Hong Kong)            -195.5   -198.6   -200.6   -202.2   -203.9   -205.5   -203.7
+SG   (Singapore)              16.0     15.5     14.9     13.8     13.2     13.0     12.8
+SL   (Colombo)               -13.1    -13.4    -13.7    -15.8    -17.0    -16.9    -18.7
+SMD  (Bruxelles)              -5.5     -5.6     -6.0     -5.7     -2.3     -2.5     -4.2
+SP   (Boras)                  -0.7     -0.8     -1.4     -1.5     -1.8     -1.8     -2.1
+SU   (Moskva)                 -2.4     -1.9     -2.3     -2.1     -2.2     -2.2     -2.1
+TL   (Chung-Li)               -1.2     -1.2     -1.2     -1.5     -1.7     -1.9     -2.3
+TP   (Praha)                   6.3      4.4      1.4      2.1      1.0      2.4     -3.2
+UME  (Gebze-Kocaeli)        -118.0   -112.2   -106.3    -97.6    -91.0    -84.1    -79.6
+USNO (Washington DC)          -0.5     -0.3     -0.3     -0.5     -0.1     -0.2     -0.1
+VMI  (Ha Noi)                -18.0    -14.5    -14.1    -11.2    -10.4     -9.4     -6.0
+VSL  (Delft)                  -5.1      0.3     -4.5     -5.6     -4.0     -2.2      0.5
+
+   UTC remains available from the monthly Circular T at
+   (http://www.bipm.org/en/bipm-services/timescales/time-ftp/Circular-T.html).

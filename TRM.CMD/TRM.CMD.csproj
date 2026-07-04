@@ -16,4 +16,9 @@
     <Folder Include="Data\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <PackageReference Include="ScottPlot" Version="5.1.59" />
+  </ItemGroup>
+
 </Project>

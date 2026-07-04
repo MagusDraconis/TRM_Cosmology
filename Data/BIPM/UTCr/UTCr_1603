@@ -1,0 +1,62 @@
+UTCr_1603
+2016 JANUARY 27, 12h UTC
+
+                      BUREAU INTERNATIONAL DES POIDS ET MESURES
+              ORGANISATION INTERGOUVERNEMENTALE DE LA CONVENTION DU METRE
+   PAVILLON DE BRETEUIL F-92312 SEVRES CEDEX TEL. +33 1 45 07 70 70   tai@bipm.org
+
+                            Computed values of [UTCr-UTC(k)]
+
+Date 2016       0h UTC      JAN 18   JAN 19   JAN 20   JAN 21   JAN 22   JAN 23   JAN 24
+       MJD                   57405    57406    57407    57408    57409    57410    57411
+Laboratory k                                        [UTCr-UTC(k)]/ns
+
+AOS  (Borowiec)                1.5      1.1      1.2      2.1      1.6      2.2      1.7
+AUS  (Sydney)               -119.5   -115.0   -106.6   -102.3   -103.3   -101.3    -91.6
+BEV  (Wien)                   -2.1     -0.6      2.8      6.1      5.9     11.8     12.3
+CH   (Bern-Wabern)            -4.9     -6.7     -7.5     -8.5     -8.6     -7.0     -5.8
+CNM  (Queretaro)               5.1      3.9      3.8      4.0      4.6      6.3      6.9
+CNMP (Panama)                -15.2    -13.0     -5.0      6.1     10.1      8.5     16.0
+DMDM (Belgrade)                8.8      5.4      1.3      0.3      4.4     10.1     14.1
+DTAG (Frankfurt/M)           178.1    179.3    177.2    177.7    179.9    182.8    182.2
+ESTC (Noordwijk)               3.3      2.7      2.7      2.5      2.1      1.9      1.2
+IFAG (Wettzell)             -857.1   -861.8   -861.2   -865.3   -865.9   -863.8   -863.2
+IMBH (Sarajevo)              258.1    253.3    251.2    250.9    249.9    248.7    247.7
+INTI (Buenos Aires)          -71.7    -69.3    -66.5    -64.7    -61.9    -59.0    -58.5
+INXE (Rio de Janeiro)         -5.1     -4.7     -4.0     -4.0     -2.1     -1.0      2.1
+IT   (Torino)                  3.0      2.3      2.4      2.6      2.6      2.6      2.5
+JV   (Kjeller)               -44.9    -44.7    -44.6    -45.0    -45.4    -45.8    -46.6
+KRIS (Daejeon)                10.6     10.5     11.4     12.5     13.0     13.6     13.9
+LT   (Vilnius)              1196.1   1194.4   1185.4   1182.1   1185.4   1183.2   1194.4
+MIKE (Espoo)                   6.5      6.0      6.1      6.1      6.1      6.5      6.4
+MTC  (Makkah)                378.2    377.0    379.1    380.5    381.0    383.1    385.4
+NAO  (Mizusawa)               15.8     12.7     14.0     19.4     16.9     17.5     15.7
+NICT (Tokyo)                  12.3     11.3     11.6     11.7     11.4     11.6     11.6
+NIM  (Beijing)                 1.6      1.0      0.8      0.6      0.7      0.8      0.6
+NIMT (Pathumthani)            97.9     98.6     98.6     94.7     84.7     77.0     74.4
+NIST (Boulder)                -5.2     -5.6     -5.8     -5.9     -6.3     -6.1     -6.0
+NMIJ (Tsukuba)                 4.8      4.1      4.3      4.3      4.1      4.3      4.3
+NMLS (Sepang)               -224.6   -224.6   -228.4   -228.7   -232.8   -235.0   -235.3
+NPLI (New-Delhi)              -2.3     -1.6     -0.5      1.0      2.4      3.3      3.9
+NRC  (Ottawa)                 78.2     79.3     80.6     79.0     79.0     76.9     76.7
+NRL  (Washington DC)          12.6     14.8     14.5     12.7     12.4     12.3     12.1
+NTSC (Lintong)                -4.3     -4.8     -5.6     -5.6     -6.3     -6.4     -6.2
+ONRJ (Rio de Janeiro)          1.2      0.0      1.2      0.6      1.2      1.0      0.4
+OP   (Paris)                   2.6      1.4      1.9      2.1      1.8      1.8      2.0
+ORB  (Bruxelles)              -2.7     -3.3     -3.9     -4.2     -4.7     -5.4     -5.8
+PL   (Warszawa)               -5.7     -7.4     -5.1      0.7     -1.8     -0.4      0.0
+PTB  (Braunschweig)            4.3      3.7      4.0      4.3      4.2      4.2      4.2
+ROA  (San Fernando)            8.0      8.4      9.0      9.6      9.6      9.1      8.4
+SASO (Riyadh)               -278.9   -278.1   -276.2   -276.7   -275.5   -274.5   -279.9
+SCL  (Hong Kong)            -112.6   -113.8   -113.9   -113.1   -111.5   -104.6   -105.2
+SG   (Singapore)              12.6     12.1     12.2     11.8     10.6     10.4     10.0
+SMD  (Bruxelles)               7.7      9.4     10.4     12.0     12.6     11.7     12.8
+SP   (Boras)                   1.1      0.2      0.5      0.6      0.0     -0.5     -0.5
+SU   (Moskva)                  2.4      1.7      1.7      3.0      2.1      2.7      2.1
+TL   (Chung-Li)               10.3      9.9     10.1      9.9      9.8      9.8     10.0
+UME  (Gebze-Kocaeli)          88.0     85.7     89.2     91.7     93.8     93.6     97.4
+USNO (Washington DC)           2.6      2.4      2.5      2.7      2.4      2.1      2.1
+VSL  (Delft)                  15.4     13.6     12.5     13.8     12.3     12.4     11.3
+
+   UTC remains available from the monthly Circular T at
+   (http://www.bipm.org/jsp/en/TimeFtp.jsp?TypePub=publication).

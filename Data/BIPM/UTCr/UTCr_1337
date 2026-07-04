@@ -1,0 +1,55 @@
+UTCr_1337
+2013 SEPTEMBER 18, 12h UTC
+
+                      BUREAU INTERNATIONAL DES POIDS ET MESURES
+              ORGANISATION INTERGOUVERNEMENTALE DE LA CONVENTION DU METRE
+   PAVILLON DE BRETEUIL F-92312 SEVRES CEDEX TEL. +33 1 45 07 70 70   tai@bipm.org
+
+                            Computed values of [UTCr-UTC(k)]
+
+Date 2013       0h UTC      SEP  9   SEP 10   SEP 11   SEP 12   SEP 13   SEP 14   SEP 15
+       MJD                   56544    56545    56546    56547    56548    56549    56550
+Laboratory k                                        [UTCr-UTC(k)]/ns
+
+AOS  (Borowiec)               -0.4      0.1      0.6      0.4      0.7      0.7      1.0
+BEV  (Wien)                   12.9     11.1      6.4      3.0      2.1     -1.8     -5.1
+CH   (Bern-Wabern)            21.2     22.2     23.8     24.3     25.1     25.3     25.9
+CNM  (Queretaro)             -10.6     -8.2     -7.6     -8.7     -7.6     -6.6     -5.4
+CNMP (Panama)                 -0.6      1.6      1.3     -0.8     -9.2    -10.8    -13.5
+DMDM (Belgrade)               -7.3    -10.4    -12.9    -12.0    -11.4     -4.6     -4.1
+DTAG (Frankfurt/M)           347.1    347.3    352.9    354.2    360.2    361.2    364.0
+IFAG (Wettzell)             -761.1   -760.3   -762.6   -768.3   -772.3   -776.8   -777.2
+IGNA (Buenos Aires)         3664.8   3682.5   3700.9   3721.4   3743.6   3764.3   3786.1
+INTI (Buenos Aires)           39.8     42.5     46.8     52.8     65.8     65.9     70.0
+IT   (Torino)                -12.0    -12.3    -11.2    -11.0    -10.6    -10.6     -9.8
+KRIS (Daejeon)                -1.7     -1.1      0.3      1.2      2.3      3.1      4.6
+LT   (Vilnius)               444.8    444.6    443.1    440.6    438.5    437.5    433.1
+MSL  (Lower Hutt)            786.5    791.4    788.7    785.7    791.4    795.8    779.3
+NAO  (Mizusawa)               46.6     46.4     40.4     37.6     37.8     35.5     30.9
+NICT (Tokyo)                   4.3      4.2      4.5      4.8      4.9      5.1      5.5
+NIM  (Beijing)                -4.4     -4.3     -3.6     -3.6     -3.2     -3.2     -2.8
+NIMT (Pathumthani)           -13.4    -17.5    -19.5    -14.9    -15.2    -12.4     -4.4
+NIST (Boulder)                14.3     14.3     14.7     14.2     14.0     13.7     13.6
+NMIJ (Tsukuba)                -1.3     -1.1     -0.8     -0.6     -0.2      0.2      0.7
+NMLS (Sepang)                795.8    803.2    813.0    816.3    827.1    832.8    842.9
+NPLI (New-Delhi)               2.3      1.9      2.5      1.1      0.8      0.4      0.7
+NRC  (Ottawa)                -24.4    -23.8    -23.3    -25.3    -21.8    -24.1    -24.3
+NRL  (Washington DC)          26.9     32.6     31.1     46.0     45.1     45.4     44.0
+NTSC (Lintong)                -2.5     -3.0     -3.9     -3.4     -2.9     -2.9     -2.5
+ONRJ (Rio de Janeiro)         -5.0     -5.2     -5.3     -5.6     -4.5     -4.8     -4.1
+OP   (Paris)                  -0.4     -0.1      0.4      0.2      0.3      0.0      0.1
+ORB  (Bruxelles)              11.8     14.9     14.6     13.6     16.0     17.5     14.7
+PL   (Warszawa)              128.9    133.1    135.2    132.9    134.6    134.3    135.3
+PTB  (Braunschweig)            1.1      0.9      1.5      1.0      1.6      1.1      1.3
+ROA  (San Fernando)            7.5      7.6      7.8      7.0      6.6      5.1      5.6
+SCL  (Hong Kong)              58.6     55.0     60.4     58.5     55.0     54.4     55.7
+SG   (Singapore)              10.6     11.6     13.0     12.5     10.2      5.8      4.9
+SP   (Boras)                   2.2      3.2      4.0      3.7      3.7      3.7      3.9
+SU   (Moskva)                 -3.4     -1.8     -3.1     -3.0     -4.2     -3.6     -5.2
+TL   (Chung-Li)               -0.6      0.4      1.4      2.4      3.7      3.8      4.2
+UME  (Gebze-Kocaeli)        1192.4   1196.6   1198.5   1201.0   1202.8   1208.4   1212.3
+USNO (Washington DC)           1.0      0.7      1.0      1.0      1.0      1.4      1.8
+VSL  (Delft)                  14.5     12.4     11.2     10.3     11.5     10.5     10.6
+
+   UTC remains available from the monthly Circular T at
+   (http://www.bipm.org/jsp/en/TimeFtp.jsp?TypePub=publication).

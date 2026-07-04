@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TRM.Core;
@@ -29,6 +30,10 @@ namespace TRM.CMD
                 Console.WriteLine(" [3] Analyze CMB Acoustic Peaks (Planck Cosmology)");
                 Console.WriteLine(" [4] Analyze Pantheon+ Supernovae (TRM scale-distance diagnostics)");
                 Console.WriteLine(" [5] Show Sector Status Snapshot (Scalar / Vector / Theta)");
+                Console.WriteLine(" [6] BIPM Clock Drift Analysis (Global B(t) detection)");
+                Console.WriteLine(" [7] BIPM UTCr Drift Analysis (Global B(t) detection v2)");
+                Console.WriteLine(" [8] PHARAO Residual Analysis (B(t) non-globality bounds)");
+                Console.WriteLine(" [9] SPARC Global Lapse Residual Analysis (Galaxy-scale B-like detection)");
                 Console.WriteLine(" [0] Exit Framework");
                 Console.WriteLine("=======================================================");
                 Console.Write(" Select an option: ");
@@ -51,6 +56,22 @@ namespace TRM.CMD
                         break;
                     case "5":
                         ShowSectorStatusSnapshot();
+                        break;
+
+                    case "6":
+                        RunBipmClockAnalysis();
+                        break;
+
+                    case "7":
+                        RunBipmUtcrAnalysis();
+                        break;
+
+                    case "8":
+                        RunPharaoAnalysis();
+                        break;
+
+                    case "9":
+                        RunSparcLapseAnalysis();
                         break;
 
                     case "0":
@@ -857,6 +878,200 @@ namespace TRM.CMD
             WaitForMenuReturn();
         }
 
+        private static void RunBipmClockAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- BIPM CLOCK DRIFT ANALYSIS ---");
+            Console.WriteLine("Detects global common-mode drift (candidate B(t) from BB13–BB16).");
+            Console.WriteLine();
+
+            string clockFolder = Path.GetFullPath(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    "..", "..", "..", "..", "Data", "BIPM", "clocks"));
+
+            // Walk up from execution dir until Data/BIPM/clocks is found.
+            if (!Directory.Exists(clockFolder))
+            {
+                var probe = AppDomain.CurrentDomain.BaseDirectory;
+                for (int i = 0; i < 10; i++)
+                {
+                    var candidate = Path.GetFullPath(
+                        Path.Combine(probe, "Data", "BIPM", "clocks"));
+                    if (Directory.Exists(candidate))
+                    {
+                        clockFolder = candidate;
+                        break;
+                    }
+                    probe = Path.GetFullPath(Path.Combine(probe, ".."));
+                }
+            }
+
+            if (!Directory.Exists(clockFolder))
+            {
+                Console.WriteLine($"ERROR: BIPM clock data folder not found.");
+                Console.WriteLine($"Expected near: {clockFolder}");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            Console.WriteLine($"Loading data from: {clockFolder}");
+            Console.WriteLine();
+
+            List<ClockMeasurement> measurements;
+            try
+            {
+                measurements = BipmClockAnalyzer.LoadUhFiles(clockFolder);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR loading files: {ex.Message}");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            Console.WriteLine($"  Loaded {measurements.Count:N0} measurements.");
+            Console.WriteLine($"  Unique clocks : {measurements.Select(m => m.ClockId).Distinct().Count()}");
+            Console.WriteLine($"  Unique labs   : {measurements.Select(m => m.Lab).Distinct().Count()}");
+            Console.WriteLine($"  MJD range     : {measurements.Min(m => m.Mjd):F3} - {measurements.Max(m => m.Mjd):F3}");
+            Console.WriteLine();
+
+            var result = BipmClockAnalyzer.Analyze(measurements);
+
+            Console.WriteLine(BipmClockAnalyzer.FormatSummary(result));
+            Console.WriteLine();
+
+            // Save outputs to execution root
+            string outputRoot = AppDomain.CurrentDomain.BaseDirectory;
+            string outputFolder = Path.Combine(outputRoot, "BipmOutput");
+            Directory.CreateDirectory(outputFolder);
+
+            BipmClockAnalyzer.WriteCsv(outputFolder, result);
+
+            string ensemblePng = Path.Combine(outputFolder, "ensemble_drift.png");
+            string pairwisePng = Path.Combine(outputFolder, "pairwise_variance.png");
+
+            BipmClockAnalyzer.SaveEnsemblePlot(ensemblePng, result);
+            BipmClockAnalyzer.SavePairwiseHistogram(pairwisePng, result);
+
+            Console.WriteLine($"Outputs written to: {outputFolder}");
+            Console.WriteLine($"  {Path.GetFileName(ensemblePng)}");
+            Console.WriteLine($"  {Path.GetFileName(pairwisePng)}");
+            Console.WriteLine($"  ensemble.csv, drift.csv, pairwise.csv");
+            Console.WriteLine();
+
+            if (result.DetectedGlobalDrift)
+            {
+                Console.WriteLine("*** RESULT: Global B(t) candidate DETECTED ***");
+                Console.WriteLine($"  Drift slope: {result.Drift.Slope:E3} ns/day");
+            }
+            else
+            {
+                Console.WriteLine("Result: No significant global drift detected.");
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunBipmUtcrAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- BIPM UTCr DRIFT ANALYSIS ---");
+            Console.WriteLine("Detects global common-mode drift (candidate B(t) from BB13-BB16).");
+            Console.WriteLine("Refined v2: stable labs, demeaned series, robust statistics.");
+            Console.WriteLine();
+
+            string utcrFolder = Path.GetFullPath(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    "..", "..", "..", "..", "Data", "BIPM", "UTCr"));
+
+            // Walk up from execution dir until Data/BIPM/UTCr is found.
+            if (!Directory.Exists(utcrFolder))
+            {
+                var probe = AppDomain.CurrentDomain.BaseDirectory;
+                for (int i = 0; i < 10; i++)
+                {
+                    var candidate = Path.GetFullPath(
+                        Path.Combine(probe, "Data", "BIPM", "UTCr"));
+                    if (Directory.Exists(candidate))
+                    {
+                        utcrFolder = candidate;
+                        break;
+                    }
+                    probe = Path.GetFullPath(Path.Combine(probe, ".."));
+                }
+            }
+
+            if (!Directory.Exists(utcrFolder))
+            {
+                Console.WriteLine("ERROR: BIPM UTCr data folder not found.");
+                Console.WriteLine($"Expected near: {utcrFolder}");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            Console.WriteLine($"Loading data from: {utcrFolder}");
+            Console.WriteLine();
+
+            UtcrAnalysisResult result;
+            try
+            {
+                result = BipmUtcrAnalyzer.Analyze(utcrFolder);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR analysing UTCr data: {ex.Message}");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            Console.WriteLine(BipmUtcrAnalyzer.FormatSummary(result));
+            Console.WriteLine();
+
+            // Save outputs to execution root
+            string outputRoot = AppDomain.CurrentDomain.BaseDirectory;
+            string outputFolder = Path.Combine(outputRoot, "UtcrOutput");
+            Directory.CreateDirectory(outputFolder);
+
+            BipmUtcrAnalyzer.WriteOutputs(outputFolder, result);
+
+            Console.WriteLine($"Outputs written to: {outputFolder}");
+            Console.WriteLine("  utcr_all.csv, utcr_ensemble.csv, utcr_lab_slopes.csv");
+            Console.WriteLine("  utcr_correlations.csv");
+            Console.WriteLine("  utcr_stable_labs.csv, utcr_demeaned_ensemble.csv");
+            Console.WriteLine("  utcr_median_ensemble.csv, utcr_common_mode_report.csv");
+            Console.WriteLine("  utcr_ensemble.png, utcr_lab_slopes.png");
+            Console.WriteLine("  demeaned_ensemble_drift.png, median_vs_mean_drift.png");
+            Console.WriteLine("  stable_lab_overlay.png");
+            Console.WriteLine();
+
+            if (result.CandidateGlobalDriftV2)
+            {
+                Console.WriteLine("*** RESULT: Global B(t) candidate DETECTED (v2) ***");
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  Demeaned drift: {result.DemeanedDrift.Slope:E3} ns/day"));
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  Median drift  : {result.MedianDrift.Slope:E3} ns/day"));
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  CM correlation: {result.CommonModeCorrelation:F4}"));
+            }
+            else if (result.CandidateGlobalDrift)
+            {
+                Console.WriteLine("Result (v1): Global drift candidate detected, but v2 criteria not met.");
+            }
+            else
+            {
+                Console.WriteLine("Result: No significant global drift detected.");
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
         private static void WaitForMenuReturn()
         {
             if (Console.IsInputRedirected || Console.IsOutputRedirected)
@@ -873,7 +1088,172 @@ namespace TRM.CMD
                 // Non-interactive host: skip blocking wait.
             }
         }
+
+        private static void RunPharaoAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- PHARAO RESIDUAL ANALYSIS ---");
+            Console.WriteLine("Quantifies B(t) non-globality bounds via ground-vs-space clock simulation.");
+            Console.WriteLine("Gradient model: spatial gradient + slope difference fractions.");
+            Console.WriteLine();
+
+            // Ensure output folder
+            string outputRoot = AppDomain.CurrentDomain.BaseDirectory;
+            string outputFolder = Path.Combine(outputRoot, "PharaoOutput");
+            Directory.CreateDirectory(outputFolder);
+
+            // Run all test cases including gradient scans
+            var cfg = new PharaoConfig();
+            List<PharaoTestCaseResult> results;
+            try
+            {
+                results = PharaoResidualAnalyzer.RunAllTests(cfg);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR running PHARAO simulation: {ex.Message}");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            // Write CSV outputs
+            PharaoResidualAnalyzer.WriteScanCsv(outputFolder, results);
+
+            // Find threshold values
+            var spatialScans = results
+                .Where(r => r.CaseName.Contains("SpatialGrad_"))
+                .OrderBy(r => r.SpatialGradientFraction)
+                .ToList();
+            var slopeScans = results
+                .Where(r => r.CaseName.Contains("SlopeDiff_"))
+                .OrderBy(r => r.SlopeDifferenceFraction)
+                .ToList();
+
+            var minSpatialGrad = spatialScans
+                .FirstOrDefault(r => r.BDetectable);
+            var minSlopeDiff = slopeScans
+                .FirstOrDefault(r => r.BDetectable);
+
+            double X = minSpatialGrad != null ? minSpatialGrad.SpatialGradientFraction : -1.0;
+            double Y = minSlopeDiff != null ? minSlopeDiff.SlopeDifferenceFraction : -1.0;
+
+            // Print summary
+            Console.WriteLine(PharaoResidualAnalyzer.FormatSummary(cfg, results));
+            Console.WriteLine();
+
+            // Print BB17 constraints block
+            Console.WriteLine("=== BB17 Empirical Constraints ===");
+            Console.WriteLine();
+            if (minSpatialGrad != null)
+            {
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  5σ minimum detectable spatial gradient: {X:E2}"));
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  Constraint: |spatialGradientFraction| < {X:E2}  (5σ)"));
+            }
+            else
+            {
+                Console.WriteLine("  5σ minimum detectable spatial gradient: NOT REACHED (all tested fractions up to 1e-1 undetectable)");
+                Console.WriteLine("  Constraint: |spatialGradientFraction| > 1e-1 (no upper bound; constant offset invisible in differential comparison)");
+            }
+
+            if (minSlopeDiff != null)
+            {
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  5σ minimum detectable slope difference: {Y:E2}"));
+                Console.WriteLine(FormattableString.Invariant(
+                    $"  Constraint: |slopeDifferenceFraction| < {Y:E2}  (5σ)"));
+            }
+            else
+            {
+                Console.WriteLine("  5σ minimum detectable slope difference: NOT REACHED (all fractions undetectable)");
+                Console.WriteLine("  Constraint: |slopeDifferenceFraction| > 1e-1 (no bound; not constrained)");
+            }
+            Console.WriteLine();
+
+            Console.WriteLine($"Outputs written to: {outputFolder}");
+            Console.WriteLine("  pharao_gradient_scan.csv");
+            Console.WriteLine("  pharao_slope_scan.csv");
+            Console.WriteLine();
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
         
+        private static void RunSparcLapseAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- SPARC GLOBAL LAPSE RESIDUAL ANALYSIS ---");
+            Console.WriteLine("Tests whether SPARC galaxy data require a universal B(t)-like term.");
+            Console.WriteLine("Runs: universal offset, phi-proxy correlation, global lambda deformation.");
+            Console.WriteLine();
+
+            // Ensure output folder
+            string outputRoot = AppDomain.CurrentDomain.BaseDirectory;
+            string outputFolder = Path.Combine(outputRoot, "SparcLapseOutput");
+            Directory.CreateDirectory(outputFolder);
+
+            SparcLapseResult result;
+            try
+            {
+                result = SparcGlobalLapseResidualAnalyzer.Run();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR running SPARC lapse analysis: {ex.Message}");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            // Write CSV outputs
+            SparcGlobalLapseResidualAnalyzer.WriteCsv(outputFolder, result);
+
+            // Print summary
+            Console.WriteLine(SparcGlobalLapseResidualAnalyzer.FormatSummary(result));
+
+            Console.WriteLine($"Outputs written to: {outputFolder}");
+            Console.WriteLine("  sparc_residuals.csv");
+            Console.WriteLine("  sparc_universal_offset_fit.csv");
+            Console.WriteLine("  sparc_phi_proxy_fit.csv");
+            Console.WriteLine("  sparc_lambda_fit.csv");
+            Console.WriteLine("  sparc_robustness_report.csv");
+
+            // Plot: residual histogram
+            try
+            {
+                var plot = new ScottPlot.Plot();
+                var residuals = result.Points.Select(p => p.Residual).ToArray();
+                double min = residuals.Min(), max = residuals.Max();
+                int binCount = 40;
+                double binWidth = (max - min) / binCount;
+                int[] counts = new int[binCount];
+                foreach (var r in residuals)
+                {
+                    int idx = (int)((r - min) / binWidth);
+                    if (idx >= binCount) idx = binCount - 1;
+                    if (idx < 0) idx = 0;
+                    counts[idx]++;
+                }
+                double[] positions = Enumerable.Range(0, binCount).Select(i => min + (i + 0.5) * binWidth).ToArray();
+                var bar = plot.Add.Bars(positions, counts.Select(c => (double)c).ToArray());
+                plot.Title("SPARC Residual Histogram");
+                plot.XLabel("Residual (dex)");
+                plot.YLabel("Count");
+                string histPath = Path.Combine(outputFolder, "sparc_residual_histogram.png");
+                plot.SavePng(histPath, 800, 600);
+                Console.WriteLine($"  Plot saved: {histPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  Plot generation skipped: {ex.Message}");
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
         private static void ClearConsole()
         {
             if (Console.IsOutputRedirected)

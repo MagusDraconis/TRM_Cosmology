@@ -1,0 +1,54 @@
+UTCr_1328
+2013 JULY 17, 12h UTC
+
+                      BUREAU INTERNATIONAL DES POIDS ET MESURES
+              ORGANISATION INTERGOUVERNEMENTALE DE LA CONVENTION DU METRE
+   PAVILLON DE BRETEUIL F-92312 SEVRES CEDEX TEL. +33 1 45 07 70 70   tai@bipm.org
+
+                            Computed values of [UTCr-UTC(k)]
+
+Date 2013       0h UTC      JUL  8   JUL  9   JUL 10   JUL 11   JUL 12   JUL 13   JUL 14
+       MJD                   56481    56482    56483    56484    56485    56486    56487
+Laboratory k                                        [UTCr-UTC(k)]/ns
+
+AOS  (Borowiec)                0.3      0.3      0.5      0.0     -0.1     -0.2     -0.3
+BEV  (Wien)                   26.4     26.8     26.3     28.8     25.9     27.6     29.5
+CH   (Bern-Wabern)             2.3      1.4      1.0      1.2      1.5      1.9      2.2
+CNM  (Queretaro)               3.5      3.9      4.2      5.4      4.6      3.8      2.8
+CNMP (Panama)                 17.4     20.7     10.9      2.1     11.4     12.8     17.7
+DMDM (Belgrade)               -7.5     -3.0     -0.5      3.2      0.3     -2.1     -2.4
+DTAG (Frankfurt/M)           314.6    315.5    316.9    318.4    318.2    319.9    321.0
+IFAG (Wettzell)             -661.3   -663.8   -665.1   -666.2   -668.2   -672.4   -671.9
+IGNA (Buenos Aires)         2414.5   2435.0   2455.8   2475.6   2493.5   2515.2   2537.1
+INTI (Buenos Aires)           39.3     39.6     43.8     43.9     42.1     41.9     41.3
+IT   (Torino)                  1.3      1.4      2.0      1.9      2.3      2.0      1.6
+KRIS (Daejeon)                -2.4     -1.7     -1.3     -1.2     -0.8     -0.3     -0.2
+LT   (Vilnius)               407.7    409.0    406.0    405.8    417.6    425.7    424.2
+MSL  (Lower Hutt)            738.9    735.4    724.5    730.9    727.9    722.7    731.2
+NAO  (Mizusawa)               36.8     41.3     39.4     40.0     39.0     35.4     34.9
+NICT (Tokyo)                  -4.0     -3.6     -3.4     -4.2     -3.2     -3.4     -3.1
+NIM  (Beijing)                -0.6     -0.9     -0.3     -0.9     -0.9     -0.8     -0.9
+NIMT (Pathumthani)            -4.2     -4.9     -3.4     -1.4     -5.8     -2.5     -5.2
+NIST (Boulder)                14.2     14.2     14.5     14.1     14.2     14.5     14.5
+NMIJ (Tsukuba)               -10.9    -11.0    -11.2    -11.6    -11.4    -10.9    -11.0
+NPLI (New-Delhi)               1.3      0.7      0.1     -1.2     -2.3     -2.7     -3.7
+NRC  (Ottawa)                -37.6    -43.1    -44.7    -44.9    -41.2    -45.3    -45.9
+NRL  (Washington DC)           1.7      2.3      2.5      2.8      3.6      4.0        -
+NTSC (Lintong)                 0.4      0.4      0.2      4.8      2.9     -1.1      0.0
+ONRJ (Rio de Janeiro)          2.1      2.2      1.4      2.0      2.7      3.7      3.8
+OP   (Paris)                   1.5      1.2      2.2      1.9      1.9      2.2      2.2
+ORB  (Bruxelles)                 -        -   -134.4     -3.5      0.0      0.1     -0.6
+PL   (Warszawa)               -7.5     -7.3     -5.3     -5.3     -7.9     -7.1     -6.4
+PTB  (Braunschweig)           -2.6     -3.0     -2.7     -3.1     -2.9     -2.8     -3.0
+ROA  (San Fernando)           -9.7     -9.3     -9.0     -9.0     -8.7     -8.2     -8.0
+SCL  (Hong Kong)              29.7     36.1     34.4     39.8     37.6        -        -
+SG   (Singapore)             -13.3    -11.5     -9.4     -9.2     -6.9     -5.6     -7.4
+SP   (Boras)                  -6.0     -5.4     -4.6     -3.8     -3.7     -3.5     -3.8
+SU   (Moskva)                  0.2     -0.7     -0.3     -0.3     -1.6     -1.4     -0.3
+TL   (Chung-Li)               -7.6     -7.7     -7.3     -7.2     -7.3     -6.4     -4.7
+UME  (Gebze-Kocaeli)         941.6    944.1    945.7    948.1    951.0    954.0    955.9
+USNO (Washington DC)          -1.4     -1.2     -1.1     -1.9     -1.6     -1.2     -1.5
+VSL  (Delft)                  -4.2     -5.7     -7.7     -9.2     -7.2     -7.1     -5.0
+
+   UTC remains available from the monthly Circular T at
+   (http://www.bipm.org/jsp/en/TimeFtp.jsp?TypePub=publication).
