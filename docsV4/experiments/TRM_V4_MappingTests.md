@@ -9,18 +9,24 @@
 
 ```
 TRM V3.4 CORE         → FROZEN ✅
-C5 framework          → STRUCTURALLY VALID ✅ (passes E1, I1, I2)
-C5 Newtonian limit    → PROVEN ✅ — B1 shows K1×F1 yields exact GM/r²
-Path B                → PRIMARY RESEARCH PATH
-  B1 (coupling test)  → ✅ PASSED — see TRM_V4_B1_Results.md
-  B2 (SPARC test)     → NEXT — unblocked
+C5 framework          → STRUCTURALLY CONSISTENT ✅ (passes E1, I1, I2)
+C5 Newtonian limit    → PHENOMENOLOGICAL MATCH — K1×F1 yields exact GM/r²
+                        (post-hoc calibration: k = G·K₀/c², PARTIAL)
+Path B                → STABLE VALIDATION LAYER
+  B1 (coupling test)  → STABLE ✅ — unique mechanism identified
+  B2 (SPARC test)     → STABLE ✅ — phenomenological consistency test
+  B3 (field equation) → OPEN 🔴 — the decisive unresolved step
 ```
 
-### The Decisive Question — ANSWERED
+### The Decisive Question — REFRAMED
 
 > **Can a mass-induced oscillator coupling perturbation δK(r) generate an effective energy density δρ_eff(r) ~ 1/r, producing a(r) ~ GM/r²?**
 
-**YES.** K1×F1: δK(r) = k·M/r, ρ_eff = ρ_ref·δK/K₀ → a(r) = −GM/r² exactly, with k = G·K₀/c². No free parameters.
+**Phenomenologically:** YES — K1×F1 is the unique mechanism among 16 candidates. δK(r) = k·M/r, ρ_eff = ρ_ref·δK/K₀ → a(r) = −GM/r² exactly, with k = G·K₀/c².
+
+**From first principles:** NOT YET — k = G·K₀/c² is post-hoc calibration. WHY δK ~ M/r is assumed (Laplace/Poisson), not derived from oscillator dynamics. This is B3.
+
+**Current classification: PARTIAL.** Unique phenomenological bridge. First-principles derivation of the coupling field equation remains open.
 
 ---
 
@@ -34,16 +40,17 @@ Path B                → PRIMARY RESEARCH PATH
 | I1 | Ω* = 1 + m/q rational consistency | **PASS** |
 | I2 | φ(x) ∈ [0.16, 0.19] for target system | **PASS** — φ₀ = ρ_bg/ρ_ref |
 
-### 1.2 Newtonian Limit Gate (C5 — OPEN)
+### 1.2 Newtonian Limit Gate (C5 — PHENOMENOLOGICAL MATCH)
 
 | Gate | Condition | Status |
 |:---|:---|:---|
-| **G1** | δρ_eff(r) ~ 1/r at large r | **PENDING** |
-| **G2** | a_eff(r) = c²/ρ_ref · ∇(δρ_eff) → GM/r² | **PENDING** — follows from G1 |
+| **G1** | δρ_eff(r) ~ 1/r at large r | **PHENOMENOLOGICAL MATCH** — K1×F1 satisfies this analytically when K1 is chosen as the δK form |
+| **G2** | a_eff(r) = c²/ρ_ref · ∇(δρ_eff) → GM/r² | **PHENOMENOLOGICAL MATCH** — follows from G1 with k = G·K₀/c² (post-hoc) |
+| **G3** | First-principles derivation of δK ~ M/r | **OPEN** — B3: coupling field equation not yet derived from oscillator dynamics |
 
 ---
 
-## 2. Path B — Coupling Modulation (PRIMARY RESEARCH PATH)
+## 2. Path B — Coupling Modulation (STABLE VALIDATION LAYER)
 
 ### 2.1 Core Hypothesis
 
@@ -69,7 +76,7 @@ Step 4: Verify                         a(r) ~ GM/r²
 
 ---
 
-## 3. Test B1 — Coupling Modulation Gradient (DECISIVE GATE)
+## 3. Test B1 — Coupling Modulation Gradient (STABLE — PHENOMENOLOGICAL MATCH)
 
 ### 3.1 Objective
 
@@ -116,21 +123,25 @@ For each (δK candidate, F mapping) pair:
 
 **Best pair: K1×F1 — δK = k·M/r, ρ_eff = ρ_ref·δK/K₀, k = G·K₀/c². See `TRM_V4_B1_Results.md` for full derivation.**
 
-### 3.6 Success Criteria (B1 — MET ✅)
+### 3.6 B1 Results Summary
 
-| Criterion | Threshold | Actual |
-|:---|:---|:---|
-| Asymptotic α | −1.0 ± 0.2 | **−1.000** |
-| Acceleration β | −2.0 ± 0.2 | **−2.000** |
-| Free parameters | 0 | **0** (k = G·K₀/c²) |
+| Criterion | Threshold | Actual | Notes |
+|:---|:---|:---|:---|
+| Asymptotic α | −1.0 ± 0.2 | **−1.000** | Exact analytic match for K1×F1 |
+| Acceleration β | −2.0 ± 0.2 | **−2.000** | Exact analytic match |
+| Unique mechanism | Only 1 of 16 pairs works | **K1×F1 only** | No degeneracy |
+| Coupling constant | Must predict G | **k = G·K₀/c² (post-hoc)** | K₀ not independently determined |
+| First-principles status | Derivation from oscillator | **NOT DERIVED** | δK ~ M/r is assumed (Laplace), not derived |
+
+**Result: K1×F1 is the unique phenomenological mechanism. Classification: PARTIAL — post-hoc calibration, B3 unresolved.**
 
 ---
 
-## 4. Test B2 — SPARC Galaxy Rotation (DEPENDS ON B1 SUCCESS)
+## 4. Test B2 — SPARC Galaxy Rotation (PHENOMENOLOGICAL CONSISTENCY TEST)
 
 ### 4.1 Objective
 
-Apply the best-performing (δK, F) pair from B1 to observed SPARC galaxy rotation curves. Test whether baryonic mass distributions reproduce observed velocities **without dark matter halos**.
+Apply the best-performing (δK, F) pair from B1 to observed SPARC galaxy rotation curves. Test whether the K1×F1 mechanism produces phenomenologically consistent rotation curves. **Note: B2 is a consistency test, not a derivation test — k = G·K₀/c² is post-hoc, and the coupling field equation (B3) remains open.**
 
 ### 4.2 Mapping Chain
 
@@ -185,18 +196,19 @@ For each SPARC galaxy (or representative subset):
 
 | Layer | Status | Next Action |
 |:---|:---|:---|
-| **C5 framework** | ✅ STRUCTURALLY VALID | None — framework complete |
+| **C5 framework** | ✅ STRUCTURALLY CONSISTENT | None — framework complete |
 | **Consistency checks (E1, I1, I2)** | ✅ ALL PASSED | None |
-| **Path B hypothesis** | 📋 FORMULATED | Execute B1 numerical test |
-| **Gate G1 (δρ ~ 1/r)** | 🔴 OPEN | **B1 — decisive test** |
-| **Gate G2 (Newtonian limit)** | 🔴 OPEN | Follows from G1 |
-| **SPARC validation** | ⏳ BLOCKED ON B1 | Execute B2 after B1 success |
+| **B1 (coupling mechanism)** | ✅ STABLE — unique phenomenological match | None — frozen unless bug found |
+| **B2 (SPARC consistency)** | ✅ STABLE — phenomenological consistency test | None — frozen |
+| **B3 (coupling field equation)** | 🔴 OPEN | Derive δK ~ M/r from oscillator dynamics |
+| **Overall classification** | **PARTIAL** | Post-hoc calibration; first-principles derivation open |
 
 ### The Mode Has Shifted
 
 ```
-BEFORE:  Theorie bauen (build theory)
-NOW:     Einen einzigen harten Mechanismus testen (test one hard mechanism)
+BEFORE:   Theorie bauen (build theory)
+B1/B2:   Einen einzigen harten Mechanismus testen (test one hard mechanism)
+NOW:     Die Feldgleichung finden (find the field equation) ← B3
 ```
 
-This is the strongest scientific position the project has ever been in. One testable hypothesis, one decisive gate, one clear success/failure criterion.
+C5 is a stable phenomenological bridge. K1×F1 is the unique mechanism. The single open question — **why does δK ~ M/r?** — is now precisely isolated in B3.
