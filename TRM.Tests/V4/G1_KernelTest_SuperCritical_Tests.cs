@@ -214,7 +214,6 @@ public class G1_KernelTest_SuperCritical_Tests
         int passed = 0, total = 6;
 
         // ── Test 1: Positivity ──
-        _output.Write("  [1] Positivity ∀x            ... ");
         bool pos = true;
         double[] testX = { -1e6, -100, -10, -1, -0.5, 0, 0.5, 1, 10, 100, 1e6 };
         foreach (double x in testX)
@@ -222,40 +221,35 @@ public class G1_KernelTest_SuperCritical_Tests
             double d = 1.0 + x + bStar * x * x + x * x * x * x;
             if (d <= 0) { pos = false; break; }
         }
-        _output.WriteLine(pos ? "PASS" : "FAIL"); if (pos) passed++;
+        _output.WriteLine($"  [1] Positivity ∀x            ... {(pos ? "PASS" : "FAIL")}"); if (pos) passed++;
 
         // ── Test 2: Lorentz stability ──
-        _output.Write("  [2] No blow-up for x<0       ... ");
         bool stable = true;
         foreach (double x in new[] { -1.0, -10.0, -100.0, -1e4, -1e6 })
         {
             double k = F(x, bStar);
             if (double.IsInfinity(k) || double.IsNaN(k) || k > 1e10) { stable = false; break; }
         }
-        _output.WriteLine(stable ? "PASS" : "FAIL"); if (stable) passed++;
+        _output.WriteLine($"  [2] No blow-up for x<0       ... {(stable ? "PASS" : "FAIL")}"); if (stable) passed++;
 
         // ── Test 3: Smoothness ──
-        _output.Write("  [3] f'(0)≠0, f''(0) finite   ... ");
         double fp0 = FPrime(0, bStar);
         double fpp0 = FDoublePrime(0, bStar);
         bool smooth = Math.Abs(fp0) > 1e-10 && double.IsFinite(fpp0);
-        _output.WriteLine(smooth ? $"PASS (f'={fp0:F2}, f''={fpp0:F2})" : "FAIL"); if (smooth) passed++;
+        _output.WriteLine($"  [3] f'(0)≠0, f''(0) finite   ... {(smooth ? $"PASS (f'={fp0:F2}, f''={fpp0:F2})" : "FAIL")}"); if (smooth) passed++;
 
         // ── Test 4: Asymptotic decay ──
-        _output.Write("  [4] K→0 as |x|→∞            ... ");
         double kPos = F(1e6, bStar), kNeg = F(-1e6, bStar);
         bool decay = kPos < 1e-20 && kNeg < 1e-20 && kPos > 0 && kNeg > 0;
-        _output.WriteLine(decay ? $"PASS (K~{kPos:E2})" : "FAIL"); if (decay) passed++;
+        _output.WriteLine($"  [4] K→0 as |x|→∞            ... {(decay ? $"PASS (K~{kPos:E2})" : "FAIL")}"); if (decay) passed++;
 
         // ── Test 5: Dispersion ──
-        _output.Write("  [5] □K=0 → ω=ck             ... ");
-        _output.WriteLine("PASS (structural — all kernels in family)"); passed++;
+        _output.WriteLine("  [5] □K=0 → ω=ck             ... PASS (structural)"); passed++;
 
         // ── Test 6: Metric extraction ──
-        _output.Write("  [6] g_μν extraction valid     ... ");
         double prefactor = Lambda * Lambda / (2.0 * Math.Abs(fp0) * K0);
         bool extract = double.IsFinite(prefactor) && prefactor > 0;
-        _output.WriteLine(extract ? $"PASS" : "FAIL"); if (extract) passed++;
+        _output.WriteLine($"  [6] g_μν extraction valid     ... {(extract ? "PASS" : "FAIL")}"); if (extract) passed++;
 
         _output.WriteLine("");
         bool allPass = passed == total;
