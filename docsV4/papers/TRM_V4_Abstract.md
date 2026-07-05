@@ -1,7 +1,9 @@
 # TRM V4 — Abstract (Draft)
 
 **Date:** 2026-07-05
-**Status:** Updated — C5 energy density interpretation is primary candidate
+**Status:** C5 energy density interpretation is the primary phenomenological candidate. Classification: PARTIAL — unique phenomenological bridge, first-principles derivation remains open.
+
+**Current status:** C5 is the unique phenomenological interpretation candidate currently supported by Path B tests. It is not yet a first-principles derivation of gravity from oscillator dynamics. Therefore the current classification is PARTIAL.
 
 ---
 

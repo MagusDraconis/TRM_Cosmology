@@ -1,7 +1,9 @@
 # TRM V4 — Time-Field Mapping (Energy Density Interpretation)
 
 **Date:** 2026-07-05
-**Status:** C5 (energy density) is the primary candidate — breakthrough formulation
+**Status:** C5 is the primary candidate — unique phenomenological bridge from energy density to time-rate. Classification: PARTIAL (post-hoc calibration, not first-principles derivation).
+
+**Current status:** C5 is the unique phenomenological interpretation candidate currently supported by Path B tests. It is not yet a first-principles derivation of gravity from oscillator dynamics. Therefore the current classification is PARTIAL.
 
 ---
 

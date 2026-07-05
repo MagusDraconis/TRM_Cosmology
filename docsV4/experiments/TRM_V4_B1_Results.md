@@ -291,7 +291,7 @@ Best pair:    K1 × F1
 δK model:     δK(r) = k·M/r  (3D Laplace Green's function)
 ρ_eff model:  ρ_eff = ρ_ref · δK/K₀
 Asymptotics:  α = −1.000, β = −2.000  (exact Newtonian)
-Free params:  0  (k = G·K₀/c² — fully determined)
+Free params:  1 post-hoc (k = G·K₀/c² — K₀ not independently determined)
 
 VALID pairs:   4  (K1×F1, K1×F3, K1×F4 — all reduce to same mechanism)
 INVALID pairs: 8  (K2×all, K3×all, K1×F2)

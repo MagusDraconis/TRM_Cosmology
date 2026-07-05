@@ -164,9 +164,9 @@ For each SPARC galaxy (or representative subset):
 
 | Outcome | Interpretation |
 |:---|:---|
-| v_pred matches v_obs across diverse galaxies with single ρ_ref | **C5 VALIDATED** — coupling modulation produces correct gravity |
+| v_pred matches v_obs across diverse galaxies with single ρ_ref | **C5 phenomenologically consistent** — coupling modulation mechanism matches Newtonian limit (post-hoc calibration, PARTIAL) |
 | v_pred matches only with per-galaxy ρ_ref tuning | PARTIAL — correct mechanism, missing scale law |
-| v_pred fails to produce flat rotation curves | C5 **FALSIFIED** — coupling modulation does not produce Newtonian gravity |
+| v_pred fails to produce flat rotation curves | C5 **phenomenologically insufficient** — coupling modulation alone does not explain observed rotation curves without additional physics |
 
 ---
 

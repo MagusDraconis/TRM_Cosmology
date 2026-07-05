@@ -1,7 +1,9 @@
 # TRM V4 — Gravity Model (Energy Density Interpretation)
 
 **Date:** 2026-07-05
-**Status:** B1 VERIFIED — K1×F1 produces exact Newtonian gravity. k = G·K₀/c².
+**Status:** B1 evaluated — K1×F1 produces exact Newtonian asymptotics analytically. The coupling constant k = G·K₀/c² is a post-hoc calibration, not a prediction. Classification: PARTIAL.
+
+**Current status:** C5 is the unique phenomenological interpretation candidate currently supported by Path B tests. It is not yet a first-principles derivation of gravity from oscillator dynamics. Therefore the current classification is PARTIAL.
 
 ---
 

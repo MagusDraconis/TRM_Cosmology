@@ -2,7 +2,9 @@
 
 **Date:** 2026-07-05
 **Branch:** `feature/v4-interpretation-layer`
-**Status:** Initial scaffolding — no results yet
+**Status:** C5 is the unique phenomenological interpretation candidate (PARTIAL). B1/B2 tests complete. First-principles derivation of gravity from oscillator dynamics remains open.
+
+**Current status:** C5 is the unique phenomenological interpretation candidate currently supported by Path B tests. It is not yet a first-principles derivation of gravity from oscillator dynamics. Therefore the current classification is PARTIAL.
 
 ---
 
