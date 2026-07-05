@@ -1,7 +1,117 @@
 # TRM V4 — G1-T2d: Full Tensor 1PN Closure
 
 **Date:** 2026-07-05
-**Status:** DEFINITIVE — G1 closure. a_H = a_φ (derived). Full 1PN mixing coefficients require dedicated tensor algebra project. TENTATIVE: TENSION (β likely < 1).
+**Status:** DEFINITIVE. Trace sector DONE. a_H = a_φ DERIVED. Mixing coefficients: computation framework provided. β_total: OPEN.
+
+---
+
+## 1. What Is DONE
+
+| Quantity | Value | Method | Status |
+|:---|:---|:---|:---|
+| a_φ (scalar kinetic) | 3.237 | ∫[f']²·|Δ|⁶, S₄/15 | ✅ |
+| a_H (tensor kinetic) | 3.237 | = a_φ (same 4-index angular factor) | ✅ |
+| b_φφφ (scalar cubic, f'³) | −0.618 | ∫[f']³·|Δ|⁶, S₄/105 | ✅ |
+| b_φφφ (scalar cubic, f'·f'') | negative | ∫f'·f''·|Δ|⁸, S₄/105 | ✅ |
+| β_φ (trace-only PPN) | < 1 | From b_φφφ/a_φ | ✅ |
+
+---
+
+## 2. Mixing Coefficient Computation Framework
+
+### 2.1 General Formula
+
+All cubic coefficients share the same radial integral:
+
+```
+I_rad = ∫₀^∞ dr · r⁹ · f'(r²/λ²) · f''(r²/λ²)  ≈ −0.155  (G1-T2c2)
+```
+
+Each coefficient b_XYZ differs only in the **angular factor** A_XYZ:
+
+```
+b_XYZ = A_XYZ · I_rad / λ⁴
+```
+
+### 2.2 Angular Factors
+
+The 6-index isotropic tensor average on S³:
+
+```
+⟨Δ^μ Δ^ν Δ^ρ Δ^σ Δ^α Δ^β⟩ = (|Δ|⁶/105) · Σ_{15 perms} η^{pair1} · η^{pair2} · η^{pair3}
+```
+
+The 15 permutations are all ways to partition {μ,ν,ρ,σ,α,β} into 3 unordered pairs.
+
+#### b_φφφ (reference)
+Trace sector: all indices contracted with η.
+A_φφφ = 2·S₄/105 (computed in G1-T2a)
+
+#### b_φφH
+One B factor = H_αβ·Δ^α·Δ^β, two ∂B factors = ∂φ·η.
+After angular integration: H_αβ contracted with sum of permutations.
+Key: H_αβ·η^αβ = 0 (traceless) → many permutations vanish.
+A_φφH = (non-zero from permutations where α,β are not paired together)
+
+#### b_φHH
+Two B factors involve H, one ∂B factor = ∂φ·η.
+A_φHH requires H·H contraction in the angular average.
+
+#### b_Hφφ
+Two ∂B factors = ∂φ·η, one B factor = H.
+A_Hφφ same as A_φφH by symmetry.
+
+#### b_HHH
+All three factors involve H.
+A_HHH requires triple H contraction.
+
+### 2.3 Computation Method
+
+For each coefficient:
+1. Write the tensor contraction explicitly
+2. Contract with the 15-permutation angular average
+3. Evaluate each permutation's contribution
+4. Sum to get A_XYZ
+
+This is a finite algebraic computation — 15 permutations × tensor contractions. Implementable in a symbolic tensor algebra package (xTensor, Cadabra) or manually with careful index tracking.
+
+---
+
+## 3. Coupled Field Equations (Ready)
+
+Once b_XYZ are known, the 1PN equations for a static point mass are:
+
+```
+∇²φ  = 4πG·ρ/a_φ − (b_φφφ/a_φ)·(∇φ)² − (b_φφH/a_φ)·∇φ·∇H_00 − (b_φHH/a_φ)·(∇H_00)²
+∇²H_00 = −6πG·ρ/a_H − (b_Hφφ/a_H)·(∇φ)² − (b_HHH/a_H)·(∇H_00)²
+```
+
+g_00 = −1 − φ + H_00 → expand to O(U²) → extract β_total.
+
+---
+
+## 4. Definitive Classification
+
+```
+TRACE SECTOR:    β_φ < 1              ROBUST ✅
+TENSOR KINETIC:  a_H = a_φ             DERIVED ✅
+MIXING COEFFS:   Framework provided    PENDING ⬜
+β_total:         Not yet computed      OPEN
+
+VERDICT: TENTATIVE TENSION
+(Unless mixing coefficients provide sign reversal)
+```
+
+---
+
+## 5. Cross-Reference
+
+| Document | Contains |
+|:---|:---|
+| G1-T2a | Radial integrals, a_φ, b₅ |
+| G1-T2c2 | f'·f'' radial integral |
+| G1-T2c3 | Trace sector sign analysis |
+| This document | Full computation framework |
 
 ---
 
