@@ -1,0 +1,65 @@
+================================================================================
+COVER LETTER — Submission to Physical Review D
+================================================================================
+
+Date: 2026-07-05
+
+To: The Editor, Physical Review D
+
+Dear Editor,
+
+We submit the manuscript entitled "Bilocal Gravity: 1-Loop Finiteness, Unitarity,
+and 2-Loop Convergence" for consideration for publication in Physical Review D.
+
+SUMMARY OF RESULTS
+──────────────────
+This paper reports a mechanism for rendering perturbative quantum gravity finite
+at the 1-loop level, using a bilocal form factor that suppresses the graviton
+propagator at high momentum. The key results are:
+
+1. Explicit 1-loop graviton self-energy computation. The bubble diagram is
+   evaluated numerically and found to be UV-finite. No counterterms are required
+   at 1-loop, in contrast to GR where four counterterms (R, R^2, R_{munu}^2,
+   Riem^2) are needed.
+
+2. 1-loop unitarity. The optical theorem gives Im Pi >= 0, and the
+   Kallen-Lehmann spectral density satisfies rho(s) >= 0. All five perturbative
+   unitarity criteria are met at the 1-loop level.
+
+3. 2-loop power counting. The superficial degree of divergence D = -26 for the
+   sunset diagram (GR: D = +6). The Goroff-Sagnotti R^3 obstruction of GR is
+   absent. A conditional all-orders convergence theorem is formulated.
+
+4. The fundamental bilocal field K(x,y) is shown to be gauge-invariant, so the
+   theory does not require a Faddeev-Popov ghost sector at the fundamental level.
+   Gauge symmetry and ghosts appear only in the derived metric-perturbation
+   description.
+
+LIMITATIONS (EXPLICITLY STATED IN THE PAPER)
+─────────────────────────────────────────────
+- The continuum limit of the underlying discrete lattice theory is not proven
+  (a standard constructive QFT challenge shared by all interacting theories in 4D).
+- The 2-loop integral has not been numerically evaluated; the Goroff-Sagnotti
+  absence is inferred from power counting.
+- The all-orders theorem is conditional on three explicit assumptions, each
+  carrying strong evidence but not yet formally proven without conditionality.
+
+The paper does not claim to solve quantum gravity. It reports a concrete
+mechanism---the bilocal form factor---with explicit 1-loop numerical verification
+and well-defined limitations.
+
+SUGGESTED REFEREES
+─────────────────
+Experts in perturbative quantum gravity, effective field theory, higher-derivative
+gravity, and nonlocal gravity would be appropriate reviewers. No specific
+individuals are suggested.
+
+We confirm that this manuscript has not been published elsewhere and is not under
+consideration by another journal.
+
+Sincerely,
+
+Fabrice Wieser
+Independent Researcher
+
+================================================================================
