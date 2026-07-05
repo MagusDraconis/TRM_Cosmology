@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We present the V4 interpretation layer of the Temporal Rate Matrix (TRM) framework — a bilocal coupling theory of gravity built on a frozen collective-frequency oscillator core. The core requires exactly two irreducible structural inputs (closure-family ansatz, bridge-band prior) plus one empirical frequency anchor (the cesium-133 SI second). The bilocal coupling kernel K(x,y) = K₀/(1 + d²/λ² + b(d²/λ²)² + (d²/λ²)⁴) provides a full Lorentzian tensor bridge: metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x}, two tensor gravitational wave polarizations plus one breathing mode, and dispersion ω = ck. The kernel parameter b controls the post-Newtonian parameter β_PPN: the quartic baseline (b=1) gives β_PPN < 1 (tension), while the optimized kernel (b≈1.25) achieves β_PPN ≈ 1 (GR-compatible). A scalar nonlinear ODE solver (β_ode ≈ 0.55) predicts a strong-field horizon at r_H ≈ 2.275 GM (+13.8% vs Schwarzschild), within current Event Horizon Telescope bounds. The parameter b is structurally preferred at b=1 through maximal flatness, cubic energy minimization, and renormalization group infrared-attractor behavior. All 184 xUnit validation tests pass. The framework is classified as weak-field complete, strong-field mapped, and structurally grounded — falsifiable for any b≠1, observationally degenerate with GR at b=1.
+We present the V4 interpretation layer of the Temporal Rate Matrix (TRM) framework — a bilocal coupling theory of gravity built on a frozen collective-frequency oscillator core. The core requires exactly two irreducible structural inputs (closure-family ansatz, bridge-band prior) plus one empirical frequency anchor (the cesium-133 SI second). The bilocal coupling kernel K(x,y) = K₀/(1 + d²/λ² + b(d²/λ²)² + (d²/λ²)⁴) provides a full Lorentzian tensor bridge: metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x}, two tensor gravitational wave polarizations plus one breathing mode, and dispersion ω = ck. The kernel parameter b controls the post-Newtonian parameter β_PPN: the quartic baseline (b=1) gives β_PPN < 1 (tension), while the optimized kernel (b≈1.25) achieves β_PPN ≈ 1 (GR-compatible). A scalar nonlinear ODE solver (β_ode ≈ 0.55) yields, within this scalar approximation, a strong-field horizon at r_H ≈ 2.275 GM (+13.8% vs Schwarzschild), within current Event Horizon Telescope bounds. The parameter b is shown to be structurally preferred at b=1 through maximal flatness, cubic energy minimization, and renormalization group infrared-attractor behavior. All 184 xUnit validation tests pass. The framework is classified as weak-field complete, strong-field mapped (scalar approximation), and structurally grounded — falsifiable for any b≠1, observationally degenerate with GR at b=1.
 
 ---
 
@@ -31,6 +31,8 @@ The version number V3.4 refers to the most recent internal refinement of the V3 
 The V4 interpretation layer, developed here, bridges oscillator quantities to gravitational observables. It does not modify the core. It is meaning development (Bedeutungsentwicklung), not theory development (Theorieentwicklung).
 
 This paper reports the complete V4 results: (i) weak-field 1PN post-Newtonian closure through kernel optimization, (ii) a full Lorentzian tensor bridge from the bilocal coupling function, (iii) strong-field horizon predictions from a scalar nonlinear ODE, and (iv) structural grounding of the kernel parameter b.
+
+**Scope disclaimer:** V4 is an interpretation layer — it maps oscillator quantities to gravitational observables and identifies the structural pathways through which gravity could emerge. It does not provide a complete derivation from an action principle, and the full tensor 1PN computation (b₁–b₄ mixing coefficients) remains pending. Results labeled "derived" follow deductively from stated inputs; results labeled "suggested" or "computed within approximation" require the outstanding items (action formulation, tensor 1PN, self-consistent strong-field solver) for full confidence. The paper should be read as a progress report on a research program, not as a claim of completion.
 
 ---
 
@@ -97,7 +99,9 @@ This chain provides a complete geometric infrastructure without assuming differe
 
 ---
 
-## 3. Field Equations
+## 3. Field Equations (Operational)
+
+The field equations below are the simplest choices consistent with the V4 admissibility criteria (C1–C8). They are not derived from an action principle — they are operational postulates whose consequences are tested against observation. The full variational formulation (bilocal effective action → Euler-Lagrange → field equations) is under development (G1T2c2).
 
 ### 3.1 Static Vacuum
 
@@ -154,7 +158,7 @@ where ε ∝ ∫[f']³ + ∫f'·f'' depends on the kernel shape. In GR, β_PPN =
 | Optimized | ≈1.25 | −0.5K₀ | ≈ 1 | COMPATIBLE |
 | Super-critical | 1.5 | −K₀ | > 1 | OVER-SHOOT |
 
-**Key result:** β_PPN(b) is continuous and crosses 1 at b ≈ 1.25. The bilocal framework spans GR-compatible β_PPN values without importing GR coefficients. Weak-field post-Newtonian compatibility is established.
+**Key result:** β_PPN(b) is continuous and crosses 1 at b ≈ 1.25 in the scalar proxy computation. The bilocal framework thus spans GR-compatible β_PPN values without importing GR coefficients. This suggests weak-field post-Newtonian compatibility is achievable within the framework; the full tensor confirmation awaits the b₁–b₄ mixing coefficient computation.
 
 ### 4.3 Stability
 
@@ -190,7 +194,7 @@ This is the simplest kernel in the Padé family that is globally Lorentzian — 
 
 ## 6. Strong-Field Results — Scalar Nonlinear Approximation (G3)
 
-**Note:** The results in this section are obtained from a scalar nonlinear ODE approximation. The full tensor strong-field solution (G_μν = 8πG·T_μν[K]) remains open. Values should be interpreted as qualitative predictions pending the full solution.
+**Note:** The results in this section are obtained from a scalar nonlinear ODE approximation — a qualitative model, not a derivation from the bilocal action. The full tensor strong-field solution (G_μν = 8πG·T_μν[K] with T_μν from the bilocal effective action) remains open. Values should be interpreted as indicative predictions pending the full solution. The uniform scaling of all observables with r_H is a structural feature of any spherically symmetric single-field model and does not depend on the specific ODE form.
 
 ### 6.1 Scalar Nonlinear ODE
 
@@ -271,14 +275,16 @@ TRM's b is to gravity what Brans-Dicke's ω is to scalar-tensor theory: a single
 
 ## 8. Discussion
 
+**Full disclosure:** The results reported in Sections 4–7 represent a research program at an intermediate stage. The bilocal framework provides the kinematic infrastructure (kernel, metric extraction, GW polarizations) and identifies the structural pathways to GR compatibility. Three major items remain open: (i) the full tensor 1PN computation (b₁–b₄ mixing coefficients from angular integrals over S³), (ii) the action principle from which the field equations follow variationally, and (iii) the self-consistent strong-field solver. Until these are completed, claims of "derivation" are restricted to results that follow deductively from stated inputs; claims about physical predictions carry the qualification "within the stated approximation."
+
 ### 8.1 What Has Been Achieved
 
 The TRM V4 interpretation layer provides:
-1. A structural derivation of the 1/r gravitational form from discrete network topology (not assumed)
-2. Weak-field 1PN GR-compatibility through kernel optimization
-3. A full Lorentzian tensor bridge (metric, GW polarizations, dispersion)
-4. Strong-field horizon prediction within current observational bounds
-5. Structural grounding of the single kernel parameter b
+1. A structural pathway from discrete oscillator network topology to the 1/r gravitational form (Sections 2–3)
+2. Weak-field 1PN GR-compatibility through continuous kernel optimization, demonstrated via scalar proxy (Section 4)
+3. A full Lorentzian tensor bridge — metric extraction, GW polarizations, and dispersion — from the bilocal kernel (Section 5)
+4. A scalar-approximation strong-field horizon consistent with current EHT bounds (Section 6)
+5. Identification of b=1 as the structurally preferred kernel parameter (Section 7)
 
 ### 8.2 What Remains Open
 
@@ -291,7 +297,7 @@ The TRM V4 interpretation layer provides:
 
 ### 8.3 Falsifiability
 
-For any b ≠ 1, TRM predicts observable deviations from GR in strong-field observables. These are testable with:
+For any b ≠ 1, TRM implies observable deviations from GR in strong-field observables within the scalar approximation. These would be testable with:
 - ngEHT (σ~10%): can detect b ≥ 1.07
 - LISA / 3G GW (σ~5%): can detect b ≥ 1.03
 - Einstein Telescope (σ~2%): can detect b ≥ 1.015
@@ -328,7 +334,7 @@ b=1 (the quartic baseline) is observationally degenerate with GR in the scalar a
 | GR | Derived from geometry | G, Λ | 2 tensor | Black holes |
 | Brans-Dicke | Derived | G, ω | 2 tensor + 1 scalar | ω-dependent |
 | MOND | Phenomenological | a₀ | Untested | Unknown |
-| **TRM V4** | **Derived from topology** | **b (→1)** | **2 tensor + 1 breathing** | **Scalar ODE approx** |
+| **TRM V4** | **Structural pathway from topology** | **b (→1)** | **2 tensor + 1 breathing** | **Scalar ODE approx** |
 
 TRM provides a structural derivation of the 1/r gravitational form from discrete network topology — a mechanism not present in other gravitational theories.
 
@@ -336,17 +342,17 @@ TRM provides a structural derivation of the 1/r gravitational form from discrete
 
 ## 9. Conclusion
 
-The TRM/TQM V4 interpretation layer establishes a bilocal coupling theory of gravity built on a frozen oscillator-network core. The framework:
+The TRM/TQM V4 interpretation layer outlines a bilocal coupling framework for gravity, built on a frozen oscillator-network core. The framework:
 
-- Derives the 1/r gravitational form from discrete graph Laplacian topology
-- Achieves weak-field 1PN GR-compatibility through continuous kernel optimization
+- Provides a structural pathway to the 1/r gravitational form from discrete graph Laplacian topology
+- Achieves weak-field 1PN GR-compatibility through continuous kernel optimization (scalar proxy; full tensor pending)
 - Provides a full Lorentzian tensor bridge (metric extraction, GW polarizations, dispersion)
-- Predicts strong-field horizon at r_H ≈ 2.275 GM, within current EHT bounds
-- Grounds the kernel parameter b structurally at b=1
+- Suggests, within a scalar nonlinear approximation, a strong-field horizon at r_H ≈ 2.275 GM — within current EHT bounds
+- Identifies b=1 as the structurally preferred value of the kernel parameter
 
-The framework is classified as **weak-field complete, strong-field mapped, structurally grounded.** It is falsifiable for any b≠1 — a prediction testable with next-generation instruments.
+The framework is classified as **weak-field complete (scalar proxy), strong-field mapped (scalar approximation), structurally grounded.** It is falsifiable for any b≠1 — a prediction testable with next-generation instruments.
 
-The bilocal kernel K(x,y) emerges as the central object of the theory. Its parameter b — analogous to Brans-Dicke ω — controls the deviation from GR. The path from the discrete oscillator network K_ij through the bilocal continuum K(x,y) to the emergent metric g_μν is the K → B → g chain that defines TRM gravity.
+The bilocal kernel K(x,y) emerges as the central object. Its parameter b — analogous to Brans-Dicke ω — controls the deviation from GR. The path from the discrete oscillator network K_ij through the bilocal continuum K(x,y) to the emergent metric g_μν is the K → B → g chain that defines this approach to gravity. The full tensor 1PN computation and the derivation of the field equations from an action principle remain the principal open problems.
 
 ---
 
