@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We present the V4 interpretation layer of the Temporal Rate Matrix (TRM) framework — a bilocal coupling theory of gravity built on a frozen collective-frequency oscillator core. The core requires exactly two irreducible structural inputs (closure-family ansatz, bridge-band prior) plus one empirical frequency anchor (the cesium-133 SI second). The bilocal coupling kernel K(x,y) = K₀/(1 + d²/λ² + b(d²/λ²)² + (d²/λ²)⁴) provides a full Lorentzian tensor bridge: metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x}, two tensor gravitational wave polarizations plus one breathing mode, and dispersion ω = ck. The kernel parameter b controls the post-Newtonian parameter β: the quartic baseline (b=1) gives β<1 (tension), while the optimized kernel (b≈1.25) achieves β≈1 (GR-compatible). A scalar nonlinear ODE solver predicts a strong-field horizon at r_H ≈ 2.275 GM (+13.8% vs Schwarzschild), within current Event Horizon Telescope bounds. The parameter b is structurally preferred at b=1 through maximal flatness, cubic energy minimization, and renormalization group infrared-attractor behavior. All 184 xUnit validation tests pass. The framework is classified as weak-field complete, strong-field mapped, and structurally grounded — falsifiable for any b≠1.
+We present the V4 interpretation layer of the Temporal Rate Matrix (TRM) framework — a bilocal coupling theory of gravity built on a frozen collective-frequency oscillator core. The core requires exactly two irreducible structural inputs (closure-family ansatz, bridge-band prior) plus one empirical frequency anchor (the cesium-133 SI second). The bilocal coupling kernel K(x,y) = K₀/(1 + d²/λ² + b(d²/λ²)² + (d²/λ²)⁴) provides a full Lorentzian tensor bridge: metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x}, two tensor gravitational wave polarizations plus one breathing mode, and dispersion ω = ck. The kernel parameter b controls the post-Newtonian parameter β_PPN: the quartic baseline (b=1) gives β_PPN < 1 (tension), while the optimized kernel (b≈1.25) achieves β_PPN ≈ 1 (GR-compatible). A scalar nonlinear ODE solver (β_ode ≈ 0.55) predicts a strong-field horizon at r_H ≈ 2.275 GM (+13.8% vs Schwarzschild), within current Event Horizon Telescope bounds. The parameter b is structurally preferred at b=1 through maximal flatness, cubic energy minimization, and renormalization group infrared-attractor behavior. All 184 xUnit validation tests pass. The framework is classified as weak-field complete, strong-field mapped, and structurally grounded — falsifiable for any b≠1, observationally degenerate with GR at b=1.
 
 ---
 
@@ -47,17 +47,20 @@ Given I1+I2, qCore = {16,17,18} and m=3 follow deductively. No further free para
 
 ### 2.2 Bilocal Coupling Kernel
 
-The discrete coupling matrix K_ij takes continuum limit K(x,y). The bilocal kernel depends on the squared geodesic distance d²(x,y):
+The discrete coupling matrix K_ij takes continuum limit K(x,y). Introducing the dimensionless variable x = d²/λ² where d²(x,y) is the squared geodesic distance and λ is the coupling length scale:
 
 \[
-K(x,y) = \frac{K_0}{1 + d^2/\lambda^2 + b(d^2/\lambda^2)^2 + (d^2/\lambda^2)^4}
+K(x) = \frac{K_0}{1 + x + b x^2 + x^4}
+\qquad (1)
 \]
 
-Coefficient status:
-- a₁ = 1: fixed by normalization (K'(0) = −K₀)
-- a₂ = b: the target parameter controlling cubic coupling
-- a₃ = 0: assumed (minimal choice)
-- a₄ = 1: fixed by Lorentz stability (decay as 1/(d²)² for |d²|→∞)
+The denominator coefficients are:
+- a₁ = 1: fixed by normalization (K'(0) = −K₀/λ²)
+- a₂ = b: the target parameter controlling cubic coupling at the origin
+- a₃ = 0: assumed (minimal choice; a₃ ≠ 0 is mathematically viable but introduces no new physics)
+- a₄ = 1: fixed by Lorentz stability (decay as 1/x⁴ for |x| → ∞)
+
+The kernel is a member of the Padé [0/4] family. Only b is free; all other coefficients are fixed by structural requirements.
 
 ### 2.3 Metric Extraction
 
@@ -65,9 +68,11 @@ The metric is extracted from the coincidence limit of the bilocal kernel:
 
 \[
 B_{\mu\nu}(x) = \frac{1}{2f'(0)} \cdot \partial_\mu \partial_\nu K(x,y)|_{y=x}
+\qquad (6)
 \]
 \[
 g_{\mu\nu} = \eta_{\mu\nu} + B_{\mu\nu}
+\qquad (7)
 \]
 
 The prefactor 1/(2f'(0)) depends on the kernel: f'(0) = −K₀/λ² for the quartic family.
@@ -86,13 +91,14 @@ This chain provides a complete geometric infrastructure without assuming differe
 
 ### 3.1 Static Vacuum
 
-The unique admissible static PDE for the coupling field under TRM V4 constraints is Laplace's equation (B3A):
+Under TRM V4 admissibility constraints (C1–C8), Laplace's equation is the preferred static PDE for the coupling field (B3A):
 
 \[
 \nabla^2 K = 0 \quad \text{(vacuum)}
+\qquad (5)
 \]
 
-with 1/r boundary condition at coupling defect sites (B3B). The 1/r form is NOT assumed — it emerges from the discrete graph Laplacian Green's function in 3D.
+with 1/r boundary condition at coupling defect sites (B3B). The 1/r form is not assumed — it emerges from the discrete graph Laplacian Green's function in 3D. Alternative PDE classes (Helmholtz, biharmonic, nonlinear) are excluded by the admissibility criteria; Laplace is the simplest surviving candidate.
 
 ### 3.2 Dynamic Extension
 
@@ -110,33 +116,35 @@ From the time-rate field T(x) = 1 + φ(x) with φ(x) = δK(x)/K₀ (energy densi
 
 \[
 a(x) = c^2 \cdot \nabla T(x) = c^2 \cdot \nabla\phi(x)
+\qquad (8)
 \]
 
-In the Newtonian limit: a(r) = GM/r² (with k = G·K₀/c² calibration).
+In the Newtonian limit: a(r) = GM/r² (with k = G·K₀/c² calibration, where k is the coupling perturbation constant).
 
 ---
 
 ## 4. Weak-Field Post-Newtonian Results (G1)
 
-### 4.1 Cubic Coupling and β
+### 4.1 Cubic Coupling and β_PPN
 
-The post-Newtonian parameter β is determined by the cubic coupling in the Multi-K tensor action:
+The post-Newtonian parameter β_PPN is determined by the cubic coupling in the Multi-K tensor action:
 
 \[
-\beta = 1 - \frac{\varepsilon}{a_\phi}
+\beta_{\rm PPN} = 1 - \frac{\varepsilon}{a_\phi}
+\qquad (2)
 \]
 
-where ε ∝ ∫[f']³ + ∫f'·f'' depends on the kernel shape.
+where ε ∝ ∫[f']³ + ∫f'·f'' depends on the kernel shape. In GR, β_PPN = 1 exactly. The sign of ε — and therefore whether β_PPN is above or below 1 — is controlled by the kernel parameter b.
 
-### 4.2 Kernel Dependence of β
+### 4.2 Kernel Dependence of β_PPN
 
-| Kernel | b | f''(0) | β(1PN) | Classification |
+| Kernel | b | f''(0) | β_PPN(1PN) | Classification |
 |:---|:---|:---|:---|:---|
 | Quartic baseline | 1.0 | 0 | < 1 | TENSION (reduced) |
 | Optimized | ≈1.25 | −0.5K₀ | ≈ 1 | COMPATIBLE |
 | Super-critical | 1.5 | −K₀ | > 1 | OVER-SHOOT |
 
-**Key result:** β(b) is continuous and crosses 1 at b ≈ 1.25. The bilocal framework spans GR-compatible β values without importing GR coefficients. Weak-field post-Newtonian compatibility is established.
+**Key result:** β_PPN(b) is continuous and crosses 1 at b ≈ 1.25. The bilocal framework spans GR-compatible β_PPN values without importing GR coefficients. Weak-field post-Newtonian compatibility is established.
 
 ### 4.3 Stability
 
@@ -166,33 +174,41 @@ The quartic-denominator kernel K₀/(1+d²/λ²+(d²/λ²)²) is:
 | Smooth at d²=0 | ✓ (K'(0) ≠ 0) |
 | No new parameters | ✓ |
 
-This is the unique simple kernel that is globally Lorentzian — finite, positive, smooth, and decaying for all d².
+This is the simplest kernel in the Padé family that is globally Lorentzian — finite, positive, smooth, and decaying for all d².
 
 ---
 
-## 6. Strong-Field Results (G3)
+## 6. Strong-Field Results — Scalar Nonlinear Approximation (G3)
+
+**Note:** The results in this section are obtained from a scalar nonlinear ODE approximation. The full tensor strong-field solution (G_μν = 8πG·T_μν[K]) remains open. Values should be interpreted as qualitative predictions pending the full solution.
 
 ### 6.1 Scalar Nonlinear ODE
 
-In spherical symmetry, the nonlinear scalar field equation is:
+In spherical symmetry, the nonlinear scalar field equation for the potential φ(r) = −GM/r + … is:
 
 \[
-\frac{d^2\phi}{dr^2} + \frac{2}{r}\frac{d\phi}{dr} = \beta\left(\frac{d\phi}{dr}\right)^2
+\frac{d^2\phi}{dr^2} + \frac{2}{r}\frac{d\phi}{dr} = \beta_{\rm ode}\left(\frac{d\phi}{dr}\right)^2
+\qquad (3)
 \]
 
-with β ≈ 0.55 from the b=1.25 kernel derivatives. Boundary condition: φ(r→∞) = 0.
+The ODE nonlinearity coefficient β_ode ≈ 0.55 is estimated from the kernel derivatives at the origin: β_ode ∝ f''(0)/f'(0) ≈ 2(b−1). For b = 1.25, this yields a positive self-coupling. Boundary condition: φ(r → ∞) = 0, matching the Schwarzschild asymptotics at large r.
 
-### 6.2 Horizon Radius
+**Important:** β_ode is distinct from β_PPN (Section 4). β_ode controls the scalar field self-interaction strength; β_PPN is the standard post-Newtonian parameter compared against GR. They are related — both depend on b — but are not the same quantity.
 
-Numerical RK2 integration (20,000 steps) yields:
+### 6.2 Horizon Radius (Scalar Approximation)
+
+Numerical RK2 integration (20,000 steps, inward from r = 100 GM) yields:
 
 \[
 r_H \approx 2.275\,GM \quad (+13.8\% \text{ vs Schwarzschild } r_H = 2.00\,GM)
+\qquad (4)
 \]
 
-β > 0 → self-energy deepens the potential → horizon forms farther from the source.
+β_ode > 0 → self-energy deepens the gravitational potential → horizon forms farther from the source than in GR.
 
-### 6.3 Strong-Field Observables
+**Caveat:** This result uses the scalar approximation. The full tensor solution may modify r_H. The scalar result provides a qualitative prediction: the horizon radius depends on b and deviates from Schwarzschild for b ≠ 1.
+
+### 6.3 Strong-Field Observables (Scalar Approximation)
 
 | Observable | GR | TRM (b=1.25) | Deviation |
 |:---|:---|:---|:---|
@@ -239,7 +255,7 @@ The Padé coefficients are moments of ρ. For a₁=1, a₄=1, a₃=0: **b = ⟨m
 
 ### 7.3 Analogy
 
-TRM's b is to gravity what Brans-Dicke's ω is to scalar-tensor theory: a single parameter controlling deviation from GR. b=1 is the GR-identical limit.
+TRM's b is to gravity what Brans-Dicke's ω is to scalar-tensor theory: a single parameter controlling deviation from GR. At b=1, strong-field predictions are observationally degenerate with GR in the scalar approximation.
 
 ---
 
@@ -269,7 +285,7 @@ For any b ≠ 1, TRM predicts observable deviations from GR in strong-field obse
 - LISA / 3G GW (σ~5%): can detect b ≥ 1.03
 - Einstein Telescope (σ~2%): can detect b ≥ 1.015
 
-b=1 (the quartic baseline) is the unfalsifiable, GR-identical limit.
+b=1 (the quartic baseline) is observationally degenerate with GR in the scalar approximation — no strong-field deviation is predicted at this parameter value.
 
 ### 8.4 Comparison with Other Theories
 
@@ -279,9 +295,9 @@ b=1 (the quartic baseline) is the unfalsifiable, GR-identical limit.
 | GR | Derived from geometry | G, Λ | 2 tensor | Black holes |
 | Brans-Dicke | Derived | G, ω | 2 tensor + 1 scalar | ω-dependent |
 | MOND | Phenomenological | a₀ | Untested | Unknown |
-| **TRM V4** | **Derived from topology** | **b (→1)** | **2 tensor + 1 breathing** | **Mapped (ODE)** |
+| **TRM V4** | **Derived from topology** | **b (→1)** | **2 tensor + 1 breathing** | **Scalar ODE approx** |
 
-TRM's unique contribution is the structural derivation of the 1/r form from discrete network topology. No other theory provides this.
+TRM provides a structural derivation of the 1/r gravitational form from discrete network topology — a mechanism not present in other gravitational theories.
 
 ---
 
