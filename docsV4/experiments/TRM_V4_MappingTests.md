@@ -1,172 +1,200 @@
 # TRM V4 — Mapping Test Plan
 
 **Date:** 2026-07-05
-**Status:** C5 (energy density) is primary candidate — C1 evaluated as PARTIAL, C5 under active evaluation
+**Status:** C5 structurally validated. **Path B (coupling modulation) is the Primary Research Path.** B1/B2 are the decisive tests.
+
+---
+
+## 0. Research Status Overview
+
+```
+TRM V3.4 CORE         → FROZEN ✅
+C5 framework          → STRUCTURALLY VALID ✅ (passes E1, I1, I2)
+C5 Newtonian limit    → OPEN — requires δρ(r) ~ 1/r
+Path B                → PRIMARY RESEARCH PATH
+  B1 (coupling test)  → PENDING — decisive gate
+  B2 (SPARC test)     → PENDING — depends on B1 success
+```
+
+### The Decisive Question
+
+> **Can a mass-induced oscillator coupling perturbation δK(r) generate an effective energy density δρ_eff(r) ~ 1/r, producing a(r) ~ GM/r²?**
+
+This is the **only remaining gate** for full C5 closure. All structural consistency checks are already passed.
 
 ---
 
 ## 1. Test Framework
 
-Each V4 interpretation candidate must be evaluated against 3 consistency checks:
+### 1.1 Structural Consistency Checks (C5 — PASSED)
 
-```
-Check 1 (E1):  Ω* globally constant — no q-dependence introduced
-Check 2 (I1):  Ω* = 1 + m/q rational consistency holds
-Check 3 (I2):  φ(x) ∈ [0.16, 0.19] for the target system
-```
-
----
-
-## 2. Candidate C5 — Energy Density Mapping ⭐ PRIMARY
-
-### 2.1 Formulation
-
-| Parameter | Value |
-|:---|:---|
-| Mapping | φ(x) = ρ_E(x) / ρ_ref |
-| Decomposition | φ(x) = φ₀ + δφ(x) with φ₀ = ρ_bg / ρ_ref |
-| Time-rate | T(x) = 1 + φ₀ + δφ(x) |
-| Gravity | a(x) = c² · ∇(δφ(x)) = c²/ρ_ref · ∇(δρ(x)) |
-
-### 2.2 Why C5 Resolves the C1 Scale Problem
-
-| Aspect | C1 | C5 |
+| Check | Condition | C5 Result |
 |:---|:---|:---|
-| φ at any scale | Must equal GM/(c²r) → fails | φ₀ = ρ_bg/ρ_ref → always in band |
-| Check 3 (I2) | FAIL at non-compact | **PASS** — φ₀ is global, naturally tunable |
-| Physical origin of φ₀ | None | Background energy density of universe |
-| Gradient | GM/r² (exact, but wrong φ) | Must verify ∇(ρ_E) ~ 1/r² for point mass |
+| E1 | Ω* globally constant — no q-dependence | **PASS** |
+| I1 | Ω* = 1 + m/q rational consistency | **PASS** |
+| I2 | φ(x) ∈ [0.16, 0.19] for target system | **PASS** — φ₀ = ρ_bg/ρ_ref |
 
-### 2.3 Consistency
+### 1.2 Newtonian Limit Gate (C5 — OPEN)
 
-| Check | Result |
-|:---|:---|
-| Check 1 (E1) | **PASS** — Ω* = 1 + φ₀ + δφ(x), constant per spatial point |
-| Check 2 (I1) | **PASS** — rational representation 1 + m/q holds for Ω* |
-| Check 3 (I2) | **PASS** — φ₀ set by ρ_bg, independently adjustable to [0.16, 0.19] |
-
-### 2.4 Key Verification Needed
-
-| Test | Question | Status |
+| Gate | Condition | Status |
 |:---|:---|:---|
-| C5.1 — Gradient scaling | Does ∇(ρ_E) around a point mass reproduce ~1/r²? | **CRITICAL** — see `TRM_V4_deltaRho_CriticalValidation.md` |
-| C5.2 — ρ_ref identification | What is the reference energy density? | TBD |
-| C5.3 — ρ_bg estimation | Can ρ_bg be independently measured to verify φ₀ ≈ 0.17? | TBD |
-| C5.4 — Newtonian limit | Does a(x) = c²/ρ_ref · ∇(δρ) match GM/r² in the weak-field limit? | **CRITICAL** — requires δρ ~ 1/r |
-
-### 2.5 Key Finding: No Standard Energy Density Produces ~1/r
-
-Analysis in `TRM_V4_deltaRho_CriticalValidation.md` shows that **no standard physical energy density** (field energy ~1/r⁴, rest-mass ~1/r³, potential ~1/r⁴) naturally produces the δρ ~ 1/r profile required for Newtonian gravity.
-
-Two paths could work:
-- **Path A:** Vacuum energy modulation (speculative — no known mechanism)
-- **Path B (TRM-native):** Oscillator coupling modulation — mass M perturbs K_ij, producing effective δρ_eff(r) from the coupling gradient. **Most promising.**
-
-### 2.6 Classification: STRUCTURALLY VALID — awaits δρ(r) numerical verification for full closure.
+| **G1** | δρ_eff(r) ~ 1/r at large r | **PENDING** |
+| **G2** | a_eff(r) = c²/ρ_ref · ∇(δρ_eff) → GM/r² | **PENDING** — follows from G1 |
 
 ---
 
-## 3. Candidate C1 — Classical Gravity
+## 2. Path B — Coupling Modulation (PRIMARY RESEARCH PATH)
 
-### Test C1.1 — Scale Verification
+### 2.1 Core Hypothesis
 
-| Parameter | Value |
-|:---|:---|
-| Mapping | φ(r) = −G·M/(c²·r) |
-| Test case: Solar mass at r = 3r_s | φ ≈ 0.167 → PASS (in bridge band) |
-| Test case: Solar mass at r = 1 AU | φ ≈ 10⁻⁸ → FAIL (not in bridge band) |
-| Test case: Galactic mass at r = 10 kpc | φ ≈ 5×10⁻⁶ → FAIL (not in bridge band) |
-
-### Test C1.2 — Gradient Check
+Mass is not a "thing" placed in space — it is a **modulation of the oscillator coupling K_ij**:
 
 ```
-a(r) = c² · ∇φ(r) = G·M/r²   (Newtonian)
+M → δK(r) → δρ_eff(r) → a(r)
 ```
 
-Newtonian scaling reproduced exactly — but only in the compact-object regime where φ is physically valid.
+This stays entirely within the TRM framework:
+- K_ij already exists in the oscillator model
+- Coupling encodes spatial adjacency
+- No external ontology needed
 
-### Test C1.3 — Consistency
+### 2.2 Required Chain
 
-| Check | Result |
-|:---|:---|
-| Check 1 (E1) | PASS — Ω* set by φ(r), constant per spatial point |
-| Check 2 (I1) | PASS — rational representation holds |
-| Check 3 (I2) | **FAIL at all non-compact scales** |
-
-**Classification: PARTIAL** — works formally but domain-limited to compact objects (r ~ 3r_s, not galactic). **SUPERSEDED by C5** for general application.
-
----
-
-## 3. Candidate C2 — Exponential Decay
-
-### Test Plan
-
-| Parameter | Value |
-|:---|:---|
-| Mapping | φ(r) = φ₀·exp(−r/r₀) |
-| Free parameters | φ₀ (amplitude), r₀ (decay length) |
-| Target | Reproduce φ ∈ [0.16, 0.19] at some physical scale |
-
-### Consistency
-
-| Check | Status |
-|:---|:---|
-| Check 1 (E1) | TBD |
-| Check 2 (I1) | TBD |
-| Check 3 (I2) | TBD |
-
-**Status: NOT EVALUATED**
+```
+Step 1: Mass M perturbs coupling       δK(r) = f(M, r)
+Step 2: Coupling gradient → density    δρ_eff(r) = F(K, ∇K, sync metrics)
+Step 3: Density gradient → gravity     a(r) = c²/ρ_ref · ∇(δρ_eff)
+Step 4: Verify                         a(r) ~ GM/r²
+```
 
 ---
 
-## 4. Candidate C3 — Constant + Perturbation
+## 3. Test B1 — Coupling Modulation Gradient (DECISIVE GATE)
 
-### Test Plan
+### 3.1 Objective
 
-| Parameter | Value |
+Test whether any physically motivated δK(r) form produces δρ_eff(r) ~ 1/r and a(r) ~ GM/r².
+
+### 3.2 Coupling Perturbation Candidates
+
+| Candidate | Form | Physical Motivation |
+|:---|:---|:---|
+| δK-A | M/r | Inverse-distance modulation (1D wave equation Green's function) |
+| δK-B | M/r² | Inverse-square (3D isotropic decay) |
+| δK-C | M·exp(−r/r₀) | Yukawa-like screening |
+| δK-D | from Σ_baryon(r) | Direct mapping from baryonic surface density |
+
+### 3.3 Effective Density Mappings
+
+| Mapping | Form | Rationale |
+|:---|:---|:---|
+| F1 — Direct | ρ_eff(r) ∝ K(r) | Simplest — coupling strength as density |
+| F2 — Gradient | ρ_eff(r) ∝ \|∇K(r)\| | Density from coupling change rate |
+| F3 — Sync energy | ρ_eff(r) ∝ local sync energy E_sync(r) | Energy stored in maintaining sync against perturbation |
+| F4 — Action proxy | ρ_eff(r) ∝ action residual δS(r) | Deviation from minimal action as energy cost |
+
+### 3.4 Numerical Test Protocol
+
+```
+For each (δK candidate, F mapping) pair:
+  1. Compute δρ_eff(r) profile
+  2. Fit asymptotic scaling: δρ_eff(r) ∝ r^α, extract α
+  3. Test α ≈ −1 (required for Newtonian match)
+  4. Compute a_eff(r) = c²/ρ_ref · ∇(δρ_eff)
+  5. Compare with a_N(r) = GM/r²
+  6. Classify: VALID (α ≈ −1), PARTIAL (α ∈ [−1.5, −0.5]), INVALID (otherwise)
+```
+
+### 3.5 Classification Matrix
+
+| | δK-A (M/r) | δK-B (M/r²) | δK-C (exp) | δK-D (Σ_bar) |
+|:---|:---|:---|:---|:---|
+| **F1** (K direct) | TBD | TBD | TBD | TBD |
+| **F2** (\|∇K\|) | TBD | TBD | TBD | TBD |
+| **F3** (sync energy) | TBD | TBD | TBD | TBD |
+| **F4** (action proxy) | TBD | TBD | TBD | TBD |
+
+### 3.6 Success Criteria
+
+| Criterion | Threshold |
 |:---|:---|
-| Mapping | φ(x) = φ₀ + δφ(x) with δφ ≪ φ₀ |
-| Idea | φ₀ = 0.17 provides the bridge-band baseline; δφ(x) encodes local structure |
-| Gradient | a(x) = c²·∇(δφ(x)) → local gravity from perturbation only |
-
-### Consistency
-
-| Check | Status |
-|:---|:---|
-| Check 1 (E1) | TBD |
-| Check 2 (I1) | TBD |
-| Check 3 (I2) | TBD |
-
-**Status: NOT EVALUATED**
+| Asymptotic α | −1.0 ± 0.2 at r ≫ r_source |
+| Acceleration match | a_eff / a_N ∈ [0.5, 2.0] over ≥ 2 decades in r |
+| No free tuning per test case | Same ρ_ref for all δK/M combinations |
 
 ---
 
-## 5. Candidate C4 — Medium/Buoyancy (BB11)
+## 4. Test B2 — SPARC Galaxy Rotation (DEPENDS ON B1 SUCCESS)
 
-### Test Plan
+### 4.1 Objective
 
-| Parameter | Value |
+Apply the best-performing (δK, F) pair from B1 to observed SPARC galaxy rotation curves. Test whether baryonic mass distributions reproduce observed velocities **without dark matter halos**.
+
+### 4.2 Mapping Chain
+
+```
+Baryons Σ_bar(r) → δK(r) → δρ_eff(r) → a_eff(r) → v_pred(r) = √(r · a_eff)
+```
+
+### 4.3 Test Protocol
+
+```
+For each SPARC galaxy (or representative subset):
+  1. Input: baryonic surface density Σ_bar(r) [gas + stars]
+  2. Map Σ_bar → δK(r) using best B1 candidate
+  3. Map δK(r) → δρ_eff(r) using best B1 mapping
+  4. Compute a_eff(r) = c²/ρ_ref · ∇(δρ_eff)
+  5. Compute v_pred(r) = √(r · a_eff(r))
+  6. Compare with v_obs(r)
+  7. Evaluate: shape, outer flatness, residuals
+```
+
+### 4.4 Evaluation Criteria
+
+| Criterion | Description |
 |:---|:---|
-| Mapping | φ as intrinsic collective medium state of the oscillator system |
-| Idea | φ = 0.17 is the system's "density" or "memory integral" — no external field needed |
+| Shape agreement | Does v_pred(r) reproduce the characteristic flat rotation curve shape? |
+| Outer flatness | Does v_pred(r) asymptote to constant v_flat without DM halo? |
+| BTFR consistency | Does the baryonic Tully-Fisher relation emerge naturally? |
+| Single ρ_ref | One global ρ_ref for all galaxies (no per-galaxy tuning)? |
 
-### Consistency
+### 4.5 Success / Failure Definition
 
-| Check | Status |
+| Outcome | Interpretation |
 |:---|:---|
-| Check 1 (E1) | TBD |
-| Check 2 (I1) | TBD |
-| Check 3 (I2) | TBD |
+| v_pred matches v_obs across diverse galaxies with single ρ_ref | **C5 VALIDATED** — coupling modulation produces correct gravity |
+| v_pred matches only with per-galaxy ρ_ref tuning | PARTIAL — correct mechanism, missing scale law |
+| v_pred fails to produce flat rotation curves | C5 **FALSIFIED** — coupling modulation does not produce Newtonian gravity |
 
-**Status: NOT EVALUATED** — reinterprets I2 rather than calibrates it.
+---
+
+## 5. Deprioritized Candidates (Historical Reference)
+
+| Candidate | Form | Classification | Reason Deprioritized |
+|:---|:---|:---|:---|
+| C1 — Classical gravity | φ = −GM/(c²r) | PARTIAL | Scale mismatch 34,000× at galactic scales |
+| C2 — Exponential decay | φ₀·exp(−r/r₀) | NOT EVALUATED | Free parameters r₀, not TRM-native |
+| C3 — Constant + perturbation | φ₀ + δφ(x) | ABSORBED into C5 | Now the φ₀/δφ decomposition in C5 |
+| C4 — Medium/buoyancy (BB11) | φ as intrinsic medium | NOT EVALUATED | Reinterprets I2 rather than calibrates it |
 
 ---
 
 ## 6. Summary
 
-| Candidate | Check 1 (E1) | Check 2 (I1) | Check 3 (I2) | Classification |
-|:---|:---|:---|:---|:---|
-| C1 — Classical gravity | PASS | PASS | FAIL (non-compact) | **PARTIAL** |
-| C2 — Exponential decay | TBD | TBD | TBD | NOT EVALUATED |
-| C3 — Constant + perturbation | TBD | TBD | TBD | NOT EVALUATED |
-| C4 — Medium/buoyancy | TBD | TBD | TBD | NOT EVALUATED |
+| Layer | Status | Next Action |
+|:---|:---|:---|
+| **C5 framework** | ✅ STRUCTURALLY VALID | None — framework complete |
+| **Consistency checks (E1, I1, I2)** | ✅ ALL PASSED | None |
+| **Path B hypothesis** | 📋 FORMULATED | Execute B1 numerical test |
+| **Gate G1 (δρ ~ 1/r)** | 🔴 OPEN | **B1 — decisive test** |
+| **Gate G2 (Newtonian limit)** | 🔴 OPEN | Follows from G1 |
+| **SPARC validation** | ⏳ BLOCKED ON B1 | Execute B2 after B1 success |
+
+### The Mode Has Shifted
+
+```
+BEFORE:  Theorie bauen (build theory)
+NOW:     Einen einzigen harten Mechanismus testen (test one hard mechanism)
+```
+
+This is the strongest scientific position the project has ever been in. One testable hypothesis, one decisive gate, one clear success/failure criterion.
