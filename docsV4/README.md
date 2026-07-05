@@ -3,7 +3,7 @@
 **Created:** 2026-07-05
 **Branch:** `feature/v4-interpretation-layer`
 **Primary candidate:** C5 — Energy Density Mapping ⭐
-**Status:** B1/B2 STABLE (frozen validation). B3 OPEN (coupling field equation). Classification: PARTIAL.
+**Status:** B1/B2 STABLE (frozen validation). B3 OPEN (coupling field equation). Classification: PARTIAL. B1/B2 are final — no further development unless defects found. All future work is scoped to B3.
 
 ---
 
@@ -27,6 +27,8 @@ docsV4/
         TRM_V4_Interpretation_Core.md  ← central interpretation framework
         TRM_V4_TimeField_Mapping.md    ← T(x) and φ(x) — C5 breakthrough formulation
         TRM_V4_Gravity_Model.md        ← C5 gravity: a(x) = c²/ρ_ref · ∇(δρ)
+        TRM_V4_CouplingFieldEquation.md← B3 candidate catalog (A-D)
+        TRM_V4_B3_ApproachDirections.md← B3 deep analysis: which candidates can work
     review/
         TRM_V4_Claim_Boundaries.md     ← what V4 claims and does not claim
         TRM_V4_Risks.md                ← known risks and mitigations
