@@ -1,7 +1,7 @@
 # TRM V4 — Gravity Model (Energy Density Interpretation)
 
 **Date:** 2026-07-05
-**Status:** C5 candidate — formulation complete, numerical verification pending
+**Status:** B1 VERIFIED — K1×F1 produces exact Newtonian gravity. k = G·K₀/c².
 
 ---
 
