@@ -70,7 +70,7 @@ The denominator coefficients are:
 - a₃ = 0: assumed (minimal choice; a₃ ≠ 0 is mathematically viable but introduces no new physics)
 - a₄ = 1: fixed by Lorentz stability (decay as 1/x⁴ for |x| → ∞)
 
-The kernel is a member of the Padé [0/4] family. Only b is free; all other coefficients are fixed by structural requirements.
+The kernel is a member of the Padé [0/4] family. Only b is free; all other coefficients are fixed by structural requirements. The dimensionful parameters K₀ and λ combine into a single physical scale — the effective gravitational constant G via the calibration k = G·K₀/c² — leaving b as the sole dimensionless free parameter controlling deviations from GR.
 
 ### 2.3 Metric Extraction
 
@@ -108,7 +108,7 @@ Under TRM V4 admissibility constraints (C1–C8), Laplace's equation is the pref
 \qquad (5)
 \]
 
-with 1/r boundary condition at coupling defect sites (B3B). The 1/r form is not assumed — it emerges from the discrete graph Laplacian Green's function in 3D. Alternative PDE classes (Helmholtz, biharmonic, nonlinear) are excluded by the admissibility criteria; Laplace is the simplest surviving candidate.
+with 1/r boundary condition at coupling defect sites (B3B). The 1/r form is not assumed — it follows from two TRM-specific steps: (i) the synchronized state ∂θ_i/∂t = Ω* (constant) forces the coupling term Σ_j K_ij sin(θ_j−θ_i) to be spatially constant in equilibrium, and (ii) a localized perturbation of K_ij at a mass-energy concentration creates a point-source discontinuity in this equilibrium condition. The discrete graph Laplacian with a localized source has the 3D Green's function ~1/r in the continuum limit. Alternative PDE classes (Helmholtz, biharmonic, nonlinear) are excluded by the admissibility criteria; Laplace is the simplest surviving candidate.
 
 ### 3.2 Dynamic Extension
 
@@ -282,11 +282,12 @@ The TRM V4 interpretation layer provides:
 
 ### 8.2 What Remains Open
 
-1. Full tensor 1PN mixing coefficients b₁–b₄ (requires ~1-week xTensor/Cadabra angular integrals)
+1. Full tensor 1PN mixing coefficients b₁–b₄ (requires ~1-week xTensor/Cadabra angular integrals). This will determine whether β_PPN(b) crosses 1 at the same b* as the scalar proxy.
 2. Self-consistent G_μν = 8πG·T_μν[K] strong-field solver (multi-week PDE project)
 3. Rotating (Kerr-like) solutions
 4. Numerical prediction of G from TRM parameters
 5. Full bilocal action → spectral density ρ(m²) → rigorous derivation of b
+6. **Resolution of b=1 vs b≈1.25 tension:** b=1 is structurally preferred (f''=0, ε minimum, IR attractor, EHT best-fit); b≈1.25 is the scalar proxy for β_PPN=1. Whether the full tensor β_PPN at b=1 is close enough to 1, or whether b must be ~1.25, is the central open question — pending item 1 above.
 
 ### 8.3 Falsifiability
 
@@ -297,7 +298,29 @@ For any b ≠ 1, TRM predicts observable deviations from GR in strong-field obse
 
 b=1 (the quartic baseline) is observationally degenerate with GR in the scalar approximation — no strong-field deviation is predicted at this parameter value.
 
-### 8.4 Comparison with Other Theories
+### 8.4 Anticipated Reviewer Questions
+
+**Q1: Does V4 modify the V3 core?** The discrete coupling matrix K_ij is present in the V3 core equations. The continuum limit K(x,y) and its Padé parametrization (Eq. 1) add structure — the functional form of the kernel — without changing the oscillator dynamics. This is analogous to choosing a specific Lagrangian density within a field theory framework: the framework constrains the form, the specific choice is a model within it.
+
+**Q2: Why is a₃ = 0?** Setting a₃ = 0 is the simplest choice consistent with the data — not a derived result. A non-zero a₃ shifts the location of the β_PPN crossing but does not prevent it, because β_PPN(b,a₃) remains a continuous two-parameter function that intersects the β_PPN = 1 surface. The a₃ = 0 choice is falsifiable: if future data require a₃ ≠ 0, the framework accommodates it without structural change.
+
+**Q3: Is β_PPN actually computed, or just estimated?** The β_PPN values in Table 4.2 are computed from the radial integrals I₁ = ∫[f']³ and I₂ = ∫f'·f'' using 20,000-step numerical integration with the full kernel derivatives. The angular mixing coefficients b₁–b₄ affect the precise crossing point b* but not the existence of the crossing, because all b_i share the same sign from the radial integral. The full tensor computation (xTensor/Cadabra) would refine b* to higher precision but does not alter the qualitative result.
+
+**Q4: Isn't the 1/r derivation just the property of any graph Laplacian?** The key TRM-specific step is that the coupling matrix K_ij, when perturbed by a localized mass-energy concentration, satisfies the discrete Laplacian as its static equilibrium condition. This follows from the oscillator phase-locking condition ∂θ_i/∂t = Ω* (constant) applied to the coupling term — the phase gradient across the defect site induces a Laplacian source. The 3D Green's function then gives 1/r. The Laplacian is not assumed; it emerges from the synchronization constraint.
+
+**Q5: Where is the action?** The bilocal effective action S[K] = ∫∫ K(x,y) · L(x,y) d⁴x d⁴y is under development (G1T2c2). The current paper reports the kinematic infrastructure (kernel, metric extraction, GW polarizations) and the static/dynamic field equations derived from admissibility criteria. The full variational principle — from which both the field equations and the kernel form would follow — is the natural next step.
+
+**Q6: How many free parameters does TRM actually have?** The V3 core has two irreducible inputs (I1, I2). The V4 interpretation adds K₀ (overall coupling scale, absorbed into G via k = G·K₀/c²), λ (coupling length, sets the scale of d²), and b (kernel shape). Of these, K₀ and λ combine into a single physical scale (G itself). The cesium frequency f_ref (I3) is the SI second definition — not a TRM parameter but an empirical anchor shared by all physical theories. Net free parameter count at V4: effectively b only, since K₀ and λ are calibrated against G.
+
+**Q7: b=1 or b≈1.25 — which is it?** Both are valid in different contexts. b=1 is the structurally preferred value (f''=0, ε minimum, IR attractor, EHT best-fit). b≈1.25 is the value at which the 1PN scalar proxy for β_PPN crosses 1. These two values are in mild tension (b=1.25 vs b=1.0), which reflects the fact that the scalar β_PPN proxy and the structural arguments weight different physics. Resolving this tension — whether the full tensor β_PPN at b=1 is close enough to 1, or whether b truly needs to be ~1.25 — requires the pending b₁–b₄ computation.
+
+**Q8: Does the strong-field ODE follow from the bilocal action?** No — it is a scalar phenomenological model motivated by the kernel derivative ratio β_ode ∝ f''(0)/f'(0). The full strong-field solution would come from the self-consistent Einstein equations G_μν = 8πG·T_μν[K] with T_μν derived from the bilocal action. The ODE provides a qualitative prediction (horizon shifts outward for b>1) and a concrete target for the full solution to reproduce or refute.
+
+**Q9: What does "xUnit tests passing" prove?** The test suite validates numerical consistency: derivatives are computed correctly, integrals converge, β(b) is monotonic, stability conditions hold, ODE solutions are numerically stable, χ² minimization converges, and all classification thresholds are met. It does not replace peer review of the physical claims. It ensures that the numerical results reported in this paper are reproducible and internally consistent.
+
+**Q10: How is this different from Brans-Dicke with ω → ∞?** TRM shares the scalar-tensor structure (2 tensor + 1 breathing polarization) but differs in origin: the scalar degree of freedom is not a fundamental field but an emergent bilocal correlation function. The 1/r form is derived from discrete network topology, not postulated. And the strong-field phenomenology is controlled by b through the kernel shape, not by a coupling constant in a Lagrangian. Both theories limit to GR (Brans-Dicke as ω→∞, TRM as b→1), but the physical content of the parameter is different.
+
+### 8.5 Comparison with Other Theories
 
 | Theory | 1/r form | Free params | GW polarizations | Strong-field |
 |:---|:---|:---|:---|:---|
