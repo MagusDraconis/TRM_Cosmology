@@ -1,0 +1,47 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}TRM Evolution}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Results Summary}{3}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Framework}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Core Theory (V3 Series, Frozen)}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Bilocal Coupling Kernel}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}From Oscillator Network to Bilocal Kernel}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Metric Extraction}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}K $\to $ B $\to $ g Chain}{5}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Field Equations---Leading-Order Action Limit}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Static Vacuum}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Dynamic Extension}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Effective Gravity}{6}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Bilocal Covariant Action}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Action}{6}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Derived Field Equations}{7}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Gravitational Constant and Parameter Structure}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Derivation}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Parameter Structure}{7}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Local EFT Emergence}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Coincidence-Limit Expansion}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Coefficients from Kernel Moments}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Interpretation}{8}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Nonlocal Propagator and Ghost Resolution}{8}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Exact Bilocal Propagator}{8}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Ghost as Truncation Artifact}{9}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Tensor Bridge}{9}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Gravitational Wave Polarizations}{9}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Full Lorentzian Kernel}{9}{subsection.8.2}%
+\contentsline {section}{\numberline {9}Weak-Field Post-Newtonian Results}{10}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Cubic Coupling and $\beta _{\rm PPN}$}{10}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Kernel Dependence (Full Tensor)}{10}{subsection.9.2}%
+\contentsline {section}{\numberline {10}Strong-Field---EFT Analysis}{10}{section.10}%
+\contentsline {subsection}{\numberline {10.1}EFT Field Equations}{10}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Key Findings}{11}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Observational Status}{11}{subsection.10.3}%
+\contentsline {section}{\numberline {11}Origin of $b$}{11}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Structural Constraints}{11}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Spectral Density Derivation}{12}{subsection.11.2}%
+\contentsline {subsection}{\numberline {11.3}Analogy}{12}{subsection.11.3}%
+\contentsline {section}{\numberline {12}Equivalence Principle}{12}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Weak Equivalence Principle (WEP)}{12}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Strong Equivalence Principle (SEP)}{12}{subsection.12.2}%
+\contentsline {section}{\numberline {13}Discussion and Outlook}{13}{section.13}%
+\contentsline {subsection}{\numberline {13.1}What Has Been Achieved}{13}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}What Remains Open}{13}{subsection.13.2}%
+\contentsline {subsection}{\numberline {13.3}DeepCompletion Program Status}{14}{subsection.13.3}%
