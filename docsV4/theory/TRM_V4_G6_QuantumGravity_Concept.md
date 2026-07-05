@@ -1,8 +1,8 @@
-# TRM V4 — G6: Quantum Gravity Concept
+# TRM V4 — G6: Quantum Gravity Concept Program
 
 **Date:** 2026-07-05
-**Status:** CONCEPTUAL FRAMEWORK. Discrete oscillator network provides natural UV regularization. No claim of complete quantum gravity theory.
-**Depends on:** V3 core oscillator dynamics, V4 bilocal action, G2 tensor bridge.
+**Status:** CONCEPTUAL PROGRAM. Lattice-regulated, bilocal, ghost-free classical → candidate UV-complete quantum theory. Executable subproblems defined.
+**Depends on:** V3 core, V4 bilocal action, DeepCompletion Phases 1A–2C, G2 tensor bridge, G4-EP/SEP, G5 strong-field.
 
 ---
 
@@ -198,4 +198,118 @@ TRM provides a **conceptual framework for finite quantum gravity** based on:
 |:---|:---|
 | `TRM_V4_DeepCompletion_Phase1D_GhostAnalysis.md` | Spectral positivity |
 | `TRM_V4_DeepCompletion_Phase1A_CovariantAction.md` | Bilocal action |
+| `TRM_V4_G4_EP_EquivalencePrinciple.md` | WEP derivation |
 | `TRM.Tests/V4/G6_QuantumGravity_Concept_Tests.cs` | xUnit validation |
+
+---
+
+## APPENDIX A — Classification Map
+
+### A.1 What Is Already Established (Classical Level)
+
+| Result | Classification | Section |
+|:---|:---|:---|
+| Discrete lattice provides natural UV cutoff | STRUCTURAL | 1 |
+| Bilocal action S[K,g] with covariant kinetic term | POSTULATED (ansatz) | Phase 1A |
+| Local EFT limit (R + c_i R² + ...) | DERIVED (coincidence limit) | Phase 1C |
+| Spectral positivity ρ(m²) ≥ 0 | NUMERICALLY VERIFIED | Phase 1D |
+| Ghost-free classical propagator | DERIVED (from spectral positivity) | 7 (paper) |
+| Kernel form factor F(k²) ~ 1/(k² a²)² (UV suppression) | STRUCTURAL (from kernel form) | 3.2 |
+
+### A.2 What Is Conceptual (Requires Development)
+
+| Concept | Status | Key open question |
+|:---|:---|:---|
+| Quantized oscillator phases → graviton states | CONCEPTUAL | Mapping discrete phase waves ↔ spin-2 graviton |
+| Lattice regulator → finite quantum loops | CONCEPTUAL | Explicit 1-loop computation needed |
+| Bilocal smearing → no point vertices | CONCEPTUAL | Rigorous power-counting proof |
+| Kernel form factor → UV-complete propagator | CONCEPTUAL | Unitarity of the dressed propagator |
+| Lattice QCD analogy → solvable continuum limit | CONCEPTUAL | Does the theory have a 2nd order phase transition? |
+
+### A.3 What Is Speculative (Requires New Insights)
+
+| Speculation | Rationale | Risk |
+|:---|:---|:---|
+| TRM could be UV-complete without further structure | Lattice + bilocal might be sufficient | High — most lattice theories need fine-tuning |
+| Graviton = collective phase wave of oscillator lattice | Attractive analogy with phonons | Medium — mapping to spin-2 is non-trivial |
+| b runs to 1 in IR, finite in UV (asymptotic safety-like) | G4 RG analysis suggests IR attractor | High — no UV fixed point computed |
+| Cosmological constant predicted from lattice ground state | Λ_eff from kernel moments (Phase 1C) | High — magnitude is CC problem |
+
+---
+
+## APPENDIX B — Executable Subproblems
+
+These are concrete, well-defined tasks that would advance the QG program from conceptual to computational:
+
+### B.1 Lattice Path Integral (6 months)
+
+**Task:** Formulate the Euclidean path integral for the discrete oscillator network:
+
+\[
+Z = \int \mathcal{D}\theta_i\; e^{-S_E[\theta_i, K_{ij}]}
+\]
+
+**Deliverables:**
+- Discrete action S_E in terms of phase differences
+- Continuum limit → bilocal action S[K]
+- Measure: flat (phase variables) or curved (constrained)?
+- First quantum correction to the classical bilocal action
+
+**Difficulty:** MEDIUM. Standard lattice field theory techniques.
+
+### B.2 1-Loop Graviton Propagator (6 months)
+
+**Task:** Compute the 1-loop correction to the graviton propagator in the bilocal theory:
+
+\[
+\Pi_{\mu\nu\alpha\beta}(k) = \int \frac{d^4p}{(2\pi)^4}\,
+\mathcal{V}(k,p)\,\mathcal{G}(p)\,\mathcal{V}(k,p)
+\]
+
+**Deliverables:**
+- Vertex Feynman rules from S_int (Phase 1A, Eq. 10)
+- Momentum-space kernel form factor
+- Demonstrate UV finiteness (if confirmed)
+- Running of G_eff and b at 1-loop
+
+**Difficulty:** HIGH. Requires bilocal Feynman rules and careful treatment of the form factor.
+
+### B.3 Continuum Limit Analysis (12 months)
+
+**Task:** Determine whether the discrete oscillator theory has a second-order phase transition allowing a continuum limit with finite G.
+
+**Deliverables:**
+- Phase diagram in (a, b) parameter space
+- Critical exponents at the transition
+- RG flow from lattice Monte Carlo or analytical FRG
+- Evidence for/against a UV fixed point
+
+**Difficulty:** VERY HIGH. Requires lattice simulation or functional RG expertise.
+
+### B.4 Spectral Positivity at Quantum Level (6 months)
+
+**Task:** Extend the classical Källén-Lehmann analysis (Phase 1D) to the quantum theory.
+
+**Deliverables:**
+- Quantum spectral density from the full propagator
+- Optical theorem check at 1-loop
+- Unitarity of the S-matrix in the bilocal theory
+
+**Difficulty:** MEDIUM-HIGH. Builds directly on Phase 1D.
+
+---
+
+## APPENDIX C — What Would Constitute a "True Finite QG Claim"
+
+To claim TRM provides a finite quantum theory of gravity, the following would be required:
+
+1. ✅ Classical action exists (Phase 1A) — DONE
+2. ✅ Classical propagator is ghost-free (Phase 1D) — DONE
+3. ⬜ Quantum path integral is well-defined (B.1) — OPEN
+4. ⬜ 1-loop corrections are finite (B.2) — OPEN
+5. ⬜ Unitarity holds at quantum level (B.4) — OPEN
+6. ⬜ Continuum limit exists with finite G (B.3) — OPEN
+7. ⬜ Low-energy EFT matches GR + higher-derivative corrections (Phase 1C) — DONE
+
+**Current status: 3 of 7 requirements met. The remaining 4 are the QG program defined above.**
+
