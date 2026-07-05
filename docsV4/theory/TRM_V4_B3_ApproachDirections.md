@@ -1,7 +1,7 @@
 # TRM V4 — B3 Approach Directions: Which Candidates Can Realistically Work?
 
 **Date:** 2026-07-05
-**Status:** B3A and B3B complete. Laplace uniqueness proven. 1/r origin identified (discrete coupling defect → graph Laplacian Green's function). Classification: mechanism explained, coefficient calibrated.
+**Status:** B3A+B3B complete, B3C open. Form explained (Laplace uniqueness + 1/r from graph Laplacian defect). Coefficient calibrated (B3C: α↔M mapping). Classification: FORM EXPLAINED, NOT FULLY DERIVED.
 **Predecessor:** `TRM_V4_CouplingFieldEquation.md` (candidate catalog)
 
 ---

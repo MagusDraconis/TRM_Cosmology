@@ -1,24 +1,25 @@
 # TRM V4 — B3: Coupling Field Equation
 
 **Date:** 2026-07-05
-**Status:** B3A+B3B complete. Laplace = unique PDE. 1/r = discrete Laplacian Green's function from coupling defect. Coefficient = calibration (k = G·K₀/c²).
-**Predecessors:** B1 (mechanism identified), B2 (phenomenological consistency)
-**Classification:** B3 is the missing piece that separates PARTIAL from VALID
+**Status:** B3A+B3B complete. B3C open (coefficient mapping). Form explained, coefficient calibrated.
+**Classification:** B3 = FORM EXPLAINED, COEFFICIENT CALIBRATED, NOT FULLY DERIVED.
 
 ---
 
-## 1. The Open Gate
+## 1. Current B3 Status (Post B3A+B3B)
 
-B1 established that K1×F1 is the **unique** mechanism that produces Newtonian asymptotics among 16 candidates. But the derivation is incomplete:
+B1 established K1×F1 as the unique phenomenological mechanism. B3A+B3B have now resolved two of the three open questions:
 
 ```
-B1 result:   δK(r) = k·M/r      →  a(r) = GM/r²   ✅ (phenomenological)
-B1 gap:      WHY does δK ~ M/r?                     ❌ (not derived)
+B3A:  ∇²K = 0 is the unique admissible PDE     → CLOSED ✅
+B3B:  1/r emerges from discrete coupling        → CLOSED ✅
+      defect → graph Laplacian Green's function
+B3C:  α ↔ M coefficient mapping                  → OPEN ⬜
 ```
 
-The coupling field equation — the governing PDE for K(r) — is the single missing element. Without it, k = G·K₀/c² is post-hoc calibration, not a prediction.
+The remaining open question is the **coefficient**: how does the physical mass M relate to the coupling defect strength α, without post-hoc calibration k = G·K₀/c²?
 
-> **B3 question: Can a governing equation for the coupling field K(r) be derived or constrained from TRM oscillator structure?**
+> **B3 current question: Can α = α(M, K₀, ω_i, N) be derived from TRM quantities, or must it remain an empirical constant (analogous to G in Newtonian gravity)?**
 
 ---
 
@@ -57,7 +58,7 @@ K(r) = K₀ + α·M/r   →   δK(r) = α·M/r   ✓
 **Status: ASSUMED, not derived.**
 The Laplace equation is the simplest elliptic PDE that produces the right answer. But we have not shown WHY K(r) should obey ∇²K ∝ −M from oscillator dynamics. This is a modeling choice — the same gap identified in the B1 critical review.
 
-**Classification: EFFECTIVE ONLY** — works phenomenologically, but the governing equation is assumed, not derived.
+**Classification: FORM EXPLAINED (B3A+B3B), COEFFICIENT CALIBRATED.** B3A proved Laplace is the unique admissible PDE class under C1–C8. B3B showed that 1/r emerges from the discrete graph Laplacian's Green's function when mass is modeled as a localized coupling defect in K_ij. The remaining gap is the coefficient mapping α ↔ M (B3C).
 
 ---
 
@@ -213,40 +214,58 @@ If the source of K is K itself (energy density proportional to coupling), the eq
 
 ---
 
-## 6. What Would Close the Gap
+## 6. What Would Close B3 Completely
 
-To upgrade from PARTIAL to VALID, one of these must be demonstrated:
+To upgrade from "form explained, coefficient calibrated" to "fully derived", the following must be demonstrated:
 
-| Requirement | Current Status |
+| Requirement | Status |
 |:---|:---|
-| **Derive ∇²K ∝ −M from oscillator dynamics** | NOT DONE — all candidates are assumed |
-| **Show that K source is mass density, not K itself** | NOT DONE — energy density ∝ K creates Helmholtz, not Laplace |
-| **Predict G from TRM parameters (K₀, ω_i baseline, N)** | NOT DONE — requires physical frequency scale |
-| **Show that the Laplace equation is the unique admissible form** | NOT DONE — no uniqueness proof |
+| **Derive ∇²K = 0 as the unique admissible PDE** | **CLOSED** — B3A uniqueness proof ✅ |
+| **Explain 1/r origin from discrete coupling defect** | **CLOSED** — B3B graph Laplacian Green's function ✅ |
+| **Derive α ↔ M mapping from TRM parameters** | **OPEN** — B3C: requires physical frequency scale or defect-energy relation ⬜ |
+| **Predict G from TRM parameters (K₀, ω_i baseline, N)** | **OPEN** — follows from B3C closure ⬜ |
+
+### Current B3 Classification
+
+```
+FORM:        EXPLAINED ✅   (B3A: unique PDE, B3B: 1/r mechanism)
+COEFFICIENT: CALIBRATED ⬜   (k = G·K₀/c² post-hoc)
+DERIVATION:  NOT FULLY DERIVED
+```
+
+B3 is now analogous to Newtonian gravity: the 1/r² form is explained by the field equation and Green's function, but G is measured, not predicted.
 
 ---
 
 ## 7. Honest Assessment
 
-The coupling field equation is the **hardest open problem** in TRM V4. All simple approaches fail:
+The coupling field equation has progressed significantly through B3A and B3B:
 
-- **Assume Laplace** → works but is post-hoc (current B1 status)
-- **Derive from action** → produces Helmholtz (K sources itself) → screening, not Newton
-- **Derive from sync energy** → no constraint on K in sync state
-- **Derive from information flow** → requires undefined continuum limit
+- **B3A** proved that ∇²K = 0 is the **unique admissible PDE class** under TRM V4 constraints — Helmholtz, biharmonic, nonlinear, and fractional alternatives are all excluded.
+- **B3B** identified the **mechanistic origin** of the 1/r form: a localized coupling defect in K_ij acts as a singular source in the discrete graph Laplacian, whose Green's function in 3D is ~1/r. The continuum limit yields ∇²K = 0 in the bulk.
 
-**The gap is structural, not technical.** The oscillator model has K as a coupling constant between discrete sites. Making K a continuous field that obeys a PDE with mass as source requires introducing new physics — a kinetic term for K and a source term K·T — that are not present in the original model.
+The remaining open problem is **B3C — coefficient mapping**: how does physical mass M relate to the coupling defect strength α? Currently α is calibrated via k = G·K₀/c², which uses G as input. To close B3 completely, α must be expressed in terms of TRM-native quantities (K₀, ω_i baseline, N, coupling topology) without using G.
 
-### The most honest formulation:
+> **B3 status: FORM EXPLAINED, COEFFICIENT CALIBRATED, NOT FULLY DERIVED.**
 
-> **B3 is currently UNSOLVED.** The coupling field equation ∇²K ∝ −M is the phenomenological assumption that makes C5 work. Deriving it from oscillator dynamics is the central research problem for TRM V4 going forward. Until then, C5 remains PARTIAL — a unique phenomenological bridge, not a first-principles derivation.
+This is analogous to the status of G in Newtonian gravity: the 1/r² form is a consequence of the field equation, but G itself is an empirical constant.
 
 ---
 
 ## 8. Next Steps
 
-1. **Formalize the action approach** — write the full action S[θ, K] including a kinetic term for K and a source term
-2. **Explore whether the source can be decoupled from K** — if ρ_E(x) is NOT proportional to K(x), the Helmholtz problem is avoided
-3. **Investigate whether mass acts as a boundary condition**, not a source — K(r) → K₀ + M/r at the boundary, with ∇²K = 0 in the bulk
-4. **Consider whether the coupling field is not a scalar but a tensor** — K_ij is already a matrix; the continuum limit might be a rank-2 field with different PDE structure
-5. **Accept the current status honestly** — B3 is an open research problem; B1/B2 are stable phenomenological validation layers
+1. **B3C** — Coefficient mapping: derive α(M, K₀, ω_i, N) without using G as input
+2. **B3B-T1** — Numerical test: single-site coupling defect in CML → verify δΩ* ∝ 1/r
+3. **Physical frequency scale** — anchor ω_i = 1.0 (dimensionless CML tick) to a physical frequency to determine K₀ in SI units
+
+---
+
+## 9. Updated Candidate Summary (Post B3A+B3B)
+
+| Candidate | PDE Form | 1/r Origin | Coefficient | Overall |
+|:---|:---|:---|:---|:---|
+| **A — Laplace** | ∇²K = 0 (unique: B3A) | Graph Laplacian Green's function (B3B) | k = G·K₀/c² (B3C open) | **FORM EXPLAINED** |
+| B — Sync energy | No constraint on K | N/A | N/A | DEAD |
+| C — Action (naive) | Helmholtz (screening) | N/A | N/A | DEAD |
+| C — Action (non-K) | Laplace possible | Same as A | Same as A | THEORETICAL (no source candidate) |
+| D — Information | Undefined continuum | N/A | N/A | DEAD |
