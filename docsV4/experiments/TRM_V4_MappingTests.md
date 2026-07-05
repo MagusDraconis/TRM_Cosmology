@@ -1,7 +1,7 @@
 # TRM V4 — Mapping Test Plan
 
 **Date:** 2026-07-05
-**Status:** B1 COMPLETE — K1×F1 produces exact Newtonian gravity. B2 is next. ✅
+**Status:** B1 COMPLETE — K1×F1 is a unique phenomenological match. Classification: **PARTIAL** (post-hoc k calibration, not derived). B2 proceeds as consistency test.
 
 ---
 

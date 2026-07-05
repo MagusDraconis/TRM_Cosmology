@@ -7,15 +7,15 @@
 
 ## Executive Summary
 
-**Result: K1 × F1 produces exact Newtonian gravity.** The coupling perturbation δK ~ M/r with direct density extraction ρ_eff ∝ K(r) yields δρ ~ 1/r → a(r) ~ GM/r².
+**Result: K1×F1 produces exact Newtonian gravity — but classification is PARTIAL after critical review.**
 
-The coupling perturbation constant is identified:
+K1×F1 with δK ~ M/r and ρ_eff ∝ K yields δρ ~ 1/r → a(r) ~ GM/r² exactly, with k = G·K₀/c². However:
 
-```
-k = G·K₀ / c²
-```
+- **k is post-hoc matched, not predicted** — k = G·K₀/c² is a consistency condition, not a derivation
+- **K1 is a modeling choice, not derived** — the coupling field lacks a governing equation; δK ~ 1/r is chosen because it works
+- **No first-principles derivation of ∇²(δK) ∝ −M from oscillator dynamics exists yet**
 
-This is a **clean, parameter-free identification**: the mass-coupling constant k is expressed entirely in terms of G, c, and the baseline coupling K₀. No new free parameters.
+The mechanism is a **unique phenomenological match** (only K1×F1 works among 16 candidates), not a first-principles derivation. See `TRM_V4_B1_CriticalReview.md` for full critical audit.
 
 ---
 
@@ -248,26 +248,37 @@ The only path to Newtonian gravity is: **δK ~ 1/r with direct density extractio
 
 ## Part 6 — Recommendation
 
-### Verdict: PROCEED TO B2
+### Classification After Critical Review: **PARTIAL**
 
-**At least one pair (K1×F1) is VALID with exact Newtonian asymptotics.** The mechanism is clean, parameter-free, and physically motivated.
+See `docsV4/review/TRM_V4_B1_CriticalReview.md` for the full critical audit.
 
-### B2 Readiness
+**The model is a unique phenomenological match — not a first-principles derivation.** k = G·K₀/c² is post-hoc calibration. K1 (δK ~ M/r) is chosen because it works, not derived from oscillator dynamics.
+
+### Verdict: PROCEED TO B2 — as phenomenological consistency test
+
+B2 tests whether the K1×F1 mechanism is **phenomenologically viable** at galactic scales. Success would establish empirical consistency, not fundamental derivation.
 
 | Prerequisite | Status |
 |:---|:---|
-| δK model identified | K1: δK(r) = k·M/r with k = G·K₀/c² |
+| δK model identified | K1: δK(r) = k·M/r with k = G·K₀/c² (post-hoc) |
 | F mapping identified | F1: ρ_eff = ρ_ref · δK/K₀ |
-| Newtonian limit proven | Exact match — zero deviation from GM/r² |
-| Coupling constant derived | k = G·K₀/c² — no free parameters |
-| SPARC mapping chain defined | Σ_bar → M(r) → δK(r) → δρ(r) → a(r) → v(r) |
+| Newtonian limit match | Exact — but via k calibration, not prediction |
+| Unique mechanism | Yes — only K1×F1 works among 16 candidates |
+
+### What B2 CAN and CANNOT Establish
+
+| CAN establish | CANNOT establish |
+|:---|:---|
+| Phenomenological viability at galactic scales | That δK ~ M/r is derived from first principles |
+| Whether single ρ_ref works across galaxies | That the coupling field equation is correct |
+| Whether BTFR emerges naturally | That the mechanism is fundamental or unique |
 
 ### B2 Open Questions
 
-1. **K₀ identification:** What is the numerical value of the baseline coupling K₀ in physical units? This requires anchoring the dimensionless CML tick (ω_i = 1.0) to a physical frequency scale.
+1. **K₀ identification:** What is the numerical value of K₀ in physical units? Requires anchoring ω_i = 1.0 to a physical frequency.
 2. **ρ_ref identification:** Must be determined from cosmological data (φ₀ = ρ_bg/ρ_ref ≈ 0.17).
-3. **Non-spherical mass distributions:** K1 assumes spherical symmetry. Disk galaxies require a generalized δK for non-spherical sources.
-4. **Nonlinear regime:** Does δK ~ M/r remain valid at large M (strong coupling perturbation), or are there saturation effects?
+3. **Non-spherical mass distributions:** K1 assumes spherical symmetry. Disk galaxies need generalized δK.
+4. **Nonlinear regime:** Does δK ~ M/r remain valid for large M? Saturation or screening?
 
 ---
 
