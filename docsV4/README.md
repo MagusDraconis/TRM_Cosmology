@@ -44,6 +44,31 @@ docsV4/
         TRM_V4_G2C_LorentzianKernelAndDispersion.md ← G2C: ω=ck
         TRM_V4_G2D_FullLorentzianClosure.md  ← G2D: quartic kernel
         TRM_V4_G3_StrongFieldTestbed.md ← G3: strong-field framework
+        TRM_V4_G4_OriginOfB.md         ← G4: structural origin of b
+        TRM_V4_G4_EP_EquivalencePrinciple.md ← G4: WEP/EEP derivation
+        TRM_V4_G4_SEP_SelfGravitating.md ← G4: SEP derivation
+        TRM_V4_G5_StrongField_Consistency.md ← G5: EFT strong-field
+        TRM_V4_G6_QuantumGravity_Concept.md  ← G6: QG concept program
+        TRM_V4_G6_Final_Status.md      ← G6: definitive QG status
+        TRM_V4_G6_Phase1A_UVPropagator.md
+        TRM_V4_G6_Phase1B_LatticePathIntegral.md
+        TRM_V4_G6_Phase2A_GravitonLoop.md
+        TRM_V4_G6_Phase2B_SelfEnergy.md
+        TRM_V4_G6_Phase2C_SpectralPositivity.md
+        TRM_V4_G6_Phase3A_TwoLoop.md
+        TRM_V4_G6_Phase3B_AllOrdersConvergence.md
+        TRM_V4_G6_Phase3C_AllOrdersFormalProof.md
+        TRM_V4_G6_Phase3D_GaugeGhost_BRST.md
+        TRM_V4_G6_Phase3E_GhostFormFactor.md
+        TRM_V4_G6_Phase3F_NonperturbativeStability.md
+        TRM_V4_DeepCompletion.md        ← DeepCompletion framework
+        TRM_V4_DeepCompletion_Phase1A_CovariantAction.md
+        TRM_V4_DeepCompletion_Phase1B_CoincidenceLimit.md
+        TRM_V4_DeepCompletion_Phase1C_LocalEFTMatching.md
+        TRM_V4_DeepCompletion_Phase1D_GhostAnalysis.md
+        TRM_V4_DeepCompletion_Phase2A_GeffCalibration.md
+        TRM_V4_DeepCompletion_Phase2B_FullTensor1PN.md
+        TRM_V4_DeepCompletion_Phase2C_NonlinearSolver.md
     review/
         TRM_V4_Claim_Boundaries.md     ← what V4 claims and does not claim
         TRM_V4_Risks.md                ← known risks and mitigations
@@ -54,7 +79,17 @@ docsV4/
         TRM_V4_B6_ResultMatrix.md      ← B6 result matrix
         TRM_V4_Reviewer_Attack_Surface.md ← reviewer attack surface
     papers/
-        TRM_V4_Abstract.md             ← paper abstract
+        TRM_V4/                        ← Classical V4 paper
+            TRM_V4_Draft_Paper.md      ← Main paper (36k)
+            TRM_V4_Supplement_Tensor1PN.md
+            TRM_V4_Abstract.md
+        G6/                            ← Quantum gravity paper
+            main.tex                   ← LaTeX manuscript (revtex4-2)
+            main.pdf                   ← Compiled PDF (367 KB)
+            TRM_V4_G6_PRDPaper.md      ← Markdown source
+            references.bib             ← 13 BibTeX entries
+            cover_letter.txt           ← PRD cover letter
+        figures/                       ← Shared figures
     experiments/
         TRM_V4_MappingTests.md         ← C5 evaluation + test plans
         TRM_V4_B1_Results.md           ← B1 coupling modulation matrix
