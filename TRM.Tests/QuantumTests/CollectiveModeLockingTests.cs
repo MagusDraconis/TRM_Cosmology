@@ -9729,7 +9729,7 @@ public class CollectiveModeLockingTests
             CadenceScoreWeight = 0.0
         };
 
-    private static ModeLockResult SimulateModeLock(double collectiveOmega, ModeLockConfig config)
+    internal static ModeLockResult SimulateModeLock(double collectiveOmega, ModeLockConfig config)
     {
         return SimulateModeLockCore(collectiveOmega, config, spatialBiasFunc: null);
     }
@@ -9890,6 +9890,9 @@ public class CollectiveModeLockingTests
         double closureResidual = 1.0 - alignment01;
 
         // Explicit cadence hypothesis term (20:17 mode-lock candidate).
+        // NOTE: cadenceTarget = 20/17 pre-selects the bridge band via the scoring prior.
+        // This is a structural input, not a discovery mechanism. See I2_Calibration_or_Axiom.md
+        // and Gamma_Origin_Analysis.md for the full circularity audit.
         const double cadenceTarget = 20.0 / 17.0;
         const double cadenceSigma = 0.012;
         double cadenceAlignment = Math.Exp(-Math.Pow((collectiveOmega - cadenceTarget) / cadenceSigma, 2.0));
@@ -11384,7 +11387,7 @@ public class CollectiveModeLockingTests
         CombinedScoreNoExplicitGates
     }
 
-    private sealed record ModeLockConfig(
+    internal sealed record ModeLockConfig(
         int CellCount,
         int Steps,
         int SettleSteps,
@@ -11426,7 +11429,7 @@ public class CollectiveModeLockingTests
                 PerturbationDeltaB: 0.0);
     }
 
-    private sealed record ModeLockResult(
+    internal sealed record ModeLockResult(
         double CollectiveOmega,
         double MeanOrder,
         double ClosureResidual,

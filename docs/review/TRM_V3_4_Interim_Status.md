@@ -1,14 +1,14 @@
 # V3.4 Interim Status — Bridge-Band Origin Program
 
-**Status:** PARTIAL STRUCTURAL PROGRESS
-**Date:** 2026-07-04
-**Scope:** BB01 through BB09 — 8 evidence audits + 2 prototype implementations + 3 integration tests
+**Status:** CLOSED — I2 CONFIRMED AS IRREDUCIBLE AXIOM
+**Date:** 2026-07-05
+**Scope:** BB01 through BB09 + BD1–BD6 + I2 Calibration — 8 evidence audits + 2 prototype implementations + 3 integration tests + 6 dynamical origin tests + 1 calibration-or-axiom analysis
 
 ---
 
 ## # Overview
 
-V3.4 is **ongoing**. The bridge-band origin (Ω ≈ 1.16‥1.19) is **not yet derived** from first principles. Major structural progress has been achieved: the emergent-Ω pipeline works, clock-bias is integrated and validated, and bridge-scale Ω* is dynamically reachable. The remaining gap is physical grounding — why φ ≈ 0.17?
+V3.4 is **closed**. The bridge-band origin (Ω ≈ 1.16‥1.19) has been thoroughly investigated and classified: I2 is an **irreducible axiom** — the bridge band is imposed, not dynamically emergent (BD1–BD6), and no non-circular external calibration law exists (I2_Calibration_or_Axiom.md). The emergent-Ω pipeline works, clock-bias is integrated and validated, and bridge-scale Ω* is operationally accessible via φ input. The remaining question is now explicitly classified as an open theoretical problem: first-principles derivation of I2.
 
 ---
 
@@ -87,7 +87,7 @@ The bridge-band chain is **mechanically complete** but **physically empty** at t
 | α·φ (frequency shift) | **0.17** | **VALIDATED** | CML10 (small φ) + CML11 (φ = 0.17) — linear, stable, synchronization preserved |
 | Ω* (emergent) | **≈ 1.17** | **VALIDATED** | CML11 — Ω*(0.17) = 1.1700000 exactly; independent of dummy Ω input |
 | γ* (emergent reciprocal) | **≈ 0.85** | **VALIDATED** | 1/Ω* ≈ 0.8547 — consistent with EulerBridgeScale |
-| Bridge band **[1.16, 1.19]** | **1.16‥1.19** | **EMPIRICAL** | CML grid scan + prior; dynamically reachable but not dynamically selected |
+| Bridge band **[1.16, 1.19]** | **1.16‥1.19** | **EMPIRICAL** | CML grid scan + prior; operationally accessible via φ input, but dynamically neutral (BD1–BD6: CLASS D — Purely Imposed) |
 
 ### Chain Status Per Link
 
@@ -104,7 +104,7 @@ The bridge-band chain is **mechanically complete** but **physically empty** at t
 
 ## # Key Insight
 
-### The Bridge Band Is Dynamically Reproducible, but Not Physically Grounded.
+### The Bridge Band Is Operationally Accessible, but Not Physically Derived.
 
 **Mechanism exists:**
 
@@ -123,7 +123,7 @@ The bridge-band chain is **mechanically complete** but **physically empty** at t
 
 | Aspect | Status |
 |:---|:---|
-| Can the bridge band be produced dynamically? | **YES** (CML11) |
+| Can the bridge band be produced via clock-bias input? | **YES** (CML11) |
 | Is the producing mechanism understood? | **YES** (clock-bias → uniform frequency shift) |
 | Is the mechanism stable? | **YES** (uniform shift cancels in locking condition) |
 | Can the mechanism reach bridge-scale? | **YES** (φ = 0.17 → Ω* = 1.17) |
@@ -182,7 +182,7 @@ The program explicitly allows:
 
 - **No solution found.** The bridge band may remain an empirical input with no first-principles derivation.
 - **Partial structural reduction only.** The clock-bias mechanism reduces the gap from "unknown Ω preference" to "unknown γ, α, φ origin" — fewer free parameters, but still not zero.
-- **Bridge band as phenomenological input.** The dynamics reproduce the band once γ is given; γ may be a parameter of the theory, not a prediction of it.
+- **Bridge band as phenomenological input.** The dynamics produce the band via the clock-bias mechanism once φ is specified; I2 is an irreducible structural input, not a prediction of the theory.
 
 ---
 
@@ -197,7 +197,7 @@ The program explicitly allows:
 - Theory completeness
 
 **We DO claim:**
-- The bridge band is dynamically reproducible via the clock-bias mechanism
+- The bridge band is operationally producible via the clock-bias mechanism given φ; it is not dynamically selected (BD1–BD6: CLASS D)
 - All 11 CML tests pass with exact and stable results
 - The chain γ → Ω → φ → Ω* → γ* is internally consistent and validated
 - The gap has been narrowed from "why Ω ≈ 1.17?" to "why γ ≈ 0.85 or φ ≈ 0.17?"
@@ -207,13 +207,16 @@ The program explicitly allows:
 
 ## # Next Decision Point
 
-The program now faces a structural fork:
+The program has reached its final classification:
 
-| Path | Description | Open Questions |
+| Path | Description | Status |
 |:---|:---|:---|
-| **Accept γ = 0.85 as empirical** | Document γ as a parameter of the theory, calibrated from CML or SPARC. Bridge band = 1/γ by definition. | Is γ a fundamental constant or a fit parameter? |
-| **Derive φ from spatial structure** | Add spatial positions to the CML lattice. Compute φ_i = GM/(c²r_i) per site. α must be very large (~34,000) or r must be very small (~compact-object). | Justifies neither the scale nor α. |
-| **Derive γ from a0** | Map the MOND acceleration scale to the frequency/time domain. Requires a new structural relation between acceleration and phase rate. | No repository infrastructure exists for this. |
-| **New physical mechanism** | Replace φ = GM/(c²r) with a different source of frequency shift (memory channel, n_eff, action residual). | Speculative; not in scope of evidence auditing. |
+| **I2 as irreducible axiom** | The bridge band [1.16, 1.19] is an irreducible structural input. BD1–BD6 confirm zero dynamical origin. No non-circular external calibration exists (I2_Calibration_or_Axiom.md). | **SELECTED — final verdict** |
+| **I2 as domain-specific prior** | The bridge band is the φ range where m = 3 is the dominant mode for N ∈ [15, 20]. This is mathematically true given I1, but does not explain why the system operates at this φ. | **Reformulation (R2)** |
+| ~~Derive φ from spatial structure~~ | BLOCKED — scale mismatch 34,000×; CML has no spatial positions (BB09, BB10). | **REJECTED** |
+| ~~Derive γ from a0~~ | BLOCKED — dimensional mismatch; no a0→γ code path (BB06). | **REJECTED** |
+| ~~New physical mechanism~~ | Speculative; not in scope of evidence auditing. | **NOT PURSUED** |
 
-**The evidence audits (BB01–BB09) are complete.** The path forward is a physics decision, not an evidence-discovery question.
+**The evidence audits (BB01–BB09) and the final classification audits (BD1–BD6, I2 Calibration) are complete.** TRM/TQM is finalized as: "a rationally constrained, parameter-driven effective theory with exactly two irreducible structural inputs: the closure-family ansatz I1 and the bridge-band prior I2."
+
+*See:* `docs/Final/V3_4/I2_Calibration_or_Axiom.md`, `docs/Final/V3_4/TRM_Canonical_Statement.md`

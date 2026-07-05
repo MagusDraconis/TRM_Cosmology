@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using TRM.Core;
@@ -34,6 +35,14 @@ namespace TRM.CMD
                 Console.WriteLine(" [7] BIPM UTCr Drift Analysis (Global B(t) detection v2)");
                 Console.WriteLine(" [8] PHARAO Residual Analysis (B(t) non-globality bounds)");
                 Console.WriteLine(" [9] SPARC Global Lapse Residual Analysis (Galaxy-scale B-like detection)");
+                Console.WriteLine(" [10] Laser Array Validation (TRM/TQM external test)");
+                Console.WriteLine(" [11] Laser Array Extensions (A+D model comparison)");
+                Console.WriteLine(" [12] Full Laser Model (amplitude + gain/loss simulation)");
+                Console.WriteLine(" [13] Paper Curve Digitizer (extract data from figures)");
+                Console.WriteLine(" [14] Laser CSV Analysis (threshold + tail fit from digitized data)");
+                Console.WriteLine(" [15] Multi-Curve Comparison (K=0.25 vs K=0.12 collapse test)");
+                Console.WriteLine(" [16] EEG Neural Analysis (TRM/TQM neural oscillation test)");
+                Console.WriteLine(" [H] Help — explain all menu options");
                 Console.WriteLine(" [0] Exit Framework");
                 Console.WriteLine("=======================================================");
                 Console.Write(" Select an option: ");
@@ -74,6 +83,41 @@ namespace TRM.CMD
                         RunSparcLapseAnalysis();
                         break;
 
+                    case "10":
+                        RunLaserArrayValidation();
+                        break;
+
+                    case "11":
+                        RunLaserArrayExtensionAnalysis();
+                        break;
+
+                    case "12":
+                        RunFullLaserModel();
+                        break;
+
+                    case "13":
+                        RunPaperCurveDigitizer();
+                        break;
+
+                    case "14":
+                        RunLaserCsvAnalysis();
+                        break;
+
+                    case "15":
+                        RunMultiCurveComparison();
+                        break;
+
+                    case "16":
+                        RunEegAnalysis();
+                        break;
+
+                    case "h":
+                    case "H":
+                    case "help":
+                    case "?":
+                        ShowHelp();
+                        break;
+
                     case "0":
                         Console.WriteLine("Exiting TRM Cosmology Framework. Goodbye!");
                         return;
@@ -83,6 +127,153 @@ namespace TRM.CMD
                 }
             }
         }
+
+        // ── Help Menu ──────────────────────────────────────────────
+
+        private static void ShowHelp()
+        {
+            ClearConsole();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+  ╔══════════════════════════════════════════════════════════════╗
+  ║               TRM COSMOLOGY — HELP & GUIDE                   ║
+  ╚══════════════════════════════════════════════════════════════╝");
+            Console.ResetColor();
+
+            PrintHelpSection("COSMOLOGY & GRAVITY",
+                "[1]  Cluster Diagnostics",
+                "     Compares TRM vs Newtonian gravity on galaxy cluster",
+                "     temperature / mass profiles (Coma, etc.).",
+                "     → Output: statistical fit tables, residual plots.",
+
+                "[2]  SPARC Galactic Rotations",
+                "     Tests TRM and MOND against observed SPARC rotation",
+                "     curves (153 galaxies). Computes χ² per model.",
+                "     → Output: best-fit parameters, comparison tables.",
+
+                "[3]  CMB Acoustic Peaks",
+                "     Analyses Planck CMB power spectrum; computes TRM",
+                "     angular diameter distance vs ΛCDM reference.",
+                "     → Output: peak positions, residuals, shift diagnostics.",
+
+                "[4]  Pantheon+ Supernovae",
+                "     TRM scale-distance diagnostics against the Pantheon+",
+                "     SN Ia catalogue (1701 light curves).",
+                "     → Output: Hubble diagram residuals, Ω_m constraints.",
+
+                "[5]  Sector Status Snapshot",
+                "     Quick overview of scalar / vector / theta sector",
+                "     calibration status and current parameter bounds.",
+                "     → Output: single-screen status table."
+            );
+
+            PrintHelpSection("GLOBAL LAPSE B(t) AUDITS",
+                "[6]  BIPM Clock Drift Analysis",
+                "     Searches for a global common-mode drift B(t) in the",
+                "     BIPM Circular-T clock comparison data.",
+                "     → Output: drift estimates, significance tests.",
+
+                "[7]  BIPM UTCr Drift Analysis",
+                "     Refined B(t) detection using UTCr rapid-UTC data",
+                "     with higher time resolution and more clocks.",
+                "     → Output: drift time-series, Allan deviation.",
+
+                "[8]  PHARAO Residual Analysis",
+                "     Tests whether B(t) is truly global by comparing",
+                "     PHARAO space-clock residuals against ground clocks.",
+                "     → Output: slope-difference bounds, non-globality limits.",
+
+                "[9]  SPARC Global Lapse Residual Analysis",
+                "     Searches for galaxy-scale B-like residuals in SPARC",
+                "     rotation curves after TRM fit removal.",
+                "     → Output: histogram, correlation tests, null result."
+            );
+
+            PrintHelpSection("LASER ARRAY VALIDATION (BB27)",
+                "[10] Laser Array Validation",
+                "     Tests TRM/TQM synchronisation predictions against",
+                "     Weizmann 400-laser array experimental data.",
+                "     Checks: threshold, scaling collapse, cluster scaling.",
+                "     → Output: pass/fail per test, interpretation.",
+
+                "[11] Laser Array Extensions",
+                "     Compares 4 model tiers: phase-only → +amplitude (A)",
+                "     → +correlated disorder (D) → A+D combined.",
+                "     → Output: R² per model, best extension identified.",
+
+                "[12] Full Laser Model",
+                "     Euler-integrated simulation of coupled amplitude +",
+                "     phase ODEs with gain/loss + nearest-neighbour ring.",
+                "     → Output: R² comparison (phase-only vs A+D vs full).",
+
+                "[13] Paper Curve Digitizer",
+                "     Interactive WinForms tool: click along a scientific",
+                "     figure to extract (x, y) data points from images.",
+                "     → Output: digitised CSV + verification scatter plot.",
+
+                "[14] Laser CSV Analysis",
+                "     Loads a digitised CSV and computes synchronisation",
+                "     threshold (y=0.5), tail fit (y~a/x²+b), R², stats.",
+                "     → Output: formatted summary with interpretation.",
+
+                "[15] Multi-Curve Comparison",
+                "     Compares figure3_k025.csv vs figure3_k012.csv for",
+                "     scaling collapse. Generates dual-curve + residual",
+                "     plots and a comparison CSV.",
+                "     → Output: collapse RMS, threshold ratio, plots, CSV."
+            );
+
+            PrintHelpSection("NEURAL VALIDATION (BB27N)",
+                "[16] EEG Neural Analysis",
+                "     Processes Muse-2 EEG data (4 channels, 256 Hz) to",
+                "     extract ω_i, Ω*, PLV, and centroid/synchrony tests.",
+                "     Compares experimental vs control recordings.",
+                "     → Output: per-channel peaks, global PLV, CSV, plots."
+            );
+
+            PrintHelpSection("WORKFLOW TIPS",
+                "",
+                "  • Run [1]–[5] first for the core cosmology picture.",
+                "  • [6]–[9] form the B(t) audit chain — run in order.",
+                "  • [10]–[15] is the laser validation pipeline:",
+                "      digitise → single-curve → multi-curve comparison.",
+                "  • [16] is the neural oscillation validation (BB27N).",
+                "  • Digitised CSV files live in Data\\Laser\\.\n" +
+                "  • Results go to Data\\Laser\\Results\\{timestamp}\\.\n" +
+                "  • Nothing is ever overwritten — each run gets a fresh folder.",
+                ""
+            );
+
+            Console.WriteLine("  Press any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        // ── Helpers ─────────────────────────────────────────────────
+
+        private static void PrintHelpSection(string title, params string[] lines)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine();
+            Console.WriteLine("  ── " + title + " ──");
+            Console.ResetColor();
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    Console.WriteLine();
+                else if (line.StartsWith("["))
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("  " + line);
+                    Console.ResetColor();
+                }
+                else
+                    Console.WriteLine("  " + line);
+            }
+        }
+
+        // ── Experiment Runners ─────────────────────────────────────
+
         private static void RunCluster_Diagnostics()
         {
             ClearConsole();
@@ -1249,6 +1440,242 @@ namespace TRM.CMD
             {
                 Console.WriteLine($"  Plot generation skipped: {ex.Message}");
             }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunPaperCurveDigitizer()
+        {
+            ClearConsole();
+            Console.WriteLine("--- PAPER CURVE DIGITIZER ---");
+            Console.WriteLine("Digitizes curves from scientific paper figures.");
+            Console.WriteLine("Click along the curve, then close the window.");
+            Console.WriteLine();
+
+            string searchFolder = LaserDataPath.InputDir;
+
+            var pngFiles = Directory.Exists(searchFolder)
+                ? Directory.GetFiles(searchFolder, "*.png", SearchOption.TopDirectoryOnly)
+                    .Concat(Directory.GetFiles(searchFolder, "*.jpg", SearchOption.TopDirectoryOnly))
+                    .Concat(Directory.GetFiles(searchFolder, "*.jpeg", SearchOption.TopDirectoryOnly))
+                    .ToArray()
+                : Array.Empty<string>();
+
+            if (pngFiles.Length == 0)
+            {
+                Console.WriteLine("  No PNG/JPG files found in:");
+                Console.WriteLine("    " + searchFolder);
+                Console.WriteLine();
+                Console.WriteLine("  Place a figure screenshot (e.g. figure2.png) in that folder");
+                Console.WriteLine("  and re-run this option.");
+                Console.WriteLine();
+                Console.WriteLine("  Expected axis mapping (edit in code if different):");
+                Console.WriteLine("    X = Omega_RMS / K   (range: 0 to 3)");
+                Console.WriteLine("    Y = SyncMetric (IPR) (range: 0 to 1)");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            Console.WriteLine("  Found images:");
+            for (int i = 0; i < pngFiles.Length; i++)
+                Console.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                    "    [{0}] {1}", i + 1, Path.GetFileName(pngFiles[i])));
+            Console.WriteLine();
+            Console.Write("  Select image number (or 0 to cancel): ");
+
+            var input = Console.ReadLine();
+            if (!int.TryParse(input, out int idx) || idx < 1 || idx > pngFiles.Length)
+            {
+                Console.WriteLine("  Cancelled.");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            string imagePath = pngFiles[idx - 1];
+            Console.WriteLine();
+
+            // Axis bounds — adjust these to match your paper's axes
+            double xMin = 0.0, xMax = 3.0;   // Omega_RMS / K
+            double yMin = 0.0, yMax = 1.0;   // IPR (sync metric)
+
+            string csvPath = Path.Combine(
+                Path.GetDirectoryName(imagePath) ?? ".",
+                Path.GetFileNameWithoutExtension(imagePath) + "_digitized.csv");
+
+            try
+            {
+                var points = PaperCurveDigitizer.RunInteractive(
+                    imagePath, xMin, xMax, yMin, yMax, csvPath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("  ERROR: " + ex.Message);
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunLaserCsvAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- LASER CSV ANALYSIS ---");
+            Console.WriteLine("Loads digitized paper data and computes:");
+            Console.WriteLine("  • synchronization threshold (y = 0.5)");
+            Console.WriteLine("  • tail fit (y ~ a/x² + b, x > 1.2)");
+            Console.WriteLine("  • R² goodness-of-fit and basic statistics");
+            Console.WriteLine();
+
+            // Find digitized CSV files in the Data/Laser directory
+            string searchFolder = LaserDataPath.InputDir;
+
+            var csvFiles = Directory.Exists(searchFolder)
+                ? Directory.GetFiles(searchFolder, "*.csv", SearchOption.TopDirectoryOnly)
+                : Array.Empty<string>();
+
+            if (csvFiles.Length == 0)
+            {
+                Console.WriteLine("  No CSV files found in:");
+                Console.WriteLine("    " + searchFolder);
+                Console.WriteLine();
+                Console.WriteLine("  Run [13] Paper Curve Digitizer first to create one.");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            Console.WriteLine("  Found CSV files:");
+            for (int i = 0; i < csvFiles.Length; i++)
+                Console.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                    "    [{0}] {1}", i + 1, Path.GetFileName(csvFiles[i])));
+            Console.WriteLine();
+            Console.Write("  Select CSV number (or 0 to cancel): ");
+
+            var input = Console.ReadLine();
+            if (!int.TryParse(input, out int idx) || idx < 1 || idx > csvFiles.Length)
+            {
+                Console.WriteLine("  Cancelled.");
+                Console.WriteLine("\nPress any key to return to the menu...");
+                WaitForMenuReturn();
+                return;
+            }
+
+            string csvPath = csvFiles[idx - 1];
+            Console.WriteLine();
+            Console.WriteLine("  Analysing: " + Path.GetFileName(csvPath));
+            Console.WriteLine();
+
+            try
+            {
+                var result = LaserCsvAnalyzer.Analyze(csvPath);
+                LaserCsvAnalyzer.PrintSummary(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("  ERROR: " + ex.Message);
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunMultiCurveComparison()
+        {
+            ClearConsole();
+            Console.WriteLine("--- MULTI-CURVE COMPARISON ---");
+            Console.WriteLine("Compares figure3_k025.csv vs figure3_k012.csv for scaling collapse.");
+            Console.WriteLine("Tests: collapse RMS, threshold ratio, tail-a ratio, dual-curve plot.");
+            Console.WriteLine();
+
+            try
+            {
+                LaserArrayMultiCurveAnalyzer.RunAndPrintAll();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("  ERROR: " + ex.Message);
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunEegAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- EEG NEURAL ANALYSIS ---");
+            Console.WriteLine("Processes Muse-2 EEG data and extracts TRM/TQM features:");
+            Console.WriteLine("  ω_i, Ω*, PLV, centroid test, synchrony test.");
+            Console.WriteLine();
+
+            try
+            {
+                NeuralEEGAnalyzer.RunAndPrintAll();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("  ERROR: " + ex.Message);
+            }
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunFullLaserModel()
+        {
+            ClearConsole();
+            Console.WriteLine("--- FULL LASER MODEL SIMULATION ---");
+            Console.WriteLine("Simulates amplitude + gain/loss + phase-coupled oscillator array.");
+            Console.WriteLine("Compares: phase-only → A+D → full model scaling collapse.");
+            Console.WriteLine();
+
+            LaserArrayFullModelAnalyzer.RunAndPrint(
+                nOscillators: 50,
+                couplingK: 0.25,
+                gainSpread: 0.1);
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunLaserArrayExtensionAnalysis()
+        {
+            ClearConsole();
+            Console.WriteLine("--- LASER ARRAY EXTENSION ANALYSIS ---");
+            Console.WriteLine("Compares TRM/TQM extensions against laser array data.");
+            Console.WriteLine("Models: phase-only → +amplitude (A) → +disorder (D) → A+D combined.");
+            Console.WriteLine();
+
+            var data = LaserArrayExtensionAnalyzer.BuildExtendedDataset();
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                "  Loaded {0} extended experimental data points (400 lasers each)", data.Count));
+            Console.WriteLine();
+
+            var result = LaserArrayExtensionAnalyzer.CompareExtensions(data);
+            LaserArrayExtensionAnalyzer.PrintSummary(result);
+
+            Console.WriteLine("\nPress any key to return to the menu...");
+            WaitForMenuReturn();
+        }
+
+        private static void RunLaserArrayValidation()
+        {
+            ClearConsole();
+            Console.WriteLine("--- LASER ARRAY VALIDATION ---");
+            Console.WriteLine("Tests TRM/TQM predictions against Weizmann 400-laser array data.");
+            Console.WriteLine("Checks: synchronization threshold, scaling collapse, cluster scaling.");
+            Console.WriteLine();
+
+            var data = LaserArrayPaperAnalyzer.BuildDataset();
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                "  Loaded {0} experimental data points", data.Count));
+            Console.WriteLine();
+
+            var result = LaserArrayPaperAnalyzer.Analyze(data);
+            LaserArrayPaperAnalyzer.PrintSummary(result);
 
             Console.WriteLine("\nPress any key to return to the menu...");
             WaitForMenuReturn();

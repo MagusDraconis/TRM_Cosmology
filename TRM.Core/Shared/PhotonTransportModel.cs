@@ -78,6 +78,9 @@ namespace TRM.Tests.RealityTests
             public bool UseLocalMemory { get; init; } = false;
             public double LambdaTime { get; init; } = 1.0;     // φ-Term
             public double LambdaSpace { get; init; } = 30.0;   // φ² μ̇-Term
+            // EulerBridgeScale = 17/20 = algebraic reciprocal of the mid-band rational cadence candidate
+            // 20/17. This is NOT a fundamental physical constant. See docs/Final/V3_4/Gamma_Origin_Analysis.md
+            // and docs/Final/V3_4/I2_Calibration_or_Axiom.md for the full analysis.
             public double EulerBridgeScale { get; init; } = 0.85;
         }
 

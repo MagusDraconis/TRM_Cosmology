@@ -1,0 +1,17 @@
+file_scope,field_name,data_type,units,allowed_values_or_format,description,notes
+EEG CSV,timestamps,numeric or datetime,seconds or ISO timestamp,Depends on acquisition software,Time reference for each EEG sample.,"Keep the original format used during acquisition. If numeric, specify whether it is relative time or Unix time in the README."
+EEG CSV,TP9,numeric,microvolts (µV),Real-valued EEG amplitude,Raw EEG signal from the left temporal electrode TP9 of the Muse 2 headset.,Do not apply filtering unless the file is explicitly labeled as processed.
+EEG CSV,AF7,numeric,microvolts (µV),Real-valued EEG amplitude,Raw EEG signal from the left frontal electrode AF7 of the Muse 2 headset.,
+EEG CSV,AF8,numeric,microvolts (µV),Real-valued EEG amplitude,Raw EEG signal from the right frontal electrode AF8 of the Muse 2 headset.,
+EEG CSV,TP10,numeric,microvolts (µV),Real-valued EEG amplitude,Raw EEG signal from the right temporal electrode TP10 of the Muse 2 headset.,
+EEG CSV,Marker0,integer or NaN,unitless,"0, 1, 2, 3, ... or NaN","Temporal marker associated with baseline, task onset, task segments, or inactive periods.",Document the final marker coding used in each experiment. Preliminary convention: 0 = baseline; positive integers = experimental event/segment; NaN = inactive or no marker.
+metadata_subjects.csv,subject_id,string,unitless,"sub-001, sub-002, ...",Anonymized participant identifier.,"Use this ID instead of names, student IDs, emails, or institutional identifiers."
+metadata_subjects.csv,original_file,string,filename,*.csv,Original CSV filename included in the Zenodo record.,Avoid names or other personal identifiers in filenames.
+metadata_subjects.csv,group,categorical,unitless,control; experimental,Experimental group assigned to the participant or recording.,Use consistent lower-case labels.
+metadata_subjects.csv,sex_code,categorical,unitless,H; M,Sex/gender code retained because it is relevant for the analyses.,Define H/M explicitly in the README according to the study convention used by the research team.
+metadata_subjects.csv,device,string,unitless,Muse 2,EEG acquisition device.,
+metadata_subjects.csv,sampling_rate_hz,numeric,Hz,256,Nominal EEG sampling frequency.,
+metadata_subjects.csv,channels,string,channel list,TP9;AF7;AF8;TP10,EEG channels included in the recording.,Use semicolon-separated list.
+metadata_subjects.csv,acquisition_datetime,datetime,ISO 8601,YYYY-MM-DD HH:MM:SS,"Date and time of the recording, if retained.",Consider reducing precision or omitting this field if exact timestamps are not needed publicly.
+metadata_subjects.csv,dataset_version,string,semantic version,1.0.0,Version of the dataset release.,
+metadata_subjects.csv,notes,string,free text,,Non-identifying notes about the recording.,Do not include personal identifiers or sensitive free-text details.

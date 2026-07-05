@@ -1,12 +1,12 @@
-# V3.4 Interim Summary — Bridge-Band Origin
+# V3.4 Final Summary — Bridge-Band Origin
 
 ## Status
 
-**PARTIAL STRUCTURAL PROGRESS**
+**CLOSED — I2 CONFIRMED AS IRREDUCIBLE AXIOM**
 
 ## Core Result
 
-The bridge band is dynamically reproducible, but not physically grounded.
+The bridge band is operationally accessible via clock-bias input, but not dynamically selected (BD1–BD6: CLASS D — Purely Imposed) and not externally calibratable (I2_Calibration_or_Axiom: all five routes blocked or circular).
 
 ## What Was Achieved
 
@@ -32,7 +32,7 @@ The bridge band is dynamically reproducible, but not physically grounded.
 | φ ≈ 0.17 has no GM/(c²r) mapping | Back-calculated from γ with α = 1.0. No M or r produces this φ in a galactic context. BB09: answer D. |
 | Real galactic φ ≈ 10⁻⁶‥10⁻⁵ only | Bridge-band φ = 0.17 is compact-object regime (r ≈ 3 r_s). Scale gap: ~34,000×. |
 | No path: a0 → γ → Ω | SPARC calibrates a0 ≈ 1.02 × 10⁻¹⁰ m/s². Disconnected from EulerBridgeScale and frequency domain. |
-| Bridge band remains empirical | Band [1.16, 1.19] identified by CML grid scan with cadence prior, not derived from dynamics. |
+| Bridge band remains empirical | Band [1.16, 1.19] identified by CML grid scan with cadence prior, not derived from dynamics. BD1–BD6 confirm zero dynamical origin; I2 is an irreducible structural input. |
 
 ## Current Minimal Chain
 
@@ -77,5 +77,8 @@ What mechanism can replace φ = 0.17 as a physically grounded input?
 
 | Axis | Verdict |
 |:---|:---|
-| **Structural / Dynamical** | **SUCCESSFUL** — mechanism identified, integrated, validated, stable |
-| **Physical / Foundational** | **INCOMPLETE** — γ is a default, φ is a free parameter, no M/r/anchor |
+| **Structural / Dynamical** | **SUCCESSFUL** — mechanism identified, integrated, validated, stable; bridge band is dynamically neutral (BD1–BD6: CLASS D) |
+| **Physical / Foundational** | **IRREDUCIBLE** — I2 is an irreducible structural input; no non-circular external calibration exists (I2_Calibration_or_Axiom.md) |
+| **Theory classification** | **CONSTRAINED EFFECTIVE THEORY** — exactly two irreducible inputs: I1 (closure-family ansatz) and I2 (bridge-band prior) |
+
+*See:* `docs/Final/V3_4/TRM_Canonical_Statement.md` for the full canonical statement.

@@ -1,0 +1,8 @@
+metric,k025,k012,ratio,interpretation
+point_count,46,41,,
+threshold_x,0.9561,0.8820,1.084,consistent_with_unity
+tail_a,0.3106,0.2425,1.281,similar_amplitudes
+tail_b,0.0503,0.0705,,
+r_squared,0.9740,0.9699,,
+collapse_rms,0.0118,,,excellent
+y_range,0.8171,0.8171,,

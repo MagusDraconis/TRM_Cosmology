@@ -12,7 +12,7 @@
 
 5. **$m$ is an indexing convention**, not a fundamental quantity (LPC02B). It labels discrete collective phase modes. Its secondary meaning as $m = p - q$ (excess winding) is algebraically defined under the ansatz.
 
-6. **The bridge band $\Omega \approx 1.16..1.19$ is an empirical input** from V2.2 galactic dynamics and CML mode-locking diagnostics. It constrains $\Omega$, not $m$, and is independent of the ansatz (LPC02A).
+6. **The bridge band $\Omega \approx 1.16..1.19$ is an irreducible structural input (I2)** from V2.2 galactic dynamics and CML mode-locking diagnostics. It constrains $\Omega$, not $m$, and is independent of the ansatz (LPC02A). BD1–BD6 confirm it is dynamically neutral (CLASS D — Purely Imposed). No non-circular external calibration exists (I2_Calibration_or_Axiom.md).
 
 7. **$m = 3$ is the bridge-band mode by empirical fit**, not by derivation (LPC03A). It is the smallest integer that, under the ansatz, produces rational $\Omega$ values in the independently observed bridge band. The three-constraint stack (phase closure + bridge-band + action/tick) formalizes rather than discovers this selection.
 
@@ -66,7 +66,7 @@
 
 | # | Question | Status |
 |:---:|:---|:---|
-| O1 | Why does the bridge band $\Omega \approx 1.16..1.19$ emerge from TQM lattice structure? | LPC02 — OPEN |
+| O1 | Why is the bridge band $\Omega \approx 1.16..1.19$ imposed as a structural constraint on TQM lattice structure? | LPC02 — CLOSED (I2 = irreducible axiom; BD1–BD6 confirm zero dynamical origin) |
 | O2 | Why is $p = q + m$ the correct ansatz rather than $p = q + f(m)$? | LPC01C/D — OPEN (convenient, not derived) |
 | O3 | Can $m = 3$ be derived independently of the bridge-band fit? | LPC03A — OPEN (currently empirical) |
 | O4 | Can the 4 model-scaffolding assumptions (A4–A6) be discharged? | Separate tracks needed |
@@ -164,7 +164,7 @@ No repository component selects $m = 3$ independently of $\delta = |m-3|/3$. The
 
 ## Remaining Open Questions
 
-1. **Origin of the bridge band:** Why does $\Omega \approx 1.16..1.19$ emerge from TQM lattice structure? (LPC02 — currently empirical from V2.2/CML.)
+1. **Origin of the bridge band:** The bridge band $\Omega \approx 1.16..1.19$ is now classified as an irreducible structural input (I2). BD1–BD6 confirm zero dynamical origin. The bridge band does not emerge from TQM lattice structure — it is imposed as a prior. (LPC02 — CLOSED; see I2_Calibration_or_Axiom.md, BridgeBand_Dynamical_Origin.md.)
 
 2. **Justification of the ansatz:** Is $p = q + m$ derivable from TQM lattice dynamics, or must it remain a definitional convention? (LPC01C/D — currently assumed.)
 
