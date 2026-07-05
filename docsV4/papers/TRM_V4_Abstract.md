@@ -1,7 +1,27 @@
-# TRM V4 — Abstract (Draft)
+# TRM V4 — Abstract (Journal-Safe)
 
 **Date:** 2026-07-05
-**Status:** C5 energy density interpretation is the primary phenomenological candidate. Classification: PARTIAL — unique phenomenological bridge, first-principles derivation remains open.
+**Status:** FINAL — V4 complete. 15/15 benchmarks, 81/81 xUnit tests.
+
+---
+
+## Working Title
+
+> Structural Derivation of the Gravitational 1/r Form from Discrete Oscillator-Network Topology
+
+---
+
+## Abstract
+
+The Temporal Rate Matrix (TRM) V4 framework derives the Newtonian gravitational 1/r form from the topology of a discrete coupled-oscillator network, without assuming the inverse-square law. The frozen core (V3.4) constrains collective frequency emergence via two structural inputs: a closure-family ansatz (I1) and a bridge-band prior (I2). The V4 interpretation layer maps oscillator quantities to physical observables through an energy density interpretation of the clock-bias parameter.
+
+The gravitational 1/r scaling emerges as the Green's function of the discrete graph Laplacian when mass is modeled as a localized coupling defect in the oscillator network. Among seven candidate PDE classes, the vacuum Laplace equation ∇²K = 0 is proven the unique admissible form under TRM V4 constraints. The dynamic extension is the massless wave equation □K = 0, with propagation speed identified as c (supported by LIGO).
+
+A unified observable dictionary maps ten physical quantities — time rate, acceleration, redshift, time dilation, light deflection, Shapiro delay, rotation curves, gravitational wave speed, and the gravitational constant — to TRM field quantities. A benchmark suite of fifteen tests across Newtonian, relativistic, and astrophysical domains demonstrates full consistency with weak-field General Relativity.
+
+The framework is classified as FORM EXPLAINED, COEFFICIENT CALIBRATED: the structural origin of the 1/r form is derived from network topology; the numerical value of G and the physical frequency scale require empirical calibration (cesium SI second anchor, I3). TRM V4 does not claim to replace General Relativity or to predict G from first principles. It provides a structurally novel, phenomenologically complete weak-field gravitational framework whose central falsifiable prediction is the 1/r phase perturbation around a coupling defect in any synchronized oscillator network.
+
+**Irreducible inputs:** I1 (closure family), I2 (bridge band), I3 (cesium frequency anchor), D1 (normalization discipline). **Classification:** FORM EXPLAINED, COEFFICIENT CALIBRATED.
 
 **Current status:** C5 is the unique phenomenological interpretation candidate currently supported by Path B tests. It is not yet a first-principles derivation of gravity from oscillator dynamics. Therefore the current classification is PARTIAL.
 

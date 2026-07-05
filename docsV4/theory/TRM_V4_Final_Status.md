@@ -1,14 +1,64 @@
 # TRM V4 — Final Status
 
 **Date:** 2026-07-05
-**Status:** FINAL — V4 closure documentation
-**Supersedes:** All interim V4 status documents
+**Status:** FINAL — V4 complete. B1–B6 passed. 15/15 benchmarks. 81/81 xUnit tests.
 
 ---
 
-## 1. Architecture Overview
+## 1. Executive Summary
 
-TRM V4 is a **phenomenological interpretation layer** built on the frozen TRM V3.4 oscillator core. It does not modify core equations, assumptions, or proof results. It provides the mapping from oscillator quantities to physical observables — specifically, gravitational acceleration.
+**TRM V4 explains the 1/r gravitational form from discrete oscillator-network topology, provides a causal wave-like dynamic extension, and reproduces weak-field gravitational observables through a consistent observable dictionary. The remaining empirical elements are the physical reference frequency I3 and the calibrated coefficient structure entering G.**
+
+| Layer | Status | Key Result |
+|:---|:---|:---|
+| **V3.4 Core** | FROZEN | I1, I2, D1, FP01-FP31, BD, E1 |
+| **B1/B2** | STABLE | K1×F1 unique mechanism, SPARC consistency |
+| **B3A** | DERIVED | Laplace = unique PDE ✓ |
+| **B3B** | DERIVED | 1/r from graph Laplacian defect ✓ |
+| **B3C** | CALIBRATED | α↔M via energy deficit, I3 = cesium |
+| **B4** | EFFECTIVE | Wave eq □K = 0, c_K = c (assumed) |
+| **B5** | COMPLETE | 10-observable dictionary O1–O10 |
+| **B6** | COMPLETE | 15 benchmarks, all pass |
+
+---
+
+## 2. Irreducible Inputs
+
+| Input | Statement | Type |
+|:---|:---|:---|
+| I1 | p = q + m | Structural |
+| I2 | Ω ∈ [1.16, 1.19] | Structural |
+| I3 | f_ref = 9.192631770×10⁹ Hz (cesium SI second) | Empirical anchor |
+| D1 | Shared normalization | Discipline |
+| (I4) | c_K = c (assumed, LIGO-supported) | Dynamical assumption |
+
+---
+
+## 3. Benchmark Summary
+
+15/15 benchmarks pass across 6 domains: Newton, redshift, time dilation, lensing/Shapiro, orbits, SPARC/BTFR. Depth: 1 DERIVED, 8 EFFECTIVE, 5 CALIBRATED, 1 ASSUMED.
+
+---
+
+## 4. What TRM V4 Can Claim
+
+- **1/r gravitational form is structurally derived** from discrete graph Laplacian (B3B)
+- **Laplace is the unique admissible static PDE** (B3A)
+- **All weak-field GR observables reproduced** through C5 phenomenology (B5, B6)
+- **Causal dynamic extension identified** as wave equation □K = 0 (B4)
+- **SPARC phenomenology competitive with MOND** (B2, calibrated)
+
+## 5. What TRM V4 Cannot Claim
+
+- G is predicted from TRM parameters (k = G·K₀/c² is post-hoc)
+- Gravity is fully derived from oscillator dynamics (coupling field PDE origin remains open — B3B explains form, not governing law)
+- Dark matter is replaced (SPARC is calibrated, not derived)
+- Strong-field / compact-object regime is covered (weak-field framework only)
+- TRM replaces GR (phenomenological bridge, not equivalence)
+
+## 6. One-Sentence Status
+
+> **TRM V4 is a structurally derived, phenomenologically complete weak-field gravitational framework with a unique coupling-defect mechanism and causal wave dynamics, requiring two empirical anchors (f_ref, k-calibration) — not yet a scale-free fundamental theory.**
 
 ```
 ┌─────────────────────────────────────────────────────────┐
