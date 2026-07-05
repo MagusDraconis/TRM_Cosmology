@@ -98,7 +98,7 @@ Evaluated with 5000 momentum points × 100 angular points:
 | 1.0 | 1.67 | ✓ |
 | 100 | 0.031 | ✓ |
 
-**No UV divergence. No counterterms required at 1-loop.** In contrast, GR requires 4 counterterms (R, R², R_μν², Riem²) at 1-loop.
+The integral is consistent with UV convergence across the sampled range. No counterterms are required at 1-loop in this framework, in contrast to GR where 4 counterterms (R, R², R_μν², Riem²) are needed.
 
 ---
 
@@ -134,7 +134,7 @@ Positivity follows from Im Π ≥ 0. No negative-residue poles — no quantum gh
 | No quantum ghost | ✓ |
 | 1-loop finite | ✓ |
 
-**All 5 criteria satisfied.**
+**All 5 criteria are met at the level of the present 1-loop analysis.**
 
 ---
 
@@ -178,17 +178,19 @@ The underlying discrete oscillator lattice has compact phase space (θ_i ∈ S¹
 
 ### 6.3 Limitations
 
-- **Continuum limit:** The existence of a second-order phase transition in the lattice theory (allowing a → 0 with finite G) is not proven. This is a standard constructive QFT challenge shared by all interacting theories in 4D.
-- **2-loop explicit computation:** Power counting is confirmed, but the explicit 2-loop integral has not been numerically evaluated.
-- **All-orders theorem:** The theorem is conditional on assumptions A1, A2, A5 (form factor asymptotics, cubic vertex dominance, nonperturbative stability). All three carry strong evidence.
+The results reported here are subject to the following qualifications:
+
+- **Continuum limit (open).** The existence of a second-order phase transition in the discrete lattice theory — allowing the continuum limit a → 0 with finite gravitational coupling — has not been established. This is a standard challenge in constructive quantum field theory, shared by all interacting theories in four dimensions. The finiteness results at finite lattice spacing do not depend on the existence of a continuum limit.
+- **2-loop explicit computation (pending).** Power counting establishes superficial convergence (D = −26 for the sunset diagram), but the full 2-loop integral has not been numerically evaluated. The absence of the Goroff-Sagnotti R³ obstruction is inferred from power counting rather than explicit computation.
+- **All-orders theorem (conditional).** The convergence theorem stated in the Appendix is conditional on three assumptions: the form factor asymptotics (A1, verified), cubic vertex dominance in the effective field theory expansion (A2, standard EFT power counting), and nonperturbative stability (A5, supported by compact phase space and bounded Euclidean action). A rigorous proof without these conditions would require a full constructive QFT treatment.
 
 ---
 
 ## 7. Conclusion
 
-Bilocal gravity with the form factor F(k²) ∼ k⁻⁴ achieves what GR cannot: 1-loop finiteness without counterterms, verified explicitly. The 1-loop theory is unitary. Power counting extends convergence to all orders. The fundamental field is gauge-invariant, eliminating ghosts. 
+Bilocal gravity with the form factor F(k²) ∼ k⁻⁴ provides a mechanism for 1-loop finiteness without counterterms — a property GR lacks. The 1-loop computation is consistent with perturbative unitarity. Power counting indicates convergence extends to higher orders. The fundamental bilocal field K(x,y) is gauge-invariant, so the framework does not require a Faddeev-Popov ghost sector at the fundamental level.
 
-The theory is a **candidate for finite quantum gravity** — not a complete proof, but a concrete mechanism with explicit 1-loop verification. The remaining open questions (continuum limit, all-orders explicit computation) are well-defined and shared with other approaches.
+The theory represents a **candidate framework for finite quantum gravity** with explicit 1-loop verification. The remaining open questions include the rigorous continuum limit of the lattice theory, explicit 2-loop numerical evaluation, and the all-orders theorem (currently conditional on assumptions A1, A2, A5 — each carrying strong evidence). These are well-defined problems shared, in various forms, with other approaches to quantum gravity.
 
 ---
 
