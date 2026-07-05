@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We construct a covariant bilocal effective action for gravity from the frozen collective-frequency core of the Temporal Rate Matrix (TRM) framework. The core requires two irreducible structural inputs plus one empirical frequency anchor (the cesium-133 SI second). The bilocal action S[K,g] — comprising kinetic, self-interaction, and matter-source terms — yields the effective field equations □K=0 and ∇²K=−4πα ρc² in the appropriate limits. The gravitational constant emerges as G_eff = α c² λ²/(16π K₀), structurally derived from the action and calibrated by the measured G. In the coincidence limit, the bilocal theory reduces to a local higher-derivative gravity EFT: L_eff = R/(16πG_eff) − Λ_eff/(8πG_eff) + c₁R² + c₂R_μν² + c₃Riem² + …, with all coefficients determined by radial moments of the bilocal kernel K(d²/λ²) = K₀/(1+d²/λ²+b(d²/λ²)²+(d²/λ²)⁴). The single free parameter b controls the post-Newtonian β_PPN (full tensor, confirmed to <1% of scalar proxy), the effective cosmological constant, and strong-field deviations from GR. The full tensor 1PN computation yields β_PPN(b=1) ≈ 0.912 (observationally excluded by Solar System) and β_PPN(b≈1.248) ≈ 1.000 (GR-compatible). EFT analysis of the self-consistent field equations indicates GR-like strong-field behavior for astrophysical masses, with all EFT corrections suppressed by (GM/λ)² ≪ 1. We demonstrate that the full bilocal propagator is ghost-free — a spin-2 pole appearing in the local EFT truncation is a derivative-expansion artifact, not a physical instability. The theory requires two empirical anchors (f_ref, G) and one free parameter (b); G is not predicted from first principles but is structurally expressed in TRM parameters. The framework is classified as a bilocal origin for higher-derivative gravity EFT with a nonlocal ghost-free UV completion — falsifiable via 1PN Solar System constraints (β_PPN ≠ 1 at b=1), with strong-field deviations suppressed below astrophysical detectability.
+We construct a covariant bilocal effective action for gravity from the frozen collective-frequency core of the Temporal Rate Matrix (TRM) framework. The core requires two irreducible structural inputs plus one empirical frequency anchor (the cesium-133 SI second). The bilocal action S[K,g] — comprising kinetic, self-interaction, and matter-source terms — yields the effective field equations □K=0 and ∇²K=−4πα ρc² in the appropriate limits. The gravitational constant emerges as G_eff = α c² λ²/(16π K₀), structurally derived from the action and calibrated by the measured G. In the coincidence limit, the bilocal theory reduces to a local higher-derivative gravity EFT: L_eff = R/(16πG_eff) − Λ_eff/(8πG_eff) + c₁R² + c₂R_μν² + c₃Riem² + …, with all coefficients determined by radial moments of the bilocal kernel K(d²/λ²) = K₀/(1+d²/λ²+b(d²/λ²)²+(d²/λ²)⁴). The single free parameter b controls the post-Newtonian β_PPN (full tensor, confirmed to <1% of scalar proxy), the effective cosmological constant, and strong-field deviations from GR. The full tensor 1PN computation yields β_PPN(b=1) ≈ 0.912 (observationally excluded by Solar System) and β_PPN(b≈1.248) ≈ 1.000 (GR-compatible). EFT analysis of the self-consistent field equations indicates GR-like strong-field behavior for astrophysical masses, with all EFT corrections suppressed by (GM/λ)² ≪ 1. We demonstrate that the full bilocal propagator satisfies spectral positivity — a spin-2 pole appearing in the local EFT truncation is a derivative-expansion artifact, not a physical instability. The theory requires two empirical anchors (f_ref, G) and one free parameter (b); G is not predicted from first principles but is structurally expressed in TRM parameters. The framework is classified as a bilocal origin for higher-derivative gravity EFT with a nonlocal ghost-free UV completion — falsifiable via 1PN Solar System constraints (β_PPN ≠ 1 at b=1), with strong-field deviations suppressed below astrophysical detectability.
 
 ---
 
@@ -441,7 +441,7 @@ The Padé coefficients are moments of ρ. For a₁=1, a₄=1, a₃=0: **b = ⟨m
 
 ### 7.3 Analogy
 
-TRM's b is to gravity what Brans-Dicke's ω is to scalar-tensor theory: a single parameter controlling deviation from GR. At b=1, strong-field predictions are observationally degenerate with GR in the scalar approximation.
+TRM's b is to gravity what Brans-Dicke's ω is to scalar-tensor theory: a single parameter controlling deviation from GR. At b≈1.248, β_PPN≈1.000 (GR-compatible at 1PN); at b=1, β_PPN≈0.912 (excluded by Solar System).
 
 ---
 
@@ -482,7 +482,7 @@ For any b ≠ 1, TRM implies observable deviations from GR in strong-field obser
 - LISA / 3G GW (σ~5%): can detect b ≥ 1.03
 - Einstein Telescope (σ~2%): can detect b ≥ 1.015
 
-b=1 (the quartic baseline) is observationally degenerate with GR in the scalar approximation — no strong-field deviation is predicted at this parameter value.
+b=1 (the quartic baseline) is excluded at 1PN (β_PPN≈0.912, |β−1|≈0.088 ≫ 10⁻⁴). The strong-field EFT analysis (Section 10) indicates GR-like behavior for all astrophysical b values.
 
 ### 12.5 Anticipated Reviewer Questions
 
@@ -534,7 +534,7 @@ The TRM/TQM V4 + DeepCompletion program establishes a bilocal covariant action f
 
 The theory requires 2 empirical anchors (f_ref, G) and 1 free parameter (b) — the same parameter economy as Brans-Dicke theory, but with G_eff structurally expressed in TRM parameters. The full tensor 1PN computation and the self-consistent strong-field solver remain the principal open problems.
 
-TRM is best interpreted as a **bilocal origin for higher-derivative gravity EFT with a nonlocal ghost-free UV completion.** The kernel parameter b — analogous to Brans-Dicke ω — controls the deviation from GR; b=1 is the structurally preferred, observationally degenerate limit.
+TRM is best interpreted as a **bilocal origin for higher-derivative gravity EFT with a nonlocal completion consistent with spectral positivity.** The kernel parameter b — analogous to Brans-Dicke ω — controls the deviation from GR; b≈1.248 is the GR-compatible value at 1PN, while b=1 is the UV structural fixed point excluded at 1PN.
 
 The present work establishes the action-level structure, the effective theory limit, the full tensor 1PN (Phase 2B), and the first-order strong-field analysis (Phase 2C). The self-consistent nonlinear strong-field solution (G_μν = 8πG·T_μν[K] with nonlocal T^K) is a well-defined computational extension; first-order EFT analysis indicates GR-like behavior for all astrophysical masses.
 
