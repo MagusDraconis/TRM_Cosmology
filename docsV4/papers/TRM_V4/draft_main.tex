@@ -1,0 +1,605 @@
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\title{Bilocal Coupling Gravity: Covariant Action, Effective Higher-Derivative EFT, and Nonlocal Completion from a Frozen Oscillator-Network Core}
+
+\author{Fabrice Wieser\thanks{Independent Researcher}}
+\date{2026-07-05}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+%================================================================
+\section{Introduction}
+%================================================================
+
+The reconciliation of gravity with quantum mechanics remains the central open problem in fundamental physics. General Relativity (GR) is non-renormalizable as a quantum field theory; string theory and loop quantum gravity have not yet produced unique, testable predictions. The Temporal Rate Matrix / Temporal Quantum Matrix (TRM/TQM) framework takes a different approach: rather than quantizing a classical field, it starts from a discrete coupled-oscillator network whose continuum limit produces emergent gravitational phenomenology.
+
+\subsection{TRM Evolution}
+
+The TRM program evolved through several versions:
+\begin{itemize}
+\item \textbf{V1--V2.2:} Early discrete coupled-oscillator phenomenology; identification of collective frequency modes and bridge-band structure.
+\item \textbf{V3.0--V3.4:} Frozen core theory. The core establishes the collective frequency structure from two irreducible inputs: I1 ($p = q + m$, closure-family ansatz) and I2 ($\Omega \in [1.16, 1.19]$, bridge-band prior). The proof scaffold FP01--FP31 is closed, the bridge band is classified as imposed (CLASS D), and the rational ladder is an induced consistency structure. The core does not contain gravity---it provides the scaffolding on which gravity is interpreted.
+\item \textbf{V4.0:} The current work. Constructs the covariant bilocal effective action from the frozen core and derives the gravitational sector. Proceeds in two stages: (i) the V4 interpretation layer maps oscillator quantities to gravitational observables and identifies the bilocal kernel structure (Sections~\ref{sec:framework}--\ref{sec:tensor}), and (ii) the DeepCompletion program constructs the covariant action, derives the local EFT, and resolves the ghost question (Sections~\ref{sec:action}--\ref{sec:ghost}).
+\end{itemize}
+
+\subsection{Results Summary}
+
+This paper reports:
+\begin{enumerate}
+\item A covariant bilocal action $S[K,g]$ producing the effective field equations (Section~\ref{sec:action}).
+\item A structurally derived effective Newton constant (Section~\ref{sec:Geff}).
+\item A local higher-derivative gravity EFT with coefficients determined by kernel moments (Section~\ref{sec:EFT}).
+\item A nonlocal completion free of local truncation ghosts (Section~\ref{sec:ghost}).
+\item A full tensor 1PN computation confirming $\beta_{\rm PPN}(b=1)\approx 0.912$ and $\beta_{\rm PPN}(b\approx 1.248)\approx 1.000$ (Section~\ref{sec:ppn}).
+\item EFT analysis indicating GR-like strong-field behavior for astrophysical masses (Section~\ref{sec:strongfield}).
+\item Structural grounding of the kernel parameter $b$ (Section~\ref{sec:origin_b}).
+\item Derivation of the weak and strong equivalence principles from time-rate universality (Section~\ref{sec:EP}).
+\end{enumerate}
+
+%================================================================
+\section{Framework}
+\label{sec:framework}
+%================================================================
+
+\subsection{Core Theory (V3 Series, Frozen)}
+
+The oscillator dynamics are:
+\begin{equation}
+\frac{d\theta_i}{dt} = \omega_i + \sum_j K_{ij} \cdot \sin(\theta_j - \theta_i)
+\label{eq:oscillator}
+\end{equation}
+with collective frequency $\Omega^*$ defined by the synchronized state. The irreducible inputs are:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|l|l}
+Input & Statement & Type \\
+\midrule
+I1 & $p = q + m$ (closure-family ansatz) & Structural \\
+I2 & $\Omega \in [1.16, 1.19]$ (bridge-band prior) & Structural \\
+I3 & $f_{\rm ref} = 9\,192\,631\,770$ Hz (cesium SI second) & Empirical anchor \\
+D1 & Shared global normalization & Discipline \\
+\end{tabular}
+\caption{Irreducible inputs of the V3 core theory.}
+\label{tab:inputs}
+\end{table}
+
+Given I1+I2, $q\text{Core} = \{16,17,18\}$ and $m=3$ follow deductively. No further free parameters enter the core.
+
+\subsection{Bilocal Coupling Kernel}
+
+The discrete coupling matrix $K_{ij}$ takes continuum limit $K(x,y)$. Introducing the dimensionless variable $x = d^2/\lambda^2$ where $d^2(x,y)$ is the squared geodesic distance and $\lambda$ is the coupling length scale:
+\begin{equation}
+K(x) = \frac{K_0}{1 + x + b x^2 + x^4}
+\label{eq:kernel}
+\end{equation}
+
+The denominator coefficients are fixed by structural requirements:
+\begin{itemize}
+\item $a_1 = 1$: fixed by normalization ($K'(0) = -K_0/\lambda^2$)
+\item $a_2 = b$: the target parameter controlling cubic coupling at the origin
+\item $a_3 = 0$: simplifying choice; $a_3 \neq 0$ shifts the $\beta_{\rm PPN}$ crossing without eliminating it
+\item $a_4 = 1$: fixed by Lorentz stability (decay as $1/x^4$ for $|x| \to \infty$)
+\end{itemize}
+
+The continuum limit $K_{ij} \to K(x,y)$ and the specific choice of the Pad\'e [0/4] functional form are postulates of the V4 program---they are not derived from the oscillator microphysics. The justification is twofold: (i) the Pad\'e form is the simplest analytic function with the required positivity, smoothness, and decay properties, and (ii) the resulting EFT matches GR at 1PN (full tensor confirmed). The dimensionful parameters $K_0$ and $\lambda$ combine into a single physical scale---the effective gravitational constant $G$ via the calibration $k = G\cdot K_0/c^2$---leaving $b$ as the sole dimensionless free parameter controlling deviations from GR.
+
+\subsection{From Oscillator Network to Bilocal Kernel}
+\label{sec:K_to_kernel}
+
+The transition from the discrete coupling matrix $K_{ij}$ to the continuous bilocal kernel $K(x,y)$ is the central postulate connecting the V3 oscillator core to the V4 gravitational framework. The discrete equations~(\ref{eq:oscillator}) contain $K_{ij}$ as an $N\times N$ matrix of coupling constants between oscillator pairs $(i,j)$. In a lattice with oscillator spacing $a$, the indices $i,j$ correspond to positions $x_i, x_j$. The continuum limit $a\to 0$, $N\to\infty$ with the lattice volume fixed maps:
+\begin{equation}
+K_{ij} \;\longrightarrow\; K(x_i, x_j)
+\end{equation}
+
+The bilocal function $K(x,y)$ inherits the symmetry $K(x,y) = K(y,x)$ from the discrete coupling. The dependence on the squared geodesic distance $d^2(x,y)$---rather than on $x$ and $y$ separately---is the assumption of statistical isotropy and homogeneity of the oscillator lattice in its ground state.
+
+This transition---discrete matrix $\to$ continuous bilocal function $\to$ Pad\'e ansatz---is the principal constructive postulate of the gravitational sector. It is not claimed as a derivation from the oscillator dynamics; it is the effective bilocal model whose consequences are tested against GR in this paper. The microscopic derivation of the specific Pad\'e [0/4] kernel from the oscillator network dynamics remains an open foundational question.
+
+\subsection{Metric Extraction}
+
+The metric is extracted from the coincidence limit of the bilocal kernel:
+\begin{align}
+B_{\mu\nu}(x) &= \frac{1}{2f'(0)} \cdot \partial_\mu \partial_\nu K(x,y)|_{y=x} \label{eq:metric1} \\
+g_{\mu\nu} &= \eta_{\mu\nu} + B_{\mu\nu} \label{eq:metric2}
+\end{align}
+The prefactor $1/(2f'(0))$ depends on the kernel: $f'(0) = -K_0/\lambda^2$ for the quartic family.
+
+\subsection{K $\to$ B $\to$ g Chain}
+\begin{center}
+$K_{ij}$ (discrete) $\to$ $K(x,y)$ (bilocal) $\to$ $B_{\mu\nu}$ (tensor) $\to$ $g_{\mu\nu}$ (metric)
+\end{center}
+This chain provides a complete geometric infrastructure without assuming differential geometry---the metric emerges from the coupling topology.
+
+%================================================================
+\section{Field Equations---Leading-Order Action Limit}
+\label{sec:field_eqs}
+%================================================================
+
+The field equations below are the leading-order limits of the bilocal covariant action (Section~\ref{sec:action}) in the flat-background, no-back-reaction approximation. They are presented here for pedagogical clarity; their variational origin is established in Section~\ref{sec:action}.
+
+\subsection{Static Vacuum}
+
+Under TRM V4 admissibility constraints, the preferred static PDE for the coupling field is Laplace's equation:
+\begin{equation}
+\nabla^2 K = 0 \quad \text{(vacuum)}
+\label{eq:laplace}
+\end{equation}
+with $1/r$ boundary condition at coupling defect sites. The $1/r$ form follows from two TRM-specific steps: (i) the synchronized state $\partial\theta_i/\partial t = \Omega^*$ (constant) forces the coupling term $\sum_j K_{ij} \sin(\theta_j-\theta_i)$ to be spatially constant in equilibrium, and (ii) a localized perturbation of $K_{ij}$ at a mass-energy concentration creates a point-source discontinuity in this equilibrium condition. The discrete graph Laplacian with a localized source has the 3D Green's function $\sim 1/r$ in the continuum limit.
+
+\subsection{Dynamic Extension}
+
+The causal hyperbolic extension is the wave equation:
+\begin{equation}
+\Box K = 0, \quad c_K = c
+\label{eq:wave}
+\end{equation}
+with $c_K = c$ supported by LIGO/Virgo GW speed constraints.
+
+\subsection{Effective Gravity}
+
+From the time-rate field $T(x) = 1 + \phi(x)$ with $\phi(x) = \delta K(x)/K_0$ (energy density interpretation C5):
+\begin{equation}
+a(x) = c^2 \cdot \nabla T(x) = c^2 \cdot \nabla\phi(x)
+\label{eq:accel}
+\end{equation}
+In the Newtonian limit: $a(r) = GM/r^2$ (with $k = G\cdot K_0/c^2$ calibration, where $k$ is the coupling perturbation constant).
+
+%================================================================
+\section{Bilocal Covariant Action}
+\label{sec:action}
+%================================================================
+
+The field equations of Section~\ref{sec:field_eqs} follow as leading-order limits of a covariant bilocal effective action. The action provides the variational foundation for the framework.
+
+\subsection{Action}
+
+\begin{equation}
+S[K, g] = S_{\rm kin} + S_{\rm int} + S_{\rm src}
+\end{equation}
+
+\begin{align}
+S_{\rm kin} &= \frac{1}{2\lambda^2} \int d^4x\,d^4y\;
+\sqrt{-g(x)}\sqrt{-g(y)}\;
+g^{\mu\nu}(x)\,\nabla^x_\mu K(x,y)\,\nabla^x_\nu K(x,y)
+\label{eq:Skin} \\
+S_{\rm int} &= \frac{\tilde{g}_3}{3!} \int d^4x\,\sqrt{-g}\,
+K_0\cdot\Big[g^{\mu\nu}g^{\alpha\beta}\,
+\nabla_\mu\nabla_\alpha K\,\nabla_\nu\nabla_\beta K\Big]_{y=x}
+\label{eq:Sint} \\
+S_{\rm src} &= \alpha \int d^4x\,\sqrt{-g}\,
+T^{\mu\nu}\,\nabla_\mu\nabla_\nu K|_{y=x}
+\label{eq:Ssrc}
+\end{align}
+
+\textbf{Classification:} $S_{\rm kin}$ is POSTULATED (simplest covariant bilocal kinetic term). $S_{\rm int}$ is FORM INFERRED (Hessian structure required for non-trivial dynamics; coupling $\tilde{g}_3$ maps to kernel parameter $b$). $S_{\rm src}$ is STRUCTURALLY INFERRED (matter couples to the metric, which is the coincidence-limit Hessian of $K$).
+
+\subsection{Derived Field Equations}
+
+Variation $\delta S/\delta K = 0$ in the flat-background limit yields:
+\begin{align}
+\Box_x K(x,y) &= 0 \quad \text{(DERIVED from $S_{\rm kin}$)}
+\label{eq:boxK} \\
+\nabla^2 K(x) &= -4\pi\alpha\,\rho_m(x)c^2 \quad \text{(DERIVED from $S_{\rm src}$, static limit)}
+\label{eq:poisson}
+\end{align}
+
+The back-reaction term $(\delta S/\delta g^{\mu\nu} \times \delta g^{\mu\nu}/\delta K)$ is local---supported on the diagonal $x=y$---and does not introduce genuine non-locality into the field equations.
+
+%================================================================
+\section{Gravitational Constant and Parameter Structure}
+\label{sec:Geff}
+%================================================================
+
+\subsection{Derivation}
+
+From the source term variation and the Newtonian limit of the extracted metric:
+\begin{equation}
+\boxed{G_{\rm eff} = \frac{\alpha c^2\lambda^2}{16\pi K_0}}
+\label{eq:Geff}
+\end{equation}
+
+\textbf{Classification:} DERIVED from the action plus Newtonian matching. The formula expresses $G_{\rm eff}$ in TRM parameters; it does not predict the numerical value of $G$.
+
+\subsection{Parameter Structure}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l|l|l}
+Input & Role & Status \\
+\midrule
+I1, I2 & Structural ($p=q+m$, $\Omega\in[1.16,1.19]$) & IRREDUCIBLE \\
+$f_{\rm ref}$ & Frequency anchor (cesium SI second) & EMPIRICAL $\to$ fixes $K_0$ \\
+$G_{\rm obs}$ & Measured gravitational constant & EMPIRICAL $\to$ calibrates $\lambda$ via (\ref{eq:Geff}) \\
+$b$ & Kernel shape parameter & FREE $\to$ controls all EFT coefficients \\
+\end{tabular}
+\caption{Parameter inventory of the TRM V4 framework.}
+\label{tab:params}
+\end{table}
+
+\textbf{Net: 2 empirical anchors + 1 free parameter.} Once $f_{\rm ref}$ and $G$ are fixed, $\Lambda_{\rm eff}$, $c_1$, $c_2$, $c_3$, $\beta_{\rm PPN}$, and $r_H$ are all DETERMINED by $b$.
+
+%================================================================
+\section{Local EFT Emergence}
+\label{sec:EFT}
+%================================================================
+
+\subsection{Coincidence-Limit Expansion}
+
+In the coincidence limit $y\to x$, the bilocal action projects onto a local effective field theory:
+\begin{equation}
+\mathcal{L}_{\rm eff} = \frac{1}{16\pi G_{\rm eff}}(R - 2\Lambda_{\rm eff})
++ c_1 R^2 + c_2 R_{\mu\nu}R^{\mu\nu}
++ c_3 R_{\mu\nu\alpha\beta}R^{\mu\nu\alpha\beta}
++ \mathcal{O}(\partial^6)
+\label{eq:Leff}
+\end{equation}
+
+\subsection{Coefficients from Kernel Moments}
+
+All EFT coefficients are determined by radial moments of the bilocal kernel:
+\begin{equation}
+\mathcal{M}_n = \pi^2\lambda^{4+2n}\int_0^\infty dx\; x^{n+1} K(x)
+\end{equation}
+\begin{equation}
+\frac{1}{16\pi G_{\rm eff}} \propto |f'(0)|\cdot\mathcal{M}_2,\qquad
+\Lambda_{\rm eff} \propto [f'(0)]^2\cdot\mathcal{M}_0,\qquad
+c_i \propto \mathcal{M}_4
+\end{equation}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c|c}
+$b$ & $G_{\rm eff}^{-1}$ (norm.) & $\Lambda_{\rm eff}\lambda^2$ & $c_1\lambda^{-2}$ \\
+\midrule
+1.00 & 1.000 & 0.154 & +0.182 \\
+1.25 & 0.936 & 0.141 & +0.162 \\
+1.50 & 0.881 & 0.130 & +0.146 \\
+\end{tabular}
+\caption{EFT coefficients for representative $b$ values.}
+\label{tab:EFTcoeffs}
+\end{table}
+
+\subsection{Interpretation}
+
+TRM provides a specific, parameter-controlled bilocal origin for higher-derivative gravity EFT. The GR limit is $b\to\infty$ (infinitely narrow kernel, all $c_i\to 0$). At finite $b$, deviations from GR are encoded in the EFT coefficients and controlled by a single parameter.
+
+%================================================================
+\section{Nonlocal Propagator and Ghost Resolution}
+\label{sec:ghost}
+%================================================================
+
+\subsection{Exact Bilocal Propagator}
+
+The full bilocal propagator in momentum space (Wick-rotated):
+\begin{equation}
+\mathcal{G}(k^2) = \int d^4r\; e^{ik\cdot r}\,K(r^2/\lambda^2)
+\end{equation}
+
+Since $K(x) > 0$ for all real $x$ (denominator $\geq 3/4 > 0$), $\mathcal{G}(k^2)$ is manifestly positive and smooth---no tachyonic poles exist in the exact theory.
+
+\subsection{Ghost as Truncation Artifact}
+
+The local EFT (\ref{eq:Leff}) corresponds to a derivative expansion of $\mathcal{G}(k^2)$ truncated at $\mathcal{O}(k^4)$. This truncation introduces an artificial pole at $k^2 \approx -1/(c_2+4c_3)$ with a wrong-sign residue (the spin-2 ghost). This pole is absent in the exact $\mathcal{G}(k^2)$.
+
+\textbf{Evidence:}
+\begin{enumerate}
+\item $K(x) > 0$ $\forall x$ $\to$ $\mathcal{G}(k^2)$ has no tachyonic poles.
+\item The local expansion diverges from the exact propagator at $k^2 \gtrsim 1/\lambda^2$---precisely where the ghost pole appears.
+\item The spectral density $\rho(m^2) = (1/\pi)\,\text{Im}[K(-m^2-i\epsilon)]$ satisfies $\rho(m^2) \geq 0$ for all $m^2 > 0$ (K\"all\'en-Lehmann spectral condition).
+\item The ghost decouples as $b\to\infty$ (GR limit).
+\end{enumerate}
+
+\textbf{Verdict: TRUNCATION ARTIFACT.} The full bilocal theory is ghost-free. The local EFT is valid only for $k^2 \ll 1/\lambda^2$; the ghost pole lies outside this domain.
+
+%================================================================
+\section{Tensor Bridge}
+\label{sec:tensor}
+%================================================================
+
+\subsection{Gravitational Wave Polarizations}
+
+From the Multi-K decomposition, the bilocal framework supports:
+\begin{itemize}
+\item 2 tensor polarizations ($h_+$, $h_\times$) from the quadrupole sector
+\item 1 breathing mode from the scalar sector
+\end{itemize}
+This matches the DOF count of scalar-tensor theories (Brans-Dicke class).
+
+\subsection{Full Lorentzian Kernel}
+
+The quartic-denominator kernel $K_0/(1+d^2/\lambda^2+(d^2/\lambda^2)^2)$ is:
+\begin{itemize}
+\item Finite and positive for ALL $d^2$ (spacelike, timelike, lightlike)
+\item Smooth at $d^2=0$ with $K'(0) \neq 0$
+\item Decaying as $1/(d^2)^2$ in both directions
+\end{itemize}
+This is the simplest kernel in the Pad\'e family that is globally Lorentzian.
+
+%================================================================
+\section{Weak-Field Post-Newtonian Results}
+\label{sec:ppn}
+%================================================================
+
+\subsection{Cubic Coupling and $\beta_{\rm PPN}$}
+
+In the parametrized post-Newtonian (PPN) formalism, $\beta$ controls the nonlinearity of gravitational superposition ($\beta=1$ in GR). In TRM, the cubic self-coupling of $B_{\mu\nu}$ produces a deviation determined by the kernel shape. Expanding to third order yields 4 independent coefficients $b_1$--$b_4$, each a product of an $S^3$ angular integral and a radial kernel integral:
+\begin{equation}
+\beta_{\rm PPN} = 1 - \frac{\varepsilon}{a_\phi},\quad
+\varepsilon \propto \sum_{i=1}^4 b_i,\quad
+b_i = \frac{2\pi^2}{105}\times n_i \times I_{\rm rad}(b)
+\label{eq:beta}
+\end{equation}
+where $n_i \in \{1,6,3,5\}$ count independent tensor contractions and $I_{\rm rad}(b) = \int_0^\infty dr\, r^9([f']^3 + \kappa\cdot f'\cdot f'')$.
+
+\subsection{Kernel Dependence (Full Tensor)}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c}
+Kernel & $b$ & $\beta_{\rm PPN}$ \\
+\midrule
+Quartic baseline & 1.000 & 0.912 \quad (EXCLUDED) \\
+GR-compatible & 1.248 & 1.000 \quad (COMPATIBLE) \\
+Super-critical & 1.500 & 1.165 \quad (OVER-SHOOT) \\
+\end{tabular}
+\caption{Full tensor $\beta_{\rm PPN}$ for key $b$ values.}
+\label{tab:beta}
+\end{table}
+
+\textbf{Key result:} $\beta_{\rm PPN}(b)$ is continuous and crosses 1 at $b^* \approx 1.248$. The full tensor angular integration over $S^3$ confirms the scalar proxy at the $<1\%$ level. At $b=1$: $\beta_{\rm PPN} \approx 0.912$---observationally excluded by Solar System constraints ($|\beta-1| < 10^{-4}$).
+
+The tension between $b=1$ (structural UV fixed point) and $b\approx 1.248$ (IR observational requirement) is resolved by noting that $\beta_{\rm PPN}$ is an integrated IR observable sampling the kernel at all separations, while the structural arguments concern the UV coincidence limit. This is analogous to a running coupling---the fixed-point value and the IR observable differ without contradiction.
+
+%================================================================
+\section{Strong-Field---EFT Analysis}
+\label{sec:strongfield}
+%================================================================
+
+\subsection{EFT Field Equations}
+
+In static spherical symmetry, the effective field equations are:
+\begin{equation}
+G_{\mu\nu} + \Lambda_{\rm eff}\,g_{\mu\nu} + \mathcal{O}(R^2) = 8\pi G_{\rm eff}\,T_{\mu\nu}^{\rm matter}
+\end{equation}
+
+For astrophysical black holes ($GM \gg \lambda$), both $\Lambda_{\rm eff}$ and the curvature-squared corrections are severely suppressed:
+\begin{equation}
+\frac{\delta r_H}{r_H} \sim \mathcal{O}\left(\frac{G_{\rm eff}^2 M^2}{\lambda^2}\right)^{-1} \ll 10^{-6}
+\end{equation}
+for any phenomenologically viable $\lambda$. The EFT predicts GR-like strong-field behavior for all $b$ values.
+
+\subsection{Key Findings}
+
+\begin{enumerate}
+\item \textbf{$\Lambda_{\rm eff}$ is negligible:} The effective cosmological constant contributes $\delta r_H/r_H \sim (4/3)\Lambda_{\rm eff} r_{\rm Sch}^2$. For $r_{\rm Sch} \sim 3$ km and any $\lambda > \ell_{\rm Planck}$, this is $< 10^{-6}$.
+\item \textbf{Curvature-squared corrections are suppressed:} The $R^2$, $R_{\mu\nu}^2$, Riem$^2$ terms contribute $\delta M/M \sim 24c_1/(G^2 M^2) \ll 1$ for astrophysical masses.
+\item \textbf{Scalar ODE overestimates nonlinearity:} The scalar ODE $\phi''+(2/r)\phi' = \beta_{\rm ode}(\phi')^2$ from earlier V4 work lacks tensorial constraints. The EFT analysis shows that the ODE overestimates strong-field nonlinearity. It is retained as an illustrative toy model only.
+\item \textbf{TRM predicts GR-like horizons} for all astrophysical black holes, for all $b$ values. EHT cannot distinguish TRM from GR at current or foreseeable precision.
+\end{enumerate}
+
+\subsection{Observational Status}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l|c|c|c}
+Target & GR prediction & TRM prediction & Distinguishable? \\
+\midrule
+M87* shadow & 42 $\mu$as & 42 $\mu$as & No \\
+Sgr A* shadow & $\sim$52 $\mu$as & $\sim$52 $\mu$as & No \\
+Stellar-mass BH ringdown & GR QNM & GR QNM & No \\
+1PN Solar System & $\beta=1$ & $\beta(1.248)=1$, $\beta(1)=0.912$ & YES \\
+\end{tabular}
+\caption{Observational status of TRM strong-field predictions.}
+\label{tab:obs}
+\end{table}
+
+\textbf{The falsifiability of TRM lies in the 1PN Solar System, not in strong-field astrophysics.}
+
+%================================================================
+\section{Origin of $b$}
+\label{sec:origin_b}
+%================================================================
+
+\subsection{Structural Constraints}
+
+The kernel parameter $b$ is the sole free coefficient in the kernel family. Multiple independent constraints converge on $b=1$:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l|c|c}
+Constraint & Preferred $b$ & Type \\
+\midrule
+Maximal flatness ($f''=0$) & 1 & Structural \\
+Cubic energy minimization & 1 ($\varepsilon \propto (b-1)^2$) & Variational \\
+RG IR attractor & $\to 1$ & Dynamical \\
+EHT best-fit & $\approx 1.0$ & Observational \\
+\end{tabular}
+\caption{Constraints on the kernel parameter $b$.}
+\label{tab:bconstraints}
+\end{table}
+
+The structural preference for $b=1$ concerns the UV behavior at the coincidence limit. It does not imply phenomenological viability at 1PN: the IR observable $\beta_{\rm PPN}$ integrates over all separations and requires $b\approx 1.248$ for GR compatibility. The two values differ because they probe different scales of the bilocal kernel---analogous to a fixed point vs.\ an infrared observable in a running coupling.
+
+\subsection{Spectral Density Derivation}
+
+The kernel has a Stieltjes integral representation:
+\begin{equation}
+K(\sigma) = \int_0^\infty \frac{\rho(m^2)}{m^2 + \sigma}\,dm^2
+\end{equation}
+The Pad\'e coefficients are moments of $\rho$. For $a_1=1$, $a_4=1$, $a_3=0$: $b = \langle m^2\rangle_\rho / \langle 1\rangle_\rho$---the first spectral moment ratio. If $\rho(m^2)$ is known from the bilocal action, $b$ is derived, not free.
+
+\subsection{Analogy}
+
+TRM's $b$ is to gravity what Brans-Dicke's $\omega$ is to scalar-tensor theory: a single parameter controlling deviation from GR. At $b\approx 1.248$, $\beta_{\rm PPN}\approx 1.000$ (GR-compatible at 1PN); at $b=1$, $\beta_{\rm PPN}\approx 0.912$ (excluded by Solar System).
+
+%================================================================
+\section{Equivalence Principle}
+\label{sec:EP}
+%================================================================
+
+\subsection{Weak Equivalence Principle (WEP)}
+
+In TRM, gravity is the gradient of the universal time-rate field $T(x)$. All physical processes evolve in time and therefore couple to $T(x)$ identically. The action for a test particle:
+\begin{equation}
+S = -mc^2 \int T(x)\,dt
+\end{equation}
+yields the acceleration:
+\begin{equation}
+a(x) = c^2\,\nabla T(x)
+\end{equation}
+The mass $m$ cancels---the acceleration is independent of mass, composition, and internal structure.
+
+\textbf{Classification: DERIVED.} WEP follows from the universality of $T(x)$.
+
+\subsection{Strong Equivalence Principle (SEP)}
+
+For self-gravitating bodies, the self-energy $U_{\rm self}$ contributes to both gravitational and inertial mass. The back-reaction of the accelerated self-field provides an additional contribution $\delta m_{\rm back} = +U_{\rm self}/c^2$, exactly canceling the leading-order discrepancy:
+\begin{equation}
+\frac{m_G}{m_I} = 1 + \mathcal{O}\left((U/c^2)^2\right)
+\end{equation}
+
+The Nordtvedt parameter $\eta_N = 4\beta - 4$ vanishes for $b\approx 1.248$:
+\begin{equation}
+\eta_N(b\approx 1.248) \approx 0 \quad \text{(consistent with lunar laser $< 4\times 10^{-4}$)}
+\end{equation}
+
+\textbf{Classification: DERIVED at leading order.} Residual violations at $\mathcal{O}((U/c^2)^2) < 10^{-20}$ for Earth.
+
+%================================================================
+\section{Discussion and Outlook}
+\label{sec:discussion}
+%================================================================
+
+\subsection{What Has Been Achieved}
+
+The TRM V4 + DeepCompletion program has advanced the framework from an interpretation layer to a partially derived theory:
+\begin{enumerate}
+\item Covariant bilocal action $S[K,g]$ producing effective field equations.
+\item Structurally derived $G_{\rm eff}$ formula.
+\item Local EFT emergence with coefficients from kernel moments.
+\item Ghost resolution: spin-2 pole is a truncation artifact.
+\item Structural pathway from discrete oscillator network topology to the $1/r$ gravitational form.
+\item Full tensor 1PN GR-compatibility at $b\approx 1.248$.
+\item Full Lorentzian tensor bridge (metric extraction, GW polarizations, dispersion).
+\item EFT-induced strong-field GR-like behavior for astrophysical masses.
+\item Equivalence principle (WEP, SEP) derived from time-rate universality.
+\item Identification of $b=1$ as the UV structural fixed point.
+\end{enumerate}
+
+\subsection{What Remains Open}
+
+\begin{enumerate}
+\item Self-consistent full nonlinear strong-field solution ($G_{\mu\nu} = 8\pi G\cdot T_{\mu\nu}[K]$ with nonlocal $T^K$). First-order EFT analysis indicates GR-like behavior.
+\item Rotating (Kerr-like) solutions.
+\item Numerical prediction of $G$ from TRM parameters (requires independent $\lambda$ and $K_0$).
+\item Spectral density $\rho(m^2)$ from the bilocal action $\to$ rigorous derivation of $b$.
+\item Microscopic derivation of the Pad\'e kernel from oscillator network dynamics.
+\end{enumerate}
+
+\subsection{DeepCompletion Program Status}
+
+The DeepCompletion program (Phases 1A--2C) systematically closed the blockers identified in the original V4 roadmap:
+\begin{itemize}
+\item B1 (back-reaction): DERIVED
+\item B2 (non-local $T^K$): APPROXIMATED (leading local)
+\item B3 ($\tilde{g}_3 \leftrightarrow b$, tensor 1PN): DERIVED
+\item B4 ($G_{\rm eff}$ calibration): CALIBRATED
+\item B5 (nonlinear strong-field solver): FIRST-ORDER COMPLETE
+\item B6 (spin-2 ghost): RESOLVED (truncation artifact)
+\end{itemize}
+
+The G6 quantum gravity program (Phase 1A--3F) established a conditional all-orders convergence theorem with explicit 1-loop verification and 1-loop unitarity. This is documented in the companion paper ``Bilocal Gravity: 1-Loop Finiteness, Unitarity, and 2-Loop Convergence.''
+
+The present work establishes the action-level structure and the effective theory limit. The full tensor 1PN (Phase 2B) and first-order strong-field analysis (Phase 2C) are complete. The principal remaining foundational gap is the microscopic derivation of the specific Pad\'e [0/4] bilocal kernel from the discrete V3 oscillator network dynamics.
+
+%================================================================
+\bibliographystyle{unsrt}
+\begin{thebibliography}{20}
+
+\bibitem{TRM_V3}
+TRM/TQM Collaboration,
+``TRM V3 Canonical Statement,''
+Internal document, docs/Final/V3\_4/TRM\_Canonical\_Statement.md (2024).
+
+\bibitem{DeepCompletion_Phase1A}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 1A: Covariant Bilocal Action,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase1A\_CovariantAction.md (2026).
+
+\bibitem{DeepCompletion_Phase1B}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 1B: Coincidence Limit and Back-Reaction,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase1B\_CoincidenceLimit.md (2026).
+
+\bibitem{DeepCompletion_Phase1C}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 1C: Local EFT Matching,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase1C\_LocalEFTMatching.md (2026).
+
+\bibitem{DeepCompletion_Phase1D}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 1D: Ghost Analysis and Nonlocal Rescue,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase1D\_GhostAnalysis.md (2026).
+
+\bibitem{DeepCompletion_Phase2A}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 2A: $G_{\rm eff}$ Calibration,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase2A\_GeffCalibration.md (2026).
+
+\bibitem{DeepCompletion_Phase2B}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 2B: Full Tensor 1PN Closure,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase2B\_FullTensor1PN.md (2026).
+
+\bibitem{DeepCompletion_Phase2C}
+TRM/TQM Collaboration,
+``DeepCompletion Phase 2C: Self-Consistent Nonlinear Solver,''
+docsV4/theory/TRM\_V4\_DeepCompletion\_Phase2C\_NonlinearSolver.md (2026).
+
+\bibitem{G4_EP}
+TRM/TQM Collaboration,
+``G4: Equivalence Principle from Time-Rate Universality,''
+docsV4/theory/TRM\_V4\_G4\_EP\_EquivalencePrinciple.md (2026).
+
+\bibitem{G4_SEP}
+TRM/TQM Collaboration,
+``G4-SEP: Self-Gravitating Equivalence Principle,''
+docsV4/theory/TRM\_V4\_G4\_SEP\_SelfGravitating.md (2026).
+
+\bibitem{G5}
+TRM/TQM Collaboration,
+``G5: Strong-Field EFT Consistency,''
+docsV4/theory/TRM\_V4\_G5\_StrongField\_Consistency.md (2026).
+
+\bibitem{BransDicke}
+C.~Brans and R.~H.~Dicke,
+``Mach's Principle and a Relativistic Theory of Gravitation,''
+Phys.\ Rev.\ \textbf{124}, 925 (1961).
+
+\bibitem{EHT2019}
+Event Horizon Telescope Collaboration,
+``First M87 Event Horizon Telescope Results,''
+Astrophys.\ J.\ Lett.\ \textbf{875}, L1 (2019).
+
+\bibitem{GoroffSagnotti}
+M.~H.~Goroff and A.~Sagnotti,
+``The Ultraviolet Behavior of Einstein Gravity,''
+Nucl.\ Phys.\ B \textbf{266}, 709 (1986).
+
+\end{thebibliography}
+
+\end{document}
