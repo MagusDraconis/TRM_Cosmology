@@ -72,21 +72,33 @@ d² = −(Δt)² + (Δx)² + ... < 0
 | **R4 — Wick rotation** | Work in Euclidean signature (imaginary time), analytically continue | Standard QFT technique |
 | **R5 — Light-cone cutoff** | K = K₀·exp(−\|d²\|/2λ²) · Θ(−d²) (spacelike only) | Causal — coupling only exists within light cone |
 
-### 2.4 Resolution R3 — Rational Kernel
+### 2.4 Resolution R3 — Rational Kernel (PARTIAL)
 
 ```
 K(x,y) = K₀ / (1 + d²(x,y) / 2λ²)
 ```
 
-At coincidence:
-```
-∂_μ∂_ν K|_{0} = (−K₀/λ²) · g_μν    (same extraction formula!)
-```
+**Advantage over Gaussian:** Slower decay at large spacelike separations. Same metric extraction formula.
 
-For large |d²|: K ∼ 2λ²·K₀/d² → decays for BOTH timelike and spacelike separations.
-No exponential blow-up. Smooth across the light cone.
+**Problem:** For timelike d² < −2λ², the denominator becomes negative → K < 0 (unphysical negative coupling). The rational kernel avoids exponential blow-up but introduces sign-flip at finite timelike separation.
 
-**R3 is the recommended kernel.** It avoids the timelike blow-up while preserving the metric extraction formula.
+**Assessment:** PARTIAL. Better than Gaussian (no blow-up at infinity) but still fails for sufficiently timelike separations. The rational kernel is usable in a regime |d²| < 2λ² (near the light cone), but not globally.
+
+### 2.5 Final Timelike Status
+
+| Kernel | Spacelike (d² > 0) | Timelike near (0 > d² > −2λ²) | Timelike far (d² < −2λ²) | Verdict |
+|:---|:---|:---|:---|:---|
+| Gaussian | ✓ decays | ✗ blows up | ✗ blows up | Static only |
+| Rational (R3) | ✓ decays | ✓ positive | ✗ negative (unphysical) | Near-light-cone only |
+| Ideal kernel | ✓ decays | ✓ positive | ✓ positive | **OPEN — not yet found** |
+
+### 2.6 Resolution Paths (Open)
+
+| Path | Approach | Status |
+|:---|:---|:---|
+| **Wick rotation** | Work in Euclidean signature (t → iτ), extract metric, analytically continue | Standard QFT technique — promising |
+| **|d²| absolute value** | K = K₀/(1 + \|d²\|/2λ²) — non-analytic at light cone | Works but non-smooth |
+| **Accept static limit** | G2A valid for spacelike/static. Lorentzian = separate project. | Honest scope limitation |
 
 ### 2.5 Sign Structure / Lorentzian Viability
 
@@ -178,17 +190,16 @@ Point mass at x₀ perturbs coupling between x and y.
 
 ---
 
-## 6. Classification
+## 6. Final Status
 
-| Aspect | Status |
+**G2A is SUPPORTED for spacelike/static metric extraction. Full Lorentzian extension remains OPEN.**
+
+| Regime | Status |
 |:---|:---|
-| Metric extraction formula | **SUPPORTED** — mathematically rigorous for any K(d²) with K'(0) ≠ 0 |
-| Symmetry g_μν = g_νμ | **SUPPORTED** — follows from commutativity of partial derivatives |
-| 6 physical DOF | **SUPPORTED** — correct for GR |
-| Flat-space limit | **SUPPORTED** — η_μν correctly recovered |
-| Timelike behavior (Gaussian) | **NOT SUPPORTED** — exponential blow-up for d² < 0 |
-| Timelike behavior (Rational R3) | **SUPPORTED** — no blow-up, smooth across light cone |
-| Einstein equations from K dynamics | **OPEN** — this is the hard problem |
+| Spacelike / static | **SUPPORTED** — metric extraction is mathematically rigorous |
+| Timelike near light cone | **OPEN** — rational kernel works for \|d²\| < 2λ² but not globally |
+| Timelike far | **OPEN** — no kernel currently handles this without blow-up or negative values |
+| Full 4D Lorentzian | **OPEN** — Wick rotation or a new kernel is required |
 
 ---
 
