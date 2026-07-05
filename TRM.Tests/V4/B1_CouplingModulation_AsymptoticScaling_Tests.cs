@@ -57,7 +57,7 @@ public class B1_CouplingModulation_AsymptoticScaling_Tests
     /// This is THE decisive test. If it fails, the mechanism is falsified.
     /// </summary>
     [Fact]
-    public void K1_F1_Must_Produce_Newtonian_Asymptotics()
+    public void B1CM01_K1xF1_DecisiveGate_NewtonianAsymptotics()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  B1 GATE — K1 × F1 NEWTONIAN ASYMPTOTICS");
@@ -113,7 +113,7 @@ public class B1_CouplingModulation_AsymptoticScaling_Tests
     // ────────────────────────────────────────────────────────────
 
     [Fact]
-    public void K2_F1_Must_Be_Invalid()
+    public void B1CM02_K2xF1_MustBeInvalid()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  B1 — K2 × F1  (δK ~ 1/r², direct density)");
@@ -137,7 +137,7 @@ public class B1_CouplingModulation_AsymptoticScaling_Tests
     // ────────────────────────────────────────────────────────────
 
     [Fact]
-    public void K1_F2_Must_Be_Invalid()
+    public void B1CM03_K1xF2_MustBeInvalid()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  B1 — K1 × F2  (δK ~ 1/r, gradient density)");
@@ -183,7 +183,7 @@ public class B1_CouplingModulation_AsymptoticScaling_Tests
     [InlineData("K3", "F2", V4Classification.Invalid,   "δK~exp, gradient → no power law")]
     [InlineData("K3", "F3", V4Classification.Invalid,   "δK~exp, sync energy ≡ F1")]
     [InlineData("K3", "F4", V4Classification.Invalid,   "δK~exp, action ≡ F1")]
-    public void Full_Matrix_Must_Match_Expected_Classification(
+    public void B1CM04_FullMatrix_ExpectedClassification(
         string kProfile, string fMap, V4Classification expected, string reason)
     {
         double alphaRho = DensityExtractionMaps.ExpectedRhoAlpha(kProfile, fMap);
@@ -212,7 +212,7 @@ public class B1_CouplingModulation_AsymptoticScaling_Tests
     /// (K1–K3 × F1–F4, excluding K4 which requires baryonic data).
     /// </summary>
     [Fact]
-    public void Print_Full_Matrix_Report()
+    public void B1CM05_MatrixReport()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  B1 COMPLETE CLASSIFICATION MATRIX");
@@ -279,7 +279,7 @@ public class B1_CouplingModulation_AsymptoticScaling_Tests
     // ────────────────────────────────────────────────────────────
 
     [Fact]
-    public void GateClassifier_Threshold_Boundaries()
+    public void B1CM06_ClassifierThresholdBoundaries()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  B1 — CLASSIFIER THRESHOLD EDGE CASES");
