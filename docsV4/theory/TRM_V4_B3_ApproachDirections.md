@@ -1,7 +1,7 @@
 # TRM V4 — B3 Approach Directions: Which Candidates Can Realistically Work?
 
 **Date:** 2026-07-05
-**Status:** Deep physical analysis of B3 candidate viability. B3A uniqueness study complete — Laplace is the unique admissible PDE class.
+**Status:** B3A and B3B complete. Laplace uniqueness proven. 1/r origin identified (discrete coupling defect → graph Laplacian Green's function). Classification: mechanism explained, coefficient calibrated.
 **Predecessor:** `TRM_V4_CouplingFieldEquation.md` (candidate catalog)
 
 ---

@@ -1,7 +1,7 @@
 # TRM V4 — B3: Coupling Field Equation
 
 **Date:** 2026-07-05
-**Status:** Initial exploration — this is the open physics question
+**Status:** B3A+B3B complete. Laplace = unique PDE. 1/r = discrete Laplacian Green's function from coupling defect. Coefficient = calibration (k = G·K₀/c²).
 **Predecessors:** B1 (mechanism identified), B2 (phenomenological consistency)
 **Classification:** B3 is the missing piece that separates PARTIAL from VALID
 
