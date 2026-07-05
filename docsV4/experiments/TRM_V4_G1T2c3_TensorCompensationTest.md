@@ -37,20 +37,3 @@ When H_μν is sourced by the same mass distribution, it contributes to g_00 at 
 ### Verdict: COMPATIBILITY NOT YET ESTABLISHED
 
 The trace sector robustly gives β < 1. The full tensor compensation requires H_μν dynamics, which is the next research frontier. TRM is neither confirmed nor ruled out at 1PN.
----
-
-## 3. Classification
-
-| Finding | Status |
-|:---|:---|
-| b₅ < 0 (scalar cubic) | **CONFIRMED** |
-| b₁–b₄ > 0 (tensor cubic — all same sign from angular factors) | **DERIVED** |
-| b_trace > 0 (total positive — compensation successful) | **DERIVED** |
-| β_total ~ 1 (quantitative match needs full computation) | **PLAUSIBLE** |
-| β < 1 (scalar-only — NOT the full result) | **PARTIAL (superseded)** |
-
-### Verdict: COMPATIBILITY IS PLAUSIBLE
-
-The tensor cubic coefficients b₁–b₄ are ALL positive (from angular contraction structure), while b₅ is negative. With 4 positive terms vs. 1 negative, the total trace-sector cubic coupling is POSITIVE — opposite to the scalar-only result.
-
-**The negative scalar b₅ is compensated by positive tensor b₁–b₄. Full β_total requires exact computation of the ratios, but the sign reversal is structurally guaranteed.**
