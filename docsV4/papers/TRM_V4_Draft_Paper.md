@@ -34,7 +34,7 @@ This paper reports the combined results: (i) a covariant bilocal action S[K,g] p
 
 **Scope disclaimer:** The V4 program provides a covariant bilocal action and emergent EFT structure. The action terms are postulated (kinetic), form-inferred (self-interaction), and structurally inferred (source). The full tensor 1PN computation (b₁–b₄ mixing coefficients) and the self-consistent nonlinear strong-field solver (G_μν = 8πG·T_μν[K]) remain pending. Results labeled "derived" follow deductively from stated inputs; results labeled "approximated" or "inferred" require the outstanding items for full confidence.
 
-**Scope and limitations.** The logical chain proceeds as follows. The V3 core establishes the collective frequency structure from two assumed inputs (I1, I2); the deduction of qCore = {16,17,18} and m = 3 from these inputs is derived (Section 2.1). The continuum limit of K_ij yields the bilocal kernel K(x,y); its functional form (Eq. 1) has three coefficients fixed by structural requirements (a₁, a₄) or simplicity (a₃), leaving b as the sole free parameter (Section 2.2). The metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x} and the GW polarization count follow from the bilocal structure (Sections 2.3–2.4, 5). The 1/r gravitational form emerges from the discrete graph Laplacian in the synchronized state — a derived result once the coupling-defect hypothesis (mass perturbs K_ij locally) is granted (Section 3.1). Beyond these structural elements, the framework currently relies on approximations: the 1PN parameter β_PPN is computed via a scalar proxy (full tensor b₁–b₄ pending; Section 4), the strong-field horizon is estimated from a scalar nonlinear ODE not yet derived from the bilocal action (Section 6), and G enters through the post-hoc calibration k = G·K₀/c² (Section 3.3). The principal open items — the bilocal effective action, the full tensor 1PN computation, and the self-consistent strong-field solver — define the path from the current interpretation layer to a complete theory. As a first step along this path, DeepCompletion Phases 1A–1C shift the framework from operational field equations to a bilocal covariant effective-action program, with local higher-derivative EFT structure emerging in the coincidence limit [5].
+**Scope and limitations.** The logical chain proceeds as follows. The V3 core establishes the collective frequency structure from two assumed inputs (I1, I2); the deduction of qCore = {16,17,18} and m = 3 from these inputs is derived (Section 2.1). The continuum limit of K_ij yields the bilocal kernel K(x,y); its functional form (Eq. 1) has three coefficients fixed by structural requirements (a₁, a₄) or simplicity (a₃), leaving b as the sole free parameter (Section 2.2). The metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x} and the GW polarization count follow from the bilocal structure (Sections 2.3–2.4, 5). The 1/r gravitational form emerges from the discrete graph Laplacian in the synchronized state — a derived result once the coupling-defect hypothesis (mass perturbs K_ij locally) is granted (Section 3.1). Beyond these structural elements, the following remain at the level of approximation or calibration: the 1PN parameter β_PPN is computed via a scalar proxy (full tensor b₁–b₄ pending; Section 8), the strong-field horizon is estimated from a scalar nonlinear ODE not yet derived from the full bilocal action (Section 10), and G enters the effective action through calibration against the observed value (Section 6). The covariant action (Section 4) and the local EFT (Section 5) are established; the full tensor 1PN computation and the self-consistent strong-field solver remain the principal open items. DeepCompletion Phases 1A–2A have shifted the framework from operational field equations to a bilocal covariant effective-action program, with local higher-derivative EFT structure emerging in the coincidence limit and the ghost question resolved [5].
 
 ---
 
@@ -101,9 +101,9 @@ This chain provides a complete geometric infrastructure without assuming differe
 
 ---
 
-## 3. Field Equations (Operational)
+## 3. Field Equations — Leading-Order Action Limit
 
-The field equations below are the simplest choices consistent with the V4 admissibility criteria (C1–C8). They are not derived from an action principle — they are operational postulates whose consequences are tested against observation. The full variational formulation (bilocal effective action → Euler-Lagrange → field equations) is under development (G1T2c2).
+The field equations below are the leading-order limits of the bilocal covariant action (Section 4) in the flat-background, no-back-reaction approximation. They are presented here for pedagogical clarity; their variational origin is established in Section 4.
 
 ### 3.1 Static Vacuum
 
@@ -141,7 +141,7 @@ In the Newtonian limit: a(r) = GM/r² (with k = G·K₀/c² calibration, where k
 
 ## 4. Bilocal Covariant Action (DeepCompletion Phase 1A)
 
-The operational field equations of Section 3 follow from a covariant bilocal effective action. This elevates the framework from postulated PDEs to a variational principle.
+The field equations of Section 3 follow as leading-order limits of a covariant bilocal effective action. The action provides the variational foundation for the framework.
 
 ### 4.1 Action
 
@@ -346,7 +346,7 @@ This is the simplest kernel in the Padé family that is globally Lorentzian — 
 
 ## 10. Strong-Field — EFT-Induced Deviations (G3, Scalar Approximation)
 
-**Note:** The results in this section are obtained from a scalar nonlinear ODE approximation — a qualitative model, not a derivation from the bilocal action. The full tensor strong-field solution (G_μν = 8πG·T_μν[K] with T_μν from the bilocal effective action) remains open. Values should be interpreted as indicative predictions pending the full solution. The uniform scaling of all observables with r_H is a structural feature of any spherically symmetric single-field model and does not depend on the specific ODE form.
+**Note:** The results in this section are obtained from a scalar nonlinear ODE approximation — a phenomenological model informed by the EFT coefficients, not a full solution of the self-consistent Einstein-K-field equations. The full tensor strong-field solution (G_μν = 8πG·T_μν[K] with T_μν from the bilocal effective action) remains open. Values should be interpreted as indicative order-of-magnitude estimates, not precise predictions. The uniform scaling of all observables with r_H is a structural feature of any spherically symmetric single-field model and does not depend on the specific ODE form.
 
 **EFT connection:** The horizon shift can be understood within the local EFT (Section 5): the effective cosmological constant Λ_eff and the higher-curvature coefficients c₁, c₂, c₃ modify the Schwarzschild metric at O(GM/λ). For b=1.25, the combined effect yields r_H ≈ 2G_eff M (1 + 0.14) ≈ 2.275 GM, consistent with the scalar ODE result at the ~1% level.
 
@@ -431,7 +431,15 @@ TRM's b is to gravity what Brans-Dicke's ω is to scalar-tensor theory: a single
 
 **Status.** The TRM V4 + DeepCompletion program has advanced the framework from an interpretation layer to a partially derived theory: the bilocal covariant action provides a variational foundation (Section 4); the coincidence limit yields a local higher-derivative gravity EFT (Section 5); the effective Newton constant is structurally expressed in TRM parameters (Section 6); and the exact bilocal propagator resolves the ghost question (Section 7). Three items remain open: (i) the full tensor 1PN computation (b₁–b₄ mixing coefficients), (ii) the self-consistent strong-field solver (G_μν = 8πG·T_μν[K]), and (iii) independent determination of λ and K₀ for a first-principles prediction of G. Claims of "derivation" are restricted to results that follow deductively from stated inputs; physical predictions carry the qualification "within the stated approximation."
 
-### 12.1 What Has Been Achieved
+### 12.1 Scope of Derivation
+
+To avoid ambiguity, we distinguish three levels of theoretical status:
+
+- **Fully derived within stated inputs:** The V3 core deductions (qCore, m=3), the □K=0 and ∇²K=−4παρ equations from the bilocal action in the flat-background limit (Section 4), the metric extraction formula, the GW polarization count, and the G_eff expression (Eq. 15).
+- **EFT-level (approximated, structurally inferred):** The local EFT coefficients (Section 5), the β_PPN scalar proxy (Section 8), the effective cosmological constant Λ_eff, and the strong-field horizon estimate (Section 10). These follow from the bilocal action at leading order in the derivative expansion; higher-order corrections from the full tensor structure and nonlinear back-reaction are pending.
+- **Open:** The full tensor 1PN computation (b₁–b₄), the self-consistent strong-field solution (G_μν = 8πG·T_μν[K]), and the first-principles prediction of G (requiring independent determination of λ and K₀).
+
+### 12.2 What Has Been Achieved
 
 The TRM V4 interpretation layer provides:
 1. A structural pathway from discrete oscillator network topology to the 1/r gravitational form (Sections 2–3)
@@ -440,7 +448,7 @@ The TRM V4 interpretation layer provides:
 4. A scalar-approximation strong-field horizon consistent with current EHT bounds (Section 6)
 5. Identification of b=1 as the structurally preferred kernel parameter (Section 7)
 
-### 12.2 What Remains Open
+### 12.3 What Remains Open
 
 1. Full tensor 1PN mixing coefficients b₁–b₄ (requires ~1-week xTensor/Cadabra angular integrals). This will determine whether β_PPN(b) crosses 1 at the same b* as the scalar proxy.
 2. Self-consistent G_μν = 8πG·T_μν[K] strong-field solver (multi-week PDE project)
@@ -449,7 +457,7 @@ The TRM V4 interpretation layer provides:
 5. Full bilocal action → spectral density ρ(m²) → rigorous derivation of b
 6. **Resolution of b=1 vs b≈1.25 tension:** b=1 is structurally preferred (f''=0, ε minimum, IR attractor, EHT best-fit); b≈1.25 is the scalar proxy for β_PPN=1. Whether the full tensor β_PPN at b=1 is close enough to 1, or whether b must be ~1.25, is the central open question — pending item 1 above.
 
-### 12.3 Falsifiability
+### 12.4 Falsifiability
 
 For any b ≠ 1, TRM implies observable deviations from GR in strong-field observables within the scalar approximation. These would be testable with:
 - ngEHT (σ~10%): can detect b ≥ 1.07
@@ -458,7 +466,7 @@ For any b ≠ 1, TRM implies observable deviations from GR in strong-field obser
 
 b=1 (the quartic baseline) is observationally degenerate with GR in the scalar approximation — no strong-field deviation is predicted at this parameter value.
 
-### 12.4 Anticipated Reviewer Questions
+### 12.5 Anticipated Reviewer Questions
 
 **Q1: Does V4 modify the V3 core?** The discrete coupling matrix K_ij is present in the V3 core equations. The continuum limit K(x,y) and its Padé parametrization (Eq. 1) add structure — the functional form of the kernel — without changing the oscillator dynamics. This is analogous to choosing a specific Lagrangian density within a field theory framework: the framework constrains the form, the specific choice is a model within it.
 
@@ -480,7 +488,7 @@ b=1 (the quartic baseline) is observationally degenerate with GR in the scalar a
 
 **Q10: How is this different from Brans-Dicke with ω → ∞?** TRM shares the scalar-tensor structure (2 tensor + 1 breathing polarization) but differs in origin: the scalar degree of freedom is not a fundamental field but an emergent bilocal correlation function. The 1/r form is derived from discrete network topology, not postulated. And the strong-field phenomenology is controlled by b through the kernel shape, not by a coupling constant in a Lagrangian. Both theories limit to GR (Brans-Dicke as ω→∞, TRM as b→1), but the physical content of the parameter is different.
 
-### 12.5 Comparison with Other Theories
+### 12.6 Comparison with Other Theories
 
 | Theory | 1/r form | Free params | GW polarizations | Strong-field | UV completion |
 |:---|:---|:---|:---|:---|:---|
@@ -509,6 +517,8 @@ The TRM/TQM V4 + DeepCompletion program establishes a bilocal covariant action f
 The theory requires 2 empirical anchors (f_ref, G) and 1 free parameter (b) — the same parameter economy as Brans-Dicke theory, but with G_eff structurally expressed in TRM parameters. The full tensor 1PN computation and the self-consistent strong-field solver remain the principal open problems.
 
 TRM is best interpreted as a **bilocal origin for higher-derivative gravity EFT with a nonlocal ghost-free UV completion.** The kernel parameter b — analogous to Brans-Dicke ω — controls the deviation from GR; b=1 is the structurally preferred, observationally degenerate limit.
+
+The present work establishes the action-level structure and the effective theory limit. The full tensor 1PN computation (b₁–b₄ mixing coefficients) and the self-consistent nonlinear strong-field solution (G_μν = 8πG·T_μν[K]) are defined but not yet executed — they constitute the natural next stage of the program.
 
 ---
 
