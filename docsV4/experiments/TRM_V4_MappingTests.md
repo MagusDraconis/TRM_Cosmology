@@ -1,7 +1,7 @@
 # TRM V4 — Mapping Test Plan
 
 **Date:** 2026-07-05
-**Status:** B1 COMPLETE — K1×F1 is a unique phenomenological match. Classification: **PARTIAL** (post-hoc k calibration, not derived). B2 proceeds as consistency test.
+**Status:** B1 COMPLETE. B2 COMPLETE. Both are **stable validation layers** — no further modifications unless bugs found. C5 is PARTIAL. Next: B3 (coupling field equation).
 
 ---
 
