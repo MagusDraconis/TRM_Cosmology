@@ -31,69 +31,71 @@ The bilocal TRM framework admits physically valid kernels that reproduce GR-comp
 
 ---
 
-## 1. Definitive Result
+## 2. Quartic Baseline Analysis (Historical)
+
+The quartic baseline kernel K₀/(1+x+x²) (b=1) gives β<1:
 
 ```
 β_total < 1    for K(d²) = K₀/(1 + d²/λ² + (d²/λ²)²)
 ```
 
-**Structurally enforced — follows from sign analysis alone. Exact numerical value pending (angular integrals).**
+**Structurally enforced — follows from sign analysis alone. This was the original G1 result before kernel optimization.**
+
+This result motivated the kernel optimization program (G1-KernelOptimization) which found that the generalized kernel family K₀/(1+x+bx²+x⁴) with b>1 reverses the cubic coupling sign and achieves β≈1.
 
 ---
 
-## 2. Proof
+## 3. Proof (Quartic Baseline)
 
-### 2.1 Radial Integral
+### 3.1 Radial Integral
 
 All cubic coefficients share: I_rad = ∫₀^∞ dr · r⁹ · f'(r²/λ²) · f''(r²/λ²).
 
 f'(0) = −K₀ < 0, f''(0) = +2K₀ > 0 → **I_rad < 0**.
 
-### 2.2 Angular Factors
+### 3.2 Angular Factors
 
 ALL angular factors are **positive definite** — integrals of metric tensor contractions over S³.
 
-### 2.3 Therefore
+### 3.3 Therefore
 
 b_i = (positive angular) × (negative radial) < 0 ∀i → **β_total < 1**.
 
 ---
 
-## 3. Status Card
+## 4. Status Card (Final)
 
 ```
 ┌──────────────────────────────────────────────┐
 │           G1 — 1PN DEFINITIVE CLOSURE         │
 ├──────────────────────────────────────────────┤
-│ TRACE SECTOR                                  │
-│   β_φ < 1              ROBUST ✅             │
-│ TENSOR KINETIC                                │
-│   a_H = a_φ             DERIVED ✅            │
-│ CUBIC SIGN (ALL)                               │
-│   b_i < 0 ∀i           PROVEN ✅              │
-│ β_total                                        │
-│   < 1                   PROVEN                │
-│   exact value           PENDING (angular)     │
-│ VERDICT                                        │
-│   TENSION — β < 1 ≠ β_GR = 1                  │
-│   Framework survives via kernel modification   │
+│ QUARTIC BASELINE (b=1)                        │
+│   β < 1              TENSION                 │
+│   (f''(0)=0 reduces cubic coupling)           │
+│                                               │
+│ OPTIMIZED FAMILY (b≈1.25)                     │
+│   β ≈ 1              COMPATIBLE ✅            │
+│   K = K₀/(1+x+1.25x²+x⁴)                     │
+│   6/6 stability checks pass                   │
+│                                               │
+│ FRAMEWORK VERDICT                             │
+│   Weak-field 1PN compatibility ACHIEVED.      │
+│   Bilocal framework spans GR-compatible β.    │
 └──────────────────────────────────────────────┘
 ```
 
----
-
-## 4. What This Means
+## 5. What This Means
 
 | Question | Answer |
 |:---|:---|
-| Is β < 1 or > 1? | **< 1** (structurally enforced) |
-| Exact numerical value? | PENDING (requires angular integrals) |
+| Quartic β < 1 or > 1? | **< 1** (structurally enforced) |
+| Optimized β ≈ 1? | **Yes** — at b ≈ 1.25 |
 | Is TRM falsified? | **No** — bilocal framework allows kernel modification |
-| Can β be adjusted to ≈ 1? | **Yes** — by modifying kernel shape K(d²) |
+| Can β be adjusted to ≈ 1? | **Yes** — by tuning b in K₀/(1+x+bx²+x⁴) |
 
 ---
 
-## 5. Cross-Reference
+## 6. Cross-Reference
 
 | Document | Role |
 |:---|:---|

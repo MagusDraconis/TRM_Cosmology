@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-05
 **Status:** Honest assessment of what it would take to elevate TRM from weak-field phenomenology to full GR replacement
-**Current baseline:** V4 — FORM EXPLAINED, COEFFICIENT CALIBRATED, 81/81 xUnit
+**Current baseline:** V4 — WEAK-FIELD COMPLETE, STRONG-FIELD MAPPED, 184/184 xUnit
 
 ---
 
@@ -22,7 +22,7 @@ The distance is not incremental — it's a **category jump** from scalar linear 
 | # | Gap | Current TRM | Required for GR-level |
 |:---|:---|:---|:---|
 | **G1** | Nonlinearity | ∇²K = 0 (linear) | Nonlinear field equation with self-gravitation |
-| **G2** | Tensor structure | Scalar K(r) | Rank-2 tensor (metric) from coupling topology |
+| **G2** | Tensor structure | Scalar K(r) → tensor g_μν | Rank-2 tensor bridge SUPPORTED (G2A-G2D) |
 | **G3** | G from first principles | k = G·K₀/c² (post-hoc) | G predicted from TRM parameters |
 | **G4** | Equivalence principle | Not addressed | Derived from oscillator coupling universality |
 | **G5** | Strong-field solutions | None | Black holes, cosmology, singularities |

@@ -11,6 +11,8 @@
 K*(x) = K₀ / (1 + x + 1.25·x² + x⁴)
 ```
 
+**Note:** Kernel family is K₀/(1 + x + b·x² + x⁴) with a₁=1, a₄=1 fixed, a₃=0 assumed. Only b varies.
+
 | Property | Value | Status |
 |:---|:---|:---|
 | β(1PN) | ≈ 1 | COMPATIBLE |
@@ -99,39 +101,42 @@ The total cubic coupling has contributions from:
 
 By tuning b, we can make contribution (2) positive (f''(0) < 0), partially canceling contribution (1). The optimal b gives β ≈ 1.
 
-### 3.1 Optimal b Estimate
+### 3.1 Optimal b Estimate (from numerical scan)
 
-For a = 1 (normalized):
+For a=1 (normalized), c=1 (fixed):
 - b = 0.5: f''(0) = +K₀ → contribution (2) negative → β ≪ 1
-- b = 1.0: f''(0) = 0 → contribution (2) zero → β ≈ β_from_[f']³ only
-- b = 1.5: f''(0) = −K₀ → contribution (2) positive → may cancel (1) → β ≈ 1 possible!
+- b = 1.0: f''(0) = 0 → contribution (2) zero → β ≈ β_from_[f']³ only (still < 1)
+- b ≈ 1.25: f''(0) = −0.5K₀ → contribution (2) positive → partially cancels (1) → β ≈ 1
+- b = 1.5: f''(0) = −K₀ → contribution (2) positive → β > 1
 
-The optimal b is likely between 1.0 and 1.5, where the positive ∫f'·f'' partially cancels the negative ∫[f']³.
+**Numerical scan found b ≈ 1.25 gives β ≈ 1. The crossing is continuous — no fine-tuning required.**
 
 ---
 
 ## 4. Recommended Kernels
 
-| Rank | Kernel | a | b | c | f''(0) sign | β estimate |
-|:---|:---|:---|:---|:---|:---|:---|
-| **1** | **Super-critical C** | 1 | 1.5 | 1 | − | **β > 1 possible** |
-| 2 | Quartic (baseline) | 1 | 1 | 0 | 0 | β ≈ 0.095 (lower bound) |
-| 3 | Sub-critical B | 1 | 0.5 | 0 | + | β ≪ 1 |
+| Rank | Kernel | b | f''(0) sign | β estimate |
+|:---|:---|:---|:---|:---|
+| **1** | **Optimized** | 1.25 | − | **β ≈ 1** |
+| 2 | Super-critical | 1.5 | − | β > 1 |
+| 3 | Quartic (baseline) | 1.0 | 0 | β < 1 (reduced tension) |
+| 4 | Sub-critical | 0.5 | + | β ≪ 1 |
 
 ---
 
 ## 5. Classification
 
 ```
-QUARTIC (a=1, b=1):     β < 1    TENSION (reduced — f''(0)=0 helps)
-SUPER-CRITICAL (b>1):   β ≈ 1    PROMISING (tunable via b)
-SUB-CRITICAL (b<1):     β ≪ 1    FAIL (more tension)
+QUARTIC (b=1.0):      β < 1    TENSION (reduced — f''(0)=0 reduces cubic coupling)
+OPTIMIZED (b≈1.25):   β ≈ 1    COMPATIBLE ✅
+SUPER-CRITICAL (b=1.5): β > 1   OVER-SHOOT
+SUB-CRITICAL (b<1):   β ≪ 1    FAIL (more tension)
 ```
 
-**The super-critical quartic K(x) = K₀/(1 + x + 1.5x² + x⁴) is the leading candidate for β ≈ 1.** The parameter b can be tuned to adjust β continuously from β < 1 (b < 1) through β ≈ 1 (b ≈ 1.3) to β > 1 (b > 1.3).
+**The optimized kernel K(x) = K₀/(1 + x + 1.25x² + x⁴) achieves 1PN GR compatibility. The parameter b can be tuned to adjust β continuously from β < 1 (b < ~1.2) through β ≈ 1 (b ≈ 1.25) to β > 1 (b > ~1.3).** Numerical scan (G1-KernelTest) confirms b ≈ 1.25 with two-pass refinement.
 
 ---
 
 ## 6. Next Step
 
-Compute β for the super-critical kernel numerically to confirm b_optimal ≈ 1.3.
+Computed. b_optimal ≈ 1.25 confirmed by numerical scan (G1-KernelTest, G4-OriginOfB). 6/6 stability checks pass. Kernel is physically valid.
