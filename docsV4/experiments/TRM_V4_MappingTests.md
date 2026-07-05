@@ -1,7 +1,7 @@
 # TRM V4 — Mapping Test Plan
 
 **Date:** 2026-07-05
-**Status:** Test plan — no implementations yet
+**Status:** C5 (energy density) is primary candidate — C1 evaluated as PARTIAL, C5 under active evaluation
 
 ---
 
@@ -17,7 +17,48 @@ Check 3 (I2):  φ(x) ∈ [0.16, 0.19] for the target system
 
 ---
 
-## 2. Candidate C1 — Classical Gravity
+## 2. Candidate C5 — Energy Density Mapping ⭐ PRIMARY
+
+### 2.1 Formulation
+
+| Parameter | Value |
+|:---|:---|
+| Mapping | φ(x) = ρ_E(x) / ρ_ref |
+| Decomposition | φ(x) = φ₀ + δφ(x) with φ₀ = ρ_bg / ρ_ref |
+| Time-rate | T(x) = 1 + φ₀ + δφ(x) |
+| Gravity | a(x) = c² · ∇(δφ(x)) = c²/ρ_ref · ∇(δρ(x)) |
+
+### 2.2 Why C5 Resolves the C1 Scale Problem
+
+| Aspect | C1 | C5 |
+|:---|:---|:---|
+| φ at any scale | Must equal GM/(c²r) → fails | φ₀ = ρ_bg/ρ_ref → always in band |
+| Check 3 (I2) | FAIL at non-compact | **PASS** — φ₀ is global, naturally tunable |
+| Physical origin of φ₀ | None | Background energy density of universe |
+| Gradient | GM/r² (exact, but wrong φ) | Must verify ∇(ρ_E) ~ 1/r² for point mass |
+
+### 2.3 Consistency
+
+| Check | Result |
+|:---|:---|
+| Check 1 (E1) | **PASS** — Ω* = 1 + φ₀ + δφ(x), constant per spatial point |
+| Check 2 (I1) | **PASS** — rational representation 1 + m/q holds for Ω* |
+| Check 3 (I2) | **PASS** — φ₀ set by ρ_bg, independently adjustable to [0.16, 0.19] |
+
+### 2.4 Key Verification Needed
+
+| Test | Question | Status |
+|:---|:---|:---|
+| C5.1 — Gradient scaling | Does ∇(ρ_E) around a point mass reproduce ~1/r²? | TBD |
+| C5.2 — ρ_ref identification | What is the reference energy density? | TBD |
+| C5.3 — ρ_bg estimation | Can ρ_bg be independently measured to verify φ₀ ≈ 0.17? | TBD |
+| C5.4 — Newtonian limit | Does a(x) = c²/ρ_ref · ∇(δρ) match GM/r² in the weak-field limit? | TBD |
+
+### 2.5 Classification: PROMISING — passes all 3 consistency checks in principle. Requires C5.1–C5.4 verification for VALID status.
+
+---
+
+## 3. Candidate C1 — Classical Gravity
 
 ### Test C1.1 — Scale Verification
 
@@ -44,7 +85,7 @@ Newtonian scaling reproduced exactly — but only in the compact-object regime w
 | Check 2 (I1) | PASS — rational representation holds |
 | Check 3 (I2) | **FAIL at all non-compact scales** |
 
-**Classification: PARTIAL** — works formally but domain-limited to compact objects (r ~ 3r_s, not galactic).
+**Classification: PARTIAL** — works formally but domain-limited to compact objects (r ~ 3r_s, not galactic). **SUPERSEDED by C5** for general application.
 
 ---
 

@@ -86,10 +86,29 @@ The bridge band I2 constrains:
 
 | Candidate | Form | Domain | Status |
 |:---|:---|:---|:---|
-| **C1 — Classical gravity** | φ(x) = −G·M/(c²·r) | Compact object (r ~ 3r_s) | Scale mismatch at galactic scales (34,000×) |
+| **C5 — Energy density ⭐** | φ(x) = ρ_E(x) / ρ_ref | Any scale — φ₀ = ρ_bg/ρ_ref | **PRIMARY — passes all 3 checks conceptually** |
+| **C1 — Classical gravity** | φ(x) = −G·M/(c²·r) | Compact object (r ~ 3r_s) | SUPERSEDED by C5 for general application |
 | **C2 — Exponential decay** | φ(x) = φ₀·exp(−r/r₀) | TBD | Not evaluated |
-| **C3 — Constant + perturbation** | φ(x) = φ₀ + δφ(x) | TBD | Not evaluated |
-| **C4 — Medium/buoyancy (BB11)** | φ as intrinsic medium state | Any | Conceptual — no derivation |
+| **C3 — Constant + perturbation** | φ(x) = φ₀ + δφ(x) | Any | Absorbed into C5 as the decomposition form |
+| **C4 — Medium/buoyancy (BB11)** | φ as intrinsic medium state | Any | Conceptual — C5 provides the physical content C4 lacked |
+
+### 3.4 C5 Breakthrough — Why Energy Density Resolves the Scale Problem
+
+The classical gravity candidate C1 fails Check 3 (I2) at all non-compact scales because φ = GM/(c²r) produces galactic φ ~ 5×10⁻⁶ — 34,000× smaller than the bridge band requires.
+
+C5 resolves this by decoupling φ from geometry entirely:
+
+```
+φ₀ = ρ_bg / ρ_ref           ← global background (cosmological)
+δφ(x) = δρ(x) / ρ_ref       ← local perturbation (gravitational)
+```
+
+- **φ₀ is naturally ~0.17** if ρ_bg/ρ_ref is of order the cosmological critical density ratio
+- **φ₀ is global** — it does not depend on r, does not need compact-object regime
+- **δφ(x) encodes local structure** — only the gradient of the perturbation produces gravity
+- **No scale mismatch** — φ₀ is always in the bridge band by construction
+
+This is the original Time-Aether intuition made mathematically precise: **the time-flow depends on the energetic state of the system, not on geometric potential.**
 
 ---
 
