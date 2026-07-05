@@ -1,4 +1,4 @@
-# Bilocal Coupling Gravity: Covariant Action, Emergent EFT, and Nonlocal UV Completion from a Frozen Oscillator-Network Core
+# Bilocal Coupling Gravity: Covariant Action, Effective Higher-Derivative EFT, and Nonlocal Completion from a Frozen Oscillator-Network Core
 
 **Authors:** TRM/TQM Collaboration
 **Date:** 2026-07-05
@@ -32,7 +32,7 @@ The V4 program, developed here, constructs a covariant bilocal effective action 
 
 This paper reports the combined results: (i) a covariant bilocal action S[K,g] producing the effective field equations, (ii) a structurally derived effective Newton constant, (iii) a local higher-derivative gravity EFT with coefficients determined by kernel moments, (iv) a ghost-free nonlocal UV completion, (v) a full tensor 1PN computation confirming β_PPN(b=1)≈0.912 and β_PPN(b≈1.248)≈1.000, (vi) a full Lorentzian tensor bridge, (vii) EFT analysis indicating GR-like strong-field behavior, and (viii) structural grounding of the kernel parameter b.
 
-**Scope disclaimer:** The V4 program provides a covariant bilocal action and emergent EFT structure. The action terms are postulated (kinetic), form-inferred (self-interaction), and structurally inferred (source). The full tensor 1PN computation (b₁–b₄ mixing coefficients) and the self-consistent nonlinear strong-field solver (G_μν = 8πG·T_μν[K]) remain pending. Results labeled "derived" follow deductively from stated inputs; results labeled "approximated" or "inferred" require the outstanding items for full confidence.
+**Scope disclaimer:** The V4 program provides a covariant bilocal action and effective higher-derivative EFT structure. The action terms are postulated (kinetic), form-inferred (self-interaction), and structurally inferred (source). The self-consistent nonlinear strong-field solver (G_μν = 8πG·T_μν[K] with nonlocal T^K) remains at the first-order EFT level. Results labeled "derived" follow deductively from stated inputs; results labeled "approximated" or "inferred" require the outstanding items for full confidence.
 
 **Scope and limitations.** The logical chain proceeds as follows. The V3 core establishes the collective frequency structure from two assumed inputs (I1, I2); the deduction of qCore = {16,17,18} and m = 3 from these inputs is derived (Section 2.1). The continuum limit of K_ij yields the bilocal kernel K(x,y); its functional form (Eq. 1) has three coefficients fixed by structural requirements (a₁, a₄) or simplicity (a₃), leaving b as the sole free parameter (Section 2.2). The metric extraction g_μν ∝ ∂_μ∂_νK|_{y=x} and the GW polarization count follow from the bilocal structure (Sections 2.3–2.4, 5). The 1/r gravitational form emerges from the discrete graph Laplacian in the synchronized state — a derived result once the coupling-defect hypothesis (mass perturbs K_ij locally) is granted (Section 3.1). Beyond these structural elements, the following remain at the level of approximation or calibration: the 1PN parameter β_PPN is computed via full tensor angular integration (Phase 2B), confirming the scalar proxy at <1% and yielding β(b=1)≈0.912 and β(b≈1.248)≈1.000, the strong-field regime is analyzed through the self-consistent EFT field equations; EFT corrections are suppressed by (GM/λ)² ≪ 1 for astrophysical masses, predicting GR-like horizons (Phase 2C), and G enters the effective action through calibration against the observed value (Section 6). The covariant action (Section 4) and the local EFT (Section 5) are established; DeepCompletion Phases 1A–2C have shifted the framework from operational field equations to a bilocal covariant effective-action program, with local higher-derivative EFT structure, full tensor 1PN, and first-order strong-field analysis completed [5].
 
@@ -75,6 +75,26 @@ The denominator coefficients are:
 - a₄ = 1: fixed by Lorentz stability (decay as 1/x⁴ for |x| → ∞)
 
 The continuum limit K_ij → K(x,y) and the specific choice of the Padé [0/4] functional form are postulates of the V4 program — they are not derived from the oscillator microphysics. The justification is twofold: (i) the Padé form is the simplest analytic function with the required positivity, smoothness, and decay properties (Section 5.2), and (ii) the resulting EFT matches GR at 1PN (full tensor confirmed, Phase 2B). The dimensionful parameters K₀ and λ combine into a single physical scale — the effective gravitational constant G via the calibration k = G·K₀/c² — leaving b as the sole dimensionless free parameter controlling deviations from GR.
+
+### 2.5 From Oscillator Network to Bilocal Kernel
+
+The transition from the discrete coupling matrix K_ij to the continuous bilocal kernel K(x,y) is the central postulate connecting the V3 oscillator core to the V4 gravitational framework. The discrete equations
+
+\[
+\frac{d\theta_i}{dt} = \omega_i + \sum_j K_{ij}\,\sin(\theta_j - \theta_i)
+\]
+
+contain K_ij as an N×N matrix of coupling constants between oscillator pairs (i,j). In a lattice with oscillator spacing a, the indices i,j correspond to positions x_i, x_j. The continuum limit a→0, N→∞ with the lattice volume fixed maps:
+
+\[
+K_{ij} \;\longrightarrow\; K(x_i, x_j)
+\]
+
+The bilocal function K(x,y) inherits the symmetry K(x,y) = K(y,x) from the discrete coupling. The dependence on the squared geodesic distance d²(x,y) — rather than on x and y separately — is the assumption of statistical isotropy and homogeneity of the oscillator lattice in its ground state.
+
+The choice of the Padé [0/4] rational form (Eq. 1) rather than, e.g., a Gaussian or exponential, is motivated by effective field theory reasoning: the denominator polynomial provides the necessary Lorentzian decay (∼1/x⁴ for |x|→∞) while maintaining positivity for all real x — properties not simultaneously satisfied by any single-term ansatz. The four denominator coefficients are constrained by: a₁=1 (normalization of the metric extraction prefactor f'(0)=−K₀/λ²), a₄=1 (dominant term for Lorentzian stability), a₃=0 (simplifying choice; non-zero a₃ shifts but does not eliminate the β_PPN crossing), and a₂=b (free parameter encoding the kernel shape).
+
+This transition — discrete matrix → continuous bilocal function → Padé ansatz — is the principal constructive postulate of the gravitational sector. It is not claimed as a derivation from the oscillator dynamics; it is the effective model whose consequences are tested against GR in this paper.
 
 The kernel is a member of the Padé [0/4] family. Only b is free; all other coefficients are fixed by structural requirements. Setting a₃ = 0 is a simplifying choice — a non-zero a₃ shifts the location of the β_PPN=1 crossing continuously but does not eliminate it, because β(b,a₃) remains a continuous function on the connected two-parameter domain. The a₃=0 choice is falsifiable: if future data require a₃ ≠ 0, the framework accommodates the additional parameter without structural change.
 
@@ -295,22 +315,24 @@ The local EFT (Eq. 14) corresponds to a derivative expansion of G(k²) truncated
 
 ### 4.1 Cubic Coupling and β_PPN
 
-The post-Newtonian parameter β_PPN is determined by the cubic coupling in the Multi-K tensor action:
+In the parametrized post-Newtonian (PPN) formalism, β controls the nonlinearity of gravitational superposition (β=1 in GR). In TRM, the cubic self-coupling of B_μν in the bilocal action produces a deviation determined by the kernel shape. Expanding to third order yields 4 independent coefficients b₁–b₄, each a product of an S³ angular integral and a radial kernel integral:
 
 \[
-\beta_{\rm PPN} = 1 - \frac{\varepsilon}{a_\phi}
+\beta_{\rm PPN} = 1 - \frac{\varepsilon}{a_\phi},
+\quad \varepsilon \propto \sum_{i=1}^4 b_i,
+\quad b_i = \frac{2\pi^2}{105}\times n_i \times I_{\rm rad}(b)
 \qquad (2)
 \]
 
-where ε ∝ ∫[f']³ + ∫f'·f'' depends on the kernel shape. In GR, β_PPN = 1 exactly. The sign of ε — and therefore whether β_PPN is above or below 1 — is controlled by the kernel parameter b.
+where n_i ∈ {1,6,3,5} count independent tensor contractions and I_rad(b) = ∫₀^∞ dr r⁹([f']³ + κ·f'·f''). All angular factors are positive rationals → all b_i share sign → β_PPN(b) crosses 1 by continuity.
 
-### 4.2 Kernel Dependence of β_PPN
+### 4.2 Kernel Dependence of β_PPN (Full Tensor, Phase 2B)
 
-| Kernel | b | f''(0) | β_PPN(1PN) | Classification |
-|:---|:---|:---|:---|:---|
-| Quartic baseline | 1.0 | 0 | < 1 | TENSION (reduced) |
-| Optimized | ≈1.25 | −0.5K₀ | ≈ 1 | COMPATIBLE |
-| Super-critical | 1.5 | −K₀ | > 1 | OVER-SHOOT |
+| Kernel | b | β_PPN | Classification |
+|:---|:---|:---|:---|
+| Quartic baseline | 1.000 | 0.912 | EXCLUDED (Solar System) |
+| GR-compatible | 1.248 | 1.000 | COMPATIBLE |
+| Super-critical | 1.500 | 1.165 | OVER-SHOOT |
 
 **Key result (full tensor, Phase 2B):** β_PPN(b) is continuous and crosses 1 at b* ≈ 1.248 (differing from the scalar proxy estimate of 1.250 by <0.2%). The full tensor angular integration over S³ (15 pairings → 4 independent coefficients b₁–b₄ with positive angular factors) confirms the scalar proxy at the <1% level. At b=1.000: β_PPN ≈ 0.912 — observationally excluded by Solar System constraints (|β−1| < 10⁻⁴). At b≈1.248: β_PPN ≈ 1.000 — GR-compatible at 1PN.
 
