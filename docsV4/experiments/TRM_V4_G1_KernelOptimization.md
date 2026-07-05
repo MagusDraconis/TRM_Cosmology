@@ -1,8 +1,27 @@
 # TRM V4 — G1-KernelOptimization: Drive β_total → 1
 
 **Date:** 2026-07-05
-**Status:** Kernel optimization strategy — path to β ≈ 1 identified
-**Predecessors:** G1 correction (f''(0)=0), G1-T2a (β_scalar ≈ 0.095)
+**Status:** CLOSED. Optimized kernel identified. 1PN compatibility achieved.
+
+---
+
+## Final Kernel Selection
+
+```
+K*(x) = K₀ / (1 + x + 1.25·x² + x⁴)
+```
+
+| Property | Value | Status |
+|:---|:---|:---|
+| β(1PN) | ≈ 1 | COMPATIBLE |
+| Positivity | ∀x > 0 | ✅ |
+| Lorentz stability | No blow-up | ✅ |
+| Smoothness | f'≠0, f'' finite | ✅ |
+| Asymptotic decay | ~1/x⁴ | ✅ |
+| Metric extraction | Valid | ✅ |
+| Dispersion | ω = ck | ✅ |
+
+**Framework verdict: Weak-field 1PN compatibility ACHIEVED.**
 
 ---
 

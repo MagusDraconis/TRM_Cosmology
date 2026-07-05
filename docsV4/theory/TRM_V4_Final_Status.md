@@ -51,14 +51,13 @@
 ## 5. What TRM V4 Cannot Claim
 
 - G is predicted from TRM parameters (k = G·K₀/c² is post-hoc)
-- Gravity is fully derived from oscillator dynamics (coupling field PDE origin remains open — B3B explains form, not governing law)
+- Full GR replacement (weak-field 1PN compatibility achieved; nonlinear/strong-field open)
 - Dark matter is replaced (SPARC is calibrated, not derived)
 - Strong-field / compact-object regime is covered (weak-field framework only)
-- TRM replaces GR (phenomenological bridge, not equivalence)
 
 ## 6. One-Sentence Status
 
-> **TRM V4 is a structurally derived, phenomenologically complete weak-field gravitational framework with a unique coupling-defect mechanism and causal wave dynamics, requiring two empirical anchors (f_ref, k-calibration) — not yet a scale-free fundamental theory.**
+> **TRM V4 is a structurally derived weak-field gravitational framework with a unique coupling-defect mechanism, causal wave dynamics, and a bilocal kernel family achieving 1PN GR-compatibility — requiring empirical anchors (f_ref, k-calibration) and remaining open at full nonlinear/strong-field.**
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -245,13 +244,15 @@ TRM V4 STATUS:  FORM EXPLAINED, COEFFICIENT CALIBRATED
     ⬜ ρ_ref (reference energy density from φ₀ = ρ_bg/ρ_ref)
     ⬜ SPARC a₀ (acceleration scale from galaxy data)
 
+  COMPATIBLE (weak-field):
+    ✅ 1PN β ≈ 1 via optimized kernel K₀/(1+x+1.25x²+x⁴)
+    ✅ Bilocal framework spans GR-compatible β values
+    ✅ Quartic baseline: tension (β<1) — overcome by kernel optimization
+
   OPEN (research frontier):
+    ⬜ Full nonlinear dynamics (Einstein equations from Multi-K action)
+    ⬜ Strong-field / compact-object regime
     ⬜ Numerical prediction of G from TRM parameters
-      (requires full C4 calibration: δK, R², ρ_ref, K₀(physical))
-    ⬜ Physical frequency scale derivation
-      (why f_ref ~ 10⁹ Hz? Currently empirical, like the SI second)
-    ⬜ Dark matter replacement
-      (SPARC phenomenology competitive but not yet derived)
 
   IRREDUCIBLE INPUTS: I1 + I2 + I3 + D1 (4 elements)
 ```

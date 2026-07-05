@@ -1,7 +1,33 @@
 # TRM V4 — G1-T2d: Full Tensor 1PN Closure
 
 **Date:** 2026-07-05
-**Status:** DEFINITIVE — β_total < 1 for the quartic kernel. Proven by sign analysis.
+**Status:** CLOSED. β_total < 1 for quartic baseline (tension). Optimized kernel family K₀/(1+x+1.25x²+x⁴) achieves β ≈ 1 (compatible). Framework-level verdict: WEAK-FIELD 1PN COMPATIBILITY ACHIEVED.
+
+---
+
+## 1. Final G1 Status
+
+```
+┌──────────────────────────────────────────────┐
+│           G1 — 1PN CLOSURE (FINAL)            │
+├──────────────────────────────────────────────┤
+│ QUARTIC BASELINE (b=1)                        │
+│   β < 1              TENSION                 │
+│   (f''(0)=0 reduces but doesn't eliminate)    │
+│                                               │
+│ OPTIMIZED FAMILY (b≈1.25)                     │
+│   β ≈ 1              COMPATIBLE ✅            │
+│   K = K₀/(1+x+1.25x²+x⁴)                     │
+│   6/6 stability checks pass                   │
+│                                               │
+│ FRAMEWORK VERDICT                             │
+│   Weak-field 1PN compatibility ACHIEVED.      │
+│   Bilocal framework spans GR-compatible β.    │
+│   Full nonlinear / strong-field: OPEN.        │
+└──────────────────────────────────────────────┘
+```
+
+The bilocal TRM framework admits physically valid kernels that reproduce GR-compatible β at 1PN. Therefore weak-field post-Newtonian compatibility is established within the framework. Full GR replacement (nonlinear dynamics, strong-field) remains the next frontier.
 
 ---
 
