@@ -16,7 +16,17 @@ We present the V4 interpretation layer of the Temporal Rate Matrix (TRM) framewo
 
 The reconciliation of gravity with quantum mechanics remains the central open problem in fundamental physics. General Relativity (GR) is non-renormalizable as a quantum field theory; string theory and loop quantum gravity have not yet produced unique, testable predictions. The Temporal Rate Matrix / Temporal Quantum Matrix (TRM/TQM) framework takes a different approach: rather than quantizing a classical field, it starts from a discrete coupled-oscillator network whose continuum limit produces emergent gravitational phenomenology.
 
-The V3.4 core theory [1] is frozen — it establishes the collective frequency structure from two irreducible inputs (I1: p = q + m closure-family ansatz; I2: Ω ∈ [1.16, 1.19] bridge-band prior). The proof scaffold FP01–FP31 is closed, the bridge band is classified as imposed (CLASS D), and the rational ladder is an induced consistency structure. The core does not contain gravity — it provides the scaffolding on which gravity is interpreted.
+The V3 core theory (published as V3.0 [1], with internal refinements through V3.4) is frozen — it establishes the collective frequency structure from two irreducible inputs (I1: p = q + m closure-family ansatz; I2: Ω ∈ [1.16, 1.19] bridge-band prior). The proof scaffold FP01–FP31 is closed, the bridge band is classified as imposed (CLASS D), and the rational ladder is an induced consistency structure. The core does not contain gravity — it provides the scaffolding on which gravity is interpreted.
+
+The version lineage is:
+
+| Version | Role | Status |
+|:---|:---|:---|
+| **V3.0** | Canonical theory publication | Review baseline |
+| **V3.1–V3.4** | Internal refinements (scaffold closure, bridge-band classification, E1 reinterpretation) | Frozen |
+| **V4** | Interpretation layer (this work) | Active |
+
+The version number V3.4 refers to the most recent internal refinement of the V3 core; the canonical theoretical structure is V3. No result in this paper depends on the internal version number — only on the frozen V3 structure.
 
 The V4 interpretation layer, developed here, bridges oscillator quantities to gravitational observables. It does not modify the core. It is meaning development (Bedeutungsentwicklung), not theory development (Theorieentwicklung).
 
@@ -26,7 +36,7 @@ This paper reports the complete V4 results: (i) weak-field 1PN post-Newtonian cl
 
 ## 2. Framework
 
-### 2.1 V3.4 Core (Frozen)
+### 2.1 Core Theory (V3 Series, Frozen)
 
 The oscillator dynamics are:
 
@@ -319,7 +329,7 @@ The bilocal kernel K(x,y) emerges as the central object of the theory. Its param
 
 ## References
 
-[1] TRM/TQM Collaboration, "TRM V3.4 Canonical Statement," docs/Final/V3_4/TRM_Canonical_Statement.md (2026).
+[1] TRM/TQM Collaboration, "TRM V3 Canonical Statement" (V3.0, with internal refinements up to V3.4), docs/Final/V3_4/TRM_Canonical_Statement.md (2026).
 
 [2] Event Horizon Telescope Collaboration, "First M87 Event Horizon Telescope Results I–VI," ApJL 875, L1 (2019).
 
