@@ -61,46 +61,58 @@ public class G3_SphericalSolver_Horizon_Tests
     }
 
     // ════════════════════════════════════════════════════════════
-    // G3_02 — Strong-field extrapolation
+    // G3_Minimal — PPN horizon estimate
     // ════════════════════════════════════════════════════════════
 
     [Fact]
-    public void G3_02_StrongField_B00_Behavior()
+    public void G3_Minimal_PPN_Horizon_Estimate()
     {
         _output.WriteLine("══════════════════════════════════════════════");
-        _output.WriteLine("  G3.02 — STRONG-FIELD B_00(r)");
+        _output.WriteLine("  G3-MINIMAL — PPN HORIZON ESTIMATE");
+        _output.WriteLine("  B_00(r) = 2GM/r − 2β·(GM/r)²");
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("");
 
-        // Extrapolate B_00(r) = −2GM/r into strong field.
-        // Horizon condition: B_00(r_H) = −1 → r_H = 2GM.
-        double rHNewton = 2.0 * G * M;
+        double beta = 1.0;   // PPN β ≈ 1 for optimized kernel
+        double rSchwarzschild = 2.0 * G * M;
 
-        _output.WriteLine($"  Newtonian horizon: r_H = {rHNewton:F2} GM");
+        _output.WriteLine($"  β = {beta:F2} (GR-compatible)");
         _output.WriteLine("");
-        _output.WriteLine($"  {"r (GM)",8} {"B_00",10} {"|B_00+1|",10} {"near H?",8}");
-        _output.WriteLine($"  {new string('-',8)} {new string('-',10)} {new string('-',10)} {new string('-',8)}");
+        _output.WriteLine($"  {"r (GM)",8} {"Φ=GM/r",8} {"B_00",10} {"|B_00+1|",10} {"near H?",8}");
+        _output.WriteLine($"  {new string('-',8)} {new string('-',8)} {new string('-',10)} {new string('-',10)} {new string('-',8)}");
 
-        double[] rVals = { 10, 5, 3, 2.5, 2.2, 2.1, 2.05, 2.01 };
-        double rHorizon = double.MaxValue;
+        double rHorizon = 0;
+        double[] rVals = { 10, 5, 3, 2.5, 2.0, 1.5, 1.0, 0.8, 0.73 };
 
         foreach (double r in rVals)
         {
-            double b00 = -2.0 * G * M / r;
+            double phi = G * M / r;
+            double b00 = 2.0 * phi - 2.0 * beta * phi * phi;
             double dist = Math.Abs(b00 + 1.0);
-            bool nearH = dist < 0.1;
+            bool nearH = dist < 0.05;
 
-            _output.WriteLine($"  {r,8:F2} {b00,10:F4} {dist,10:F4} {(nearH ? "YES" : ""),8}");
+            _output.WriteLine($"  {r,8:F2} {phi,8:F4} {b00,10:F4} {dist,10:F4} {(nearH ? "YES" : ""),8}");
 
-            if (b00 <= -0.99) rHorizon = Math.Min(rHorizon, r);
+            if (b00 <= -0.99 && rHorizon == 0) rHorizon = r;
         }
 
+        // Analytical horizon: 2Φ − 2βΦ² = −1 → βΦ² − Φ − ½ = 0
+        // Φ = (1 ± √(1+2β)) / (2β)
+        double phiH = (1.0 + Math.Sqrt(1.0 + 2.0 * beta)) / (2.0 * beta);
+        double rHAnalytic = G * M / phiH;
+
         _output.WriteLine("");
-        _output.WriteLine($"  B_00 → −1 at r ≈ {rHNewton:F2} GM (Newtonian extrapolation)");
+        _output.WriteLine($"  PPN horizon (analytic): r_H = {rHAnalytic:F3} GM");
+        _output.WriteLine($"  Schwarzschild:          r_H = {rSchwarzschild:F2} GM");
         _output.WriteLine("");
-        _output.WriteLine("  ⚠ This is the LINEAR (weak-field) extrapolation.");
-        _output.WriteLine("  The full nonlinear solution may shift r_H or eliminate it.");
-        _output.WriteLine("  Requires self-consistent field solver (G3-next).");
+        _output.WriteLine("  ⚠ PPN ansatz valid only for Φ ≪ 1 (r ≫ GM).");
+        _output.WriteLine($"  At r_H={rHAnalytic:F2}GM, Φ={phiH:F2} — outside PPN validity.");
+        _output.WriteLine("  The true horizon requires the full nonlinear solution.");
+        _output.WriteLine("");
+        _output.WriteLine("  TENTATIVE (PPN only):");
+        _output.WriteLine(rHAnalytic < 3.0
+            ? "  HORIZON EXISTS (r_H < 3GM in PPN extrapolation)"
+            : "  NONE (B_00 > −1 in PPN range)");
     }
 
     // ════════════════════════════════════════════════════════════
@@ -108,7 +120,7 @@ public class G3_SphericalSolver_Horizon_Tests
     // ════════════════════════════════════════════════════════════
 
     [Fact]
-    public void G3_03_Kernel_Energy_At_Strong_Field()
+    public void G3_02_Kernel_Energy_At_Strong_Field()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  G3.03 — KERNEL BEHAVIOR AT STRONG FIELD");
@@ -149,7 +161,7 @@ public class G3_SphericalSolver_Horizon_Tests
     // ════════════════════════════════════════════════════════════
 
     [Fact]
-    public void G3_04_Summary()
+    public void G3_03_Summary()
     {
         _output.WriteLine("══════════════════════════════════════════════");
         _output.WriteLine("  G3 SUMMARY — HORIZON TEST");
