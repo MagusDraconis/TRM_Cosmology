@@ -1,14 +1,12 @@
-# 🌌 Temporal Rate Matrix / Temporal Quantum Matrix — V3.4 Core Theorie (frozen)
+# 🌌 Temporal Rate Matrix / Temporal Quantum Matrix — V4 Interpretation Layer (active)
 
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21012262-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.21012262)
 
-> **Canonical verdict (V3.4):** TRM/TQM is a rationally constrained, parameter-driven effective theory with exactly two irreducible structural inputs: the closure-family ansatz I1 and the bridge-band prior I2. The core theory is frozen — no further structural modifications without opening a new major version.
+> **V3.4 Core:** Frozen — two irreducible structural inputs (I1, I2). **V4 Interpretation Layer:** Weak-field 1PN GR-compatible, full Lorentzian tensor bridge, strong-field mapped. 184/184 xUnit tests passing.
 
-This repository contains the numerical implementation and analysis tools for the **Temporal Rate Matrix (TRM)** / **Temporal Quantum Matrix (TQM)** framework.
-
-> *Temporal Rate Matrix / Temporal Quantum Matrix — V3.4 Core Theorie (frozen)*
+This repository contains the numerical implementation and analysis tools for the **Temporal Rate Matrix (TRM)** / **Temporal Quantum Matrix (TQM)** framework. The V3.4 core theory is frozen; the V4 interpretation layer bridges oscillator quantities to gravitational observables.
 
 
 ## 🔬 Overview
@@ -59,6 +57,74 @@ TRM/TQM is falsified if any of the following are observed:
 
 ---
 
+## 🚀 V4 Interpretation Layer (active on `feature/v4-interpretation-layer`)
+
+The V4 interpretation layer maps TRM internal quantities (Ω*, φ, K_ij) to physical observables without modifying the frozen V3.4 core. It is **Bedeutungsentwicklung** (meaning development), not **Theorieentwicklung** (theory development).
+
+### V4 Achievements
+
+| Module | Status | Result |
+|:---|:---|:---|
+| **B1–B2** | STABLE | K1×F1 coupling mechanism; SPARC phenomenology |
+| **B3A–B3B** | DERIVED | ∇²K=0 uniqueness; 1/r from graph Laplacian coupling defect |
+| **B3C** | CALIBRATED | α↔M via energy deficit; f_ref = 9.192631770×10⁹ Hz (cesium SI second) |
+| **B4** | EFFECTIVE | □K=0 wave dynamics; c_K = c |
+| **B5–B6** | COMPLETE | 10-observable dictionary; 15/15 benchmarks pass |
+| **G1** | COMPATIBLE | 1PN β ≈ 1 via optimized kernel K₀/(1+x+1.25x²+x⁴) |
+| **G2** | SUPPORTED | Full Lorentzian tensor bridge: metric extraction, 2+1 GW polarizations, ω=ck |
+| **G3** | SOLVED (scalar) | r_H ≈ 2.275GM (+13.8%); within EHT bounds; falsifiable |
+| **G4** | STRUCTURALLY PREFERRED | b=1 is natural fixed point (f''=0, ε minimum, IR attractor) |
+
+### Kernel Family
+
+The central V4 object is the bilocal coupling kernel:
+
+\[
+K(x) = \frac{K_0}{1 + x + b x^2 + x^4}, \quad x = d^2/\lambda^2
+\]
+
+- **b = 1** (quartic baseline): f''(0) = 0, maximal flatness, natural fixed point
+- **b ≈ 1.25** (optimized): β ≈ 1 at 1PN, GR-compatible weak-field
+- **b is continuous**: β(b) crosses 1 — no fine-tuning required
+- **Analogy**: b is TRM's Brans-Dicke ω; b=1 is the GR-identical limit
+
+### Strong-Field Predictions (scalar approximation)
+
+| Observable | GR | TRM (b=1.25) | Deviation |
+|:---|:---|:---|:---|
+| Horizon r_H | 2.00 GM | 2.275 GM | +13.8% |
+| Photon sphere | 3.00 GM | 3.413 GM | +13.8% |
+| Shadow radius | 5.20 GM | 5.91 GM | +13.8% |
+| QNM ω·GM | 0.374 | 0.329 | −12.1% |
+
+→ Currently within EHT observational uncertainty (M87* ~17%, Sgr A* ~12%). Falsifiable with next-generation instruments (ngEHT, LISA, 3G GW detectors).
+
+### V4 Documentation
+
+All V4 documentation lives in `docsV4/` — strictly separated from the frozen V3.4 core in `docs/`.
+
+- `docsV4/README.md` — V4 workspace overview and directory structure
+- `docsV4/theory/TRM_V4_Final_Status.md` — **Canonical V4 closure document**
+- `docsV4/theory/TRM_V4_Interpretation_Core.md` — C5 energy density interpretation
+- `docsV4/theory/TRM_V4_G4_OriginOfB.md` — Structural origin of kernel parameter b
+- `docsV4/experiments/TRM_V4_G1T2d_FullTensor1PNClosure.md` — G1 1PN definitive closure
+- `docsV4/experiments/TRM_V4_G1_KernelOptimization.md` — Kernel optimization → b≈1.25
+- `docsV4/theory/TRM_V4_G2D_FullLorentzianClosure.md` — Quartic kernel as full Lorentzian solution
+- `docsV4/theory/TRM_V4_G3_StrongFieldTestbed.md` — G3 strong-field framework
+- `docsV4/TRM_V4_GR_Replacement_Roadmap.md` — G1–G6 gap analysis toward GR replacement
+- `docsV4/review/TRM_V4_GravityTestAudit.md` — Full gravity test audit and classification
+
+### V4 Cardinal Rule
+
+> **"Does this modify the core?" → YES → forbidden. NO → allowed.**
+
+```
+/docs   → V3.4 FINAL (FROZEN) — do not modify
+/docsV4 → V4 interpretation layer — active workspace
+```
+
+---
+
 ## ✅ Current Branch Baseline (V3.4 Core Theorie — frozen)
 
 - **FP scaffold closed:** FP01–FP31 complete with zero pending-proof items. FP27 (positivity), FP28 (\(\varepsilon = 0 \iff m = 3\)), FP29 (\(q\text{CoreSupport}(q) = 1 - 3/q\)), FP31 (asymptotic limits) all proven.
@@ -100,6 +166,7 @@ Key reproducibility commands:
 
 ## 🕰️ Version lineage
 
+- `V4.0 (Interpretation Layer)`: **Active** — 1PN GR-compatible bilocal kernel, full Lorentzian tensor bridge, strong-field scalar ODE solver, 184 xUnit tests. Built on frozen V3.4 core. Branch: `feature/v4-interpretation-layer`.
 - `V3.4`: **Core Theorie (frozen)** — bridge-band classified as imposed structural input, FP scaffold closed, E1 reinterpreted, canonical statement finalized. No further structural modifications.
 - `V3.1–V3.3`: Intermediate research milestones (memory-channel action closure, minimal action from TQM lattice, m=3 closure scaffold).
 - `V3.0`: Review baseline (multi-sector framework with explicit claim boundaries).
@@ -171,6 +238,12 @@ Execute the rigorous xUnit test suite to verify the exact cosmological constants
 
 Run only the fast hard regression gate:
 `dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=CoreRegression"`
+
+Run the V4 interpretation layer tests (184 tests, B1–G4):
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=V4"`
+
+Run only G1–G4 (1PN closure through origin of b):
+`dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category=G1|Category=G2|Category=G3|Category=G4"`
 
 Run the default suite without slow sweeps:
 `dotnet test TRM.Tests/TRM.Tests.csproj --filter "Category!=LongRunning"`
