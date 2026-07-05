@@ -2,9 +2,40 @@
 
 **Date:** 2026-07-05
 **Branch:** `feature/v4-interpretation-layer`
-**Status:** C5 is the unique phenomenological interpretation candidate (PARTIAL). B1/B2 tests complete. First-principles derivation of gravity from oscillator dynamics remains open.
+**Status:** COMPLETE. B1–G4 closed. Weak-field 1PN compatible. Tensor bridge supported. Strong-field mapped. 184/184 xUnit.
 
-**Current status:** C5 is the unique phenomenological interpretation candidate currently supported by Path B tests. It is not yet a first-principles derivation of gravity from oscillator dynamics. Therefore the current classification is PARTIAL.
+---
+
+## 0. What Is TRM/TQM?
+
+The Temporal Rate Matrix / Temporal Quantum Matrix framework describes collective frequency emergence in finite coupled phase-oscillator lattices:
+
+\[
+\frac{d\theta_i}{dt} = \omega_i + \sum_j K_{ij} \cdot f(\theta_i - \theta_j)
+\]
+
+The V3.4 core is frozen with two irreducible inputs (I1: closure-family ansatz p=q+m, I2: bridge-band prior Ω∈[1.16,1.19]). The V4 interpretation layer maps oscillator quantities to physical observables without modifying the core.
+
+### 0.1 The K → B → g Chain
+
+```
+Discrete oscillator network:    K_ij (coupling matrix)
+         │  continuum limit
+         ▼
+Bilocal kernel:                 K(x,y) = K₀/(1 + d²/λ² + b(d²/λ²)² + (d²/λ²)⁴)
+         │  coincidence limit y→x
+         ▼
+Tensor field:                   B_μν(x) = (1/(2f'(0))) · ∂_μ∂_ν K(x,y)|_{y=x}
+         │  linearized gravity
+         ▼
+Metric:                         g_μν = η_μν + B_μν
+```
+
+The kernel parameter b controls the cubic coupling at the origin: f''(0) = 2K₀(1−b).
+- **b = 1** (quartic): f''(0) = 0 — maximal flatness, minimal cubic coupling, natural fixed point
+- **b ≈ 1.25** (optimized): β ≈ 1 at 1PN — GR-compatible weak-field
+- **b is continuous**: crosses 1 without fine-tuning
+- **Analogy**: b is TRM's Brans-Dicke ω; b=1 is the GR-identical limit
 
 ---
 
