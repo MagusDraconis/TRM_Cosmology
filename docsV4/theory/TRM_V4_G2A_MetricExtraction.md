@@ -18,10 +18,12 @@ where d²(x,y) = g_αβ(x) · (y−x)^α · (y−x)^β + O(Δx³) in Riemann nor
 ### 1.1 Verification
 
 ```
-∂_μ K = K · (−1/λ²) · (g_μν · Δx^ν + ...)
-∂_μ ∂_ν K|_{y=x} = (−K₀/λ²) · g_μν(x)
-→ g_μν(x) = −(λ²/K₀) · ∂_μ ∂_ν K|_{y=x}  ✓
+∂_μ K = f'(d²) · 2g_μν(x)·(y−x)^ν      (chain rule through d²)
+∂_μ ∂_ν K|_{y=x} = 2f'(0) · g_μν(x)      (∂d²/∂y|_{y=x} = 0 eliminates f'' term)
+→ g_μν(x) = (1/(2f'(0))) · ∂_μ ∂_ν K|_{y=x}  ✓
 ```
+
+The prefactor depends on f'(0). For Gaussian f'(0) = −K₀/(2λ²) → 1/(2f'(0)) = −λ²/K₀. For quartic f'(0) = −K₀/λ² → 1/(2f'(0)) = −λ²/(2K₀). The general formula is kernel-dependent through f'(0).
 
 ---
 
@@ -121,14 +123,15 @@ K = K₀ · (1 + d²/2λ²)^(−1)
 
 Same as the Gaussian! The extraction formula is robust — it doesn't depend on the specific kernel form, only on the leading Taylor expansion of K(d²).
 
-**Theorem:** For ANY kernel K(d²) with K'(0) ≠ 0:
+**Theorem:** For ANY smooth kernel f(d²) with f'(0) ≠ 0:
 ```
-g_μν(x) = −(1/K'(0)) · ∂_μ ∂_ν K(x,y) |_{y=x}
+g_μν(x) = (1/(2f'(0))) · ∂_μ ∂_ν f(d²(x,y)) |_{y=x}
 ```
-where K'(0) = dK/d(d²)|_{d²=0}.
+where f'(0) = df/d(d²)|_{d²=0}.
 
-The Gaussian gives K'(0) = −K₀/2λ² → g_μν = −(2λ²/K₀)·∂_μ∂_ν K|_{0}.
-The rational R3 gives K'(0) = −K₀/2λ² → same formula.
+The Gaussian gives f'(0) = −K₀/(2λ²) → g_μν = −(λ²/K₀)·∂_μ∂_ν f|_{0}.
+The rational R3 gives f'(0) = −K₀/(2λ²) → same prefactor as Gaussian.
+The quartic gives f'(0) = −K₀/λ² → g_μν = −(λ²/(2K₀))·∂_μ∂_ν f|_{0}.
 
 ---
 
