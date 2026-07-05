@@ -49,12 +49,20 @@ Check 3 (I2):  φ(x) ∈ [0.16, 0.19] for the target system
 
 | Test | Question | Status |
 |:---|:---|:---|
-| C5.1 — Gradient scaling | Does ∇(ρ_E) around a point mass reproduce ~1/r²? | TBD |
+| C5.1 — Gradient scaling | Does ∇(ρ_E) around a point mass reproduce ~1/r²? | **CRITICAL** — see `TRM_V4_deltaRho_CriticalValidation.md` |
 | C5.2 — ρ_ref identification | What is the reference energy density? | TBD |
 | C5.3 — ρ_bg estimation | Can ρ_bg be independently measured to verify φ₀ ≈ 0.17? | TBD |
-| C5.4 — Newtonian limit | Does a(x) = c²/ρ_ref · ∇(δρ) match GM/r² in the weak-field limit? | TBD |
+| C5.4 — Newtonian limit | Does a(x) = c²/ρ_ref · ∇(δρ) match GM/r² in the weak-field limit? | **CRITICAL** — requires δρ ~ 1/r |
 
-### 2.5 Classification: PROMISING — passes all 3 consistency checks in principle. Requires C5.1–C5.4 verification for VALID status.
+### 2.5 Key Finding: No Standard Energy Density Produces ~1/r
+
+Analysis in `TRM_V4_deltaRho_CriticalValidation.md` shows that **no standard physical energy density** (field energy ~1/r⁴, rest-mass ~1/r³, potential ~1/r⁴) naturally produces the δρ ~ 1/r profile required for Newtonian gravity.
+
+Two paths could work:
+- **Path A:** Vacuum energy modulation (speculative — no known mechanism)
+- **Path B (TRM-native):** Oscillator coupling modulation — mass M perturbs K_ij, producing effective δρ_eff(r) from the coupling gradient. **Most promising.**
+
+### 2.6 Classification: STRUCTURALLY VALID — awaits δρ(r) numerical verification for full closure.
 
 ---
 
