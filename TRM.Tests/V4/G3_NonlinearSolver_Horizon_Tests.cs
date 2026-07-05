@@ -39,7 +39,7 @@ public class G3_NonlinearSolver_Horizon_Tests
         // β ∝ f''(0)/f'(0) ≈ 0.55 → positive (self-energy deepens potential)
         double beta = 0.55;
 
-        int n = 5000;
+        int n = 20000;
         double rStart = 100.0;
         double dr = (rStart - 0.01) / n;
 
@@ -82,10 +82,9 @@ public class G3_NonlinearSolver_Horizon_Tests
 
             double b00 = -2.0 * phiArr[i];
 
-            // Print at key radii
+            // Print at key radii (sparse)
             bool keyRadius = Math.Abs(r - 10.0) < 0.5 || Math.Abs(r - 5.0) < 0.2 ||
-                            Math.Abs(r - 3.0) < 0.1 || Math.Abs(r - 2.0) < 0.1 ||
-                            Math.Abs(r - 1.5) < 0.05;
+                            Math.Abs(r - 3.0) < 0.1 || Math.Abs(r - 2.0) < 0.05;
 
             if (keyRadius)
             {
@@ -103,21 +102,27 @@ public class G3_NonlinearSolver_Horizon_Tests
         }
 
         _output.WriteLine("");
+        double rSch = 2.0 * G * M;
         if (foundHorizon)
         {
+            double ratio = rH / rSch;
+            string cls = Math.Abs(ratio - 1.0) < 0.05 ? "GR-LIKE" :
+                         ratio > 1.0 ? "SHIFTED OUTWARD" : "SHIFTED INWARD";
             _output.WriteLine($"  ╔══════════════════════════════════════╗");
             _output.WriteLine($"  ║  HORIZON FOUND                      ║");
             _output.WriteLine($"  ║  r_H = {rH:F3} GM                      ║");
-            double rSch = 2.0 * G * M;
-            string cls = Math.Abs(rH - rSch) < 0.01 ? "GR-LIKE" :
-                         Math.Abs(rH - rSch) < 0.5 ? "SHIFTED" : "STRONGLY SHIFTED";
-            _output.WriteLine($"  ║  r_schwarzschild = {rSch:F2} GM               ║");
+            _output.WriteLine($"  ║  r_sch = {rSch:F2} GM                    ║");
+            _output.WriteLine($"  ║  r_H / r_sch = {ratio:F3}               ║");
             _output.WriteLine($"  ║  Classification: {cls,-20} ║");
             _output.WriteLine($"  ╚══════════════════════════════════════╝");
+
+            // Physical plausibility: r_H should not be orders of magnitude off
+            Assert.True(rH > 0.1 && rH < 20.0,
+                $"Horizon radius {rH:F2}GM should be physically plausible (0.1–20 GM)");
         }
         else
         {
-            _output.WriteLine("  NO HORIZON — B_00(r) > −1 for all r ≥ 0.01 GM.");
+            _output.WriteLine("  NO HORIZON — B_00(r) > −1 for r ≥ 0.01 GM.");
             _output.WriteLine("  Classification: HORIZONLESS OBJECT");
         }
 
