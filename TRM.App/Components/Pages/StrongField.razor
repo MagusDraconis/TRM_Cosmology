@@ -1,0 +1,110 @@
+@page "/strong-field"
+@using TRM.Core.StrongField
+@inject IStrongFieldService StrongFieldService
+
+<PageTitle>Strong Field</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Regular Schwarzschild & Strong-Field Diagnostics</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudNumericField T="double" Label="Mass (M☉)" @bind-Value="_massSolar" Min="0.1" Max="100" Step="0.1" />
+            <MudNumericField T="double" Label="Core scale factor (r_c/r_s)" @bind-Value="_coreScale" Min="0.02" Max="2" Step="0.01" />
+            <MudNumericField T="int" Label="Samples" @bind-Value="_samples" Min="50" Max="400" Step="10" />
+            <MudNumericField T="double" Label="Max radius (r/r_s)" @bind-Value="_maxRadiusRs" Min="2" Max="30" Step="0.5" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Recompute">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaults">Reset Defaults</MudButton>
+            </MudStack>
+
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.body2">Schwarzschild radius: @_result.SchwarzschildRadiusMeters.ToString("E3") m</MudText>
+            <MudText Typo="Typo.body2">Core radius: @_result.CoreRadiusMeters.ToString("E3") m</MudText>
+            <MudText Typo="Typo.body2">Inner horizon: @FormatOptional(_result.InnerHorizonMeters)</MudText>
+            <MudText Typo="Typo.body2">Outer horizon: @FormatOptional(_result.OuterHorizonMeters)</MudText>
+
+            <MudChip T="string" Variant="Variant.Filled" Color="@(_result.HasFiniteCore ? Color.Success : Color.Error)" Class="mt-2">
+                @(_result.HasFiniteCore ? "Finite core" : "Singular core")
+            </MudChip>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR reference horizon: r_s = 2GM / c²</MudText>
+                <MudText Typo="Typo.caption">TRM strong-field profile uses regularized core scale r_c to avoid singular behavior.</MudText>
+                <MudText Typo="Typo.caption">Current: M=@_massSolar.ToString("F2") M☉, r_c/r_s=@_coreScale.ToString("F3"), r_max=@_maxRadiusRs.ToString("F2"), N=@_samples</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4 mb-3">
+            <MudText Typo="Typo.h6" GutterBottom="true">Metric Comparison (g00)</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_g00Series" XAxisLabels="_labels" Width="100%" Height="300px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Regular Metric Component (grr)</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_grrSeries" XAxisLabels="_labels" Width="100%" Height="300px" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const double DefaultMassSolar = 5.0;
+    private const double DefaultCoreScale = 0.25;
+    private const int DefaultSamples = 180;
+    private const double DefaultMaxRadiusRs = 12.0;
+
+    private double _massSolar = DefaultMassSolar;
+    private double _coreScale = DefaultCoreScale;
+    private int _samples = DefaultSamples;
+    private double _maxRadiusRs = DefaultMaxRadiusRs;
+
+    private StrongFieldResult _result = new([], 0, 0, null, null, 1.0, true);
+    private string[] _labels = [];
+    private List<ChartSeries> _g00Series = [];
+    private List<ChartSeries> _grrSeries = [];
+
+    protected override void OnInitialized()
+    {
+        Recompute();
+    }
+
+    private void Recompute()
+    {
+        _result = StrongFieldService.ComputeRegularSchwarzschild(new StrongFieldInput(
+            _massSolar,
+            _coreScale,
+            _samples,
+            _maxRadiusRs));
+
+        _labels = _result.Profile.Select(p => p.RadiusInSchwarzschildUnits.ToString("F2")).ToArray();
+
+        _g00Series =
+        [
+            new ChartSeries { Name = "Regular g00", Data = _result.Profile.Select(p => p.RegularG00).ToArray() },
+            new ChartSeries { Name = "Schwarzschild g00", Data = _result.Profile.Select(p => p.SchwarzschildG00).ToArray() }
+        ];
+
+        _grrSeries =
+        [
+            new ChartSeries { Name = "Regular grr", Data = _result.Profile.Select(p => p.RegularGrr).ToArray() }
+        ];
+    }
+
+    private void ResetDefaults()
+    {
+        _massSolar = DefaultMassSolar;
+        _coreScale = DefaultCoreScale;
+        _samples = DefaultSamples;
+        _maxRadiusRs = DefaultMaxRadiusRs;
+        Recompute();
+    }
+
+    private static string FormatOptional(double? value)
+    {
+        return value.HasValue ? value.Value.ToString("E3") + " m" : "not detected";
+    }
+}

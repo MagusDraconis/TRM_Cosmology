@@ -42,7 +42,7 @@
 
 ## Are runtime services unchanged?
 
-- [x] **Yes.** No changes to `TRM.Core`, `TRM.QuantumCore`, `TRM.Simulations`, or `TRM.Tests` (except `DoubleSlitPhaseCoherenceTests.cs` which is DS diagnostics, already complete).
+- [x] **Yes.** No changes to `TRM.Core`, `TRM.Simulations`, or `TRM.Tests` (except `DoubleSlitPhaseCoherenceTests.cs` which is DS diagnostics, already complete).
 - [x] Only `TRM.FormalProofs/`, `TRM.FormalProofs.Cli/`, and `docs/` were modified.
 
 ---

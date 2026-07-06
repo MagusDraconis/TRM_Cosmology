@@ -1,0 +1,209 @@
+@page "/lattice"
+@using TRM.Core.Lattice
+@using System.Diagnostics
+@inject ILatticeService LatticeService
+@implements IDisposable
+
+<PageTitle>Lattice</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Microscopic Lattice Simulator</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Lattice Controls</MudText>
+
+            <MudNumericField T="int" Label="Node Count (N)" Value="_nodeCount" ValueChanged="OnNodeCountChanged" Min="8" Max="128" Step="2" Immediate="true" />
+            <MudNumericField T="double" Label="Coupling" Value="_coupling" ValueChanged="OnCouplingChanged" Min="0" Max="2" Step="0.05" Immediate="true" />
+            <MudNumericField T="double" Label="Injected Energy" Value="_injectedEnergy" ValueChanged="OnEnergyChanged" Min="0" Max="50" Step="0.5" Immediate="true" />
+            <MudNumericField T="int" Label="Injection Node" Value="_injectionIndex" ValueChanged="OnInjectionIndexChanged" Min="0" Max="127" Step="1" Immediate="true" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RecomputeAsync">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaultsAsync">Reset Defaults</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="InjectPulseAsync">Inject Energy Pulse</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Disabled="@(!_isComputing)" OnClick="CancelComputation">Cancel</MudButton>
+            </MudStack>
+
+            @if (_isComputing)
+            {
+                <MudProgressLinear Color="Color.Info" Indeterminate="true" Class="mt-2" />
+            }
+
+            <MudText Typo="Typo.caption" Class="mt-1">Last compute: @_lastComputeMs ms</MudText>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">Discrete lattice evolution with coupling and local energy injection.</MudText>
+                <MudText Typo="Typo.caption">Overlay compares measured correlation C(r) against Padé [0/4] kernel approximation.</MudText>
+                <MudText Typo="Typo.caption">Current: N=@_nodeCount, coupling=@_coupling.ToString("F2"), injected energy=@_injectedEnergy.ToString("F2"), node=@_injectionIndex</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4 mb-3">
+            <MudText Typo="Typo.h6" GutterBottom="true">Node Energy Profile</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_nodeSeries" XAxisLabels="_nodeLabels" Width="100%" Height="300px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Correlation vs Padé [0/4] Kernel</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_correlationSeries" XAxisLabels="_distanceLabels" Width="100%" Height="300px" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const int DefaultNodeCount = 48;
+    private const double DefaultCoupling = 0.8;
+    private const double DefaultInjectedEnergy = 10.0;
+    private const int DefaultInjectionIndex = 12;
+
+    private int _nodeCount = DefaultNodeCount;
+    private double _coupling = DefaultCoupling;
+    private double _injectedEnergy = DefaultInjectedEnergy;
+    private int _injectionIndex = DefaultInjectionIndex;
+
+    private string[] _nodeLabels = [];
+    private string[] _distanceLabels = [];
+    private List<ChartSeries> _nodeSeries = [];
+    private List<ChartSeries> _correlationSeries = [];
+    private CancellationTokenSource? _computeCts;
+    private CancellationTokenSource? _debounceCts;
+    private bool _isComputing;
+    private long _lastComputeMs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RecomputeAsync();
+    }
+
+    private async Task ResetDefaultsAsync()
+    {
+        _nodeCount = DefaultNodeCount;
+        _coupling = DefaultCoupling;
+        _injectedEnergy = DefaultInjectedEnergy;
+        _injectionIndex = DefaultInjectionIndex;
+        await RecomputeAsync();
+    }
+
+    private async Task OnNodeCountChanged(int value)
+    {
+        _nodeCount = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnCouplingChanged(double value)
+    {
+        _coupling = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnEnergyChanged(double value)
+    {
+        _injectedEnergy = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnInjectionIndexChanged(int value)
+    {
+        _injectionIndex = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task ScheduleRecomputeAsync()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(250, _debounceCts.Token);
+            await RecomputeAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private async Task InjectPulseAsync()
+    {
+        _injectedEnergy += 1.0;
+        await RecomputeAsync();
+    }
+
+    private async Task RecomputeAsync()
+    {
+        _computeCts?.Cancel();
+        _computeCts?.Dispose();
+        _computeCts = new CancellationTokenSource();
+
+        var token = _computeCts.Token;
+        _isComputing = true;
+        await InvokeAsync(StateHasChanged);
+        var sw = Stopwatch.StartNew();
+
+        try
+        {
+            var input = new LatticeInput(_nodeCount, _coupling, _injectedEnergy, _injectionIndex);
+            var snapshot = await Task.Run(() => LatticeService.ComputeSnapshot(input), token);
+            token.ThrowIfCancellationRequested();
+
+            _nodeLabels = Enumerable.Range(0, snapshot.NodeEnergies.Count)
+                .Select(i => i.ToString())
+                .ToArray();
+
+            _distanceLabels = snapshot.Distances
+                .Select(d => d.ToString("F0"))
+                .ToArray();
+
+            _nodeSeries =
+            [
+                new ChartSeries
+                {
+                    Name = "Node Energy",
+                    Data = snapshot.NodeEnergies.ToArray()
+                }
+            ];
+
+            _correlationSeries =
+            [
+                new ChartSeries
+                {
+                    Name = "Correlation",
+                    Data = snapshot.Correlation.ToArray()
+                },
+                new ChartSeries
+                {
+                    Name = "Padé [0/4] Kernel",
+                    Data = snapshot.PadeKernel.ToArray()
+                }
+            ];
+
+            _lastComputeMs = sw.ElapsedMilliseconds;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            _isComputing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void CancelComputation()
+    {
+        _computeCts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        _debounceCts?.Cancel();
+        _computeCts?.Cancel();
+        _debounceCts?.Dispose();
+        _computeCts?.Dispose();
+    }
+}

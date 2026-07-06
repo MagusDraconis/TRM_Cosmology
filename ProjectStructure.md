@@ -14,7 +14,6 @@ Root: `D:\Coding\Test\Physics`
 - `TRM.CMD/`
 - `TRM.Core/`
 - `TRM.Python/`
-- `TRM.QuantumCore/`
 - `TRM.Simulations/`
 - `TRM.Tests/`
 - `README.md`
@@ -37,12 +36,6 @@ Root: `D:\Coding\Test\Physics`
 
 - `TRM.CMD/TRM.CMD.csproj`
   - `Program.cs`
-
-- `TRM.QuantumCore/TRM.QuantumCore.csproj`
-  - `Fields/`
-  - `Fluctuations/`
-  - `Planck/`
-  - `Statistics/`
 
 - `TRM.Simulations/TRM.Simulations.csproj`
   - `Experiments/`

@@ -90,7 +90,7 @@ This document maps active TRM/TQM services, models, and tests to:
 
 ## 3.2 Planck/quantum consistency channel
 
-### `TRM.QuantumCore/Planck/PlanckConstants.cs`
+### `TRM.Core/Shared/PlanckConstants.cs`
 - **Purpose:** Planck constants from SI constants.
 - **Equations:**
   - `lP = sqrt(hbar*G/c^3)`
@@ -101,7 +101,7 @@ This document maps active TRM/TQM services, models, and tests to:
 - **Gaps:** no uncertainty propagation/error budget in implementation.
 - **Class:** **A**
 
-### `TRM.QuantumCore/Planck/DerivedConstants.cs`
+### `TRM.Core/Shared/DerivedConstants.cs`
 - **Purpose:** derive `c`, `hbar`, `G` from Planck tuple.
 - **Equations:**
   - `c = lP/tP`,
@@ -256,8 +256,8 @@ This document maps active TRM/TQM services, models, and tests to:
 ## 5) Final Priority List (A/B/C/D)
 
 ## A) Directly publish-ready (within stated scope)
-- `TRM.QuantumCore/Planck/PlanckConstants.cs`
-- `TRM.QuantumCore/Planck/DerivedConstants.cs`
+- `TRM.Core/Shared/PlanckConstants.cs`
+- `TRM.Core/Shared/DerivedConstants.cs`
 - `TRM.Tests/RealityTests/PhotonTransportModel_FixationTests.cs` (regression/invariant scope)
 - `TRM.Tests/CoreTests/RarRelationTests.cs` (pipeline validation scope)
 

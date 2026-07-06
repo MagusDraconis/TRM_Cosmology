@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TRM.QuantumCore.Planck;
+using TRM.Core.Shared;
 
 namespace TRM.Simulations.Experiments;
 
@@ -14,9 +14,9 @@ public class PlanckMultiScan
         baseP = basePlanck;
     }
 
-    public List<ScanResult> Run(int steps, double maxVariation)
+    public List<TRM.Core.Shared.ScanResult> Run(int steps, double maxVariation)
     {
-        var results = new List<ScanResult>();
+        var results = new List<TRM.Core.Shared.ScanResult>();
 
         // Referenzwerte (baseline Planck → gibt dir "wahre" c, ħ, G)
         var baseDerived = new DerivedConstants(baseP);
@@ -50,7 +50,7 @@ public class PlanckMultiScan
                 Math.Pow(hbarRatio - 1, 2) +
                 Math.Pow(GRatio - 1, 2);
 
-            results.Add(new ScanResult
+            results.Add(new TRM.Core.Shared.ScanResult
             {
                 epsL = epsL,
                 epsT = epsT,

@@ -1,4 +1,4 @@
-﻿using TRM.QuantumCore.Planck;
+﻿using TRM.Core.Shared;
 
 namespace TRM.Tests.QuantumTests;
 

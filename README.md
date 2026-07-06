@@ -198,8 +198,6 @@ This repository includes computational models and analysis scripts for:
 
 - `TRM.Core`  
   The theoretical engine. Contains shared analysis models, the RK4 acoustic solver, and grid-sweep optimization algorithms.
-- `TRM.QuantumCore`  
-  Planck constants, quantum statistics, temporal fluctuation models.
 - `TRM.FormalProofs`  
   Formal proof infrastructure — m=3 Lean proofs, rational arithmetic.
 - `TRM.Simulations`  

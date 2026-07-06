@@ -32,8 +32,8 @@ Stand: automatische Repository-Analyse (C#-Scope) für `TRM_Cosmology.slnx`
 
 ## Dateiweise Code-to-Theory-Matrix
 
-## 1) `TRM.QuantumCore/Planck/PlanckConstants.cs`
-- **Namespace/Klasse:** `TRM.QuantumCore.Planck`, `PlanckConstants`, `PhysicalConstantsSI`
+## 1) `TRM.Core/Shared/PlanckConstants.cs`
+- **Namespace/Klasse:** `TRM.Core.Shared`, `PlanckConstants`, `PhysicalConstantsSI`
 - **Enthaltene Modellfunktionen:** `FromPhysicalConstants()`
 - **Implizite Gleichungen:**
   - \(l_P = \sqrt{\hbar G / c^3}\)
@@ -45,8 +45,8 @@ Stand: automatische Repository-Analyse (C#-Scope) für `TRM_Cosmology.slnx`
 - **Fit/Kalibrierung:** keine explizite Fitlogik hier
 - **Statusmarker:** **bestätigt/tested** (für Basis-Rekonstruktion), **limitation** (kein Unsicherheitsbudget für Konstanten)
 
-## 2) `TRM.QuantumCore/Planck/DerivedConstants.cs`
-- **Namespace/Klasse:** `TRM.QuantumCore.Planck`, `DerivedConstants`
+## 2) `TRM.Core/Shared/DerivedConstants.cs`
+- **Namespace/Klasse:** `TRM.Core.Shared`, `DerivedConstants`
 - **Modellfunktionen:** Ableitung von `SpeedOfLight`, `ReducedPlanck`, `G` aus Planck-Skalen
 - **Gleichungen:**
   - \(c = l_P/t_P\)

@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
+		<RunSettingsFilePath>default.runsettings</RunSettingsFilePath>
 	</PropertyGroup>
 
 	<ItemGroup>

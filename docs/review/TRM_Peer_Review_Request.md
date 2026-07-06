@@ -342,7 +342,7 @@ Relevant repository areas for review may include:
 docs/Theory/
 docs/review/
 TRM.Core/
-TRM.QuantumCore/
+TRM.Simulations/
 TRM.Tests/RealityTests/
 TRM.Tests/QuantumTests/
 TRM.Tests/CoreTests/

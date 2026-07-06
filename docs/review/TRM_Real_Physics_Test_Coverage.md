@@ -7,7 +7,7 @@ Quellen:
 - `docs/review/TRM_Service_Test_Consolidation.md`
 - `docs/Theory/TRM_Geodesic_Derivation.md`
 - `docs/Theory/TRM_Finsler_Optical_Action.md`
-- bestehende C# Services und Tests (`TRM.Tests`, `TRM.Core`, `TRM.QuantumCore`)
+- bestehende C# Services und Tests (`TRM.Tests`, `TRM.Core`, `TRM.Simulations`)
 
 ---
 
@@ -103,8 +103,8 @@ Quellen:
 ## 7) Planck constants
 
 - **Relevante Services:**
-  - `TRM.QuantumCore/Planck/PlanckConstants.cs`
-  - `TRM.QuantumCore/Planck/DerivedConstants.cs`
+  - `TRM.Core/Shared/PlanckConstants.cs`
+  - `TRM.Core/Shared/DerivedConstants.cs`
 - **Relevante Tests:**
   - `TRM.Tests/QuantumTests/PlanckConsistencyTests.cs`
 - **Modellbezug:**

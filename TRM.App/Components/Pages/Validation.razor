@@ -1,0 +1,147 @@
+@page "/validation"
+@using System.Text
+@using TRM.Core.Credibility
+@using TRM.Core.WeakField
+@inject IWeakFieldService WeakFieldService
+@inject ICredibilityService CredibilityService
+@inject IJSRuntime JS
+
+<PageTitle>Validation</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Validation Suite</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Validation Inputs</MudText>
+            <MudNumericField T="double" Label="κ" @bind-Value="_kappa" Min="0" Max="2" Step="0.01" />
+            <MudNumericField T="double" Label="b" @bind-Value="_b" Min="0.1" Max="4" Step="0.01" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Refresh">Refresh</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaults">Reset Defaults</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ExportCsv">Export CSV</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="ExportLatex">Export LaTeX</MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-3">
+            <MudText Typo="Typo.h6" GutterBottom="true">Reproducibility</MudText>
+            <MudText Typo="Typo.body2">Generated (UTC): @_record.GeneratedAtUtc.ToString("u")</MudText>
+            <MudText Typo="Typo.body2">Engine: @_record.EngineVersion</MudText>
+            <MudText Typo="Typo.body2">Digest: @_record.ParameterDigestSha256</MudText>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4 mb-3">
+            <MudText Typo="Typo.h6" GutterBottom="true">Equation Snippets (LaTeX)</MudText>
+            <MudText Typo="Typo.body2">@("$E(p^2)=\\frac{1}{1+x+b x^2+x^4},\\;x=-p^2/\\Lambda^2$")</MudText>
+            <MudText Typo="Typo.body2">@("$\\beta_{PPN},\\gamma_{PPN}\\to 1$ in weak field")</MudText>
+            <MudText Typo="Typo.body2">@("$\\Delta\\theta = \\frac{4GM}{c^2 b_{impact}}$")</MudText>
+            <MudText Typo="Typo.body2">@("$\\Delta\\omega = \\frac{6\\pi GM}{c^2 a(1-e^2)}$")</MudText>
+            <MudText Typo="Typo.caption" Class="mt-2">Current inputs: κ=@_kappa.ToString("F3"), b=@_b.ToString("F3")</MudText>
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Validation Scoreboard</MudText>
+            <MudTable Items="_rows" Dense="true" Hover="true" Bordered="true" Striped="true">
+                <HeaderContent>
+                    <MudTh>Metric</MudTh>
+                    <MudTh>Theory</MudTh>
+                    <MudTh>Reference</MudTh>
+                    <MudTh>Status</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Metric</MudTd>
+                    <MudTd>@context.Theory</MudTd>
+                    <MudTd>@context.Reference</MudTd>
+                    <MudTd>
+                        <MudChip T="string" Color="@(context.Status == "Pass" ? Color.Success : Color.Warning)" Variant="Variant.Filled" Size="Size.Small">
+                            @context.Status
+                        </MudChip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const double DefaultKappa = 0.3;
+    private const double DefaultB = 1.248;
+
+    private double _kappa = DefaultKappa;
+    private double _b = DefaultB;
+
+    private ReproducibilityRecord _record = new(DateTime.MinValue, "unknown", "", new Dictionary<string, string>());
+    private List<ValidationExportRow> _rows = [];
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        var ppn = WeakFieldService.ComputePpn(new PpnInput(_kappa, _b));
+        var deflection = WeakFieldService.ComputeLightDeflection(WeakFieldBodyPreset.Sun, 1.0);
+        var perihelion = WeakFieldService.ComputePerihelion(PerihelionPlanetPreset.Mercury);
+
+        _rows =
+        [
+            new ValidationExportRow(
+                "β_PPN",
+                ppn.BetaPpn.ToString("F8"),
+                "1.00000000",
+                Math.Abs(ppn.BetaPpn - 1.0) <= ppn.CombinedBetaBound ? "Pass" : "Warn"),
+            new ValidationExportRow(
+                "γ_PPN",
+                ppn.GammaPpn.ToString("F8"),
+                "1.00000000",
+                Math.Abs(ppn.GammaPpn - 1.0) <= ppn.CassiniGammaBound ? "Pass" : "Warn"),
+            new ValidationExportRow(
+                "Solar deflection (arcsec)",
+                deflection.DeflectionArcSeconds.ToString("F4"),
+                "1.75",
+                Math.Abs(deflection.DeflectionArcSeconds - 1.75) <= 0.1 ? "Pass" : "Warn"),
+            new ValidationExportRow(
+                "Mercury perihelion (arcsec/century)",
+                perihelion.TheoryArcSecPerCentury.ToString("F3"),
+                perihelion.EphemerisArcSecPerCentury.ToString("F3"),
+                perihelion.IsWithinTolerance ? "Pass" : "Warn")
+        ];
+
+        _record = CredibilityService.BuildReproducibilityRecord(new Dictionary<string, string>
+        {
+            ["kappa"] = _kappa.ToString("G17"),
+            ["b"] = _b.ToString("G17"),
+            ["rows"] = _rows.Count.ToString()
+        });
+    }
+
+    private void ResetDefaults()
+    {
+        _kappa = DefaultKappa;
+        _b = DefaultB;
+        Refresh();
+    }
+
+    private async Task ExportCsv()
+    {
+        var csv = CredibilityService.BuildCsv(_rows);
+        await DownloadAsync("trm-validation.csv", "text/csv", csv);
+    }
+
+    private async Task ExportLatex()
+    {
+        var tex = CredibilityService.BuildLatexTable("TRM Validation Snapshot", _rows);
+        await DownloadAsync("trm-validation.tex", "text/plain", tex);
+    }
+
+    private async Task DownloadAsync(string fileName, string contentType, string content)
+    {
+        var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(content));
+        await JS.InvokeVoidAsync("trmDownloadFile", fileName, contentType, base64);
+    }
+}

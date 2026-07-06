@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TRM.QuantumCore.Planck;
+using TRM.Core.Shared;
 using TRM.Simulations.Experiments;
 using Xunit.Abstractions;
 

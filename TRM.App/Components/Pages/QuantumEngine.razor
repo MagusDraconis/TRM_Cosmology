@@ -1,0 +1,218 @@
+@page "/quantum-engine"
+@using TRM.Core.QuantumLoops
+@using System.Diagnostics
+@inject IQuantumLoopService QuantumLoopService
+@implements IDisposable
+
+<PageTitle>Quantum Engine</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Quantum Engine & Loop Finiteness</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Parameters</MudText>
+
+            <MudNumericField T="double" Label="κ (mixing)" Value="_kappa" ValueChanged="OnKappaChanged" Immediate="true" Min="0.01" Max="2" Step="0.01" />
+            <MudNumericField T="double" Label="b (bilocal scale)" Value="_b" ValueChanged="OnBChanged" Immediate="true" Min="0.1" Max="4" Step="0.01" />
+            <MudNumericField T="double" Label="Λ²" Value="_lambdaSquared" ValueChanged="OnLambdaChanged" Immediate="true" Min="1" Max="5000" Step="1" />
+            <MudNumericField T="double" Label="p² min" Value="_pMin" ValueChanged="OnPMinChanged" Immediate="true" Min="0" Max="10000" Step="1" />
+            <MudNumericField T="double" Label="p² max" Value="_pMax" ValueChanged="OnPMaxChanged" Immediate="true" Min="1" Max="100000" Step="1" />
+            <MudNumericField T="int" Label="Samples" Value="_samples" ValueChanged="OnSamplesChanged" Immediate="true" Min="20" Max="300" Step="10" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RecomputeAsync">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaultsAsync">Reset Defaults</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Disabled="@(!_isComputing)" OnClick="CancelComputation">Cancel</MudButton>
+            </MudStack>
+
+            @if (_isComputing)
+            {
+                <MudProgressLinear Color="Color.Info" Indeterminate="true" Class="mt-2" />
+            }
+
+            <MudText Typo="Typo.caption" Class="mt-1">Last compute: @_lastComputeMs ms</MudText>
+
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.body2">Asymptotic indicator (at highest p²):</MudText>
+            <MudText Typo="Typo.body2">1-loop: @_tailOneLoop.ToString("E3")</MudText>
+            <MudText Typo="Typo.body2">2-loop: @_tailTwoLoop.ToString("E3")</MudText>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR-like baseline propagator: D(x) = 1 / (1 + x)</MudText>
+                <MudText Typo="Typo.caption">TRM UV form: D(x) = 1 / (1 + x + b x² + x⁴), with x = -p² / Λ²</MudText>
+                <MudText Typo="Typo.caption">Current: κ=@_kappa.ToString("F3"), b=@_b.ToString("F3"), Λ²=@_lambdaSquared.ToString("F1"), p²=[@_pMin.ToString("F0"), @_pMax.ToString("F0")], N=@_samples</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4 mb-3">
+            <MudText Typo="Typo.h6" GutterBottom="true">UV Drop-Off (Linear Scale)</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_linearSeries" XAxisLabels="_xAxisLabels" Width="100%" Height="320px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">UV Drop-Off (Log10 Scale)</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_logSeries" XAxisLabels="_xAxisLabels" Width="100%" Height="320px" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const double DefaultKappa = 0.3;
+    private const double DefaultB = 1.248;
+    private const double DefaultLambdaSquared = 400.0;
+    private const double DefaultPMin = 0.0;
+    private const double DefaultPMax = 4000.0;
+    private const int DefaultSamples = 80;
+
+    private double _kappa = DefaultKappa;
+    private double _b = DefaultB;
+    private double _lambdaSquared = DefaultLambdaSquared;
+    private double _pMin = DefaultPMin;
+    private double _pMax = DefaultPMax;
+    private int _samples = DefaultSamples;
+
+    private double _tailOneLoop;
+    private double _tailTwoLoop;
+
+    private string[] _xAxisLabels = [];
+    private List<ChartSeries> _linearSeries = [];
+    private List<ChartSeries> _logSeries = [];
+    private CancellationTokenSource? _computeCts;
+    private CancellationTokenSource? _debounceCts;
+    private bool _isComputing;
+    private long _lastComputeMs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RecomputeAsync();
+    }
+
+    private async Task ResetDefaultsAsync()
+    {
+        _kappa = DefaultKappa;
+        _b = DefaultB;
+        _lambdaSquared = DefaultLambdaSquared;
+        _pMin = DefaultPMin;
+        _pMax = DefaultPMax;
+        _samples = DefaultSamples;
+        await RecomputeAsync();
+    }
+
+    private async Task OnKappaChanged(double value)
+    {
+        _kappa = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnBChanged(double value)
+    {
+        _b = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnLambdaChanged(double value)
+    {
+        _lambdaSquared = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnPMinChanged(double value)
+    {
+        _pMin = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnPMaxChanged(double value)
+    {
+        _pMax = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnSamplesChanged(int value)
+    {
+        _samples = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task ScheduleRecomputeAsync()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(250, _debounceCts.Token);
+            await RecomputeAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private async Task RecomputeAsync()
+    {
+        _computeCts?.Cancel();
+        _computeCts?.Dispose();
+        _computeCts = new CancellationTokenSource();
+
+        var token = _computeCts.Token;
+        _isComputing = true;
+        await InvokeAsync(StateHasChanged);
+
+        var sw = Stopwatch.StartNew();
+
+        try
+        {
+            var input = new UvLoopInput(_kappa, _b, _lambdaSquared, _pMin, _pMax, _samples);
+            var series = await Task.Run(() => QuantumLoopService.ComputeUvLoopSeries(input), token);
+            token.ThrowIfCancellationRequested();
+
+            _xAxisLabels = series.Select(p => p.MomentumSquared.ToString("F0")).ToArray();
+
+            var oneLoop = series.Select(p => p.OneLoopIntegrand).ToArray();
+            var twoLoop = series.Select(p => p.TwoLoopIntegrand).ToArray();
+
+            _linearSeries =
+            [
+                new ChartSeries { Name = "1-Loop", Data = oneLoop },
+                new ChartSeries { Name = "2-Loop", Data = twoLoop }
+            ];
+
+            _logSeries =
+            [
+                new ChartSeries { Name = "log10(1-Loop)", Data = oneLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() },
+                new ChartSeries { Name = "log10(2-Loop)", Data = twoLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() }
+            ];
+
+            _tailOneLoop = oneLoop.Length > 0 ? oneLoop[^1] : 0;
+            _tailTwoLoop = twoLoop.Length > 0 ? twoLoop[^1] : 0;
+            _lastComputeMs = sw.ElapsedMilliseconds;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            _isComputing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void CancelComputation()
+    {
+        _computeCts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        _debounceCts?.Cancel();
+        _computeCts?.Cancel();
+        _debounceCts?.Dispose();
+        _computeCts?.Dispose();
+    }
+}

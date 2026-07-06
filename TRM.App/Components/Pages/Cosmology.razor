@@ -1,0 +1,195 @@
+@page "/cosmology"
+@using TRM.Core.Cosmology
+@using System.Diagnostics
+@inject ICosmologyService CosmologyService
+@implements IDisposable
+
+<PageTitle>Cosmology</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Galactic Rotation & SPARC</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudSelect T="string" Label="SPARC Galaxy" Value="_selectedGalaxy" ValueChanged="OnGalaxyChanged">
+                @foreach (var g in _galaxies)
+                {
+                    <MudSelectItem T="string" Value="@g.Name">@g.Name (Vflat @g.VFlatKmS.ToString("F0") km/s)</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="double" Label="Theory λ" Value="_lambda" ValueChanged="OnLambdaChanged" Min="0.2" Max="4" Step="0.05" Immediate="true" />
+            <MudNumericField T="int" Label="Samples" Value="_samples" ValueChanged="OnSamplesChanged" Min="12" Max="120" Step="2" Immediate="true" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RecomputeAsync">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaultsAsync">Reset Defaults</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Disabled="@(!_isComputing)" OnClick="CancelComputation">Cancel</MudButton>
+            </MudStack>
+
+            @if (_isComputing)
+            {
+                <MudProgressLinear Color="Color.Info" Indeterminate="true" Class="mt-2" />
+            }
+
+            <MudText Typo="Typo.caption" Class="mt-1">Last compute: @_lastComputeMs ms</MudText>
+
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.body2">Galaxy: @_result.GalaxyName</MudText>
+            <MudText Typo="Typo.body2">Vflat: @_result.VFlatKmS.ToString("F1") km/s</MudText>
+            <MudText Typo="Typo.body2">λ: @_result.Lambda.ToString("F2")</MudText>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR/Newton baseline: v_GR(r) derived from baryonic mass profile.</MudText>
+                <MudText Typo="Typo.caption">TRM curve: v_TRM(r, λ) with model correction parameter λ.</MudText>
+                <MudText Typo="Typo.caption">Current: galaxy=@_selectedGalaxy, λ=@_lambda.ToString("F2"), samples=@_samples, Vflat=@_result.VFlatKmS.ToString("F1") km/s</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4 mb-3">
+            <MudText Typo="Typo.h6" GutterBottom="true">Rotation Curve Overlay</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_series" XAxisLabels="_labels" Width="100%" Height="330px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Sampled Points</MudText>
+            <MudTable Items="_tableRows" Dense="true" Hover="true" Bordered="true" Striped="true">
+                <HeaderContent>
+                    <MudTh>R (kpc)</MudTh>
+                    <MudTh>Observed (km/s)</MudTh>
+                    <MudTh>Err</MudTh>
+                    <MudTh>GR (km/s)</MudTh>
+                    <MudTh>Theory (km/s)</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.RadiusKpc.ToString("F2")</MudTd>
+                    <MudTd>@context.ObservedKmS.ToString("F2")</MudTd>
+                    <MudTd>@context.ObservedErrorKmS.ToString("F2")</MudTd>
+                    <MudTd>@context.NewtonGrKmS.ToString("F2")</MudTd>
+                    <MudTd>@context.TheoryKmS.ToString("F2")</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const double DefaultLambda = 1.0;
+    private const int DefaultSamples = 50;
+
+    private List<CosmologyGalaxySummary> _galaxies = [];
+    private string _selectedGalaxy = string.Empty;
+    private double _lambda = DefaultLambda;
+    private int _samples = DefaultSamples;
+
+    private CosmologyRotationResult _result = new("", [], 0, 1.0);
+    private string[] _labels = [];
+    private List<ChartSeries> _series = [];
+    private List<CosmologyRotationPoint> _tableRows = [];
+    private CancellationTokenSource? _computeCts;
+    private CancellationTokenSource? _debounceCts;
+    private bool _isComputing;
+    private long _lastComputeMs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _galaxies = CosmologyService.GetAvailableGalaxies(120).ToList();
+        _selectedGalaxy = _galaxies.FirstOrDefault()?.Name ?? string.Empty;
+        await RecomputeAsync();
+    }
+
+    private async Task ResetDefaultsAsync()
+    {
+        _lambda = DefaultLambda;
+        _samples = DefaultSamples;
+        _selectedGalaxy = _galaxies.FirstOrDefault()?.Name ?? string.Empty;
+        await RecomputeAsync();
+    }
+
+    private async Task OnGalaxyChanged(string value)
+    {
+        _selectedGalaxy = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnLambdaChanged(double value)
+    {
+        _lambda = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task OnSamplesChanged(int value)
+    {
+        _samples = value;
+        await ScheduleRecomputeAsync();
+    }
+
+    private async Task ScheduleRecomputeAsync()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _debounceCts.Token);
+            await RecomputeAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private async Task RecomputeAsync()
+    {
+        _computeCts?.Cancel();
+        _computeCts?.Dispose();
+        _computeCts = new CancellationTokenSource();
+
+        var token = _computeCts.Token;
+        _isComputing = true;
+        await InvokeAsync(StateHasChanged);
+        var sw = Stopwatch.StartNew();
+
+        try
+        {
+            _result = await Task.Run(() => CosmologyService.ComputeRotationCurves(_selectedGalaxy, _lambda, _samples), token);
+            token.ThrowIfCancellationRequested();
+
+            _labels = _result.Points.Select(p => p.RadiusKpc.ToString("F1")).ToArray();
+            _series =
+            [
+                new ChartSeries { Name = "Observed", Data = _result.Points.Select(p => p.ObservedKmS).ToArray() },
+                new ChartSeries { Name = "GR (Newton)", Data = _result.Points.Select(p => p.NewtonGrKmS).ToArray() },
+                new ChartSeries { Name = "Theory", Data = _result.Points.Select(p => p.TheoryKmS).ToArray() }
+            ];
+
+            _tableRows = _result.Points.Take(15).ToList();
+            _lastComputeMs = sw.ElapsedMilliseconds;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            _isComputing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void CancelComputation()
+    {
+        _computeCts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        _debounceCts?.Cancel();
+        _computeCts?.Cancel();
+        _debounceCts?.Dispose();
+        _computeCts?.Dispose();
+    }
+}

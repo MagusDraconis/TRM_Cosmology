@@ -1,0 +1,88 @@
+@page "/perihelion"
+@using TRM.Core.WeakField
+@inject IWeakFieldService WeakFieldService
+
+<PageTitle>Perihelion</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Anomalous Perihelion Precession</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudSelect T="PerihelionPlanetPreset" Label="Planet" @bind-Value="_planet">
+                @foreach (var planet in Enum.GetValues<PerihelionPlanetPreset>())
+                {
+                    <MudSelectItem T="PerihelionPlanetPreset" Value="@planet">@planet</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Recompute">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaults">Reset Defaults</MudButton>
+            </MudStack>
+
+            <MudDivider Class="my-3" />
+            <MudChip T="string" Color="@(_result.IsWithinTolerance ? Color.Success : Color.Warning)" Variant="Variant.Filled">
+                @(_result.IsWithinTolerance ? "Within ephemeris tolerance" : "Outside ephemeris tolerance")
+            </MudChip>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR reference: Δω_GR = 6πGM / (c² a(1-e²))</MudText>
+                <MudText Typo="Typo.caption">TRM compares model perihelion prediction to Einstein and ephemeris values.</MudText>
+                <MudText Typo="Typo.caption">Current: planet=@_planet, theory=@_result.TheoryArcSecPerCentury.ToString("F3"), ephemeris=@_result.EphemerisArcSecPerCentury.ToString("F3") arcsec/century</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Precession Scoreboard (arcsec/century)</MudText>
+
+            <MudTable Items="_rows" Dense="true" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>Metric</MudTh>
+                    <MudTh>Value</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Label</MudTd>
+                    <MudTd>@context.Value</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const PerihelionPlanetPreset DefaultPlanet = PerihelionPlanetPreset.Mercury;
+
+    private PerihelionPlanetPreset _planet = DefaultPlanet;
+    private PerihelionResult _result = new("Mercury", 0, 0, 0, 0, false);
+    private List<RowItem> _rows = [];
+
+    protected override void OnInitialized()
+    {
+        Recompute();
+    }
+
+    private void Recompute()
+    {
+        _result = WeakFieldService.ComputePerihelion(_planet);
+
+        _rows =
+        [
+            new RowItem("Theory", _result.TheoryArcSecPerCentury.ToString("F3")),
+            new RowItem("Einstein", _result.EinsteinArcSecPerCentury.ToString("F3")),
+            new RowItem("Ephemeris", _result.EphemerisArcSecPerCentury.ToString("F3")),
+            new RowItem("|Theory - Ephemeris|", _result.AbsoluteDeltaToEphemeris.ToString("F3"))
+        ];
+    }
+
+    private void ResetDefaults()
+    {
+        _planet = DefaultPlanet;
+        Recompute();
+    }
+
+    private sealed record RowItem(string Label, string Value);
+}

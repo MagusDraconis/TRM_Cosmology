@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TRM.QuantumCore.Planck;
+using TRM.Core.Shared;
 
 namespace TRM.Simulations.Experiments;
 

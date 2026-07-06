@@ -1,0 +1,127 @@
+@page "/ppn"
+@using TRM.Core.WeakField
+@inject IWeakFieldService WeakFieldService
+
+<PageTitle>PPN Validator</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">PPN Validator</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Parameters</MudText>
+            <MudNumericField T="double" Label="κ (mixing)" @bind-Value="_kappa" Min="0.0" Max="2.0" Step="0.01" />
+            <MudNumericField T="double" Label="b (bilocal scale)" @bind-Value="_b" Min="0.1" Max="4.0" Step="0.01" />
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Recompute">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaults">Reset Defaults</MudButton>
+            </MudStack>
+
+            <MudDivider Class="my-3" />
+
+            <MudText Typo="Typo.body2">Optimized target: b ≈ 1.248, κ ≈ 0.3</MudText>
+            <MudChip T="string" Color="@(_result.IsOptimizedZone ? Color.Success : Color.Default)" Variant="Variant.Filled" Class="mt-2">
+                @(_result.IsOptimizedZone ? "Optimized zone" : "Outside optimized zone")
+            </MudChip>
+
+            <MudChip T="string" Color="@(_result.IsWithinBounds ? Color.Success : Color.Error)" Variant="Variant.Filled" Class="mt-2 ml-2">
+                @(_result.IsWithinBounds ? "PASS (within bounds)" : "FAIL (out of bounds)")
+            </MudChip>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR reference: β_PPN = 1, γ_PPN = 1</MudText>
+                <MudText Typo="Typo.caption">TRM evaluates β_PPN(κ,b), γ_PPN(κ,b) and compares to experimental bounds.</MudText>
+                <MudText Typo="Typo.caption">Current: κ=@_kappa.ToString("F3"), b=@_b.ToString("F3"), β=@_result.BetaPpn.ToString("F8"), γ=@_result.GammaPpn.ToString("F8")</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Solar-System PPN Comparison</MudText>
+
+            <MudTable Items="_rows" Dense="true" Hover="true" Bordered="true" Striped="true">
+                <HeaderContent>
+                    <MudTh>Parameter</MudTh>
+                    <MudTh>Theory</MudTh>
+                    <MudTh>GR</MudTh>
+                    <MudTh>Bound</MudTh>
+                    <MudTh>Status</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Parameter">@context.Name</MudTd>
+                    <MudTd DataLabel="Theory">@context.TheoryValue</MudTd>
+                    <MudTd DataLabel="GR">@context.GrValue</MudTd>
+                    <MudTd DataLabel="Bound">@context.Bound</MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Color="@(context.IsPass ? Color.Success : Color.Error)" Variant="Variant.Filled" Size="Size.Small">
+                            @(context.IsPass ? "Pass" : "Fail")
+                        </MudChip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const double DefaultKappa = 0.3;
+    private const double DefaultB = 1.248;
+
+    private double _kappa = DefaultKappa;
+    private double _b = DefaultB;
+
+    private PpnResult _result = new(
+        1,
+        1,
+        0,
+        0,
+        2.3e-5,
+        2.3e-4,
+        true,
+        true);
+
+    private List<PpnRow> _rows = [];
+
+    protected override void OnInitialized()
+    {
+        Recompute();
+    }
+
+    private void ResetDefaults()
+    {
+        _kappa = DefaultKappa;
+        _b = DefaultB;
+        Recompute();
+    }
+
+    private void Recompute()
+    {
+        _result = WeakFieldService.ComputePpn(new PpnInput(_kappa, _b));
+
+        _rows =
+        [
+            new PpnRow(
+                "β_PPN",
+                _result.BetaPpn.ToString("F8"),
+                "1.00000000",
+                $"|β-1| ≤ {_result.CombinedBetaBound:E2}",
+                Math.Abs(_result.BetaPpn - 1.0) <= _result.CombinedBetaBound),
+
+            new PpnRow(
+                "γ_PPN",
+                _result.GammaPpn.ToString("F8"),
+                "1.00000000",
+                $"|γ-1| ≤ {_result.CassiniGammaBound:E2}",
+                Math.Abs(_result.GammaPpn - 1.0) <= _result.CassiniGammaBound)
+        ];
+    }
+
+    private sealed record PpnRow(
+        string Name,
+        string TheoryValue,
+        string GrValue,
+        string Bound,
+        bool IsPass);
+}

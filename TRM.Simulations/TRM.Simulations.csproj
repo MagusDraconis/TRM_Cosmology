@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TRM.QuantumCore\TRM.QuantumCore.csproj" />
+    <ProjectReference Include="..\TRM.Core\TRM.Core.csproj" />
   </ItemGroup>
 
 </Project>

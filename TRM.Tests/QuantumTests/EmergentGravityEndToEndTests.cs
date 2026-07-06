@@ -1,5 +1,5 @@
 using System;
-using TRM.QuantumCore.Planck;
+using TRM.Core.Shared;
 using Xunit.Abstractions;
 
 namespace TRM.Tests.QuantumTests;
@@ -794,6 +794,7 @@ public class EmergentGravityEndToEndTests
         Assert.InRange(maxError, 0.0, 0.15);
     }
 
+    [Trait("Category", "LongRunning")]
     [Trait("Category", "PhysicsValidation")]
     [Fact]
     /// <summary>
@@ -1671,6 +1672,7 @@ public class EmergentGravityEndToEndTests
         Assert.True(bestMaxErrorAcross <= 0.75, "Tick-field envelope should remain bounded.");
     }
 
+    [Trait("Category", "LongRunning")]
     [Trait("Category", "PhysicsValidation")]
     [Fact]
     /// <summary>

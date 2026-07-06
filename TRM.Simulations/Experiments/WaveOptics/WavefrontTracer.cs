@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TRM.QuantumCore.Planck;
+using TRM.Core.Shared;
 
 namespace TRM.Simulations.Experiments.WaveOptics;
 

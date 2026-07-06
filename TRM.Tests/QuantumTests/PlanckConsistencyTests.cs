@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using TRM.QuantumCore.Planck;
+using TRM.Core.Shared;
 using TRM.Simulations.Experiments;
 using Xunit.Abstractions;
 
@@ -11,7 +11,7 @@ namespace TRM.Tests.QuantumTests;
 /// <summary>
 /// Consistency tests for Planck base/derived constants and scan behavior.
 /// Status: tested (core consistency), exploratory/diagnostic (multi-scan export).
-/// Related implementation: TRM.QuantumCore/Planck/PlanckConstants.cs and DerivedConstants.cs.
+/// Related implementation: TRM.Core.Shared/PlanckConstants.cs and DerivedConstants.cs.
 /// Related docs: docs/review/TRM_Real_Physics_Test_Coverage.md.
 /// </summary>
 public class PlanckConsistencyTests

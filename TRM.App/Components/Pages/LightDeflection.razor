@@ -1,0 +1,85 @@
+@page "/light-deflection"
+@using TRM.Core.WeakField
+@inject IWeakFieldService WeakFieldService
+
+<PageTitle>Light Deflection</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Light Deflection</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudSelect T="WeakFieldBodyPreset" Label="Body" @bind-Value="_body">
+                @foreach (var body in Enum.GetValues<WeakFieldBodyPreset>())
+                {
+                    <MudSelectItem T="WeakFieldBodyPreset" Value="@body">@body</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="double" Label="Impact parameter multiplier" @bind-Value="_impactMultiplier" Min="0.25" Max="30" Step="0.1" />
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Recompute">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaults">Reset Defaults</MudButton>
+            </MudStack>
+
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.body2">Deflection: @_result.DeflectionArcSeconds.ToString("F4") arcsec</MudText>
+            <MudText Typo="Typo.body2">Sun baseline: @_result.SolarBaselineArcSeconds.ToString("F4") arcsec</MudText>
+
+            <MudChip T="string" Color="@(Math.Abs(_result.BaselineDeltaArcSeconds) <= 0.25 ? Color.Success : Color.Warning)" Variant="Variant.Filled" Class="mt-2">
+                Δ baseline: @_result.BaselineDeltaArcSeconds.ToString("F4") arcsec
+            </MudChip>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR reference (weak field): Δθ_GR ≈ 4GM / (c² b_impact)</MudText>
+                <MudText Typo="Typo.caption">TRM computes deflection with model-specific weak-field corrections and reports baseline delta.</MudText>
+                <MudText Typo="Typo.caption">Current: body=@_body, impact multiplier=@_impactMultiplier.ToString("F2"), Δθ=@_result.DeflectionArcSeconds.ToString("F4") arcsec</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Deflection vs Impact Parameter</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_series" XAxisLabels="_labels" Width="100%" Height="330px" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const WeakFieldBodyPreset DefaultBody = WeakFieldBodyPreset.Sun;
+    private const double DefaultImpactMultiplier = 1.0;
+
+    private WeakFieldBodyPreset _body = DefaultBody;
+    private double _impactMultiplier = DefaultImpactMultiplier;
+
+    private LightDeflectionResult _result = new(0, 0, 0, 0);
+    private string[] _labels = [];
+    private List<ChartSeries> _series = [];
+
+    protected override void OnInitialized()
+    {
+        Recompute();
+    }
+
+    private void Recompute()
+    {
+        _result = WeakFieldService.ComputeLightDeflection(_body, _impactMultiplier);
+
+        var multipliers = Enumerable.Range(1, 20).Select(i => i * 0.5).ToArray();
+        var values = multipliers
+            .Select(m => WeakFieldService.ComputeLightDeflection(_body, m).DeflectionArcSeconds)
+            .ToArray();
+
+        _labels = multipliers.Select(m => m.ToString("F1")).ToArray();
+        _series = [new ChartSeries { Name = "Δθ (arcsec)", Data = values }];
+    }
+
+    private void ResetDefaults()
+    {
+        _body = DefaultBody;
+        _impactMultiplier = DefaultImpactMultiplier;
+        Recompute();
+    }
+}

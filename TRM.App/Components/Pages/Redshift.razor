@@ -1,0 +1,90 @@
+@page "/redshift"
+@using TRM.Core.WeakField
+@inject IWeakFieldService WeakFieldService
+
+<PageTitle>Redshift</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Gravitational Redshift & Time Dilation</MudText>
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4">
+            <MudSelect T="WeakFieldBodyPreset" Label="Body preset" @bind-Value="_body">
+                @foreach (var body in Enum.GetValues<WeakFieldBodyPreset>())
+                {
+                    <MudSelectItem T="WeakFieldBodyPreset" Value="@body">@body</MudSelectItem>
+                }
+            </MudSelect>
+            <MudNumericField T="double" Label="Max radius multiplier" @bind-Value="_maxRadiusMultiplier" Min="1.1" Max="100" Step="0.5" />
+            <MudNumericField T="int" Label="Samples" @bind-Value="_samples" Min="8" Max="120" Step="2" />
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Recompute">Recompute</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDefaults">Reset Defaults</MudButton>
+            </MudStack>
+
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.body2">Surface shift (TRM): @_surfaceTrm.ToString("E4")</MudText>
+            <MudText Typo="Typo.body2">Surface shift (GR): @_surfaceGr.ToString("E4")</MudText>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
+                <MudText Typo="Typo.caption">GR weak-field redshift: Δν/ν ≈ ΔΦ / c²</MudText>
+                <MudText Typo="Typo.caption">TRM compares modified weak-field phase response against GR baseline across radius.</MudText>
+                <MudText Typo="Typo.caption">Current: body=@_body, r_max multiplier=@_maxRadiusMultiplier.ToString("F2"), samples=@_samples</MudText>
+            </MudPaper>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Δν/ν vs Radius</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="_series" XAxisLabels="_labels" Width="100%" Height="330px" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const WeakFieldBodyPreset DefaultBody = WeakFieldBodyPreset.Earth;
+    private const double DefaultMaxRadiusMultiplier = 10;
+    private const int DefaultSamples = 40;
+
+    private WeakFieldBodyPreset _body = DefaultBody;
+    private double _maxRadiusMultiplier = DefaultMaxRadiusMultiplier;
+    private int _samples = DefaultSamples;
+
+    private string[] _labels = [];
+    private List<ChartSeries> _series = [];
+    private double _surfaceTrm;
+    private double _surfaceGr;
+
+    protected override void OnInitialized()
+    {
+        Recompute();
+    }
+
+    private void ResetDefaults()
+    {
+        _body = DefaultBody;
+        _maxRadiusMultiplier = DefaultMaxRadiusMultiplier;
+        _samples = DefaultSamples;
+        Recompute();
+    }
+
+    private void Recompute()
+    {
+        var points = WeakFieldService.ComputeRedshiftSeries(_body, _maxRadiusMultiplier, _samples);
+        _labels = points.Select((_, i) => i.ToString()).ToArray();
+
+        var trm = points.Select(p => p.TrmDeltaNuOverNu).ToArray();
+        var gr = points.Select(p => p.GrDeltaNuOverNu).ToArray();
+
+        _series =
+        [
+            new ChartSeries { Name = "TRM", Data = trm },
+            new ChartSeries { Name = "GR", Data = gr }
+        ];
+
+        _surfaceTrm = trm.FirstOrDefault();
+        _surfaceGr = gr.FirstOrDefault();
+    }
+}
