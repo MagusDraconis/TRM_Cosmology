@@ -26,10 +26,24 @@
             <MudText Typo="Typo.body2">Surface shift (TRM): @_surfaceTrm.ToString("E4")</MudText>
             <MudText Typo="Typo.body2">Surface shift (GR): @_surfaceGr.ToString("E4")</MudText>
 
-            <MudPaper Class="pa-3 mt-3" Outlined="true">
+            <MudPaper Class="pa-3 mt-3" Outlined="true" Style="max-height: 80vh; overflow-y: auto;">
                 <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
-                <MudText Typo="Typo.caption">GR weak-field redshift: Δν/ν ≈ ΔΦ / c²</MudText>
-                <MudText Typo="Typo.caption">TRM compares modified weak-field phase response against GR baseline across radius.</MudText>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">GR weak-field redshift (Einstein):</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\frac{\Delta\nu}{\nu}\approx\frac{GM}{c^2 r}$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">Potential form:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\frac{\Delta\nu}{\nu}\approx\frac{\Delta\Phi}{c^2},\qquad\Phi=-\frac{GM}{r}$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">TRM correction:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\left(\frac{\Delta\nu}{\nu}\right)_{\text{TRM}}=\left(\frac{\Delta\nu}{\nu}\right)_{\text{GR}}\cdot f(\kappa,b),\qquad f(\kappa,b)\xrightarrow[\kappa\to0.3,\;b\to1.248]{}1$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">Correction scaling:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$f(\kappa,b)=1+\mathcal{O}(|\kappa-\kappa_0|+|b-b_0|)$$" />
+                </div>
                 <MudText Typo="Typo.caption">Current: body=@_body, r_max multiplier=@_maxRadiusMultiplier.ToString("F2"), samples=@_samples</MudText>
             </MudPaper>
         </MudPaper>
@@ -39,6 +53,20 @@
         <MudPaper Class="pa-4">
             <MudText Typo="Typo.h6" GutterBottom="true">Δν/ν vs Radius</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="_series" XAxisLabels="_labels" Width="100%" Height="330px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-3" Outlined="true">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
+            <MudText Typo="Typo.body2">
+                TRM gravitational redshift agrees with the GR prediction
+                <LatexDisplay Content="$\Delta\nu/\nu\approx GM/c^2 r$" /> to within a correction factor
+                <LatexDisplay Content="$f(\kappa,b)\to 1$" /> at the optimized parameters. The deviation
+                scales as <LatexDisplay Content="$\mathcal{O}(|\kappa-\kappa_0|+|b-b_0|)$" />, remaining
+                below experimental sensitivity for near-optimal parameter choices. This demonstrates that
+                TRM smoothly recovers the Einstein equivalence principle in the weak-field, low-velocity
+                limit while allowing for testable departures when the UV parameters deviate from their
+                optimized values.
+            </MudText>
         </MudPaper>
     </MudItem>
 </MudGrid>

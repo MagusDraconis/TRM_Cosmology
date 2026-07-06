@@ -34,14 +34,32 @@
             <MudText Typo="Typo.caption" Class="mt-1">Last compute: @_lastComputeMs ms</MudText>
 
             <MudDivider Class="my-3" />
-            <MudText Typo="Typo.body2">Asymptotic indicator (at highest p²):</MudText>
-            <MudText Typo="Typo.body2">1-loop: @_tailOneLoop.ToString("E3")</MudText>
-            <MudText Typo="Typo.body2">2-loop: @_tailTwoLoop.ToString("E3")</MudText>
+            <MudText Typo="Typo.subtitle2">TRM (regularized)</MudText>
+            <MudText Typo="Typo.body2">1-loop tail: @_tailOneLoop.ToString("E3")</MudText>
+            <MudText Typo="Typo.body2">2-loop tail: @_tailTwoLoop.ToString("E3")</MudText>
+            <MudDivider Class="my-2" />
+            <MudText Typo="Typo.subtitle2">GR (bare)</MudText>
+            <MudText Typo="Typo.body2">1-loop tail: @_tailGrOneLoop.ToString("E3")</MudText>
+            <MudText Typo="Typo.body2">2-loop tail: @_tailGrTwoLoop.ToString("E3")</MudText>
 
-            <MudPaper Class="pa-3 mt-3" Outlined="true">
+            <MudChip T="string" Color="@(_tailOneLoop < _tailGrOneLoop ? Color.Success : Color.Warning)" Variant="Variant.Filled" Class="mt-2">
+                @(_tailOneLoop < _tailGrOneLoop ? "TRM UV-suppressed vs GR" : "Check parameters")
+            </MudChip>
+
+            <MudPaper Class="pa-3 mt-3" Outlined="true" Style="max-height: 80vh; overflow-y: auto;">
                 <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
-                <MudText Typo="Typo.caption">GR-like baseline propagator: D(x) = 1 / (1 + x)</MudText>
-                <MudText Typo="Typo.caption">TRM UV form: D(x) = 1 / (1 + x + b x² + x⁴), with x = -p² / Λ²</MudText>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">GR baseline — pole at x = −1:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$D_{\text{GR}}(x)=\frac{1}{1+x}\;\xrightarrow{p^2\to\Lambda^2}\;\infty$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">TRM UV-regularized — finite everywhere:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$D_{\text{TRM}}(x)=\frac{1}{1+x+b x^2+x^4},\qquad x=-\frac{p^2}{\Lambda^2}$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">1-loop integrands:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\mathcal{I}^{(1)}_{\text{GR}}=|D_{\text{GR}}|,\qquad\mathcal{I}^{(1)}_{\text{TRM}}=|D_{\text{TRM}}|\;e^{-\kappa p^2/\Lambda^2}$$" />
+                </div>
                 <MudText Typo="Typo.caption">Current: κ=@_kappa.ToString("F3"), b=@_b.ToString("F3"), Λ²=@_lambdaSquared.ToString("F1"), p²=[@_pMin.ToString("F0"), @_pMax.ToString("F0")], N=@_samples</MudText>
             </MudPaper>
         </MudPaper>
@@ -56,6 +74,17 @@
         <MudPaper Class="pa-4">
             <MudText Typo="Typo.h6" GutterBottom="true">UV Drop-Off (Log10 Scale)</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="_logSeries" XAxisLabels="_xAxisLabels" Width="100%" Height="320px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-3" Outlined="true">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
+            <MudText Typo="Typo.body2">
+                The TRM propagator <LatexDisplay Content="$D(p^2)=1/(1+x+bx^2+x^4)$" /> with damping
+                <LatexDisplay Content="$e^{-\kappa p^2/\Lambda^2}$" /> renders both loop integrands
+                finite. In contrast, the bare GR propagator <LatexDisplay Content="$1/(1+x)$" />
+                diverges at <LatexDisplay Content="$p^2=\Lambda^2$" />. The UV cutoff
+                <LatexDisplay Content="$\Lambda\sim 1/\ell_P$" /> emerges from discrete lattice spacing.
+            </MudText>
         </MudPaper>
     </MudItem>
 </MudGrid>
@@ -77,6 +106,8 @@
 
     private double _tailOneLoop;
     private double _tailTwoLoop;
+    private double _tailGrOneLoop;
+    private double _tailGrTwoLoop;
 
     private string[] _xAxisLabels = [];
     private List<ChartSeries> _linearSeries = [];
@@ -176,21 +207,29 @@
 
             var oneLoop = series.Select(p => p.OneLoopIntegrand).ToArray();
             var twoLoop = series.Select(p => p.TwoLoopIntegrand).ToArray();
+            var grOneLoop = series.Select(p => p.GrOneLoopIntegrand).ToArray();
+            var grTwoLoop = series.Select(p => p.GrTwoLoopIntegrand).ToArray();
 
             _linearSeries =
             [
-                new ChartSeries { Name = "1-Loop", Data = oneLoop },
-                new ChartSeries { Name = "2-Loop", Data = twoLoop }
+                new ChartSeries { Name = "TRM 1-Loop", Data = oneLoop },
+                new ChartSeries { Name = "TRM 2-Loop", Data = twoLoop },
+                new ChartSeries { Name = "GR 1-Loop", Data = grOneLoop },
+                new ChartSeries { Name = "GR 2-Loop", Data = grTwoLoop }
             ];
 
             _logSeries =
             [
-                new ChartSeries { Name = "log10(1-Loop)", Data = oneLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() },
-                new ChartSeries { Name = "log10(2-Loop)", Data = twoLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() }
+                new ChartSeries { Name = "log10 TRM 1-Loop", Data = oneLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() },
+                new ChartSeries { Name = "log10 TRM 2-Loop", Data = twoLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() },
+                new ChartSeries { Name = "log10 GR 1-Loop", Data = grOneLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() },
+                new ChartSeries { Name = "log10 GR 2-Loop", Data = grTwoLoop.Select(v => Math.Log10(Math.Max(v, 1e-30))).ToArray() }
             ];
 
             _tailOneLoop = oneLoop.Length > 0 ? oneLoop[^1] : 0;
             _tailTwoLoop = twoLoop.Length > 0 ? twoLoop[^1] : 0;
+            _tailGrOneLoop = grOneLoop.Length > 0 ? grOneLoop[^1] : 0;
+            _tailGrTwoLoop = grTwoLoop.Length > 0 ? grTwoLoop[^1] : 0;
             _lastComputeMs = sw.ElapsedMilliseconds;
         }
         catch (OperationCanceledException)

@@ -49,7 +49,8 @@ public class WeakFieldServiceTests
 
         var result = service.ComputeLightDeflection(WeakFieldBodyPreset.Sun, impactParameterMultiplier: 1.0);
 
-        Assert.InRange(result.DeflectionArcSeconds, 1.70, 1.80);
+        Assert.InRange(result.GrDeflectionArcSeconds, 1.70, 1.80);
+        Assert.InRange(result.TrmDeflectionArcSeconds, 1.70, 1.80);
     }
 
     [Fact]
@@ -59,7 +60,8 @@ public class WeakFieldServiceTests
 
         var result = service.ComputePerihelion(PerihelionPlanetPreset.Mercury);
 
-        Assert.InRange(result.TheoryArcSecPerCentury, 42.0, 44.0);
+        Assert.InRange(result.GrArcSecPerCentury, 42.0, 44.0);
+        Assert.InRange(result.TrmArcSecPerCentury, 42.0, 44.0);
         Assert.True(result.IsWithinTolerance);
     }
 }

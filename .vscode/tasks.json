@@ -16,6 +16,19 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "build TRM.App",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}\\TRM.App\\TRM.App.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
         }
     ]
 }

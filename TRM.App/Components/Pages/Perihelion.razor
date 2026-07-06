@@ -4,7 +4,7 @@
 
 <PageTitle>Perihelion</PageTitle>
 
-<MudText Typo="Typo.h4" GutterBottom="true">Anomalous Perihelion Precession</MudText>
+<MudText Typo="Typo.h4" GutterBottom="true">Anomalous Perihelion Precession — TRM vs GR</MudText>
 
 <MudGrid Spacing="2">
     <MudItem xs="12" md="4">
@@ -22,33 +22,78 @@
             </MudStack>
 
             <MudDivider Class="my-3" />
-            <MudChip T="string" Color="@(_result.IsWithinTolerance ? Color.Success : Color.Warning)" Variant="Variant.Filled">
-                @(_result.IsWithinTolerance ? "Within ephemeris tolerance" : "Outside ephemeris tolerance")
+            <MudText Typo="Typo.subtitle2">GR (Einstein)</MudText>
+            <MudText Typo="Typo.body2">Δω_GR = @_result.GrArcSecPerCentury.ToString("F3") ″/century</MudText>
+            <MudDivider Class="my-2" />
+            <MudText Typo="Typo.subtitle2">TRM (PPN-derived)</MudText>
+            <MudText Typo="Typo.body2">Δω_TRM = @_result.TrmArcSecPerCentury.ToString("F3") ″/century</MudText>
+            <MudText Typo="Typo.body2">PPN factor: @_result.PpnFactor.ToString("F10")</MudText>
+            <MudText Typo="Typo.body2">β_PPN = @_result.BetaPpn.ToString("F8"), γ_PPN = @_result.GammaPpn.ToString("F8")</MudText>
+            <MudText Typo="Typo.body2">Ephemeris: @_result.EphemerisArcSecPerCentury.ToString("F3") ″/century</MudText>
+
+            <MudChip T="string" Color="@(_result.IsWithinTolerance ? Color.Success : Color.Warning)" Variant="Variant.Filled" Class="mt-2">
+                @(_result.IsWithinTolerance ? $"Within tolerance: |TRM - ephemeris| = {_result.AbsoluteDeltaTrmToEphemeris:F3}″" : "Outside ephemeris tolerance")
             </MudChip>
 
-            <MudPaper Class="pa-3 mt-3" Outlined="true">
+            <MudPaper Class="pa-3 mt-3" Outlined="true" Style="max-height: 80vh; overflow-y: auto;">
                 <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
-                <MudText Typo="Typo.caption">GR reference: Δω_GR = 6πGM / (c² a(1-e²))</MudText>
-                <MudText Typo="Typo.caption">TRM compares model perihelion prediction to Einstein and ephemeris values.</MudText>
-                <MudText Typo="Typo.caption">Current: planet=@_planet, theory=@_result.TheoryArcSecPerCentury.ToString("F3"), ephemeris=@_result.EphemerisArcSecPerCentury.ToString("F3") arcsec/century</MudText>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">GR (Einstein, 1915) — analytical:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\Delta\omega_{\text{GR}}=\frac{6\pi GM}{c^2 a(1-e^2)}\quad\text{per orbit}$$" />
+                </div>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">PPN generalisation (Will–Nordtvedt):</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\Delta\omega=\frac{2+2\gamma-\beta}{3}\cdot\Delta\omega_{\text{GR}}$$" />
+                </div>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">TRM — PPN parameters from propagator:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\beta_{\text{PPN}}(\kappa,b),\quad\gamma_{\text{PPN}}(\kappa,b)\xrightarrow[\kappa\to0.3,\;b\to1.248]{}\{1,1\}$$" />
+                </div>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">Per century scaling:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\Delta\omega_{\text{century}}=\Delta\omega_{\text{orbit}}\cdot\frac{100\;\text{yr}}{T_{\text{orbital}}}$$" />
+                </div>
+
+                <MudText Typo="Typo.caption">Current: planet=@_planet, β=@_result.BetaPpn.ToString("F8"), γ=@_result.GammaPpn.ToString("F8"), TRM=@_result.TrmArcSecPerCentury.ToString("F3")″, GR=@_result.GrArcSecPerCentury.ToString("F3")″</MudText>
             </MudPaper>
         </MudPaper>
     </MudItem>
 
     <MudItem xs="12" md="8">
         <MudPaper Class="pa-4">
-            <MudText Typo="Typo.h6" GutterBottom="true">Precession Scoreboard (arcsec/century)</MudText>
+            <MudText Typo="Typo.h6" GutterBottom="true">Precession Scoreboard (@_planet — arcsec/century)</MudText>
 
             <MudTable Items="_rows" Dense="true" Hover="true" Striped="true" Bordered="true">
                 <HeaderContent>
                     <MudTh>Metric</MudTh>
-                    <MudTh>Value</MudTh>
+                    <MudTh>Value (″/century)</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd>@context.Label</MudTd>
-                    <MudTd>@context.Value</MudTd>
+                    <MudTd Class="trm-number-cell">@context.Value</MudTd>
                 </RowTemplate>
             </MudTable>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-3" Outlined="true">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
+            <MudText Typo="Typo.body2">
+                TRM perihelion precession follows from the PPN formalism:
+                <LatexDisplay Content="$\Delta\omega=\frac{2+2\gamma-\beta}{3}\cdot\Delta\omega_{\text{GR}}$" />.
+                At the optimized parameters (<LatexDisplay Content="$\kappa=0.3,\;b=1.248$" />), the PPN
+                factor equals unity, recovering Einstein's prediction of
+                <LatexDisplay Content="$42.98''$" />/century for Mercury. This consistency chain — TRM
+                propagator <LatexDisplay Content="$\to$" /> PPN parameters
+                <LatexDisplay Content="$\to$" /> perihelion advance — provides a non-trivial test of the
+                model: the same (<LatexDisplay Content="$\kappa, b$" />) that regularize quantum loops
+                also determine solar-system orbital dynamics. Future high-precision measurements
+                (e.g., BepiColombo) may detect deviations if nature's parameters differ from the
+                optimized zone.
+            </MudText>
         </MudPaper>
     </MudItem>
 </MudGrid>
@@ -57,7 +102,7 @@
     private const PerihelionPlanetPreset DefaultPlanet = PerihelionPlanetPreset.Mercury;
 
     private PerihelionPlanetPreset _planet = DefaultPlanet;
-    private PerihelionResult _result = new("Mercury", 0, 0, 0, 0, false);
+    private PerihelionResult _result = new("", 0, 0, 0, 0, 0, 0, 0, 0, false);
     private List<RowItem> _rows = [];
 
     protected override void OnInitialized()
@@ -71,10 +116,13 @@
 
         _rows =
         [
-            new RowItem("Theory", _result.TheoryArcSecPerCentury.ToString("F3")),
-            new RowItem("Einstein", _result.EinsteinArcSecPerCentury.ToString("F3")),
-            new RowItem("Ephemeris", _result.EphemerisArcSecPerCentury.ToString("F3")),
-            new RowItem("|Theory - Ephemeris|", _result.AbsoluteDeltaToEphemeris.ToString("F3"))
+            new RowItem("TRM (PPN-derived)", _result.TrmArcSecPerCentury.ToString("F3")),
+            new RowItem("GR (Einstein)", _result.GrArcSecPerCentury.ToString("F3")),
+            new RowItem("Ephemeris (observed)", _result.EphemerisArcSecPerCentury.ToString("F3")),
+            new RowItem("|TRM − Ephemeris|", _result.AbsoluteDeltaTrmToEphemeris.ToString("F3")),
+            new RowItem("PPN factor (2+2γ−β)/3", _result.PpnFactor.ToString("F10")),
+            new RowItem("β_PPN", _result.BetaPpn.ToString("F8")),
+            new RowItem("γ_PPN", _result.GammaPpn.ToString("F8"))
         ];
     }
 

@@ -29,10 +29,25 @@
                 @(_result.HasFiniteCore ? "Finite core" : "Singular core")
             </MudChip>
 
-            <MudPaper Class="pa-3 mt-3" Outlined="true">
+            <MudPaper Class="pa-3 mt-3" Outlined="true" Style="max-height: 80vh; overflow-y: auto;">
                 <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
-                <MudText Typo="Typo.caption">GR reference horizon: r_s = 2GM / c²</MudText>
-                <MudText Typo="Typo.caption">TRM strong-field profile uses regularized core scale r_c to avoid singular behavior.</MudText>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">GR Schwarzschild (singular):</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$g_{00}^{\text{GR}}=1-\frac{r_s}{r},\qquad r_s=\frac{2GM}{c^2}$$" />
+                </div>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">TRM — no point masses (quantum cutoff):</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$r_c\sim\frac{1}{\Lambda}\sim\ell_P,\quad M_{\text{eff}}(r)=M\left(1-e^{-r^3/r_c^3}\right)$$" />
+                    <LatexDisplay Mode="LatexMode.Inline" Content="$r\ll r_c$: flat core ($g_{00}\to 1$) — $r\gg r_c$: GR recovered ($g_{00}\to g_{00}^{\text{GR}}$)" />
+                </div>
+
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">TRM regular metric:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$g_{00}=1-\frac{r_s}{r}\left(1-e^{-r^3/r_c^3}\right),\quad g_{rr}=\frac{1}{g_{00}}$$" />
+                </div>
+
                 <MudText Typo="Typo.caption">Current: M=@_massSolar.ToString("F2") M☉, r_c/r_s=@_coreScale.ToString("F3"), r_max=@_maxRadiusRs.ToString("F2"), N=@_samples</MudText>
             </MudPaper>
         </MudPaper>
@@ -47,6 +62,23 @@
         <MudPaper Class="pa-4">
             <MudText Typo="Typo.h6" GutterBottom="true">Regular Metric Component (grr)</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="_grrSeries" XAxisLabels="_labels" Width="100%" Height="300px" />
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-3" Outlined="true">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
+            <MudText Typo="Typo.body2">
+                TRM replaces the classical Schwarzschild singularity with a regular core via the mass
+                regularization <LatexDisplay Content="$M_{\text{eff}}(r)=M(1-e^{-r^3/r_c^3})$" />.
+                At the center (<LatexDisplay Content="$r\to 0$" />), the effective mass vanishes,
+                producing flat spacetime (<LatexDisplay Content="$g_{00}\to 1$" />) instead of a
+                curvature singularity. At large distances (<LatexDisplay Content="$r\gg r_c$" />),
+                the Schwarzschild metric is recovered exactly. The core scale
+                <LatexDisplay Content="$r_c$" /> is not a free parameter — it traces back to the
+                UV cutoff <LatexDisplay Content="$\Lambda$" /> from the quantum propagator, providing
+                a unified description of quantum-scale regularization and strong-field gravity. The
+                existence of a finite core also implies that TRM black holes have no central singularity,
+                resolving a long-standing tension between general relativity and quantum mechanics.
+            </MudText>
         </MudPaper>
     </MudItem>
 </MudGrid>

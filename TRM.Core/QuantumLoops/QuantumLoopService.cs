@@ -17,13 +17,20 @@ public sealed class QuantumLoopService : IQuantumLoopService
         {
             var momentumSquared = pMin + (i * step);
             var x = -momentumSquared / lambdaSquared;
-            var kernel = 1.0 / (1.0 + x + input.B * x * x + Math.Pow(x, 4));
 
+            // TRM: Padé [0/4] regularized kernel
+            var kernel = 1.0 / (1.0 + x + input.B * x * x + Math.Pow(x, 4));
             var damping = Math.Exp(-safeKappa * momentumSquared / lambdaSquared);
             var oneLoop = Math.Abs(kernel) * damping;
             var twoLoop = oneLoop * oneLoop * (1.0 / (1.0 + momentumSquared / lambdaSquared));
 
-            points.Add(new UvLoopPoint(momentumSquared, kernel, oneLoop, twoLoop));
+            // GR baseline: bare propagator 1/(1+x) without regularization
+            var grKernel = 1.0 / (1.0 + x);
+            var grOneLoop = Math.Abs(grKernel);
+            var grTwoLoop = grOneLoop * grOneLoop * (1.0 / (1.0 + momentumSquared / lambdaSquared));
+
+            points.Add(new UvLoopPoint(momentumSquared, kernel, oneLoop, twoLoop,
+                grKernel, grOneLoop, grTwoLoop));
         }
 
         return points;

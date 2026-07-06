@@ -11,6 +11,28 @@
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "integratedTerminal"
+        },
+        {
+            "name": "TRM.App (Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build TRM.App",
+            "program": "${workspaceFolder}\\TRM.App\\bin\\Debug\\net10.0\\TRM.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}\\TRM.App",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
+            },
+            "launchBrowser": {
+                "enabled": true,
+                "args": "${auto-detect-url}",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start ${auto-detect-url}"
+                }
+            }
         }
     ]
 }

@@ -1,5 +1,6 @@
 ﻿<MudNavMenu Dense="true">
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <MudNavLink Href="/equations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Functions">Key Equations</MudNavLink>
 
     <MudNavGroup Title="Micro-Scale (Quantum)" Icon="@Icons.Material.Filled.Science">
         <MudNavLink Href="/quantum-engine" Match="NavLinkMatch.Prefix">Quantum Engine & UV Finiteness</MudNavLink>
@@ -23,6 +24,17 @@
 
     <MudNavGroup Title="Validation Suite" Icon="@Icons.Material.Filled.Verified">
         <MudNavLink Href="/validation" Match="NavLinkMatch.Prefix">Validation & Exports</MudNavLink>
+    </MudNavGroup>
+
+    <MudDivider Class="my-2" />
+
+    <MudNavGroup Title="Resources" Icon="@Icons.Material.Filled.Link">
+        <MudNavLink Href="https://github.com/MagusDraconis/TRM_Cosmology" Target="_blank" Icon="@Icons.Custom.Brands.GitHub" ForceLoad="false">
+            GitHub Repository
+        </MudNavLink>
+        <MudNavLink Href="https://zenodo.org/records/20681734" Target="_blank" Icon="@Icons.Material.Filled.MenuBook" ForceLoad="false">
+            Zenodo Paper
+        </MudNavLink>
     </MudNavGroup>
 </MudNavMenu>
 

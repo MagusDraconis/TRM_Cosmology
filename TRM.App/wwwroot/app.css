@@ -58,3 +58,82 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* ---- LaTeX / Math rendering ---- */
+.trm-latex {
+    font-size: inherit;
+}
+.trm-latex-display {
+    display: block;
+    margin: 0.8rem 0;
+    text-align: center;
+    font-size: 1.05em;
+}
+.trm-latex-inline {
+    display: inline;
+}
+
+/* Physics formula card */
+.trm-formula-card {
+    background: var(--mud-palette-background-grey);
+    border-left: 3px solid var(--mud-palette-primary);
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+}
+
+.trm-formula-card .trm-latex-display {
+    margin: 0.3rem 0;
+}
+
+/* Improve MudChart readability */
+.mud-chart-legend {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Numeric table alignment */
+.trm-number-cell {
+    font-variant-numeric: tabular-nums;
+    font-family: 'Consolas', 'Courier New', monospace;
+    text-align: right;
+}
+
+/* ---- Global button sizing (12px = 0.75rem) ---- */
+.mud-button-root {
+    font-size: 0.75rem !important;
+}
+
+.mud-button-filled,
+.mud-button-outlined,
+.mud-button-text {
+    padding: 3px 10px !important;
+    min-height: 28px !important;
+}
+
+.mud-button-filled.mud-button-small,
+.mud-button-outlined.mud-button-small {
+    font-size: 0.6875rem !important;
+    padding: 2px 8px !important;
+    min-height: 24px !important;
+}
+
+/* Sidebar nav links */
+.mud-nav-link {
+    font-size: 0.8125rem !important;
+}
+
+/* Input fields */
+.mud-input-control {
+    font-size: 0.8125rem;
+}
+.mud-input-label {
+    font-size: 0.8125rem !important;
+}
+
+/* Table cells */
+.mud-table td, .mud-table th {
+    font-size: 0.8125rem;
+}
+
+/* Quantum chart styling done via JS (chart-styler.js) */

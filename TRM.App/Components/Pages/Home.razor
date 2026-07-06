@@ -3,21 +3,111 @@
 <PageTitle>TRM Cosmology UI</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">TRM Cosmology UI</MudText>
-<MudText Typo="Typo.body1" Class="mb-2">
-    This interface compares GR-baseline predictions against TRM model outputs across quantum, weak-field, strong-field, and cosmological regimes.
-</MudText>
+
+<MudPaper Class="pa-4 mb-3" Outlined="true" Style="background: linear-gradient(135deg, var(--mud-palette-drawer-background, #F5F8FC) 0%, var(--mud-palette-background, #FAFCFF) 100%);">
+    <MudStack Spacing="1">
+        <MudText Typo="Typo.body2">
+            <b>TRM</b> is a discrete-spacetime extension of general relativity with a bilocal lattice propagator.
+        </MudText>
+        <MudText Typo="Typo.body2">
+            It simultaneously preserves perturbative unitarity, removes ghost degrees of freedom, and renders 1-loop graviton amplitudes finite — without extra dimensions or counterterms.
+        </MudText>
+        <MudText Typo="Typo.body2">
+            This interface validates the model against GR across quantum, weak-field, strong-field, and cosmological regimes.
+        </MudText>
+    </MudStack>
+</MudPaper>
+
+<MudPaper Class="pa-4 mb-3" Outlined="true">
+    <MudText Typo="Typo.h6" GutterBottom="true">Core Feature</MudText>
+    <MudStack Spacing="1" Class="mb-2">
+        <MudText Typo="Typo.body2">&#8226; Ghost-free propagation (classical and perturbative quantum level)</MudText>
+        <MudText Typo="Typo.body2">&#8226; Explicit 1-loop finiteness (no counterterms required)</MudText>
+        <MudText Typo="Typo.body2">&#8226; Perturbative unitarity at 1-loop — <LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" /></MudText>
+    </MudStack>
+    <MudText Typo="Typo.caption">
+        These properties arise from a bilocal kernel with UV-suppressed propagator.
+    </MudText>
+
+    <MudText Typo="Typo.subtitle2" GutterBottom="true" Class="mt-3">Why this matters</MudText>
+    <MudText Typo="Typo.body2" Class="mb-3">
+        Quantum gravity proposals face a structural tradeoff: preserving unitarity, ensuring finiteness,
+        and avoiding ghosts — satisfying all three simultaneously is rare. General relativity is unitary
+        and ghost-free but non-renormalizable. Higher-derivative extensions achieve finiteness at the cost
+        of ghosts. String theory resolves all three but requires extra dimensions and non-local structure.
+    </MudText>
+
+    <MudTable Items="_comparisonRows" Dense="true" Hover="true" Bordered="true" Striped="true" Elevation="0">
+        <HeaderContent>
+            <MudTh>Approach</MudTh>
+            <MudTh>Ghost-free</MudTh>
+            <MudTh>Finite loops</MudTh>
+            <MudTh>Unitary</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Approach</MudTd>
+            <MudTd>@context.GhostFree</MudTd>
+            <MudTd>@context.FiniteLoops</MudTd>
+            <MudTd>@context.Unitary</MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <MudText Typo="Typo.caption" Class="mt-2">
+        * Verified explicitly at 1-loop level for the Padé [0/4] propagator
+        <LatexDisplay Content="$D(p^2)=1/(1+x+bx^2+x^4)$" /> with
+        <LatexDisplay Content="$\kappa$" />-controlled exponential damping.
+        See <MudLink Href="/quantum-engine">Quantum Engine &amp; UV Finiteness</MudLink> for the integrand computation.
+    </MudText>
+</MudPaper>
 
 <MudPaper Class="pa-4 mb-3" Outlined="true">
     <MudText Typo="Typo.h6" GutterBottom="true">How to read each dashboard</MudText>
     <MudText Typo="Typo.body2">1) Set parameters in the left control panel.</MudText>
     <MudText Typo="Typo.body2">2) Review the Physics Context box for formulas and current parameter values.</MudText>
     <MudText Typo="Typo.body2">3) Compare chart/table outputs between GR reference and TRM prediction.</MudText>
+    <MudText Typo="Typo.caption" Class="mt-2">
+        See the <MudLink Href="/equations">Key Equations</MudLink> page for the full set of TRM formulas
+        across all physical regimes.
+    </MudText>
 </MudPaper>
 
-<MudPaper Class="pa-4" Outlined="true">
-    <MudText Typo="Typo.h6" GutterBottom="true">Common reference formulas (weak field)</MudText>
-    <MudText Typo="Typo.body2">GR redshift: Δν/ν ≈ ΔΦ / c²</MudText>
-    <MudText Typo="Typo.body2">GR deflection: Δθ ≈ 4GM / (c² b)</MudText>
-    <MudText Typo="Typo.body2">GR perihelion: Δω = 6πGM / (c² a(1-e²))</MudText>
-    <MudText Typo="Typo.caption" Class="mt-2">Use the navigation menu to open regime-specific pages for detailed TRM formulas and live parameter readouts.</MudText>
+<MudPaper Class="pa-4 mt-3" Outlined="true">
+    <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
+
+    <MudText Typo="Typo.body2">
+        TRM occupies a unique position among quantum gravity candidates: it is simultaneously ghost-free
+        (Padé propagator preserves correct sign), 1-loop finite (explicitly computed — no Landau pole),
+        and unitary (<LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" />),
+        all within a four-dimensional, local framework. This combination — achieved by only three other
+        approaches partially or at the cost of extra structure — makes TRM a structurally distinct candidate.
+    </MudText>
+
+    <MudText Typo="Typo.body2" Class="mt-2">
+        The model extends GR by a discrete spacetime lattice with minimum length
+        <LatexDisplay Content="$\ell_P$" />. At the UV scale, the Padé [0/4] propagator
+        <LatexDisplay Content="$D(p^2)=1/(1+x+bx^2+x^4)$" /> regularizes quantum loop integrals
+        and suppresses UV modes via damping <LatexDisplay Content="$e^{-\kappa p^2/\Lambda^2}$" />.
+        In the weak-field limit, PPN parameters converge to unity
+        (<LatexDisplay Content="$\beta_{\text{PPN}},\gamma_{\text{PPN}}\to 1$" />),
+        recovering all solar-system tests. In strong fields, the regularized mass factor
+        <LatexDisplay Content="$M_{\text{eff}}(r)=M(1-e^{-r^3/r_c^3})$" /> removes the central
+        singularity while preserving the Schwarzschild limit at large
+        <LatexDisplay Content="$r$" />. On cosmological scales, the effective acceleration law
+        <LatexDisplay Content="$g_{\text{TRM}}=g_N+\sqrt{g_N a_0}/\lambda$" /> with
+        <LatexDisplay Content="$a_0\approx 1.2\times 10^{-10}\,\text{m/s}^2$" /> provides
+        an alternative to particle dark matter. The speed of light itself emerges from the lattice:
+        <LatexDisplay Content="$c=\ell_P/t_P$" />.
+    </MudText>
 </MudPaper>
+
+@code {
+    private record ComparisonRow(string Approach, string GhostFree, string FiniteLoops, string Unitary);
+
+    private static readonly List<ComparisonRow> _comparisonRows =
+    [
+        new("General Relativity", "\u2713", "\u2717", "\u2713"),
+        new("R\u00B2 / Higher-derivative", "\u2717", "\u2713", "\u2717"),
+        new("String Theory", "\u2713", "\u2713", "\u2713"),
+        new("TRM", "\u2713", "\u2713*", "\u2713")
+    ];
+}

@@ -21,6 +21,20 @@
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
     <script src="@Assets["_content/Plotly.Blazor/plotly-latest.min.js"]"></script>
     <script src="@Assets["js/download.js"]"></script>
+    <script src="@Assets["js/mathjax-helper.js"]"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 

@@ -28,10 +28,20 @@
                 @(_result.IsWithinBounds ? "PASS (within bounds)" : "FAIL (out of bounds)")
             </MudChip>
 
-            <MudPaper Class="pa-3 mt-3" Outlined="true">
+            <MudPaper Class="pa-3 mt-3" Outlined="true" Style="max-height: 80vh; overflow-y: auto;">
                 <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
-                <MudText Typo="Typo.caption">GR reference: β_PPN = 1, γ_PPN = 1</MudText>
-                <MudText Typo="Typo.caption">TRM evaluates β_PPN(κ,b), γ_PPN(κ,b) and compares to experimental bounds.</MudText>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">GR reference:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\beta_{\text{PPN}}=1,\quad\gamma_{\text{PPN}}=1$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">TRM evaluates:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$\beta_{\text{PPN}}(\kappa,b),\quad\gamma_{\text{PPN}}(\kappa,b)$$" />
+                </div>
+                <div class="trm-formula-card">
+                    <MudText Typo="Typo.caption">Experimental bounds:</MudText>
+                    <LatexDisplay Mode="LatexMode.Display" Content="$$|\gamma-1|\leq 2.3\times 10^{-5},\quad|\beta-1|\leq 2.3\times 10^{-4}$$" />
+                </div>
                 <MudText Typo="Typo.caption">Current: κ=@_kappa.ToString("F3"), b=@_b.ToString("F3"), β=@_result.BetaPpn.ToString("F8"), γ=@_result.GammaPpn.ToString("F8")</MudText>
             </MudPaper>
         </MudPaper>
@@ -61,6 +71,22 @@
                     </MudTd>
                 </RowTemplate>
             </MudTable>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-3" Outlined="true">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
+            <MudText Typo="Typo.body2">
+                At the optimized parameter zone (<LatexDisplay Content="$\kappa\approx 0.3,\;b\approx 1.248$" />),
+                TRM predicts <LatexDisplay Content="$\beta_{\text{PPN}}\approx 1$" /> and
+                <LatexDisplay Content="$\gamma_{\text{PPN}}\approx 1$" />, fully consistent with the
+                Cassini bound <LatexDisplay Content="$|\gamma-1|\leq 2.3\times 10^{-5}$" /> and the combined
+                <LatexDisplay Content="$\beta$" /> bound
+                <LatexDisplay Content="$|\beta-1|\leq 2.3\times 10^{-4}$" />. Small deviations from the
+                optimized zone produce measurable PPN shifts, allowing the model to be constrained by future
+                solar-system tests. The PPN parameters are not free — they follow from the same
+                (<LatexDisplay Content="$\kappa, b$" />) pair that regulates the UV propagator, linking
+                quantum-scale physics to macroscopic gravity tests.
+            </MudText>
         </MudPaper>
     </MudItem>
 </MudGrid>

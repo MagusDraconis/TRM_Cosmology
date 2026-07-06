@@ -1,0 +1,31 @@
+@using Microsoft.AspNetCore.Components
+@inject IJSRuntime JS
+
+<span @ref="_elementRef" class="trm-latex trm-latex-@Mode.ToString().ToLowerInvariant()">
+    @((MarkupString)Content)
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Content { get; set; } = string.Empty;
+
+    [Parameter]
+    public LatexMode Mode { get; set; } = LatexMode.Inline;
+
+    private ElementReference _elementRef;
+    private bool _pendingTypeset = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingTypeset)
+        {
+            _pendingTypeset = false;
+            await JS.InvokeVoidAsync("trmMathJax.typesetElement", _elementRef);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        _pendingTypeset = true;
+    }
+}

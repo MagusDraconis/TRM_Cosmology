@@ -1,0 +1,63 @@
+@page "/equations"
+
+<PageTitle>Key Equations</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Key Equations</MudText>
+<MudText Typo="Typo.body1" Class="mb-2">
+    Core formulas of the TRM model across all physical regimes, from quantum to cosmological scales.
+</MudText>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">TRM UV Propagator (Quantum)</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$D(p^2)=\frac{1}{1+x+b x^2+x^4},\qquad x=-\frac{p^2}{\Lambda^2}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">1-Loop and 2-Loop Integrands</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\mathcal{I}^{(1)}_{\text{TRM}}=|D(x)|\;e^{-\kappa p^2/\Lambda^2}$$" />
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\mathcal{I}^{(2)}_{\text{TRM}}=\left[\mathcal{I}^{(1)}_{\text{TRM}}\right]^2\cdot\frac{1}{1+p^2/\Lambda^2}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">PPN Parameters</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\beta_{\text{PPN}}(\kappa,b),\quad\gamma_{\text{PPN}}(\kappa,b),\qquad\{\beta,\gamma\}\xrightarrow[\kappa\to0.3,\;b\to1.248]{}\{1,1\}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Gravitational Redshift</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\left(\frac{\Delta\nu}{\nu}\right)_{\text{TRM}}=\left(\frac{\Delta\nu}{\nu}\right)_{\text{GR}}\cdot f(\kappa,b),\qquad\frac{\Delta\nu}{\nu}\approx\frac{GM}{c^2 r}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Light Deflection</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\Delta\theta_{\text{TRM}}=\Delta\theta_{\text{GR}}\cdot f(\kappa,b),\qquad\Delta\theta_{\text{GR}}\approx\frac{4GM}{c^2 b_{\text{impact}}}$$" />
+    <LatexDisplay Mode="LatexMode.Display" Content="$$n_{\text{eff}}=2+\lambda_{\text{time}}\phi+\lambda_{\text{space}}\phi^2|\dot{\mu}|,\qquad c_{\text{eff}}=\frac{c_0}{n_{\text{eff}}}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Perihelion Precession (PPN-derived)</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\Delta\omega_{\text{TRM}}=\frac{2+2\gamma-\beta}{3}\cdot\frac{6\pi GM}{c^2 a(1-e^2)}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Regular Schwarzschild Metric</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$M_{\text{eff}}(r)=M\left(1-e^{-r^3/r_c^3}\right),\qquad r_s=\frac{2GM}{c^2}$$" />
+    <LatexDisplay Mode="LatexMode.Display" Content="$$g_{00}=1-\frac{r_s}{r}\left(1-e^{-r^3/r_c^3}\right),\quad g_{rr}=\frac{1}{g_{00}}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Galactic Rotation (Cosmology)</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$g_{\text{TRM}}(r,\lambda)=g_N(r)+\frac{\sqrt{g_N(r)\cdot a_0}}{\lambda}$$" />
+    <LatexDisplay Mode="LatexMode.Display" Content="$$v_{\text{TRM}}(r,\lambda)=\sqrt{r\cdot g_{\text{TRM}}(r,\lambda)},\qquad a_0\approx 1.2\times 10^{-10}\,\text{m/s}^2$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Speed of Light — Lattice Derivation</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$c=\frac{\ell_P}{t_P}=\frac{\Delta x}{\Delta t}\quad\text{(discrete spacetime limit)}$$" />
+    <LatexDisplay Mode="LatexMode.Display" Content="$$\ell_P=\sqrt{\frac{\hbar G}{c^3}},\quad t_P=\sqrt{\frac{\hbar G}{c^5}}$$" />
+</div>
+
+<div class="trm-formula-card">
+    <MudText Typo="Typo.subtitle2" GutterBottom="true">Lattice Correlation & Padé Kernel</MudText>
+    <LatexDisplay Mode="LatexMode.Display" Content="$$C(d)=\frac{\langle E_i E_{i+d}\rangle}{\langle E_i^2\rangle},\qquad K(x)=\frac{1}{1+x+b x^2+x^4}$$" />
+</div>

@@ -1,7 +1,10 @@
 namespace TRM.Core.WeakField;
 
 public sealed record LightDeflectionResult(
-    double DeflectionRadians,
-    double DeflectionArcSeconds,
+    double GrDeflectionRadians,
+    double GrDeflectionArcSeconds,
+    double TrmDeflectionRadians,
+    double TrmDeflectionArcSeconds,
     double SolarBaselineArcSeconds,
-    double BaselineDeltaArcSeconds);
+    double TrmCorrectionFactor,
+    double DeltaTrmMinusGrArcSeconds);

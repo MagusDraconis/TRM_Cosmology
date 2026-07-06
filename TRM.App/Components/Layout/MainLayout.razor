@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -10,7 +10,8 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" Class="mr-2" />
         <MudText Typo="Typo.h6">TRM Cosmology UI</MudText>
         <MudSpacer />
-        <MudLink Href="https://github.com/MagusDraconis/TRM_Cosmology" Target="_blank">View Source</MudLink>
+        <MudIconButton Href="https://github.com/MagusDraconis/TRM_Cosmology" Target="_blank" Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
+        <MudIconButton Href="https://zenodo.org/records/20681734" Target="_blank" Icon="@Icons.Material.Filled.MenuBook" Color="Color.Inherit" />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="DrawerVariant.Responsive" Class="pa-2">
@@ -32,6 +33,56 @@
 
 @code {
     private bool _drawerOpen = true;
+
+    private static readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#1565C0",
+            PrimaryContrastText = "#FFFFFF",
+            Secondary = "#0D47A1",
+            SecondaryContrastText = "#FFFFFF",
+            Tertiary = "#1E88E5",
+            AppbarBackground = "#0D47A1",
+            AppbarText = "#FFFFFF",
+            DrawerBackground = "#F5F8FC",
+            DrawerText = "#1A237E",
+            Background = "#FAFCFF",
+            Surface = "#FFFFFF",
+            Info = "#2196F3",
+            Success = "#2E7D32",
+            Warning = "#F57F17",
+            Error = "#C62828",
+            TextPrimary = "#212121",
+            TextSecondary = "#546E7A",
+            Divider = "#BBDEFB",
+            ActionDefault = "#1565C0",
+            ActionDisabled = "#90CAF9",
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#42A5F5",
+            PrimaryContrastText = "#0D1117",
+            Secondary = "#64B5F6",
+            SecondaryContrastText = "#0D1117",
+            Tertiary = "#2196F3",
+            AppbarBackground = "#0D1117",
+            AppbarText = "#E3F2FD",
+            DrawerBackground = "#0F1B2D",
+            DrawerText = "#90CAF9",
+            Background = "#0D1117",
+            Surface = "#161B22",
+            Info = "#42A5F5",
+            Success = "#43A047",
+            Warning = "#FFB300",
+            Error = "#EF5350",
+            TextPrimary = "#E3F2FD",
+            TextSecondary = "#90CAF9",
+            Divider = "#1B3A5C",
+            ActionDefault = "#42A5F5",
+            ActionDisabled = "#1B3A5C",
+        }
+    };
 
     private void ToggleDrawer()
     {
