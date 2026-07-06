@@ -68,7 +68,9 @@
     <MudItem xs="12" md="8">
         <MudPaper Class="pa-4 mb-3">
             <MudText Typo="Typo.h6" GutterBottom="true">UV Drop-Off (Linear Scale)</MudText>
-            <MudChart ChartType="ChartType.Line" ChartSeries="_linearSeries" XAxisLabels="_xAxisLabels" Width="100%" Height="320px" />
+            <MudChart ChartType="ChartType.Line" ChartOptions="_linearLineChartOptions" ChartSeries="_linearLineSeries" XAxisLabels="_xAxisLabels" Width="100%" Height="320px">
+                
+            </MudChart>
         </MudPaper>
 
         <MudPaper Class="pa-4">
@@ -110,7 +112,16 @@
     private double _tailGrTwoLoop;
 
     private string[] _xAxisLabels = [];
-    private List<ChartSeries> _linearSeries = [];
+    
+    private List<ChartSeries> _linearLineSeries = [];
+
+    private ChartOptions _linearLineChartOptions = new()
+    {
+        // ChartPalette = ["#00E676", "#D500F9"],
+        LineStrokeWidth = 3,
+        ShowLegend = true,
+        YAxisRequireZeroPoint = true
+    };
     private List<ChartSeries> _logSeries = [];
     private CancellationTokenSource? _computeCts;
     private CancellationTokenSource? _debounceCts;
@@ -210,10 +221,12 @@
             var grOneLoop = series.Select(p => p.GrOneLoopIntegrand).ToArray();
             var grTwoLoop = series.Select(p => p.GrTwoLoopIntegrand).ToArray();
 
-            _linearSeries =
+
+            _linearLineSeries =
             [
-                new ChartSeries { Name = "TRM 1-Loop", Data = oneLoop },
-                new ChartSeries { Name = "TRM 2-Loop", Data = twoLoop },
+
+                new ChartSeries { Name = "TRM 1-Loop", Data = oneLoop, ShowDataMarkers = true },
+                new ChartSeries { Name = "TRM 2-Loop", Data = twoLoop,  },
                 new ChartSeries { Name = "GR 1-Loop", Data = grOneLoop },
                 new ChartSeries { Name = "GR 2-Loop", Data = grTwoLoop }
             ];

@@ -55,12 +55,12 @@
 
     <MudItem xs="12" md="8">
         <MudPaper Class="pa-4 mb-3">
-            <MudText Typo="Typo.h6" GutterBottom="true">Metric Comparison (g00)</MudText>
+            <MudText Typo="Typo.h6" GutterBottom="true">g₀₀ — TRM Regular vs GR Schwarzschild</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="_g00Series" XAxisLabels="_labels" Width="100%" Height="300px" />
         </MudPaper>
 
         <MudPaper Class="pa-4">
-            <MudText Typo="Typo.h6" GutterBottom="true">Regular Metric Component (grr)</MudText>
+            <MudText Typo="Typo.h6" GutterBottom="true">g_rr — TRM Regular vs GR Schwarzschild</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="_grrSeries" XAxisLabels="_labels" Width="100%" Height="300px" />
         </MudPaper>
 
@@ -113,16 +113,19 @@
             _maxRadiusRs));
 
         _labels = _result.Profile.Select(p => p.RadiusInSchwarzschildUnits.ToString("F2")).ToArray();
+        // Append r/r_s unit hint to first label
+        if (_labels.Length > 0) _labels[0] = _labels[0] + " r/rs";
 
         _g00Series =
         [
-            new ChartSeries { Name = "Regular g00", Data = _result.Profile.Select(p => p.RegularG00).ToArray() },
-            new ChartSeries { Name = "Schwarzschild g00", Data = _result.Profile.Select(p => p.SchwarzschildG00).ToArray() }
+            new ChartSeries { Name = "TRM Regular g₀₀", Data = _result.Profile.Select(p => p.RegularG00).ToArray(), ShowDataMarkers = true },
+            new ChartSeries { Name = "GR Schwarzschild g₀₀", Data = _result.Profile.Select(p => p.SchwarzschildG00).ToArray() }
         ];
 
         _grrSeries =
         [
-            new ChartSeries { Name = "Regular grr", Data = _result.Profile.Select(p => p.RegularGrr).ToArray() }
+            new ChartSeries { Name = "TRM Regular g_rr", Data = _result.Profile.Select(p => p.RegularGrr).ToArray(), ShowDataMarkers = true},
+            new ChartSeries { Name = "GR Schwarzschild g_rr", Data = _result.Profile.Select(p => p.SchwarzschildGrr).ToArray() }
         ];
     }
 

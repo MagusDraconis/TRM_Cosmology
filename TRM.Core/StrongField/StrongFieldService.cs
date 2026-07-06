@@ -29,6 +29,7 @@ public sealed class StrongFieldService : IStrongFieldService
             var g00 = 1.0 - (rs / r) * regularMassFactor;
             var grr = 1.0 / Math.Max(1e-12, g00);
             var schwarzschildG00 = 1.0 - rs / r;
+            var schwarzschildGrr = 1.0 / Math.Max(1e-12, schwarzschildG00);
 
             if (prevG00.HasValue && Math.Sign(prevG00.Value) != Math.Sign(g00))
             {
@@ -43,7 +44,7 @@ public sealed class StrongFieldService : IStrongFieldService
                 }
             }
 
-            profile.Add(new StrongFieldPoint(r, r / rs, g00, grr, schwarzschildG00));
+            profile.Add(new StrongFieldPoint(r, r / rs, g00, grr, schwarzschildG00, schwarzschildGrr));
             prevG00 = g00;
             prevR = r;
         }

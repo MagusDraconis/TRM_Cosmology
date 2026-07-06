@@ -5,4 +5,5 @@ public sealed record StrongFieldPoint(
     double RadiusInSchwarzschildUnits,
     double RegularG00,
     double RegularGrr,
-    double SchwarzschildG00);
+    double SchwarzschildG00,
+    double SchwarzschildGrr);
