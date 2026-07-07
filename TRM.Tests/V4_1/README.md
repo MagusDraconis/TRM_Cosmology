@@ -63,3 +63,14 @@ All physical claims remain in `docsV4_1/theory/` with explicit classification.
 | Functional F(D) (framework) | Weight robustness + counterexample tests |
 
 No theory note is considered mature unless there is a matching xUnit test layer.
+
+### V4.1 Test Maturity Ladder
+
+| Level | What | Tests |
+|:---|:---|:---|
+| 1 | Exact graph-structure (adjacency, degree, undirected, connected) | `V4_1_GraphGenerator_Tests` |
+| 2 | Continuum-trend (shell growth N(r) ~ r^D) | `V4_1_DimensionalStructure_Tests` |
+| 3 | Spectral diagnostics (λ₂, λ_max, S₁ computable) | `V4_1_SpectralDiagnostics_Tests` |
+| 4 | Functional/selection pipeline (graph → F(D)) | `V4_1_FunctionalF_Tests`, `V4_1_DimensionSelection_Benchmark_Tests` |
+| 5 | Real graph-family comparison across D | `V4_1_SpectralDiagnostics_Tests` (pipeline integration) |
+| 6 | CML synchronisation and bridge-band experiments | *Future — requires simulation infrastructure* |
