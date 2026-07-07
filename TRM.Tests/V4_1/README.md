@@ -81,7 +81,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 11 | ScottPlot figure generation | `V4_1_PlotGeneration_Tests` |
 | 12 | Paper-ready figure bundles | `V4_1_FigureBundle_Tests` |
 | 13 | Analysis and interpretation layer | `V4_1_Analysis_Tests` |
-| 14 | Publication-ready paper generation | `V4_1_Publication_Tests` — abstract through conclusion + claim–evidence map |
+| 14 | Publication-ready paper generation | `V4_1_Publication_Tests` |
+| 15 | Real CML dimension audit | `V4_1_CmlDimensionAudit_Tests` — proxy vs CML, bridge-band, counterexamples |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
