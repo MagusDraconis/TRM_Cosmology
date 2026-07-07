@@ -300,6 +300,108 @@ physical emergence of spacetime geometry is a hypothesis requiring:
   appropriate limit
 - Consistency with Lorentz invariance
 
+### 3.8 Dimensional Emergence
+
+The continuum limit of §3.7 recovers Euclidean space only if the effective
+dimension D of the graph matches the physical dimension of spacetime. This
+subsection asks: what structural properties of the coupling graph enforce D = 3?
+
+#### 3.8.1 Graph Scaling and Dimension
+
+The effective dimension D of a graph is defined by the scaling of the number of
+nodes N(r) within graph distance r:
+
+```
+N(r) ∝ r^D    →    D = d log N / d log r
+```
+
+For a cubic lattice: D = 3. For a random graph or small-world network: D may be
+fractional or ill-defined. The physical requirement that the discrete Laplacian
+Δ_G converges to the Euclidean ∇² constrains D:
+
+```
+Δ_G → ∇²    ⇒    D = 3
+```
+
+A Laplacian on a D-dimensional regular lattice converges to the D-dimensional
+Euclidean Laplacian. If D ≠ 3, the continuum operator is not the 3D Laplacian
+required for Newtonian gravity (∇²K = 0 → K ∼ 1/r).
+
+#### 3.8.2 Structural Requirements for D = 3
+
+For a graph to have D = 3, the following properties must hold:
+
+**Node degree scaling.** In a D-dimensional regular lattice, the number of
+neighbours (degree) of each node is 2D. The average degree ⟨k⟩ must satisfy:
+
+```
+⟨k⟩ ≈ 6    (for D = 3 cubic lattice)
+```
+
+If ⟨k⟩ ≫ 6, the graph has higher effective dimension or non-local shortcuts.
+
+**Isotropic connectivity.** The coupling graph must not favour any spatial
+direction. In the continuum limit, this requires:
+
+```
+Σ_{j ∈ N(i)} (x_j − x_i) = 0    (no net directional bias)
+```
+
+An anisotropic graph yields an anisotropic Laplacian, which does not converge
+to the isotropic Euclidean ∇². This isotropy is not guaranteed — it depends on
+whether the coupling matrix K_ij has directional structure.
+
+**Absence of shortcuts.** Long-range edges (small-world connections) distort the
+scaling N(r) ∝ r³. If shortcuts exist, the effective dimension decreases.
+The requirement:
+
+```
+K_ij → 0 sufficiently fast as d(i, j) → ∞
+```
+
+Short-range (nearest-neighbour) coupling ensures local graph structure.
+Long-range coupling introduces non-local propagation, violating Euclidean
+convergence.
+
+#### 3.8.3 Why D = 3 Is Currently ASSUMED
+
+The V4 framework works with a 3+1 dimensional continuum from the outset:
+- The bilocal kernel K(x,y) depends on 3D Euclidean distance d²(x,y)
+- The wave equation □K = 0 is formulated in 3+1 dimensions
+- The 1/r form follows from the 3D Laplacian Green's function
+
+**D = 3 is an input, not an output.** The oscillator model does not contain
+a mechanism that selects D = 3 from a larger space of possible dimensions.
+If the coupling graph happened to have D = 4, the theory would predict 1/r²
+gravity and different PPN parameters — contradicting observation.
+
+This makes D = 3 the most important open structural question in V4.1. All
+results that depend on the 3D continuum limit (1/r gravity, PPN convergence,
+EFT strong-field) inherit D = 3 as an assumption.
+
+#### 3.8.4 Path to Derivation
+
+Making D = 3 derivable requires showing that D ≠ 3 graphs are structurally
+excluded by the oscillator dynamics. Candidate conditions:
+
+| Condition | Effect |
+|:---|---|
+| Phase synchronisation stability | Coupling topologies with D ≠ 3 may not support stable synchronised states |
+| Bridge-band constraint I2 | Ω ∈ [1.16, 1.19] may only be realisable in D = 3 graphs |
+| Coupling frustration minimisation | D = 3 may be the unique dimension minimising energetic frustration |
+| Fractal-to-Euclidean transition | Graph dimension may flow to D = 3 under renormalisation of coupling |
+
+**None of these are proven.** They define a research program.
+
+#### 3.8.5 Claim Classification
+
+| Claim | Classification | Justification |
+|:---|---|:---|
+| N(r) ∝ r^D scaling law | **DERIVABLE CANDIDATE** | Standard definition of graph dimension; follows from adjacency |
+| D = 3 requirement for ∇² convergence | **DERIVABLE CANDIDATE** | D-dimensional grid Laplacian converges to D-dimensional ∇²; is a standard PDE result |
+| D = 3 from oscillator constraints | **HYPOTHESIS** | No derivation exists; candidate mechanisms (sync stability, I2, frustration) are unexplored |
+| Graph isotropy → Euclidean Laplacian | **FRAMEWORK** | Conditional: if the coupling graph is regular and isotropic, convergence follows |
+
 ---
 
 ## 4. From Causal Metric to Spatial Operators
@@ -406,6 +508,8 @@ adjacency and causal distance.
 | Graph Laplacian Δ_G from adjacency | **DERIVABLE CANDIDATE** | Standard graph construction Δ_G = D − A; no additional assumptions |
 | Continuum recovery ∇² from Δ_G | **HYPOTHESIS** | Requires regular lattice, D = 3, Δx → 0; physical emergence pending |
 | Euclidean large-scale space from graph | **HYPOTHESIS** | Graph theory convergence; D = 3 must be derived, not assumed |
+| D = 3 from oscillator constraints | **HYPOTHESIS** | No derivation exists; candidate mechanisms unexplored |
+| N(r) ∝ r^D scaling from adjacency | **DERIVABLE CANDIDATE** | Standard graph dimension definition |
 
 ---
 
