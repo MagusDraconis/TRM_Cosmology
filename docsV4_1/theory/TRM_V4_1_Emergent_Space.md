@@ -96,7 +96,54 @@ c_K = K₀ · Δx · f_ref
 
 where K₀ is set to 1 (normalised coupling strength) for the causal bound.
 
-### 3.3 Connection to Speed of Light
+### 3.3 Time-Distance Equivalence
+
+If propagation is causal and bounded by c_TRM = 1, then space can be defined
+from time alone. The key insight:
+
+> **Spatial distance = minimal propagation time between nodes.**
+
+**Propagation time.** Define the propagation time T(i, j) as the minimum number
+of oscillator cycles required for a signal to travel from node i to node j.
+Since each step traverses exactly one edge per cycle:
+
+```
+T(i, j) = d(i, j)
+```
+
+where d(i, j) is the graph distance (number of edges on the shortest path).
+
+**Spatial distance.** The physical spatial distance is then:
+
+```
+d_space(i, j) = c_TRM · T(i, j) = T(i, j)
+```
+
+In TRM-native units (c_TRM = 1), spatial distance and propagation time are
+numerically identical. Distance is measured in cycles — no pre-existing metric
+or coordinate system is required. Geometry emerges from causal connectivity:
+two nodes are close if few propagation cycles separate them; distant if many
+cycles are needed.
+
+**Continuum limit.** For a regular lattice graph, the graph distance d(i, j)
+converges to Euclidean distance in the large-scale limit:
+
+```
+d_space(r) → |r|    as    r ≫ Δx
+```
+
+This recovers the familiar 3D spatial metric from the discrete causal structure.
+No metric tensor is presupposed — the metric emerges from the causal graph.
+
+**Classification:**
+
+| Claim | Classification |
+|:---|---|
+| T(i, j) = d(i, j) | **DERIVABLE CANDIDATE** — follows from c_TRM ≤ 1 and discrete propagation |
+| d_space = minimal propagation time | **FRAMEWORK** — definitional; consistent with causal set theory |
+| Spatial metric from causal graph | **HYPOTHESIS** — requires continuum-limit proof and Lorentz-invariance verification |
+
+### 3.4 Connection to Speed of Light
 
 If the causal bound of the oscillator network is identified with the speed of light:
 
@@ -112,7 +159,7 @@ B4 Candidate A prediction (Δx ≈ 0.33 m) because K₀ ≈ 0.10 is factored out
 propagation is the fundamental speed limit of spacetime — a claim that requires
 independent verification.
 
-### 3.4 Causal Bound Argument
+### 3.5 Causal Bound Argument
 
 The claim that the maximal propagation speed in a discrete oscillator network is
 one graph step per cycle rests on the following structural facts:
