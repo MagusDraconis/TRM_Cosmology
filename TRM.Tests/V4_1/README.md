@@ -90,7 +90,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 20 | Proto-1PN / nonlinear correction audit | `V4_1_Proto1PnAudit_Tests` |
 | 21 | Radial-law / effective exponent audit | `V4_1_RadialLawAudit_Tests` |
 | 22 | Dimension-selection synthesis | `V4_1_DimensionSynthesis_Tests` |
-| 23 | Minimal mechanism extraction | `V4_1_MechanismExtraction_Tests` — contribution ranking, leave-one-out, win style |
+| 23 | Minimal mechanism extraction | `V4_1_MechanismExtraction_Tests` |
+| 24 | Parameter phase structure | `V4_1_PhaseStructure_Tests` — D=3 coverage, regime maps, winner stability |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
