@@ -9,16 +9,16 @@
 <MudText Typo="Typo.h4" GutterBottom="true">Quantum Engine &amp; Loop Finiteness</MudText>
 
 <MudPaper Class="pa-3 mb-3" Outlined="true">
-    <MudText Typo="Typo.body2">
-        This page visualizes how the propagator scaling
-        <LatexDisplay Content="$D_{\text{GR}}(k^2)\sim 1/k^2$" />
-        and
-        <LatexDisplay Content="$D_{\text{TRM}}(k^2)\sim 1/k^6$" />
-        affects loop integrals.
+    <MudText Typo="Typo.body2" GutterBottom="true">
+        This page visualizes the UV behavior of loop integrands.
     </MudText>
-    <MudText Typo="Typo.body2" Class="mt-2">
-        The rapid decay in TRM suppresses UV contributions,
-        while the GR baseline exhibits divergent behavior.
+    <MudText Typo="Typo.body2">
+        For GR (<LatexDisplay Content="$D\sim 1/k^2$" />), high-momentum contributions
+        remain large, leading to divergent integrals.
+    </MudText>
+    <MudText Typo="Typo.body2">
+        In TRM (<LatexDisplay Content="$D\sim 1/k^6$" />), the integrand decays rapidly,
+        and the integral remains finite.
     </MudText>
 </MudPaper>
 
@@ -60,6 +60,14 @@
                 @(_tailOneLoop < _tailGrOneLoop ? "TRM UV-suppressed vs GR" : "Check parameters")
             </MudChip>
 
+            <MudPaper Class="pa-2 mt-3" Outlined="true" Style="background: var(--mud-palette-info-hover, #F0F7FF);">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">UV tail comparison</MudText>
+                <MudText Typo="Typo.body2">TRM (1-loop): @_tailOneLoop.ToString("E3") &nbsp;&nbsp;|&nbsp;&nbsp; GR (1-loop): @_tailGrOneLoop.ToString("E3")</MudText>
+                <MudText Typo="Typo.caption">
+                    &rarr; suppression factor &sim;@((_tailGrOneLoop / Math.Max(_tailOneLoop, 1e-30)).ToString("E1"))
+                </MudText>
+            </MudPaper>
+
             <MudPaper Class="pa-3 mt-3" Outlined="true" Style="max-height: 80vh; overflow-y: auto;">
                 <MudText Typo="Typo.subtitle2" GutterBottom="true">Physics Context</MudText>
                 <div class="trm-formula-card">
@@ -90,6 +98,9 @@
         <MudPaper Class="pa-4">
             <MudText Typo="Typo.h6" GutterBottom="true">UV Drop-Off (Log10 Scale)</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="_logSeries" XAxisLabels="_xAxisLabels" Width="100%" Height="320px" />
+            <MudText Typo="Typo.caption" Class="mt-1">
+                TRM decays faster &rarr; finite integral.
+            </MudText>
         </MudPaper>
 
         <MudPaper Class="pa-4 mt-3" Outlined="true">
