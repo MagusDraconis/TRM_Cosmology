@@ -4,16 +4,41 @@
 
 <MudText Typo="Typo.h4" GutterBottom="true">Temporal Rate Matrix (TRM) Cosmology</MudText>
 
-<MudPaper Class="pa-4 mb-3" Outlined="true" Style="background: linear-gradient(135deg, var(--mud-palette-drawer-background, #F5F8FC) 0%, var(--mud-palette-background, #FAFCFF) 100%);">
+<MudCard Class="mb-3">
+    <MudCardMedia Image="images/TRM-TQM-V3-Image1_Web_small.jpg" Height="200" alt="TRM space image" />
+    <MudCardContent>
+        <MudText Typo="Typo.body2">
+            <b>TRM</b> — a bilocal field theory on a discrete spacetime lattice. Gravity emerges from the coincidence limit of the propagator <LatexDisplay Content="$K(x,y)$" />.
+        </MudText>
+        <MudText Typo="Typo.body2">
+            A bilocal kernel <LatexDisplay Content="$K(x)=K_0/(1+x+bx^2+x^4)$" /> provides UV suppression via form factor <LatexDisplay Content="$\mathcal{F}(k^2)\sim k^{-4}$" />.
+        </MudText>
+        <MudText Typo="Typo.body2">
+            Ghost-free &middot; 1-loop finite &middot; perturbatively unitary (<LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" />).
+        </MudText>
+    </MudCardContent>
+</MudCard>
+
+<MudPaper Class="pa-4 mb-3" Outlined="true">
     <MudStack Spacing="1">
         <MudText Typo="Typo.body2">
-            <b>TRM</b> is a discrete-spacetime extension of general relativity with a bilocal lattice propagator.
+            GR propagator: <LatexDisplay Content="$D(k^2)\sim 1/k^2$" />
         </MudText>
         <MudText Typo="Typo.body2">
-            It simultaneously preserves perturbative unitarity, removes ghost degrees of freedom, and renders 1-loop graviton amplitudes finite — without extra dimensions or counterterms.
+            TRM propagator: <LatexDisplay Content="$D(k^2)\sim 1/k^6$" />
         </MudText>
-        <MudText Typo="Typo.body2">
-            This interface validates the model against GR across quantum, weak-field, strong-field, and cosmological regimes.
+        <MudText Typo="Typo.caption" Class="mb-2">
+            UV modes are suppressed by the bilocal kernel form factor.
+        </MudText>
+        <img src="propagator_comparison.png" alt="GR (1/k²) vs TRM (1/k⁶) propagator scaling at high momentum" style="width:100%; max-width:560px; display:block;" />
+        <MudText Typo="Typo.caption">
+            At high momentum, the bilocal kernel form factor suppresses UV contributions as 1/k⁶, compared to the GR behavior 1/k².
+        </MudText>
+        <MudText Typo="Typo.caption" Class="mt-2">
+            This stronger 1/k⁶ suppression implies that high-momentum (UV)
+            contributions to loop integrals decay rapidly,
+            leading to finite integrals.
+            See <MudLink Href="/quantum-engine">Quantum Engine &amp; Loop Finiteness</MudLink> for the explicit computation.
         </MudText>
     </MudStack>
 </MudPaper>
@@ -26,15 +51,15 @@
         <MudText Typo="Typo.body2">&#8226; Perturbative unitarity at 1-loop — <LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" /></MudText>
     </MudStack>
     <MudText Typo="Typo.caption">
-        These properties arise from a bilocal kernel with UV-suppressed propagator.
+        These arise from the bilocal kernel structure.
     </MudText>
 
     <MudText Typo="Typo.subtitle2" GutterBottom="true" Class="mt-3">Why this matters</MudText>
     <MudText Typo="Typo.body2" Class="mb-3">
-        Quantum gravity proposals face a structural tradeoff: preserving unitarity, ensuring finiteness,
-        and avoiding ghosts — satisfying all three simultaneously is rare. General relativity is unitary
-        and ghost-free but non-renormalizable. Higher-derivative extensions achieve finiteness at the cost
-        of ghosts. String theory resolves all three but requires extra dimensions and non-local structure.
+        Quantum gravity faces a structural tradeoff: unitarity, finiteness, and ghost-freedom.
+        GR is unitary and ghost-free but non-renormalizable; higher-derivative theories are
+        finite but introduce ghosts. TRM resolves this via a bilocal form factor
+        <LatexDisplay Content="$\mathcal{F}(k^2)\sim k^{-4}$" /> that suppresses UV modes without ghost degrees of freedom.
     </MudText>
 
     <MudTable Items="_comparisonRows" Dense="true" Hover="true" Bordered="true" Striped="true" Elevation="0">
@@ -53,10 +78,7 @@
     </MudTable>
 
     <MudText Typo="Typo.caption" Class="mt-2">
-        * Verified explicitly at 1-loop level for the Padé [0/4] propagator
-        <LatexDisplay Content="$D(p^2)=1/(1+x+bx^2+x^4)$" /> with
-        <LatexDisplay Content="$\kappa$" />-controlled exponential damping.
-        See <MudLink Href="/quantum-engine">Quantum Engine &amp; UV Finiteness</MudLink> for the integrand computation.
+        * Verified explicitly at 1-loop level.
     </MudText>
 </MudPaper>
 
@@ -75,29 +97,19 @@
     <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Conclusions</MudText>
 
     <MudText Typo="Typo.body2">
-        TRM occupies a unique position among quantum gravity candidates: it is simultaneously ghost-free
-        (Padé propagator preserves correct sign), 1-loop finite (explicitly computed — no Landau pole),
-        and unitary (<LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" />),
-        all within a four-dimensional, local framework. This combination — achieved by only three other
-        approaches partially or at the cost of extra structure — makes TRM a structurally distinct candidate.
+        TRM provides a framework in which UV suppression, ghost-freedom, and perturbative
+        unitarity are realized within a four-dimensional setting — consistent with the
+        conditional all-orders convergence theorem (subject to assumptions A1–A5).
     </MudText>
 
     <MudText Typo="Typo.body2" Class="mt-2">
-        The model extends GR by a discrete spacetime lattice with minimum length
-        <LatexDisplay Content="$\ell_P$" />. At the UV scale, the Padé [0/4] propagator
-        <LatexDisplay Content="$D(p^2)=1/(1+x+bx^2+x^4)$" /> regularizes quantum loop integrals
-        and suppresses UV modes via damping <LatexDisplay Content="$e^{-\kappa p^2/\Lambda^2}$" />.
-        In the weak-field limit, PPN parameters converge to unity
-        (<LatexDisplay Content="$\beta_{\text{PPN}},\gamma_{\text{PPN}}\to 1$" />),
-        recovering all solar-system tests. In strong fields, the regularized mass factor
-        <LatexDisplay Content="$M_{\text{eff}}(r)=M(1-e^{-r^3/r_c^3})$" /> removes the central
-        singularity while preserving the Schwarzschild limit at large
-        <LatexDisplay Content="$r$" />. On cosmological scales, the effective acceleration law
-        <LatexDisplay Content="$g_{\text{TRM}}=g_N+\sqrt{g_N a_0}/\lambda$" /> with
-        <LatexDisplay Content="$a_0\approx 1.2\times 10^{-10}\,\text{m/s}^2$" /> provides
-        an alternative to particle dark matter. The speed of light itself emerges from the lattice:
-        <LatexDisplay Content="$c=\ell_P/t_P$" />.
+        Cross-scale consistency with GR:
     </MudText>
+    <MudStack Spacing="0" Class="ml-4">
+        <MudText Typo="Typo.body2">&#8226; Weak-field: <LatexDisplay Content="$\beta_{\text{PPN}},\gamma_{\text{PPN}}\to 1$" /> — solar-system tests recovered</MudText>
+        <MudText Typo="Typo.body2">&#8226; Strong-field: <LatexDisplay Content="$M_{\text{eff}}(r)=M(1-e^{-r^3/r_c^3})$" /> — singularity regularized, Schwarzschild preserved at large <LatexDisplay Content="$r$" /></MudText>
+        <MudText Typo="Typo.body2">&#8226; Cosmological: <LatexDisplay Content="$g_{\text{TRM}}=g_N+\sqrt{g_N a_0}/\lambda$" /> — alternative to particle dark matter</MudText>
+    </MudStack>
 </MudPaper>
 
 @code {
@@ -108,6 +120,6 @@
         new("General Relativity", "\u2713", "\u2717", "\u2713"),
         new("R\u00B2 / Higher-derivative", "\u2717", "\u2713", "\u2717"),
         new("String Theory", "\u2713", "\u2713", "\u2713"),
-        new("TRM", "\u2713", "\u2713*", "\u2713")
+        new("TRM", "\u2713", "\u2713*", "\u2713*")
     ];
 }

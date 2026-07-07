@@ -17,5 +17,11 @@
     <PackageReference Include="Plotly.Blazor" Version="6.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\images\TRM-TQM-V3-Image1_Web_small.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 
 </Project>
