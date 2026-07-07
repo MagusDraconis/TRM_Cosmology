@@ -85,7 +85,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 15 | Real CML dimension audit | `V4_1_CmlDimensionAudit_Tests` |
 | 16 | Dispersion and Lorentz audit | `V4_1_DispersionAudit_Tests` |
 | 17 | Effective causal-cone / horizon audit | `V4_1_CausalConeAudit_Tests` |
-| 18 | Localized defect / mass-source audit | `V4_1_DefectResponseAudit_Tests` — radial profiles, 1/r fits |
+| 18 | Localized defect / mass-source audit | `V4_1_DefectResponseAudit_Tests` |
+| 19 | Multi-defect superposition / weak-field composition | `V4_1_MultiDefectSuperposition_Tests` — linearity, far-field residuals |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
