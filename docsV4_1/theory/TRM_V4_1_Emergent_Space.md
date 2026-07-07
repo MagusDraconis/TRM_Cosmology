@@ -402,6 +402,77 @@ excluded by the oscillator dynamics. Candidate conditions:
 | D = 3 from oscillator constraints | **HYPOTHESIS** | No derivation exists; candidate mechanisms (sync stability, I2, frustration) are unexplored |
 | Graph isotropy → Euclidean Laplacian | **FRAMEWORK** | Conditional: if the coupling graph is regular and isotropic, convergence follows |
 
+#### 3.8.6 Minimal 3D Selection Criteria
+
+**Purpose.** D = 3 is not derived from oscillator dynamics. This subsection
+identifies the minimal structural conditions a coupling graph must satisfy to
+serve as a viable 3D emergence candidate. These criteria do not prove D = 3 —
+they define what a proof must establish.
+
+**Candidate criteria.** A coupling graph G = (V, E) with adjacency K_ij is a
+viable 3D emergence candidate if it satisfies:
+
+1. **Constant local degree.** The number of coupling partners per oscillator
+   is approximately uniform across the network and consistent with a 3D lattice:
+
+   ```
+   ⟨k⟩ ≈ 6,    σ_k ≪ ⟨k⟩
+   ```
+
+   Fluctuations in local degree produce inhomogeneous effective dimension.
+
+2. **Isotropic local connectivity.** There is no statistically preferred
+   direction in the coupling pattern:
+
+   ```
+   Σ_{j ∈ N(i)} (x_j − x_i) = 0    (orientation-averaged)
+   ```
+
+   Anisotropy implies an anisotropic Laplacian, breaking Euclidean convergence.
+
+3. **Absence of long-range shortcuts.** Coupling strength must decay with
+   graph distance. For every ε > 0, there exists R such that:
+
+   ```
+   K_ij < ε    for all    d(i, j) > R
+   ```
+
+   Shortcuts distort volume scaling N(r) ∝ r^D, reducing effective dimension.
+
+4. **Stable synchronisation under local perturbations.** The fully
+   synchronised state θ_i = Ω* t must be a stable attractor of the dynamics.
+   A D ≠ 3 graph that cannot support stable phase-locking is dynamically
+   excluded — the oscillator network never enters the regime where the
+   continuum limit is meaningful.
+
+5. **Regular large-scale volume growth.** The number of nodes within graph
+   distance r must scale as:
+
+   ```
+   N(r) ∝ r³    for    r ≫ 1
+   ```
+
+   Deviations from cubic scaling indicate fractal or higher-dimensional structure.
+
+**Physical interpretation.** Criteria (1)–(3) are geometric: they ensure the
+graph looks locally like a 3D lattice. Criterion (4) is dynamical: only
+graphs that permit stable synchronisation can host the V4 physics (bridge band,
+collective frequency Ω*). Criterion (5) is global: it ensures that local 3D
+structure extends to large scales.
+
+If all five criteria hold, the graph Laplacian Δ_G converges to the Euclidean
+∇² in D = 3, and the V4 continuum results (1/r gravity, PPN convergence) follow.
+If any criterion fails, D ≠ 3 or the continuum limit is anisotropic — and the
+V4 predictions change.
+
+**Classification:**
+
+| Claim | Classification | Justification |
+|:---|---|:---|
+| Five-criterion list | **FRAMEWORK** | Defines conditions; does not assert they are satisfied |
+| D = 3 from these criteria | **HYPOTHESIS** | No proof that any graph satisfies all five simultaneously |
+| Synchronisation-based selection | **DERIVABLE CANDIDATE** | Criterion (4) is in principle testable via CML simulation; formal proof outstanding |
+
 ---
 
 ## 4. From Causal Metric to Spatial Operators
