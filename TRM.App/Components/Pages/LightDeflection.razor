@@ -121,7 +121,7 @@
         _labels = multipliers.Select(m => m.ToString("F1")).ToArray();
         _series =
         [
-            new ChartSeries { Name = "TRM Δθ (arcsec)", Data = trmValues },
+            new ChartSeries { Name = "TRM Δθ (arcsec)", Data = trmValues, ShowDataMarkers= true },
             new ChartSeries { Name = "GR Δθ (arcsec)", Data = grValues }
         ];
     }
