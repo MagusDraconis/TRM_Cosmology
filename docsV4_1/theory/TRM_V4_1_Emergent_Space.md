@@ -225,6 +225,81 @@ dynamics. A formal proof requires:
   invariance in the continuum limit.
 - Confirmation that K₀ ≤ 1 (coupling strength does not exceed the causal bound).
 
+### 3.6 Metric Properties
+
+The causal distance d(i, j) satisfies the axioms of a discrete metric:
+
+**Symmetry.** Graph distance is symmetric by construction — the shortest path
+from i to j has the same length as the shortest path from j to i:
+
+```
+d(i, j) = d(j, i)
+```
+
+This follows from the undirected nature of the coupling graph (K_ij = K_ji).
+
+**Triangle inequality.** For any three nodes i, j, k, the shortest path from i
+to k cannot be longer than the shortest path from i to j plus the shortest path
+from j to k:
+
+```
+d(i, k) ≤ d(i, j) + d(j, k)
+```
+
+This holds because concatenating the shortest path i → j with the shortest path
+j → k produces a valid (though not necessarily shortest) path i → k.
+
+**Positive definiteness.** d(i, j) ≥ 0, with d(i, j) = 0 if and only if i = j.
+
+**Discrete metric.** The pair (V, d) — where V is the set of oscillator nodes and
+d is the graph distance — forms a discrete metric space. No continuum embedding
+is required for this structure to be well-defined.
+
+**Classification of discrete metric: DERIVABLE CANDIDATE.** The metric axioms
+follow directly from the graph-theoretic definition of distance and the symmetry
+of the coupling matrix. The result is structural — no additional assumptions beyond
+the existence of a connected, undirected coupling graph.
+
+### 3.7 Continuum Limit
+
+The discrete graph distance approximates Euclidean distance in the large-scale limit
+for regular lattice graphs.
+
+**Scaling.** Introduce a physical length scale Δx (the spatial embedding parameter
+or graph edge length). The physical distance corresponding to graph distance d is:
+
+```
+r = d · Δx
+```
+
+**Convergence.** For a regular cubic lattice in D = 3 dimensions, the graph distance
+between nodes at lattice coordinates n_i and n_j converges to the Euclidean norm:
+
+```
+d(i, j) · Δx → |x_i - x_j|    as    d(i, j) → ∞
+```
+
+where x_i = Δx · n_i are the continuum coordinates.
+
+**Conditions.** The convergence requires:
+- Regular lattice structure (uniform spacing, uniform connectivity)
+- Large separation (d ≫ 1, so lattice discretisation effects are negligible)
+- D = 3 (matches observed spatial dimensionality)
+
+**Deviations.** At small scales (d ~ O(1)), the discrete graph distance deviates
+from the Euclidean metric. These deviations are a falsifiable prediction: the
+graph-Laplacian Green's function K(r) ~ 1/r is exact only in the continuum limit;
+at lattice scale, corrections of order Δx/r appear.
+
+**Classification of continuum limit: HYPOTHESIS.** The convergence of graph
+distance to Euclidean distance for regular lattices is a standard result in graph
+theory. However, the identification of this mathematical convergence with the
+physical emergence of spacetime geometry is a hypothesis requiring:
+- Derivation of D = 3 from coupling topology (not assumed)
+- Verification that the emergent metric satisfies the Einstein equations in the
+  appropriate limit
+- Consistency with Lorentz invariance
+
 ---
 
 ## 4. Claim Classification
@@ -234,6 +309,8 @@ dynamics. A formal proof requires:
 | Space emerges from coupling topology | **HYPOTHESIS** | No derivation from oscillator dynamics; graph distance is a definition, not a prediction |
 | Graph distance as physical distance | **FRAMEWORK** | Consistent with TRM structure; not yet tested against observables |
 | c_TRM = 1 (causal bound) | **DERIVABLE CANDIDATE** | Follows from discrete propagation physics; requires formal proof of maximal signalling rate |
+| Discrete metric (symmetry, triangle inequality) | **DERIVABLE CANDIDATE** | Follows from undirected graph structure; no additional assumptions |
+| Continuum limit → Euclidean metric | **HYPOTHESIS** | Standard graph theory result; physical identification requires D=3 derivation and Lorentz consistency |
 | SI value of c = Δx · f_ref | **CALIBRATED** | Requires Δx (external spatial anchor) and f_ref (I3) |
 | Network causal bound = speed of light | **HYPOTHESIS** | Plausible but not derived; assumes oscillator coupling is the fundamental speed limit |
 
