@@ -74,3 +74,4 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 4 | Functional/selection pipeline (graph → F(D)) | `V4_1_FunctionalF_Tests`, `V4_1_DimensionSelection_Benchmark_Tests` |
 | 5 | Real graph-family comparison across D | `V4_1_SpectralDiagnostics_Tests` (pipeline integration) |
 | 6 | CML synchronisation and bridge-band experiments | *Future — requires simulation infrastructure* |
+| 7 | Deterministic sync dynamics on real graph families | `V4_1_SynchronizationDynamics_Tests`, `V4_1_SynchronizationDimensionComparison_Tests` |
