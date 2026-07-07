@@ -13,7 +13,7 @@ namespace TRM.Tests.V4_1;
 [Trait("Category", "V4_1_DimensionSelection")]
 public class V4_1_SpectralDiagnostics_Tests
 {
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_Spectral_Lambda2_PositiveOnConnectedGraphs()
     {
         foreach (var g in new[] {
@@ -25,7 +25,7 @@ public class V4_1_SpectralDiagnostics_Tests
         }
     }
 
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_Spectral_LambdaMax_GreaterEqualsLambda2()
     {
         var g = GraphFactory.CubicLattice(3);
@@ -34,7 +34,7 @@ public class V4_1_SpectralDiagnostics_Tests
         Assert.True(lMax >= l2, $"λ_max={lMax:F3} should be ≥ λ₂={l2:F3}.");
     }
 
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_Spectral_SpectralBalance_IsComputableForAllD()
     {
         var graphs = new (int D, GraphTopology g)[]
@@ -55,7 +55,7 @@ public class V4_1_SpectralDiagnostics_Tests
         }
     }
 
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_Spectral_NoNaNOnBaselineGraphs()
     {
         foreach (var g in new[] {
@@ -82,7 +82,7 @@ public class V4_1_SpectralDiagnostics_Tests
         return new GraphDimensionScenario(D, lambda2, lambdaMax, sigmaTheta, meanVTheta, deltaOmega);
     }
 
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_40_FunctionalF_RealGraphDiagnostics_AreComputable()
     {
         var scenarios = new[]
@@ -102,7 +102,7 @@ public class V4_1_SpectralDiagnostics_Tests
         }
     }
 
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_41_FunctionalF_RealGraphPipeline_HasNoBuiltInD3Bias()
     {
         // If all D have identical observables, F(D) must be identical.
@@ -126,7 +126,7 @@ public class V4_1_SpectralDiagnostics_Tests
         Assert.Equal(4, results.Distinct().Count());
     }
 
-    [Fact(Skip = "Power-iteration eigenvalue solver needs replacement with dense solver for small graphs.")]
+    [Fact]
     public void V4_1_42_FunctionalF_RealGraphInputs_ProduceDeterministicOutputs()
     {
         var g = GraphFactory.CubicLattice(3);

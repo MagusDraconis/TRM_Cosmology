@@ -75,3 +75,6 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 5 | Real graph-family comparison across D | `V4_1_SpectralDiagnostics_Tests` (pipeline integration) |
 | 6 | CML synchronisation and bridge-band experiments | *Future — requires simulation infrastructure* |
 | 7 | Deterministic sync dynamics on real graph families | `V4_1_SynchronizationDynamics_Tests`, `V4_1_SynchronizationDimensionComparison_Tests` |
+| 8 | Dense spectral numerics + regression hardening | `V4_1_NumericsRegression_Tests` — Jacobi solver, determinism, zero-mode, perturbation stability |
+
+Skipped tests must either be promoted to pass or explicitly justified as scale-limited.

@@ -177,20 +177,19 @@ public static class GraphMetrics
         return Eigenvalues(L, k);
     }
 
-    /// <summary>Second eigenvalue (spectral gap) of Laplacian.</summary>
+    /// <summary>Second eigenvalue (spectral gap) of Laplacian via dense Jacobi solver.</summary>
     public static double Lambda2(GraphTopology g)
     {
-        // Analytical for tractable cases; numerical fallback otherwise.
-        int N = g.NodeCount;
-        var ev = LaplacianEigenvalues(g, Math.Min(5, N));
+        var L = LaplacianMatrix(g);
+        var ev = DenseSymmetricEigenSolver.Eigenvalues(L);
         return ev.Length >= 2 ? ev[1] : 0;
     }
 
-    /// <summary>Largest eigenvalue of Laplacian.</summary>
+    /// <summary>Largest eigenvalue of Laplacian via dense Jacobi solver.</summary>
     public static double LambdaMax(GraphTopology g)
     {
-        int N = g.NodeCount;
-        var ev = LaplacianEigenvalues(g, Math.Min(5, N));
+        var L = LaplacianMatrix(g);
+        var ev = DenseSymmetricEigenSolver.Eigenvalues(L);
         return ev[^1];
     }
 }
