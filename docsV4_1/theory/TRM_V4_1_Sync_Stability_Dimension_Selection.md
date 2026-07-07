@@ -165,6 +165,122 @@ Conversely, the hypothesis gains support if:
 
 ---
 
+## 5.7 Dimensional Selection Functional
+
+The arguments above are qualitative. A quantitative discriminator is required
+to test whether D = 3 is dynamically selected. This section defines a candidate
+**dimensional selection functional** F(D).
+
+### 5.7.1 Motivation
+
+Currently, each indicator (§4) is evaluated separately: spectral gap, basin
+size, perturbation decay, propagation isotropy, bridge-band width. A graph
+might score well on one metric and poorly on another. A **scalar** functional
+F(D) combines these into a single quantity whose maximum identifies the
+preferred dimension.
+
+### 5.7.2 Definition
+
+Define F(D) for a graph ensemble at effective dimension D as:
+
+```
+F(D) = α₁·S₁(D) + α₂·S₂(D) + α₃·S₃(D)
+```
+
+where the three terms are:
+
+**S₁(D) — Spectral balance.**
+
+```
+S₁ = λ₂ / λ_max
+```
+
+Ratio of the first non-zero eigenvalue λ₂ (synchronisation speed) to the
+largest eigenvalue λ_max (mode bandwidth). D = 3 is expected to maximise
+this ratio: low D has small λ₂ (slow sync); high D has large λ_max (dense
+spectrum). The ratio peaks where the spectrum is optimally structured for
+both fast synchronisation and discrete mode separation.
+
+**S₂(D) — Isotropy of propagation.**
+
+```
+S₂ = 1 − σ_θ / ⟨v_θ⟩
+```
+
+where σ_θ is the angular standard deviation of the front propagation speed
+v_θ and ⟨v_θ⟩ is the mean. Perfect isotropy gives S₂ = 1. For D < 3,
+propagation is necessarily anisotropic (a 2D sheet has a normal direction).
+For D > 3, higher-dimensional lattices may introduce direction-dependent
+shortest paths. D = 3 is expected to maximise S₂.
+
+**S₃(D) — Bridge-band sharpness.**
+
+```
+S₃ = 1 / ΔΩ
+```
+
+where ΔΩ is the width of the bridge band (spread of Ω* across random
+realisations). A narrow bridge band (small ΔΩ) indicates a well-defined
+collective frequency — consistent with I2 (Ω ∈ [1.16, 1.19]). D = 3 is
+expected to minimise ΔΩ and thus maximise S₃, because the discrete mode
+structure is cleanest at the balanced connectivity of a cubic lattice.
+
+The weights α₁, α₂, α₃ are **not prescribed** — they are to be determined by
+calibration against CML simulation data. The functional is defined up to
+monotonic transformations; only the location of the maximum matters.
+
+### 5.7.3 Hypothesis
+
+> **F(D) has a unique global maximum at D = 3.**
+
+In words: the optimal trade-off between spectral structure, propagation
+isotropy, and bridge-band sharpness occurs at exactly three spatial dimensions.
+D < 3 underperforms on spectral balance and isotropy. D > 3 underperforms on
+bridge-band sharpness and spectral separation. D = 3 sits at the intersection.
+
+### 5.7.4 Interpretation
+
+The functional formalises the intuition that D = 3 is the **unique dimension
+where locality and connectivity are balanced**:
+
+| Regime | Spectral balance | Isotropy | Bridge band | Overall F(D) |
+|:---|---:|:---:|:---:|:---:|
+| D = 1 | Low (sparse) | Low (built-in axis) | Moderate | Low |
+| D = 2 | Moderate | Moderate | Moderate | Intermediate |
+| **D = 3** | **High** | **High** | **High (narrowest)** | **Maximum** |
+| D = 4 | High (dense) | High | Low (broad) | Intermediate (dense modes) |
+| D ≥ 5 | Very high (oversaturated) | High | Very low | Low (loss of discrete structure) |
+
+The functional treats each indicator as **necessary but not sufficient**.
+A graph that synchronises well (high S₁) but is anisotropic (low S₂) scores
+poorly overall. Only D = 3 scores well on all three simultaneously.
+
+### 5.7.5 Simulation Strategy
+
+F(D) can be evaluated in CML simulations with controlled graph topology:
+
+1. Generate regular lattice graphs at D ∈ {1, 2, 3, 4} with matching node
+   count N ≈ 1000 and nearest-neighbour coupling.
+2. For each D, run N_sim ≈ 100 random initial conditions and measure λ₂, λ_max,
+   σ_θ, ⟨v_θ⟩, and ΔΩ.
+3. Compute S₁, S₂, S₃ and scan α₁, α₂, α₃ to check robustness of the maximum
+   at D = 3.
+4. Repeat for graphs with controlled shortcut density and degree variance to
+   test sensitivity.
+
+This defines a **measurable objective** for the next phase of V4.1 simulation
+work. No simulation results are reported here.
+
+### 5.7.6 Classification
+
+| Claim | Classification | Justification |
+|:---|---|:---|
+| Functional F(D) definition | **FRAMEWORK** | Defines a scalar objective; weights are free parameters |
+| F(D) maximum at D = 3 | **HYPOTHESIS** | Plausible from qualitative arguments; no simulation data exists |
+| Derivation of F(D) form from oscillator dynamics | **DERIVABLE CANDIDATE** | Individual terms (λ₂, σ_θ, ΔΩ) are computable from K_ij; functional form pending |
+
+---
+
 ## 6. Claim Classification
 
 | Claim | Classification | Justification |
@@ -173,6 +289,9 @@ Conversely, the hypothesis gains support if:
 | Stability indicators as selection diagnostics | **FRAMEWORK** | Defines testable quantities; does not assert outcomes |
 | Future derivation from oscillator dynamics | **DERIVABLE CANDIDATE** | In principle computable via CML; formal proof outstanding |
 | I2 bridge band constrains spatial dimension | **HYPOTHESIS** | I2 is observed in 3D CML; D-dependence untested |
+| Functional F(D) definition (three-term) | **FRAMEWORK** | Defines a scalar objective; weights are free parameters |
+| F(D) maximum at D = 3 | **HYPOTHESIS** | Plausible from qualitative arguments; no simulation data |
+| Derivation of F(D) from oscillator dynamics | **DERIVABLE CANDIDATE** | Individual terms computable from K_ij; functional form pending |
 
 ---
 
