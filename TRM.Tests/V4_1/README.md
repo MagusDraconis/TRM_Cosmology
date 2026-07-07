@@ -52,3 +52,14 @@ Tests do **not** claim physical truth. Tests validate:
 - Correct computation (functional evaluation)
 
 All physical claims remain in `docsV4_1/theory/` with explicit classification.
+
+### Test maturity ladder
+
+| Claim type | Required test layer |
+|:---|:---|
+| Structural (exact identities) | Exact equality / property tests |
+| Continuum (convergence) | Resolution-scan convergence tests |
+| Dimensional selection (hypothesis) | Benchmark + falsification tests on synthetic inputs |
+| Functional F(D) (framework) | Weight robustness + counterexample tests |
+
+No theory note is considered mature unless there is a matching xUnit test layer.
