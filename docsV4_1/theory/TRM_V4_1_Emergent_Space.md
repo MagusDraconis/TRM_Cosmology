@@ -302,7 +302,97 @@ physical emergence of spacetime geometry is a hypothesis requiring:
 
 ---
 
-## 4. Claim Classification
+## 4. From Causal Metric to Spatial Operators
+
+The causal metric d(i, j) defined in §3 provides the foundation. This section shows
+how standard continuum spatial operators — specifically the Laplacian ∇² — emerge
+from the discrete adjacency structure without presupposing a background manifold.
+
+### 4.1 Discrete Neighborhood Structure
+
+The oscillator graph G = (V, E) consists of nodes V (oscillators) and edges E
+(couplings K_ij > 0). The graph distance d(i, j) induces a natural notion of locality:
+
+```
+N(i) = { j ∈ V : d(i, j) = 1 }
+```
+
+The set N(i) is the immediate neighbourhood of node i — all oscillators directly
+coupled to it. Iterating neighbourhoods generates concentric shells at distances
+d = 1, 2, 3, …, defining the discrete analogue of spherical surfaces.
+
+### 4.2 Graph Laplacian
+
+From the adjacency structure, define the discrete graph Laplacian acting on a
+node-valued field φ: V → ℝ:
+
+```
+(Δ_φ φ)(i) = Σ_{j ∈ N(i)} (φ(j) − φ(i))
+```
+
+In matrix form: Δ_G = D − A, where A_ij = K_ij is the adjacency (coupling) matrix
+and D_ii = Σ_j A_ij is the degree matrix.
+
+This operator is the discrete analogue of the continuum Laplacian. It measures the
+excess of a field value at a node relative to its neighbours — the discrete
+divergence of the discrete gradient.
+
+### 4.3 Continuum Limit
+
+For a regular cubic lattice with spacing Δx in D = 3 dimensions, the discrete
+Laplacian converges to the Euclidean Laplacian in the limit Δx → 0:
+
+```
+Σ_{j ∈ N(i)} (φ(j) − φ(i)) → Δx² · ∇²φ(x)
+```
+
+More precisely, for a smooth function φ sampled at lattice points:
+
+```
+(Δ_G φ)(i) / Δx² → ∇²φ(x_i)    as    Δx → 0
+```
+
+The convergence follows from the Taylor expansion of φ around x_i:
+
+```
+φ(x_i + Δx e_μ) = φ(x_i) + Δx ∂_μφ + ½Δx² ∂_μ²φ + O(Δx³)
+```
+
+Summing over the 2D nearest neighbours cancels the first-order terms (by symmetry
+of the regular lattice), leaving the second-order terms that compose the Laplacian.
+
+### 4.4 Physical Interpretation
+
+**Space is not assumed — it is reconstructed.** The chain of emergence is:
+
+```
+adjacency K_ij
+  → graph distance d(i, j)
+    → discrete Laplacian Δ_G
+      → continuum Laplacian ∇² (at large scales)
+```
+
+Differential geometry — metric tensors, covariant derivatives, curvature —
+emerges only in the continuum limit. At the fundamental level of the oscillator
+network, only adjacency and causal propagation exist. The familiar tools of
+continuum field theory are **effective descriptions** valid at scales r ≫ Δx.
+
+This connects directly to the V4 result: the 1/r gravitational form arises as
+the Green's function of ∇²K = 0 (B3B). In V4.1, ∇² itself is not fundamental —
+it is the continuum limit of the graph Laplacian, which in turn follows from
+adjacency and causal distance.
+
+### 4.5 Claim Classification
+
+| Claim | Classification | Justification |
+|:---|---|:---|
+| Graph Laplacian from adjacency | **DERIVABLE CANDIDATE** | Follows from graph definition; Δ_G = D − A is the standard construction |
+| Continuum recovery of ∇² | **HYPOTHESIS** | Requires regular lattice, D = 3, and Δx → 0 limit; physical identification pending |
+| Euclidean large-scale space | **HYPOTHESIS** | Graph theory result; physical emergence requires D = 3 derivation from coupling topology |
+
+---
+
+## 5. Claim Classification
 
 | Claim | Classification | Justification |
 |:---|---|:---|
@@ -313,10 +403,13 @@ physical emergence of spacetime geometry is a hypothesis requiring:
 | Continuum limit → Euclidean metric | **HYPOTHESIS** | Standard graph theory result; physical identification requires D=3 derivation and Lorentz consistency |
 | SI value of c = Δx · f_ref | **CALIBRATED** | Requires Δx (external spatial anchor) and f_ref (I3) |
 | Network causal bound = speed of light | **HYPOTHESIS** | Plausible but not derived; assumes oscillator coupling is the fundamental speed limit |
+| Graph Laplacian Δ_G from adjacency | **DERIVABLE CANDIDATE** | Standard graph construction Δ_G = D − A; no additional assumptions |
+| Continuum recovery ∇² from Δ_G | **HYPOTHESIS** | Requires regular lattice, D = 3, Δx → 0; physical emergence pending |
+| Euclidean large-scale space from graph | **HYPOTHESIS** | Graph theory convergence; D = 3 must be derived, not assumed |
 
 ---
 
-## 5. Scope Boundary
+## 6. Scope Boundary
 
 This document does **NOT** modify:
 
@@ -331,7 +424,7 @@ This is an **exploratory extension**. It defines a research program, not establi
 
 ---
 
-## 6. Relation to B4-T1
+## 7. Relation to B4-T1
 
 | | B4-T1 (V4) | V4.1 (this document) |
 |:---|---|:---|
@@ -345,7 +438,7 @@ is recovered via calibration, not derivation.
 
 ---
 
-## 7. Falsification
+## 8. Falsification
 
 The V4.1 emergent-space hypothesis is falsified if:
 
@@ -357,7 +450,7 @@ The V4.1 emergent-space hypothesis is falsified if:
 
 ---
 
-## 8. Next Steps
+## 9. Next Steps
 
 1. **Formal proof** — demonstrate that c_TRM = 1 is the maximal signal propagation rate
    in a discrete oscillator network.
@@ -369,11 +462,13 @@ The V4.1 emergent-space hypothesis is falsified if:
 
 ---
 
-## 9. Cross-References
+## 10. Cross-References
 
 | Document | Role |
 |:---|:---|
 | `docsV4/experiments/TRM_V4_B4_T1_PropagationSpeedClosure.md` | B4 propagation speed analysis |
-| `docsV4/theory/TRM_V4_B3B_BoundaryDefectOrigin.md` | 1/r from graph Laplacian |
+| `docsV4/theory/TRM_V4_B3B_BoundaryDefectOrigin.md` | 1/r from graph Laplacian (§4 connects to discrete Δ_G) |
 | `docsV4/theory/TRM_V4_Interpretation_Core.md` | C5 energy density interpretation |
 | `docsV4/review/TRM_V4_Claim_Boundaries.md` | V4 claim boundaries |
+| `docsV4_1/theory/TRM_V4_1_Emergent_Space.md` §3 | Causal metric and time-distance equivalence |
+| `docsV4_1/theory/TRM_V4_1_Emergent_Space.md` §4 | Graph Laplacian and continuum operator emergence |
