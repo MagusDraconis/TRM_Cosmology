@@ -96,7 +96,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 26 | Universality-class / robustness audit | `V4_1_UniversalityAudit_Tests` |
 | 27 | Cross-framework comparator / null-model audit | `V4_1_ComparatorAudit_Tests` |
 | 28 | Minimal core reduction audit | `V4_1_ReductionAudit_Tests` |
-| 29 | Core reconstruction / closure audit | `V4_1_CoreReconstruction_Tests` — retention, residuals, correction ranking |
+| 29 | Core reconstruction / closure audit | `V4_1_CoreReconstruction_Tests` |
+| 30 | Core-plus-correction closure audit | `V4_1_CorePlusCorrectionClosure_Tests` — improvement, closure, residual rank |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
