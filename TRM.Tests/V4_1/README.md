@@ -83,7 +83,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 13 | Analysis and interpretation layer | `V4_1_Analysis_Tests` |
 | 14 | Publication-ready paper generation | `V4_1_Publication_Tests` |
 | 15 | Real CML dimension audit | `V4_1_CmlDimensionAudit_Tests` |
-| 16 | Dispersion and Lorentz audit | `V4_1_DispersionAudit_Tests` — linearity, isotropy, directional fits |
+| 16 | Dispersion and Lorentz audit | `V4_1_DispersionAudit_Tests` |
+| 17 | Effective causal-cone / horizon audit | `V4_1_CausalConeAudit_Tests` — front speed, cone width, anisotropy |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
