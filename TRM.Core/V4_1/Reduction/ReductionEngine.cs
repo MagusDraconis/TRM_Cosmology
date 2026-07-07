@@ -11,7 +11,7 @@ public static class ReductionEngine
         ["spectral"] = 0.35, ["defect"] = 0.30, ["sync"] = 0.25,
         ["isotropy"] = 0.20, ["outer-exponent"] = 0.20,
         ["dispersion"] = 0.15, ["composition"] = 0.15,
-        ["causal-cone"] = 0.10, ["weak-field"] = 0.10
+        ["causal-cone"] = 0.10,         ["weak-field"] = 0.10, ["d4-favoring"] = 0.05
     };
 
     // Per-mechanism per-D scores: [D1, D2, D3, D4].
@@ -26,6 +26,7 @@ public static class ReductionEngine
         ["composition"] = [0.4, 0.5, 0.7, 0.5],
         ["causal-cone"] = [0.3, 0.5, 0.6, 0.5],
         ["weak-field"] = [0.4, 0.5, 0.6, 0.4],
+        ["d4-favoring"] = [0.1, 0.2, 0.3, 0.9],
     };
 
     // Baseline full-system scores.
@@ -76,7 +77,7 @@ public static class ReductionEngine
         {
             var withoutThis = names.Where(n => n != name).ToList();
             var eval = EvaluateSubset(withoutThis);
-            if (eval.PreferredDim != 3 || eval.ScoreRetention < 0.6)
+            if (eval.PreferredDim != 3 || eval.ScoreRetention < 0.8)
                 critical.Add(name);
         }
 
