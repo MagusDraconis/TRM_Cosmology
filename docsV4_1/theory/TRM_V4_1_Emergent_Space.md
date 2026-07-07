@@ -112,6 +112,72 @@ B4 Candidate A prediction (Δx ≈ 0.33 m) because K₀ ≈ 0.10 is factored out
 propagation is the fundamental speed limit of spacetime — a claim that requires
 independent verification.
 
+### 3.4 Causal Bound Argument
+
+The claim that the maximal propagation speed in a discrete oscillator network is
+one graph step per cycle rests on the following structural facts:
+
+**1. Locality of coupling.** Each oscillator is coupled only to its immediate
+neighbours in the graph. Influence propagates exclusively via coupling edges —
+there are no long-range direct connections. A perturbation at node A can affect
+node B only through intermediate nodes along some path A → … → B.
+
+**2. Discrete-time dynamics.** The oscillator phase θ_i evolves in discrete steps
+with period τ = 1/f_ref. During one cycle, an oscillator responds to the state of
+its neighbours at the beginning of that cycle. Information arriving from beyond
+the immediate neighbourhood is delayed by at least one cycle per intermediate node.
+
+**3. No edge-skipping.** Since oscillators do not have access to non-local oscillator
+states, a signal cannot skip edges. The shortest path between two nodes defines
+the minimum number of cycles required for information to propagate between them.
+
+**4. Maximal rate.** From (1)–(3), the propagation distance per cycle is bounded:
+
+```
+Δd_max = 1 edge per cycle
+```
+
+In TRM-native units (cycle = time unit, edge = length unit):
+
+```
+c_TRM ≤ 1    (causal bound)
+```
+
+The equality c_TRM = 1 is achieved when propagation is unfrustrated — i.e., when
+coupling is nearest-neighbour and symmetric, and no delays are introduced by
+phase mismatch or coupling inhomogeneity.
+
+**5. Wave propagation.** In the continuum limit of a regular lattice, this bound
+corresponds to linear dispersion:
+
+```
+ω = c_TRM · k    (with c_TRM = 1)
+```
+
+The massless wave equation □K = 0 follows as the long-wavelength limit of the
+discrete propagation described above. The propagation speed c_K that appears in
+□K = 0 is therefore identified with the causal bound c_TRM = 1.
+
+**6. SI conversion.** The physical value of the propagation speed is obtained by
+multiplying by the spatial and temporal unit scales:
+
+```
+c = Δx · f_ref · c_TRM = Δx · f_ref
+```
+
+The dimensionless bound c_TRM = 1 is a structural consequence of discrete
+propagation. The SI value of c is **CALIBRATED** from the spatial anchor Δx and
+the temporal anchor f_ref.
+
+**Classification of c_TRM = 1: DERIVABLE CANDIDATE.** The argument above is
+structural — it follows from the assumptions of local coupling and discrete-time
+dynamics. A formal proof requires:
+- Rigorous demonstration that no super-causal propagation protocol exists in
+  the oscillator network model.
+- Verification that the network's causal structure is consistent with Lorentz
+  invariance in the continuum limit.
+- Confirmation that K₀ ≤ 1 (coupling strength does not exceed the causal bound).
+
 ---
 
 ## 4. Claim Classification
