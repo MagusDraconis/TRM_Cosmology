@@ -1,4 +1,5 @@
 ﻿@page "/"
+@* V4 interpretation layer is frozen. No further conceptual changes allowed. *@
 
 <PageTitle>TRM Cosmology</PageTitle>
 
@@ -55,12 +56,16 @@
 <MudPaper Class="pa-4 mb-3" Outlined="true">
     <MudPaper Class="pa-3 mb-3" Outlined="true" Style="background: var(--mud-palette-info-hover, #F0F7FF);">
         <MudText Typo="Typo.body2">
-            <b>Structural insight:</b> The 1/r gravitational form emerges as the Green's function
-            of a discrete graph Laplacian under localized coupling perturbations.
+            <b>Structural contribution:</b> The 1/r gravitational form emerges from
+            discrete graph Laplacian topology — <b>DERIVED</b>.
         </MudText>
     </MudPaper>
     <MudStack Spacing="1">
-        <MudText Typo="Typo.subtitle2" GutterBottom="true">Quantum-scale behavior</MudText>
+        <MudText Typo="Typo.subtitle2" GutterBottom="true">UV-scale behavior</MudText>
+        <MudText Typo="Typo.body2">
+            A candidate UV-improved bilocal gravity framework
+            with 1-loop verified finiteness and conditional all-orders convergence.
+        </MudText>
         <MudText Typo="Typo.body2">
             Kernel &rarr; Fourier transform:
             <LatexDisplay Content="$\mathcal{F}(k^2)\sim k^{-4}$" />
@@ -96,11 +101,14 @@
 </MudPaper>
 
 <MudPaper Class="pa-4 mb-3" Outlined="true">
-    <MudText Typo="Typo.h6" GutterBottom="true">Core Feature</MudText>
+    <MudText Typo="Typo.h6" GutterBottom="true">Current verified features</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">
+        At the current level of verification, the bilocal kernel framework supports the following properties:
+    </MudText>
     <MudStack Spacing="1" Class="mb-2">
-        <MudText Typo="Typo.body2">&#8226; Ghost-free propagation (classical and perturbative quantum level)</MudText>
-        <MudText Typo="Typo.body2">&#8226; Explicit 1-loop finiteness (no counterterms required)</MudText>
-        <MudText Typo="Typo.body2">&#8226; Perturbative unitarity at 1-loop — <LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" /></MudText>
+        <MudText Typo="Typo.body2">&#8226; Ghost-free propagation (supported by spectral positivity and Padé kernel sign structure)</MudText>
+        <MudText Typo="Typo.body2">&#8226; 1-loop finiteness (explicitly verified; no counterterms required at 1-loop)</MudText>
+        <MudText Typo="Typo.body2">&#8226; Perturbative unitarity at 1-loop (<LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" />)</MudText>
     </MudStack>
     <MudText Typo="Typo.caption">
         These arise from the bilocal kernel structure.
@@ -130,7 +138,7 @@
     </MudTable>
 
     <MudText Typo="Typo.caption" Class="mt-2">
-        * Verified explicitly at 1-loop level.
+        @TableFootnote
     </MudText>
 </MudPaper>
 
@@ -150,6 +158,27 @@
                 <MudText Typo="Typo.body2">&#8226; Does <b>not</b> predict <LatexDisplay Content="$G$" /> from first principles</MudText>
                 <MudText Typo="Typo.body2">&#8226; Does <b>not</b> claim complete quantum gravity</MudText>
             </MudStack>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudPaper Class="pa-4 mb-3" Outlined="true">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" md="6">
+            <MudText Typo="Typo.subtitle2" GutterBottom="true">Parameter Structure</MudText>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.body2">&#8226; 1 free parameter: <LatexDisplay Content="$b$" /></MudText>
+                <MudText Typo="Typo.body2">&#8226; 2 empirical anchors: <LatexDisplay Content="$f_{\text{ref}}$" /> (cesium SI second), <LatexDisplay Content="$G$" /></MudText>
+                <MudText Typo="Typo.body2">&#8226; Comparable to GR (<LatexDisplay Content="$G, \Lambda$" />) or Brans-Dicke (<LatexDisplay Content="$\omega$" />)</MudText>
+            </MudStack>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudText Typo="Typo.subtitle2" GutterBottom="true">On the bilocal kernel</MudText>
+            <MudText Typo="Typo.body2">
+                The bilocal kernel is introduced as the minimal structure consistent with:
+                Laplacian emergence of 1/r, Lorentzian stability, and UV suppression.
+                It is <b>not</b> claimed as a fundamental microscopic derivation.
+            </MudText>
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -179,7 +208,8 @@
     </MudText>
     <MudStack Spacing="0" Class="ml-4">
         <MudText Typo="Typo.body2">&#8226; Weak-field: <LatexDisplay Content="$\beta_{\text{PPN}},\gamma_{\text{PPN}}\to 1$" /> — solar-system tests recovered</MudText>
-        <MudText Typo="Typo.body2">&#8226; Strong-field: <LatexDisplay Content="$M_{\text{eff}}(r)=M(1-e^{-r^3/r_c^3})$" /> — singularity regularized, Schwarzschild preserved at large <LatexDisplay Content="$r$" /></MudText>
+        <MudText Typo="Typo.body2">&#8226; Strong-field: EFT analysis indicates GR-like behavior (<LatexDisplay Content="$\delta\ll 10^{-6}$" />) — <b>SUPPORTED</b></MudText>
+        <MudText Typo="Typo.body2">&#8226; Scalar ODE: illustrative toy model only (<LatexDisplay Content="$r_H\approx 2.275\,GM$" />, +13.8%)</MudText>
         <MudText Typo="Typo.body2">&#8226; Cosmological: <LatexDisplay Content="$g_{\text{TRM}}=g_N+\sqrt{g_N a_0}/\lambda$" /> — alternative to particle dark matter</MudText>
     </MudStack>
 </MudPaper>
@@ -192,6 +222,8 @@
         new("General Relativity", "\u2713", "\u2717", "\u2713"),
         new("R\u00B2 / Higher-derivative", "\u2717", "\u2713", "\u2717"),
         new("String Theory", "\u2713", "\u2713", "\u2713"),
-        new("TRM", "\u2713", "\u2713*", "\u2713*")
+        new("TRM", "\u2713", "\u2713 (1-loop*)", "\u2713 (1-loop*)")
     ];
+
+    private static readonly string TableFootnote = "* Explicitly verified at 1-loop level; all-orders convergence remains conditional.";
 }
