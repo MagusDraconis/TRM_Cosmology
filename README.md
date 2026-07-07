@@ -3,10 +3,15 @@
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20681734-0A7BBB?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.20681734)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-trm.runasp.net-2ea44f?logo=blazor)](https://trm.runasp.net/)
 
 > **V3.4 Core:** Frozen — two irreducible structural inputs (I1, I2). **V4 Interpretation Layer:** Weak-field 1PN GR-compatible, full Lorentzian tensor bridge, strong-field mapped. 184/184 xUnit tests passing.
 
 This repository contains the numerical implementation and analysis tools for the **Temporal Rate Matrix (TRM)** / **Temporal Quantum Matrix (TQM)** framework. The V3.4 core theory is frozen; the V4 interpretation layer bridges oscillator quantities to gravitational observables.
+
+## 🌐 Live App
+
+The TRM web interface is deployed at **[trm.runasp.net](https://trm.runasp.net/)** — explore the PPN validator, quantum loop finiteness, propagator scaling comparison, and cross-scale GR validation dashboards interactively.
 
 
 ## 🔬 Overview

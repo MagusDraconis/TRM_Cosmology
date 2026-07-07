@@ -7,24 +7,76 @@
 <MudCard Class="mb-3">
     <MudCardMedia Image="images/TRM-TQM-V3-Image1_Web_small.jpg" Height="200" alt="TRM space image" />
     <MudCardContent>
-        <MudText Typo="Typo.body2">
-            <b>TRM</b> — a bilocal field theory on a discrete spacetime lattice. Gravity emerges from the coincidence limit of the propagator <LatexDisplay Content="$K(x,y)$" />.
-        </MudText>
-        <MudText Typo="Typo.body2">
-            A bilocal kernel <LatexDisplay Content="$K(x)=K_0/(1+x+bx^2+x^4)$" /> provides UV suppression via form factor <LatexDisplay Content="$\mathcal{F}(k^2)\sim k^{-4}$" />.
-        </MudText>
-        <MudText Typo="Typo.body2">
-            Ghost-free &middot; 1-loop finite &middot; perturbatively unitary (<LatexDisplay Content="$\operatorname{Im}\Pi\geq 0,\;\rho\geq 0$" />).
-        </MudText>
+        <MudText Typo="Typo.h5" GutterBottom="true"><b>Gravity from topology — not geometry</b></MudText>
+        <MudStack Spacing="1">
+            <MudText Typo="Typo.body2">
+                Structural origin of the 1/r gravitational form from a discrete graph Laplacian — <b>DERIVED</b>.
+            </MudText>
+            <MudText Typo="Typo.body2">
+                GR-compatible weak-field behavior at 1PN (<LatexDisplay Content="$\beta_{\text{PPN}}\approx 1$" /> at <LatexDisplay Content="$b\approx 1.248$" />) — <b>SUPPORTED</b>.
+            </MudText>
+            <MudText Typo="Typo.body2">
+                UV-suppressed propagator <LatexDisplay Content="$D(k^2)\sim 1/k^6$" />, 1-loop finite — <b>VERIFIED</b> at 1-loop, conditional all-orders.
+            </MudText>
+        </MudStack>
     </MudCardContent>
 </MudCard>
 
 <MudPaper Class="pa-4 mb-3" Outlined="true">
+    <MudText Typo="Typo.h6" GutterBottom="true">How gravity emerges</MudText>
+    <MudGrid Spacing="2">
+        <MudItem xs="12" md="4">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary">Step 1 — Discrete Origin</MudText>
+            <MudText Typo="Typo.body2">
+                A network of coupled phase oscillators on a discrete lattice.
+                Interactions are governed by a bilocal coupling matrix <LatexDisplay Content="$K_{ij}$" />.
+            </MudText>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary">Step 2 — Emergence of Gravity</MudText>
+            <MudText Typo="Typo.body2">
+                A localized coupling defect in the graph Laplacian yields
+                <LatexDisplay Content="$\nabla^2 K = 0$" />.
+                The Green's function gives <LatexDisplay Content="$K(r)\sim 1/r$" /> — <b>DERIVED</b>.
+            </MudText>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary">Step 3 — Physical Mapping</MudText>
+            <MudText Typo="Typo.body2">
+                <LatexDisplay Content="$\varphi(x) = \rho_E / \rho_{\text{ref}}$" /> — <b>HYPOTHESIS</b> (C5).
+                Time-rate field <LatexDisplay Content="$T(x)$" /> yields acceleration
+                <LatexDisplay Content="$a(x) = c^2 \nabla T(x)$" />.
+                Newtonian limit reproduced — <b>SUPPORTED</b>.
+            </MudText>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudPaper Class="pa-4 mb-3" Outlined="true">
+    <MudPaper Class="pa-3 mb-3" Outlined="true" Style="background: var(--mud-palette-info-hover, #F0F7FF);">
+        <MudText Typo="Typo.body2">
+            <b>Structural insight:</b> The 1/r gravitational form emerges as the Green's function
+            of a discrete graph Laplacian under localized coupling perturbations.
+        </MudText>
+    </MudPaper>
     <MudStack Spacing="1">
+        <MudText Typo="Typo.subtitle2" GutterBottom="true">Quantum-scale behavior</MudText>
+        <MudText Typo="Typo.body2">
+            Kernel &rarr; Fourier transform:
+            <LatexDisplay Content="$\mathcal{F}(k^2)\sim k^{-4}$" />
+        </MudText>
+        <MudText Typo="Typo.body2">
+            Propagator:
+            <LatexDisplay Content="$D_{\text{TRM}}(k^2) = (1/k^2)\cdot\mathcal{F}(k^2) \sim 1/k^6$" />
+        </MudText>
+        <MudText Typo="Typo.body2" Class="mb-2">
+            Consequence: strong UV suppression &middot; 1-loop finite (<b>VERIFIED</b>) &middot;
+            all-orders convergence (<b>CONDITIONAL</b> theorem, A1–A5).
+        </MudText>
         <MudText Typo="Typo.body2">
             GR propagator: <LatexDisplay Content="$D(k^2)\sim 1/k^2$" />
         </MudText>
-        <MudText Typo="Typo.body2">
+        <MudText Typo="Typo.body2" Class="mb-2">
             TRM propagator: <LatexDisplay Content="$D(k^2)\sim 1/k^6$" />
         </MudText>
         <MudText Typo="Typo.caption" Class="mb-2">
@@ -80,6 +132,26 @@
     <MudText Typo="Typo.caption" Class="mt-2">
         * Verified explicitly at 1-loop level.
     </MudText>
+</MudPaper>
+
+<MudPaper Class="pa-4 mb-3" Outlined="true">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" md="6">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" GutterBottom="true">Framework Classification</MudText>
+            <MudStack Spacing="1">
+                <MudText Typo="Typo.body2"><b>FORM EXPLAINED</b> — the 1/r structure is <b>DERIVED</b> from network topology.</MudText>
+                <MudText Typo="Typo.body2"><b>COEFFICIENT CALIBRATED</b> — <LatexDisplay Content="$G$" /> is <b>CALIBRATED</b> from observation.</MudText>
+            </MudStack>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudText Typo="Typo.subtitle2" GutterBottom="true">What TRM V4 does NOT claim</MudText>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.body2">&#8226; Does <b>not</b> replace General Relativity</MudText>
+                <MudText Typo="Typo.body2">&#8226; Does <b>not</b> predict <LatexDisplay Content="$G$" /> from first principles</MudText>
+                <MudText Typo="Typo.body2">&#8226; Does <b>not</b> claim complete quantum gravity</MudText>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
 </MudPaper>
 
 <MudPaper Class="pa-4 mb-3" Outlined="true">
