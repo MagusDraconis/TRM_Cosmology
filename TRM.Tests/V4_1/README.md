@@ -78,6 +78,7 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 8 | Dense spectral numerics + regression hardening | `V4_1_NumericsRegression_Tests` — Jacobi solver, determinism |
 | 9 | Deterministic parameter scans + regression envelopes | `V4_1_SyncParameterScan_Tests`, `V4_1_SyncRegressionEnvelope_Tests` |
 | 10 | Deterministic reporting and figure-ready exports | `V4_1_ReportingExport_Tests`, `V4_1_ReportingSummary_Tests`, `V4_1_ReportingMatrix_Tests` |
+| 11 | Deterministic figure generation with ScottPlot | `V4_1_PlotGeneration_Tests` — heatmap, regime grid, line plots, SVG stability |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
