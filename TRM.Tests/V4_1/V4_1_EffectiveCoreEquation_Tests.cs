@@ -62,4 +62,20 @@ public class V4_1_EffectiveCoreEquation_Tests
         var result = EffectiveCoreEquationEngine.Audit();
         Assert.True(result.OverallClosure is "CLOSED" or "PARTIAL" or "OPEN");
     }
+
+    [Fact]
+    public void V4_1_246_EquationStability_ClassifiesRobustness()
+    {
+        var s = EffectiveCoreEquationEngine.TestStability();
+        Assert.True(s.StabilityClass is "robust" or "weakly-stable" or "variant-dependent");
+        Assert.True(s.D3PreservedCount >= s.TotalVariants - 1);
+    }
+
+    [Fact]
+    public void V4_1_247_EquationStability_IsDeterministic()
+    {
+        var s1 = EffectiveCoreEquationEngine.TestStability();
+        var s2 = EffectiveCoreEquationEngine.TestStability();
+        Assert.Equal(s1.StabilityClass, s2.StabilityClass);
+    }
 }
