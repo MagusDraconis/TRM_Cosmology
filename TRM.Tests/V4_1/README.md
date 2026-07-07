@@ -99,7 +99,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 29 | Core reconstruction / closure audit | `V4_1_CoreReconstruction_Tests` |
 | 30 | Core-plus-correction closure audit | `V4_1_CorePlusCorrectionClosure_Tests` |
 | 31 | Effective-core equation audit | `V4_1_EffectiveCoreEquation_Tests` |
-| 32 | Mechanism-to-equation mapping | `V4_1_MechanismEquation_Tests` — attribution, primary/correction/mixed |
+| 32 | Mechanism-to-equation mapping | `V4_1_MechanismEquation_Tests` |
+| 33 | Canonical equation form audit | `V4_1_CanonicalFormAudit_Tests` — block structure, preferred form |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
