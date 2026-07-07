@@ -87,7 +87,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 17 | Effective causal-cone / horizon audit | `V4_1_CausalConeAudit_Tests` |
 | 18 | Localized defect / mass-source audit | `V4_1_DefectResponseAudit_Tests` |
 | 19 | Multi-defect superposition / weak-field composition | `V4_1_MultiDefectSuperposition_Tests` |
-| 20 | Proto-1PN / nonlinear correction audit | `V4_1_Proto1PnAudit_Tests` — eta fit, near/far-field window |
+| 20 | Proto-1PN / nonlinear correction audit | `V4_1_Proto1PnAudit_Tests` |
+| 21 | Radial-law / effective exponent audit | `V4_1_RadialLawAudit_Tests` — inner/outer exponents, regime labels |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
