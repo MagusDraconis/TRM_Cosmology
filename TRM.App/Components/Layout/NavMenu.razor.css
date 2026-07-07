@@ -103,3 +103,38 @@
         overflow-y: auto;
     }
 }
+
+::deep .trm-drawer .mud-navmenu.mud-navmenu-dense .mud-nav-link {
+    background-color: var(--mud-palette-primary) !important;
+    color: white !important;
+}
+
+::deep .trm-drawer .trm-nav-link .mud-nav-link-text,
+::deep .trm-drawer .trm-nav-link .mud-nav-link-icon,
+::deep .trm-drawer .mud-nav-link .mud-nav-link-text,
+::deep .trm-drawer .mud-nav-link .mud-nav-link-icon {
+    color: white !important;
+}
+
+::deep .trm-drawer .trm-nav-link.mud-nav-link:hover,
+::deep .trm-drawer .mud-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+::deep .trm-nav-group {
+    background-color: var(--mud-palette-primary) !important;
+    color: white !important;
+    border-radius: 6px;
+    font-weight: 600;
+    display: block;
+    width: 100%;
+}
+
+::deep .trm-nav-group .mud-icon-root {
+    color: white !important;
+}
+
+::deep .trm-drawer,
+::deep .trm-drawer * {
+    color: white;
+}

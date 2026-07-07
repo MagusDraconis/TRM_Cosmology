@@ -136,4 +136,15 @@ h1:focus {
     font-size: 0.8125rem;
 }
 
+.trm-nav-group {
+    background-color: var(--mud-palette-primary) !important;
+    color: white !important;
+    border-radius: 6px;
+    font-weight: 600;
+    display: block;
+    width: 100%;
+}
+
+
+
 /* Quantum chart styling done via JS (chart-styler.js) */

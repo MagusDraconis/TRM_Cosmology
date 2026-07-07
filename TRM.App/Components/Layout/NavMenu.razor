@@ -1,40 +1,58 @@
 ﻿<MudNavMenu Dense="true">
-    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="/equations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Functions">Key Equations</MudNavLink>
+    <MudDivider Class="my-2" />
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Class="trm-nav-link">Home</MudNavLink>
+    <MudNavLink Href="/equations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Functions" Class="trm-nav-link">Key Equations</MudNavLink>
 
-    <MudNavGroup Title="Micro-Scale (Quantum)" Icon="@Icons.Material.Filled.Science">
-        <MudNavLink Href="/quantum-engine" Match="NavLinkMatch.Prefix">Quantum Engine & UV Finiteness</MudNavLink>
-        <MudNavLink Href="/lattice" Match="NavLinkMatch.Prefix">Microscopic Lattice</MudNavLink>
-    </MudNavGroup>
+    <MudDivider Class="my-2" />
+    <MudText Typo="Typo.subtitle2" Class="px-3 py-1 trm-nav-group">
+        <MudIcon Icon="@Icons.Material.Filled.Science" Size="Size.Small" Class="mr-1" />
+        Micro-Scale (Quantum)
+    </MudText>
+    <MudNavLink Href="/quantum-engine" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Quantum Engine & UV Finiteness</MudNavLink>
+    <MudNavLink Href="/lattice" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Microscopic Lattice</MudNavLink>
 
-    <MudNavGroup Title="Macro-Scale (Weak-Field)" Icon="@Icons.Material.Filled.Public">
-        <MudNavLink Href="/ppn" Match="NavLinkMatch.Prefix">PPN Validator</MudNavLink>
-        <MudNavLink Href="/redshift" Match="NavLinkMatch.Prefix">Redshift & Time Dilation</MudNavLink>
-        <MudNavLink Href="/light-deflection" Match="NavLinkMatch.Prefix">Light Deflection</MudNavLink>
-        <MudNavLink Href="/perihelion" Match="NavLinkMatch.Prefix">Perihelion Precession</MudNavLink>
-    </MudNavGroup>
+    <MudDivider Class="my-2" />
+    <MudText Typo="Typo.subtitle2" Class="px-3 py-1 trm-nav-group">
+        <MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Small" Class="mr-1" />
+        Macro-Scale (Weak-Field)
+    </MudText>
+    <MudNavLink Href="/ppn" Match="NavLinkMatch.Prefix" Class="trm-nav-link">PPN Validator</MudNavLink>
+    <MudNavLink Href="/redshift" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Redshift & Time Dilation</MudNavLink>
+    <MudNavLink Href="/light-deflection" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Light Deflection</MudNavLink>
+    <MudNavLink Href="/perihelion" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Perihelion Precession</MudNavLink>
 
-    <MudNavGroup Title="Strong-Field" Icon="@Icons.Material.Filled.DonutLarge">
-        <MudNavLink Href="/strong-field" Match="NavLinkMatch.Prefix">Regular Schwarzschild</MudNavLink>
-    </MudNavGroup>
+    <MudDivider Class="my-2" />
+    <MudText Typo="Typo.subtitle2" Class="px-3 py-1 trm-nav-group">
+        <MudIcon Icon="@Icons.Material.Filled.DonutLarge" Size="Size.Small" Class="mr-1" />
+        Strong-Field
+    </MudText>
+    <MudNavLink Href="/strong-field" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Regular Schwarzschild</MudNavLink>
 
-    <MudNavGroup Title="Cosmological Scale" Icon="@Icons.Material.Filled.AutoGraph">
-        <MudNavLink Href="/cosmology" Match="NavLinkMatch.Prefix">Galactic Rotation & SPARC</MudNavLink>
-    </MudNavGroup>
+    <MudDivider Class="my-2" />
+    <MudText Typo="Typo.subtitle2" Class="px-3 py-1 trm-nav-group">
+        <MudIcon Icon="@Icons.Material.Filled.AutoGraph" Size="Size.Small" Class="mr-1" />
+        Cosmological Scale
+    </MudText>
+    <MudNavLink Href="/cosmology" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Galactic Rotation & SPARC</MudNavLink>
 
-    <MudNavGroup Title="Validation Suite" Icon="@Icons.Material.Filled.Verified">
-        <MudNavLink Href="/validation" Match="NavLinkMatch.Prefix">Validation & Exports</MudNavLink>
-    </MudNavGroup>
+    <MudDivider Class="my-2" />
+    <MudText Typo="Typo.subtitle2" Class="px-3 py-1 trm-nav-group">
+        <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Class="mr-1" />
+        Validation Suite
+    </MudText>
+    <MudNavLink Href="/validation" Match="NavLinkMatch.Prefix" Class="trm-nav-link">Validation & Exports</MudNavLink>
 
     <MudDivider Class="my-2" />
 
-    <MudNavGroup Title="Resources" Icon="@Icons.Material.Filled.Link">
-        <MudNavLink Href="https://github.com/MagusDraconis/TRM_Cosmology" Target="_blank" Icon="@Icons.Custom.Brands.GitHub" ForceLoad="false">
-            GitHub Repository
-        </MudNavLink>
-        <MudNavLink Href="https://zenodo.org/records/20681734" Target="_blank" Icon="@Icons.Material.Filled.MenuBook" ForceLoad="false">
-            Zenodo Paper
-        </MudNavLink>
-    </MudNavGroup>
+    <MudText Typo="Typo.subtitle2" Class="px-3 py-1 trm-nav-group">
+        <MudIcon Icon="@Icons.Material.Filled.Link" Size="Size.Small" Class="mr-1" />
+        Resources
+    </MudText>
+    <MudNavLink Href="https://github.com/MagusDraconis/TRM_Cosmology" Target="_blank" Icon="@Icons.Custom.Brands.GitHub" ForceLoad="false" Class="trm-nav-link">
+        GitHub Repository
+    </MudNavLink>
+    <MudNavLink Href="https://zenodo.org/records/20681734" Target="_blank" Icon="@Icons.Material.Filled.MenuBook" ForceLoad="false" Class="trm-nav-link">
+        Zenodo Paper
+    </MudNavLink>
 </MudNavMenu>
 
