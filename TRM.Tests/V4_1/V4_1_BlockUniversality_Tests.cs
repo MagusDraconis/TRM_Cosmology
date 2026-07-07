@@ -36,7 +36,9 @@ public class V4_1_BlockUniversality_Tests
     {
         var r1 = BlockUniversalityEngine.Audit();
         var r2 = BlockUniversalityEngine.Audit();
-        Assert.Equal(r1.FormFrequency["Core+Correction"], r2.FormFrequency["Core+Correction"]);
+        int cc1 = r1.FormFrequency.GetValueOrDefault("Core+Correction");
+        int cc2 = r2.FormFrequency.GetValueOrDefault("Core+Correction");
+        Assert.Equal(cc1, cc2);
     }
 
     [Fact]
