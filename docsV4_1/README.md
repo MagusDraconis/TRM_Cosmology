@@ -39,7 +39,8 @@ The central hypothesis:
 docsV4_1/
     README.md
     theory/
-        TRM_V4_1_Emergent_Space.md   ← Core V4.1 concept document
+        TRM_V4_1_Emergent_Space.md              ← Core V4.1 concept document
+        TRM_V4_1_Sync_Stability_Dimension_Selection.md  ← D = 3 selection via sync stability
 ```
 
 ---
