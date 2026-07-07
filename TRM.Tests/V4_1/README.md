@@ -94,7 +94,8 @@ No theory note is considered mature unless there is a matching xUnit test layer.
 | 24 | Parameter phase structure | `V4_1_PhaseStructure_Tests` |
 | 25 | Universal scaling / compromise-law audit | `V4_1_ScalingLawAudit_Tests` |
 | 26 | Universality-class / robustness audit | `V4_1_UniversalityAudit_Tests` |
-| 27 | Cross-framework comparator / null-model audit | `V4_1_ComparatorAudit_Tests` — specificity, D3 survival, trivial detection |
+| 27 | Cross-framework comparator / null-model audit | `V4_1_ComparatorAudit_Tests` |
+| 28 | Minimal core reduction audit | `V4_1_ReductionAudit_Tests` — subsets, critical mechanisms, redundant |
 
 Parameter scans must be exportable to stable CSV/JSON. Summary tables and matrix outputs
 support later plotting and paper figures. Reporting layers do not add new claims —
