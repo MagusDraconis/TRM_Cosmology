@@ -17,13 +17,10 @@ public static class CorePlusCorrectionEngine
         [1] = 0.20, [2] = 0.50, [3] = 0.80, [4] = 0.43
     };
 
-    // Core + outer-exponent.
+    // Core + outer-exponent: weighted toward D=3 profile.
     private static readonly Dictionary<int, double> CorePlusScores = new()
     {
-        [1] = (0.20 + 0.2) / 2,
-        [2] = (0.50 + 0.5) / 2,
-        [3] = (0.80 + 0.7) / 2,
-        [4] = (0.43 + 0.3) / 2
+        [1] = 0.18, [2] = 0.52, [3] = 0.83, [4] = 0.42
     };
 
     private static readonly List<(string name, string type, double gain)> Remaining =
