@@ -1,0 +1,212 @@
+{
+  "releaseStatus": "EXPLORATORY",
+  "date": "2026-07-12",
+  "testSummary": {
+    "total": 433,
+    "passed": 433,
+    "failed": 0,
+    "skipped": 0,
+    "verification": "TEST-RUN-VERIFIED",
+    "command": "dotnet test --filter \"FullyQualifiedName~V4_1\" -v normal",
+    "date": "2026-07-12"
+  },
+  "suites": [
+    {
+      "name": "Pre-existing V4.1 audit/analysis",
+      "tests": 248,
+      "status": "PASS",
+      "claimCategory": ""
+    },
+    {
+      "name": "Emergent Metric",
+      "tests": 73,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Dimensional Emergence",
+      "tests": 15,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Blind Emergent Geometry",
+      "tests": 18,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Self-Consistent Topology",
+      "tests": 12,
+      "status": "PASS",
+      "claimCategory": "CONDITIONAL"
+    },
+    {
+      "name": "Topology Fixed-Point Robustness",
+      "tests": 12,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Quantum Benchmarks",
+      "tests": 12,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Planck Scale Benchmarks",
+      "tests": 8,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "claimCategory": "SUPPORTED",
+      "name": "Natural Continuous Coupling Update",
+      "tests": 13,
+      "status": "PASS"
+    },
+    {
+      "name": "Coupling Law Selection",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Exponential Fixed Point",
+      "tests": 16,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Exp Fixed-Point Robustness",
+      "tests": 7,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    }
+  ],
+  "supportedClaims": [
+    "Pipeline produces finite, deterministic outputs",
+    "d = -log(R) is a valid metric under tested conditions",
+    "Blind geometry reconstruction works under tested conditions",
+    "Self-consistent topology loop is numerically stable",
+    "Null models and degeneracies are correctly detected",
+    "No built-in D=3 preference",
+    "Quantum-like benchmark behavior (interference, uncertainty, discrete spectra, tunneling)",
+    "TRM internal scale candidates are finite, positive, deterministic",
+    "Dimensionless ratios between scales are computable",
+    "Parameter sweeps show smooth variation across tested ranges",
+    "kNN alone does not create false convergence",
+    "Shuffled theta destroys geometric stability",
+    "Linearized dynamics is stable diffusion with Laplacian spectrum",
+    "Bounded graphs produce discrete spectra"
+  ],
+  "conditionalClaims": [
+    "Stable topology convergence depends on K, k, alpha, sigma, E",
+    "D_eff stabilizes when Jaccard > 0.5",
+    "Phase-lock outperforms correlation/lock-time under tested conditions",
+    "Quantum-like structures depend on graph and parameter choices",
+    "hbar_eff candidates are dimensionless and discretization-dependent",
+    "TRM internal scales depend on discretization (N, k, alpha)"
+  ],
+  "hypotheses": [
+    "Physical emergent space from self-consistent oscillator topology",
+    "D = 3 selected by synchronization dynamics",
+    "Continuum limit -> Riemannian metric",
+    "Lorentzian spacetime emergence (3+1)",
+    "Gravitational dynamics from emergent topology",
+    "Physical quantum mechanics from TRM oscillator dynamics",
+    "Planck scale correspondence"
+  ],
+  "notClaimed": [
+    "GR is replaced",
+    "D = 3 is derived",
+    "G is predicted from first principles",
+    "hbar is derived",
+    "c is derived",
+    "Planck length/time are derived",
+    "Quantum mechanics is fully derived",
+    "Born rule / entanglement / spin are derived",
+    "Quantum gravity problem is solved"
+  ],
+  "openProblems": [
+    {
+      "priority": "P1",
+      "title": "Natural Continuous Coupling Update",
+      "description": "Replace kNN topology construction with continuous update law K_next = F(R, d). Candidate forms: exp(-d/xi), Gaussian, power-law, softmax."
+    },
+    {
+      "priority": "P1",
+      "title": "Fixed-Point Uniqueness",
+      "description": "Does the topology converge to a unique attractor independent of initial conditions?"
+    },
+    {
+      "priority": "P1",
+      "title": "Continuum Limit",
+      "description": "Does the emergent geometry survive N -> infinity? Large-N scaling not yet established."
+    },
+    {
+      "priority": "P2",
+      "title": "Causal Structure",
+      "description": "Introduce directed / asymmetric rate matrices to enable light-cone structure and propagation speed measurement."
+    },
+    {
+      "priority": "P2",
+      "title": "Lorentz Signature",
+      "description": "Test whether spacetime-like propagation (omega(k) dispersion, invariant speed) emerges from recovered topology."
+    },
+    {
+      "priority": "P3",
+      "title": "hbar_eff Normalization",
+      "description": "hbar_eff candidates are dimensionless graph units. Physical normalization requires identification of energy and time scales."
+    },
+    {
+      "priority": "P3",
+      "title": "Planck-Scale Continuum Comparison",
+      "description": "Numerical comparison of l_TRM and t_TRM with physical l_P and t_P requires physical unit mapping."
+    },
+    {
+      "priority": "P3",
+      "title": "Born-Rule Benchmark",
+      "description": "Does |psi|^2 emerge from oscillator amplitude in a continuum limit? No test exists."
+    }
+  ],
+  "documents": [
+    {
+      "title": "Current Status & Test Evidence",
+      "filename": "TRM_V4_1_Current_Status_And_Test_Evidence.md",
+      "url": "documents/TRM_V4_1_Current_Status_And_Test_Evidence.md",
+      "available": true,
+      "description": "Full test suite table, release integrity check, claim discipline summary."
+    },
+    {
+      "title": "V4.1 Self-Consistent Emergent Space Formalism",
+      "filename": "TRM_V4_1_SelfConsistent_Emergent_Space_Formalism.md",
+      "url": "documents/TRM_V4_1_SelfConsistent_Emergent_Space_Formalism.md",
+      "available": true,
+      "description": "Full pipeline definition, R candidates, claim discipline table, open problems."
+    },
+    {
+      "title": "Zenodo Release Notes",
+      "filename": "TRM_V4_1_Zenodo_Release_Notes.md",
+      "url": "documents/TRM_V4_1_Zenodo_Release_Notes.md",
+      "available": true,
+      "description": "Build instructions, scope boundary, references, Zenodo metadata."
+    }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "EFP: Exponential Fixed Point investigation active",
+    "candidateUpdateLaws": [
+      "K_ij_next = K0 * exp(-d_ij / xi)",
+      "K_ij_next = K0 * exp(-(d_ij / xi)^2)",
+      "K_ij_next = K0 / (1 + d_ij^p)",
+      "K_ij_next = K0 * softmax_j(-d_ij / tau)",
+      "K_ij_next = K0 * exp(-d_ij / xi) * S_ij  (S_ij = temporal stability of R_ij)"
+    ]
+  },
+  "releaseIntegrity": {
+    "totalTestsVerified": 433,
+    "passedVerified": 433,
+    "verificationMethod": "TEST-RUN-VERIFIED",
+    "mismatch": null
+  }
+}

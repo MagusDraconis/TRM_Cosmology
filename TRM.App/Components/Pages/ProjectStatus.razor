@@ -1,0 +1,210 @@
+@page "/project-status"
+@using TRM.App.Services
+@using TRM.App.Models
+@inject TrmStatusService StatusService
+@rendermode InteractiveServer
+
+<PageTitle>Project Status</PageTitle>
+
+@if (_status is null)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    var s = _status;
+
+<MudText Typo="Typo.h4" GutterBottom="true">TRM Project Status</MudText>
+<MudText Typo="Typo.body1" Class="mb-4">Current status of the Temporal Rate Matrix (TRM) research program.</MudText>
+
+<MudPaper Class="pa-4 mb-4" Outlined="true" Style="background: var(--mud-palette-info-hover, #F0F7FF); border-left: 4px solid var(--mud-palette-info, #2196F3);">
+    <MudStack Spacing="1">
+        <MudText Typo="Typo.body2"><b>TRM is an exploratory research program.</b></MudText>
+        <MudText Typo="Typo.body2">The project uses strict claim discipline:</MudText>
+        <MudStack Row="true" Spacing="2" Class="mt-1">
+            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">SUPPORTED</MudChip>
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">CONDITIONAL</MudChip>
+            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled">HYPOTHESIS</MudChip>
+            <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Filled">NOT CLAIMED</MudChip>
+        </MudStack>
+        <MudText Typo="Typo.caption" Class="mt-1">
+            The project does <b>not</b> currently claim: replacement of General Relativity · derivation of quantum mechanics · derivation of Planck scales · derivation of D=3
+        </MudText>
+    </MudStack>
+</MudPaper>
+
+<MudPaper Class="pa-4 mb-4" Outlined="true">
+    <MudText Typo="Typo.h6" GutterBottom="true">Status Overview</MudText>
+    <MudGrid Spacing="2">
+        <MudItem xs="6" sm="4" md="3" lg="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">V3.4 Core</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">✅ Frozen</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="3" lg="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">V4 Interpretation</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">✅ Frozen</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="3" lg="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">V4.1 Emergent Space</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled">✅ Active</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="3" lg="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Test Status</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">✅ @s.TestSummary.Passed/@s.TestSummary.Total</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="3" lg="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Verification</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled">✅ @s.TestSummary.Verification</MudChip>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudText Typo="Typo.h6" GutterBottom="true" Class="mt-2">Current Research Status</MudText>
+<MudGrid Spacing="2">
+    @foreach (var suite in s.Suites.Where(su => !string.IsNullOrEmpty(su.ClaimCategory)))
+    {
+        var color = suite.ClaimCategory switch { "SUPPORTED" => Color.Success, "CONDITIONAL" => Color.Warning, "HYPOTHESIS" => Color.Info, _ => Color.Default };
+        <MudItem xs="12" md="6" lg="4">
+            <MudCard Elevation="1" Class="trm-status-card">
+                <MudCardContent>
+                    <MudStack Spacing="1">
+                        <MudChip T="string" Size="Size.Small" Color="@color" Variant="Variant.Filled">@suite.ClaimCategory</MudChip>
+                        <MudText Typo="Typo.subtitle1"><b>@suite.Name</b></MudText>
+                        <MudText Typo="Typo.body2">@GetSuiteDescription(suite.Name)</MudText>
+                        @if (suite.Name.Contains("Quantum")) { <MudText Typo="Typo.caption" Color="Color.Secondary">⚠ This does <b>not</b> mean quantum mechanics is derived.</MudText> }
+                        else if (suite.Name.Contains("Planck")) { <MudText Typo="Typo.caption" Color="Color.Secondary">⚠ Planck length and Planck time are <b>not</b> derived.</MudText> }
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+<MudText Typo="Typo.h6" GutterBottom="true" Class="mt-4">Claim Discipline</MudText>
+<MudGrid Spacing="2">
+    <MudItem xs="12" md="6">
+        <MudCard Elevation="1" Style="border-top: 4px solid var(--mud-palette-success, #2E7D32);">
+            <MudCardContent>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled" Class="mb-2">SUPPORTED (@s.SupportedClaims.Count)</MudChip>
+                <MudStack Spacing="0">
+                    @foreach (var c in s.SupportedClaims) { <MudText Typo="Typo.body2">&bull; @c</MudText> }
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudCard Elevation="1" Style="border-top: 4px solid var(--mud-palette-warning, #F57F17);">
+            <MudCardContent>
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled" Class="mb-2">CONDITIONAL (@s.ConditionalClaims.Count)</MudChip>
+                <MudStack Spacing="0">
+                    @foreach (var c in s.ConditionalClaims) { <MudText Typo="Typo.body2">&bull; @c</MudText> }
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudCard Elevation="1" Style="border-top: 4px solid var(--mud-palette-info, #2196F3);">
+            <MudCardContent>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled" Class="mb-2">HYPOTHESIS (@s.Hypotheses.Count)</MudChip>
+                <MudStack Spacing="0">
+                    @foreach (var c in s.Hypotheses) { <MudText Typo="Typo.body2">&bull; @c</MudText> }
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudCard Elevation="1" Style="border-top: 4px solid var(--mud-palette-error, #C62828);">
+            <MudCardContent>
+                <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Filled" Class="mb-2">NOT CLAIMED (@s.NotClaimed.Count)</MudChip>
+                <MudStack Spacing="0">
+                    @foreach (var c in s.NotClaimed) { <MudText Typo="Typo.body2">&bull; @c</MudText> }
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudText Typo="Typo.h6" GutterBottom="true" Class="mt-4">Key Open Problems</MudText>
+<MudGrid Spacing="2">
+    @foreach (var p in s.OpenProblems)
+    {
+        var priC = p.Priority switch { "P1" => Color.Error, "P2" => Color.Warning, _ => Color.Default };
+        <MudItem xs="12" md="6" lg="4">
+            <MudCard Elevation="1" Class="trm-status-card">
+                <MudCardContent>
+                    <MudChip T="string" Size="Size.Small" Color="@priC" Variant="Variant.Outlined" Class="mb-1">@p.Priority</MudChip>
+                    <MudText Typo="Typo.subtitle2"><b>@p.Title</b></MudText>
+                    <MudText Typo="Typo.body2">@p.Description</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@if (!string.IsNullOrEmpty(s.Roadmap.RecommendedTestFile))
+{
+    <MudText Typo="Typo.h6" GutterBottom="true" Class="mt-4">Roadmap</MudText>
+    <MudPaper Class="pa-4 mb-4" Outlined="true">
+        <MudText Typo="Typo.subtitle2" GutterBottom="true">Recommended Next Test File</MudText>
+        <MudText Typo="Typo.body2" Class="mb-2"><code>@s.Roadmap.RecommendedTestFile</code></MudText>
+        <MudText Typo="Typo.subtitle2" GutterBottom="true">Candidate Continuous Coupling Update Laws</MudText>
+        <MudStack Spacing="0">
+            @foreach (var law in s.Roadmap.CandidateUpdateLaws) { <MudText Typo="Typo.body2"><code>@law</code></MudText> }
+        </MudStack>
+    </MudPaper>
+}
+
+<MudText Typo="Typo.h6" GutterBottom="true" Class="mt-4">Documents</MudText>
+<MudGrid Spacing="2">
+    @foreach (var doc in s.Documents)
+    {
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-3 text-center" Outlined="true">
+                <MudIcon Icon="@Icons.Material.Filled.Description" Size="Size.Large" Color="Color.Primary" />
+                <MudText Typo="Typo.subtitle2" Class="mt-1"><b>@doc.Title</b></MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@doc.Description</MudText>
+                @if (doc.Available && doc.Url is not null)
+                { <MudButton Href="@doc.Url" Variant="Variant.Outlined" Size="Size.Small" Class="mt-2" Color="Color.Primary">Open</MudButton> }
+                else
+                { <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">Document not yet published on website.</MudText> }
+            </MudPaper>
+        </MudItem>
+    }
+</MudGrid>
+
+<MudPaper Class="pa-4 mt-4" Outlined="true" Style="background: var(--mud-palette-success-hover, #E8F5E9); border-left: 4px solid var(--mud-palette-success, #2E7D32);">
+    <MudText Typo="Typo.subtitle1" Color="Color.Success"><b>✅ @s.TestSummary.Passed / @s.TestSummary.Total Tests Passing — @s.TestSummary.Verification @s.TestSummary.Date</b></MudText>
+    <MudText Typo="Typo.caption">Command: <code>@s.TestSummary.Command</code> · @s.Suites.Count suites · @s.TestSummary.Failed failed · @s.TestSummary.Skipped skipped</MudText>
+</MudPaper>
+}
+
+@code {
+    private TrmStatusModel? _status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _status = await StatusService.GetStatusAsync();
+    }
+
+    private static string GetSuiteDescription(string name) => name switch
+    {
+        "Emergent Metric" => "Temporal Rate Matrices transformed into logarithmic distance d = -log(R) satisfy metric properties.",
+        "Blind Emergent Geometry" => "Geometry reconstructed from oscillator phase dynamics without using graph distance during inference.",
+        "Self-Consistent Topology" => "Topology iteratively updated from inferred Temporal Rate Matrices in a convergent loop.",
+        "Topology Fixed-Point Robustness" => "Null models, shuffled oscillators, random matrices do not produce same stability signatures.",
+        "Quantum Benchmarks" => "Interference, graph uncertainty, discrete spectra, tunneling-like attenuation benchmarked.",
+        "Planck Scale Benchmarks" => "Internal TRM scale candidates measured (l_TRM, t_TRM, correlation cutoff, spectral cutoff, causal time).",
+        "Dimensional Emergence" => "Spectral/sync diagnostics across graph topologies; correlation analysis.",
+        _ => "Test suite results verified."
+    };
+}

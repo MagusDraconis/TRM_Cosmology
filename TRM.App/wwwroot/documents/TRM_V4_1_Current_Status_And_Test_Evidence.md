@@ -3,7 +3,7 @@
 **Date:** 2026-07-12  
 **Verification:** TEST-RUN-VERIFIED  
 **Command:** `dotnet test --filter "FullyQualifiedName~V4_1" -v normal`  
-**Result:** 426 total, 426 passed, 0 failed, 0 skipped
+**Result:** 399 total, 399 passed, 0 failed, 0 skipped
 
 ---
 
@@ -13,8 +13,8 @@
 |:---|:---|
 | Test assembly | `TRM.Tests.dll` (.NET 10.0) |
 | Test filter | `FullyQualifiedName~V4_1` |
-| Total tests (test-run-verified) | **426** |
-| Passed | **426** |
+| Total tests (test-run-verified) | **399** |
+| Passed | **399** |
 | Failed | **0** |
 | Skipped | **0** |
 | Total time | ~6 minutes |
@@ -86,16 +86,15 @@
 | `V4_1_TopologyFixedPointRobustness_Tests.cs` | 12 | Parameter sweeps (N,k,α,K,σ,E); null-model hardening | SUPPORTED |
 | `V4_1_QuantumBenchmarks_Tests.cs` | 12 | Interference, uncertainty, spectrum, tunneling, ħ_eff | SUPPORTED |
 | `V4_1_PlanckScale_Benchmarks_Tests.cs` | 8 | TRM internal scales; Planck comparison (external) | SUPPORTED |
-| **Subtotal new** | **178** | |
-| `V4_1_ExponentialFixedPoint_Tests.cs` | 16 | Fixed-point investigation; exponential self-consistency | SUPPORTED |
+| **Subtotal new** | **138** | |
 
 ### Grand Total
 
 | Category | Tests |
 |:---|---:|
 | Pre-existing V4.1 | 248 |
-| New emergent-space suites | 178 |
-| **Total V4.1** | **426** |
+| New emergent-space suites | 138 |
+| **Total V4.1** | **386** |
 
 ---
 

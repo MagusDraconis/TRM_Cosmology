@@ -1,5 +1,6 @@
 using TRM.App.Components;
 using MudBlazor.Services;
+using TRM.App.Services;
 using TRM.Core.Credibility;
 using TRM.Core.Cosmology;
 using TRM.Core.Lattice;
@@ -19,6 +20,10 @@ builder.Services.AddScoped<ILatticeService, LatticeService>();
 builder.Services.AddScoped<IQuantumLoopService, QuantumLoopService>();
 builder.Services.AddScoped<IStrongFieldService, StrongFieldService>();
 builder.Services.AddScoped<IWeakFieldService, WeakFieldService>();
+
+// TRM status data pipeline
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(sp.GetRequiredService<IConfiguration>()["BaseUrl"] ?? "https://localhost:5001/") });
+builder.Services.AddScoped<TrmStatusService>();
 
 var app = builder.Build();
 
