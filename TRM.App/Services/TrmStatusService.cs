@@ -62,8 +62,8 @@ public sealed class TrmStatusService
             Date = "pending verification",
             TestSummary = new TestSummary
             {
-                Total = 787,
-                Passed = 787,
+                Total = 830,
+                Passed = 830,
                 Failed = 0,
                 Skipped = 0,
                 Verification = "pending verification",
@@ -113,7 +113,10 @@ public sealed class TrmStatusService
                 new() { Name = "Causal-ETG-Dim Large-N Conv", Tests = 12, Status = "PASS", ClaimCategory = "SUPPORTED" },
                 new() { Name = "Emergent Lorentz Signature", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
                 new() { Name = "Emergent Space-Time Separation", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
-                new() { Name = "Emergent Metric Tensor Proxy", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" }
+                new() { Name = "Emergent Metric Tensor Proxy", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Emergent Geodesic Structure", Tests = 14, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Geodesic Robustness", Tests = 14, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "GR-Limit Probe", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" }
             ],
             SupportedClaims =
             [
