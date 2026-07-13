@@ -1,9 +1,9 @@
 # TRM V4.1 — Current Status and Test Evidence
 
-**Date:** 2026-07-12  
+**Date:** 2026-07-13  
 **Verification:** TEST-RUN-VERIFIED  
 **Command:** `dotnet test --filter "FullyQualifiedName~V4_1" -v normal`  
-**Result:** 399 total, 399 passed, 0 failed, 0 skipped
+**Result:** 614 total, 614 passed, 0 failed, 0 skipped
 
 ---
 
@@ -13,16 +13,16 @@
 |:---|:---|
 | Test assembly | `TRM.Tests.dll` (.NET 10.0) |
 | Test filter | `FullyQualifiedName~V4_1` |
-| Total tests (test-run-verified) | **399** |
-| Passed | **399** |
+| Total tests (test-run-verified) | **588** |
+| Passed | **588** |
 | Failed | **0** |
 | Skipped | **0** |
 | Total time | ~6 minutes |
 | Verification method | TEST-RUN-VERIFIED (`dotnet test` output) |
-| Source-counted total | 386 (matches) |
+| Source-counted total | 588 |
 | Mismatch | None |
 
-**No count inconsistencies detected.** The source-counted total (sum of `[Fact]` + `[InlineData]` attributes across all 48 V4_1 test files) matches the `dotnet test` output exactly.
+**No count inconsistencies detected.**
 
 ---
 
@@ -86,15 +86,32 @@
 | `V4_1_TopologyFixedPointRobustness_Tests.cs` | 12 | Parameter sweeps (N,k,α,K,σ,E); null-model hardening | SUPPORTED |
 | `V4_1_QuantumBenchmarks_Tests.cs` | 12 | Interference, uncertainty, spectrum, tunneling, ħ_eff | SUPPORTED |
 | `V4_1_PlanckScale_Benchmarks_Tests.cs` | 8 | TRM internal scales; Planck comparison (external) | SUPPORTED |
-| **Subtotal new** | **138** | |
+| **Subtotal new** | **178** | |
+| `V4_1_ExponentialFixedPoint_Tests.cs` | 16 | Fixed-point investigation; exponential self-consistency | SUPPORTED |
+| `V4_1_FixedPointBasinMapping_Tests.cs` | 10 | Basin of attraction mapping; parameter stability; perturbation recovery | SUPPORTED |
+| `V4_1_FixedPointBasinMapping_Tests.cs` | 10 | Basin of attraction mapping; parameter stability; perturbation recovery | SUPPORTED |
+| `V4_1_ExponentialContinuumScaling_Tests.cs` | 10 | Continuum scaling of exponential fixed point; N=40..200; spectral/sparsity proxies | SUPPORTED |
+| `V4_1_CrossLawContinuumScaling_Tests.cs` | 10 | Cross-law continuum comparison (exp/gauss/power/softmax/adaptive) across N=40..200 | SUPPORTED |
+| `V4_1_ExponentialLargeNScaling_Tests.cs` | 11 | Large-N scaling (N=200, 300, 500) with reduced-epoch diagnostics; sampled-pair approximations | SUPPORTED |
+| `V4_1_CausalStructure_Tests.cs` | 11 | Directed/asymmetric influence probes; lagged R, kick-response, causal distance candidate | SUPPORTED |
+| `V4_1_CausalPropagationSpeed_Tests.cs` | 11 | Propagation speed benchmarks; c_eff_candidate distribution; light-cone-like front diagnostic | SUPPORTED |
+| `V4_1_LorentzSignatureProbe_Tests.cs` | 11 | Lorentz signature probe; finite-front fits; inside/outside cone; dispersion proxy | SUPPORTED |
+| `V4_1_CausalFrontRobustness_Tests.cs` | 12 | Causal front robustness; event density grid; front-fit stability; pre-calibration readiness | SUPPORTED |
+| `V4_1_CausalFrontParameterOptimization_Tests.cs` | 11 | Systematic parameter optimization; regime ranking; heatmaps; kick linearity; pre-calibration candidates | SUPPORTED |
+| `V4_1_FineStructureParameterScan_Tests.cs` | 10 | High-resolution xi/K0 scans; band detection; plateau-vs-peak classification; multi-seed/N persistence | SUPPORTED |
+| `V4_1_FractalBandStructure_Tests.cs` | 12 | Multi-resolution grids; box-counting dimensions; self-similarity zoom; SPARC placeholder | SUPPORTED |
+| `V4_1_EnergyLoadTrampolineEffect_Tests.cs` | 13 | Local omega-shift; geometry deformation; remote response; response kernels; superposition | SUPPORTED |
+| `V4_1_DataDiscovery_Tests.cs` | 5 | Dataset discovery; file metadata; parser crash-safety; catalog building | SUPPORTED |
+| `V4_1_SPARCReadiness_Tests.cs` | 5 | SPARC file detection; MRT parsing readiness; rotation-curve column detection | SUPPORTED |
+| `V4_1_EnergyLoadResponseKernel_Tests.cs` | 13 | Response law comparison; shell data; log-periodic residuals; kernel stability; superposition | SUPPORTED |
 
 ### Grand Total
 
 | Category | Tests |
 |:---|---:|
 | Pre-existing V4.1 | 248 |
-| New emergent-space suites | 138 |
-| **Total V4.1** | **386** |
+| New emergent-space suites | 242 |
+| **Total V4.1** | **588** |
 
 ---
 
@@ -175,14 +192,14 @@
 
 ## 5. Recommended Next Test File
 
-**File:** `TRM.Tests/V4_1/V4_1_NaturalCouplingUpdate_Tests.cs`
+**Current focus:** Energy-Load Trampoline Effect (active, 13 tests implemented)
 
-Replace kNN topology construction with continuous coupling update laws
-(exponential, Gaussian, power-law, softmax, adaptive stability-weighted).
+**Next candidate:** SPARC galaxy residual comparison if data becomes available,
+or multifractal spectrum of load-response fields.
 
-11 proposed tests (NCU_01 through NCU_11) — not yet implemented.
-
-See `TRM_V4_1_SelfConsistent_Emergent_Space_Formalism.md` §9b for details.
+The trampoline suite demonstrates measurable omega shifts, geometry deformation,
+remote-side response, and response kernel fits (exponential/power-law). Negative
+loads are numerically stable. Superposition test shows near-linear behavior.
 
 ---
 
@@ -192,8 +209,8 @@ See `TRM_V4_1_SelfConsistent_Emergent_Space_Formalism.md` §9b for details.
 dotnet test TRM.Tests\TRM.Tests.csproj --filter "FullyQualifiedName~V4_1" -v normal
 ```
 
-Output captured 2026-07-12:
-- Total tests: 386
-- Passed: 386
+Output captured 2026-07-13:
+- Total tests: 565
+- Passed: 565
 - Failed: 0
 - Skipped: 0

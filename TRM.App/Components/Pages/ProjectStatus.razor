@@ -15,7 +15,8 @@ else
     var s = _status;
 
 <MudText Typo="Typo.h4" GutterBottom="true">TRM Project Status</MudText>
-<MudText Typo="Typo.body1" Class="mb-4">Current status of the Temporal Rate Matrix (TRM) research program.</MudText>
+<MudText Typo="Typo.body1">Current status of the Temporal Rate Matrix (TRM) research program.</MudText>
+<MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-4">Info: This page is updated nearly every day, and at least once every week.</MudText>
 
 <MudPaper Class="pa-4 mb-4" Outlined="true" Style="background: var(--mud-palette-info-hover, #F0F7FF); border-left: 4px solid var(--mud-palette-info, #2196F3);">
     <MudStack Spacing="1">
@@ -174,7 +175,7 @@ else
                 <MudText Typo="Typo.subtitle2" Class="mt-1"><b>@doc.Title</b></MudText>
                 <MudText Typo="Typo.caption" Color="Color.Secondary">@doc.Description</MudText>
                 @if (doc.Available && doc.Url is not null)
-                { <MudButton Href="@doc.Url" Variant="Variant.Outlined" Size="Size.Small" Class="mt-2" Color="Color.Primary">Open</MudButton> }
+                { <MudButton Href="@doc.Url" Variant="Variant.Outlined" Size="Size.Small" Class="mt-2" Color="Color.Primary" Target="_blank">Open</MudButton> }
                 else
                 { <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">Document not yet published on website.</MudText> }
             </MudPaper>
@@ -205,6 +206,27 @@ else
         "Quantum Benchmarks" => "Interference, graph uncertainty, discrete spectra, tunneling-like attenuation benchmarked.",
         "Planck Scale Benchmarks" => "Internal TRM scale candidates measured (l_TRM, t_TRM, correlation cutoff, spectral cutoff, causal time).",
         "Dimensional Emergence" => "Spectral/sync diagnostics across graph topologies; correlation analysis.",
+        "Natural Continuous Coupling Update" => "Continuous update laws (exp, Gaussian, power-law, softmax) replace kNN topology construction.",
+        "Coupling Law Selection" => "Comparison of exponential, Gaussian, power-law, softmax, and adaptive coupling update forms.",
+        "Exponential Fixed Point" => "Fixed-point investigation of K_next = K0 * exp(-d/xi); self-consistency and convergence diagnostics.",
+        "Exp Fixed-Point Robustness" => "Parameter sweeps (xi, K0, sigma); contraction diagnostic; law comparison; large-N hints.",
+        "Fixed-Point Basin Mapping" => "Basin of attraction mapping across initial conditions, perturbations, parameters, and nulls.",
+        "Exponential Continuum Scaling" => "Continuum scaling of exponential fixed point up to N=200; sparsity and spectral proxies.",
+        "Cross-Law Continuum Scaling" => "Cross-law comparison (exp/gauss/power/softmax/adaptive) across N=40..200; robustness ranking.",
+        "Exponential Large-N Scaling" => "Large-N scaling (N=200, 300, 500) with reduced-epoch diagnostics; sampled-pair approximations.",
+        "Causal Structure Probe" => "Directed/asymmetric influence probes (lagged R, kick-response delays, causal distance d/tau).",
+        "Causal Propagation Speed" => "Propagation speed benchmarks; c_eff_candidate distribution; light-cone-like front diagnostic.",
+        "Lorentz Signature Probe" => "Lorentz signature probe; finite-front fits; inside/outside cone; dispersion proxy.",
+        "Causal Front Robustness" => "Causal front robustness; event density grid; fit stability; pre-calibration readiness.",
+        "Causal Front Param Optimization" => "Parameter optimization; regime ranking; heatmaps; kick linearity; pre-calibration candidates.",
+        "Fine Structure Parameter Scan" => "High-resolution xi/K0 scans; band detection; plateau-vs-peak classification.",
+        "Fractal Band Structure" => "Multi-resolution grids; box-counting dimensions; self-similarity zoom; SPARC placeholder.",
+        "Energy-Load Trampoline Effect" => "Local omega-shift; geometry deformation; remote response; response kernel fits.",
+        "Data Discovery" => "Dataset discovery; MRT/DAT parsers; file metadata; catalog building.",
+        "SPARC Readiness" => "SPARC file detection; MRT parsing readiness; rotation-curve column detection.",
+        "SPARC Residual Structure" => "SPARC MassModels loading; baryonic velocity preview; residual law fits.",
+        "Energy-Time-Geometry Coupling" => "Energy→Time→Geometry chain; Load→Ω→R→d→K→remote response diagnostics.",
+        "Energy-Load Response Kernel" => "Response law comparison; shell data; log-periodic residuals; kernel stability.",
         _ => "Test suite results verified."
     };
 }

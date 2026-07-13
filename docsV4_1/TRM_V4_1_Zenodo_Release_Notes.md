@@ -1,9 +1,9 @@
 # TRM V4.1 — Zenodo Release Notes
 
 **Version:** V4.1 (pre-release / exploratory)  
-**Date:** 2026-07-12  
+**Date:** 2026-07-13  
 **Status:** EXPLORATORY — not a finished physical theory  
-**Test baseline:** 386/386 xUnit tests passing (TEST-RUN-VERIFIED)  
+**Test baseline:** 614/614 xUnit tests passing (TEST-RUN-VERIFIED)
 
 ---
 
@@ -36,11 +36,11 @@ and spacetime structure emerge from phase-synchronized oscillator dynamics.
 | Metric | Value |
 |:---|---:|
 | Test command | `dotnet test --filter "FullyQualifiedName~V4_1" -v normal` |
-| Total tests | 386 |
-| Passed | 386 |
+| Total tests | 588 |
+| Passed | 588 |
 | Failed | 0 |
 | Skipped | 0 |
-| Test files | 48 |
+| Test files | 65 |
 | Test framework | xUnit 2.9.3, .NET 10.0 |
 
 ### Suite Breakdown
@@ -55,6 +55,25 @@ and spacetime structure emerge from phase-synchronized oscillator dynamics.
 | Topology fixed-point robustness | 12 | PASS |
 | Quantum benchmarks | 12 | PASS |
 | Planck-scale benchmarks | 8 | PASS |
+| Exponential fixed point | 16 | PASS |
+| Exp fixed-point robustness | 7 | PASS |
+| Fixed-point basin mapping | 10 | PASS |
+| Continuum scaling | 10 | PASS |
+| Cross-law continuum scaling | 10 | PASS |
+| Exponential large-N scaling | 11 | PASS |
+| Causal structure probe | 11 | PASS |
+| Causal propagation speed | 11 | PASS |
+| Lorentz signature probe | 11 | PASS |
+| Causal front robustness | 12 | PASS |
+| Causal front param opt | 11 | PASS |
+| Fine structure scan | 10 | PASS |
+| Fractal band structure | 12 | PASS |
+| Energy-load trampoline | 13 | PASS |
+| Data discovery | 5 | PASS |
+| SPARC readiness | 5 | PASS |
+| Energy-load response kernel | 13 | PASS |
+| SPARC residual structure | 11 | PASS |
+| Energy-time-geometry | 15 | PASS |
 
 ---
 

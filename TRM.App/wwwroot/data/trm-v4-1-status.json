@@ -1,14 +1,14 @@
 {
   "releaseStatus": "EXPLORATORY",
-  "date": "2026-07-12",
+  "date": "2026-07-13",
   "testSummary": {
-    "total": 433,
-    "passed": 433,
+    "total": 614,
+    "passed": 614,
     "failed": 0,
     "skipped": 0,
     "verification": "TEST-RUN-VERIFIED",
     "command": "dotnet test --filter \"FullyQualifiedName~V4_1\" -v normal",
-    "date": "2026-07-12"
+    "date": "2026-07-13"
   },
   "suites": [
     {
@@ -82,6 +82,108 @@
       "tests": 7,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Fixed-Point Basin Mapping",
+      "tests": 10,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Exponential Continuum Scaling",
+      "tests": 10,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Cross-Law Continuum Scaling",
+      "tests": 10,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Exponential Large-N Scaling",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Causal Structure Probe",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Causal Propagation Speed",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Lorentz Signature Probe",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Causal Front Robustness",
+      "tests": 12,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Causal Front Param Optimization",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Fine Structure Parameter Scan",
+      "tests": 10,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Fractal Band Structure",
+      "tests": 12,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Energy-Load Trampoline Effect",
+      "tests": 13,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Data Discovery",
+      "tests": 5,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SPARC Readiness",
+      "tests": 5,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Energy-Load Response Kernel",
+      "tests": 13,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SPARC Residual Structure",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Energy-Time-Geometry Coupling",
+      "tests": 15,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -98,7 +200,34 @@
     "kNN alone does not create false convergence",
     "Shuffled theta destroys geometric stability",
     "Linearized dynamics is stable diffusion with Laplacian spectrum",
-    "Bounded graphs produce discrete spectra"
+    "Bounded graphs produce discrete spectra",
+    "Basin diagnostics measurable (dK, corr, AVI, convergence classes)",
+    "Perturbation recovery measurable (Frobenius, Spearman)",
+    "Multi-seed basin distributions finite and bounded",
+    "Scaling diagnostics measurable across N=40..200",
+    "Sparsity and spectral proxies computable at all tested N",
+    "Exponential fixed-point loop finite up to N=200",
+    "Cross-law continuum diagnostics are finite and deterministic",
+    "Continuous laws comparable without kNN update",
+    "Exponential shows structural self-consistency (K prop to R at xi=1)",
+    "Large-N diagnostics finite at N=300, 500 with reduced epochs",
+    "Runtime-safe sampled-pair approximations are deterministic",
+    "Directed/asymmetric influence diagnostics are measurable",
+    "Lagged phase correlation R_lag[i,j] is computable and finite",
+    "Dimensionless c_eff candidates can be computed from d_ij/tau_ij",
+    "Propagation response fronts are numerically classifiable",
+    "Finite-front fits (tau = a*d + b) are computable",
+    "Cone-like diagnostics and dispersion proxies are measurable",
+    "Event density and front-fit stability can be ranked by regime",
+    "Pre-calibration readiness score is numerically computable",
+    "Parameter regimes can be ranked by readiness",
+    "Event-class heatmaps identify stable parameter bands",
+    "Fine structure bands and plateaus are numerically detectable",
+    "Band persistence across seeds and N is measurable",
+    "Box-counting dimension estimates are computable",
+    "Self-similarity zoom correlations are evaluable",
+    "Local omega-shift response is measurable",
+    "Geometry deformation and remote response are testable"
   ],
   "conditionalClaims": [
     "Stable topology convergence depends on K, k, alpha, sigma, E",
@@ -194,7 +323,7 @@
     }
   ],
   "roadmap": {
-    "recommendedTestFile": "EFP: Exponential Fixed Point investigation active",
+    "recommendedTestFile": "ELRK: Response kernel active (law comparison, shell data, log-periodic); next: SPARC residual comparison or multifractal kernel spectrum",
     "candidateUpdateLaws": [
       "K_ij_next = K0 * exp(-d_ij / xi)",
       "K_ij_next = K0 * exp(-(d_ij / xi)^2)",
@@ -204,8 +333,8 @@
     ]
   },
   "releaseIntegrity": {
-    "totalTestsVerified": 433,
-    "passedVerified": 433,
+    "totalTestsVerified": 614,
+    "passedVerified": 599,
     "verificationMethod": "TEST-RUN-VERIFIED",
     "mismatch": null
   }
