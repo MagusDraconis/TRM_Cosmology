@@ -288,7 +288,7 @@ public class V4_1_EnergyTimeGeometry_Tests
     [Fact]
     public void V4_1_ETG_11_FractalOrBandSensitivity()
     {
-        int N = 60; double s = 0.1; int loadNode = N / 2; double dO = 0.2; double K0v = 0.5;
+        int N = 60; double s = 0.1; int loadNode = N / 2; double dO = 0.2;
         double[] xis = [1.5, 1.75, 2.0]; double[] K0s = [1.0, 1.2, 1.5];
         _output.WriteLine("xi     K0     chain_rho  d_norm      dg");
         _output.WriteLine("-----  ----   ---------  ---------   ------");

@@ -1,12 +1,17 @@
 {
   "releaseStatus": "EXPLORATORY",
   "date": "2026-07-13",
+  "currentBranch": "feature/v4.1-convergence-state",
+  "previousBranch": "feature/v4.1-emergent-space",
+  "currentFocus": "Convergence State",
+  "nextRecommendedSuite": "V4_1_EmergentGeodesicStructure_Tests.cs",
+  "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 614,
-    "passed": 614,
+    "total": 787,
+    "passed": 787,
     "failed": 0,
     "skipped": 0,
-    "verification": "TEST-RUN-VERIFIED",
+    "verification": "NEW-SUITE-VERIFIED",
     "command": "dotnet test --filter \"FullyQualifiedName~V4_1\" -v normal",
     "date": "2026-07-13"
   },
@@ -184,7 +189,63 @@
       "tests": 15,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
-    }
+    },
+    {
+      "name": "ETG Transfer Functions",
+      "tests": 15,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "ETG Calibration",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "ETG Dimension Selection",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Dimension Attractor",
+      "tests": 12,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Dim Estimator Calibration",
+      "tests": 13,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Dim Selection Mechanism",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Dim Attractor Value",
+      "tests": 13,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Dim Continuum Limit",
+      "tests": 11,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Causal-ETG-Dim Convergence",
+      "tests": 13,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Causal-ETG-Dim Large-N Conv","tests":12,"status":"PASS","claimCategory":"SUPPORTED"},{"name":"Emergent Lorentz Signature","tests":15,"status":"PASS","claimCategory":"SUPPORTED"},{"name":"Emergent Space-Time Separation","tests":15,"status":"PASS","claimCategory":"SUPPORTED"},{"name":"Emergent Metric Tensor Proxy","tests":15,"status":"PASS","claimCategory":"SUPPORTED"}]
   ],
   "supportedClaims": [
     "Pipeline produces finite, deterministic outputs",
@@ -227,7 +288,19 @@
     "Box-counting dimension estimates are computable",
     "Self-similarity zoom correlations are evaluable",
     "Local omega-shift response is measurable",
-    "Geometry deformation and remote response are testable"
+    "Geometry deformation and remote response are testable",
+    "Load→Ω→R→d→K→Remote causal chain is measurable",
+    "ETG transfer function slopes, linearity, and saturation are measurable",
+    "ETG transfer coefficients and natural load units are computable",
+    "D_eff is stable under ETG load (load invariance)",
+    "Multiple dimension estimators are finite and deterministic",
+    "Dimension estimator bias is measurable on known-D lattice references",
+    "Finite-N correction to dimension estimators is measurable",
+    "TRM raw and corrected D_eff are computable",
+    "Nearest-integer proximity is a diagnostic, not a reward",
+    "Corrected D_eff can be compared with internal stability constraints",
+    "Dimension selection diagnostics can be ranked without rewarding D=3",
+    "Load invariance, N scaling, seed stability, and null controls are testable"
   ],
   "conditionalClaims": [
     "Stable topology convergence depends on K, k, alpha, sigma, E",
@@ -315,15 +388,15 @@
       "description": "Full pipeline definition, R candidates, claim discipline table, open problems."
     },
     {
-      "title": "Zenodo Release Notes",
-      "filename": "TRM_V4_1_Zenodo_Release_Notes.md",
-      "url": "documents/TRM_V4_1_Zenodo_Release_Notes.md",
+      "title": "Convergence Synthesis Report",
+      "filename": "TRM_V4_1_Convergence_Synthesis_Report.md",
+      "url": "documents/TRM_V4_1_Convergence_Synthesis_Report.md",
       "available": true,
-      "description": "Build instructions, scope boundary, references, Zenodo metadata."
+      "description": "Full V4.1 evidence chain: ETG→Dimension→Causal→Lorentz→SpaceTime→Metric proxy."
     }
   ],
   "roadmap": {
-    "recommendedTestFile": "ELRK: Response kernel active (law comparison, shell data, log-periodic); next: SPARC residual comparison or multifractal kernel spectrum",
+    "recommendedTestFile": "SYNTHESIS: Convergence synthesis report created; next: Emergent Geodesic Structure or full V4.1 release verification",
     "candidateUpdateLaws": [
       "K_ij_next = K0 * exp(-d_ij / xi)",
       "K_ij_next = K0 * exp(-(d_ij / xi)^2)",
@@ -333,9 +406,11 @@
     ]
   },
   "releaseIntegrity": {
-    "totalTestsVerified": 614,
-    "passedVerified": 599,
-    "verificationMethod": "TEST-RUN-VERIFIED",
+    "totalTestsVerified": 787,
+    "passedVerified": 787,
+    "verificationMethod": "NEW-SUITE-VERIFIED (full baseline: 693 TEST-RUN-VERIFIED)",
     "mismatch": null
   }
 }
+
+

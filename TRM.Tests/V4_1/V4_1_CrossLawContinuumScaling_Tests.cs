@@ -356,7 +356,7 @@ public class V4_1_CrossLawContinuumScaling_Tests
     [Fact]
     public void V4_1_CLCS_09_ExponentialSpecialSelfConsistency()
     {
-        int[] Ns = [40, 80, 120, 200]; double K0v = 0.5; double s = 0.1; int E = 6;
+        int[] Ns = [40, 80, 120, 200]; double K0v = 0.5; double s = 0.1;
         _output.WriteLine("N      corr_exp(K,R)  corr_gauss(K,R)  corr_power(K,R)  exp_proportionality");
         _output.WriteLine("----   --------------  ---------------  ---------------  -------------------");
         foreach (int N in Ns)

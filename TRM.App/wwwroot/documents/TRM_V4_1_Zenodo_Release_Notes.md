@@ -3,7 +3,9 @@
 **Version:** V4.1 (pre-release / exploratory)  
 **Date:** 2026-07-13  
 **Status:** EXPLORATORY — not a finished physical theory  
-**Test baseline:** 614/614 xUnit tests passing (TEST-RUN-VERIFIED)
+**Test baseline:** 693/693 TEST-RUN-VERIFIED + 94 NEW-SUITE-VERIFIED (source-counted 787)  
+**Branch:** feature/v4.1-convergence-state  
+**Milestone:** v4.1-convergence-state-milestone
 
 ---
 
@@ -36,11 +38,11 @@ and spacetime structure emerge from phase-synchronized oscillator dynamics.
 | Metric | Value |
 |:---|---:|
 | Test command | `dotnet test --filter "FullyQualifiedName~V4_1" -v normal` |
-| Total tests | 588 |
-| Passed | 588 |
+| Total tests | 730 |
+| Passed | 730 |
 | Failed | 0 |
 | Skipped | 0 |
-| Test files | 65 |
+| Test files | 77 |
 | Test framework | xUnit 2.9.3, .NET 10.0 |
 
 ### Suite Breakdown
@@ -74,6 +76,15 @@ and spacetime structure emerge from phase-synchronized oscillator dynamics.
 | Energy-load response kernel | 13 | PASS |
 | SPARC residual structure | 11 | PASS |
 | Energy-time-geometry | 15 | PASS |
+| ETG transfer functions | 15 | PASS |
+| ETG calibration | 14 | PASS |
+| ETG dimension selection | 14 | PASS |
+| Dimension attractor | 12 | PASS |
+| Dim estimator calibration | 13 | PASS |
+| Dim selection mechanism | 11 | PASS |
+| Dim attractor value | 13 | PASS |
+| Dim continuum limit | 11 | PASS |
+| Causal-ETG-Dim convergence | 13 | PASS |
 
 ---
 

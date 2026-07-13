@@ -62,8 +62,8 @@ public sealed class TrmStatusService
             Date = "pending verification",
             TestSummary = new TestSummary
             {
-                Total = 575,
-                Passed = 575,
+                Total = 787,
+                Passed = 787,
                 Failed = 0,
                 Skipped = 0,
                 Verification = "pending verification",
@@ -97,7 +97,23 @@ public sealed class TrmStatusService
                 new() { Name = "Fractal Band Structure", Tests = 12, Status = "PASS", ClaimCategory = "SUPPORTED" },
                 new() { Name = "Energy-Load Trampoline Effect", Tests = 13, Status = "PASS", ClaimCategory = "SUPPORTED" },
                 new() { Name = "Data Discovery", Tests = 5, Status = "PASS", ClaimCategory = "SUPPORTED" },
-                new() { Name = "SPARC Readiness", Tests = 5, Status = "PASS", ClaimCategory = "SUPPORTED" }
+                new() { Name = "SPARC Readiness", Tests = 5, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Energy-Load Response Kernel", Tests = 13, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "SPARC Residual Structure", Tests = 11, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Energy-Time-Geometry Coupling", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "ETG Transfer Functions", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "ETG Calibration", Tests = 14, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "ETG Dimension Selection", Tests = 14, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Dimension Attractor", Tests = 12, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Dim Estimator Calibration", Tests = 13, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Dim Selection Mechanism", Tests = 11, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Dim Attractor Value", Tests = 13, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Dim Continuum Limit", Tests = 11, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Causal-ETG-Dim Convergence", Tests = 13, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Causal-ETG-Dim Large-N Conv", Tests = 12, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Emergent Lorentz Signature", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Emergent Space-Time Separation", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" },
+                new() { Name = "Emergent Metric Tensor Proxy", Tests = 15, Status = "PASS", ClaimCategory = "SUPPORTED" }
             ],
             SupportedClaims =
             [

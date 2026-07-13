@@ -74,7 +74,7 @@ public class V4_1_RadialLawAudit_Tests
         // Inner and outer exponents are measured, not assumed.
         foreach (var r in results)
         {
-            Assert.NotEqual(0, r.RegimeResult.ExponentCurve.Count);
+            Assert.NotEmpty(r.RegimeResult.ExponentCurve);
             Assert.NotNull(r.RegimeResult.RegimeLabel);
         }
     }

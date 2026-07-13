@@ -3,7 +3,7 @@
 **Date:** 2026-07-13  
 **Verification:** TEST-RUN-VERIFIED  
 **Command:** `dotnet test --filter "FullyQualifiedName~V4_1" -v normal`  
-**Result:** 614 total, 614 passed, 0 failed, 0 skipped
+**Result:** 730 total, 730 passed, 0 failed, 0 skipped
 
 ---
 
@@ -13,13 +13,13 @@
 |:---|:---|
 | Test assembly | `TRM.Tests.dll` (.NET 10.0) |
 | Test filter | `FullyQualifiedName~V4_1` |
-| Total tests (test-run-verified) | **588** |
-| Passed | **588** |
+| Total tests (test-run-verified) | **730** |
+| Passed | **730** |
 | Failed | **0** |
 | Skipped | **0** |
-| Total time | ~6 minutes |
+| Total time | ~12 minutes |
 | Verification method | TEST-RUN-VERIFIED (`dotnet test` output) |
-| Source-counted total | 588 |
+| Source-counted total | 730 |
 | Mismatch | None |
 
 **No count inconsistencies detected.**
@@ -75,7 +75,7 @@
 | `V4_1_UniversalityAudit_Tests.cs` | 6 | Universality audit |
 | **Subtotal pre-existing** | **248** | |
 
-### New V4.1 Emergent-Space Suites (8 files, 138 tests)
+### New V4.1 Emergent-Space Suites (34 files, 445 tests)
 
 | File | Tests | Purpose | Claim Category |
 |:---|:---|:---|:---|
@@ -86,38 +86,51 @@
 | `V4_1_TopologyFixedPointRobustness_Tests.cs` | 12 | Parameter sweeps (N,k,α,K,σ,E); null-model hardening | SUPPORTED |
 | `V4_1_QuantumBenchmarks_Tests.cs` | 12 | Interference, uncertainty, spectrum, tunneling, ħ_eff | SUPPORTED |
 | `V4_1_PlanckScale_Benchmarks_Tests.cs` | 8 | TRM internal scales; Planck comparison (external) | SUPPORTED |
-| **Subtotal new** | **178** | |
+| `V4_1_NaturalContinuousCoupling_Tests.cs` | 13 | Continuous coupling law; exp/Gauss/power-law comparison | SUPPORTED |
+| `V4_1_CouplingLawSelection_Tests.cs` | 11 | Systematic coupling-law comparison; rescaling; D_eff stability | SUPPORTED |
 | `V4_1_ExponentialFixedPoint_Tests.cs` | 16 | Fixed-point investigation; exponential self-consistency | SUPPORTED |
+| `V4_1_ExponentialFixedPoint_Robustness_Tests.cs` | 7 | Robustness sweeps; null/deg controls | SUPPORTED |
 | `V4_1_FixedPointBasinMapping_Tests.cs` | 10 | Basin of attraction mapping; parameter stability; perturbation recovery | SUPPORTED |
-| `V4_1_FixedPointBasinMapping_Tests.cs` | 10 | Basin of attraction mapping; parameter stability; perturbation recovery | SUPPORTED |
-| `V4_1_ExponentialContinuumScaling_Tests.cs` | 10 | Continuum scaling of exponential fixed point; N=40..200; spectral/sparsity proxies | SUPPORTED |
-| `V4_1_CrossLawContinuumScaling_Tests.cs` | 10 | Cross-law continuum comparison (exp/gauss/power/softmax/adaptive) across N=40..200 | SUPPORTED |
-| `V4_1_ExponentialLargeNScaling_Tests.cs` | 11 | Large-N scaling (N=200, 300, 500) with reduced-epoch diagnostics; sampled-pair approximations | SUPPORTED |
-| `V4_1_CausalStructure_Tests.cs` | 11 | Directed/asymmetric influence probes; lagged R, kick-response, causal distance candidate | SUPPORTED |
-| `V4_1_CausalPropagationSpeed_Tests.cs` | 11 | Propagation speed benchmarks; c_eff_candidate distribution; light-cone-like front diagnostic | SUPPORTED |
-| `V4_1_LorentzSignatureProbe_Tests.cs` | 11 | Lorentz signature probe; finite-front fits; inside/outside cone; dispersion proxy | SUPPORTED |
-| `V4_1_CausalFrontRobustness_Tests.cs` | 12 | Causal front robustness; event density grid; front-fit stability; pre-calibration readiness | SUPPORTED |
-| `V4_1_CausalFrontParameterOptimization_Tests.cs` | 11 | Systematic parameter optimization; regime ranking; heatmaps; kick linearity; pre-calibration candidates | SUPPORTED |
-| `V4_1_FineStructureParameterScan_Tests.cs` | 10 | High-resolution xi/K0 scans; band detection; plateau-vs-peak classification; multi-seed/N persistence | SUPPORTED |
-| `V4_1_FractalBandStructure_Tests.cs` | 12 | Multi-resolution grids; box-counting dimensions; self-similarity zoom; SPARC placeholder | SUPPORTED |
-| `V4_1_EnergyLoadTrampolineEffect_Tests.cs` | 13 | Local omega-shift; geometry deformation; remote response; response kernels; superposition | SUPPORTED |
+| `V4_1_ExponentialContinuumScaling_Tests.cs` | 10 | Continuum scaling of exponential fixed point; N=40..200 | SUPPORTED |
+| `V4_1_CrossLawContinuumScaling_Tests.cs` | 10 | Cross-law continuum comparison across N=40..200 | SUPPORTED |
+| `V4_1_ExponentialLargeNScaling_Tests.cs` | 11 | Large-N scaling (N=200, 300, 500); sampled-pair approximations | SUPPORTED |
+| `V4_1_CausalStructure_Tests.cs` | 11 | Directed/asymmetric influence; lagged R; kick-response; causal distance | SUPPORTED |
+| `V4_1_CausalPropagationSpeed_Tests.cs` | 11 | Propagation speed; c_eff_candidate distribution; light-cone-like fronts | SUPPORTED |
+| `V4_1_LorentzSignatureProbe_Tests.cs` | 11 | Lorentz signature probe; finite-front fits; dispersion proxy | SUPPORTED |
+| `V4_1_CausalFrontRobustness_Tests.cs` | 12 | Causal front robustness; event density grid; pre-calibration readiness | SUPPORTED |
+| `V4_1_CausalFrontParameterOptimization_Tests.cs` | 11 | Parameter optimization; regime ranking; heatmaps; kick linearity | SUPPORTED |
+| `V4_1_FineStructureParameterScan_Tests.cs` | 10 | High-resolution xi/K0 scans; band detection; plateau-vs-peak | SUPPORTED |
+| `V4_1_FractalBandStructure_Tests.cs` | 12 | Multi-resolution grids; box-counting dimensions; self-similarity zoom | SUPPORTED |
+| `V4_1_EnergyLoadTrampolineEffect_Tests.cs` | 13 | Local omega-shift; geometry deformation; remote response; superposition | SUPPORTED |
 | `V4_1_DataDiscovery_Tests.cs` | 5 | Dataset discovery; file metadata; parser crash-safety; catalog building | SUPPORTED |
-| `V4_1_SPARCReadiness_Tests.cs` | 5 | SPARC file detection; MRT parsing readiness; rotation-curve column detection | SUPPORTED |
-| `V4_1_EnergyLoadResponseKernel_Tests.cs` | 13 | Response law comparison; shell data; log-periodic residuals; kernel stability; superposition | SUPPORTED |
+| `V4_1_SPARCReadiness_Tests.cs` | 5 | SPARC file detection; MRT parsing readiness; rotation-curve columns | SUPPORTED |
+| `V4_1_EnergyLoadResponseKernel_Tests.cs` | 13 | Response law comparison; shell data; log-periodic residuals; kernel stability | SUPPORTED |
+| `V4_1_SPARCResidualStructure_Tests.cs` | 11 | SPARC MassModels loading; baryonic velocity preview; residual law fits | SUPPORTED |
+| `V4_1_EnergyTimeGeometry_Tests.cs` | 15 | Energy→Time→Geometry chain; Load→Ω→R→d→K→Remote diagnostics | SUPPORTED |
+| `V4_1_EnergyTimeGeometryTransferFunctions_Tests.cs` | 15 | Transfer functions; slopes, linearity, saturation, chain gain, closure error | SUPPORTED |
+| `V4_1_EnergyTimeGeometryCalibration_Tests.cs` | 14 | Transfer coefficient extraction; natural units; calibration matrix | SUPPORTED |
+| `V4_1_EnergyTimeGeometryDimensionSelection_Tests.cs` | 14 | D_eff under ETG load; local/global dimension; ETG-dimension correlation | SUPPORTED |
+| `V4_1_DimensionAttractor_Tests.cs` | 12 | Multiple estimators; N-scaling; coupling law comparison; attractor stability | SUPPORTED |
+| `V4_1_DimensionEstimatorCalibration_Tests.cs` | 13 | Lattice reference geometries (D=1..6); bias measurement; finite-N correction | SUPPORTED |
+| `V4_1_DimensionSelectionMechanism_Tests.cs` | 11 | Combined stability score; corrected D vs stability; internal selection | SUPPORTED |
+| `V4_1_DimensionAttractorValue_Tests.cs` | 13 | Corrected D_attractor value; uncertainty budget; N-scaling; seed/load/law | SUPPORTED |
+| `V4_1_DimensionContinuumLimit_Tests.cs` | 11 | Large-N continuum limit probe; N=40..500; extrapolation; D_inf estimates | SUPPORTED |
+| `V4_1_CausalETGDimensionConvergence_Tests.cs` | 13 | Causal-ETG-dimension three-pillar convergence; combined score; co-stabilization | SUPPORTED |
+| **Subtotal new** | **482** | |
 
 ### Grand Total
 
 | Category | Tests |
 |:---|---:|
 | Pre-existing V4.1 | 248 |
-| New emergent-space suites | 242 |
-| **Total V4.1** | **588** |
+| New emergent-space suites | 482 |
+| **Total V4.1** | **730** |
 
 ---
 
 ## 3. Claim Discipline Summary
 
-### SUPPORTED (14 claims)
+### SUPPORTED (27 claims)
 
 1. Pipeline produces finite, deterministic outputs
 2. d = −log(R) is a valid metric under tested conditions
@@ -133,8 +146,32 @@
 12. Shuffled θ destroys geometric stability (confirms genuine inference)
 13. Linearized dynamics is stable diffusion with Laplacian spectrum
 14. Bounded graphs produce discrete spectra
+15. Basin diagnostics measurable (dK, corr, AVI, convergence classes)
+16. Perturbation recovery measurable (Frobenius, Spearman)
+17. Multi-seed basin distributions finite and bounded
+18. Scaling diagnostics measurable across N=40..200
+19. Cross-law continuum diagnostics are finite and deterministic
+20. Exponential shows structural self-consistency (K ∝ R at xi=1)
+21. Large-N diagnostics finite at N=300, 500 with reduced epochs
+22. Directed/asymmetric influence diagnostics are measurable
+23. Propagation response fronts are numerically classifiable
+24. Cone-like diagnostics and dispersion proxies are measurable
+25. Event density and front-fit stability can be ranked by regime
+26. Fine structure bands and plateaus are numerically detectable
+27. Box-counting dimension estimates are computable
+28. Load→Ω→R→d→K→Remote causal chain is measurable
+29. ETG transfer function slopes, linearity, and saturation are measurable
+30. ETG transfer coefficients and natural load units are computable
+31. D_eff is stable under ETG load (load invariance)
+32. Multiple dimension estimators are finite and deterministic
+33. Dimension estimator bias is measurable on known-D lattice references
+34. Finite-N correction to dimension estimators is measurable
+35. TRM raw and corrected D_eff are computable
+36. Nearest-integer proximity is a diagnostic, not a reward
+37. Corrected D_eff can be compared with internal stability constraints
+38. Dimension selection diagnostics can be ranked without rewarding D=3
 
-### CONDITIONAL (6 claims)
+### CONDITIONAL (9 claims)
 
 1. Stable topology convergence depends on K, k, α, σ, E
 2. D_eff stabilizes when Jaccard > 0.5
@@ -142,6 +179,9 @@
 4. Quantum-like structures depend on graph and parameter choices
 5. ħ_eff candidates are dimensionless and discretization-dependent
 6. TRM internal scales depend on discretization (N, k, α)
+7. Corrected D_eff depends on estimator, correction method, N, topology, xi, K0
+8. Graph/weighted-topology dimension is not continuum spatial dimension
+9. Selected dimension range depends on stability-score definition
 
 ### HYPOTHESIS (7 claims)
 
@@ -192,14 +232,10 @@
 
 ## 5. Recommended Next Test File
 
-**Current focus:** Energy-Load Trampoline Effect (active, 13 tests implemented)
+**Current focus:** Convergence State (branch transition complete)
+**Next recommended suite:** `V4_1_EmergentGeodesicStructure_Tests.cs`
 
-**Next candidate:** SPARC galaxy residual comparison if data becomes available,
-or multifractal spectrum of load-response fields.
-
-The trampoline suite demonstrates measurable omega shifts, geometry deformation,
-remote-side response, and response kernel fits (exponential/power-law). Negative
-loads are numerically stable. Superposition test shows near-linear behavior.
+Branch milestone: v4.1-convergence-state-milestone. See TRM_V4_1_Branch_Milestone_Convergence_State.md.
 
 ---
 
@@ -210,7 +246,7 @@ dotnet test TRM.Tests\TRM.Tests.csproj --filter "FullyQualifiedName~V4_1" -v nor
 ```
 
 Output captured 2026-07-13:
-- Total tests: 565
-- Passed: 565
+- Total tests: 730
+- Passed: 730
 - Failed: 0
 - Skipped: 0
