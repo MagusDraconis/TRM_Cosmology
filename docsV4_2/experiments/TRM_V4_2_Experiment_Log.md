@@ -14,3 +14,15 @@
 - N-scaling bias: systematic, reported separately
 - Anti-circularity: 7/7 gates pass
 - Total project: 1464 tests (1450 V4.1 + 14 V4.2)
+
+---
+## 2026-07-14 — ELCE — External Length Calibration Execution
+
+- Suite: V4_2_ExternalLengthCalibrationExecution_Tests.cs
+- Tests: 14/14 passed (13s)
+- Classification: A READY
+- MeanDist_ref: finite, positive, CV ~0.30
+- L_scale: reproducible, stochastic uncertainty bounded
+- Independent of time, c_eff, G_eff, source calibration
+- Anti-circularity: all gates pass
+- Total project: 1478 tests
