@@ -56,6 +56,15 @@ public static class MrtParser
         // Skip separator lines and notes between columns and data
         while (lineIdx < lines.Length && (lines[lineIdx].TrimStart().StartsWith("-") || lines[lineIdx].TrimStart().StartsWith("=") || lines[lineIdx].TrimStart().StartsWith("Note")))
             lineIdx++;
+        // Skip note continuation lines and reference section
+        // (lines containing " = " that are not data rows: notes, references, abbreviations)
+        while (lineIdx < lines.Length && lines[lineIdx].Contains(" = "))
+        {
+            lineIdx++;
+        }
+        // Skip any trailing separator after reference section
+        while (lineIdx < lines.Length && (lines[lineIdx].TrimStart().StartsWith("-") || lines[lineIdx].TrimStart().StartsWith("=")))
+            lineIdx++;
         // Parse data rows
         int consecEmpty = 0;
         while (lineIdx < lines.Length)
@@ -101,7 +110,7 @@ public static class MrtParser
             // After fixing, parts[0] is now the first non-byte part (Format)
             var col = new MrtColumn { StartByte = start, EndByte = end, Format = parts.Length > 1 ? parts[1] : "", Units = parts.Length > 2 ? parts[2] : "" };
             int labelIdx = 3;
-            if (col.Units == "---") labelIdx = 2;
+            if (col.Units == "---") labelIdx = 3;
             if (parts.Length > labelIdx) col.Label = parts[labelIdx];
             return col;
         }
