@@ -6,9 +6,21 @@
 
 <PageTitle>Project Status</PageTitle>
 
-@if (_status is null)
+@if (_loading)
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (_status is null || _loadError)
+{
+    <MudPaper Class="pa-6 mt-4" Outlined="true" Style="background: var(--mud-palette-warning-hover, #FFF8E1); border-left: 4px solid var(--mud-palette-warning, #F57F17);">
+        <MudStack Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Size="Size.Large" Color="Color.Warning" />
+            <MudText Typo="Typo.h6" Color="Color.Warning">Status Data Unavailable</MudText>
+            <MudText Typo="Typo.body1">Currently no project status data is available.</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">The status file (trm-v4-1-status.json) could not be loaded. This may happen if the file is missing, malformed, or contains invalid data.</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Please verify that <code>wwwroot/data/trm-v4-1-status.json</code> exists and is valid JSON.</MudText>
+        </MudStack>
+    </MudPaper>
 }
 else
 {
@@ -191,10 +203,14 @@ else
 
 @code {
     private TrmStatusModel? _status;
+    private bool _loading = true;
+    private bool _loadError;
 
     protected override async Task OnInitializedAsync()
     {
         _status = await StatusService.GetStatusAsync();
+        _loadError = _status is null;
+        _loading = false;
     }
 
     private static string GetSuiteDescription(string name) => name switch
