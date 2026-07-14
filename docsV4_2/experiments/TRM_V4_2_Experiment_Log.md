@@ -180,3 +180,14 @@
 - Recommended next experiments listed
 - Total project: 1660 tests
 - V4.2 chain: 15 suites, 210 tests COMPLETE
+
+---
+## 2026-07-14 — SIEBS — SI Error Budget Sensitivity
+
+- Suite: V4_2_SI_ErrorBudgetSensitivity_Tests.cs
+- Tests: 14/14 passed (41s)
+- Classification: A — DOMINANT ERROR SOURCES IDENTIFIED
+- KEY FINDING: c_eff_SI MeanDist CANCELS — c_eff_SI depends ONLY on Omega (CV~0.01)
+- KEY FINDING: G_eff_SI depends on (Omega/MeanDist)^3 — MeanDist (3x~0.30) dominates
+- Total project: 1674 tests
+- 16 V4.2 suites complete
