@@ -3,7 +3,7 @@
 **Version:** V4.1 (pre-release / exploratory)  
 **Date:** 2026-07-13  
 **Status:** EXPLORATORY — not a finished physical theory  
-**Test baseline:** 693/693 TEST-RUN-VERIFIED + 94 NEW-SUITE-VERIFIED (source-counted 787)  
+**Test baseline:** 1018/1018 xUnit tests passing (FULL TEST-RUN-VERIFIED, 2026-07-14)  
 **Branch:** feature/v4.1-convergence-state  
 **Milestone:** v4.1-convergence-state-milestone
 
@@ -38,11 +38,12 @@ and spacetime structure emerge from phase-synchronized oscillator dynamics.
 | Metric | Value |
 |:---|---:|
 | Test command | `dotnet test --filter "FullyQualifiedName~V4_1" -v normal` |
-| Total tests | 730 |
-| Passed | 730 |
+| Total tests | 1018 |
+| Passed | 1018 |
 | Failed | 0 |
 | Skipped | 0 |
-| Test files | 77 |
+| Test files | ~90 |
+| Duration | 10m 49s |
 | Test framework | xUnit 2.9.3, .NET 10.0 |
 
 ### Suite Breakdown

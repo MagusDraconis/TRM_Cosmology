@@ -1,8 +1,8 @@
 {
   "releaseStatus": "EXPLORATORY",
   "date": "2026-07-13",
-  "currentBranch": "feature/v4.1-convergence-state",
-  "previousBranch": "feature/v4.1-emergent-space",
+  "currentBranch": "feature/v4.1-calibration-framework",
+  "previousBranch": "feature/v4.1-convergence-state",
   "currentFocus": "Curvature Response Proxy",
   "nextRecommendedSuite": "V4_1_EinsteinEquationProxy_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
@@ -11,7 +11,7 @@
     "passed": 874,
     "failed": 0,
     "skipped": 0,
-    "verification": "NEW-SUITE-VERIFIED",
+    "verification": "FULL TEST-RUN-VERIFIED",
     "command": "dotnet test --filter \"FullyQualifiedName~V4_1\" -v normal",
     "date": "2026-07-13"
   },
@@ -374,6 +374,20 @@
   ],
   "documents": [
     {
+      "title": "Post-Verification Synthesis",
+      "filename": "TRM_V4_1_Post_Verification_Synthesis.md",
+      "url": "documents/TRM_V4_1_Post_Verification_Synthesis.md",
+      "available": true,
+      "description": "Executive overview of verified findings, calibration status, claim discipline, and next phase."
+    },
+    {
+      "title": "Full Verification Report",
+      "filename": "TRM_V4_1_FULL_VERIFICATION_REPORT.md",
+      "url": "documents/TRM_V4_1_FULL_VERIFICATION_REPORT.md",
+      "available": true,
+      "description": "Complete 1018-test verification: build status, test summary, convergence snapshot, release integrity."
+    },
+    {
       "title": "Current Status & Test Evidence",
       "filename": "TRM_V4_1_Current_Status_And_Test_Evidence.md",
       "url": "documents/TRM_V4_1_Current_Status_And_Test_Evidence.md",
@@ -396,7 +410,7 @@
     }
   ],
   "roadmap": {
-    "recommendedTestFile": "SYNTHESIS: Convergence synthesis report created; next: Emergent Geodesic Structure or full V4.1 release verification",
+    "recommendedTestFile": "Next: feature/v4.1-calibration-framework — External Time Anchor Design",
     "candidateUpdateLaws": [
       "K_ij_next = K0 * exp(-d_ij / xi)",
       "K_ij_next = K0 * exp(-(d_ij / xi)^2)",
@@ -408,10 +422,15 @@
   "releaseIntegrity": {
     "totalTestsVerified": 874,
     "passedVerified": 874,
-    "verificationMethod": "NEW-SUITE-VERIFIED (full baseline: 693 TEST-RUN-VERIFIED)",
+    "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
     "mismatch": null
   }
 }
+
+
+
+
+
 
 
 

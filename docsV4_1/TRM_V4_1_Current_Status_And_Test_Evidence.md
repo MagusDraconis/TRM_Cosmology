@@ -3,7 +3,7 @@
 **Date:** 2026-07-13  
 **Verification:** TEST-RUN-VERIFIED  
 **Command:** `dotnet test --filter "FullyQualifiedName~V4_1" -v normal`  
-**Result:** 730 total, 730 passed, 0 failed, 0 skipped
+**Result:** 1018 total, 1018 passed, 0 failed, 0 skipped
 
 ---
 
@@ -13,13 +13,13 @@
 |:---|:---|
 | Test assembly | `TRM.Tests.dll` (.NET 10.0) |
 | Test filter | `FullyQualifiedName~V4_1` |
-| Total tests (test-run-verified) | **730** |
-| Passed | **730** |
+| Total tests (test-run-verified) | **1018** |
+| Passed | **1018** |
 | Failed | **0** |
 | Skipped | **0** |
 | Total time | ~12 minutes |
 | Verification method | TEST-RUN-VERIFIED (`dotnet test` output) |
-| Source-counted total | 730 |
+| Source-counted total | 1018 |
 | Mismatch | None |
 
 **No count inconsistencies detected.**
@@ -246,7 +246,7 @@ dotnet test TRM.Tests\TRM.Tests.csproj --filter "FullyQualifiedName~V4_1" -v nor
 ```
 
 Output captured 2026-07-13:
-- Total tests: 730
-- Passed: 730
+- Total tests: 1018
+- Passed: 1018
 - Failed: 0
 - Skipped: 0
