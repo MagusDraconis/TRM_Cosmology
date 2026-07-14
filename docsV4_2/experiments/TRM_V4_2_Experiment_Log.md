@@ -228,3 +228,15 @@
 - Alpha refinement less impactful than length refinement (weight 1 vs 3)
 - Baseline retained
 - Total project: 1716 tests
+
+---
+## 2026-07-14 — EBR — Error Budget Reconciliation
+
+- Suite: V4_2_ErrorBudgetReconciliation_Tests.cs
+- Tests: 14/14 passed
+- Classification: A RECONCILED
+- c_eff_SI: Omega-dominated (CV ~0.01). MeanDist cancels by construction.
+- G_eff_SI: MeanDist-dominated (cubic, CV ~0.90). Structural, not noise.
+- No retroactive proxy substitution. Predictions unchanged.
+- Total project: 1730 tests
+- V4.2: 20 suites, 280 tests complete
