@@ -204,3 +204,15 @@
 - G_eff_SI remains MD-dominated at all N
 - Total project: 1688 tests
 - Next: V4_2_MeanDistAnchorRefinement_Tests.cs
+
+---
+## 2026-07-14 — MDAR — MeanDist Anchor Refinement
+
+- Suite: V4_2_MeanDistAnchorRefinement_Tests.cs
+- Tests: 14/14 passed (39s)
+- Classification: A — PROXY ANALYSIS COMPLETE
+- 7 proxies compared: MeanDist, Median, TrimmedMean, GeodesicMean, LocalShell, P50, P75
+- c_eff cancellation holds for all multiplicative proxies
+- MeanDist CV ~0.30 — proxies show similar CV
+- MeanDist retained as baseline
+- Total project: 1702 tests
