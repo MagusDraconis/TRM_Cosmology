@@ -7,8 +7,8 @@
   "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1338,
-    "passed": 1338,
+    "total": 1352,
+    "passed": 1352,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
@@ -429,6 +429,12 @@
       "tests": 14,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Internal Minkowski-Metric Consistency",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -609,5 +615,5 @@
     "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
     "mismatch": null
   },
-  "fullVerification": 1338
+  "fullVerification": 1352
 }
