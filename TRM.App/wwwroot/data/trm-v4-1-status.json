@@ -3,12 +3,12 @@
   "date": "2026-07-13",
   "currentBranch": "feature/v4.1-calibration-framework",
   "previousBranch": "feature/v4.1-convergence-state",
-  "currentFocus": "Natural Continuous Coupling Update",
-  "nextRecommendedSuite": "V4_1_ExternalAstrophysicalCalibrationDesign_Tests.cs",
+  "currentFocus": "External Astrophysical Calibration Design",
+  "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1142,
-    "passed": 1142,
+    "total": 1156,
+    "passed": 1156,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
@@ -345,6 +345,12 @@
       "name": "Fixed-Point Uniqueness",
       "claimCategory": "SUPPORTED",
       "status": "PASS"
+    },
+    {
+      "name": "External Astrophysical Calibration Design",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -525,5 +531,5 @@
     "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
     "mismatch": null
   },
-  "fullVerification": 1142
+  "fullVerification": 1156
 }
