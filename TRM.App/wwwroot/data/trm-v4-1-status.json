@@ -3,7 +3,7 @@
   "date": "2026-07-13",
   "currentBranch": "feature/v4.1-calibration-framework",
   "previousBranch": "feature/v4.1-convergence-state",
-  "currentFocus": "Branch Synthesis",
+  "currentFocus": "Branch Completion",
   "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
@@ -639,6 +639,12 @@
       "url": "documents/TRM_V4_1_Convergence_Synthesis_Report.md",
       "available": true,
       "description": "Full V4.1 evidence chain: ETG→Dimension→Causal→Lorentz→SpaceTime→Metric proxy."
+    },
+    {
+      "title": "TRM V4.1 Calibration Framework Branch Completion",
+      "filename": "TRM_V4_1_Calibration_Framework_Branch_Completion.md",
+      "url": "documents/TRM_V4_1_Calibration_Framework_Branch_Completion.md",
+      "available": true
     }
   ],
   "roadmap": {
@@ -649,12 +655,14 @@
       "K_ij_next = K0 / (1 + d_ij^p)",
       "K_ij_next = K0 * softmax_j(-d_ij / tau)",
       "K_ij_next = K0 * exp(-d_ij / xi) * S_ij  (S_ij = temporal stability of R_ij)"
-    ]
+    ],
+    "recommendedNextBranch": "feature/v4.2-physical-calibration-and-prediction",
+    "currentPhase": "Calibration Framework — COMPLETE"
   },
   "releaseIntegrity": {
-    "totalTestsVerified": 874,
+    "totalTestsVerified": 1450,
     "passedVerified": 874,
-    "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V4_1",
     "mismatch": null
   },
   "fullVerification": 1450
