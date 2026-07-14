@@ -7,8 +7,8 @@
   "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1296,
-    "passed": 1296,
+    "total": 1310,
+    "passed": 1310,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
@@ -411,6 +411,12 @@
       "tests": 14,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Internal Light-Cone Invariant",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -591,5 +597,5 @@
     "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
     "mismatch": null
   },
-  "fullVerification": 1296
+  "fullVerification": 1310
 }
