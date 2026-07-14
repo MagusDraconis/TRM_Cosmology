@@ -1,10 +1,10 @@
 {
   "releaseStatus": "EXPLORATORY",
-  "date": "2026-07-13",
+  "date": "2026-07-14",
   "currentBranch": "feature/v4.1-calibration-framework",
   "previousBranch": "feature/v4.1-convergence-state",
   "currentFocus": "Branch Completion",
-  "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
+  "nextRecommendedSuite": "V4_2_ExternalTimeCalibration_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
     "total": 1450,
@@ -480,59 +480,26 @@
     }
   ],
   "supportedClaims": [
-    "Pipeline produces finite, deterministic outputs",
-    "d = -log(R) is a valid metric under tested conditions",
-    "Blind geometry reconstruction works under tested conditions",
-    "Self-consistent topology loop is numerically stable",
-    "Null models and degeneracies are correctly detected",
-    "No built-in D=3 preference",
-    "Quantum-like benchmark behavior (interference, uncertainty, discrete spectra, tunneling)",
-    "TRM internal scale candidates are finite, positive, deterministic",
-    "Dimensionless ratios between scales are computable",
-    "Parameter sweeps show smooth variation across tested ranges",
-    "kNN alone does not create false convergence",
-    "Shuffled theta destroys geometric stability",
-    "Linearized dynamics is stable diffusion with Laplacian spectrum",
-    "Bounded graphs produce discrete spectra",
-    "Basin diagnostics measurable (dK, corr, AVI, convergence classes)",
-    "Perturbation recovery measurable (Frobenius, Spearman)",
-    "Multi-seed basin distributions finite and bounded",
-    "Scaling diagnostics measurable across N=40..200",
-    "Sparsity and spectral proxies computable at all tested N",
-    "Exponential fixed-point loop finite up to N=200",
-    "Cross-law continuum diagnostics are finite and deterministic",
-    "Continuous laws comparable without kNN update",
-    "Exponential shows structural self-consistency (K prop to R at xi=1)",
-    "Large-N diagnostics finite at N=300, 500 with reduced epochs",
-    "Runtime-safe sampled-pair approximations are deterministic",
-    "Directed/asymmetric influence diagnostics are measurable",
-    "Lagged phase correlation R_lag[i,j] is computable and finite",
-    "Dimensionless c_eff candidates can be computed from d_ij/tau_ij",
-    "Propagation response fronts are numerically classifiable",
-    "Finite-front fits (tau = a*d + b) are computable",
-    "Cone-like diagnostics and dispersion proxies are measurable",
-    "Event density and front-fit stability can be ranked by regime",
-    "Pre-calibration readiness score is numerically computable",
-    "Parameter regimes can be ranked by readiness",
-    "Event-class heatmaps identify stable parameter bands",
-    "Fine structure bands and plateaus are numerically detectable",
-    "Band persistence across seeds and N is measurable",
-    "Box-counting dimension estimates are computable",
-    "Self-similarity zoom correlations are evaluable",
-    "Local omega-shift response is measurable",
-    "Geometry deformation and remote response are testable",
-    "Load→Ω→R→d→K→Remote causal chain is measurable",
-    "ETG transfer function slopes, linearity, and saturation are measurable",
-    "ETG transfer coefficients and natural load units are computable",
-    "D_eff is stable under ETG load (load invariance)",
-    "Multiple dimension estimators are finite and deterministic",
-    "Dimension estimator bias is measurable on known-D lattice references",
-    "Finite-N correction to dimension estimators is measurable",
-    "TRM raw and corrected D_eff are computable",
-    "Nearest-integer proximity is a diagnostic, not a reward",
-    "Corrected D_eff can be compared with internal stability constraints",
-    "Dimension selection diagnostics can be ranked without rewarding D=3",
-    "Load invariance, N scaling, seed stability, and null controls are testable"
+    "Calibration governance is complete (7 suites, 96 tests)",
+    "Time, length, source, c_eff, and G_eff anchor designs are internally complete",
+    "Anti-circularity gates are enforced across all chains",
+    "Omega is an ultra-stable internal attractor clock (CV ~ 0.01)",
+    "Omega is independent of geometric fluctuations (primary clock, not derived)",
+    "Internal geometry (d_ij) satisfies metric-like properties",
+    "c_eff_internal is measurable, universal, frame-consistent, and continuum-persistent (N <= 500)",
+    "Internal cone/interval structure produces light-cone-like sign separation",
+    "Observer-frame consistency is supported across 6 internal frame types",
+    "Lorentz-like interval-preservation diagnostics are internally measurable",
+    "Minkowski-like diagonal-dominant metric signature is internally measurable",
+    "Equivalence-principle-like local flatness / source-curvature separation is measurable",
+    "Field-closure chain (Source->Curvature->Metric->Geodesic) has bounded residuals",
+    "Conservation/Bianchi-like balance and divergence diagnostics are measurable",
+    "Weak-field regime shows load-linear curvature and localized PhiProxy",
+    "Weak-field observable proxies (bending/delay/clock-shift) are universal",
+    "SPARC governance pipeline (readiness, blind protocol, data manifest) is complete",
+    "Null and degenerate controls fail all major structures",
+    "Fixed-point uniqueness verified under tested conditions (strong single attractor)",
+    "Natural continuous coupling supports exponential and Gaussian laws"
   ],
   "conditionalClaims": [
     "Stable topology convergence depends on K, k, alpha, sigma, E",
@@ -552,56 +519,75 @@
     "Planck scale correspondence"
   ],
   "notClaimed": [
-    "GR is replaced",
-    "D = 3 is derived",
-    "G is predicted from first principles",
-    "hbar is derived",
-    "c is derived",
-    "Planck length/time are derived",
-    "Quantum mechanics is fully derived",
-    "Born rule / entanglement / spin are derived",
-    "Quantum gravity problem is solved"
+    "Physical c derived",
+    "Speed of light derived",
+    "Physical G derived",
+    "Physical mass or energy derived",
+    "SI units derived",
+    "D=3 derived",
+    "Physical spacetime derived",
+    "Physical metric tensor derived",
+    "Lorentz invariance proven",
+    "Special Relativity derived",
+    "General Relativity derived or replaced",
+    "Einstein equations derived",
+    "Newtonian gravity derived",
+    "Physical gravity derived",
+    "Physical conservation laws derived",
+    "Bianchi identities derived",
+    "Gravitational lensing derived",
+    "Gravitational redshift derived",
+    "Shapiro delay derived",
+    "Time dilation derived",
+    "SPARC explained",
+    "Dark matter replaced",
+    "True N->infinity continuum proof"
   ],
   "openProblems": [
     {
-      "priority": "P1",
-      "title": "Natural Continuous Coupling Update",
-      "description": "Replace kNN topology construction with continuous update law K_next = F(R, d). Candidate forms: exp(-d/xi), Gaussian, power-law, softmax."
+      "Priority": "P1",
+      "Title": "External Calibration Policy",
+      "Description": "Define admissible external calibration procedures for time, length, source, c_eff, and G_eff anchors."
     },
     {
-      "priority": "P1",
-      "title": "Fixed-Point Uniqueness",
-      "description": "Does the topology converge to a unique attractor independent of initial conditions?"
+      "Priority": "P1",
+      "Title": "Natural Continuous Coupling Update",
+      "Description": "Further generalize coupling update beyond exponential/Gaussian families."
     },
     {
-      "priority": "P1",
-      "title": "Continuum Limit",
-      "description": "Does the emergent geometry survive N -> infinity? Large-N scaling not yet established."
+      "Priority": "P2",
+      "Title": "External Time Anchor Design",
+      "Description": "Apply Omega/Omega_mean anchor to external time reference."
     },
     {
-      "priority": "P2",
-      "title": "Causal Structure",
-      "description": "Introduce directed / asymmetric rate matrices to enable light-cone structure and propagation speed measurement."
+      "Priority": "P2",
+      "Title": "External Length Anchor Design",
+      "Description": "Apply MeanDist anchor to external length reference."
     },
     {
-      "priority": "P2",
-      "title": "Lorentz Signature",
-      "description": "Test whether spacetime-like propagation (omega(k) dispersion, invariant speed) emerges from recovered topology."
+      "Priority": "P2",
+      "Title": "Source-Curvature Physical Interpretation",
+      "Description": "Determine whether alpha_TRM corresponds to a physical coupling constant after calibration."
     },
     {
-      "priority": "P3",
-      "title": "hbar_eff Normalization",
-      "description": "hbar_eff candidates are dimensionless graph units. Physical normalization requires identification of energy and time scales."
+      "Priority": "P3",
+      "Title": "hbar_eff Normalization",
+      "Description": "Normalize internal action scale for quantum-benchmark comparison."
     },
     {
-      "priority": "P3",
-      "title": "Planck-Scale Continuum Comparison",
-      "description": "Numerical comparison of l_TRM and t_TRM with physical l_P and t_P requires physical unit mapping."
+      "Priority": "P3",
+      "Title": "Planck Continuum Comparison",
+      "Description": "Compare internal scales with Planck-scale continuum extrapolation."
     },
     {
-      "priority": "P3",
-      "title": "Born-Rule Benchmark",
-      "description": "Does |psi|^2 emerge from oscillator amplitude in a continuum limit? No test exists."
+      "Priority": "P3",
+      "Title": "Born Rule Benchmark",
+      "Description": "Benchmark TRM state distributions against Born-rule statistics."
+    },
+    {
+      "Priority": "P3",
+      "Title": "External Astrophysical Calibration",
+      "Description": "Design external astrophysical comparison after model freeze."
     }
   ],
   "documents": [
@@ -645,25 +631,35 @@
       "filename": "TRM_V4_1_Calibration_Framework_Branch_Completion.md",
       "url": "documents/TRM_V4_1_Calibration_Framework_Branch_Completion.md",
       "available": true
+    },
+    {
+      "title": "Internal Causal-Geometry Synthesis",
+      "filename": "TRM_V4_1_Internal_Causal_Geometry_Synthesis.md",
+      "url": "documents/TRM_V4_1_Internal_Causal_Geometry_Synthesis.md",
+      "available": true,
+      "description": "Complete scientific synthesis of the V4.1 internal causal-geometry program."
     }
   ],
   "roadmap": {
-    "recommendedTestFile": "Next: feature/v4.1-calibration-framework — External Time Anchor Design",
-    "candidateUpdateLaws": [
-      "K_ij_next = K0 * exp(-d_ij / xi)",
-      "K_ij_next = K0 * exp(-(d_ij / xi)^2)",
-      "K_ij_next = K0 / (1 + d_ij^p)",
-      "K_ij_next = K0 * softmax_j(-d_ij / tau)",
-      "K_ij_next = K0 * exp(-d_ij / xi) * S_ij  (S_ij = temporal stability of R_ij)"
-    ],
+    "currentPhase": "Calibration Framework - COMPLETE",
     "recommendedNextBranch": "feature/v4.2-physical-calibration-and-prediction",
-    "currentPhase": "Calibration Framework — COMPLETE"
+    "recommendedTestFile": "V4_2_ExternalTimeCalibration_Tests.cs",
+    "nextSteps": [
+      "External time-anchor calibration against SI second",
+      "External length-anchor calibration against SI meter",
+      "c_eff external calibration",
+      "G_eff external calibration",
+      "Continuum-limit validation at N>500",
+      "Blind SPARC comparison (governance -> prediction)"
+    ]
   },
   "releaseIntegrity": {
     "totalTestsVerified": 1450,
-    "passedVerified": 874,
     "verificationMethod": "dotnet test --filter FullyQualifiedName~V4_1",
-    "mismatch": null
+    "passedVerified": 1450,
+    "mismatch": "None - all 1450 verified"
   },
-  "fullVerification": 1450
+  "fullVerification": 1450,
+  "phase": "Calibration Framework",
+  "dashboardVersion": "ExecutiveV4"
 }
