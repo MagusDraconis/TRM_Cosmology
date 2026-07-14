@@ -38,3 +38,15 @@
 - All three anchors now calibrated
 - Total project: 1492 tests
 - Next: V4_2_BlindCEffPrediction_Tests.cs
+
+---
+## 2026-07-14 — BCEP — Blind c_eff Prediction
+
+- Suite: V4_2_BlindCEffPrediction_Tests.cs
+- Tests: 14/14 passed (44s)
+- Classification: PREDICTION READY
+- c_eff_predicted computed from frozen T_scale + L_scale
+- Deterministic, seed-stable, anti-circularity enforced
+- No comparison to physical c executed
+- Total project: 1506 tests
+- Next: V4_2_BlindGEffPrediction_Tests.cs
