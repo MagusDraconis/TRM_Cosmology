@@ -3,7 +3,7 @@
   "date": "2026-07-14",
   "currentBranch": "feature/v4.1-calibration-framework",
   "previousBranch": "feature/v4.1-convergence-state",
-  "currentFocus": "Branch Completion",
+  "currentFocus": "V4.1 Complete - V4.2 Preparation",
   "nextRecommendedSuite": "V4_2_ExternalTimeCalibration_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
@@ -545,49 +545,54 @@
   ],
   "openProblems": [
     {
-      "Priority": "P1",
-      "Title": "External Calibration Policy",
-      "Description": "Define admissible external calibration procedures for time, length, source, c_eff, and G_eff anchors."
+      "priority": "P1",
+      "title": "External Time Calibration Execution",
+      "description": "Apply Omega/Omega_mean anchor to an external time reference (e.g., SI second) under anti-circularity policy."
     },
     {
-      "Priority": "P1",
-      "Title": "Natural Continuous Coupling Update",
-      "Description": "Further generalize coupling update beyond exponential/Gaussian families."
+      "priority": "P1",
+      "title": "External Length Calibration Execution",
+      "description": "Apply MeanDist anchor to an external length reference (e.g., SI meter) under anti-circularity policy."
     },
     {
-      "Priority": "P2",
-      "Title": "External Time Anchor Design",
-      "Description": "Apply Omega/Omega_mean anchor to external time reference."
+      "priority": "P1",
+      "title": "External Source Calibration Execution",
+      "description": "Apply OmegaSource anchor to an external mass/energy reference under anti-circularity policy."
     },
     {
-      "Priority": "P2",
-      "Title": "External Length Anchor Design",
-      "Description": "Apply MeanDist anchor to external length reference."
+      "priority": "P1",
+      "title": "Blind c_eff Prediction",
+      "description": "Predict c_eff from frozen model and compare to physical c without post-hoc tuning."
     },
     {
-      "Priority": "P2",
-      "Title": "Source-Curvature Physical Interpretation",
-      "Description": "Determine whether alpha_TRM corresponds to a physical coupling constant after calibration."
+      "priority": "P1",
+      "title": "Blind G_eff Prediction",
+      "description": "Predict G_eff from frozen model and compare to physical G without post-hoc tuning."
     },
     {
-      "Priority": "P3",
-      "Title": "hbar_eff Normalization",
-      "Description": "Normalize internal action scale for quantum-benchmark comparison."
+      "priority": "P2",
+      "title": "Continuum Validation Beyond N=500",
+      "description": "Extend continuum-limit diagnostics to N>500; test convergence of c_eff, geometry, and closure residuals."
     },
     {
-      "Priority": "P3",
-      "Title": "Planck Continuum Comparison",
-      "Description": "Compare internal scales with Planck-scale continuum extrapolation."
+      "priority": "P2",
+      "title": "Physical Calibration Error Budget",
+      "description": "Quantify error propagation from finite-N, proxy definitions, and seed variance into physical-unit predictions."
     },
     {
-      "Priority": "P3",
-      "Title": "Born Rule Benchmark",
-      "Description": "Benchmark TRM state distributions against Born-rule statistics."
+      "priority": "P2",
+      "title": "Frozen-Model Prediction Protocol",
+      "description": "Define pre-registered prediction protocol: freeze model, predict, then compare to external data without fitting."
     },
     {
-      "Priority": "P3",
-      "Title": "External Astrophysical Calibration",
-      "Description": "Design external astrophysical comparison after model freeze."
+      "priority": "P3",
+      "title": "SPARC Blind Metric Execution",
+      "description": "Execute blind SPARC comparison using frozen model; report all metrics without cherry-picking."
+    },
+    {
+      "priority": "P3",
+      "title": "hbar_eff / Born Rule / Planck Comparison",
+      "description": "Normalize internal action scale; benchmark state distributions against Born rule; compare internal scales to Planck scale."
     }
   ],
   "documents": [
@@ -630,14 +635,15 @@
       "title": "TRM V4.1 Calibration Framework Branch Completion",
       "filename": "TRM_V4_1_Calibration_Framework_Branch_Completion.md",
       "url": "documents/TRM_V4_1_Calibration_Framework_Branch_Completion.md",
-      "available": true
+      "available": true,
+      "description": "Final branch-completion report for V4.1 calibration framework: 1450/1450 verified, completed chains, claim discipline, and next-branch recommendation."
     },
     {
       "title": "Internal Causal-Geometry Synthesis",
       "filename": "TRM_V4_1_Internal_Causal_Geometry_Synthesis.md",
       "url": "documents/TRM_V4_1_Internal_Causal_Geometry_Synthesis.md",
       "available": true,
-      "description": "Complete scientific synthesis of the V4.1 internal causal-geometry program."
+      "description": "Complete scientific synthesis of the V4.1 internal causal-geometry program: Omega clock through observable proxies."
     }
   ],
   "roadmap": {
