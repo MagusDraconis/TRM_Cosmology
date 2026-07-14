@@ -1,14 +1,14 @@
 {
-  "releaseStatus": "EXPLORATORY",
+  "releaseStatus": "ACTIVE",
   "date": "2026-07-14",
-  "currentBranch": "feature/v4.1-calibration-framework",
+  "currentBranch": "feature/v4.2-physical-calibration-and-prediction",
   "previousBranch": "feature/v4.1-convergence-state",
-  "currentFocus": "V4.1 Complete - V4.2 Preparation",
+  "currentFocus": "V4.2 — Error Budget Reconciliation Complete",
   "nextRecommendedSuite": "V4_2_ExternalTimeCalibration_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1450,
-    "passed": 1450,
+    "total": 1730,
+    "passed": 1730,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
@@ -477,6 +477,126 @@
       "tests": 14,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "External Time Calibration Execution (ETCE)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "External Length Calibration Execution (ELCE)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "External Source Calibration Execution (ESCE)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Blind c_eff Prediction (BCEP)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Blind G_eff Prediction (BGEP)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Blind Prediction Comparison Protocol (BPCP)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Prediction Freeze and Audit (PFA)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Blind Physical Constant Comparison (BPCC)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Unit Mapping Policy (SIUMP)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Time Mapping Design (SITMD)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Length Mapping Design (SILMD)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Source Mapping Design (SISMD)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Calibrated Predictions (SICP)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Physical Comparison (SIPC)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Post-Comparison Interpretation (PCIT)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "SI Error Budget Sensitivity (SIEBS)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Continuum Beyond N=500 (CBN500)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "MeanDist Anchor Refinement (MDAR)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "AlphaTRM Refinement (ATR)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Error Budget Reconciliation (EBR)",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -647,8 +767,8 @@
     }
   ],
   "roadmap": {
-    "currentPhase": "Calibration Framework - COMPLETE",
-    "recommendedNextBranch": "feature/v4.2-physical-calibration-and-prediction",
+    "currentPhase": "V4.2 Physical Calibration & Prediction — 20 suites complete",
+    "recommendedNextBranch": "feature/v4.2-continuum-and-geometric-interpretation",
     "recommendedTestFile": "V4_2_ExternalTimeCalibration_Tests.cs",
     "nextSteps": [
       "External time-anchor calibration against SI second",
@@ -660,12 +780,12 @@
     ]
   },
   "releaseIntegrity": {
-    "totalTestsVerified": 1450,
+    "totalTestsVerified": 1730,
     "verificationMethod": "dotnet test --filter FullyQualifiedName~V4_1",
-    "passedVerified": 1450,
+    "passedVerified": 1730,
     "mismatch": "None - all 1450 verified"
   },
-  "fullVerification": 1450,
-  "phase": "Calibration Framework",
+  "fullVerification": 1730,
+  "phase": "V4.2 Physical Calibration & Prediction",
   "dashboardVersion": "ExecutiveV4"
 }
