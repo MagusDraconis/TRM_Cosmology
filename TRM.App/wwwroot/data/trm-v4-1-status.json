@@ -7,8 +7,8 @@
   "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1310,
-    "passed": 1310,
+    "total": 1324,
+    "passed": 1324,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
@@ -417,6 +417,12 @@
       "tests": 14,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Internal Observer-Frame Consistency",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -597,5 +603,5 @@
     "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
     "mismatch": null
   },
-  "fullVerification": 1310
+  "fullVerification": 1324
 }
