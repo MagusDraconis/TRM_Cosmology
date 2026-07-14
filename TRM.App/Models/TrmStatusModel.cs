@@ -7,6 +7,9 @@ public sealed class TrmStatusModel
     [JsonPropertyName("releaseStatus")]
     public string ReleaseStatus { get; init; } = "EXPLORATORY";
 
+    [JsonPropertyName("phase")]
+    public string Phase { get; init; } = "";
+
     [JsonPropertyName("date")]
     public string Date { get; init; } = "";
 

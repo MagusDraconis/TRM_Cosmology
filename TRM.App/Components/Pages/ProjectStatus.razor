@@ -41,7 +41,7 @@ else
             <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Filled">NOT CLAIMED</MudChip>
         </MudStack>
         <MudText Typo="Typo.caption" Class="mt-1">
-            The project does <b>not</b> currently claim: replacement of General Relativity · derivation of quantum mechanics · derivation of Planck scales · derivation of D=3
+            The project does <b>not</b> currently claim: derivation of physical c · derivation of physical G · replacement of General Relativity · derivation of quantum mechanics · derivation of Planck scales · derivation of D=3
         </MudText>
     </MudStack>
 </MudPaper>
@@ -63,8 +63,8 @@ else
         </MudItem>
         <MudItem xs="6" sm="4" md="3" lg="2">
             <MudPaper Class="pa-3 text-center" Outlined="true">
-                <MudText Typo="Typo.caption" Color="Color.Secondary">V4.1 Emergent Space</MudText>
-                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled">✅ Active</MudChip>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@(s.Phase ?? "V4")</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled">✅ @(s.ReleaseStatus ?? "Active")</MudChip>
             </MudPaper>
         </MudItem>
         <MudItem xs="6" sm="4" md="3" lg="2">

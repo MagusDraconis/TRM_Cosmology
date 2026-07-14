@@ -764,7 +764,8 @@
       "Independent validation of c_eff cancellation",
       "External SI-unit calibration execution",
       "Frozen-model SPARC blind comparison"
-    ]
+    ],
+    "recommendedTestFile": "V4_3_GeometricScaleCandidateSurvey_Tests.cs"
   },
   "releaseIntegrity": {
     "totalTestsVerified": 1744,
