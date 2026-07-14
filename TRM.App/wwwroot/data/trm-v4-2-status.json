@@ -1,18 +1,18 @@
 {
-  "releaseStatus": "ACTIVE",
+  "releaseStatus": "ACTIVE — V4.2 Physical Calibration & Prediction",
   "date": "2026-07-14",
   "currentBranch": "feature/v4.2-physical-calibration-and-prediction",
   "previousBranch": "feature/v4.1-convergence-state",
-  "currentFocus": "V4.2 — Error Budget Reconciliation Complete",
+  "currentFocus": "V4.2 Branch Completion",
   "nextRecommendedSuite": "V4_2_ExternalTimeCalibration_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1730,
-    "passed": 1730,
+    "total": 1744,
+    "passed": 1744,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
-    "command": "dotnet test --filter \"FullyQualifiedName~V4_1\" -v normal",
+    "command": "dotnet test --filter FullyQualifiedName~V4",
     "date": "2026-07-14"
   },
   "suites": [
@@ -600,51 +600,43 @@
     }
   ],
   "supportedClaims": [
-    "Calibration governance is complete (7 suites, 96 tests)",
-    "Time, length, source, c_eff, and G_eff anchor designs are internally complete",
-    "Anti-circularity gates are enforced across all chains",
-    "Omega is an ultra-stable internal attractor clock (CV ~ 0.01)",
-    "Omega is independent of geometric fluctuations (primary clock, not derived)",
-    "Internal geometry (d_ij) satisfies metric-like properties",
-    "c_eff_internal is measurable, universal, frame-consistent, and continuum-persistent (N <= 500)",
-    "Internal cone/interval structure produces light-cone-like sign separation",
-    "Observer-frame consistency is supported across 6 internal frame types",
-    "Lorentz-like interval-preservation diagnostics are internally measurable",
-    "Minkowski-like diagonal-dominant metric signature is internally measurable",
-    "Equivalence-principle-like local flatness / source-curvature separation is measurable",
-    "Field-closure chain (Source->Curvature->Metric->Geodesic) has bounded residuals",
-    "Conservation/Bianchi-like balance and divergence diagnostics are measurable",
-    "Weak-field regime shows load-linear curvature and localized PhiProxy",
-    "Weak-field observable proxies (bending/delay/clock-shift) are universal",
-    "SPARC governance pipeline (readiness, blind protocol, data manifest) is complete",
-    "Null and degenerate controls fail all major structures",
-    "Fixed-point uniqueness verified under tested conditions (strong single attractor)",
-    "Natural continuous coupling supports exponential and Gaussian laws"
+    "Calibration chain complete: T_scale, L_scale, M_scale independently verified",
+    "Blind c_eff and G_eff predictions frozen, audited, and reproducible",
+    "SI time mapping: Cs-133 hyperfine reference (non-circular)",
+    "SI length mapping: Kr-86 wavelength primary path (non-circular)",
+    "SI source mapping: SI kilogram (h-based, 2019) independent of G",
+    "SI meter path marked CONDITIONAL only (c-circularity disclosed)",
+    "c_eff_SI = Kr86/Cs133 x Omega (MeanDist cancels exactly)",
+    "c_eff_SI uncertainty: Omega-dominated (CV ~0.01)",
+    "G_eff_SI uncertainty: MeanDist-dominated (cubic, CV ~0.90)",
+    "MeanDist variance persists to N=1000 (structural, not noise)",
+    "No proxy retroactively substituted; frozen predictions unchanged",
+    "Anti-circularity and anti-feedback gates enforced across all chains",
+    "Null and degenerate controls fail major structures"
   ],
   "conditionalClaims": [
-    "Stable topology convergence depends on K, k, alpha, sigma, E",
-    "D_eff stabilizes when Jaccard > 0.5",
-    "Phase-lock outperforms correlation/lock-time under tested conditions",
-    "Quantum-like structures depend on graph and parameter choices",
-    "hbar_eff candidates are dimensionless and discretization-dependent",
-    "TRM internal scales depend on discretization (N, k, alpha)"
+    "All results depend on Kr-86 primary length path (pre-1983 standard)",
+    "SI meter is CONDITIONAL: depends on c by definition",
+    "G_eff uses L^3/(T^2 M) dimensional form",
+    "Results limited to finite N=40-1000 with reduced epochs at large N",
+    "Results depend on proxy definitions (d_ij, Omega field, curvature proxy)",
+    "Results depend on primary attractor regime (xi=1.75, K0=1.2)",
+    "Refinement candidates (MDAR, ATR) are exploratory — not adopted",
+    "Physical comparison is protocol-level; dimensional unit gap acknowledged"
   ],
   "hypotheses": [
-    "Physical emergent space from self-consistent oscillator topology",
-    "D = 3 selected by synchronization dynamics",
-    "Continuum limit -> Riemannian metric",
-    "Lorentzian spacetime emergence (3+1)",
-    "Gravitational dynamics from emergent topology",
-    "Physical quantum mechanics from TRM oscillator dynamics",
-    "Planck scale correspondence"
+    "Alternative geometry-scale interpretation may reduce G_eff uncertainty",
+    "Persistent MeanDist variance may represent structural attractor geometry",
+    "Further continuum work may clarify geometric scale meaning",
+    "Independent validation of c_eff cancellation structure is needed",
+    "External SI-unit calibration may enable physically meaningful comparison"
   ],
   "notClaimed": [
     "Physical c derived",
     "Speed of light derived",
     "Physical G derived",
-    "Physical mass or energy derived",
-    "SI units derived",
-    "D=3 derived",
+    "Gravity derived",
+    "SI units derived from TRM",
     "Physical spacetime derived",
     "Physical metric tensor derived",
     "Lorentz invariance proven",
@@ -652,9 +644,6 @@
     "General Relativity derived or replaced",
     "Einstein equations derived",
     "Newtonian gravity derived",
-    "Physical gravity derived",
-    "Physical conservation laws derived",
-    "Bianchi identities derived",
     "Gravitational lensing derived",
     "Gravitational redshift derived",
     "Shapiro delay derived",
@@ -666,53 +655,38 @@
   "openProblems": [
     {
       "priority": "P1",
-      "title": "External Time Calibration Execution",
-      "description": "Apply Omega/Omega_mean anchor to an external time reference (e.g., SI second) under anti-circularity policy."
+      "title": "Geometric Scale Interpretation",
+      "description": "Determine why MeanDist variance persists to N=1000. Is this a structural attractor property or a proxy limitation?"
     },
     {
       "priority": "P1",
-      "title": "External Length Calibration Execution",
-      "description": "Apply MeanDist anchor to an external length reference (e.g., SI meter) under anti-circularity policy."
-    },
-    {
-      "priority": "P1",
-      "title": "External Source Calibration Execution",
-      "description": "Apply OmegaSource anchor to an external mass/energy reference under anti-circularity policy."
-    },
-    {
-      "priority": "P1",
-      "title": "Blind c_eff Prediction",
-      "description": "Predict c_eff from frozen model and compare to physical c without post-hoc tuning."
-    },
-    {
-      "priority": "P1",
-      "title": "Blind G_eff Prediction",
-      "description": "Predict G_eff from frozen model and compare to physical G without post-hoc tuning."
+      "title": "Alternative Length Proxy Design",
+      "description": "Design fundamentally different (non-multiplicative) length proxies for G_eff prediction."
     },
     {
       "priority": "P2",
-      "title": "Continuum Validation Beyond N=500",
-      "description": "Extend continuum-limit diagnostics to N>500; test convergence of c_eff, geometry, and closure residuals."
+      "title": "Continuum Limit Beyond N=1000",
+      "description": "Extend diagnostics to N=1500, 2000; test whether MeanDist variance eventually stabilizes."
     },
     {
       "priority": "P2",
-      "title": "Physical Calibration Error Budget",
-      "description": "Quantify error propagation from finite-N, proxy definitions, and seed variance into physical-unit predictions."
+      "title": "Independent c_eff Cancellation Validation",
+      "description": "Verify the MeanDist cancellation identity with independent numerical and analytical checks."
     },
     {
       "priority": "P2",
-      "title": "Frozen-Model Prediction Protocol",
-      "description": "Define pre-registered prediction protocol: freeze model, predict, then compare to external data without fitting."
+      "title": "External SI-Unit Calibration",
+      "description": "Execute SI-unit mapping using external reference values for time, length, and source."
     },
     {
       "priority": "P3",
-      "title": "SPARC Blind Metric Execution",
-      "description": "Execute blind SPARC comparison using frozen model; report all metrics without cherry-picking."
+      "title": "Blind SPARC Comparison",
+      "description": "Execute frozen-model SPARC comparison under governance protocol (no fitting)."
     },
     {
       "priority": "P3",
       "title": "hbar_eff / Born Rule / Planck Comparison",
-      "description": "Normalize internal action scale; benchmark state distributions against Born rule; compare internal scales to Planck scale."
+      "description": "Normalize internal action scale; benchmark against quantum and Planck-scale references."
     }
   ],
   "documents": [
@@ -764,28 +738,40 @@
       "url": "documents/TRM_V4_1_Internal_Causal_Geometry_Synthesis.md",
       "available": true,
       "description": "Complete scientific synthesis of the V4.1 internal causal-geometry program: Omega clock through observable proxies."
+    },
+    {
+      "title": "V4.2 Branch Completion",
+      "filename": "TRM_V4_2_Physical_Calibration_And_Prediction_Completion.md",
+      "url": "documents/TRM_V4_2_Physical_Calibration_And_Prediction_Completion.md",
+      "available": false,
+      "description": "V4.2 branch completion synthesis: 1744 tests, 21 suites, all chains complete."
+    },
+    {
+      "title": "V4.2 Experiment Log",
+      "filename": "TRM_V4_2_Experiment_Log.md",
+      "url": "documents/TRM_V4_2_Experiment_Log.md",
+      "available": false,
+      "description": "Append-only experiment log for all 21 V4.2 suites."
     }
   ],
   "roadmap": {
-    "currentPhase": "V4.2 Physical Calibration & Prediction — 20 suites complete",
-    "recommendedNextBranch": "feature/v4.2-continuum-and-geometric-interpretation",
-    "recommendedTestFile": "V4_2_ExternalTimeCalibration_Tests.cs",
+    "currentPhase": "V4.2 Physical Calibration & Prediction — COMPLETE",
+    "recommendedNextBranch": "feature/v4.3-geometric-scale-interpretation",
     "nextSteps": [
-      "External time-anchor calibration against SI second",
-      "External length-anchor calibration against SI meter",
-      "c_eff external calibration",
-      "G_eff external calibration",
-      "Continuum-limit validation at N>500",
-      "Blind SPARC comparison (governance -> prediction)"
+      "Geometric scale interpretation of MeanDist variance",
+      "Fundamentally different length proxies for G_eff",
+      "Continuum limit beyond N=1000",
+      "Independent validation of c_eff cancellation",
+      "External SI-unit calibration execution",
+      "Frozen-model SPARC blind comparison"
     ]
   },
   "releaseIntegrity": {
-    "totalTestsVerified": 1730,
-    "verificationMethod": "dotnet test --filter FullyQualifiedName~V4_1",
-    "passedVerified": 1730,
-    "mismatch": "None - all 1450 verified"
+    "totalTestsVerified": 1744,
+    "passedVerified": 1744,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V4"
   },
-  "fullVerification": 1730,
+  "fullVerification": 1744,
   "phase": "V4.2 Physical Calibration & Prediction",
-  "dashboardVersion": "ExecutiveV4"
+  "dashboardVersion": "ExecutiveV4.2"
 }

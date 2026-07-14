@@ -248,3 +248,13 @@
 - Tests: 14/14 passed
 - Classification: BRANCH READY FOR COMPLETION
 - All 10 chains complete. 1744 total tests.
+
+---
+## 2026-07-14 — FINAL — V4.2 Branch Ready
+
+- 21 suites, 294 tests added to V4.1 baseline (1450)
+- Total: 1744 tests
+- All 10 chains complete
+- Homepage JSON fully updated with V4.2 claims, hypotheses, open problems
+- Branch ready for tag: v4.2-physical-calibration-complete
+- Recommended next: feature/v4.3-geometric-scale-interpretation
