@@ -97,3 +97,15 @@
 - Numerical comparison is protocol-level only — not physically interpretable
 - Total project: 1562 tests
 - All 8 V4.2 suites complete
+
+---
+## 2026-07-14 — SIUMP — SI Unit Mapping Policy
+
+- Suite: V4_2_SIUnitMappingPolicy_Tests.cs
+- Tests: 14/14 passed
+- Classification: MAPPING FRAMEWORK READY
+- Admissible/forbidden anchors, anti-circularity, audit framework defined
+- Critical finding: SI meter depends on c — independent length standard required (Option A)
+- No SI mapping executed
+- Total project: 1576 tests
+- All 9 V4.2 suites complete
