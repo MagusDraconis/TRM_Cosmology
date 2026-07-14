@@ -109,3 +109,14 @@
 - No SI mapping executed
 - Total project: 1576 tests
 - All 9 V4.2 suites complete
+
+---
+## 2026-07-14 — SITMD — SI Time Mapping Design
+
+- Suite: V4_2_SI_Time_Mapping_Design_Tests.cs
+- Tests: 14/14 passed
+- Classification: A DESIGN READY
+- Cs-133 hyperfine reference: admissible, independent of c, G, length, source
+- SI_T_scale formula defined
+- No circularity, no astrophysical data
+- Total project: 1590 tests
