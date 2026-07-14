@@ -131,3 +131,14 @@
 - Option B: Modern SI meter (CONDITIONAL, disclosed c-circularity)
 - All forbidden references rejected
 - Total project: 1604 tests
+
+---
+## 2026-07-14 — SISMD — SI Source Mapping Design
+
+- Suite: V4_2_SI_Source_Mapping_Design_Tests.cs
+- Tests: 14/14 passed
+- Classification: A DESIGN READY
+- SI kilogram (2019, h-based) admissible — independent of G and c
+- All three SI mapping designs complete
+- Total project: 1618 tests
+- Next: V4_2_SI_Calibrated_Predictions_Tests.cs
