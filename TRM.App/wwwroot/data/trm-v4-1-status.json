@@ -7,8 +7,8 @@
   "nextRecommendedSuite": "V4_1_SPARCResidualBlindComparison_Tests.cs",
   "milestoneDocument": "TRM_V4_1_Branch_Milestone_Convergence_State.md",
   "testSummary": {
-    "total": 1394,
-    "passed": 1394,
+    "total": 1408,
+    "passed": 1408,
     "failed": 0,
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
@@ -453,6 +453,12 @@
       "tests": 14,
       "status": "PASS",
       "claimCategory": "SUPPORTED"
+    },
+    {
+      "name": "Internal Weak-Field Limit",
+      "tests": 14,
+      "status": "PASS",
+      "claimCategory": "SUPPORTED"
     }
   ],
   "supportedClaims": [
@@ -633,5 +639,5 @@
     "verificationMethod": "FULL TEST-RUN-VERIFIED (2026-07-14, 10m49s)",
     "mismatch": null
   },
-  "fullVerification": 1394
+  "fullVerification": 1408
 }
