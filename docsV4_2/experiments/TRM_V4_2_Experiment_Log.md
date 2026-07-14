@@ -63,3 +63,14 @@
 - No comparison to physical G executed
 - Total project: 1520 tests
 - All 5 calibration+prediction suites complete
+
+---
+## 2026-07-14 — BPCP — Blind Prediction Comparison Protocol
+
+- Suite: V4_2_BlindPredictionComparisonProtocol_Tests.cs
+- Tests: 14/14 passed
+- Classification: COMPARISON READY
+- Governance protocol, audit trail, hashing, anti-feedback defined
+- No comparison to physical c or G executed
+- Total project: 1534 tests
+- All 6 V4.2 suites complete
