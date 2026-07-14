@@ -155,3 +155,16 @@
 - No physical comparison executed
 - Total project: 1632 tests
 - Next: V4_2_SI_Physical_Comparison_Tests.cs
+
+---
+## 2026-07-14 — SIPC — SI Physical Comparison
+
+- Suite: V4_2_SI_Physical_Comparison_Tests.cs
+- Tests: 14/14 passed (7s)
+- Classification: A COMPARISON COMPLETE
+- Kr-86 primary path, no modern-meter circularity
+- c_eff_SI and G_eff_SI compared to CODATA 2018 values
+- Error metrics computed, predictions unchanged
+- Honest reporting enforced
+- Total project: 1646 tests
+- V4.2 SI comparison chain COMPLETE
