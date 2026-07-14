@@ -216,3 +216,15 @@
 - MeanDist CV ~0.30 — proxies show similar CV
 - MeanDist retained as baseline
 - Total project: 1702 tests
+
+---
+## 2026-07-14 — ATR — AlphaTRM Refinement
+
+- Suite: V4_2_AlphaTRMRefinement_Tests.cs
+- Tests: 14/14 passed
+- Classification: A — ALPHA ANALYSIS COMPLETE
+- 6 alpha candidates: Baseline, LocalWeighted, GeodesicWeighted, ShellAvg, Median, Trimmed
+- All CV ~0.30 — similar to baseline
+- Alpha refinement less impactful than length refinement (weight 1 vs 3)
+- Baseline retained
+- Total project: 1716 tests
