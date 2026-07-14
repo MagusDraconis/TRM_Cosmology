@@ -120,3 +120,14 @@
 - SI_T_scale formula defined
 - No circularity, no astrophysical data
 - Total project: 1590 tests
+
+---
+## 2026-07-14 — SILMD — SI Length Mapping Design
+
+- Suite: V4_2_SI_Length_Mapping_Design_Tests.cs
+- Tests: 14/14 passed
+- Classification: A DESIGN READY
+- Option A: Kr-86 wavelength standard (pre-1983, independent of c)
+- Option B: Modern SI meter (CONDITIONAL, disclosed c-circularity)
+- All forbidden references rejected
+- Total project: 1604 tests
