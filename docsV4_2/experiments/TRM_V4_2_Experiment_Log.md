@@ -191,3 +191,16 @@
 - KEY FINDING: G_eff_SI depends on (Omega/MeanDist)^3 — MeanDist (3x~0.30) dominates
 - Total project: 1674 tests
 - 16 V4.2 suites complete
+
+---
+## 2026-07-14 — CBN500 — Continuum Beyond N=500
+
+- Suite: V4_2_ContinuumBeyondN500_Tests.cs
+- Tests: 14/14 passed (~12min including N=800,1000)
+- Classification: A — CONTINUUM CHARACTERIZED BEYOND N=500
+- Omega ultra-stable at all N (CV ~0.01)
+- c_eff_SI cancellation verified at N=500,800,1000
+- MeanDist CV persists (~0.30) — proxy limitation or structural
+- G_eff_SI remains MD-dominated at all N
+- Total project: 1688 tests
+- Next: V4_2_MeanDistAnchorRefinement_Tests.cs
