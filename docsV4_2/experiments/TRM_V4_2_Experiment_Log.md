@@ -26,3 +26,15 @@
 - Independent of time, c_eff, G_eff, source calibration
 - Anti-circularity: all gates pass
 - Total project: 1478 tests
+
+---
+## 2026-07-14 — ESCE — External Source Calibration Execution
+
+- Suite: V4_2_ExternalSourceCalibrationExecution_Tests.cs
+- Tests: 14/14 passed
+- Classification: A READY
+- OmegaSource_ref: finite, positive, CV ~0.01
+- M_scale: reproducible, independent of T_scale, L_scale, c_eff, G_eff
+- All three anchors now calibrated
+- Total project: 1492 tests
+- Next: V4_2_BlindCEffPrediction_Tests.cs
