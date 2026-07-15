@@ -171,6 +171,7 @@ Key reproducibility commands:
 
 ## 🕰️ Version lineage
 
+- `V5.0 (Independent Replication)`: **COMPLETE** — First independent replication campaign of the V4.5 prospective prediction pipeline. 6 suites, 78 tests. Protocol → Execute → Audit → Compare → Interpret → Synthesize. Independent seeds, hashes, UUIDs. No V4.5 mutation. Branch: `feature/v5.0-independent-replication-and-validation`. Tag: `v5.0-independent-replication-complete`.
 - `V4.5 (Prospective Prediction)`: **COMPLETE** — First fully prospective prediction pipeline: Protocol → Generate → Freeze → Compute → Audit → Govern → Compare → Interpret → Synthesize. 9 suites, 126 tests. No anchor reselection, no parameter tuning, no post-hoc optimization. Branch: `feature/v4.5-prospective-anchor-prediction-branch`. Tag: `v4.5-prospective-anchor-prediction-complete`.
 - `V4.4 (Length Anchor Validation)`: **COMPLETE** — MeanDist survives 6-axis stress testing, operational envelope mapped, HIGH-MARGIN safety classification. 5 suites, 70 tests. Tag: `v4.4-prospective-length-anchor-validation-complete`.
 - `V4.3 (Geometric Scale Interpretation)`: **COMPLETE** — Scale candidates classified, hierarchy mapped, selection governed. 8 suites, 113 tests. Tag: `v4.3-geometric-scale-interpretation-complete`.
@@ -226,16 +227,61 @@ Protocol (PAPP) → Generation (PAPG) → Freeze (PAPF)
 
 ### Next Phase
 
-**V5.0 — Independent Replication and Validation**
+**V5.1 — Replication Expansion and Ensemble Validation**
 
-`feature/v5.0-independent-replication-and-validation`
+`feature/v5.1-replication-expansion-and-ensemble-validation`
 
 Objectives:
-- Replicate prospective prediction pipeline independently
-- Characterize regime sensitivity (xi, K0, N, coupling law)
-- Execute SI-unit mapping under prospective protocol
-- Compare with physical constants under governance
-- Distinguish structural robustness from regime-specific outcomes
+- Multi-seed ensemble analysis (10+ independent seeds)
+- Regime expansion (xi, K0 parameter sweeps)
+- Coupling-law robustness (Gaussian, power-law)
+- Continuum replication beyond N=1000
+- Ensemble error budget and statistical characterization
+- External reviewer reproduction protocol
+
+---
+
+## 🚀 V5.0 — Independent Replication and Validation (COMPLETE)
+
+**Status:** COMPLETE
+**Branch:** `feature/v5.0-independent-replication-and-validation`
+**Tag:** `v5.0-independent-replication-complete`
+**Tests:** 78 V5.0 tests (2021 total project tests)
+
+### Key Outcome
+
+The first independent replication campaign of the V4.5 prospective prediction pipeline has been completed:
+
+```
+Protocol (IRP) → Execution (IRE) → Audit (IRA)
+    → Comparison (IRC) → Interpretation (IRI) → Branch Synthesis (IRBS)
+```
+
+### Replication Guarantees
+
+| Guarantee | Status |
+|:---|:---|
+| Independent seeds (50, 55, 60 ≠ V4.5 seed 45) | VERIFIED |
+| Independent SHA-256 prediction hashes | VERIFIED |
+| Independent replication UUIDs | VERIFIED |
+| No V4.5 artifact mutation | VERIFIED |
+| No parameter tuning (14/14 deep checks) | VERIFIED |
+| No anchor reselection (11/11 checks) | VERIFIED |
+| No external calibration | VERIFIED |
+| 3-way hash reproducibility | VERIFIED |
+| Audit classification | AUDIT-A — COMPLETE |
+| Claim discipline preserved | ALL PHASES |
+
+### Current Completed Phases
+
+| Version | Phase | Tests |
+|:---|:---|:--:|
+| V4.1 | Calibration Framework | 1340 |
+| V4.2 | Physical Calibration | 294 |
+| V4.3 | Geometric Scale Interpretation | 113 |
+| V4.4 | Length Anchor Validation | 70 |
+| V4.5 | Prospective Prediction | 126 |
+| V5.0 | Independent Replication | 78 |
 
 ## 📊 Implemented Domains
 
