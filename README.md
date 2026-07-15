@@ -171,6 +171,7 @@ Key reproducibility commands:
 
 ## 🕰️ Version lineage
 
+- `V5.1 (Ensemble Validation)`: **COMPLETE** — 10-seed ensemble replication campaign. Omega: HIGHLY STABLE, c_eff: MODERATELY STABLE, MeanDist/G_eff: STRUCTURALLY VARIABLE. 6 suites, 84 tests. Branch: `feature/v5.1-replication-expansion-and-ensemble-validation`. Tag: `v5.1-replication-ensemble-validation-complete`.
 - `V5.0 (Independent Replication)`: **COMPLETE** — First independent replication campaign of the V4.5 prospective prediction pipeline. 6 suites, 78 tests. Protocol → Execute → Audit → Compare → Interpret → Synthesize. Independent seeds, hashes, UUIDs. No V4.5 mutation. Branch: `feature/v5.0-independent-replication-and-validation`. Tag: `v5.0-independent-replication-complete`.
 - `V4.5 (Prospective Prediction)`: **COMPLETE** — First fully prospective prediction pipeline: Protocol → Generate → Freeze → Compute → Audit → Govern → Compare → Interpret → Synthesize. 9 suites, 126 tests. No anchor reselection, no parameter tuning, no post-hoc optimization. Branch: `feature/v4.5-prospective-anchor-prediction-branch`. Tag: `v4.5-prospective-anchor-prediction-complete`.
 - `V4.4 (Length Anchor Validation)`: **COMPLETE** — MeanDist survives 6-axis stress testing, operational envelope mapped, HIGH-MARGIN safety classification. 5 suites, 70 tests. Tag: `v4.4-prospective-length-anchor-validation-complete`.
@@ -227,17 +228,68 @@ Protocol (PAPP) → Generation (PAPG) → Freeze (PAPF)
 
 ### Next Phase
 
-**V5.1 — Replication Expansion and Ensemble Validation**
+**V5.2 — Regime Sensitivity and Ensemble Expansion**
 
-`feature/v5.1-replication-expansion-and-ensemble-validation`
+`feature/v5.2-regime-sensitivity-and-ensemble-expansion`
 
 Objectives:
-- Multi-seed ensemble analysis (10+ independent seeds)
-- Regime expansion (xi, K0 parameter sweeps)
-- Coupling-law robustness (Gaussian, power-law)
-- Continuum replication beyond N=1000
-- Ensemble error budget and statistical characterization
+- xi / K0 regime sensitivity mapping
+- Load sensitivity characterization
+- Coupling-law ensemble robustness (Gaussian, power-law)
+- N-scaling ensemble expansion (N>500, N>1000)
+- Safe-boundary condition testing
 - External reviewer reproduction protocol
+
+---
+
+## 🚀 V5.1 — Replication Expansion and Ensemble Validation (COMPLETE)
+
+**Status:** COMPLETE
+**Branch:** `feature/v5.1-replication-expansion-and-ensemble-validation`
+**Tag:** `v5.1-replication-ensemble-validation-complete`
+**Tests:** 84 V5.1 tests (2105 total project tests)
+
+### Key Outcome
+
+V5.1 expanded V5.0 from a single independent replication campaign to a 10-seed ensemble replication campaign:
+
+```
+Protocol (REP) → Execution (REE) → Audit (REA)
+    → Comparison (REC) → Interpretation (REI) → Branch Synthesis (REBS)
+```
+
+### Ensemble Findings
+
+| Metric | Stability | Driver |
+|--------|:---------:|--------|
+| Omega | HIGHLY STABLE | Simple frequency proxy |
+| c_eff | MODERATELY STABLE | Omega-dominated |
+| MeanDist | STRUCTURALLY VARIABLE | Topology-dependent |
+| G_eff | STRUCTURALLY VARIABLE | MD³ amplified |
+
+### Governance Guarantees
+
+| Guarantee | Status |
+|:---|:---|
+| All 10 seeds retained | VERIFIED |
+| No seed removal | VERIFIED |
+| No outlier deletion | VERIFIED |
+| No parameter tuning | VERIFIED |
+| No anchor reselection | VERIFIED |
+| 3-way hash reproducibility | VERIFIED |
+| AUDIT-A classification | VERIFIED |
+
+### Current Completed Phases
+
+| Version | Phase | Tests |
+|:---|:---|:--:|
+| V4.1 | Calibration Framework | 1340 |
+| V4.2 | Physical Calibration | 294 |
+| V4.3 | Geometric Scale Interpretation | 113 |
+| V4.4 | Length Anchor Validation | 70 |
+| V4.5 | Prospective Prediction | 126 |
+| V5.0 | Independent Replication | 78 |
+| V5.1 | Ensemble Validation | 84 |
 
 ---
 
