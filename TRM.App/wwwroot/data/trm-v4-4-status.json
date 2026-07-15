@@ -1,25 +1,24 @@
 {
   "releaseStatus": "V4.4 COMPLETE",
+  "phase": "V4.4 COMPLETE",
   "date": "2026-07-15",
   "currentBranch": "feature/v4.4-prospective-length-anchor-validation",
-  "previousBranch": "feature/v4.3-geometric-scale-interpretation",
-  "baseTag": "v4.3-geometric-scale-interpretation-complete",
   "currentFocus": "V4.4 Complete — V4.5 Preparation",
-  "recommendedNextBranch": "feature/v4.5-prospective-anchor-prediction-branch",
-  "recommendedNextSuite": "V4_5_ProspectiveAnchorPredictionProtocol_Tests.cs",
   "testSummary": {
     "total": 1818,
     "passed": 1818,
     "failed": 0,
     "skipped": 0,
-    "verification": "FULL TEST-RUN-VERIFIED"
+    "verification": "FULL TEST-RUN-VERIFIED",
+    "command": "dotnet test --filter FullyQualifiedName~V4",
+    "date": "2026-07-15"
   },
-  "v4_4Suites": [
-    { "name": "Prospective Length Anchor Validation", "tag": "PLAV", "tests": 14, "status": "PASS" },
-    { "name": "Length Anchor Stress Test", "tag": "LAST", "tests": 14, "status": "PASS" },
-    { "name": "Length Anchor Operational Envelope", "tag": "LAOE", "tests": 14, "status": "PASS" },
-    { "name": "Length Anchor Safety Margin", "tag": "LASM", "tests": 14, "status": "PASS" },
-    { "name": "Length Anchor Branch Synthesis", "tag": "LABS", "tests": 14, "status": "PASS" }
+  "suites": [
+    { "name": "Prospective Length Anchor Validation", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Length Anchor Stress Test", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Length Anchor Operational Envelope", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Length Anchor Safety Margin", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Length Anchor Branch Synthesis", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "MeanDist survives prospective validation (8/8 criteria).",
@@ -50,12 +49,22 @@
     "Einstein equations derived",
     "dark matter replaced"
   ],
+  "roadmap": {
+    "recommendedTestFile": "V4_5_ProspectiveAnchorPredictionProtocol_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "releaseIntegrity": {
+    "totalTestsVerified": 1818,
+    "passedVerified": 1818,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V4",
+    "mismatch": "None"
+  },
   "documents": [
-    "docsV4_4/TRM_V4_4_Prospective_Length_Anchor_Validation_Completion.md",
-    "docsV4_4/theory/TRM_V4_4_Prospective_Length_Anchor_Validation_Roadmap.md",
-    "docsV4_4/theory/TRM_V4_4_Prospective_Length_Anchor_Validation.md",
-    "docsV4_4/theory/TRM_V4_4_Length_Anchor_Stress_Test.md",
-    "docsV4_4/theory/TRM_V4_4_Length_Anchor_Operational_Envelope.md",
-    "docsV4_4/theory/TRM_V4_4_Length_Anchor_Safety_Margin.md"
+    { "title": "V4.4 Completion Report", "filename": "TRM_V4_4_Prospective_Length_Anchor_Validation_Completion.md", "available": true, "description": "V4.4 branch completion synthesis" },
+    { "title": "Prospective Validation", "filename": "TRM_V4_4_Prospective_Length_Anchor_Validation.md", "available": true, "description": "PLAV suite theory document" },
+    { "title": "Length Anchor Stress Test", "filename": "TRM_V4_4_Length_Anchor_Stress_Test.md", "available": true, "description": "LAST suite theory document" },
+    { "title": "Operational Envelope", "filename": "TRM_V4_4_Length_Anchor_Operational_Envelope.md", "available": true, "description": "LAOE suite theory document" },
+    { "title": "Safety Margin", "filename": "TRM_V4_4_Length_Anchor_Safety_Margin.md", "available": true, "description": "LASM suite theory document" },
+    { "title": "V4.4 Roadmap", "filename": "TRM_V4_4_Prospective_Length_Anchor_Validation_Roadmap.md", "available": true, "description": "V4.4 initial roadmap" }
   ]
 }
