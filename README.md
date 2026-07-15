@@ -171,6 +171,7 @@ Key reproducibility commands:
 
 ## 🕰️ Version lineage
 
+- `V5.2 (Regime Sensitivity)`: **COMPLETE** — 23-point, 69-run regime campaign. Seed stability ≠ regime stability. Omega: seed-stable, xi-sensitive. MeanDist: seed-variable, xi-robust. 6 suites, 84 tests. Branch: `feature/v5.2-regime-sensitivity-and-ensemble-expansion`. Tag: `v5.2-regime-sensitivity-complete`.
 - `V5.1 (Ensemble Validation)`: **COMPLETE** — 10-seed ensemble replication campaign. Omega: HIGHLY STABLE, c_eff: MODERATELY STABLE, MeanDist/G_eff: STRUCTURALLY VARIABLE. 6 suites, 84 tests. Branch: `feature/v5.1-replication-expansion-and-ensemble-validation`. Tag: `v5.1-replication-ensemble-validation-complete`.
 - `V5.0 (Independent Replication)`: **COMPLETE** — First independent replication campaign of the V4.5 prospective prediction pipeline. 6 suites, 78 tests. Protocol → Execute → Audit → Compare → Interpret → Synthesize. Independent seeds, hashes, UUIDs. No V4.5 mutation. Branch: `feature/v5.0-independent-replication-and-validation`. Tag: `v5.0-independent-replication-complete`.
 - `V4.5 (Prospective Prediction)`: **COMPLETE** — First fully prospective prediction pipeline: Protocol → Generate → Freeze → Compute → Audit → Govern → Compare → Interpret → Synthesize. 9 suites, 126 tests. No anchor reselection, no parameter tuning, no post-hoc optimization. Branch: `feature/v4.5-prospective-anchor-prediction-branch`. Tag: `v4.5-prospective-anchor-prediction-complete`.
@@ -228,17 +229,61 @@ Protocol (PAPP) → Generation (PAPG) → Freeze (PAPF)
 
 ### Next Phase
 
-**V5.2 — Regime Sensitivity and Ensemble Expansion**
+**V5.3 — Stability Mechanism and Control Parameters**
 
-`feature/v5.2-regime-sensitivity-and-ensemble-expansion`
+`feature/v5.3-stability-mechanism-and-control-parameters`
 
 Objectives:
-- xi / K0 regime sensitivity mapping
-- Load sensitivity characterization
-- Coupling-law ensemble robustness (Gaussian, power-law)
-- N-scaling ensemble expansion (N>500, N>1000)
-- Safe-boundary condition testing
-- External reviewer reproduction protocol
+- Investigate Omega xi-response mechanism
+- Investigate MeanDist topology-realization mechanism
+- Decompose synchronization vs geometry control parameters
+- Map regime transition surfaces
+- Characterize control-parameter separation
+
+---
+
+## 🚀 V5.2 — Regime Sensitivity and Ensemble Expansion (COMPLETE)
+
+**Status:** COMPLETE
+**Branch:** `feature/v5.2-regime-sensitivity-and-ensemble-expansion`
+**Tag:** `v5.2-regime-sensitivity-complete`
+**Tests:** 84 V5.2 tests (2189 total project tests)
+
+### Key Outcome
+
+V5.2 expanded ensemble validation into a frozen 23-point, 69-run regime sensitivity campaign:
+
+```
+Protocol (RSP) → Execution (RSE) → Audit (RSA)
+    → Comparison (RSC) → Interpretation (RSI) → Branch Synthesis (RSBS)
+```
+
+### Central Finding: Seed Stability ≠ Regime Stability
+
+| Metric | Seed Stability | Regime Stability |
+|--------|:-------------:|:----------------:|
+| Omega | HIGHLY STABLE | **REGIME SENSITIVE** (xi) |
+| MeanDist | SEED-VARIABLE | **HIGHLY STABLE** (xi) |
+| c_eff | MODERATELY STABLE | MODERATELY STABLE |
+| G_eff | STRUCTURALLY VARIABLE | MODERATELY STABLE |
+
+### Corrected Picture
+
+**OLD (V5.1):** Omega always stable, MeanDist always variable.
+**NEW (V5.2):** Omega is seed-stable but xi-regime-sensitive. MeanDist is seed-variable but xi-regime-robust.
+
+### Current Completed Phases
+
+| Version | Phase | Tests |
+|:---|:---|:--:|
+| V4.1 | Calibration Framework | 1340 |
+| V4.2 | Physical Calibration | 294 |
+| V4.3 | Geometric Scale Interpretation | 113 |
+| V4.4 | Length Anchor Validation | 70 |
+| V4.5 | Prospective Prediction | 126 |
+| V5.0 | Independent Replication | 78 |
+| V5.1 | Ensemble Validation | 84 |
+| V5.2 | Regime Sensitivity | 84 |
 
 ---
 

@@ -1,0 +1,76 @@
+{
+  "releaseStatus": "V5.2 COMPLETE",
+  "phase": "Regime Sensitivity and Ensemble Expansion",
+  "date": "2026-07-15",
+  "testSummary": { "total": 2189, "passed": 2189, "failed": 0, "skipped": 0, "verification": "FULL TEST-RUN-VERIFIED", "command": "dotnet test --filter Category=V5_2", "date": "2026-07-15" },
+  "suites": [
+    { "name": "Regime Sensitivity Protocol", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Regime Sensitivity Execution", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Regime Sensitivity Audit", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Regime Sensitivity Comparison", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Regime Sensitivity Interpretation", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Regime Sensitivity Branch Synthesis", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Regime sensitivity protocol was defined before execution.",
+    "Frozen regime grid contained 23 points and 69 runs.",
+    "All 69 runs were executed.",
+    "Audit-A was achieved.",
+    "No regime point removal occurred.",
+    "No run removal occurred.",
+    "No seed removal occurred.",
+    "No post-hoc grid adjustment occurred.",
+    "No parameter tuning was detected.",
+    "No anchor reselection was detected.",
+    "Seed stability and regime stability are distinct stability types.",
+    "Omega is seed-stable but xi-regime-sensitive.",
+    "MeanDist is seed-variable but xi-regime-robust.",
+    "c_eff is moderately stable across the tested regime sweep.",
+    "G_eff is moderately stable across the tested regime sweep."
+  ],
+  "conditionalClaims": [
+    "Results are finite-grid only.",
+    "Regime grid is limited to tested ranges.",
+    "Each regime point used 3 seeds.",
+    "Results depend on current proxy definitions.",
+    "Results depend on current pipeline implementation.",
+    "Results do not establish physical validity.",
+    "xi sensitivity is measured, not yet theoretically derived.",
+    "MeanDist regime robustness is tested only within the frozen grid."
+  ],
+  "hypotheses": [
+    "Omega may encode synchronization-frequency response to xi.",
+    "MeanDist may encode global geometry robust under xi changes.",
+    "Seed variability of MeanDist may arise from topology or realization differences.",
+    "c_eff may inherit mixed stability from Omega and calibration structure.",
+    "G_eff may remain sensitive to geometry-channel definitions under broader regimes.",
+    "Broader regime sweeps may reveal transition surfaces.",
+    "Future work may distinguish synchronization-control parameters from geometry-control parameters."
+  ],
+  "notClaimed": [
+    "physical c derived", "physical G derived", "SI units derived from TRM",
+    "physical spacetime derived", "physical length derived", "space derived from time",
+    "Lorentz invariance proven", "Special Relativity derived", "General Relativity derived or replaced",
+    "Einstein equations derived", "Newtonian gravity derived", "gravitational observables derived",
+    "SPARC explained", "dark matter replaced", "true N-to-infinity continuum proof",
+    "external third-party validation completed", "physical theory proven"
+  ],
+  "openProblems": [
+    { "priority": "P1", "title": "Stability Mechanism Protocol", "description": "Protocol for investigating seed vs regime stability mechanisms." },
+    { "priority": "P1", "title": "Omega xi-response mechanism", "description": "Why does Omega shift with xi?" },
+    { "priority": "P1", "title": "MeanDist topology-realization mechanism", "description": "Why is MeanDist seed-variable but regime-robust?" },
+    { "priority": "P2", "title": "Synchronization vs Geometry Decomposition", "description": "Separate synch-control from geometry-control parameters." },
+    { "priority": "P2", "title": "Control-Parameter Separation", "description": "Identify which parameters control which stability dimension." },
+    { "priority": "P3", "title": "External review of stability taxonomy", "description": "Third-party validation of stability classification." }
+  ],
+  "documents": [
+    { "title": "V5.2 Completion Report", "filename": "TRM_V5_2_Regime_Sensitivity_And_Ensemble_Expansion_Completion.md", "available": true, "description": "V5.2 branch completion" },
+    { "title": "Regime Protocol", "filename": "TRM_V5_2_Regime_Sensitivity_Protocol.md", "available": true, "description": "RSP" },
+    { "title": "Regime Execution", "filename": "TRM_V5_2_Regime_Sensitivity_Execution.md", "available": true, "description": "RSE" },
+    { "title": "Regime Audit", "filename": "TRM_V5_2_Regime_Sensitivity_Audit.md", "available": true, "description": "RSA" },
+    { "title": "Regime Comparison", "filename": "TRM_V5_2_Regime_Sensitivity_Comparison.md", "available": true, "description": "RSC" },
+    { "title": "Regime Interpretation", "filename": "TRM_V5_2_Regime_Sensitivity_Interpretation.md", "available": true, "description": "RSI" }
+  ],
+  "roadmap": { "recommendedTestFile": "V5_3_StabilityMechanismProtocol_Tests.cs", "candidateUpdateLaws": [] },
+  "releaseIntegrity": { "totalTestsVerified": 2189, "passedVerified": 2189, "verificationMethod": "dotnet test --filter Category=V5_2", "mismatch": "None" }
+}
