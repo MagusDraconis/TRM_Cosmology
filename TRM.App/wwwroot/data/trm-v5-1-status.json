@@ -2,8 +2,6 @@
   "releaseStatus": "V5.1 COMPLETE",
   "phase": "Replication Expansion and Ensemble Validation",
   "date": "2026-07-15",
-  "currentBranch": "feature/v5.1-replication-expansion-and-ensemble-validation",
-  "currentFocus": "V5.1 Complete - V5.2 Preparation",
   "testSummary": {
     "total": 2105,
     "passed": 2105,
@@ -11,24 +9,15 @@
     "skipped": 0,
     "verification": "FULL TEST-RUN-VERIFIED",
     "command": "dotnet test --filter Category=V5_1",
-    "date": "2026-07-15",
-    "breakdown": {
-      "v4_1": 1340,
-      "v4_2": 294,
-      "v4_3": 113,
-      "v4_4": 70,
-      "v4_5": 126,
-      "v5_0": 78,
-      "v5_1": 84
-    }
+    "date": "2026-07-15"
   },
   "suites": [
-    { "tag": "REP", "name": "Replication Ensemble Protocol", "tests": 14, "status": "PASS", "classification": "PROTOCOL DEFINED" },
-    { "tag": "REE", "name": "Replication Ensemble Execution", "tests": 14, "status": "PASS", "classification": "ENSEMBLE EXECUTED" },
-    { "tag": "REA", "name": "Replication Ensemble Audit", "tests": 14, "status": "PASS", "classification": "AUDIT-A — COMPLETE" },
-    { "tag": "REC", "name": "Replication Ensemble Comparison", "tests": 14, "status": "PASS", "classification": "ENSEMBLE COMPARISON COMPLETE" },
-    { "tag": "REI", "name": "Replication Ensemble Interpretation", "tests": 14, "status": "PASS", "classification": "INTERPRETATION-A — COMPLETE" },
-    { "tag": "REBS", "name": "Replication Ensemble Branch Synthesis", "tests": 14, "status": "PASS", "classification": "COMPLETE" }
+    { "name": "Replication Ensemble Protocol", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Replication Ensemble Execution", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Replication Ensemble Audit", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Replication Ensemble Comparison", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Replication Ensemble Interpretation", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Replication Ensemble Branch Synthesis", "tests": 14, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Ensemble replication protocol is defined.",
@@ -80,41 +69,32 @@
     "physical theory proven"
   ],
   "openProblems": [
-    "P1 Regime Sensitivity Protocol",
-    "P1 Multi-regime Ensemble Execution",
-    "P1 Regime-Audit Integrity",
-    "P2 xi / K0 Sensitivity Mapping",
-    "P2 Load Sensitivity Mapping",
-    "P2 Coupling-Law Ensemble Robustness",
-    "P2 N-scaling Ensemble Expansion",
-    "P3 External Review Reproduction",
-    "P3 Physical Comparison Under Expanded Ensemble Governance"
+    { "priority": "P1", "title": "Regime Sensitivity Protocol", "description": "Define protocol for xi/K0/load sensitivity characterization." },
+    { "priority": "P1", "title": "Multi-regime Ensemble Execution", "description": "Execute ensemble across xi/K0/load parameter grids." },
+    { "priority": "P1", "title": "Regime-Audit Integrity", "description": "Audit ensemble across multiple regime points." },
+    { "priority": "P2", "title": "xi / K0 Sensitivity Mapping", "description": "Map ensemble stability across coupling parameter space." },
+    { "priority": "P2", "title": "Load Sensitivity Mapping", "description": "Characterize load-dependent ensemble behavior." },
+    { "priority": "P2", "title": "Coupling-Law Ensemble Robustness", "description": "Test Gaussian and power-law coupling under ensemble." },
+    { "priority": "P2", "title": "N-scaling Ensemble Expansion", "description": "Extend ensemble to N>500 and N>1000." },
+    { "priority": "P3", "title": "External Review Reproduction", "description": "Protocol for independent third-party ensemble validation." },
+    { "priority": "P3", "title": "Physical Comparison Under Ensemble Governance", "description": "Governed comparison to physical constants with ensemble statistics." }
   ],
   "documents": [
     { "title": "V5.1 Completion Report", "filename": "TRM_V5_1_Replication_Ensemble_Validation_Completion.md", "available": true, "description": "V5.1 branch completion (sections A-S)" },
-    { "title": "Ensemble Protocol", "filename": "TRM_V5_1_Replication_Ensemble_Protocol.md", "available": true, "description": "REP — 7 phases, 30 forbidden actions" },
-    { "title": "Ensemble Execution", "filename": "TRM_V5_1_Replication_Ensemble_Execution.md", "available": true, "description": "REE — 10-seed ensemble at baseline regime" },
-    { "title": "Ensemble Audit", "filename": "TRM_V5_1_Replication_Ensemble_Audit.md", "available": true, "description": "REA — AUDIT-A, 3-way hash, no removal" },
-    { "title": "Ensemble Comparison", "filename": "TRM_V5_1_Replication_Ensemble_Comparison.md", "available": true, "description": "REC — Distribution overlap, reproducibility, stability" },
-    { "title": "Ensemble Interpretation", "filename": "TRM_V5_1_Replication_Ensemble_Interpretation.md", "available": true, "description": "REI — Stability tiers, variability attribution" }
+    { "title": "Ensemble Protocol", "filename": "TRM_V5_1_Replication_Ensemble_Protocol.md", "available": true, "description": "REP" },
+    { "title": "Ensemble Execution", "filename": "TRM_V5_1_Replication_Ensemble_Execution.md", "available": true, "description": "REE" },
+    { "title": "Ensemble Audit", "filename": "TRM_V5_1_Replication_Ensemble_Audit.md", "available": true, "description": "REA" },
+    { "title": "Ensemble Comparison", "filename": "TRM_V5_1_Replication_Ensemble_Comparison.md", "available": true, "description": "REC" },
+    { "title": "Ensemble Interpretation", "filename": "TRM_V5_1_Replication_Ensemble_Interpretation.md", "available": true, "description": "REI" }
   ],
   "roadmap": {
-    "currentPhase": "V5.1 Replication Expansion and Ensemble Validation - COMPLETE",
-    "recommendedNextBranch": "feature/v5.2-regime-sensitivity-and-ensemble-expansion",
     "recommendedTestFile": "V5_2_RegimeSensitivityProtocol_Tests.cs",
-    "recommendedNextSuite": "V5_2_RegimeSensitivityProtocol_Tests.cs"
+    "candidateUpdateLaws": []
   },
   "releaseIntegrity": {
     "totalTestsVerified": 2105,
     "passedVerified": 2105,
     "verificationMethod": "dotnet test --filter Category=V5_1",
     "mismatch": "None"
-  },
-  "fullVerification": {
-    "v5_1_tests": 84,
-    "v5_1_passed": 84,
-    "total_project_tests": 2105,
-    "total_passed": 2105,
-    "verificationStatus": "FULLY VERIFIED"
   }
 }
