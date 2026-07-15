@@ -171,11 +171,71 @@ Key reproducibility commands:
 
 ## 🕰️ Version lineage
 
+- `V4.5 (Prospective Prediction)`: **COMPLETE** — First fully prospective prediction pipeline: Protocol → Generate → Freeze → Compute → Audit → Govern → Compare → Interpret → Synthesize. 9 suites, 126 tests. No anchor reselection, no parameter tuning, no post-hoc optimization. Branch: `feature/v4.5-prospective-anchor-prediction-branch`. Tag: `v4.5-prospective-anchor-prediction-complete`.
+- `V4.4 (Length Anchor Validation)`: **COMPLETE** — MeanDist survives 6-axis stress testing, operational envelope mapped, HIGH-MARGIN safety classification. 5 suites, 70 tests. Tag: `v4.4-prospective-length-anchor-validation-complete`.
+- `V4.3 (Geometric Scale Interpretation)`: **COMPLETE** — Scale candidates classified, hierarchy mapped, selection governed. 8 suites, 113 tests. Tag: `v4.3-geometric-scale-interpretation-complete`.
+- `V4.2 (Physical Calibration)`: **COMPLETE** — SI-unit mapping via Kr-86 length path, CODATA comparison protocol, 10 calibration/prediction chains. 21 suites, 294 tests. Tag: `v4.2-physical-calibration-complete`.
+- `V4.1 (Calibration Framework)`: **COMPLETE** — Internal causal geometry synthesis, convergence state, branch completion. 121 suites, 1340 tests. Tag: `v4.1-calibration-framework-complete`.
 - `V4.0 (Interpretation Layer)`: **Active** — 1PN GR-compatible bilocal kernel, full Lorentzian tensor bridge, strong-field scalar ODE solver, 184 xUnit tests. Built on frozen V3.4 core. Branch: `feature/v4-interpretation-layer`.
 - `V3.4`: **Core Theorie (frozen)** — bridge-band classified as imposed structural input, FP scaffold closed, E1 reinterpreted, canonical statement finalized. No further structural modifications.
 - `V3.1–V3.3`: Intermediate research milestones (memory-channel action closure, minimal action from TQM lattice, m=3 closure scaffold).
 - `V3.0`: Review baseline (multi-sector framework with explicit claim boundaries).
 - `V2.2` and `V1`: Legacy historical baselines.
+
+---
+
+## 🚀 V4.5 — Prospective Prediction Branch (COMPLETE)
+
+**Status:** COMPLETE  
+**Branch:** `feature/v4.5-prospective-anchor-prediction-branch`  
+**Tag:** `v4.5-prospective-anchor-prediction-complete`  
+**Tests:** 126 V4.5 tests (1943 total project tests)
+
+### Key Outcome
+
+The first fully prospective prediction pipeline has been designed, executed, audited, compared, interpreted, and synthesized:
+
+```
+Protocol (PAPP) → Generation (PAPG) → Freeze (PAPF)
+    → Computation (PAPC) → Audit (PAPA) → Governance (PACP)
+    → Comparison (PAXC) → Interpretation (PAXI) → Branch Synthesis (PABS)
+```
+
+### Governance Guarantees
+
+| Guarantee | Status |
+|:---|:---|
+| No anchor reselection | VERIFIED |
+| No parameter tuning | VERIFIED |
+| No post-hoc optimization | VERIFIED |
+| No freeze reset | VERIFIED |
+| Audit reproducibility (SHA-256) | VERIFIED |
+| Comparison reproducibility | VERIFIED |
+| Anti-feedback pathways locked | 14/14 |
+| Claim discipline enforced | ALL PHASES |
+
+### Current Completed Phases
+
+| Version | Phase | Tests |
+|:---|:---|:--:|
+| V4.1 | Calibration Framework | 1340 |
+| V4.2 | Physical Calibration | 294 |
+| V4.3 | Geometric Scale Interpretation | 113 |
+| V4.4 | Length Anchor Validation | 70 |
+| V4.5 | Prospective Prediction | 126 |
+
+### Next Phase
+
+**V5.0 — Independent Replication and Validation**
+
+`feature/v5.0-independent-replication-and-validation`
+
+Objectives:
+- Replicate prospective prediction pipeline independently
+- Characterize regime sensitivity (xi, K0, N, coupling law)
+- Execute SI-unit mapping under prospective protocol
+- Compare with physical constants under governance
+- Distinguish structural robustness from regime-specific outcomes
 
 ## 📊 Implemented Domains
 
