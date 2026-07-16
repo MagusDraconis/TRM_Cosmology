@@ -7,3 +7,23 @@
 
 ## Testing Guidelines
 - For xUnit in this project, long calculation tests should be skipped by default and only run in an explicit long-running test mode.
+
+## Documentation Maintenance
+
+The following documentation files must be kept up to date at all times:
+
+- `docs/TRM_Project_Lineage_Overview.md` — Authoritative historical overview of the entire project.
+- `docs/TRM_Project_QuickStart_For_New_Chats.md` — Short operational briefing for new chats and reviewers.
+
+**Update rule:** After any session that changes project status (new findings, completed phases, test count changes, claim status updates, branch completions, new hypotheses, or changed open problems), review both documents and update any stale information. At minimum, review these documents at the start of every session if more than 24 hours have passed since last update.
+
+**What to check:**
+- Version status and branch name
+- Test counts (total, passed, failed)
+- Supported / Conditional / Hypothesis / Not Claimed items
+- Current research frontier description
+- Open problems list
+- Development statistics table
+- One-page snapshot
+
+**Do not** modify theory content, introduce new claims, or alter historical descriptions without explicit evidence from branch completion reports.
