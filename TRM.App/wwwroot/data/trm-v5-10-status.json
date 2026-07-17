@@ -1,23 +1,43 @@
 {
-  "releaseStatus": "V5.10 INITIALIZED",
+  "releaseStatus": "V5.10 COMPLETE",
   "phase": "Branch Control Asymmetry and Induction",
   "date": "2026-07-17",
-  "testSummary": { "total": 2510, "passed": 2510, "failed": 0, "skipped": 0, "verification": "FULL TEST-RUN-VERIFIED", "command": "dotnet test", "date": "2026-07-17", "note": "Cumulative across V4.1-V5.10. V5.9 added 19 tests. V5.10 initialized with 4 protocol tests." },
-  "suites": [],
-  "supportedClaims": [
-    "Control asymmetry problem pre-registered: Hi→Lo works, Lo→Hi fails at CP5.",
-    "Intervention classes A-E defined for induction testing.",
-    "Branch threshold frozen at Omega > 1.783 (V5.3)."
+  "testSummary": { "total": 2523, "passed": 2523, "failed": 0, "skipped": 0, "verification": "FULL TEST-RUN-VERIFIED", "command": "dotnet test", "date": "2026-07-17", "note": "Cumulative across V4.1-V5.10. V5.10 added 17 tests across 7 suites (CAP-CAL)." },
+  "suites": [
+    { "name": "Control Asymmetry Protocol (CAP)", "tests": 4, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Asymmetry Execution (CAE)", "tests": 3, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "K Boost Validity Audit (CAA)", "tests": 2, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Trajectory Induction (CAI)", "tests": 2, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "K-Graft Decomposition (CAJ)", "tests": 2, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Persistence Consistency (CAK)", "tests": 2, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "d+K Graft Audit (CAL)", "tests": 2, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
-  "conditionalClaims": ["Protocol only — execution pending."],
-  "notClaimed": ["physical constants", "relativity", "quantum mechanics", "cosmology"],
+  "supportedClaims": [
+    "High→Low suppression remains reproducible.",
+    "N=71 is the most induction-sensitive regime.",
+    "K boost is a threshold artifact — 0% persistence after continuation.",
+    "Full K graft creates immediate induction at N=71 (41%).",
+    "Delayed induction exists (high after +1 epoch).",
+    "No strict persistent Lo→Hi conversion demonstrated.",
+    "V5.9 directional commitment survives all validated V5.10 tests.",
+    "Strict persistence (immediate high + survives +1 epoch) is the required evidence for genuine induction."
+  ],
+  "conditionalClaims": [
+    "N=71 is the strongest induction window — results at other N are weaker.",
+    "K-graft immediate induction is strongest at CP4, weaker at earlier checkpoints.",
+    "Full K graft outperforms K_mean-only and K_std-only for immediate induction.",
+    "Control asymmetry may be basin-structural (Hi→Lo down-gradient, Lo→Hi barrier)."
+  ],
+  "notClaimed": ["physical constants", "relativity", "quantum mechanics", "cosmology", "impossibility of Lo→Hi induction", "universal irreversibility"],
   "openProblems": [
-    { "priority": "P1", "title": "Lo→Hi Induction", "description": "Why does low branch resist induction at CP5?" },
-    { "priority": "P1", "title": "Control Asymmetry Mechanism", "description": "Is asymmetry basin-structural or operator-dependent?" }
+    { "priority": "P1", "title": "Accessibility Asymmetry", "description": "Why are Hi→Lo transitions persistently accessible while Lo→Hi persistent transitions are not?" },
+    { "priority": "P2", "title": "Basin Structure", "description": "Is Lo→Hi blocked by a basin barrier? Can the barrier be quantified?" }
   ],
   "documents": [
-    { "title": "V5.10 README", "filename": "README.md", "available": true, "description": "Control asymmetry overview" }
+    { "title": "V5.10 Final Synthesis", "filename": "TRM_V5_10_Final_Synthesis.md", "available": true, "description": "Complete V5.10 synthesis: control asymmetry confirmed" },
+    { "title": "CAA K Boost Audit", "filename": "TRM_V5_10_KBoostValidityAndManifoldAudit.md", "available": true, "description": "K boost = threshold artifact" },
+    { "title": "CAK Persistence Audit", "filename": "TRM_V5_10_InductionPersistenceConsistencyAudit.md", "available": true, "description": "Strict persistence = 0" }
   ],
-  "roadmap": { "recommendedTestFile": "V5_10_BranchControlAsymmetryProtocol_Tests.cs", "candidateUpdateLaws": [] },
-  "releaseIntegrity": { "totalTestsVerified": 2510, "passedVerified": 2510, "verificationMethod": "dotnet test", "mismatch": "None" }
+  "roadmap": { "recommendedTestFile": "V5_10_FullTrajectoryAndStateInductionAudit_Tests.cs", "candidateUpdateLaws": [] },
+  "releaseIntegrity": { "totalTestsVerified": 2523, "passedVerified": 2523, "verificationMethod": "dotnet test", "mismatch": "None" }
 }
