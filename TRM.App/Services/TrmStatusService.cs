@@ -33,7 +33,10 @@ public sealed class TrmStatusService
         if (!Directory.Exists(dir)) { _availableVersions = new List<string>(); return _availableVersions; }
 
         _availableVersions = Directory.GetFiles(dir, "*.json")
-            .Where(f => Path.GetFileName(f).EndsWith("-status.json"))
+            .Where(f => {
+                var name = Path.GetFileName(f);
+                return name.StartsWith("trm-v") && name.EndsWith("-status.json");
+            })
             .Select(f => Path.GetFileNameWithoutExtension(f).Replace("trm-v", "").Replace("-status", ""))
             .OrderBy(v => {
                 var parts = v.Split('-', '.');
@@ -49,14 +52,20 @@ public sealed class TrmStatusService
     public string? GetCurrentVersion() => _currentVersion;
 
     /// <summary>
-    /// Loads the newest available status file.
+    /// Loads the newest available status file. Falls back to older versions if newest fails.
     /// </summary>
     public async Task<TrmStatusModel?> GetStatusAsync()
     {
         var versions = GetAvailableVersions();
         if (versions.Count == 0) return null;
-        var newest = versions.Last();
-        return await LoadVersionAsync(newest);
+
+        // Try newest first, fall back to older versions
+        for (int i = versions.Count - 1; i >= 0; i--)
+        {
+            var model = await LoadVersionAsync(versions[i]);
+            if (model is not null) return model;
+        }
+        return null;
     }
 
     /// <summary>
