@@ -367,7 +367,8 @@ FodyWeavers.xsd
 /docs/*
 !/docs/Theory/
 !/docs/review/
-
+!/docs/TRM_Project_QuickStart_For_New_Chats.md
+!/docs/TRM_Project_Lineage_Overview.md
 /docs/Theory/*
 !/docs/Theory/**
 

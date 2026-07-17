@@ -23,3 +23,4 @@ Base test count: 2362 cumulative.
 | 2026-07-16 | — | — | BRANCH INITIALIZED from V5.5 |
 | 2026-07-16 | MGCP (Protocol) | 10 | DESIGN COMPLETE: MGC1-MGC5 hypotheses, gates A-F defined |
 | 2026-07-16 | MGCE (Execution) | 3 | Nm NOT NECESSARY: Skip-Nm doubles high-branch (5->12/30). Double-Cupd destroys branches (5->1/30). Full map partially reducible. |
+| 2026-07-17 | MGCA (Analysis) | 10 | GATE A+C REACHED: Nm confirmed branch suppressor. Extra Cupd/DL destructive ONLY with Nm. Without Nm, Double-Cupd amplifies to 29/30 high. Minimal map: Sm→RP→DL→Cupd. RP necessary. DL→Cupd order unresolved. |

@@ -153,6 +153,7 @@ public class V5_6_MinimalGenerativeCoreExecution_Tests
         _output.WriteLine("MGCE: N=67 | 30 seeds | B0 full, R1 skip-Nm, R2 double-Cupd"); }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void V5_6_MGCE_02_Execution() {
         _output.WriteLine("═══ V5.6 MGCE ═══");
         int n = 67;
