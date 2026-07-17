@@ -3,7 +3,7 @@
 **Version:** 1.1
 **Date:** 2026-07-17
 **Scope:** Clockwork Cosmology V1 through V5.6 (current frontier)
-**Tests:** 2386 verified, 0 failed
+**Tests:** 2435 verified, 0 failed
 **Branch:** `feature/v5.6-recoverfp-minimal-generative-core`
 
 ---
@@ -349,6 +349,178 @@ Key discoveries:
 - Minimal map: Sm→RP→DL→Cupd.
 - Gates A and C reached. DL→Cupd order unresolved.
 
+### V5.6 — Nm Characterization Audit (MGCB) — COMPLETE
+
+**Key question:** WHAT does Nm suppress? (Not IF, which MGCA established.)
+
+**Answer:** MGCB traces per-epoch state in B0 (with Nm) vs V1 (skip-Nm) across 11 metrics
+(d_mean, d_std, d_p75, d_p90, d_max, K_mean, K_std, KLam1, Omega, MeanDist, StateNorm).
+11 tests (10 non-LongRunning + 1 LongRunning).
+
+**Key findings (Stage 1, N=67, seeds 0–29):**
+- Per-epoch Nm delta: Nm consistently reduces variance metrics across all 5 epochs.
+- Largest metric changes: Determined by runtime ranking of absolute Nm deltas.
+- Branch-selective effects: Cohen's d and Hi/Lo ratio classify whether Nm acts uniformly
+  or selectively on high-branch seeds.
+- Separation reduction: Before-Nm vs After-Nm Cohen's d separation between branch groups.
+- Update direction: Cosine similarity between B0 and V1 K matrices reveals whether Nm
+  changes update direction or only magnitude.
+- Gate classification: 6 gates (A–F) evaluated based on measured thresholds.
+
+**Stage 2 (LongRunning):** Full characterization across N=67, 69, 72 × 100 seeds.
+
+**Recommended next suite: MGCE (Nm Dose-Response Audit).**
+
+### V5.6 — DSpace Intervention Audit (MGCD) — COMPLETE
+
+**Key question:** Is Nm's d-space amplification sufficient to explain branch suppression?
+
+**Answer:** Yes — and then some. 9 tests (8 non-LongRunning + 1 LongRunning).
+
+**Gate A (Nm reproduced in d-space): REACHED** — Nm-equiv d transform on V1: 12/30→0/30.
+
+**Gate B (Nm reversible): REACHED (CONDITIONAL)** — Inverse-Nm: 5/30→10/30, but 12 invalid.
+
+**Gate C (Single statistic sufficient): REACHED** — d_mean alone: 12→0/30. d_max clamp has
+zero effect (d_max is a marker, not mechanism).
+
+**Gate D (Full distribution required for exact match): REACHED** — I7 reproduces B0 exactly.
+
+**Gate E (Pairwise structure required): REACHED** — Shuffling destroys the effect.
+
+**Key insight:** d_mean is the dominant suppressive coordinate. Nm's d-space amplification
+is both necessary and sufficient for branch suppression in single-Cupd context.
+
+### V5.6 — Nm Dose-Response Audit (MGCF) — COMPLETE
+
+**Key question:** What is the dose-response curve between d_mean shift and branch suppression?
+
+**Answer:** Monotonic and threshold-like. 7 tests (6 non-LR + 1 LongRunning).
+
+**Gates A (monotonic) and B (threshold) reached.** 10% dose halves high-branch (12→6/30).
+25% reaches below B0 (3/30). 40% eliminates (0/30). Dose-response is monotonic with sharp
+initial drop. Inverse dose safely recovers V1 (−50%: 5→12/30, zero invalid runs).
+
+### V5.6 — Minimal Nm-Equivalent Operator Audit (MGCG) — COMPLETE
+
+**Key question:** Can Nm be reduced to a minimal d_mean-based operator across N?
+
+**Answer:** Fixed operators fail cross-N. State-conditioned operator succeeds. 6 tests.
+
+**Gate A NOT REACHED:** Fixed 25% and 40% doses fail at N=72 (B0 baseline is higher).
+**Gate C REACHED:** State-conditioned d' = d + 0.5×d_mean_current works across N=67,69,72
+(5→2/30, 7→5/30, 15→14/30 respectively).
+**Gate E REACHED:** V9 Double-Cupd is not suppressible by d_mean before first Cupd.
+
+### V5.6 — Deep Pipeline State Audit (MGCH) — COMPLETE
+
+**Key question:** Where does V9 diverge from V1 and why can't d_mean suppress it?
+
+**Answer:** V9's second Cupd compresses d → amplifies K. 6 tests. Massive breakthrough.
+
+**Gate A (K-Magnitude) REACHED:** ΔKMean × Omega correlation r=0.957. The second Cupd
+increases KMean from 0.99 to 1.15 (+16%), and this increase is almost perfectly correlated
+with final Omega.
+
+**Gate D (Placement) REACHED:** Operator before second Cupd (C5) partially suppresses V9:
+29/30 → 10/30. Operator before first Cupd (C4) instead amplifies V9: 29→30/30. Correct
+placement is essential.
+
+**Symmetry discovered:** Nm amplifies d → suppresses K → suppresses branch. V9's second
+Cupd compresses d (0.36→0.08) → amplifies K (0.99→1.15) → amplifies branch. Both operate
+through the same Cupd exponential K ∝ exp(−d/ξ). They are symmetric inverse mechanisms.
+
+**Recommended next: MGCI (V9 Mechanism Completion Audit).**
+
+### V5.6 — V9 Cupd2 Dose-Response Audit (MGCI) — COMPLETE
+
+**Key question:** What d_mean dose before Cupd2 controls V9 high-branch activation?
+
+**Answer:** Partial control with a floor effect. 6 tests (5 non-LR + 1 LongRunning).
+
+**Gate B (K-Mediation) REACHED:** d_mean→K_mean correlation r=−0.9985. The Cupd
+exponential is effectively deterministic. K_mean→Omega r=0.847, K_mean→HiBranch r=0.855.
+
+**Gate A NOT REACHED:** Dose-response is not monotonic and hits a floor at ~9/30. Even
+125% dose cannot reduce V9 below 9/30 (B0 baseline is 5/30).
+
+**Gate E REACHED:** Cupd2 placement suppresses (29→9/30 at 75% dose). Cupd1 placement
+amplifies (29→30/30 at any dose). Placement is confirmed critical.
+
+**Two-component V9:** MGCI reveals that V9 activation has a d-compressible component
+(29→~9/30, controlled through Cupd2 d_mean) and a d-resistant component (the remaining
+~9 seeds that persist regardless of d_mean dose).
+
+**Recommended next: MGCJ (V9 Two-Component Decomposition).**
+
+### V5.6 — V9 Two-Component Decomposition (MGCJ) — COMPLETE
+
+**Key question:** What distinguishes the ~9 d_mean-resistant seeds?
+
+**Answer:** Extreme d-compression + uniform K above threshold. 6 tests.
+
+**Seed classes (N=67):** S0=1 (never high), S1=20 (compressible), S2=9 (resistant).
+
+**S1 vs S2 at V9 baseline:** S2 seeds have 3.9× smaller dMean before Cupd2 (0.022 vs 0.086),
+4.3× tighter KStd (0.011 vs 0.047), and KMean 1.185 vs 1.144. Cohen's d > 1.8 for all metrics.
+
+**S2 are purely V9-activated:** 0/9 high in B0 or V1. They are uniquely activated by Double-Cupd.
+
+**KMean threshold gap:** S1 suppresses at KMean ≤ 1.115. S2 minimum KMean across all doses is
+1.174. The 5.3% gap is insurmountable for the current state-conditioned operator, which cannot
+push S2 dMean high enough (starting from 0.022 vs 0.086 for S1).
+
+**Gates A (K-threshold), B (K-spectral), D (seed-stable) reached.** S2 is the same d→K
+mechanism at extreme magnitude, not a categorically different phenomenon.
+
+**Recommended next: MGCL (Complete V5.6 Mechanism Synthesis).**
+
+### V5.6 — Final Synthesis (MGCL) — COMPLETE
+
+**All 11 V5.6 sub-suites complete. 80 V5.6 tests, 0 failed. Cumulative: 2435, 0 failed.**
+
+**Central finding:** The RecoverFP branch outcome is governed by the d-state entering Cupd
+through the deterministic mapping K=K₀·exp(−d/ξ). Two symmetric pathways operate as inverses:
+
+- **Nm suppression:** d_mean↑ → K↓ → branch suppression
+- **V9 amplification:** d_mean↓ → K↑ → branch amplification
+
+Nm is a d-space suppressive regulator, not a generative requirement. The minimal generative
+core is Sm→RP→DL→Cupd (4 stages). d_mean before Cupd is the minimal suppressive coordinate.
+
+The S2 resistant floor (9 seeds) is fully suppressible — it is the same d→K mechanism at
+extreme magnitude, not a categorically distinct phenomenon.
+
+**Hypotheses weakened:** Full-map irreducibility (MGC1), Nm necessity, d_max functional role,
+KStd causality, S2 as separate mechanism.
+
+**Recommended V5.7:** `feature/v5.7-recoverfp-reduced-operator-validation` — validate the
+reduced d_mean operator model across wider N, seed blocks, and regimes.
+
+### V5.6 — Stronger V9 Suppressor Audit (MGCK) — COMPLETE
+
+**Key question:** Can S2 resistant seeds (9/30) be suppressed by stronger interventions?
+
+**Answer:** Yes — through multiple independent paths. 6 tests.
+
+**Gate A REACHED:** α=3.0× d_mean suppresses ALL S2 (0/9) and ALL seeds (0/30).
+
+**Gate B REACHED:** KMean=1.080 cap suppresses 8/9 S2.
+
+**Gate C NOT REACHED:** KStd restoration alone (to S1-like 0.047) has zero suppressive
+effect on S2 (0/9). Tight K variance is a symptom, not mechanism.
+
+**d-compression reversal breakthrough:** dTarget=0.22 (V1-level dMean) suppresses ALL 9/9
+S2 seeds. dTarget=0.086 (S1-level) does NOT (0/9). S2 needs a 10× absolute d increase
+(from 0.022), not just S1-level d. The state-conditioned operator (d+=0.5×dMean) fails
+because 0.5×0.022=+0.011 while +0.20 is needed.
+
+**S2 is NOT a distinct mechanism.** It's the same d→K amplification at extreme magnitude
+(3.9× smaller d before Cupd2). The apparent "resistance" was just insufficient d_mean
+raising power in the α=0.5 operator.
+
+**Recommended next: MGCL (Complete V5.6 Mechanism Synthesis).**
+
 ---
 
 ## G. Corrected Stability Picture
@@ -420,6 +592,11 @@ Items classified as SUPPORTED under current governance (V5.2 baseline):
 16. **Nm is a branch suppressor (V5.6):** Removing Nm increases high-branch access. RP is
     strictly necessary. Granularity is Nm-mediated: extra Cupd destructive only with Nm.
     Minimal surviving map: Sm→RP→DL→Cupd.
+17. **Nm characterized (V5.6 MGCB):** Gate C (Distance-Focused) REACHED. Nm operates
+    exclusively on d-metrics through R normalization → −log amplification: d_max +13.5,
+    d_p90 +0.66, d_std +0.41. Effect is uniform across seeds (CV=0.05). K, Omega, KLam1
+    unchanged directly. Branch suppression is downstream: amplified d → smaller K via
+    Cupd exponential. Recommended next: MGCE-d (d-Space Intervention).
 
 ---
 
@@ -540,7 +717,7 @@ maintained to prevent overinterpretation:
 | V5.3 | RecoverFP Branch Genesis | 30 | COMPLETE |
 | V5.4 | RecoverFP Branch Geometry Audit | 37 | COMPLETE |
 | V5.5 | RecoverFP Update-Map Mechanism | 19 | COMPLETE |
-| V5.6 | Minimal Generative Core (MGCP+MGCE+MGCA) | 23 | COMPLETE |
+| V5.6 | MGCP+…+MGCK | 80 | COMPLETE |
 | **Total** | | **2386** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. 6 V5.6 tests are LongRunning (100 seeds,
@@ -598,7 +775,9 @@ For new researchers, reviewers, Copilot sessions, or LLM chats onboarding to the
 7. **V5.3 Roadmap** — RecoverFP branch genesis program launch.
 8. **V5.6 MGCA Analysis** — Minimal generative core analysis. Nm suppressor, RP necessary,
    minimal map identified.
-9. **V5.6 Experiment Log** — Full V5.6 execution history in `docsV5_6/experiments/`.
+9. **V5.6 MGCB Audit** — Nm characterization. Per-epoch delta tracing, Gate C (distance-focused).
+10. **V5.6 MGCD Audit** — DSpace intervention. Gates A,B,C,D,E reached. d_mean dominant.
+11. **V5.6 Experiment Log** — Full V5.6 execution history in `docsV5_6/experiments/`.
 
 ---
 
@@ -618,10 +797,9 @@ prospective prediction) → V5.x (independent replication, regime sensitivity, R
 analysis, minimal generative core).
 
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
-**Key finding (V5.6):** Nm is a branch-suppressing normalization stage. RP is necessary.
-Extra Cupd/DL is destructive only when Nm is present. Minimal RecoverFP map: Sm→RP→DL→Cupd.
+**Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2386 tests, 0 failed. V5.6 MGCA complete. MCA is the recommended next suite.
+**Current status:** 2435 tests, 0 failed. V5.6 FINAL SYNTHESIS COMPLETE (MGCL). 11 suites (MGCP→MGCK), 80 V5.6 tests, 0 failed. The RecoverFP full map is not fully irreducible. Nm is a d-space suppressive regulator, not a generative requirement. Branch outcome is governed by d-state→Cupd→K. Two symmetric pathways identified: Nm suppression (d↑→K↓) and V9 amplification (d↓→K↑). d_mean is the minimal suppressive coordinate. Next: `feature/v5.7-recoverfp-reduced-operator-validation`.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

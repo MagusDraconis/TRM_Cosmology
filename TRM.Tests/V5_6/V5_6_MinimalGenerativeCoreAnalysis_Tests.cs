@@ -1,6 +1,8 @@
 using Xunit;
 using Xunit.Abstractions;
 using System.Text;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace TRM.Tests.V5_6;
 
@@ -341,8 +343,9 @@ public class V5_6_MinimalGenerativeCoreAnalysis_Tests
         Func<int, int, (double, double, double, double, double)> runner, int n, int seeds) {
         var om = new double[seeds]; var dm = new double[seeds];
         var dp = new double[seeds]; var ks = new double[seeds]; var l1 = new double[seeds];
-        for (int s = 0; s < seeds; s++)
+        Parallel.For(0, seeds, s => {
             (om[s], dm[s], dp[s], ks[s], l1[s]) = runner(n, s);
+        });
         int hi = om.Count(x => x > FIXED_THRESHOLD);
         return (om, dm, dp, ks, l1, hi);
     }
@@ -661,8 +664,13 @@ public class V5_6_MinimalGenerativeCoreAnalysis_Tests
         _output.WriteLine($"Seeds per N: {Stage2Seeds}");
         _output.WriteLine("");
 
-        foreach (int n in Stage2NValues) {
-            _output.WriteLine($"── N={n} ──");
+        // Run all N values in parallel, collect results
+        var nResults = new ConcurrentDictionary<int, (double[] om, double[] dm, double[] dp, double[] ks, double[] l1, int hi,
+            string label)>();
+        var nSepResults = new ConcurrentDictionary<int, List<(string label, double[] om, double[] dm, double[] ks, double[] l1)>>();
+        var nFlags = new ConcurrentDictionary<int, (bool nmSuppresses, bool rpNecessary, bool orderMatters, bool doubleCupdDestroys)>();
+
+        Parallel.ForEach(Stage2NValues, n => {
             int seeds = Stage2Seeds;
 
             var b0 = AnalyzeCondition(RunB0, n, seeds);
@@ -671,6 +679,38 @@ public class V5_6_MinimalGenerativeCoreAnalysis_Tests
             var v5 = AnalyzeCondition(RunV5, n, seeds);
             var v6 = AnalyzeCondition(RunV6, n, seeds);
             var v8 = AnalyzeCondition(RunV8, n, seeds);
+
+            nResults[n] = (b0.om, b0.dm, b0.dp, b0.ks, b0.l1, b0.hi, "B0");
+            nResults[n + 1000] = (v1.om, v1.dm, v1.dp, v1.ks, v1.l1, v1.hi, "V1");
+            nResults[n + 2000] = (v4.om, v4.dm, v4.dp, v4.ks, v4.l1, v4.hi, "V4");
+            nResults[n + 3000] = (v5.om, v5.dm, v5.dp, v5.ks, v5.l1, v5.hi, "V5");
+            nResults[n + 4000] = (v6.om, v6.dm, v6.dp, v6.ks, v6.l1, v6.hi, "V6");
+            nResults[n + 5000] = (v8.om, v8.dm, v8.dp, v8.ks, v8.l1, v8.hi, "V8");
+
+            var seps = new List<(string, double[], double[], double[], double[])>();
+            seps.Add(("B0 baseline", b0.om, b0.dm, b0.ks, b0.l1));
+            seps.Add(("V1 skip-Nm", v1.om, v1.dm, v1.ks, v1.l1));
+            seps.Add(("V4 skip-RP", v4.om, v4.dm, v4.ks, v4.l1));
+            seps.Add(("V5 skip-RP+Nm", v5.om, v5.dm, v5.ks, v5.l1));
+            seps.Add(("V6 Cupd-b4-DL", v6.om, v6.dm, v6.ks, v6.l1));
+            seps.Add(("V8 dbl-Cupd", v8.om, v8.dm, v8.ks, v8.l1));
+            nSepResults[n] = seps;
+
+            nFlags[n] = (
+                v1.hi > b0.hi,
+                v4.hi < Math.Max(1, (int)(b0.hi * 0.5)),
+                v6.hi < Math.Max(1, (int)(b0.hi * 0.5)),
+                v8.hi < Math.Max(1, (int)(b0.hi * 0.5))
+            );
+        });
+
+        // Output results in original N order
+        foreach (int n in Stage2NValues) {
+            _output.WriteLine($"── N={n} ──");
+            int seeds = Stage2Seeds;
+
+            var b0 = nResults[n]; var v1 = nResults[n + 1000]; var v4 = nResults[n + 2000];
+            var v5 = nResults[n + 3000]; var v6 = nResults[n + 4000]; var v8 = nResults[n + 5000];
 
             _output.WriteLine($"{"",-14} {"Omega",8} {"CV",7} {"High",7} {"dMean",8} {"dP90",8} {"Kstd",8} {"lam1",8}");
             PrintRow("B0 baseline", b0.om, b0.dm, b0.dp, b0.ks, b0.l1, b0.hi, seeds);
@@ -681,22 +721,13 @@ public class V5_6_MinimalGenerativeCoreAnalysis_Tests
             PrintRow("V8 dbl-Cupd", v8.om, v8.dm, v8.dp, v8.ks, v8.l1, v8.hi, seeds);
 
             _output.WriteLine("");
-            PrintSeparations("B0 baseline", b0.om, b0.dm, b0.ks, b0.l1);
-            PrintSeparations("V1 skip-Nm", v1.om, v1.dm, v1.ks, v1.l1);
-            PrintSeparations("V4 skip-RP", v4.om, v4.dm, v4.ks, v4.l1);
-            PrintSeparations("V5 skip-RP+Nm", v5.om, v5.dm, v5.ks, v5.l1);
-            PrintSeparations("V6 Cupd-b4-DL", v6.om, v6.dm, v6.ks, v6.l1);
-            PrintSeparations("V8 dbl-Cupd", v8.om, v8.dm, v8.ks, v8.l1);
+            var seps = nSepResults[n];
+            foreach (var (label, om, dm, ks, l1) in seps)
+                PrintSeparations(label, om, dm, ks, l1);
 
-            // Nm role summary
             _output.WriteLine("");
-            bool nmSuppresses = v1.hi > b0.hi;
-            bool rpNecessary = v4.hi < Math.Max(1, (int)(b0.hi * 0.5));
-            bool orderMatters = v6.hi < Math.Max(1, (int)(b0.hi * 0.5));
-            bool doubleCupdDestroys = v8.hi < Math.Max(1, (int)(b0.hi * 0.5));
-
-            _output.WriteLine($"Nm-suppresses={nmSuppresses} RP-necessary={rpNecessary} Order-matters={orderMatters} DblCupd-destructive={doubleCupdDestroys}");
-
+            var flags = nFlags[n];
+            _output.WriteLine($"Nm-suppresses={flags.nmSuppresses} RP-necessary={flags.rpNecessary} Order-matters={flags.orderMatters} DblCupd-destructive={flags.doubleCupdDestroys}");
             _output.WriteLine("");
         }
 
@@ -712,8 +743,10 @@ public class V5_6_MinimalGenerativeCoreAnalysis_Tests
         _output.WriteLine($"Seeds per N: {Stage2Seeds}");
         _output.WriteLine("");
 
-        foreach (int n in Stage2NValues) {
-            _output.WriteLine($"── N={n} ──");
+        // Run all N values in parallel, collect results
+        var nResults = new ConcurrentDictionary<int, List<(string label, double[] om, double[] dm, double[] dp, double[] ks, double[] l1, int hi)>>();
+
+        Parallel.ForEach(Stage2NValues, n => {
             int seeds = Stage2Seeds;
 
             var b0 = AnalyzeCondition(RunB0, n, seeds);
@@ -724,14 +757,24 @@ public class V5_6_MinimalGenerativeCoreAnalysis_Tests
             var v9 = AnalyzeCondition(RunV9, n, seeds);
             var v10 = AnalyzeCondition(RunV10, n, seeds);
 
+            var list = new List<(string, double[], double[], double[], double[], double[], int)>();
+            list.Add(("B0 baseline", b0.om, b0.dm, b0.dp, b0.ks, b0.l1, b0.hi));
+            list.Add(("V1 skip-Nm", v1.om, v1.dm, v1.dp, v1.ks, v1.l1, v1.hi));
+            list.Add(("V2 Nm-after-DL", v2.om, v2.dm, v2.dp, v2.ks, v2.l1, v2.hi));
+            list.Add(("V3 Nm-after-Cupd", v3.om, v3.dm, v3.dp, v3.ks, v3.l1, v3.hi));
+            list.Add(("V7 dbl-DL", v7.om, v7.dm, v7.dp, v7.ks, v7.l1, v7.hi));
+            list.Add(("V9 skipNm+dblC", v9.om, v9.dm, v9.dp, v9.ks, v9.l1, v9.hi));
+            list.Add(("V10 skipNm+dblD", v10.om, v10.dm, v10.dp, v10.ks, v10.l1, v10.hi));
+            nResults[n] = list;
+        });
+
+        // Output results in original N order
+        foreach (int n in Stage2NValues) {
+            _output.WriteLine($"── N={n} ──");
+            int seeds = Stage2Seeds;
             _output.WriteLine($"{"",-16} {"Omega",8} {"CV",7} {"High",7} {"dMean",8} {"dP90",8} {"Kstd",8} {"lam1",8}");
-            PrintRow("B0 baseline", b0.om, b0.dm, b0.dp, b0.ks, b0.l1, b0.hi, seeds);
-            PrintRow("V1 skip-Nm", v1.om, v1.dm, v1.dp, v1.ks, v1.l1, v1.hi, seeds);
-            PrintRow("V2 Nm-after-DL", v2.om, v2.dm, v2.dp, v2.ks, v2.l1, v2.hi, seeds);
-            PrintRow("V3 Nm-after-Cupd", v3.om, v3.dm, v3.dp, v3.ks, v3.l1, v3.hi, seeds);
-            PrintRow("V7 dbl-DL", v7.om, v7.dm, v7.dp, v7.ks, v7.l1, v7.hi, seeds);
-            PrintRow("V9 skipNm+dblC", v9.om, v9.dm, v9.dp, v9.ks, v9.l1, v9.hi, seeds);
-            PrintRow("V10 skipNm+dblD", v10.om, v10.dm, v10.dp, v10.ks, v10.l1, v10.hi, seeds);
+            foreach (var (label, om, dm, dp, ks, l1, hi) in nResults[n])
+                PrintRow(label, om, dm, dp, ks, l1, hi, seeds);
             _output.WriteLine("");
         }
 

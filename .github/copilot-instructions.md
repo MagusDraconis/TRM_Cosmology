@@ -7,6 +7,7 @@
 
 ## Testing Guidelines
 - For xUnit in this project, long calculation tests should be skipped by default and only run in an explicit long-running test mode.
+- **Performance optimization:** When writing or modifying tests that contain many independent loop iterations (e.g., seed sweeps, parameter scans, variant comparisons), use `Parallel.For`, `Parallel.ForEach`, or `Parallel.Invoke` to distribute work across CPU cores. Collect results in thread-safe collections (`ConcurrentDictionary`, `ConcurrentBag`), then output sequentially after parallel work completes. This is especially important for tests tagged `LongRunning`.
 
 ## Documentation Maintenance
 

@@ -11,10 +11,10 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.6 MGCA COMPLETE |
+| Current Version | V5.6 FINAL SYNTHESIS COMPLETE |
 | Current Branch | `feature/v5.6-recoverfp-minimal-generative-core` |
-| Total Tests (non-LR) | 2380 |
-| Total Tests (with LR) | 2386 |
+| Total Tests (non-LR) | 2429 |
+| Total Tests (with LR) | 2435 |
 | Failed Tests | 0 |
 | Current Status | Research active |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
@@ -73,9 +73,11 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.3 | RecoverFP branch stability mechanism | Low/High Omega branches, branch mixing explains seed variability |
 | V5.4 | RecoverFP branch geometry audit | PC1 dominates, d_mean strongest endpoint separator |
 | V5.5 | RecoverFP update-map mechanism | Full 5-epoch cycle required, d/K amplify synchronously |
-| V5.6 | Minimal generative core analysis | Nm is branch suppressor, RP necessary, minimal map: Sm→RP→DL→Cupd |
+| V5.6 | MGCP→…→MGCK | S2 fully suppressible. d-compression reversal (dTarget=0.22) or KCap=1.080 or α=3.0 d_mean. All gates A,B,D reached. |
 
-**2380 tests (non-LongRunning), 2386 total, 0 failed across all versions.**
+**MGCJ adds 5 non-LongRunning + 1 LongRunning.**
+**MGCK adds 6 non-LongRunning.**
+**Total: 2429 non-LR, 2435 with LR, 0 failed.**
 
 ---
 
@@ -98,8 +100,12 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
    with frozen threshold Omega > 1.783 (V5.3).
 9. **Nm is a branch suppressor** — Removing Nm doubles high-branch fraction (5→12/30) at N=67.
    Extra Cupd is destructive only when Nm is present. Without Nm, extra passes amplify.
-10. **Minimal surviving RecoverFP map: Sm→RP→DL→Cupd** — 4 stages, Nm is removable, RP is
-    necessary (V5.6).
+10. **Minimal surviving RecoverFP map: Sm→RP→DL→Cupd** — 4 stages, Nm is removable, RP is necessary (V5.6 MGCA).
+11. **Nm suppression is d-space mediated (V5.6 MGCD):** d_mean shift alone eliminates V1 high-branch (12→0/30). Full distribution matching reproduces B0 exactly.
+12. **d_mean is a monotonic threshold-like control coordinate (V5.6 MGCF):** 25% Nm dose reaches B0-level, 40% eliminates high-branch. Inverse dose safely recovers V1.
+13. **Nm and V9 are symmetric d↔K mechanisms (V5.6 MGCH):** Nm amplifies d→suppresses K. V9's second Cupd compresses d→amplifies K (r=0.957). Operator before Cupd2 suppresses V9 (29→10/30).
+14. **V9 has two clean seed classes (V5.6 MGCJ):** S1=20 compressible seeds. S2=9 resistant seeds (3.9× smaller d, 4.3× tighter K, 0% B0/V1-high). Same mechanism at extreme magnitude.
+15. **S2 is fully suppressible (V5.6 MGCK):** dTarget=0.22 suppresses all 9 S2. KMean=1.080 cap suppresses 8/9. α=3.0× d_mean suppresses all. S2 is same d→K mechanism, not distinct.
 
 ---
 
@@ -148,7 +154,7 @@ fundamental decomposition of the attractor.
 
 ## H. Current Open Problems
 
-1. **Nm dose-response** — How much Nm is needed? Can partial Nm preserve branch access?
+1. **Nm mechanism characterized (MGCB):** Gate C — distance-focused. Nm amplifies d_std (+0.41), d_p90 (+0.66), d_max (+13.5) uniformly (CV=0.05). K/Omega untouched directly. Downstream: amplified d → smaller K via Cupd → branch suppression. Next: MGCE-d.
 2. **V9 runaway mechanism** — What prevents all 30/30 seeds from going high in Skip-Nm+Double-Cupd?
 3. **DL→Cupd order sensitivity** — Is stage order truly necessary or sampling noise?
 4. **Pass-count sensitivity without Nm** — Does 3 or 6 Cupd passes change branch formation?
