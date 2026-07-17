@@ -31,7 +31,7 @@ public sealed class TrmStatusService
 
         try
         {
-            var path = Path.Combine(_env.WebRootPath, "data", "trm-v5-5-status.json");
+            var path = Path.Combine(_env.WebRootPath, "data", "trm-v5-6-status.json");
             if (!File.Exists(path)) return null;
 
             await using var stream = File.OpenRead(path);
