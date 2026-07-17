@@ -1,5 +1,6 @@
 {
-  "releaseStatus": "EXPLORATORY",
+  "releaseStatus": "V4.3 COMPLETE",
+  "phase": "Geometric Scale Interpretation",
   "date": "2026-07-15",
   "currentBranch": "feature/v4.3-geometric-scale-interpretation",
   "previousBranch": "feature/v4.2-physical-calibration-and-prediction",
@@ -29,7 +30,7 @@
     "v4_root": 1,
     "total": 1748
   },
-  "v4_3Suites": [
+  "suites": [
     {
       "name": "Geometric Scale Candidate Survey",
       "tag": "GSCS",
@@ -88,9 +89,8 @@
     }
   ],
   "roadmap": {
-    "currentPhase": "V4.3 Geometric Scale Interpretation — COMPLETE",
-    "recommendedNextBranch": "feature/v4.4-prospective-length-anchor-validation",
-    "recommendedTestFile": "V4_4_ProspectiveLengthAnchorValidation_Tests.cs"
+    "recommendedTestFile": "V4_4_ProspectiveLengthAnchorValidation_Tests.cs",
+    "candidateUpdateLaws": []
   },
   "supportedClaims": [
     "Geometric scale candidates have been surveyed (12 candidates, 8 advanced).",
@@ -141,7 +141,7 @@
     "dark matter replaced",
     "true N-to-infinity continuum proof"
   ],
-  "openProblemsV44": [
+  "openProblems": [
     { "id": "P1", "title": "Prospective Length Anchor Validation", "priority": "P1" },
     { "id": "P1", "title": "Length Anchor Stress Testing", "priority": "P1" },
     { "id": "P2", "title": "MeanDist Robustness Under New Seeds", "priority": "P2" },
@@ -151,13 +151,13 @@
     { "id": "P3", "title": "G_eff Uncertainty Reduction Strategy", "priority": "P3" }
   ],
   "documents": [
-    "docsV4_3/TRM_V4_3_Geometric_Scale_Interpretation_Completion.md",
-    "docsV4_3/theory/TRM_V4_3_Geometric_Scale_Candidate_Survey.md",
-    "docsV4_3/theory/TRM_V4_3_Geometric_Scale_Classification.md",
-    "docsV4_3/theory/TRM_V4_3_Global_Vs_Local_Scale.md",
-    "docsV4_3/theory/TRM_V4_3_Geometric_Scale_Hierarchy.md",
-    "docsV4_3/theory/TRM_V4_3_Geometric_Scale_Interpretation.md",
-    "docsV4_3/theory/TRM_V4_3_Geometric_Scale_Selection.md",
-    "docsV4_3/theory/TRM_V4_3_Prospective_Length_Anchor_Protocol.md"
+    { "title": "V4.3 Completion Report", "filename": "TRM_V4_3_Geometric_Scale_Interpretation_Completion.md", "available": true, "description": "V4.3 branch completion synthesis" },
+    { "title": "Candidate Survey", "filename": "TRM_V4_3_Geometric_Scale_Candidate_Survey.md", "available": true, "description": "GSCS suite" },
+    { "title": "Scale Classification", "filename": "TRM_V4_3_Geometric_Scale_Classification.md", "available": true, "description": "GSC suite" },
+    { "title": "Global vs Local Scale", "filename": "TRM_V4_3_Global_Vs_Local_Scale.md", "available": true, "description": "GVLS suite" },
+    { "title": "Scale Hierarchy", "filename": "TRM_V4_3_Geometric_Scale_Hierarchy.md", "available": true, "description": "GSH suite" },
+    { "title": "Scale Interpretation", "filename": "TRM_V4_3_Geometric_Scale_Interpretation.md", "available": true, "description": "GSI suite" },
+    { "title": "Scale Selection", "filename": "TRM_V4_3_Geometric_Scale_Selection.md", "available": true, "description": "GSS suite" },
+    { "title": "Length Anchor Protocol", "filename": "TRM_V4_3_Prospective_Length_Anchor_Protocol.md", "available": true, "description": "PLAP suite" }
   ]
 }

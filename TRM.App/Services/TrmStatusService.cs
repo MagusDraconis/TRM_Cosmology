@@ -33,11 +33,11 @@ public sealed class TrmStatusService
         if (!Directory.Exists(dir)) { _availableVersions = new List<string>(); return _availableVersions; }
 
         _availableVersions = Directory.GetFiles(dir, "*.json")
-            .Where(f => Path.GetFileName(f).StartsWith("trm-v") && Path.GetFileName(f).EndsWith("-status.json"))
-            .Select(f => Path.GetFileNameWithoutExtension(f).Replace("trm-", "").Replace("-status", ""))
+            .Where(f => Path.GetFileName(f).EndsWith("-status.json"))
+            .Select(f => Path.GetFileNameWithoutExtension(f).Replace("trm-v", "").Replace("-status", ""))
             .OrderBy(v => {
                 var parts = v.Split('-', '.');
-                if (parts.Length >= 2 && int.TryParse(parts[0].TrimStart('v', 'V'), out int maj) &&
+                if (parts.Length >= 2 && int.TryParse(parts[0], out int maj) &&
                     int.TryParse(parts[1], out int min))
                     return maj * 100 + min;
                 return 9999;
@@ -70,7 +70,7 @@ public sealed class TrmStatusService
 
         try
         {
-            var path = Path.Combine(_env.WebRootPath, "data", $"trm-{version}-status.json");
+            var path = Path.Combine(_env.WebRootPath, "data", $"trm-v{version}-status.json");
             if (!File.Exists(path)) return null;
 
             await using var stream = File.OpenRead(path);
