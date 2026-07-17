@@ -25,4 +25,5 @@ V5.9 initialized from V5.8 COMPLETE (`4a523b3`).
 |:---|:---|:--:|:---|
 | 2026-07-17 | — | — | BRANCH INITIALIZED from V5.8 COMPLETE |
 | 2026-07-17 | BCP | — | Protocol designed. Commitment metrics and intervention methodology pre-registered. |
-| 2026-07-17 | BCE | 4 | GATE C (Prediction before commitment): No primary N (67-72) reaches soft commitment (<10% flip) at epochs 1-4. N=71 most plastic (flip rate ≥39%). Predictability at epoch 5 precedes commitment. N=80 soft-commits at epoch 4 (7%). |
+| 2026-07-17 | BCE | 4 | GATE C: Prediction before commitment. No primary N soft-commits by epoch 4. N=71 most plastic. |
+| 2026-07-17 | BCA | 6 | GATES B,C,D: 7/8 N non-monotonic (persistent plasticity). Only N=66,80 soft-commit. N=71 transition-plastic. All primary N: pred before commit. Strong commitment NOT reached anywhere. |
