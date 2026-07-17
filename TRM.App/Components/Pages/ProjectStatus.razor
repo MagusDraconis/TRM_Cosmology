@@ -17,8 +17,8 @@ else if (_status is null || _loadError)
             <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Size="Size.Large" Color="Color.Warning" />
             <MudText Typo="Typo.h6" Color="Color.Warning">Status Data Unavailable</MudText>
             <MudText Typo="Typo.body1">Currently no project status data is available.</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">The status file (trm-v4-1-status.json) could not be loaded. This may happen if the file is missing, malformed, or contains invalid data.</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">Please verify that <code>wwwroot/data/trm-v4-1-status.json</code> exists and is valid JSON.</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">The status file could not be loaded. This may happen if the file is missing, malformed, or contains invalid data.</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Please verify that <code>wwwroot/data/trm-v*-status.json</code> files exist and are valid JSON.</MudText>
         </MudStack>
     </MudPaper>
 }
@@ -27,6 +27,13 @@ else
     var s = _status;
 
 <MudText Typo="Typo.h4" GutterBottom="true">TRM Project Status</MudText>
+<MudStack Row="true" Spacing="1" Class="mb-4">
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoFirst" Disabled="@(_firstDisabled)">⏮ First</MudButton>
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoPrevious" Disabled="@(_prevDisabled)">◀ Back</MudButton>
+    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@_currentVersionLabel</MudChip>
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoNext" Disabled="@(_nextDisabled)">Forward ▶</MudButton>
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoNewest" Disabled="@(_newestDisabled)">Newest ⏭</MudButton>
+</MudStack>
 <MudText Typo="Typo.body1">Current status of the Temporal Rate Matrix (TRM) research program.</MudText>
 <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-4">Info: This page is updated nearly every day, and at least once every week.</MudText>
 
@@ -205,13 +212,42 @@ else
     private TrmStatusModel? _status;
     private bool _loading = true;
     private bool _loadError;
+    private string _currentVersionLabel = "";
+    private bool _prevDisabled = true;
+    private bool _nextDisabled = true;
+    private bool _firstDisabled = true;
+    private bool _newestDisabled = true;
 
     protected override async Task OnInitializedAsync()
     {
         _status = await StatusService.GetStatusAsync();
         _loadError = _status is null;
         _loading = false;
+        UpdateNavigationState();
     }
+
+    private async Task LoadAndRefresh(string version)
+    {
+        _loading = true; _loadError = false;
+        _status = await StatusService.LoadVersionAsync(version);
+        _loadError = _status is null;
+        _loading = false;
+        UpdateNavigationState();
+    }
+
+    private void UpdateNavigationState()
+    {
+        _currentVersionLabel = StatusService.GetCurrentVersion() ?? "?";
+        _prevDisabled = StatusService.GetPreviousVersion() is null;
+        _nextDisabled = StatusService.GetNextVersion() is null;
+        _firstDisabled = StatusService.GetFirstVersion() == _currentVersionLabel;
+        _newestDisabled = StatusService.GetNewestVersion() == _currentVersionLabel;
+    }
+
+    private async Task GoFirst() { var v = StatusService.GetFirstVersion(); if (v is not null) await LoadAndRefresh(v); }
+    private async Task GoPrevious() { var v = StatusService.GetPreviousVersion(); if (v is not null) await LoadAndRefresh(v); }
+    private async Task GoNext() { var v = StatusService.GetNextVersion(); if (v is not null) await LoadAndRefresh(v); }
+    private async Task GoNewest() { var v = StatusService.GetNewestVersion(); if (v is not null) await LoadAndRefresh(v); }
 
     private static string GetSuiteDescription(string name) => name switch
     {
