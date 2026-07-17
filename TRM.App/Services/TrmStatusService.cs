@@ -34,7 +34,7 @@ public sealed class TrmStatusService
 
         _availableVersions = Directory.GetFiles(dir, "*.json")
             .Where(f => Path.GetFileName(f).StartsWith("trm-v") && Path.GetFileName(f).EndsWith("-status.json"))
-            .Select(f => Path.GetFileNameWithoutExtension(f).Replace("trm-", ""))
+            .Select(f => Path.GetFileNameWithoutExtension(f).Replace("trm-", "").Replace("-status", ""))
             .OrderBy(v => {
                 var parts = v.Split('-', '.');
                 if (parts.Length >= 2 && int.TryParse(parts[0].TrimStart('v', 'V'), out int maj) &&
