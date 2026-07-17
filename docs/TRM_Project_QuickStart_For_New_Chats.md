@@ -11,10 +11,10 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.6 FINAL SYNTHESIS COMPLETE |
+| Current Version | V5.7 COMPLETE → V5.8 INITIALIZED |
 | Current Branch | `feature/v5.6-recoverfp-minimal-generative-core` |
-| Total Tests (non-LR) | 2429 |
-| Total Tests (with LR) | 2435 |
+| Total Tests (non-LR) | 2460 |
+| Total Tests (with LR) | 2466 |
 | Failed Tests | 0 |
 | Current Status | Research active |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
@@ -74,6 +74,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.4 | RecoverFP branch geometry audit | PC1 dominates, d_mean strongest endpoint separator |
 | V5.5 | RecoverFP update-map mechanism | Full 5-epoch cycle required, d/K amplify synchronously |
 | V5.6 | MGCP→…→MGCK | S2 fully suppressible. d-compression reversal (dTarget=0.22) or KCap=1.080 or α=3.0 d_mean. All gates A,B,D reached. |
+| V5.7 | ROCP→ROCE2 | R1 suppression mostly robust across N=60-80. V9 amplification N=64-70 window. N=71 sharp transition. dRatio 100% predictor. |
 
 **MGCJ adds 5 non-LongRunning + 1 LongRunning.**
 **MGCK adds 6 non-LongRunning.**
@@ -106,6 +107,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 13. **Nm and V9 are symmetric d↔K mechanisms (V5.6 MGCH):** Nm amplifies d→suppresses K. V9's second Cupd compresses d→amplifies K (r=0.957). Operator before Cupd2 suppresses V9 (29→10/30).
 14. **V9 has two clean seed classes (V5.6 MGCJ):** S1=20 compressible seeds. S2=9 resistant seeds (3.9× smaller d, 4.3× tighter K, 0% B0/V1-high). Same mechanism at extreme magnitude.
 15. **S2 is fully suppressible (V5.6 MGCK):** dTarget=0.22 suppresses all 9 S2. KMean=1.080 cap suppresses 8/9. α=3.0× d_mean suppresses all. S2 is same d→K mechanism, not distinct.
+16. **R1 suppression is mostly robust cross-N (V5.7):** State-conditioned operator works at 8/9 N (60-80). Cupd d→K universal. V9 amplification is N=64-70 window only. N=71 is sharp transition (dRatio crosses 1.0).
 
 ---
 
