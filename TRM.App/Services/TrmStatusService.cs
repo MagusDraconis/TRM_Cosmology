@@ -32,7 +32,8 @@ public sealed class TrmStatusService
         var dir = Path.Combine(_env.WebRootPath, "data");
         if (!Directory.Exists(dir)) { _availableVersions = new List<string>(); return _availableVersions; }
 
-        _availableVersions = Directory.GetFiles(dir, "trm-v*-status.json")
+        _availableVersions = Directory.GetFiles(dir, "*.json")
+            .Where(f => Path.GetFileName(f).StartsWith("trm-v") && Path.GetFileName(f).EndsWith("-status.json"))
             .Select(f => Path.GetFileNameWithoutExtension(f).Replace("trm-", ""))
             .OrderBy(v => {
                 var parts = v.Split('-', '.');
