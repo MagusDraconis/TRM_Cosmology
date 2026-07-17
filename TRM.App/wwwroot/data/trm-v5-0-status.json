@@ -76,15 +76,15 @@
     "independent third-party validation completed"
   ],
   "openProblems": [
-    "P1 Replication Ensemble Protocol",
-    "P1 Multi-seed Ensemble Execution",
-    "P1 Ensemble Audit and Integrity",
-    "P2 Regime Sensitivity Expansion",
-    "P2 Coupling-Law Replication Robustness",
-    "P2 Continuum Replication Beyond N=1000",
-    "P2 Ensemble Error Budget",
-    "P3 Independent External Reviewer Reproduction",
-    "P3 Physical Comparison Under Ensemble Governance"
+    { "priority": "P1", "title": "Replication Ensemble Protocol", "description": "Design multi-seed ensemble replication protocol." },
+    { "priority": "P1", "title": "Multi-seed Ensemble Execution", "description": "Execute ensemble replication with independent seeds." },
+    { "priority": "P1", "title": "Ensemble Audit and Integrity", "description": "Audit ensemble reproducibility and integrity." },
+    { "priority": "P2", "title": "Regime Sensitivity Expansion", "description": "Test replication across multiple regimes." },
+    { "priority": "P2", "title": "Coupling-Law Replication Robustness", "description": "Test coupling law sensitivity in replication." },
+    { "priority": "P2", "title": "Continuum Replication Beyond N=1000", "description": "Extend replication to larger N." },
+    { "priority": "P2", "title": "Ensemble Error Budget", "description": "Characterize ensemble-level error budget." },
+    { "priority": "P3", "title": "Independent External Reviewer Reproduction", "description": "Enable external reproduction of pipeline." },
+    { "priority": "P3", "title": "Physical Comparison Under Ensemble Governance", "description": "Compare with physical data under governance." }
   ],
   "documents": [
     { "title": "V5.0 Completion Report", "filename": "TRM_V5_0_Independent_Replication_Completion.md", "available": true, "description": "V5.0 branch completion synthesis (sections A-O)" },
