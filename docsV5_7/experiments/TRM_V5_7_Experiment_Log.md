@@ -27,3 +27,4 @@ Base test count: 2435 cumulative.
 |:---|:---|:--:|:---|
 | 2026-07-17 | — | — | BRANCH INITIALIZED from V5.6 COMPLETE |
 | 2026-07-17 | ROCP | — | Protocol designed. Validation axes defined. Failure criteria pre-registered. |
+| 2026-07-17 | ROCE | 6 | GATE B (Partially Robust): R1≤B0 at 8/9 N. d→K universal (r<−0.95). V9 AMPLIFICATION FALSIFIED at N≥72. K→Ω N-conditioned (breaks at N<66). F2 (seed-block) triggered at N=72,80. F3 (amplification fail) triggered. |
