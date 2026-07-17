@@ -25,4 +25,5 @@ V5.8 initialized from V5.7 COMPLETE (`a80fb6c`).
 |:---|:---|:--:|:---|
 | 2026-07-17 | — | — | BRANCH INITIALIZED from V5.7 COMPLETE |
 | 2026-07-17 | BPP | — | Protocol designed. Predictors and evaluation metrics pre-registered. |
-| 2026-07-17 | BPE | 4 | GATE D (N-dependent): d_mean Epoch 4 bal=0.815 for pooled N. Cross-N prediction fails at all N except N=67. N=71 is hardest (bal < 0.6 at all epochs). No universal threshold exists — prediction is N-conditioned. |
+| 2026-07-17 | BPE | 4 | GATE D (N-dependent): d_mean Epoch 4 bal=0.815 pooled. Cross-N prediction fails. N=71 hardest. |
+| 2026-07-17 | BPA | 5 | GATES B,D: Per-N threshold restores prediction (mean bal=0.791). N=80 perfect (0.978). N=71 predictable at epoch 5 (0.967). Pooled z-score weak (0.703). Late-epoch dominates. |
