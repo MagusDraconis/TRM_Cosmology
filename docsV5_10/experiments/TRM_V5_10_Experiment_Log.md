@@ -22,3 +22,4 @@
 | Date | Suite | Tests | Outcome |
 |:---|:---|:--:|:---|
 | 2026-07-17 | — | — | BRANCH INITIALIZED from V5.9 COMPLETE |
+| 2026-07-17 | CAE | 3 | GATES A,F: K boost induces Lo→Hi at 100% of low seeds across ALL N. d compression induces 37-93%. V5.9 directional commitment was OPERATOR-SPECIFIC, not structural. Control asymmetry is intervention-dependent. |
