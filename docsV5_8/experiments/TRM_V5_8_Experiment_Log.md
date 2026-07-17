@@ -24,4 +24,5 @@ V5.8 initialized from V5.7 COMPLETE (`a80fb6c`).
 | Date | Suite | Tests | Outcome |
 |:---|:---|:--:|:---|
 | 2026-07-17 | — | — | BRANCH INITIALIZED from V5.7 COMPLETE |
-| 2026-07-17 | BPP | — | Protocol designed. Predictors defined. Evaluation metrics pre-registered. |
+| 2026-07-17 | BPP | — | Protocol designed. Predictors and evaluation metrics pre-registered. |
+| 2026-07-17 | BPE | 4 | GATE D (N-dependent): d_mean Epoch 4 bal=0.815 for pooled N. Cross-N prediction fails at all N except N=67. N=71 is hardest (bal < 0.6 at all epochs). No universal threshold exists — prediction is N-conditioned. |
