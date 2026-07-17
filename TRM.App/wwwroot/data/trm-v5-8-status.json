@@ -1,0 +1,44 @@
+{
+  "releaseStatus": "V5.8 COMPLETE",
+  "phase": "Branch Predictability and Forecasting",
+  "date": "2026-07-17",
+  "testSummary": { "total": 2487, "passed": 2487, "failed": 0, "skipped": 0, "verification": "FULL TEST-RUN-VERIFIED", "command": "dotnet test", "date": "2026-07-17", "note": "Cumulative across V4.1-V5.8. V5.8 added 21 new tests across 4 suites." },
+  "suites": [
+    { "name": "Branch Predictability Protocol (BPP)", "tests": 7, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Branch Predictability Execution (BPE)", "tests": 4, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "N-Conditioned Predictor Analysis (BPA)", "tests": 5, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "Hard Regime Calibration (BPC)", "tests": 5, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Branch prediction is N-conditioned — global pooled thresholds fail.",
+    "Per-N thresholds substantially improve forecasting.",
+    "d_mean is the strongest practical predictor (richer features add little).",
+    "Epoch 5 prediction is highly accurate (bal >= 0.93 for all class-stable N).",
+    "N=71 is predictable at epoch 5 (bal = 0.967) — not a forecasting blind spot.",
+    "N=64 and N=66 are class-imbalance artifacts — scores are not meaningful.",
+    "Train-test gaps are small (< 0.04) — no overfitting evidence."
+  ],
+  "conditionalClaims": [
+    "d_mean is the strongest forecasting coordinate among tested features.",
+    "Forecasting requires N-conditioning.",
+    "Earlier prediction may require richer state representations.",
+    "Results based on B0 condition with seeds 0-49/50-99 train/test split."
+  ],
+  "notClaimed": [
+    "time emergence", "space emergence", "c derivation",
+    "physical constants", "relativity", "quantum mechanics", "cosmology",
+    "causality from prediction", "mechanism from forecasting",
+    "universal global prediction threshold", "early branch prediction"
+  ],
+  "openProblems": [
+    { "priority": "P1", "title": "Early Prediction Gap", "description": "Why can't epoch 1-3 state predict branch outcome? What about Matrix-level features?" },
+    { "priority": "P2", "title": "Commitment vs Predictability", "description": "When does branch become irreversible vs predictable? V5.9 investigates." }
+  ],
+  "documents": [
+    { "title": "V5.8 Final Synthesis", "filename": "TRM_V5_8_Final_Synthesis.md", "available": true, "description": "Late-stage, N-conditioned branch predictability" },
+    { "title": "BPA N-Conditioned Predictors", "filename": "TRM_V5_8_NConditionedPredictorAnalysis.md", "available": true, "description": "Per-N thresholds restore prediction" },
+    { "title": "BPC Hard Regime Calibration", "filename": "TRM_V5_8_HardRegimeAndLatePredictorCalibration.md", "available": true, "description": "Best epoch=5, d_mean alone is sufficient" }
+  ],
+  "roadmap": { "recommendedTestFile": "V5_8_HardRegimeAndLatePredictorCalibration_Tests.cs", "candidateUpdateLaws": [ "per-N d_mean threshold", "epoch 5 late-stage prediction" ] },
+  "releaseIntegrity": { "totalTestsVerified": 2487, "passedVerified": 2487, "verificationMethod": "dotnet test", "mismatch": "None" }
+}

@@ -4,7 +4,7 @@ using TRM.App.Models;
 namespace TRM.App.Services;
 
 /// <summary>
-/// Loads TRM V4.1 project status from wwwroot/data/trm-v4-1-status.json.
+/// Loads TRM project status from wwwroot/data/trm-v5-9-status.json.
 /// Returns null when JSON is unavailable — caller must handle missing data.
 /// Never returns stale/default values.
 /// </summary>
@@ -31,7 +31,7 @@ public sealed class TrmStatusService
 
         try
         {
-            var path = Path.Combine(_env.WebRootPath, "data", "trm-v5-6-status.json");
+            var path = Path.Combine(_env.WebRootPath, "data", "trm-v5-9-status.json");
             if (!File.Exists(path)) return null;
 
             await using var stream = File.OpenRead(path);

@@ -1,0 +1,35 @@
+{
+  "releaseStatus": "V5.9 INITIALIZED",
+  "phase": "Branch Commitment and Irreversibility",
+  "date": "2026-07-17",
+  "testSummary": { "total": 2493, "passed": 2493, "failed": 0, "skipped": 0, "verification": "FULL TEST-RUN-VERIFIED", "command": "dotnet test", "date": "2026-07-17", "note": "Cumulative across V4.1-V5.9. V5.9 added 6 new protocol tests." },
+  "suites": [
+    { "name": "Branch Commitment Protocol (BCP)", "tests": 6, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Commitment problem pre-registered: when does branch become irreversible?",
+    "Intervention methodology defined: state-conditioned d_mean suppressor at epochs 1-4.",
+    "Commitment metrics defined: flip rate, commitment epoch, irreversibility onset.",
+    "Branch threshold frozen at Omega > 1.783 (V5.3)."
+  ],
+  "conditionalClaims": [
+    "Protocol only — execution pending."
+  ],
+  "notClaimed": [
+    "time emergence", "space emergence", "c derivation",
+    "physical constants", "relativity", "quantum mechanics", "cosmology",
+    "commitment epoch (not yet measured)"
+  ],
+  "openProblems": [
+    { "priority": "P1", "title": "Commitment Epoch", "description": "At which epoch does branch identity become irreversible?" },
+    { "priority": "P2", "title": "Predictability vs Commitment Gap", "description": "Is the branch committed before it becomes predictable?" },
+    { "priority": "P2", "title": "Intervention Strength", "description": "Does stronger intervention change the commitment epoch?" }
+  ],
+  "documents": [
+    { "title": "V5.9 README", "filename": "README.md", "available": true, "description": "Branch commitment and irreversibility overview" },
+    { "title": "V5.9 Roadmap", "filename": "TRM_V5_9_BranchCommitment_Roadmap.md", "available": true, "description": "Commitment metrics and decision gates" },
+    { "title": "BCP Protocol", "filename": "TRM_V5_9_BranchCommitment_Protocol.md", "available": true, "description": "Pre-registered commitment protocol" }
+  ],
+  "roadmap": { "recommendedTestFile": "V5_9_BranchCommitmentProtocol_Tests.cs", "candidateUpdateLaws": [ "commitment epoch identification", "irreversibility detection" ] },
+  "releaseIntegrity": { "totalTestsVerified": 2493, "passedVerified": 2493, "verificationMethod": "dotnet test", "mismatch": "None" }
+}
