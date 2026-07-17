@@ -11,12 +11,12 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.11 COMPLETE → V5.12 INITIALIZED |
-| Current Branch | `feature/v5.6-recoverfp-minimal-generative-core` |
-| Total Tests (non-LR) | 2460 |
-| Total Tests (with LR) | 2466 |
+| Current Version | V5.12 COMPLETE → V5.13 INITIALIZED |
+| Current Branch | `feature/v5.13-high-basin-pathway-validation-and-scaling` |
+| Total Tests (non-LR) | 2539 |
+| Total Tests (with LR) | 2565 |
 | Failed Tests | 0 |
-| Current Status | Research active |
+| Current Status | Research active — V5.12 pathways discovered, scaling to V5.13 |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
 
 ---
@@ -79,6 +79,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.9 | BCP→BCI | Directional commitment: Hi→Lo possible, Lo→Hi locked at CP5. N=71 transition-plastic. |
 | V5.10 | CAP→CAL | Control asymmetry confirmed. No strict persistent Lo→Hi. V5.9 commitment strengthened. |
 | V5.11 | BAP→BAA | Basin-accessibility asymmetry: Hi→Lo reaches Lo basin, Lo→Hi stays off-manifold. |
+| V5.12 | HBP→HBL | Two entry pathways validated. Compression-room + Crypto-Hi Mild. Prospective model: matched=10%, mismatched=0%. |
 
 **MGCJ adds 5 non-LongRunning + 1 LongRunning.**
 **MGCK adds 6 non-LongRunning.**
