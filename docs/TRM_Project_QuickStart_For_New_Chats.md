@@ -11,7 +11,7 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.10 COMPLETE → V5.11 INITIALIZED |
+| Current Version | V5.11 COMPLETE → V5.12 INITIALIZED |
 | Current Branch | `feature/v5.6-recoverfp-minimal-generative-core` |
 | Total Tests (non-LR) | 2460 |
 | Total Tests (with LR) | 2466 |
@@ -77,7 +77,8 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.7 | ROCP→ROCE2 | R1 suppression mostly robust across N=60-80. V9 amplification N=64-70 window. N=71 sharp transition. dRatio 100% predictor. |
 | V5.8 | BPP→BPC | Branch prediction is late-stage and N-conditioned. d_mean epoch 5 + per-N threshold: bal ≥ 0.93 for all class-stable N. |
 | V5.9 | BCP→BCI | Directional commitment: Hi→Lo possible, Lo→Hi locked at CP5. N=71 transition-plastic. |
-| V5.10 | CAP→CAL | Control asymmetry confirmed. No strict persistent Lo→Hi induction found. K boost = artifact. V5.9 commitment strengthened. |
+| V5.10 | CAP→CAL | Control asymmetry confirmed. No strict persistent Lo→Hi. V5.9 commitment strengthened. |
+| V5.11 | BAP→BAA | Basin-accessibility asymmetry: Hi→Lo reaches Lo basin, Lo→Hi stays off-manifold. |
 
 **MGCJ adds 5 non-LongRunning + 1 LongRunning.**
 **MGCK adds 6 non-LongRunning.**
