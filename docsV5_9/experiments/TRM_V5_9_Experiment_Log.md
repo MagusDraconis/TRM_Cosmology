@@ -26,4 +26,5 @@ V5.9 initialized from V5.8 COMPLETE (`4a523b3`).
 | 2026-07-17 | — | — | BRANCH INITIALIZED from V5.8 COMPLETE |
 | 2026-07-17 | BCP | — | Protocol designed. Commitment metrics and intervention methodology pre-registered. |
 | 2026-07-17 | BCE | 4 | GATE C: Prediction before commitment. No primary N soft-commits by epoch 4. N=71 most plastic. |
-| 2026-07-17 | BCA | 6 | GATES B,C,D: 7/8 N non-monotonic (persistent plasticity). Only N=66,80 soft-commit. N=71 transition-plastic. All primary N: pred before commit. Strong commitment NOT reached anywhere. |
+| 2026-07-17 | BCA | 6 | GATES B,C,D: 7/8 N non-monotonic. N=71 transition-plastic. All primary N: pred before commit. |
+| 2026-07-17 | BCI | 3 | GATES C,F: Directional commitment — Lo→Hi = 0% at CP5 (irreversible), Hi→Lo = 14-31% (plastic). Only N=66 soft-committed. No N reaches strong commitment or irreversibility. Asymmetric irreversibility. |
