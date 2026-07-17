@@ -1,0 +1,23 @@
+{
+  "releaseStatus": "V5.10 INITIALIZED",
+  "phase": "Branch Control Asymmetry and Induction",
+  "date": "2026-07-17",
+  "testSummary": { "total": 2510, "passed": 2510, "failed": 0, "skipped": 0, "verification": "FULL TEST-RUN-VERIFIED", "command": "dotnet test", "date": "2026-07-17", "note": "Cumulative across V4.1-V5.10. V5.9 added 19 tests. V5.10 initialized with 4 protocol tests." },
+  "suites": [],
+  "supportedClaims": [
+    "Control asymmetry problem pre-registered: Hi→Lo works, Lo→Hi fails at CP5.",
+    "Intervention classes A-E defined for induction testing.",
+    "Branch threshold frozen at Omega > 1.783 (V5.3)."
+  ],
+  "conditionalClaims": ["Protocol only — execution pending."],
+  "notClaimed": ["physical constants", "relativity", "quantum mechanics", "cosmology"],
+  "openProblems": [
+    { "priority": "P1", "title": "Lo→Hi Induction", "description": "Why does low branch resist induction at CP5?" },
+    { "priority": "P1", "title": "Control Asymmetry Mechanism", "description": "Is asymmetry basin-structural or operator-dependent?" }
+  ],
+  "documents": [
+    { "title": "V5.10 README", "filename": "README.md", "available": true, "description": "Control asymmetry overview" }
+  ],
+  "roadmap": { "recommendedTestFile": "V5_10_BranchControlAsymmetryProtocol_Tests.cs", "candidateUpdateLaws": [] },
+  "releaseIntegrity": { "totalTestsVerified": 2510, "passedVerified": 2510, "verificationMethod": "dotnet test", "mismatch": "None" }
+}
