@@ -6,7 +6,7 @@
 | ARP | PENDING | — | — |
 | ARE | **COMPLETE** | 1 | 2026-07-18 |
 | ARA | **COMPLETE** | — | 2026-07-18 |
-| ARI | PENDING | — | — |
+| ARI | **COMPLETE** | 1 | 2026-07-18 |
 | ARS | PENDING | — | — |
 
 Baseline: M3+ (V5.16). Goal: adaptive control via post-intervention rebMagnitude.
