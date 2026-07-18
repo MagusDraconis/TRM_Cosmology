@@ -11,9 +11,9 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.24 COMPLETE → V5.25 PLANNED |
-| Current Branch | `feature/v5.24-omega-per-k-gain-and-response-conversion` |
-| Total Tests | 2743 |
+| Current Version | V5.26 COMPLETE → V5.27 PLANNED |
+| Current Branch | `feature/v5.26-c3-gain-magnitude-and-rescue-conversion` |
+| Total Tests | 2748 |
 | Failed Tests | 0 |
 | Current Status | V5.21 COMPLETE — Low-N rescue immunity and basin access confirmed |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |

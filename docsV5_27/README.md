@@ -1,0 +1,1 @@
+# V5.27 — Full-Chain Rescue Calibration**Branch:** feature/v5.27-full-chain-rescue-calibration-and-probability**Base:** V5.26 COMPLETE**Central:** Calibrate full C3 gain chain into probabilistic rescue model.
