@@ -5,7 +5,7 @@
 |-------|--------|-------|------|
 | ARP | PENDING | — | — |
 | ARE | **COMPLETE** | 1 | 2026-07-18 |
-| ARA | PENDING | — | — |
+| ARA | **COMPLETE** | — | 2026-07-18 |
 | ARI | PENDING | — | — |
 | ARS | PENDING | — | — |
 
