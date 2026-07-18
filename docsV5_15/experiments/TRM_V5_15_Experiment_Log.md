@@ -9,7 +9,7 @@
 | Suite | Status | Tests | Date |
 |-------|--------|-------|------|
 | CVP | PENDING | — | — |
-| CVE | PENDING | — | — |
+| CVE | **COMPLETE** | 4 | 2026-07-18 |
 | CVA | PENDING | — | — |
 | CVI | PENDING | — | — |
 | CVS | PENDING | — | — |
