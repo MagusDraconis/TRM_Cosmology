@@ -12,7 +12,7 @@
 |-------|--------|-------|------|
 | RGP | INITIALIZED | 8 | 2026-07-18 |
 | RGE | **COMPLETE** | 6 | 2026-07-18 |
-| RGA | PENDING | — | — |
+| RGA | **COMPLETE** | 6 | 2026-07-18 |
 | RGI | PENDING | — | — |
 | RGS | PENDING | — | — |
 
@@ -20,8 +20,8 @@
 
 ## Experiment History
 
-### RGE — Residual Geometry Execution (2026-07-18)
-6 tests, ~4.5 min. 263 residual profiles across N=67-80, 25+ features across F1-F6. M3 baseline reproduced. dStd (0.49 ES), lambda2 (0.38), dTailWidth (0.37) identified as top residual candidates. Dataset ready for RGA.
+### RGA — Residual Geometry Analysis (2026-07-18)
+6 tests, ~4.5 min. 10 residual features tested against M3 on holdout. orthHiVec is best (+3.5% holdout, +14.1% at N=72). No other feature >+3%. dTailWidth overfit. Most features neutral. M3 is near control ceiling. Gates A, E reached; G marginally reached.
 
 ---
 
