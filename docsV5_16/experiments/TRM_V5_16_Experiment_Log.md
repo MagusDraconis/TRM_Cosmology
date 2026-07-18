@@ -5,7 +5,7 @@
 | Suite | Status | Tests | Date |
 |-------|--------|-------|------|
 | EGP | PENDING | — | — |
-| EGE | PENDING | — | — |
+| EGE | **COMPLETE** | 5 | 2026-07-18 |
 | EGA | PENDING | — | — |
 | EGI | PENDING | — | — |
 | EGS | PENDING | — | — |
