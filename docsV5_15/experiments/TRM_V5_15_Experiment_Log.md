@@ -11,7 +11,7 @@
 | CVP | PENDING | — | — |
 | CVE | **COMPLETE** | 4 | 2026-07-18 |
 | CVA | **COMPLETE** | 5 | 2026-07-18 |
-| CVI | PENDING | — | — |
+| CVI | **COMPLETE** | 4 | 2026-07-18 |
 | CVS | PENDING | — | — |
 
 ## Baseline Model (Frozen from V5.14)
