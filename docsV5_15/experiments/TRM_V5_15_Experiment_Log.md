@@ -10,7 +10,7 @@
 |-------|--------|-------|------|
 | CVP | PENDING | — | — |
 | CVE | **COMPLETE** | 4 | 2026-07-18 |
-| CVA | PENDING | — | — |
+| CVA | **COMPLETE** | 5 | 2026-07-18 |
 | CVI | PENDING | — | — |
 | CVS | PENDING | — | — |
 
