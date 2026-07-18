@@ -11,7 +11,7 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.16 COMPLETE → V5.17 PLANNED |
+| Current Version | V5.17 COMPLETE → V5.18 PLANNED |
 | Current Branch | `feature/v5.13-high-basin-pathway-validation-and-scaling` |
 | Total Tests (non-LR) | 2608 |
 | Total Tests (with LR) | 2644 |
