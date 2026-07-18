@@ -4,5 +4,5 @@
 | ABP | PENDING | — |
 | ABE | **COMPLETE** | 1 | 2026-07-18 |
 | ABA | **COMPLETE** | — | 2026-07-18 |
-| ABI | PENDING | — |
+| ABI | **COMPLETE** | — | 2026-07-18 |
 | ABS | PENDING | — |
