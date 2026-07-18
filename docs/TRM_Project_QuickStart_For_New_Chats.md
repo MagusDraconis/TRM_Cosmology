@@ -11,9 +11,9 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.21 COMPLETE → V5.22 PLANNED |
-| Current Branch | `feature/v5.21-low-n-rescue-immunity-and-basin-access` |
-| Total Tests | 2688 |
+| Current Version | V5.22 COMPLETE → V5.23 PLANNED |
+| Current Branch | `feature/v5.22-inducibility-onset-and-c3-effectiveness` |
+| Total Tests | 2709 |
 | Failed Tests | 0 |
 | Current Status | V5.21 COMPLETE — Low-N rescue immunity and basin access confirmed |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
