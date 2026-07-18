@@ -2,7 +2,7 @@
 | Suite | Status | Tests |
 |-------|--------|-------|
 | ABP | PENDING | — |
-| ABE | PENDING | — |
+| ABE | **COMPLETE** | 1 | 2026-07-18 |
 | ABA | PENDING | — |
 | ABI | PENDING | — |
 | ABS | PENDING | — |
