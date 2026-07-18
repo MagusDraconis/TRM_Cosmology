@@ -11,10 +11,10 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.15 COMPLETE → V5.16 PLANNED |
+| Current Version | V5.16 COMPLETE → V5.17 PLANNED |
 | Current Branch | `feature/v5.13-high-basin-pathway-validation-and-scaling` |
 | Total Tests (non-LR) | 2608 |
-| Total Tests (with LR) | 2631 |
+| Total Tests (with LR) | 2644 |
 | Failed Tests | 0 |
 | Current Status | Research active — V5.15 COMPLETE (ceiling reached), V5.16 planned |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
