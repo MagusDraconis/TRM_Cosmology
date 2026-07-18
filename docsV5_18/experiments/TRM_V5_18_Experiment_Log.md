@@ -2,7 +2,7 @@
 | Suite | Status | Tests |
 |-------|--------|-------|
 | AGP | PENDING | — |
-| AGE | PENDING | — |
+| AGE | **COMPLETE** | 1 | 2026-07-18 |
 | AGA | PENDING | — |
 | AGI | PENDING | — |
 | AGS | PENDING | — |
