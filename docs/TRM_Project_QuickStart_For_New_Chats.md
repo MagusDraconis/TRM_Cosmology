@@ -11,12 +11,12 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.14 COMPLETE → V5.15 PLANNED |
+| Current Version | V5.15 COMPLETE → V5.16 PLANNED |
 | Current Branch | `feature/v5.13-high-basin-pathway-validation-and-scaling` |
-| Total Tests (non-LR) | 2590 |
-| Total Tests (with LR) | 2615 |
+| Total Tests (non-LR) | 2608 |
+| Total Tests (with LR) | 2631 |
 | Failed Tests | 0 |
-| Current Status | Research active — V5.14 COMPLETE, V5.15 planned |
+| Current Status | Research active — V5.15 COMPLETE (ceiling reached), V5.16 planned |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
 
 ---
@@ -81,8 +81,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.11 | BAP→BAA | Basin-accessibility asymmetry: Hi→Lo reaches Lo basin, Lo→Hi stays off-manifold. |
 | V5.12 | HBP→HBL | Two entry pathways validated. Compression-room + Crypto-Hi Mild. |
 | V5.13 | High-Basin Pathway Validation and Scaling | P1 transfers. P2 demoted. projHiVec +12.5% N=71. N-conditioned M3. |
-| V5.14 | Residual Geometry and Control Limits | orthHiVec +14.1% N=72. 9/10 candidates fail. Near ceiling. M3+ model. |
-| V5.15 | Control Ceiling and Unexplained Variance | Planned. Quantify remaining variance after M3+. |
+| V5.14 | Residual Geometry and Control Limits | orthHiVec +14.1% N=72. Near ceiling. M3+ model. |
+| V5.15 | Control Ceiling and Unexplained Variance | ~35% residual variance. Structured but not actionable. Ceiling confirmed. M3+ retained. |
+| V5.16 | Explanatory Gap and Feature Discovery | Planned. Shift to feature discovery — what remains unmeasured? |
 
 **MGCJ adds 5 non-LongRunning + 1 LongRunning.**
 **MGCK adds 6 non-LongRunning.**
