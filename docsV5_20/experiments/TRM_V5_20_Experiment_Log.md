@@ -2,7 +2,7 @@
 | Suite | Status | Tests |
 |-------|--------|-------|
 | BMP | PENDING | — |
-| BME | PENDING | — |
+| BME | **COMPLETE** | 1 | 2026-07-18 |
 | BMA | PENDING | — |
 | BMI | PENDING | — |
 | BMS | PENDING | — |
