@@ -6,7 +6,7 @@
 |-------|--------|-------|------|
 | EGP | PENDING | — | — |
 | EGE | **COMPLETE** | 5 | 2026-07-18 |
-| EGA | PENDING | — | — |
+| EGA | **COMPLETE** | 5 | 2026-07-18 |
 | EGI | PENDING | — | — |
 | EGS | PENDING | — | — |
 
