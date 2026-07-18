@@ -3,6 +3,6 @@
 |-------|--------|-------|
 | AGP | PENDING | — |
 | AGE | **COMPLETE** | 1 | 2026-07-18 |
-| AGA | PENDING | — |
+| AGA | **COMPLETE** | — | 2026-07-18 |
 | AGI | PENDING | — |
 | AGS | PENDING | — |
