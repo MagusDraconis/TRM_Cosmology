@@ -13,15 +13,15 @@
 | RGP | INITIALIZED | 8 | 2026-07-18 |
 | RGE | **COMPLETE** | 6 | 2026-07-18 |
 | RGA | **COMPLETE** | 6 | 2026-07-18 |
-| RGI | PENDING | — | — |
+| RGI | **COMPLETE** | 5 | 2026-07-18 |
 | RGS | PENDING | — | — |
 
 ---
 
 ## Experiment History
 
-### RGA — Residual Geometry Analysis (2026-07-18)
-6 tests, ~4.5 min. 10 residual features tested against M3 on holdout. orthHiVec is best (+3.5% holdout, +14.1% at N=72). No other feature >+3%. dTailWidth overfit. Most features neutral. M3 is near control ceiling. Gates A, E reached; G marginally reached.
+### RGI — Residual Intervention Limit Audit (2026-07-18)
+5 tests, ~4 min. M4 (M3+orthHiVec>0.0153) improves N=72 holdout 64%→78% (+14.1%). Neutral at N=71/75. +20% displacement helps (+8.3%), +10% destroys (-58%). Missed candidates 33-75% recoverable. N=75 signal real but sparse (4 seeds). Ceiling NOT reached — one N-specific residual degree of freedom. Gates A, B, D, E reached.
 
 ---
 
