@@ -57,7 +57,7 @@ public class V5_13_PathwayScalingAnalysis_Tests
             var cohort=ProfileCohort(n,0,99,hi,lo,50);
             var p1=cohort.Where(b=>b.cls=="P1"||b.cls=="P1b").ToArray();
             var p2=cohort.Where(b=>b.cls=="P2").ToArray();
-            _o.WriteLine($"\nN={n}: P1={p1.Length} (d0 mean={p1.Average(b=>b.d0):F4})  P2={p2.Length} (d0 mean={p2.Average(b=>b.d0):F4})");
+            _o.WriteLine($"\nN={n}: P1={p1.Length} (d0 mean={(p1.Length>0?p1.Average(b=>b.d0):0):F4})  P2={p2.Length} (d0 mean={(p2.Length>0?p2.Average(b=>b.d0):0):F4})");
 
             // Per-class matched rate
             var trials=new ConcurrentBag<Trial>();

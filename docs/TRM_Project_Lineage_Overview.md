@@ -3,8 +3,9 @@
 **Version:** 1.1
 **Date:** 2026-07-17
 **Scope:** Clockwork Cosmology V1 through V5.6 (current frontier)
-**Tests:** 2435 verified, 0 failed
-**Branch:** `feature/v5.6-recoverfp-minimal-generative-core`
+**Tests:** 2590 verified, 0 failed
+**Branch:** `feature/v5.13-high-basin-pathway-validation-and-scaling`
+**Current Frontier:** V5.13 COMPLETE → V5.14 PLANNED
 
 ---
 

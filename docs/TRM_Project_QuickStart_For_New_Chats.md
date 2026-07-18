@@ -11,12 +11,12 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.12 COMPLETE → V5.13 INITIALIZED |
+| Current Version | V5.13 COMPLETE → V5.14 PLANNED |
 | Current Branch | `feature/v5.13-high-basin-pathway-validation-and-scaling` |
-| Total Tests (non-LR) | 2539 |
-| Total Tests (with LR) | 2565 |
+| Total Tests (non-LR) | 2565 |
+| Total Tests (with LR) | 2590 |
 | Failed Tests | 0 |
-| Current Status | Research active — V5.12 pathways discovered, scaling to V5.13 |
+| Current Status | Research active — V5.13 COMPLETE, V5.14 planned |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
 
 ---
@@ -79,7 +79,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.9 | BCP→BCI | Directional commitment: Hi→Lo possible, Lo→Hi locked at CP5. N=71 transition-plastic. |
 | V5.10 | CAP→CAL | Control asymmetry confirmed. No strict persistent Lo→Hi. V5.9 commitment strengthened. |
 | V5.11 | BAP→BAA | Basin-accessibility asymmetry: Hi→Lo reaches Lo basin, Lo→Hi stays off-manifold. |
-| V5.12 | HBP→HBL | Two entry pathways validated. Compression-room + Crypto-Hi Mild. Prospective model: matched=10%, mismatched=0%. |
+| V5.12 | HBP→HBL | Two entry pathways validated. Compression-room + Crypto-Hi Mild. |
+| V5.13 | High-Basin Pathway Validation and Scaling | P1 transfers (directionally). P2 demoted. projHiVec hidden variable found (+12.5% N=71 holdout). N-conditioned M3 model. |
+| V5.14 | Residual Geometry and Control Limits | Planned. Investigate unexplained variance beyond projHiVec. |
 
 **MGCJ adds 5 non-LongRunning + 1 LongRunning.**
 **MGCK adds 6 non-LongRunning.**
@@ -194,23 +196,20 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### V5.6 MGCA — Complete. Next: MCA (Minimal Core Audit)
+### V5.13 COMPLETE — Next: V5.14 Residual Geometry and Control Limits
 
-**Status:** MGCA COMPLETE
-**Branch:** `feature/v5.6-recoverfp-minimal-generative-core`
+**Status:** V5.13 COMPLETE (2590 tests, 0 failed)
+**Branch:** `feature/v5.13-high-basin-pathway-validation-and-scaling`
 
-**Key findings from MGCA:**
+**Key findings from V5.13:**
 
-1. **Nm is a branch suppressor** — Removing Nm increases high-branch from 5/30 to 12/30.
-   Nm position matters: shifting Nm later makes it MORE suppressive (2/30).
-2. **RP is strictly necessary** — Synthetic R matrices produce zero high-branch (0/30).
-3. **Granularity is Nm-mediated** — Extra Cupd/DL destroys branches only when Nm is present.
-   Without Nm, Double-Cupd amplifies to 29/30 high (Omega=3.07).
-4. **Minimal map: Sm→RP→DL→Cupd** (4 stages, skip Nm).
-5. **DL→Cupd order is unresolved** — 3/30 vs 5/30 high, needs larger sample.
+1. **Compression-Room P1/P1b transfers directionally** — 50-56% holdout persistence at N=71/72.
+2. **projHiVec is the best residual selector** — +12.5% holdout at N=71, +8.1% at N=72.
+3. **P2 Crypto-Hi demoted** — Does not robustly transfer; dilutes precision when included.
+4. **N=67 inaccessible, N=75 strongest, N=80 saturated.**
+5. **Final model M3:** N-conditioned P1/P1b + projHiVec > -0.3281.
 
-**Next suite:** MCA — Validate Sm→RP→DL→Cupd across N=67,69,72 with 100 seeds. Characterize
-Nm dose-response. Investigate V9 runaway amplification. Resolve DL→Cupd ordering.
+**Next:** V5.14 — Investigate whether unexplained persistence variance can be reduced by additional geometric selectors, or whether the model has reached its explanatory limit. See `docsV5_13/TRM_V5_13_Final_Synthesis.md`.
 
 ---
 
