@@ -3,9 +3,9 @@
 **Version:** 1.1
 **Date:** 2026-07-17
 **Scope:** Clockwork Cosmology V1 through V5.6 (current frontier)
-**Tests:** 2730 verified, 0 failed
-**Branch:** `feature/v5.23-c3-gain-source-and-response-amplification`
-**Current Frontier:** V5.23 COMPLETE → V5.24 PLANNED
+**Tests:** 2743 verified, 0 failed
+**Branch:** `feature/v5.24-omega-per-k-gain-and-response-conversion`
+**Current Frontier:** V5.24 COMPLETE → V5.25 PLANNED
 
 ---
 
