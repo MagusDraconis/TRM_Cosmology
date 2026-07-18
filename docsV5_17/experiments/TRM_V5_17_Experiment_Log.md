@@ -4,7 +4,7 @@
 | Suite | Status | Tests | Date |
 |-------|--------|-------|------|
 | ARP | PENDING | — | — |
-| ARE | PENDING | — | — |
+| ARE | **COMPLETE** | 1 | 2026-07-18 |
 | ARA | PENDING | — | — |
 | ARI | PENDING | — | — |
 | ARS | PENDING | — | — |
