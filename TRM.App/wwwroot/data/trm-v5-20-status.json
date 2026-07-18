@@ -1,0 +1,1 @@
+{"releaseStatus":"V5.20 INITIALIZED","phase":"Adaptive Boundary Mechanism","date":"2026-07-18","testSummary":{"total":2661,"passed":2661,"failed":0},"baselineModel":"M3++ (bounded N=65-79)","suites":[{"id":"BMP","status":"INITIALIZED","tests":3}]}
