@@ -11,12 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.17 COMPLETE → V5.18 PLANNED |
-| Current Branch | `feature/v5.13-high-basin-pathway-validation-and-scaling` |
-| Total Tests (non-LR) | 2608 |
-| Total Tests (with LR) | 2644 |
+| Current Version | V5.21 COMPLETE → V5.22 PLANNED |
+| Current Branch | `feature/v5.21-low-n-rescue-immunity-and-basin-access` |
+| Total Tests | 2688 |
 | Failed Tests | 0 |
-| Current Status | Research active — V5.15 COMPLETE (ceiling reached), V5.16 planned |
+| Current Status | V5.21 COMPLETE — Low-N rescue immunity and basin access confirmed |
 | Primary Reference | `TRM_Project_Lineage_Overview.md` |
 
 ---

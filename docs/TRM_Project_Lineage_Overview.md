@@ -3,9 +3,9 @@
 **Version:** 1.1
 **Date:** 2026-07-17
 **Scope:** Clockwork Cosmology V1 through V5.6 (current frontier)
-**Tests:** 2590 verified, 0 failed
-**Branch:** `feature/v5.13-high-basin-pathway-validation-and-scaling`
-**Current Frontier:** V5.13 COMPLETE → V5.14 PLANNED
+**Tests:** 2688 verified, 0 failed
+**Branch:** `feature/v5.21-low-n-rescue-immunity-and-basin-access`
+**Current Frontier:** V5.21 COMPLETE → V5.22 PLANNED
 
 ---
 
