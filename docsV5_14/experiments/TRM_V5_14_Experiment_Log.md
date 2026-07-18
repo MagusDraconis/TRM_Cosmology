@@ -11,7 +11,7 @@
 | Suite | Status | Tests | Date |
 |-------|--------|-------|------|
 | RGP | INITIALIZED | 8 | 2026-07-18 |
-| RGE | PENDING | — | — |
+| RGE | **COMPLETE** | 6 | 2026-07-18 |
 | RGA | PENDING | — | — |
 | RGI | PENDING | — | — |
 | RGS | PENDING | — | — |
@@ -20,8 +20,8 @@
 
 ## Experiment History
 
-### RGP — Residual Geometry Protocol (2026-07-18)
-Protocol initialization. 8 verification tests. Defines frozen M3 baseline, 6 residual feature families (F1-F6), decision gates A-G, failure criteria, and validation design.
+### RGE — Residual Geometry Execution (2026-07-18)
+6 tests, ~4.5 min. 263 residual profiles across N=67-80, 25+ features across F1-F6. M3 baseline reproduced. dStd (0.49 ES), lambda2 (0.38), dTailWidth (0.37) identified as top residual candidates. Dataset ready for RGA.
 
 ---
 
