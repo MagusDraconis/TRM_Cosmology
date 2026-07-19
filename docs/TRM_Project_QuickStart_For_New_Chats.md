@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.27 INITIALIZED |
-| Current Branch | `feature/v5.27-full-chain-rescue-calibration-and-probability` |
-| Total Tests | 2748 |
+| Current Version | V5.27 COMPLETE |
+| Current Branch | `feature/v5.28-rescue-risk-stratum-and-control-policy` |
+| Total Tests | 2762 |
 | Failed Tests | 0 |
-| Current Status | V5.26 COMPLETE — full-chain rescue conversion is probabilistic. V5.27 INITIALIZED — calibrate rescue probability from complete chain. |
+| Current Status | V5.27 COMPLETE — rescue-risk stratum calibrated. V5.28 INITIALIZED — policy evaluation. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -93,9 +93,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
-| V5.27 | Full Chain Rescue Calibration | INITIALIZED — calibrate probability from complete chain. |
+| V5.27 | Full Chain Rescue Calibration | COMPLETE — c3OmgS>0.1 two-stratum risk table. P_A=0.0%, P_B=9.6%. |
 
-**Cumulative total: 2748 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2762 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -223,29 +223,22 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.27
+### Current Frontier — V5.28
 
-**Status:** V5.26 COMPLETE → V5.27 INITIALIZED
-**Branch:** `feature/v5.27-full-chain-rescue-calibration-and-probability`
+**Status:** V5.27 COMPLETE → V5.28 INITIALIZED
+**Branch:** `feature/v5.28-rescue-risk-stratum-and-control-policy`
 
-**Validated chain:**
-```
-d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue
-```
+**V5.27 validated model:**
+- Frozen c3OmegaShift > 0.1 two-stratum risk table
+- P_A = 0.0% [0.0%–0.3%], P_B = 9.6% [6.6%–13.6%]
+- Full C3 gain chain retained as mechanistic explanation
+- c3OmegaShift is the minimal robust predictive summary
 
-**Current question:** Can this full chain produce a calibrated rescue probability?
+**V5.28 question:** Can the validated c3OmegaShift risk stratum define a safe
+adaptive control policy that reduces wasted interventions while preserving zero damage?
 
-**Current warning:** Do not search for a deterministic one-threshold rescue rule. V5.26
-rejected that. Rescue is probabilistic.
-
-**Current model:** M3++ remains the preferred adaptive model.
-
-**V5.27 goal:** Probability calibration from the complete chain, not new mechanism discovery.
-Compare full-chain model against sign-rule-only and c3OmegaShift-only baselines.
-
-**Key constraint:** Use only validated chain variables — d_tail, deltaD, deltaK, omegaPerK
-sign, omegaPerK magnitude, c3OmegaShift, omDist, lambda1. Do not modify M3++, do not add
-correction classes, do not retune thresholds, do not introduce new variables.
+**Key constraint:** M3++ is frozen. No retuning. Policy evaluation only. See
+`docsV5_27/TRM_V5_27_Final_Synthesis.md` for complete V5.27 summary.
 
 ---
 
@@ -278,7 +271,7 @@ explicitly differentiate between:
 
 Do not introduce new theory. Do not overstate results. Do not claim physical
 constants, spacetime, relativity, quantum mechanics, cosmology, emergence, or
-universal control. The project has 2748 tests with 0 failures. V5.27 is the
+universal control. The project has 2762 tests with 0 failures. V5.28 is the
 active research frontier.
 ```
 

@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.27
-**Tests:** 2748 verified, 0 failed
-**Branch:** `feature/v5.27-full-chain-rescue-calibration-and-probability`
-**Current Frontier:** V5.26 COMPLETE → V5.27 INITIALIZED
+**Tests:** 2762 verified, 0 failed
+**Branch:** `feature/v5.28-rescue-risk-stratum-and-control-policy`
+**Current Frontier:** V5.27 COMPLETE → V5.28 INITIALIZED
 
 ---
 
@@ -791,29 +791,38 @@ is mixed and probabilistic. No single layer guarantees rescue.
 - Rescue is probabilistic, not threshold-determined.
 - No single chain layer is sufficient for rescue prediction.
 
-### V5.27 — Full Chain Rescue Calibration and Probability — INITIALIZED
+### V5.27 — Full Chain Rescue Calibration and Probability — COMPLETE
 
 **Key question:** Can the complete validated C3 gain chain be calibrated into a reliable
 probabilistic rescue model?
 
-**Status:** INITIALIZED
+**Answer:** Yes, but not as a full-chain continuous model. The complete chain is mechanistically
+valid but the best practical calibration is a frozen two-stratum table based on c3OmegaShift > 0.1.
 
 **Validated chain:**
 ```
 d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue
 ```
 
-**Expected task:** Calibrate probability from complete chain. Compare against sign rule,
-c3OmegaShift, omegaPerK alone. Validate across N and cohorts. Avoid deterministic rescue
-claims.
+**Final calibrated table (independent validation pool, n=1377):**
 
-**Constraints:**
-- Do not modify M3++.
-- Do not add correction classes.
-- Do not retune thresholds.
-- Do not add new variables.
-- Use only validated chain variables: d_tail, deltaD, deltaK, omegaPerK sign, omegaPerK
-  magnitude, c3OmegaShift, omDist, lambda1.
+| Stratum | P(rescue) | 95% CI |
+|---------|----------:|--------|
+| c3OmgS ≤ 0.1 | 0.0% | [0.0%, 0.3%] |
+| c3OmgS > 0.1 | 9.6% | [6.6%, 13.6%] |
+
+**Key findings:**
+- c3OmegaShift > 0.1 is the strongest validated rescue-risk stratifier.
+- Full-chain predictive superiority is rejected.
+- Mechanistic chain is retained as explanatory structure.
+- 10/10 independent validation splits show P_B > P_A. Zero inversions.
+- Pooled independent CIs are statistically separated.
+- c3OmegaShift is the minimal robust sufficient summary.
+- Rescue is probabilistic, not deterministic.
+
+**Suites:** FCP (3), FCE (5), FCA (5), FCI (1). 14 tests, 0 failed.
+
+**Status:** COMPLETE. See `docsV5_27/TRM_V5_27_Final_Synthesis.md`.
 
 ---
 
@@ -1083,8 +1092,8 @@ maintained to prevent overinterpretation:
 | V5.24 | Omega-per-K Gain and Response Conversion | — | COMPLETE |
 | V5.25 | Omega Gain Sign Validation | — | COMPLETE |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | — | COMPLETE |
-| V5.27 | Full Chain Rescue Calibration and Probability | — | INITIALIZED |
-| **Total** | | **2748** | **0 failed** |
+| V5.27 | Full Chain Rescue Calibration and Probability | 14 | COMPLETE |
+| **Total** | | **2762** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2748 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
@@ -1164,10 +1173,11 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2748 tests, 0 failed. V5.26 COMPLETE — rescue conversion is probabilistic.
-V5.27 INITIALIZED — calibrating rescue probability from the complete validated C3 gain chain.
-Current branch: `feature/v5.27-full-chain-rescue-calibration-and-probability`.
-Preferred model: M3++ (adaptive). See section F2 for V5.7–V5.27 details.
+**Current status:** 2762 tests, 0 failed. V5.27 COMPLETE — c3OmgS>0.1 risk stratum
+validated. V5.28 INITIALIZED — risk-stratum control policy evaluation.
+Current branch: `feature/v5.28-rescue-risk-stratum-and-control-policy`.
+Preferred model: M3++ (adaptive) with frozen c3OmgS>0.1 two-stratum risk table.
+See section F2 for V5.7–V5.27 details.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
