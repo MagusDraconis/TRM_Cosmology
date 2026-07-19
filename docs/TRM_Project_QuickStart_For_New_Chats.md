@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.43 COMPLETE |
-| Current Branch | `feature/v5.43-hidden-response-state-and-temporal-trace-discovery` |
-| Total Tests | 2853 |
+| Current Version | V5.44 COMPLETE |
+| Current Branch | `feature/v5.44-c3-correction-response-instrumentation-and-microstate-audit` |
+| Total Tests | 2859 |
 | Failed Tests | 0 |
-| Current Status | V5.43 COMPLETE — C3 computation sensitivity localized. V5.44 PENDING. |
+| Current Status | V5.44 COMPLETE — C3 microstate identified, N-dependent bridge. V5.45 PENDING. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -99,8 +99,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.41 | Causal Test Design Under Attractor Absorption | COMPLETE — perturbation invalidated; Stop-Low outcome-validated. |
 | V5.42 | Counterfactual Trace and Natural Variation Causal Rejection | COMPLETE — 7 sufficiency claims rejected; 63.6% divergence. |
 | V5.43 | Hidden Response State and Temporal Trace Discovery | COMPLETE — C3 computation sensitivity; unrecorded microstate. |
+| V5.44 | C3 Correction Response Instrumentation and Microstate Audit | COMPLETE — c3ExitOm2 identified; N-dependent bridge. |
 
-**Cumulative total: 2853 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2859 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -279,7 +280,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. The project has 2853 tests with 0 failures. V5.43 is the active research frontier.
+Do not introduce new theory. The project has 2859 tests with 0 failures. V5.44 is the active research frontier.
 ```
 
 ---
