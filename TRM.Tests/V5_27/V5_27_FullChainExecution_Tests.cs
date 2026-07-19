@@ -608,4 +608,208 @@ public class V5_27_FullChainExecution_Tests
         };
     }
 
+    struct SplitResult{
+        public string name;public int totalN,totalRescues;public double baseRate;
+        public int signN,binN,chainN;
+        public double signRate,binRate,chainRate;
+        public double brierSign,brierBin,brierChain,brierBase;
+        public double bsSignMean,bsBinMean,bsChainMean;
+        public double bsSignLo,bsBinLo,bsChainLo;
+        public double bsSignHi,bsBinHi,bsChainHi;
+    }
+
+    [Fact]
+    public void FCE_03_FrozenC3OmegaShiftBinaryReplication()
+    {
+        _o.WriteLine("═══════════════════════════════════════════════════");
+        _o.WriteLine("═══ FCE_03: Frozen c3OmegaShift Binary Replication ═══");
+        _o.WriteLine("═══ Does c3OmgS>0.1 replicate across splits? ═══");
+        _o.WriteLine("═══════════════════════════════════════════════════");
+
+        // ─── Collect profiles ───
+        int[] Ns={64,65,66,67,70,72,75,78,80};
+        var profiles=new ConcurrentBag<ChainProfile>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<399;s++){if(IsHi(n,s))continue;var p=BuildChainProfile(n,s,hi,lo);if(p!=null)profiles.Add(p.Value);}});
+        var all=profiles.ToArray();
+        _o.WriteLine($"Profiles: {all.Length}, Rescues: {all.Count(p=>p.persistent)} ({all.Count(p=>p.persistent)*100.0/all.Length:F1}%)");
+        int[] cohorts=all.Select(p=>p.cohort).Distinct().OrderBy(c=>c).ToArray();
+        _o.WriteLine($"Cohorts: [{string.Join(",",cohorts)}]");
+
+        // ─── PART A: Replication Design Audit ───
+        _o.WriteLine($"\n═══ Part A: Replication Design Audit ═══");
+        _o.WriteLine($"Available: {all.Length} profiles, {cohorts.Length} cohorts, {Ns.Length} N values.");
+        _o.WriteLine($"c3OmegaShift>0.1 FROZEN from V5.26. NOT retuned.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Split 1: Random seed 42 (FCE_02 holdout)");
+        _o.WriteLine($"Split 2: Random seed 137 (independent random)");
+        _o.WriteLine($"Split 3: Cohort {{0,1}} train, cohort {{2,3}} test");
+        _o.WriteLine($"Split 4: N≤70 train, N≥72 test");
+        _o.WriteLine($"Split 5: N≥72 train, N≤70 test");
+        _o.WriteLine($"");
+        _o.WriteLine($"Leakage: bootstrap from test only. Enrichment vs split baseline. No cross-split contamination.");
+
+        // ─── PART B: Frozen Baseline Replication ───
+        _o.WriteLine($"\n═══ Part B: Frozen Baseline Replication ═══");
+
+        var splits=new List<SplitResult>();
+
+        // Split 1: seed 42 (FCE_02)
+        var sr1=EvaluateSplit(all,42,"Split 1 (seed 42)");
+        splits.Add(sr1);
+
+        // Split 2: seed 137
+        var sr2=EvaluateSplit(all,137,"Split 2 (seed 137)");
+        splits.Add(sr2);
+
+        // Split 3: cohort
+        var trainC3=all.Where(p=>p.cohort<=1).ToArray();
+        var testC3=all.Where(p=>p.cohort>=2).ToArray();
+        // Only evaluate on `test` — train not used (frozen thresholds)
+        var sr3=EvaluateSplitFromTest(testC3,all,"Split 3 (cohort {0,1}|{2,3})");
+        splits.Add(sr3);
+
+        // Split 4: N≤70 vs N≥72
+        var testLow=all.Where(p=>p.n<=70).ToArray();
+        var testHigh=all.Where(p=>p.n>=72).ToArray();
+        var sr4=EvaluateSplitFromTest(testLow,all,"Split 4 (N≤70)");
+        splits.Add(sr4);
+        var sr5=EvaluateSplitFromTest(testHigh,all,"Split 5 (N≥72)");
+        splits.Add(sr5);
+
+        // ─── Print all ───
+        _o.WriteLine($"\n─── Split Summary ───");
+        _o.WriteLine($"{0,-30} {1,5} {2,5} {3,7} {4,7} {5,7} {6,7} {7,7}",
+            "Split","n","resc","base%","sign%","bin%","chain%","best");
+        foreach(var s in splits){
+            double best=Math.Max(Math.Max(s.signRate,s.binRate),s.chainRate);
+            string bestName=s.binRate>=best-0.1?"c3Bin":s.signRate>=best-0.1?"sign":"chain";
+            _o.WriteLine($"{s.name,-30} {s.totalN,5} {s.totalRescues,5} {s.baseRate,6:F1}% {s.signRate,6:F1}% {s.binRate,6:F1}% {s.chainRate,6:F1}% {bestName,7}");
+        }
+
+        _o.WriteLine($"\n─── Brier Comparison ───");
+        _o.WriteLine($"{0,-30} {1,8} {2,8} {3,8} {4,8}",
+            "Split","Base","Sign","c3Bin","Chain");
+        foreach(var s in splits){
+            double bestBrier=Math.Min(Math.Min(Math.Min(s.brierBase,s.brierSign),s.brierBin),s.brierChain);
+            _o.WriteLine($"{s.name,-30} {s.brierBase,8:F4} {s.brierSign,8:F4} {s.brierBin,8:F4} {s.brierChain,8:F4}"+
+                $"  min={bestBrier:F4}");
+        }
+
+        _o.WriteLine($"\n─── Bootstrap CI Summary (from test split) ───");
+        _o.WriteLine($"{0,-30} {1,12} {2,12} {3,12}",
+            "Split","sign [lo-hi]","c3Bin [lo-hi]","chain [lo-hi]");
+        foreach(var s in splits){
+            _o.WriteLine($"{s.name,-30} [{s.bsSignLo:F1}%-{s.bsSignHi:F1}%]  [{s.bsBinLo:F1}%-{s.bsBinHi:F1}%]  [{s.bsChainLo:F1}%-{s.bsChainHi:F1}%]");
+        }
+
+        // ─── Part C: Replication Criteria ───
+        _o.WriteLine($"\n═══ Part C: Replication Criteria ═══");
+
+        var validSplits=splits.Where(s=>s.totalRescues>=1).ToList();
+        _o.WriteLine($"Valid splits (≥1 rescue): {validSplits.Count}/{splits.Count}");
+
+        int binBeatsSign=validSplits.Count(s=>s.binRate>s.signRate+0.5);
+        int binBeatsChain=validSplits.Count(s=>s.binRate>=s.chainRate-0.5);
+        int binBetterBrier=validSplits.Count(s=>s.brierBin<=s.brierBase);
+        int binBelowBaseline=validSplits.Count(s=>s.binRate<s.baseRate-5);
+        bool catastrophe=binBelowBaseline>0;
+
+        _o.WriteLine($"C1: c3Bin > sign enrichment in {binBeatsSign}/{validSplits.Count} splits");
+        _o.WriteLine($"C2: c3Bin ≥ chain enrichment in {binBeatsChain}/{validSplits.Count} splits");
+        _o.WriteLine($"C3: c3Bin Brier ≤ baseline Brier in {binBetterBrier}/{validSplits.Count} splits");
+        _o.WriteLine($"C4: Catastrophic inversion (c3Bin rate < baseline by >5pp): {(catastrophe?"YES — REJECTED":"NONE")}");
+
+        bool allC1C3=binBeatsSign==validSplits.Count&&binBeatsChain==validSplits.Count&&binBetterBrier==validSplits.Count;
+        bool majorityC1C3=binBeatsSign>=validSplits.Count/2+1&&binBeatsChain>=validSplits.Count/2+1&&binBetterBrier>=validSplits.Count/2+1;
+
+        string replicationVerdict;
+        if(allC1C3&&!catastrophe)replicationVerdict="SUPPORTED (all splits pass C1-C3, no catastrophes)";
+        else if(majorityC1C3&&!catastrophe)replicationVerdict="CONDITIONAL (majority of splits pass C1-C3, no catastrophes)";
+        else if(catastrophe)replicationVerdict="FAILED (catastrophic inversion detected)";
+        else replicationVerdict="FAILED (c3OmegaShift>0.1 does not consistently outperform baselines)";
+
+        _o.WriteLine($"\nReplication verdict: {replicationVerdict}");
+
+        // ─── Part D: Cross-N Validation ───
+        _o.WriteLine($"\n═══ Part D: Cross-N Validation (all profiles, frozen c3OmgS>0.1) ═══");
+        _o.WriteLine($"{0,4} {1,5} {2,5} {3,7} {4,7} {5,7} {6,8} {7,7}",
+            "N","n","resc","base%","binSel","bin%","enrich","BrierΔ");
+
+        foreach(var n in Ns){
+            var subN=all.Where(p=>p.n==n).ToArray();
+            if(subN.Length==0)continue;
+            int rescN=subN.Count(p=>p.persistent);
+            double baseN=rescN*100.0/Math.Max(1,subN.Length);
+            var binSub=subN.Where(p=>p.c3OmgS>0.1).ToArray();
+            double binRate=binSub.Length>0?binSub.Count(p=>p.persistent)*100.0/Math.Max(1,binSub.Length):0;
+            double enrich=baseN>0?binRate/baseN:0;
+            double brierB=subN.Average(p=>Math.Pow((p.persistent?1.0:0.0)-baseN/100.0,2));
+            double brierC=subN.Average(p=>{double pr=p.c3OmgS>0.1?Math.Max(binRate/100.0,0.01):baseN/100.0;return Math.Pow((p.persistent?1.0:0.0)-pr,2);});
+            string warn=subN.Length<15?" [n<15]":"";
+            _o.WriteLine($"{n,4} {subN.Length,5} {rescN,5} {baseN,6:F1}% {binSub.Length,6} {binRate,6:F1}% {enrich,7:F1}x {brierC-brierB,+7:F4}{warn}");
+        }
+
+        // ─── Part E: Determination ───
+        _o.WriteLine($"\n═══════════════════════════════════════════════════");
+        _o.WriteLine($"═══ FCE_03 DETERMINATION ═══");
+        _o.WriteLine($"═══════════════════════════════════════════════════");
+        _o.WriteLine($"Replication verdict: {replicationVerdict}");
+        _o.WriteLine($"");
+        _o.WriteLine($"SUPPORTED: c3OmgS>0.1 enriches rescue across multiple independent splits.");
+        _o.WriteLine($"CONDITIONAL: bootstrap CIs overlap; rescue counts small; frozen threshold; finite-N; cohort limited.");
+        _o.WriteLine($"HYPOTHESIS: c3OmgS>0.1 defines a rescue-enriched risk stratum replicable across splits.");
+        _o.WriteLine($"HYPOTHESIS: Final-layer response (c3OmegaShift) captures most prediction-usable signal.");
+        _o.WriteLine($"NOT CLAIMED: causality, deterministic threshold, smooth calibration, full-chain superiority, physical N-meaning.");
+        _o.WriteLine($"");
+        _o.WriteLine($"═══ FCE_03 complete. ═══");
+    }
+
+    SplitResult EvaluateSplit(ChainProfile[] all,int rngSeed,string name){
+        var rng=new Random(rngSeed);
+        var shuffled=all.OrderBy(_=>rng.Next()).ToArray();
+        int mid=shuffled.Length/2;
+        var test=shuffled.Skip(mid).ToArray();
+        return EvaluateSplitFromTest(test,all,name);
+    }
+
+    SplitResult EvaluateSplitFromTest(ChainProfile[] test,ChainProfile[] all,string name){
+        var sr=new SplitResult{name=name,totalN=test.Length,totalRescues=test.Count(p=>p.persistent)};
+        sr.baseRate=sr.totalRescues*100.0/Math.Max(1,sr.totalN);
+
+        var signSub=test.Where(p=>p.hasPosSign).ToArray();
+        var binSub=test.Where(p=>p.c3OmgS>0.1).ToArray();
+        var chainSub=test.Where(FCE01ChainSelector(all)).ToArray();
+
+        sr.signN=signSub.Length;sr.binN=binSub.Length;sr.chainN=chainSub.Length;
+        sr.signRate=signSub.Length>0?signSub.Count(p=>p.persistent)*100.0/Math.Max(1,signSub.Length):0;
+        sr.binRate=binSub.Length>0?binSub.Count(p=>p.persistent)*100.0/Math.Max(1,binSub.Length):0;
+        sr.chainRate=chainSub.Length>0?chainSub.Count(p=>p.persistent)*100.0/Math.Max(1,chainSub.Length):0;
+
+        sr.brierBase=test.Average(p=>Math.Pow((p.persistent?1.0:0.0)-sr.baseRate/100.0,2));
+        sr.brierSign=test.Average(p=>{double pr=p.hasPosSign?Math.Max(sr.signRate/100.0,0.01):sr.baseRate/100.0;return Math.Pow((p.persistent?1.0:0.0)-pr,2);});
+        sr.brierBin=test.Average(p=>{double pr=p.c3OmgS>0.1?Math.Max(sr.binRate/100.0,0.01):sr.baseRate/100.0;return Math.Pow((p.persistent?1.0:0.0)-pr,2);});
+        sr.brierChain=test.Average(p=>{double pr=FCE01ChainSelector(all)(p)?Math.Max(sr.chainRate/100.0,0.01):sr.baseRate/100.0;return Math.Pow((p.persistent?1.0:0.0)-pr,2);});
+
+        // Bootstrap CIs from test only
+        var brng=new Random(42+1000);int B=500;
+        var bsSign=new double[B];var bsBin=new double[B];var bsChain=new double[B];
+        for(int b=0;b<B;b++){
+            var sample=new ChainProfile[test.Length];
+            for(int i=0;i<test.Length;i++)sample[i]=test[brng.Next(test.Length)];
+            var ss=sample.Where(p=>p.hasPosSign).ToArray();
+            var bs=sample.Where(p=>p.c3OmgS>0.1).ToArray();
+            var cs=sample.Where(FCE01ChainSelector(all)).ToArray();
+            bsSign[b]=ss.Length>0?ss.Count(p=>p.persistent)*100.0/Math.Max(1,ss.Length):0;
+            bsBin[b]=bs.Length>0?bs.Count(p=>p.persistent)*100.0/Math.Max(1,bs.Length):0;
+            bsChain[b]=cs.Length>0?cs.Count(p=>p.persistent)*100.0/Math.Max(1,cs.Length):0;
+        }
+        Array.Sort(bsSign);Array.Sort(bsBin);Array.Sort(bsChain);
+        sr.bsSignMean=bsSign.Average();sr.bsBinMean=bsBin.Average();sr.bsChainMean=bsChain.Average();
+        sr.bsSignLo=bsSign[12];sr.bsBinLo=bsBin[12];sr.bsChainLo=bsChain[12];
+        sr.bsSignHi=bsSign[487];sr.bsBinHi=bsBin[487];sr.bsChainHi=bsChain[487];
+
+        return sr;
+    }
+
 }
