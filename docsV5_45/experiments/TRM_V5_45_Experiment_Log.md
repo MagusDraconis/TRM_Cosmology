@@ -2,7 +2,7 @@
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
 | CAP | PLANNED | — | — |
-| CAE | PLANNED | — | — |
+| CAE | COMPLETE | 1 | Model E — Mixed N+state autonomy. Hi-bridge [72,75], Lo [67,70]. All gates. |
 | CAA | PLANNED | — | — |
 | CAI | PLANNED | — | — |
 | CAS | PLANNED | — | — |
