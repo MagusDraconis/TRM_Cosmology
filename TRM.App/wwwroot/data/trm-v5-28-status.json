@@ -1,0 +1,1 @@
+{"releaseStatus":"V5.28 INITIALIZED","phase":"Rescue Risk Stratum and Control Policy","date":"2026-07-19","testSummary":{"total":2762,"passed":2762,"failed":0},"baselineModel":"M3++ (from V5.17-V5.18), c3OmgS>0.1 risk stratum (from V5.27)","nextVersion":null,"suites":[{"id":"RSP","status":"PLANNED","tests":0}]}
