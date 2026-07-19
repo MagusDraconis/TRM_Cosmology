@@ -3,9 +3,13 @@
 |-------|--------|-------|---------|
 | TDP | COMPLETE | 3 | Protocol frozen. Causal test taxonomy defined. |
 | TDE | COMPLETE | 1 | D1 INVALIDATED. D2/D5/D6 FEASIBLE. D7 ACCEPTED. All 8 gates reached. |
-| TDA | PLANNED | — | — |
-| TDI | PLANNED | — | — |
-| TDS | PLANNED | — | — |
+| TDA | COMPLETE | 1 | Identifiability matrix built. 8 claims REJECTED. Natural variation = STABLE DIAGNOSTIC. |
+| TDI | SKIPPED | — | TDA subsumes audit function |
+| TDS | PLANNED | — | Final V5.41 synthesis |
+
+## TDA Results
+
+**50 profiles, 6 N.** Natural variation = STABLE DIAGNOSTIC RELATION (tercile sep=0.27, rescue delta=16.7pp). Invariance = WEAKLY INVARIANT (consistent sign, std=0.224). Mediation = TEMPORALLY AMBIGUOUS. Counterfactual trace = OBSERVATIONAL (rebMag diff=-1.94). 8 causal claims REJECTED. 30/50 wrong-direction profiles. Stop-Low = OUTCOME-VALIDATED (0 rescues A, 4 rescues B). No causal closure required.
 
 ## TDE Results
 
