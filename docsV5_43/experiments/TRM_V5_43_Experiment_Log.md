@@ -2,7 +2,7 @@
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
 | HTP | PLANNED | — | — |
-| HTE | PLANNED | — | — |
+| HTE | COMPLETE | 1 | Model G — Unresolved. 62.5% divergence at T4 only. Gates A-G,I reached. |
 | HTA | PLANNED | — | — |
 | HTI | PLANNED | — | — |
 | HTS | PLANNED | — | — |
