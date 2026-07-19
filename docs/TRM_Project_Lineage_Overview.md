@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2859 verified, 0 failed
-**Branch:** `feature/v5.44-c3-correction-response-instrumentation-and-microstate-audit`
-**Current Frontier:** V5.44 COMPLETE → V5.45 PENDING
+**Tests:** 2865 verified, 0 failed
+**Branch:** `feature/v5.45-c3-response-autonomy-and-n-dependent-bridge`
+**Current Frontier:** V5.45 COMPLETE → V5.46 PENDING
 
 ---
 
@@ -1028,6 +1028,24 @@ the microstate but does not achieve full causal closure. Stop-Low valid. V6 NOT 
 
 **Status:** COMPLETE. See `docsV5_44/TRM_V5_44_Final_Synthesis.md`.
 
+### V5.45 — C3 Response Autonomy and N-Dependent Bridge (CAP→CAI) — COMPLETE
+
+Investigated what controls the autonomous C3 response and N-dependent entry→exit bridge.
+
+**CAE:** Bridge mapped — bimodal: N=67,70 LOW, N=72,75 HIGH. All rescues in high-bridge N.
+
+**CAA:** N=67 explained — range=0.049, zero variance. Entry variance necessary, not sufficient.
+N=70 anomalous — wide range but weak bridge.
+
+**CAI:** N=70 SOLVED — range=1.468 but IQR=0.023, bulk compressed, tail outliers.
+N=65 = low-sample artifact. Model upgraded to D — entry-variance + N-window interaction,
+distribution shape (IQR) is key factor.
+
+**Conclusion:** Bridge requires usable entry-state bulk spread (IQR), not just raw range.
+Origin of N-dependent distribution shape remains open. Stop-Low valid. V6 NOT READY.
+
+**Status:** COMPLETE. See `docsV5_45/TRM_V5_45_Final_Synthesis.md`.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1332,7 +1350,8 @@ maintained to prevent overinterpretation:
 | V5.42 | Counterfactual Trace and Natural Variation Causal Rejection | 5 | COMPLETE |
 | V5.43 | Hidden Response State and Temporal Trace Discovery | 5 | COMPLETE |
 | V5.44 | C3 Correction Response Instrumentation and Microstate Audit | 7 | COMPLETE |
-| **Total** | | **2859** | **0 failed** |
+| V5.45 | C3 Response Autonomy and N-Dependent Bridge | 7 | COMPLETE |
+| **Total** | | **2865** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at

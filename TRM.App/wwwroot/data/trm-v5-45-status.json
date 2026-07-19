@@ -1,1 +1,1 @@
-{"releaseStatus":"V5.45 INITIALIZED","phase":"C3 Response Autonomy and N-Dependent Bridge","date":"2026-07-19","testSummary":{"total":2859,"passed":2859,"failed":0}}
+{"releaseStatus":"V5.45 COMPLETE","phase":"C3 Response Autonomy and N-Dependent Bridge","date":"2026-07-19","testSummary":{"total":2865,"passed":2865,"failed":0},"suites":[{"name":"CAP","status":"COMPLETE","tests":3},{"name":"CAE","status":"COMPLETE","tests":1},{"name":"CAA","status":"COMPLETE","tests":1},{"name":"CAI","status":"COMPLETE","tests":1},{"name":"CAS","status":"COMPLETE","tests":0}]}
