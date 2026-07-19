@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.30 COMPLETE |
-| Current Branch | `feature/v5.31-policy-limit-mapping-and-failure-discovery` |
-| Total Tests | 2780 |
+| Current Version | V5.31 COMPLETE |
+| Current Branch | `feature/v5.32-stop-low-external-validation-and-reproducibility` |
+| Total Tests | 2786 |
 | Failed Tests | 0 |
-| Current Status | V5.30 COMPLETE — generalized with margin caveat. V5.31 INITIALIZED — failure discovery. |
+| Current Status | V5.31 COMPLETE — structural robustness confirmed. V5.32 INITIALIZED — external reproducibility. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -93,10 +93,10 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
-| V5.30 | Policy Generalization and Efficiency | COMPLETE — generalized with margin caveat. 73% work reduction. |
-| V5.31 | Policy Limit Mapping and Failure Discovery | INITIALIZED — active search for failure regimes. |
+| V5.31 | Policy Limit Mapping and Failure Discovery | COMPLETE — structural robustness (oPK 58x). |
+| V5.32 | External Validation and Reproducibility | INITIALIZED — independent regeneration. |
 
-**Cumulative total: 2780 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2786 tests, 0 failed as of 2026-07-19.**
 
 ---
 
