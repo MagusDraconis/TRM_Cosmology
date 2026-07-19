@@ -10,6 +10,16 @@
 
 ---
 
+## Current Preferred Restart Documents
+
+For any new LLM chat or Copilot session, read in this order:
+
+1. `TRM_Current_Frontier.md` (this file) — active frontier, model, constraints, next prompt
+2. `TRM_Project_QuickStart_For_New_Chats.md` — operational briefing, supported findings, open problems
+3. `TRM_Project_Lineage_Overview.md` — complete V1 → V5.27 historical lineage
+
+---
+
 ## One-Sentence Current State
 
 The project has moved from static branch control to adaptive response control and now to

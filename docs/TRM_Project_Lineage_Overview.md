@@ -1172,8 +1172,7 @@ Preferred model: M3++ (adaptive). See section F2 for V5.7–V5.27 details.
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
 
-**Recommended first reads:** V4.5 Completion (governance template), V5.2 Completion
-(corrected stability picture), V5.6 MGCA Analysis (current frontier), this document (A–O).
+**Recommended first reads:** TRM_Current_Frontier.md (current frontier), TRM_Project_QuickStart_For_New_Chats.md (operational briefing), V4.5 Completion (governance template), V5.6 MGCA Analysis (historical turning point), this document (A–O).
 
 ---
 

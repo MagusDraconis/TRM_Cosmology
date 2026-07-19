@@ -180,14 +180,24 @@ fundamental decomposition of the attractor.
 
 ## H. Current Open Problems
 
-1. **Nm mechanism characterized (MGCB):** Gate C — distance-focused. Nm amplifies d_std (+0.41), d_p90 (+0.66), d_max (+13.5) uniformly (CV=0.05). K/Omega untouched directly. Downstream: amplified d → smaller K via Cupd → branch suppression. Next: MGCE-d.
-2. **V9 runaway mechanism** — What prevents all 30/30 seeds from going high in Skip-Nm+Double-Cupd?
-3. **DL→Cupd order sensitivity** — Is stage order truly necessary or sampling noise?
-4. **Pass-count sensitivity without Nm** — Does 3 or 6 Cupd passes change branch formation?
-5. **Continuum expansion** — Do branch signatures hold at N > 200, N > 500?
-6. **External validation** — Can independent reviewers reproduce the RecoverFP pipeline?
-7. **Coupling-law sensitivity** — How do Gaussian and power-law coupling change RecoverFP?
-8. **SI-unit mapping** — Can dimensionless predictions be physically compared under anti-circularity governance?
+### V5.27 Frontier Open Problem
+
+1. **Full-chain rescue calibration:** Can rescue probability be calibrated from the complete
+   validated C3 gain chain better than any single threshold rule? Compare full-chain model
+   against sign-rule-only and c3OmegaShift-only baselines.
+
+### Historical Unresolved Questions (V5.6 era)
+
+These were open at V5.6 completion and partially addressed by V5.7–V5.26, but definitive
+closure was not reached for all:
+
+1. **V9 runaway mechanism** — What prevents all 30/30 seeds from going high in Skip-Nm+Double-Cupd?
+2. **DL→Cupd order sensitivity** — Is stage order truly necessary or sampling noise?
+3. **Pass-count sensitivity without Nm** — Does 3 or 6 Cupd passes change branch formation?
+4. **Continuum expansion** — Do branch signatures hold at N > 200, N > 500?
+5. **External validation** — Can independent reviewers reproduce the RecoverFP pipeline?
+6. **Coupling-law sensitivity** — How do Gaussian and power-law coupling change RecoverFP?
+7. **SI-unit mapping** — Can dimensionless predictions be physically compared under anti-circularity governance?
 
 ---
 
