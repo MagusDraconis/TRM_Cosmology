@@ -1,0 +1,1 @@
+{"releaseStatus":"V5.29 INITIALIZED","phase":"Risk-Stratum Boundary and Threshold Robustness","date":"2026-07-19","testSummary":{"total":2768,"passed":2768,"failed":0},"baselineModel":"M3++ (unchanged), Stop-Low policy (from V5.28)","nextVersion":null,"suites":[{"id":"RBP","status":"PLANNED","tests":0}]}
