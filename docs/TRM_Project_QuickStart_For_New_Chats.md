@@ -11,9 +11,9 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.37 COMPLETE |
-| Current Branch | `feature/v5.38-response-state-interaction-and-k-rebound-dominance` |
-| Total Tests | 2823 |
+| Current Version | V5.38 COMPLETE |
+| Current Branch | `feature/v5.39-attractor-absorption-and-perturbation-resistance` |
+| Total Tests | 2829 |
 | Failed Tests | 0 |
 | Current Status | V5.35 COMPLETE — causal closure falsified. V5.36 INITIALIZED — c3OmgS origin. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
@@ -93,10 +93,10 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
-| V5.37 | Omega Proximity Causal Scaling | COMPLETE — downgraded to weak conditional. |
-| V5.38 | Response-State Interaction and K-Rebound Dominance | INITIALIZED — interaction analysis. |
+| V5.38 | Response-State Interaction and K-Rebound Dominance | COMPLETE — diagnostic hierarchy, not causal. |
+| V5.39 | Attractor Absorption and Perturbation Resistance | INITIALIZED — why does attractor absorb K-perturb? |
 
-**Cumulative total: 2823 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2829 tests, 0 failed as of 2026-07-19.**
 
 ---
 
