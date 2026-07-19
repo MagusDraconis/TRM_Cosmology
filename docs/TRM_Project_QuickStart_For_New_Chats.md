@@ -1,9 +1,9 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 1.1
-**Date:** 2026-07-17
+**Version:** 2.0
+**Date:** 2026-07-19
 **Read time:** < 5 minutes
-**Primary reference:** `docs/TRM_Project_Lineage_Overview.md`
+**Primary reference:** `docs/TRM_Project_Lineage_Overview.md`, `docs/TRM_Current_Frontier.md`
 
 ---
 
@@ -11,12 +11,12 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.26 COMPLETE → V5.27 PLANNED |
-| Current Branch | `feature/v5.26-c3-gain-magnitude-and-rescue-conversion` |
+| Current Version | V5.27 INITIALIZED |
+| Current Branch | `feature/v5.27-full-chain-rescue-calibration-and-probability` |
 | Total Tests | 2748 |
 | Failed Tests | 0 |
-| Current Status | V5.21 COMPLETE — Low-N rescue immunity and basin access confirmed |
-| Primary Reference | `TRM_Project_Lineage_Overview.md` |
+| Current Status | V5.26 COMPLETE — full-chain rescue conversion is probabilistic. V5.27 INITIALIZED — calibrate rescue probability from complete chain. |
+| Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
 
@@ -82,11 +82,20 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.13 | High-Basin Pathway Validation and Scaling | P1 transfers. P2 demoted. projHiVec +12.5% N=71. N-conditioned M3. |
 | V5.14 | Residual Geometry and Control Limits | orthHiVec +14.1% N=72. Near ceiling. M3+ model. |
 | V5.15 | Control Ceiling and Unexplained Variance | ~35% residual variance. Structured but not actionable. Ceiling confirmed. M3+ retained. |
-| V5.16 | Explanatory Gap and Feature Discovery | Planned. Shift to feature discovery — what remains unmeasured? |
+| V5.16 | Explanatory Gap and Feature Discovery | rebMagnitude explains residual. No pre-intervention proxy. Shift to adaptive. |
+| V5.17 | Adaptive Response and Rebound Control | C3 entry-vector re-alignment validates. Static ceiling breached. M3++ model. |
+| V5.18 | Adaptive Control Generalization | M3++ generalizes across cohorts. Hostile audit survived. Zero damage. |
+| V5.19 | Adaptive Control Boundary Mapping | N=50-64 inaccessible, N=65-79 active, N=72 peak, N=80+ saturated. |
+| V5.20 | Adaptive Boundary Mechanism | Lower = inducibility, peak = alignment, upper = saturation. |
+| V5.21 | Low-N Rescue Immunity and Basin Access | N<65 rescue-immune under tested operators. Structural reach barrier. |
+| V5.22 | Inducibility Onset and C3 Effectiveness | N=65 onset via resonant reversal. C3 gain activates. |
+| V5.23 | C3 Gain Source and Response Amplification | Chain decomposition: d_tail → deltaD → deltaK → omegaPerK → c3OmegaShift. |
+| V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
+| V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
+| V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
+| V5.27 | Full Chain Rescue Calibration | INITIALIZED — calibrate probability from complete chain. |
 
-**MGCJ adds 5 non-LongRunning + 1 LongRunning.**
-**MGCK adds 6 non-LongRunning.**
-**Total: 2429 non-LR, 2435 with LR, 0 failed.**
+**Cumulative total: 2748 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -116,6 +125,13 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 14. **V9 has two clean seed classes (V5.6 MGCJ):** S1=20 compressible seeds. S2=9 resistant seeds (3.9× smaller d, 4.3× tighter K, 0% B0/V1-high). Same mechanism at extreme magnitude.
 15. **S2 is fully suppressible (V5.6 MGCK):** dTarget=0.22 suppresses all 9 S2. KMean=1.080 cap suppresses 8/9. α=3.0× d_mean suppresses all. S2 is same d→K mechanism, not distinct.
 16. **R1 suppression is mostly robust cross-N (V5.7):** State-conditioned operator works at 8/9 N (60-80). Cupd d→K universal. V9 amplification is N=64-70 window only. N=71 is sharp transition (dRatio crosses 1.0).
+17. **M3 model (V5.13):** P1/P1b Compression-Room pathway + projHiVec selector. Validated across N=71–80.
+18. **M3+ model (V5.14):** M3 + orthHiVec at N=72. Practical static model reaching control ceiling.
+19. **M3++ adaptive model (V5.17–V5.18):** M3+ + rebMagnitude adaptive probe + C3 entry-vector re-alignment. Preferred validated model. Cross-cohort generalization, zero damage.
+20. **Bounded operating domain (V5.19):** N=50–64 inaccessible, N=65–79 adaptive-active, N=72 peak, N=80+ saturated.
+21. **C3 gain chain (V5.23–V5.26):** d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue. Each layer validated. omegaPerK is final gain bottleneck.
+22. **omegaPerK sign rule (V5.24–V5.25):** omDist < 0.5 AND lambda1 < 0.95. Precision ~81%, enrichment ~5.5×. Diagnostic/enrichment, not sufficient.
+23. **Rescue conversion is probabilistic (V5.26):** Movement quality > movement quantity. No single threshold guarantees rescue.
 
 ---
 
@@ -197,20 +213,29 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### V5.13 COMPLETE — Next: V5.14 Residual Geometry and Control Limits
+### Current Frontier — V5.27
 
-**Status:** V5.13 COMPLETE (2590 tests, 0 failed)
-**Branch:** `feature/v5.13-high-basin-pathway-validation-and-scaling`
+**Status:** V5.26 COMPLETE → V5.27 INITIALIZED
+**Branch:** `feature/v5.27-full-chain-rescue-calibration-and-probability`
 
-**Key findings from V5.13:**
+**Validated chain:**
+```
+d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue
+```
 
-1. **Compression-Room P1/P1b transfers directionally** — 50-56% holdout persistence at N=71/72.
-2. **projHiVec is the best residual selector** — +12.5% holdout at N=71, +8.1% at N=72.
-3. **P2 Crypto-Hi demoted** — Does not robustly transfer; dilutes precision when included.
-4. **N=67 inaccessible, N=75 strongest, N=80 saturated.**
-5. **Final model M3:** N-conditioned P1/P1b + projHiVec > -0.3281.
+**Current question:** Can this full chain produce a calibrated rescue probability?
 
-**Next:** V5.14 — Investigate whether unexplained persistence variance can be reduced by additional geometric selectors, or whether the model has reached its explanatory limit. See `docsV5_13/TRM_V5_13_Final_Synthesis.md`.
+**Current warning:** Do not search for a deterministic one-threshold rescue rule. V5.26
+rejected that. Rescue is probabilistic.
+
+**Current model:** M3++ remains the preferred adaptive model.
+
+**V5.27 goal:** Probability calibration from the complete chain, not new mechanism discovery.
+Compare full-chain model against sign-rule-only and c3OmegaShift-only baselines.
+
+**Key constraint:** Use only validated chain variables — d_tail, deltaD, deltaK, omegaPerK
+sign, omegaPerK magnitude, c3OmegaShift, omDist, lambda1. Do not modify M3++, do not add
+correction classes, do not retune thresholds, do not introduce new variables.
 
 ---
 
@@ -219,17 +244,19 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 > Copy and paste the following prompt into a new LLM chat or Copilot session:
 
 ```
-Please review the following two documents from the TRM/TQM project:
+Please review the following three documents from the TRM/TQM project:
 
 1. docs/TRM_Project_Lineage_Overview.md
 2. docs/TRM_Project_QuickStart_For_New_Chats.md
+3. docs/TRM_Current_Frontier.md
 
-After reading both, summarize:
+After reading all three, summarize:
 
 1. Strongest supported findings
-2. Strongest active hypotheses
-3. Current open problems
-4. Current V5.3 research objectives
+2. Current model M3++ and its components
+3. Full C3 gain chain (d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue)
+4. Current V5.27 research objective: calibrate rescue probability from complete chain
+5. Claim discipline / not-claimed boundaries
 
 Maintain strict claim discipline throughout. For every statement you make,
 explicitly differentiate between:
@@ -239,8 +266,10 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. Do not overstate results. The project has 2189 tests
-with 0 failures. V5.2 is complete. V5.3 is the active research frontier.
+Do not introduce new theory. Do not overstate results. Do not claim physical
+constants, spacetime, relativity, quantum mechanics, cosmology, emergence, or
+universal control. The project has 2748 tests with 0 failures. V5.27 is the
+active research frontier.
 ```
 
 ---
@@ -249,16 +278,15 @@ with 0 failures. V5.2 is complete. V5.3 is the active research frontier.
 
 | # | Document | Path |
 |:-:|:---------|:-----|
-| 1 | Project Lineage Overview | `docs/TRM_Project_Lineage_Overview.md` |
-| 2 | V5.6 MGCA Analysis | `docsV5_6/analysis/TRM_V5_6_MinimalGenerativeCoreAnalysis.md` |
-| 3 | V5.6 MGCE Execution | `docsV5_6/analysis/TRM_V5_6_MinimalGenerativeCoreExecution.md` |
-| 4 | V5.6 MGCP Protocol | `docsV5_6/protocols/TRM_V5_6_MinimalGenerativeCore_Protocol.md` |
-| 5 | V5.2 Regime Sensitivity Completion | `docsV5_2/TRM_V5_2_Regime_Sensitivity_And_Ensemble_Expansion_Completion.md` |
-| 6 | V5.0 Independent Replication Completion | `docsV5_0/TRM_V5_0_Independent_Replication_Completion.md` |
-| 7 | V4.5 Prospective Prediction Completion | `docsV4_5/TRM_V4_5_Prospective_Prediction_Completion.md` |
+| 1 | Current Frontier | `docs/TRM_Current_Frontier.md` |
+| 2 | Project Lineage Overview | `docs/TRM_Project_Lineage_Overview.md` |
+| 3 | V5.6 MGCA Analysis | `docsV5_6/analysis/TRM_V5_6_MinimalGenerativeCoreAnalysis.md` |
+| 4 | V4.5 Prospective Prediction Completion | `docsV4_5/TRM_V4_5_Prospective_Prediction_Completion.md` |
+| 5 | V5.0 Independent Replication Completion | `docsV5_0/TRM_V5_0_Independent_Replication_Completion.md` |
+| 6 | V5.2 Regime Sensitivity Completion | `docsV5_2/TRM_V5_2_Regime_Sensitivity_And_Ensemble_Expansion_Completion.md` |
 
 ---
 
-*Generated 2026-07-16, updated 2026-07-17. This document is a short operational briefing — not a replacement
-for the full lineage overview. Read `TRM_Project_Lineage_Overview.md` for the complete
-historical context, detailed version descriptions, and full claim taxonomy.*
+*Generated 2026-07-16, last updated 2026-07-19. This document is a short operational briefing — not a replacement
+for the full lineage overview or the current frontier document. Read `TRM_Project_Lineage_Overview.md` for the
+complete historical context and `TRM_Current_Frontier.md` for the active research state.*

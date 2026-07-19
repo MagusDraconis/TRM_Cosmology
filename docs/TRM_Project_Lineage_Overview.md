@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 1.1
-**Date:** 2026-07-17
-**Scope:** Clockwork Cosmology V1 through V5.6 (current frontier)
+**Version:** 2.0
+**Date:** 2026-07-19
+**Scope:** Clockwork Cosmology V1 through V5.27
 **Tests:** 2748 verified, 0 failed
-**Branch:** `feature/v5.26-c3-gain-magnitude-and-rescue-conversion`
-**Current Frontier:** V5.26 COMPLETE → V5.27 PLANNED
+**Branch:** `feature/v5.27-full-chain-rescue-calibration-and-probability`
+**Current Frontier:** V5.26 COMPLETE → V5.27 INITIALIZED
 
 ---
 
@@ -524,6 +524,299 @@ raising power in the α=0.5 operator.
 
 ---
 
+## F2. V5.7–V5.27 RecoverFP Branch Control and Adaptive Rescue Program
+
+### V5.7 — Reduced Operator Validation (ROCP→ROCE2) — COMPLETE
+
+**Key question:** Does the reduced d_mean operator model hold across wider N and seed blocks?
+
+**Answer:** Partially. R1 suppression is mostly robust across N. V9 amplification is
+isolated to a finite N window. N=71 transition observed. Cupd d→K mechanism remains central.
+
+- R1 suppression robust at 8/9 N values (N=60–80).
+- V9 amplification confined to N=64–70 window.
+- N=71 marks sharp transition (dRatio crosses 1.0).
+- Cupd d→K mechanism universal across tested N.
+
+### V5.8 — Branch Predictability (BPP→BPC) — COMPLETE
+
+**Key question:** Can branch outcomes be predicted from pre-Cupd observables?
+
+**Answer:** Yes, but with constraints. Branch prediction is late-stage and N-conditioned.
+d_mean at late epoch plus per-N threshold provides strong prediction in stable N regimes.
+Prediction is not early universal forecasting.
+
+- Balanced accuracy ≥ 0.93 for all class-stable N.
+- d_mean at epoch 5 is the dominant predictor.
+- Per-N thresholds required — no universal threshold.
+- Prediction fails at transition-N (N=71).
+
+### V5.9 — Branch Commitment (BCP→BCI) — COMPLETE
+
+**Key question:** At what point in the RecoverFP cycle does branch outcome become committed?
+
+**Answer:** By CP5, directional commitment is established. Hi→Lo remains accessible.
+Lo→Hi becomes locked under static protocols. N=71 transition-plastic.
+
+- Directional commitment asymmetry confirmed.
+- Hi→Lo degradation possible through d-space suppression.
+- Lo→Hi induction blocked under standard RecoverFP.
+- N=71 is the only N where commitment is plastic.
+
+### V5.10 — Control Asymmetry (CAP→CAL) — COMPLETE
+
+**Key question:** Is the Hi→Lo/Lo→Hi control asymmetry fundamental?
+
+**Answer:** Yes. Low→High threshold crossing can occur transiently, but strict persistent
+Low→High induction is not demonstrated. Threshold crossing is not branch conversion.
+K-graft and d+K graft are not sufficient for genuine persistent induction.
+
+- Control asymmetry confirmed and strengthened from V5.9.
+- Transient Omega crossing ≠ genuine branch conversion.
+- Operator grafts fail to produce persistent Lo→Hi.
+- Asymmetry is structural, not a protocol artifact.
+
+### V5.11 — Branch Accessibility and Basin Structure (BAP→BAA) — COMPLETE
+
+**Key question:** Why does Hi→Lo work but Lo→Hi fail?
+
+**Answer:** Basin-accessibility asymmetry. Hi→Lo works because suppression reaches the
+natural Low basin. Lo→Hi fails because induced states remain Low-like or off-manifold.
+Threshold crossing is not basin access.
+
+- Hi→Lo: d-space suppression lands in genuine Low basin.
+- Lo→Hi: induced states are Low-like or off-manifold.
+- Omega crossover ≠ basin membership.
+- Basin structure explains the asymmetry observed since V5.9.
+
+### V5.12 — High-Basin Entry Conditions (HBP→HBL) — COMPLETE
+
+**Key question:** Are there any pathways into the High basin from Low seeds?
+
+**Answer:** Yes — candidate entry pathways identified. Compression-Room pathway and
+Crypto-Hi mild pathway initially validated. Matched pathway strategy beats universal
+and mismatched strategies. Strict persistence remains sparse.
+
+- Compression-Room P1: strongest initial candidate.
+- Crypto-Hi P2: second candidate with mild conditions.
+- Matched strategy (pathway × N window) outperforms universal strategies.
+- Persistence rates remain low; entry is possible but unreliable.
+
+### V5.13 — Pathway Validation and Scaling — COMPLETE
+
+**Key question:** Which pathways transfer across N and cohorts?
+
+**Answer:** Compression-Room P1/P1b remains the primary transferable pathway. Crypto-Hi P2
+is demoted as non-transferable/local. projHiVec becomes validated residual selector.
+
+- P1/P1b transfers directionally (50–56% holdout persistence at N=71/72).
+- P2 does not robustly transfer; dilutes precision when included.
+- projHiVec: +12.5% holdout at N=71, +8.1% at N=72.
+- Final model M3: N-conditioned P1/P1b + projHiVec > −0.3281.
+- N=67 inaccessible, N=75 strongest, N=80 saturated.
+
+### V5.14 — Residual Geometry and Control Limits — COMPLETE
+
+**Key question:** Can additional geometric selectors reduce unexplained persistence variance?
+
+**Answer:** Limited. orthHiVec validated as N=72 residual refinement. Most residual geometry
+candidates fail or overfit. Final static model becomes M3+: M3 + orthHiVec at N=72.
+
+- orthHiVec: +14.1% holdout at N=72.
+- Most alternative geometric selectors fail or overfit.
+- Diminishing returns from additional selectors.
+- M3+ defined as the practical static model.
+
+### V5.15 — Control Ceiling and Unexplained Variance — COMPLETE
+
+**Key question:** Has the static control model reached its explanatory limit?
+
+**Answer:** Yes. M3+ explains approximately 47% of persistence variance. Around 35% residual
+remains structured. Static refinements fail to convert residual structure into robust control
+gains. Practical static control ceiling reached under existing observables.
+
+- ~47% variance explained by M3+.
+- ~35% residual is structured (not noise).
+- Static refinements produce diminishing or zero gains.
+- Ceiling confirmed under measured pre-intervention features.
+
+### V5.16 — Explanatory Gap and Feature Discovery — COMPLETE
+
+**Key question:** What drives the remaining ~35% unexplained variance?
+
+**Answer:** Post-intervention response dynamics. rebMagnitude strongly explains residual
+success/failure. No reliable pre-intervention proxy found. Gap is explanatory but not
+pre-actionable.
+
+- rebMagnitude (post-intervention rebound) strongly separates success from failure.
+- No pre-intervention feature predicts rebMagnitude reliably.
+- The gap is explanatory: we can explain post-hoc, but cannot predict pre-action.
+- Shift from static pre-intervention features to adaptive post-intervention dynamics.
+
+### V5.17 — Adaptive Response and Rebound Control — COMPLETE
+
+**Key question:** Can the post-intervention rebound be used adaptively?
+
+**Answer:** Yes. rebMagnitude becomes adaptive probe. Additional compression fails and can
+damage successes. Entry-vector re-alignment C3 validates as adaptive correction. Static
+ceiling breached.
+
+- rebMagnitude measured post-intervention, used as adaptive signal.
+- Additional compression degrades or reverses successes.
+- C3 entry-vector re-alignment: +significant adaptive lift.
+- M3++ model: M3+ + rebMagnitude adaptive probe + C3 correction.
+- Static ceiling (V5.15) breached by adaptive strategy.
+
+### V5.18 — Adaptive Control Generalization — COMPLETE
+
+**Key question:** Does M3++ generalize beyond the development cohort?
+
+**Answer:** Yes. M3++ generalizes across multiple cohorts and N windows. Hostile audit
+survived. Adaptive lift remains positive. Damage remains zero in tested cohorts.
+M3++ becomes the preferred validated adaptive model.
+
+- Cross-cohort generalization confirmed.
+- Hostile audit: no degradation, no spurious failures.
+- Adaptive lift positive across all tested cohorts.
+- Damage (success→failure from intervention) remains zero.
+
+### V5.19 — Adaptive Control Boundary Mapping — COMPLETE
+
+**Key question:** What are the operating boundaries of M3++?
+
+**Answer:** Domain is bounded, not universal. N=50–64 inaccessible, N=65–79 adaptive-active,
+N=72 peak, N=80+ saturated. Damage remains zero across tested N.
+
+- N=50–64: no adaptive response — rescue-immune.
+- N=65–79: adaptive-active — C3 correction produces lift.
+- N=72: peak adaptive response.
+- N=80+: saturated — static success already high.
+- Domain is bounded, not universal.
+
+### V5.20 — Adaptive Boundary Mechanism — COMPLETE
+
+**Key question:** Why are the boundaries where they are?
+
+**Answer:** Mixed boundary mechanism identified. Lower boundary = inducibility / basin
+reachability. Peak = rebMagnitude + orthHiVec + High-basin proximity. Upper boundary =
+static saturation. Candidate scarcity does not explain low-N failure.
+
+- Low-N failure is not a candidate-count artifact.
+- Lower boundary reflects structural inducibility limit.
+- Peak reflects optimal alignment of adaptive factors.
+- Upper boundary reflects ceiling from static success saturation.
+
+### V5.21 — Low-N Rescue Immunity and Basin Access — COMPLETE
+
+**Key question:** Can N<65 be rescued under any tested operator?
+
+**Answer:** No. N<65 remains rescue-immune under tested operator classes. Missing local High
+reference hypothesis falsified. Transferred references redirect response but do not induce
+persistence. Low-N barrier is structural reach / non-inducibility under current operators.
+
+- All tested operator classes fail below N=65.
+- Transferred-reference audit: redirects response, no persistence.
+- Missing-local-reference hypothesis falsified.
+- Barrier is structural, not informational.
+
+### V5.22 — Inducibility Onset and C3 Effectiveness — COMPLETE
+
+**Key question:** What activates C3 gain at N=65?
+
+**Answer:** Sharp C3 gain activation explained by resonant reversal: anti-aligned seed +
+large dT1 + C3 correction → large Omega response → rescue. N=64 can satisfy preconditions
+but remains below C3-effectiveness threshold.
+
+- Resonant reversal defined as the onset mechanism.
+- Anti-aligned seed: initial d-state far from target.
+- Large dT1: substantial first-stage movement.
+- C3 correction: entry-vector re-alignment.
+- N=64 seeds can satisfy preconditions but C3 gain remains sub-threshold.
+
+### V5.23 — C3 Gain Source and Response Amplification — COMPLETE
+
+**Key question:** Where does C3 gain come from?
+
+**Answer:** C3 gain decomposed into layered chain: d_tail → deltaD → deltaK → omegaPerK →
+c3OmegaShift. d_tail is necessary but not sufficient. omegaPerK identified as final gain
+bottleneck.
+
+- d_tail: enables C3 movement (necessary, not sufficient).
+- deltaD: transfers through stable d→K coupling.
+- deltaK: intermediate gain stage.
+- omegaPerK: final gain bottleneck — controls whether K-change converts to Omega response.
+- c3OmegaShift: aggregate Omega response to C3 correction.
+
+### V5.24 — Omega-per-K Gain and Response Conversion — COMPLETE
+
+**Key question:** What controls whether deltaK converts to Omega response?
+
+**Answer:** omegaPerK sign is the final conversion layer. Two-condition sign rule discovered:
+omDist < 0.5 AND lambda1 < 0.95. Positive omegaPerK becomes likely when both hold.
+N=64 usually fails both; N=65 rescued seeds satisfy both.
+
+- omegaPerK sign = direction of Omega response per unit K-change.
+- Positive sign → K-change amplifies Omega in desired direction.
+- Sign rule: omDist < 0.5 AND lambda1 < 0.95.
+- N=64: seeds usually fail both conditions.
+- N=65 rescued: seeds satisfy both conditions.
+
+### V5.25 — Omega Gain Sign Validation — COMPLETE
+
+**Key question:** Is the sign rule reliable?
+
+**Answer:** Yes, as a high-precision enrichment rule — not as a rescue determinant. Precision
+approximately 81%. Recall approximately 24%. Rule-positive rescue approximately 11%.
+Rule-negative rescue approximately 2%. Enrichment approximately 5.5×. Sign rule is not
+sufficient for rescue.
+
+- Precision ~81%: rule-positive seeds mostly have correct sign.
+- Recall ~24%: rule captures ~1/4 of positive-sign seeds.
+- Rule-positive rescue rate ~11%.
+- Rule-negative rescue rate ~2%.
+- Enrichment ~5.5× over baseline.
+- Sign rule enriches but does not guarantee rescue.
+
+### V5.26 — C3 Gain Magnitude and Rescue Conversion — COMPLETE
+
+**Key question:** Does movement magnitude predict rescue?
+
+**Answer:** No. Movement magnitude does not predict rescue. Rescued seeds can have smaller
+deltaD than failed seeds. Quality of movement matters more than quantity. Rescue conversion
+is mixed and probabilistic. No single layer guarantees rescue.
+
+- deltaD magnitude: no predictive power for rescue.
+- Rescued seeds can have smaller deltaD than failed seeds.
+- Quality of movement (direction, alignment) dominates quantity.
+- Rescue is probabilistic, not threshold-determined.
+- No single chain layer is sufficient for rescue prediction.
+
+### V5.27 — Full Chain Rescue Calibration and Probability — INITIALIZED
+
+**Key question:** Can the complete validated C3 gain chain be calibrated into a reliable
+probabilistic rescue model?
+
+**Status:** INITIALIZED
+
+**Validated chain:**
+```
+d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue
+```
+
+**Expected task:** Calibrate probability from complete chain. Compare against sign rule,
+c3OmegaShift, omegaPerK alone. Validate across N and cohorts. Avoid deterministic rescue
+claims.
+
+**Constraints:**
+- Do not modify M3++.
+- Do not add correction classes.
+- Do not retune thresholds.
+- Do not add new variables.
+- Use only validated chain variables: d_tail, deltaD, deltaK, omegaPerK sign, omegaPerK
+  magnitude, c3OmegaShift, omDist, lambda1.
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -597,7 +890,28 @@ Items classified as SUPPORTED under current governance (V5.2 baseline):
     exclusively on d-metrics through R normalization → −log amplification: d_max +13.5,
     d_p90 +0.66, d_std +0.41. Effect is uniform across seeds (CV=0.05). K, Omega, KLam1
     unchanged directly. Branch suppression is downstream: amplified d → smaller K via
-    Cupd exponential. Recommended next: MGCE-d (d-Space Intervention).
+    Cupd exponential.
+18. **M3 model (V5.13):** P1/P1b Compression-Room pathway + projHiVec residual selector.
+    N-conditioned. Validated across N=71–80.
+19. **M3+ model (V5.14):** M3 + orthHiVec refinement at N=72. Practical static model reaching
+    control ceiling.
+20. **Static ceiling (V5.15):** M3+ reaches practical static control ceiling under measured
+    pre-intervention features. ~47% variance explained, ~35% structured residual.
+21. **M3++ model (V5.17–V5.18):** M3+ + rebMagnitude adaptive probe + C3 entry-vector
+    re-alignment correction. Preferred validated adaptive model.
+22. **M3++ generalization (V5.18):** Adaptive control generalizes across tested cohorts and
+    N windows. Hostile audit survived. Damage remains zero in tested cohorts.
+23. **Bounded operating domain (V5.19):** N=50–64 inaccessible, N=65–79 adaptive-active,
+    N=72 peak, N=80+ saturated. Domain is bounded, not universal.
+24. **Low-N rescue immunity (V5.21):** N<65 remains non-inducible under tested operator
+    classes and transferred-reference audits.
+25. **C3 gain chain (V5.23):** d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift →
+    rescue. Each layer validated. d_tail necessary but not sufficient. omegaPerK is final
+    gain bottleneck.
+26. **omegaPerK sign rule (V5.24–V5.25):** omDist < 0.5 AND lambda1 < 0.95. Precision ~81%,
+    enrichment ~5.5×. Validated as high-precision enrichment rule.
+27. **Rescue conversion (V5.26):** Probabilistic full-chain enrichment, not deterministic
+    threshold. Movement quality dominates movement quantity.
 
 ---
 
@@ -618,6 +932,16 @@ Items classified as CONDITIONAL — valid under specified conditions, not univer
 8. Disagreement with physical reference values ≠ falsification of TRM framework.
 9. Structural comparisons only — no physical measurement has been compared.
 10. Pipeline completeness depends on all 5–8 suites per phase remaining intact.
+11. **M3++ is validated only for tested N ranges, tested seed cohorts, and tested
+    operators.** Generalization to untested N or operator classes is not established.
+12. **Low-N inaccessibility (N<65) is supported only under current operator classes.**
+    Future operator classes may alter this boundary.
+13. **omegaPerK sign rule is diagnostic/enrichment, not sufficient.** It enriches rescue
+    likelihood but does not guarantee rescue.
+14. **Rescue probability remains probabilistic.** No deterministic rescue threshold has
+    been found.
+15. **Adaptive control does not imply universal branch control.** M3++ operates within a
+    bounded domain.
 
 ---
 
@@ -667,6 +991,15 @@ HYPOTHESIS pending larger-sample confirmation (Stage 2 LongRunning):
 - **H16:** Extra DL or Cupd passes are destructive only when Nm is present.
 - **H17:** The minimal surviving RecoverFP map is Sm→RP→DL→Cupd (4 stages).
 
+### Rescue Probability Hypotheses (V5.27 frontier)
+
+- **H18:** Full-chain rescue probability may be calibratable from validated chain variables
+  (d_tail, deltaD, deltaK, omegaPerK sign, omegaPerK magnitude, c3OmegaShift).
+- **H19:** Remaining rescue variance may reflect unresolved quality-of-movement factors not
+  captured by current chain variables.
+- **H20:** c3OmegaShift and omegaPerK sign enrich rescue likelihood but do not determine it.
+  No single layer is sufficient.
+
 ---
 
 ## K. Current Not Claimed
@@ -700,6 +1033,17 @@ maintained to prevent overinterpretation:
 15. **N→∞ continuum limit proven** — finite-N runs only.
 16. **SPARC galaxy rotation curves explained** — effective comparator only.
 17. **Zero-parameter theory** — TRM has exactly 2 irreducible structural inputs (I1, I2).
+18. **Universal Low→High control is not claimed.**
+19. **Universal adaptive control is not claimed.** M3++ operates within bounded domain.
+20. **N<65 impossibility under all future operators is not claimed.** Inaccessibility is
+    established only under tested operator classes.
+21. **omDist/lambda1 causality is not proven.** The sign rule is an enrichment rule, not a
+    causal mechanism.
+22. **Deterministic rescue threshold is not claimed.** V5.26 rejected single-threshold
+    rescue. Rescue is probabilistic.
+23. **Physical interpretation of N-boundaries is not claimed.** N=65, N=72, N=80 boundaries
+    are operational observations within TRM, not physical phase transitions.
+24. **Physical criticality is not claimed.**
 
 ---
 
@@ -719,10 +1063,32 @@ maintained to prevent overinterpretation:
 | V5.4 | RecoverFP Branch Geometry Audit | 37 | COMPLETE |
 | V5.5 | RecoverFP Update-Map Mechanism | 19 | COMPLETE |
 | V5.6 | MGCP+…+MGCK | 80 | COMPLETE |
-| **Total** | | **2386** | **0 failed** |
+| V5.7 | Reduced Operator Validation | — | COMPLETE |
+| V5.8 | Branch Predictability | — | COMPLETE |
+| V5.9 | Branch Commitment | — | COMPLETE |
+| V5.10 | Control Asymmetry | — | COMPLETE |
+| V5.11 | Branch Accessibility and Basin Structure | — | COMPLETE |
+| V5.12 | High-Basin Entry Conditions | — | COMPLETE |
+| V5.13 | Pathway Validation and Scaling | — | COMPLETE |
+| V5.14 | Residual Geometry and Control Limits | — | COMPLETE |
+| V5.15 | Control Ceiling and Unexplained Variance | — | COMPLETE |
+| V5.16 | Explanatory Gap and Feature Discovery | — | COMPLETE |
+| V5.17 | Adaptive Response and Rebound Control | — | COMPLETE |
+| V5.18 | Adaptive Control Generalization | — | COMPLETE |
+| V5.19 | Adaptive Control Boundary Mapping | — | COMPLETE |
+| V5.20 | Adaptive Boundary Mechanism | — | COMPLETE |
+| V5.21 | Low-N Rescue Immunity and Basin Access | — | COMPLETE |
+| V5.22 | Inducibility Onset and C3 Effectiveness | — | COMPLETE |
+| V5.23 | C3 Gain Source and Response Amplification | — | COMPLETE |
+| V5.24 | Omega-per-K Gain and Response Conversion | — | COMPLETE |
+| V5.25 | Omega Gain Sign Validation | — | COMPLETE |
+| V5.26 | C3 Gain Magnitude and Rescue Conversion | — | COMPLETE |
+| V5.27 | Full Chain Rescue Calibration and Probability | — | INITIALIZED |
+| **Total** | | **2748** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. 6 V5.6 tests are LongRunning (100 seeds,
-multi-N analysis). Non-LongRunning total: 2380. All tests pass.
+Note: Test counts represent version-specific test suites. The cumulative total of 2748 verified
+tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
+V5.6, 2590 at V5.13) are historical milestones.
 
 ---
 
@@ -730,7 +1096,7 @@ multi-N analysis). Non-LongRunning total: 2380. All tests pass.
 
 ### V5.6 — Minimal Generative Core Analysis (MGCA) — COMPLETE
 
-**Status:** COMPLETE
+**Status:** COMPLETE (historical reference)
 **Branch:** `feature/v5.6-recoverfp-minimal-generative-core`
 
 The V5.3–V5.5 RecoverFP program discovered a finite-N branch split (low-Omega and high-Omega
@@ -753,8 +1119,7 @@ DL→Cupd) are necessary for branch generation?
 **Gates reached:** A (Nm Suppressor), C (Minimal Map Without Nm).
 **Gate unresolved:** B (Stage Ordering).
 
-**Recommended next suite:** MCA (Minimal Core Audit) — Validate Sm→RP→DL→Cupd, characterize
-Nm dose-response, investigate V9 runaway amplification.
+For the current frontier (V5.27), see section F2 above.
 
 ---
 
@@ -762,23 +1127,22 @@ Nm dose-response, investigate V9 runaway amplification.
 
 For new researchers, reviewers, Copilot sessions, or LLM chats onboarding to the project:
 
-1. **Clockwork Cosmology V1** — Historical origin. Understand the variable time-rate
+1. **TRM_Current_Frontier.md** — Current frontier state, model, and next prompt (quickest start).
+2. **TRM_Project_QuickStart_For_New_Chats.md** — Short operational briefing.
+3. **Clockwork Cosmology V1** — Historical origin. Understand the variable time-rate
    hypothesis in its earliest form.
-2. **TRM V2.2** — Transition to scalar field framework. See the formalization from
+4. **TRM V2.2** — Transition to scalar field framework. See the formalization from
    narrative to T(x,t).
-3. **TRM V3.0 Review Baseline** — Claim boundaries introduced. Multi-sector candidate
+5. **TRM V3.0 Review Baseline** — Claim boundaries introduced. Multi-sector candidate
    discipline established.
-4. **V4.5 Completion** — First fully prospective prediction pipeline. Governance template
+6. **V4.5 Completion** — First fully prospective prediction pipeline. Governance template
    for all subsequent phases.
-5. **V5.0 Completion** — First independent replication. Pipeline reproduced with different
+7. **V5.0 Completion** — First independent replication. Pipeline reproduced with different
    seeds.
-6. **V5.2 Completion** — First regime sensitivity map. Corrected stability picture.
-7. **V5.3 Roadmap** — RecoverFP branch genesis program launch.
-8. **V5.6 MGCA Analysis** — Minimal generative core analysis. Nm suppressor, RP necessary,
+8. **V5.2 Completion** — First regime sensitivity map. Corrected stability picture.
+9. **V5.6 MGCA Analysis** — Minimal generative core analysis. Nm suppressor, RP necessary,
    minimal map identified.
-9. **V5.6 MGCB Audit** — Nm characterization. Per-epoch delta tracing, Gate C (distance-focused).
-10. **V5.6 MGCD Audit** — DSpace intervention. Gates A,B,C,D,E reached. d_mean dominant.
-11. **V5.6 Experiment Log** — Full V5.6 execution history in `docsV5_6/experiments/`.
+10. **Section F2 above** — V5.7–V5.27 Branch Control and Adaptive Rescue Program.
 
 ---
 
@@ -800,7 +1164,10 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2466 tests, 0 failed. V5.7 COMPLETE. R1 suppression mostly robust (8/9 N). V9 amplification N=64-70 window. N=71 sharp transition. Cupd d→K universal. Next: `feature/v5.8-branch-predictability-and-forecasting`.
+**Current status:** 2748 tests, 0 failed. V5.26 COMPLETE — rescue conversion is probabilistic.
+V5.27 INITIALIZED — calibrating rescue probability from the complete validated C3 gain chain.
+Current branch: `feature/v5.27-full-chain-rescue-calibration-and-probability`.
+Preferred model: M3++ (adaptive). See section F2 for V5.7–V5.27 details.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -810,7 +1177,7 @@ equations, dark matter replacement, physical theory proven.
 
 ---
 
-*Generated 2026-07-16, updated 2026-07-17. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V5.6. It is intended for onboarding
+*Generated 2026-07-16, last updated 2026-07-19. This document is the authoritative historical overview of the
+TRM/TQM project from Clockwork Cosmology V1 through V5.27. It is intended for onboarding
 new researchers, reviewers, Copilot sessions, and LLM chats. Maintain strict claim
 discipline when referencing any finding described herein.*
