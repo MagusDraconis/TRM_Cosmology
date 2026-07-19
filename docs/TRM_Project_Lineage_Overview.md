@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2848 verified, 0 failed
-**Branch:** `feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection`
-**Current Frontier:** V5.42 COMPLETE → V5.43 PENDING
+**Tests:** 2853 verified, 0 failed
+**Branch:** `feature/v5.43-hidden-response-state-and-temporal-trace-discovery`
+**Current Frontier:** V5.43 COMPLETE → V5.44 PENDING
 
 ---
 
@@ -989,6 +989,25 @@ variables do not uniquely determine c3OmgS or rescue. Stop-Low valid. V6 NOT REA
 
 **Status:** COMPLETE. See `docsV5_42/TRM_V5_42_Final_Synthesis.md`.
 
+### V5.43 — Hidden Response State and Temporal Trace Discovery (HTP→HTA) — COMPLETE
+
+Investigated why near-identical snapshot profiles diverge using 5-checkpoint temporal
+trace (T0–T4). 73 traced profiles, 15 matched pairs.
+
+**HTE:** 8/15 divergent. 62.5% at T4 only — divergence is late-stage. Divergent pairs
+have SMALLER early Omega differences (ratio 0.48 at T0). Hidden factor unresolved.
+
+**HTA:** T4 mechanism = Model E (C3 computation sensitivity — c3OmgS formula amplifies
+small T3 differences). Early-similarity paradox = Model A (late-stage amplification —
+tightly matched pairs more likely to straddle c3OmgS boundary). Hidden factor = Model G
+(unrecorded microstate in C3 correction response between T3 and T4).
+
+**Conclusion:** Temporal trace LOCALIZES divergence to C3 computation stage but does not
+identify mechanism. The C3 correction response itself is the uninstrumented gap.
+Stop-Low valid. Causal closure incomplete. V6 NOT READY.
+
+**Status:** COMPLETE. See `docsV5_43/TRM_V5_43_Final_Synthesis.md`.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1291,9 +1310,10 @@ maintained to prevent overinterpretation:
 | V5.40 | Causal Closure and Attractor Topology | 5 | COMPLETE |
 | V5.41 | Causal Test Design Under Attractor Absorption | 5 | COMPLETE |
 | V5.42 | Counterfactual Trace and Natural Variation Causal Rejection | 5 | COMPLETE |
-| **Total** | | **2848** | **0 failed** |
+| V5.43 | Hidden Response State and Temporal Trace Discovery | 5 | COMPLETE |
+| **Total** | | **2853** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2848 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 2853 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
 V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 

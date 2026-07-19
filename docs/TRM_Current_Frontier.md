@@ -3,9 +3,9 @@
 **Version:** 1.3
 **Date:** 2026-07-19
 
-**Current Version:** V5.42 COMPLETE
-**Current Branch:** `feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection`
-**Cumulative Tests:** 2848
+**Current Version:** V5.43 COMPLETE
+**Current Branch:** `feature/v5.43-hidden-response-state-and-temporal-trace-discovery`
+**Cumulative Tests:** 2853
 **Failed:** 0
 
 ---
@@ -32,8 +32,11 @@ to causal-test methodology: perturbation is INVALIDATED; natural variation,
 counterfactual trace, and causal rejection are viable alternatives. V5.42 applied counterfactual trace:
 7/11 near-identical profiles diverge on c3OmgS (63.6%). 7 sufficiency claims
 REJECTED — no single variable determines the outcome. Causal closure narrowed
-but not achieved. Central insight: predictive validity (Stop-Low) does not
-require causal closure. Causal closure remains blocked. V6 remains NOT READY.
+but not achieved. V5.43 added temporal trace: 62.5% of divergence appears
+only at T4 (c3OmgS computation). Pre-C3 trajectory does not explain
+most divergence. Hidden factor = Model G — unrecorded microstate in
+C3 correction response. Temporal trace LOCALIZES but does not EXPLAIN.
+Causal closure remains blocked. V6 remains NOT READY.
 
 ---
 
@@ -137,6 +140,7 @@ deterministic threshold rescue.
 | V5.40 | **COMPLETE** — Causal closure and attractor topology. Aligned perturbations do NOT survive better. Weak signals are artifacts. Absorption direction-invariant. Causal closure BLOCKED. |
 | V5.41 | **COMPLETE** — Causal test methodology. Perturbation INVALIDATED. Natural variation = diagnostic. 8 claims REJECTED. Stop-Low is OUTCOME-VALIDATED without causal closure. |
 | V5.42 | **COMPLETE** — Counterfactual trace and causal rejection. 7/11 near-identical pairs diverge (63.6%). 7 sufficiency claims REJECTED. No single variable determines outcome. |
+| V5.43 | **COMPLETE** — Hidden trace discovery. 62.5% divergence at T4 (C3 computation). Paradox resolved (late-stage amplification). Hidden factor = unrecorded microstate. |
 
 ---
 

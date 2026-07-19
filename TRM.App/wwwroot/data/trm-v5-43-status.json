@@ -1,1 +1,1 @@
-{"releaseStatus":"V5.43 INITIALIZED","phase":"Hidden Response State and Temporal Trace Discovery","date":"2026-07-19","testSummary":{"total":2848,"passed":2848,"failed":0}}
+{"releaseStatus":"V5.43 COMPLETE","phase":"Hidden Response State and Temporal Trace Discovery","date":"2026-07-19","testSummary":{"total":2853,"passed":2853,"failed":0},"suites":[{"name":"HTP","status":"COMPLETE","tests":3},{"name":"HTE","status":"COMPLETE","tests":1},{"name":"HTA","status":"COMPLETE","tests":1},{"name":"HTS","status":"COMPLETE","tests":0}]}
