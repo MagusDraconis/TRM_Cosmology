@@ -2,7 +2,7 @@
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
 | CRP | PLANNED | — | — |
-| CRE | PLANNED | — | — |
+| CRE | COMPLETE | 1 | 4 sufficiency claims REJECTED. 5/11 near-identical pairs diverge. All 8 gates reached. |
 | CRA | PLANNED | — | — |
 | CRI | PLANNED | — | — |
 | CRS | PLANNED | — | — |
