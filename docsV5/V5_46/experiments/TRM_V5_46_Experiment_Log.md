@@ -2,7 +2,7 @@
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
 | EDP | PLANNED | — | — |
-| EDE | PLANNED | — | — |
+| EDE | COMPLETE | 1 | Model C — Post-compression controlled. T0→Entry IQR=1.000. All 11 gates. |
 | EDA | PLANNED | — | — |
 | EDI | PLANNED | — | — |
 | EDS | PLANNED | — | — |
