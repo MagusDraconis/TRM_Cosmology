@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.39 COMPLETE |
-| Current Branch | `feature/v5.39-attractor-absorption-and-perturbation-resistance` |
-| Total Tests | 2833 |
+| Current Version | V5.40 COMPLETE |
+| Current Branch | `feature/v5.40-causal-closure-and-attractor-topology` |
+| Total Tests | 2838 |
 | Failed Tests | 0 |
-| Current Status | V5.39 COMPLETE — attractor absorption characterized. V5.40 PENDING. |
+| Current Status | V5.40 COMPLETE — causal closure blocked. V5.41 PENDING. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -95,8 +95,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
 | V5.38 | Response-State Interaction and K-Rebound Dominance | COMPLETE — diagnostic hierarchy, not causal. |
 | V5.39 | Attractor Absorption and Perturbation Resistance | COMPLETE — attractor absorbs K-perturb at lambda1. |
+| V5.40 | Causal Closure and Attractor Topology | COMPLETE — perturbations absorbed; causal closure blocked. |
 
-**Cumulative total: 2833 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2838 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -136,6 +137,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 24. **Stop-Low policy validated (V5.28–V5.33):** c3OmgS > 0.1 continue, ≤ 0.1 stop. 75% work reduction, zero damage. Boundary robust (V5.29). Generalized (V5.30). Reproducible (V5.32). Efficient (V5.33).
 25. **c3OmegaShift origin — diagnostic hierarchy (V5.36–V5.38):** lambda1 is strongest separator (|corr|=0.618). Hierarchy: lambda1 > rebMag > omDist. Diagnostic, not causal. Rescue paradox resolved.
 26. **Attractor absorption (V5.39):** K-perturb (±15%) → lambda1 delta < 0.03. Attractor resists direct manipulation. Explains V5.38 RII null result. Model C — Omega restoration dominates.
+27. **Causal closure blocked (V5.40):** Attractor-aligned perturbations do NOT survive better. All families absorbed 87–99%. Weak directional signals are baseline-state artifacts (52.3% correct). Absorption direction-invariant (Model D).
 
 ---
 
@@ -184,12 +186,13 @@ fundamental decomposition of the attractor.
 
 ## H. Current Open Problems
 
-### V5.39 Frontier Open Problem
+### V5.40 Frontier Open Problem
 
-1. **Causal closure against attractor resistance:** V5.39 confirmed the attractor absorbs
-   simple state perturbations. Can perturbation strategies work with (not against) attractor
-   dynamics to test causal closure? If diagnostic hierarchy is resistant to manipulation,
-   what approaches can establish causal leverage?
+1. **Causal closure under attractor absorption:** V5.40 confirmed that all perturbation
+   families (direct, aligned, combined, mismatched) are absorbed before c3OmgS. Weak
+   directional signals are baseline-state artifacts. What causal test designs remain
+   valid under strong attractor restoration? Can causal influence be tested through
+   natural variation, invariance analysis, or counterfactual trace instead of perturbation?
 
 ### Historical Unresolved Questions (V5.6 era)
 
@@ -227,21 +230,23 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.39
+### Current Frontier — V5.40
 
-**Status:** V5.39 COMPLETE → V5.40 PENDING
-**Branch:** `feature/v5.39-attractor-absorption-and-perturbation-resistance`
+**Status:** V5.40 COMPLETE → V5.41 PENDING
+**Branch:** `feature/v5.40-causal-closure-and-attractor-topology`
 
-**V5.38–V5.39 story arc:**
-V5.38 established a diagnostic hierarchy (lambda1 > rebMag > omDist) for c3OmegaShift
-formation. V5.38 RII showed lambda1 perturbation via K-scaling produced no causal signal.
-V5.39 closed the loop: the attractor absorbs K-state perturbations at the lambda1 stage
-(delta < 0.03 for ±15% scaling). Model C — Omega restoration dominates downstream.
+**V5.39–V5.40 story arc:**
+V5.39 showed the attractor absorbs K-state perturbations. V5.40 tested whether
+attractor-compatible perturbations could penetrate this protection — they could not.
+All perturbation families (direct, Omega-aligned, rebound-aligned, d-tail-aligned,
+combined, mismatch) are absorbed 87–99% before c3OmgS. Weak directional signals
+(55%+ in CTE) collapse to 52.3% under CTA stratification — they are baseline-state
+artifacts. Absorption is direction-invariant (Model D). Causal closure remains BLOCKED.
 
-**V5.40 direction:** If the attractor resists simple perturbation, what approaches can
-work with (not against) attractor dynamics to test causal closure?
+**V5.41 direction:** Move from perturbation attempts to causal-test methodology design.
+What test designs remain valid under strong attractor restoration?
 
-See `docsV5_39/TRM_V5_39_Final_Synthesis.md` for complete summary.
+See `docsV5_40/TRM_V5_40_Final_Synthesis.md` for complete summary.
 
 ---
 
@@ -272,7 +277,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. The project has 2833 tests with 0 failures. V5.39 is the active research frontier.
+Do not introduce new theory. The project has 2838 tests with 0 failures. V5.40 is the active research frontier.
 ```
 
 ---

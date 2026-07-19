@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2833 verified, 0 failed
-**Branch:** `feature/v5.39-attractor-absorption-and-perturbation-resistance`
-**Current Frontier:** V5.39 COMPLETE → V5.40 PENDING
+**Tests:** 2838 verified, 0 failed
+**Branch:** `feature/v5.40-causal-closure-and-attractor-topology`
+**Current Frontier:** V5.40 COMPLETE → V5.41 PENDING
 
 ---
 
@@ -926,6 +926,28 @@ separators cannot be converted to causal controls.
 
 **Status:** COMPLETE. See `docsV5_39/TRM_V5_39_Final_Synthesis.md`.
 
+### V5.40 — Causal Closure and Attractor Topology (CTP→CTA) — COMPLETE
+
+Tested whether attractor-compatible perturbations could penetrate the absorption
+barrier V5.39 discovered. 8 perturbation families (direct K-scaling, Omega-aligned,
+rebound-aligned, d-tail-aligned, combined, mismatch) tested across N=[65,66,67,70,72,75].
+
+**CTE:** V5.39 absorption reproduced (lambda1 delta = 0.0231). All families absorbed
+87–99% before c3OmgS. Attractor-aligned perturbations do NOT survive better than
+mismatch (Gate D FAILED). Weak c3OmgS directional signals found (55%+ consistency).
+
+**CTA:** 728 profiles stratified. Weak signals collapse: overall correct rate = 52.3%
+(near chance). Effect-to-noise ratio = 0.886. Baseline-state artifact discovered —
+negative c3OmgS = 63.8%, high c3OmgS = 36.1% (reversal). Absorption is
+direction-invariant (Model D). Weak signals classified as Model C —
+perturbation-pattern artifact (not causal).
+
+**Conclusion:** Causal closure remains BLOCKED. The attractor absorbs all perturbation
+patterns uniformly. No perturbation family provides causal leverage. Stop-Low safe.
+V6 NOT READY.
+
+**Status:** COMPLETE. See `docsV5_40/TRM_V5_40_Final_Synthesis.md`.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1032,6 +1054,10 @@ Items classified as SUPPORTED under current governance (V5.2 baseline):
 30. **Attractor absorption (V5.39):** K-state perturbation (±15%) produces only ~0.027 delta
     in lambda1. The attractor resists direct state manipulation, explaining V5.38 RII's null
     causal result. Model C — Omega restoration dominates downstream.
+31. **Causal closure blocked (V5.40):** Attractor-aligned perturbations do not survive better
+    than mismatch. All perturbation families absorbed 87–99%. Weak c3OmgS directional signals
+    are baseline-state artifacts (52.3% correct, near chance). Absorption is direction-invariant
+    (Model D). Causal closure remains BLOCKED.
 
 ---
 
@@ -1166,6 +1192,7 @@ maintained to prevent overinterpretation:
 21. **V6 readiness** — all geometry candidates (length, space, velocity, c) remain NOT READY.
 22. **Attractor topology characterized** — V5.39 shows absorption but full topology is not mapped.
 23. **Causal control achieved** — no perturbation has been shown to causally control c3OmegaShift.
+24. **Attractor topology penetrable** — V5.40 shows all perturbation patterns are absorbed uniformly.
 16. **SPARC galaxy rotation curves explained** — effective comparator only.
 17. **Zero-parameter theory** — TRM has exactly 2 irreducible structural inputs (I1, I2).
 18. **Universal Low→High control is not claimed.**
@@ -1220,9 +1247,10 @@ maintained to prevent overinterpretation:
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | — | COMPLETE |
 | V5.38 | Response-State Interaction and K-Rebound Dominance | 6 | COMPLETE |
 | V5.39 | Attractor Absorption and Perturbation Resistance | 4 | COMPLETE |
-| **Total** | | **2833** | **0 failed** |
+| V5.40 | Causal Closure and Attractor Topology | 5 | COMPLETE |
+| **Total** | | **2838** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2833 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 2838 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
 V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
