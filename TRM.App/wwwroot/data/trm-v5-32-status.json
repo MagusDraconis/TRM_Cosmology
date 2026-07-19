@@ -1,0 +1,1 @@
+{"releaseStatus":"V5.32 INITIALIZED","phase":"Stop-Low External Validation and Reproducibility","date":"2026-07-19","testSummary":{"total":2786,"passed":2786,"failed":0},"baselineModel":"M3++ (unchanged), Stop-Low policy, structural robustness (V5.31)","nextVersion":null,"suites":[{"id":"EVP","status":"PLANNED","tests":0}]}
