@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.28 COMPLETE |
-| Current Branch | `feature/v5.29-risk-stratum-boundary-and-threshold-robustness` |
-| Total Tests | 2768 |
+| Current Version | V5.29 COMPLETE |
+| Current Branch | `feature/v5.30-stop-low-policy-generalization-and-efficiency` |
+| Total Tests | 2773 |
 | Failed Tests | 0 |
-| Current Status | V5.28 COMPLETE — Stop-Low policy validated. V5.29 INITIALIZED — boundary robustness audit. |
+| Current Status | V5.29 COMPLETE — boundary robustness confirmed. V5.30 INITIALIZED — policy generalization. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -93,10 +93,10 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
-| V5.28 | Rescue Risk Stratum and Control Policy | COMPLETE — Stop-Low policy validated. 75% work reduction. |
-| V5.29 | Boundary and Threshold Robustness | INITIALIZED — stress-test Stop-Low boundary. |
+| V5.29 | Boundary and Threshold Robustness | COMPLETE — 0.247 safety gap. Noise-robust. |
+| V5.30 | Policy Generalization and Efficiency | INITIALIZED — large-scale policy audit. |
 
-**Cumulative total: 2768 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2773 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -269,7 +269,7 @@ explicitly differentiate between:
 
 Do not introduce new theory. Do not overstate results. Do not claim physical
 constants, spacetime, relativity, quantum mechanics, cosmology, emergence, or
-universal control. The project has 2768 tests with 0 failures. V5.29 is the
+universal control. The project has 2773 tests with 0 failures. V5.30 is the
 active research frontier.
 ```
 
