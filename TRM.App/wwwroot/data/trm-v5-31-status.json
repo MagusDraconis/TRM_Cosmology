@@ -1,0 +1,1 @@
+{"releaseStatus":"V5.31 INITIALIZED","phase":"Policy Limit Mapping and Failure Discovery","date":"2026-07-19","testSummary":{"total":2780,"passed":2780,"failed":0},"baselineModel":"M3++ (unchanged), Stop-Low policy (from V5.28), margin caveat (from V5.30)","nextVersion":null,"suites":[{"id":"PLP","status":"PLANNED","tests":0}]}
