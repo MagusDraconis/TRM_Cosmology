@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.38 COMPLETE |
+| Current Version | V5.39 COMPLETE |
 | Current Branch | `feature/v5.39-attractor-absorption-and-perturbation-resistance` |
-| Total Tests | 2829 |
+| Total Tests | 2833 |
 | Failed Tests | 0 |
-| Current Status | V5.35 COMPLETE — causal closure falsified. V5.36 INITIALIZED — c3OmgS origin. |
+| Current Status | V5.39 COMPLETE — attractor absorption characterized. V5.40 PENDING. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -94,9 +94,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
 | V5.38 | Response-State Interaction and K-Rebound Dominance | COMPLETE — diagnostic hierarchy, not causal. |
-| V5.39 | Attractor Absorption and Perturbation Resistance | INITIALIZED — why does attractor absorb K-perturb? |
+| V5.39 | Attractor Absorption and Perturbation Resistance | COMPLETE — attractor absorbs K-perturb at lambda1. |
 
-**Cumulative total: 2829 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2833 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -133,6 +133,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 21. **C3 gain chain (V5.23–V5.26):** d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue. Each layer validated. omegaPerK is final gain bottleneck.
 22. **omegaPerK sign rule (V5.24–V5.25):** omDist < 0.5 AND lambda1 < 0.95. Precision ~81%, enrichment ~5.5×. Diagnostic/enrichment, not sufficient.
 23. **Rescue conversion is probabilistic (V5.26):** Movement quality > movement quantity. No single threshold guarantees rescue.
+24. **Stop-Low policy validated (V5.28–V5.33):** c3OmgS > 0.1 continue, ≤ 0.1 stop. 75% work reduction, zero damage. Boundary robust (V5.29). Generalized (V5.30). Reproducible (V5.32). Efficient (V5.33).
+25. **c3OmegaShift origin — diagnostic hierarchy (V5.36–V5.38):** lambda1 is strongest separator (|corr|=0.618). Hierarchy: lambda1 > rebMag > omDist. Diagnostic, not causal. Rescue paradox resolved.
+26. **Attractor absorption (V5.39):** K-perturb (±15%) → lambda1 delta < 0.03. Attractor resists direct manipulation. Explains V5.38 RII null result. Model C — Omega restoration dominates.
 
 ---
 
@@ -181,16 +184,16 @@ fundamental decomposition of the attractor.
 
 ## H. Current Open Problems
 
-### V5.27 Frontier Open Problem
+### V5.39 Frontier Open Problem
 
-1. **Full-chain rescue calibration:** Can rescue probability be calibrated from the complete
-   validated C3 gain chain better than any single threshold rule? Compare full-chain model
-   against sign-rule-only and c3OmegaShift-only baselines.
+1. **Causal closure against attractor resistance:** V5.39 confirmed the attractor absorbs
+   simple state perturbations. Can perturbation strategies work with (not against) attractor
+   dynamics to test causal closure? If diagnostic hierarchy is resistant to manipulation,
+   what approaches can establish causal leverage?
 
 ### Historical Unresolved Questions (V5.6 era)
 
-These were open at V5.6 completion and partially addressed by V5.7–V5.26, but definitive
-closure was not reached for all:
+These were open at V5.6 completion and have been progressively addressed by V5.7–V5.39:
 
 1. **V9 runaway mechanism** — What prevents all 30/30 seeds from going high in Skip-Nm+Double-Cupd?
 2. **DL→Cupd order sensitivity** — Is stage order truly necessary or sampling noise?
@@ -224,19 +227,21 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.29
+### Current Frontier — V5.39
 
-**Status:** V5.28 COMPLETE → V5.29 INITIALIZED
-**Branch:** `feature/v5.29-risk-stratum-boundary-and-threshold-robustness`
+**Status:** V5.39 COMPLETE → V5.40 PENDING
+**Branch:** `feature/v5.39-attractor-absorption-and-perturbation-resistance`
 
-**V5.28 validated policy:** Stop-Low — post-C3 continuation policy.
-c3OmgS > 0.1: continue. c3OmgS ≤ 0.1: stop.
-Preserves all rescues. Zero damage. 75% work reduction.
+**V5.38–V5.39 story arc:**
+V5.38 established a diagnostic hierarchy (lambda1 > rebMag > omDist) for c3OmegaShift
+formation. V5.38 RII showed lambda1 perturbation via K-scaling produced no causal signal.
+V5.39 closed the loop: the attractor absorbs K-state perturbations at the lambda1 stage
+(delta < 0.03 for ±15% scaling). Model C — Omega restoration dominates downstream.
 
-**V5.29 question:** How robust is the Stop-Low policy around the c3OmgS = 0.1 boundary?
-Stress-test without retuning.
+**V5.40 direction:** If the attractor resists simple perturbation, what approaches can
+work with (not against) attractor dynamics to test causal closure?
 
-See `docsV5_28/TRM_V5_28_Final_Synthesis.md` for complete summary.
+See `docsV5_39/TRM_V5_39_Final_Synthesis.md` for complete summary.
 
 ---
 
@@ -267,7 +272,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. The project has 2780 tests with 0 failures. V5.31 is the active research frontier.
+Do not introduce new theory. The project has 2833 tests with 0 failures. V5.39 is the active research frontier.
 ```
 
 ---

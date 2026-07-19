@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 1.2
+**Version:** 1.3
 **Date:** 2026-07-19
 
-**Current Version:** V5.29 INITIALIZED
-**Current Branch:** `feature/v5.29-risk-stratum-boundary-and-threshold-robustness`
-**Cumulative Tests:** 2768
+**Current Version:** V5.39 COMPLETE
+**Current Branch:** `feature/v5.39-attractor-absorption-and-perturbation-resistance`
+**Cumulative Tests:** 2833
 **Failed:** 0
 
 ---
@@ -22,8 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.28 validated Stop-Low as a safe post-C3 continuation policy (75% work reduction, zero
-rescue loss). V5.29 now stress-tests the c3OmgS = 0.1 boundary robustness without retuning.
+V5.28 validated Stop-Low as a safe post-C3 continuation policy. V5.38 established
+lambda1/K-state as the strongest diagnostic separator of c3OmegaShift. V5.39
+confirmed that the attractor absorbs K-state perturbations, explaining why
+diagnostic variables resist direct causal manipulation. Causal closure
+remains incomplete. V6 remains NOT READY.
 
 ---
 
@@ -33,6 +36,18 @@ rescue loss). V5.29 now stress-tests the c3OmgS = 0.1 boundary robustness withou
 - c3OmgS > 0.1: continue M3++ persistence validation
 - c3OmgS ≤ 0.1: stop continuation (low rescue probability)
 - Preserves all rescues. Zero damage. 75% work reduction.
+
+**Diagnostic hierarchy (V5.38):**
+1. lambda1 / K-state (|corr| ≈ 0.618)
+2. rebMagnitude (|corr| ≈ 0.528)
+3. omDist / Omega proximity (|corr| ≈ 0.518)
+4. Omega T1 (|corr| ≈ 0.518)
+5. kSensitivity (|corr| ≈ 0.467)
+6. d_tail (|corr| ≈ 0.400)
+
+**Attractor absorption (V5.39):**
+K-state perturbation (±15%) → lambda1 delta < 0.03. The attractor resists
+direct state manipulation. Model C — Omega restoration dominates downstream.
 
 ---
 
@@ -45,6 +60,7 @@ rescue loss). V5.29 now stress-tests the c3OmgS = 0.1 boundary robustness withou
 - **orthHiVec** refinement at N=72 (+14.1% holdout)
 - **rebMagnitude** adaptive probe (post-intervention rebound signal)
 - **C3** entry-vector re-alignment correction (adaptive correction that breaches static ceiling)
+- **Stop-Low** post-C3 continuation policy (c3OmgS > 0.1 threshold, frozen)
 
 ---
 
@@ -86,39 +102,46 @@ deterministic threshold rescue.
 
 | Version | Finding |
 |:--------|:--------|
-| V5.21 | N<65 remains rescue-immune under tested operator classes. Transferred-reference hypothesis falsified. |
-| V5.22 | C3 gain activates at N=65 via resonant reversal: anti-aligned seed + large dT1 + C3 correction → large Omega response → rescue. |
-| V5.23 | C3 gain decomposed: d_tail is necessary but not sufficient; omegaPerK is final gain bottleneck. |
-| V5.24 | omegaPerK sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
-| V5.25 | Sign rule validated: precision ~81%, enrichment ~5.5×. Rule-positive rescue ~11%, rule-negative ~2%. Sign rule is not sufficient for rescue. |
-| V5.26 | Movement magnitude does not predict rescue. Rescue conversion is probabilistic. Quality > quantity. |
-| V5.27 | **COMPLETE** — c3OmegaShift > 0.1 frozen two-stratum risk table. P_A=0.0%, P_B=9.6%. Independent validation passed. Zero inversions. |
-| V5.28 | **INITIALIZED** — risk-stratum policy: can the validated risk stratum define safe adaptive control? |
+| V5.27 | **COMPLETE** — c3OmegaShift > 0.1 frozen two-stratum risk table. P_A=0.0%, P_B=9.6%. Independent validation passed. |
+| V5.28 | **COMPLETE** — Stop-Low policy validated. c3OmgS > 0.1 continue, ≤ 0.1 stop. 75% work reduction, zero damage. |
+| V5.29 | **COMPLETE** — Boundary robustness confirmed. Safety gap 0.247. Noise ±0.05 produces 0 flips. Model A. |
+| V5.30 | **COMPLETE** — Generalization to 1322 profiles, 6 cohorts. 64 rescues, 0 missed. Hostile audit passed. |
+| V5.31 | **COMPLETE** — Failure search. 7 stress regimes. Zero low-stratum rescues. Gap stable at 0.056. |
+| V5.32 | **COMPLETE** — Reproducibility. 3 execution modes — all IDENTICAL. Deterministic. |
+| V5.33 | **COMPLETE** — Operational efficiency. 72% workload reduction, 3.6× efficiency gain. |
+| V5.34 | **COMPLETE** — Foundation consolidation. 26 supported findings, 30 claims audited. V6 NOT READY. |
+| V5.35 | **COMPLETE** — Mechanism closure. Causal chain falsified. c3OmgS = Model B diagnostic. |
+| V5.36 | **COMPLETE** — c3OmegaShift origin. lambda1 (-0.619), omDist (-0.512), rebMag (-0.531). Partial causal evidence (later downgraded). |
+| V5.37 | **COMPLETE** — Omega proximity scaling. Dose-response non-monotonic. V5.36 causal claim downgraded. Model C — weak conditional. |
+| V5.38 | **COMPLETE** — Response-state interaction. lambda1 = strongest diagnostic separator (|corr|=0.618). Diagnostic hierarchy only. |
+| V5.39 | **COMPLETE** — Attractor absorption. K-perturbation absorbed at lambda1 stage. Explains V5.38 RII failure. Model C — Omega restoration dominates. |
 
 ---
 
-## Current V5.28 Research Question
+## Current V5.39 Research Question
 
-**Can the validated c3OmegaShift risk stratum define a safe adaptive control policy
-that reduces wasted interventions while preserving zero damage?**
+**Why does the system absorb K-state / lambda1 perturbations?**
 
-Expected tasks:
-- Gate C3 application by c3OmegaShift expectation or observation
-- Measure reduction in wasted interventions
-- Measure reduction in false-positive adaptive actions
-- Verify zero-damage preservation
-- Evaluate practical rescue efficiency gain
+**Answer:** The attractor resists perturbation at the lambda1 stage.
+±15% K-scaling → lambda1 delta < 0.03. Perturbation partially propagates
+downstream. Omega T2 restoration is the dominant absorption mechanism
+(Model C). This explains why V5.38 RII's lambda1 intervention produced
+no causal signal.
+
+**Key result:** Diagnostic hierarchy variables resist direct manipulation
+because the attractor protects its internal state coordinates.
 
 ---
 
-## V5.28 Constraints
+## V5.39 Constraints
 
 - Do not modify M3++.
 - Do not retune c3OmegaShift threshold (0.1 is frozen).
 - Do not add new correction classes.
 - Do not add new variables.
-- Policy gating only — no mechanism modification.
-- Use only validated chain variables and the frozen risk table.
+- Do not modify Stop-Low.
+- Do not claim physical interpretation.
+- Do not attempt V6 derivations.
 
 ---
 
@@ -127,22 +150,27 @@ Expected tasks:
 ### SUPPORTED
 
 - M3++ adaptive model validated within tested domain.
-- V5.27: c3OmegaShift > 0.1 defines rescue-enriched risk stratum.
-- V5.27: P_A = 0.0% [0.0%–0.3%], P_B = 9.6% [6.6%–13.6%].
+- Stop-Low policy: c3OmgS > 0.1 continue, ≤ 0.1 stop. Preserves all rescues, zero damage.
+- V5.27: c3OmegaShift > 0.1 defines rescue-enriched risk stratum. P_A = 0.0%, P_B = 9.6%.
 - Full C3 gain chain is mechanistically valid.
 - c3OmegaShift is the minimal robust predictive summary.
 - Rescue is probabilistic, not deterministic.
+- V5.38: lambda1 / K-state is the strongest diagnostic separator of c3OmegaShift (|corr| ≈ 0.618).
+- V5.38: Diagnostic hierarchy: lambda1 > rebMag > omDist.
+- V5.39: Attractor absorbs K-state perturbations at lambda1 stage (delta < 0.03 for ±15% K-scaling).
+- V5.39: Absorption model = Model C — Omega restoration dominates downstream.
 
 ### CONDITIONAL
 
 - All findings are finite-N and operator-class limited.
 - V5.27 calibration is conservative, not precise.
 - N=50–64 is inaccessible. N=65–79 is adaptive-active.
+- V5.39 absorption model derived from 6 N, single perturbation class.
+- Diagnostic hierarchy is observational, not causal.
 
 ### HYPOTHESIS
 
-- V5.28: Risk-stratum policy can reduce wasted interventions.
-- V5.28: Policy gating can preserve zero damage.
+- V5.40: Causal testing against attractor topology may reveal new leverage.
 
 ### NOT CLAIMED
 
@@ -154,41 +182,49 @@ Expected tasks:
 - Physical interpretation of N-boundaries
 - Physical criticality
 - Full-chain predictive superiority
+- lambda1 causality
+- rebound causality
+- c3OmegaShift causal sufficiency
+- Full causal closure
+- V6 readiness
+- Length, space, velocity, or c derivation
 
 ---
 
-## Recommended V5.28 Next Prompt
+## Recommended V5.40 Next Prompt
 
 ```
-You are acting as a TRM/TQM V5.28 risk-stratum policy agent.
+You are acting as a TRM/TQM V5.40 causal closure and attractor topology agent.
 
 Current branch:
-feature/v5.28-rescue-risk-stratum-and-control-policy
+feature/v5.40-causal-closure-and-attractor-topology
 
 Base:
-V5.27 COMPLETE
+V5.39 COMPLETE
 
 Current cumulative state:
-2762 tests passed
+2833 tests passed
 0 failed
 
 Purpose:
-Evaluate whether the validated c3OmegaShift > 0.1 risk stratum
-can define a safe adaptive control policy.
+If the attractor resists simple state perturbations (V5.39), what approaches
+can test causal closure without fighting attractor restoration?
 
-Frozen model:
-M3++ with c3OmegaShift > 0.1 two-stratum risk table
+Frozen:
+M3++, Stop-Low policy, c3OmegaShift > 0.1 threshold.
 
 Core questions:
-1. Should C3 be applied only when c3OmegaShift > 0.1?
-2. Can risk-stratum gating reduce wasted interventions?
-3. Does gating preserve zero damage?
-4. Does policy improve practical rescue efficiency?
+1. Can perturbation strategies be designed that work with (not against) attractor dynamics?
+2. Does multi-stage perturbation bypass early-stage absorption?
+3. Can attractor topology itself be probed for causal leverage?
+4. Does any approach improve causal closure?
+5. Does V6 remain not ready?
 
 Do not modify M3++.
 Do not retune c3OmegaShift threshold.
 Do not add new variables or correction classes.
 Do not claim physical interpretation.
+Do not attempt length, space, velocity, or c derivations.
 ```
 
 ---

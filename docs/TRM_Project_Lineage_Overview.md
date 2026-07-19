@@ -2,10 +2,10 @@
 
 **Version:** 2.0
 **Date:** 2026-07-19
-**Scope:** Clockwork Cosmology V1 through V5.27
-**Tests:** 2829 verified, 0 failed
+**Scope:** Clockwork Cosmology V1 through V5.39
+**Tests:** 2833 verified, 0 failed
 **Branch:** `feature/v5.39-attractor-absorption-and-perturbation-resistance`
-**Current Frontier:** V5.38 COMPLETE → V5.39 INITIALIZED
+**Current Frontier:** V5.39 COMPLETE → V5.40 PENDING
 
 ---
 
@@ -826,6 +826,108 @@ d_tail → deltaD → deltaK → omegaPerK sign → c3OmegaShift → rescue
 
 ---
 
+## F3. V5.28–V5.39 Stop-Low Policy Through Causal Diagnostics
+
+### V5.28 — Stop-Low Policy Validation (RSP→RSI) — COMPLETE
+
+Validated the post-C3 continuation policy: if c3OmgS > 0.1, continue M3++; if ≤ 0.1,
+stop continuation. All 21 rescues in Stratum B (c3OmgS > 0.1), zero in Stratum A.
+75% work reduction. Zero delayed rescues. Model A (safe stop/go policy).
+
+**Status:** COMPLETE. See `docsV5_28/TRM_V5_28_Final_Synthesis.md`.
+
+### V5.29 — Boundary Robustness (RBP→RBA) — COMPLETE
+
+Safety gap 0.247 (max stopped = 0.070, min rescue = 0.317). Noise ±0.05: 0 flips,
+0 missed rescues. omegaPerK explains gap (stopped oPK=2.8-16.4, rescued=18-2113).
+Model A (robust hard stop threshold).
+
+**Status:** COMPLETE. See `docsV5_29/TRM_V5_29_Final_Synthesis.md`.
+
+### V5.30 — Generalization (SGP→SGI) — COMPLETE
+
+Expanded to 1322 profiles, 24 N, 6 cohorts. 64 rescues, 0 missed. Hostile audit passed.
+Core gap preserved at 0.247. Model B (generalized with margin caveat).
+
+**Status:** COMPLETE. See `docsV5_30/TRM_V5_30_Final_Synthesis.md`.
+
+### V5.31 — Failure Search (PLP→PLA) — COMPLETE
+
+7 stress regimes. Zero low-stratum rescues found. Min gap 0.056 stable.
+oPK ratio 58× confirms response-dynamics separation. Structural robustness. Model A.
+
+**Status:** COMPLETE. See `docsV5_31/TRM_V5_31_Final_Synthesis.md`.
+
+### V5.32 — Reproducibility (EVP→EVA) — COMPLETE
+
+3 execution modes (standard, N-reversed, repeat) — all IDENTICAL (631,443,41,0,0.056).
+oPK ratio 76×. Execution-order invariant. Deterministic.
+
+**Status:** COMPLETE. See `docsV5_32/TRM_V5_32_Final_Synthesis.md`.
+
+### V5.33 — Operational Efficiency (OEP→OEI) — COMPLETE
+
+72% workload reduction. 3.6× efficiency gain. ~13 continuations saved per rescue.
+At scale N=10000: ~7200 continuations saved. Model D (Efficiency+Resource+Triage).
+
+**Status:** COMPLETE. See `docsV5_33/TRM_V5_33_Final_Synthesis.md`.
+
+### V5.34 — Foundation Consolidation (FCP→FCI) — COMPLETE
+
+26 supported findings extracted across 5 layers. 30 claims audited, no drift.
+V6 assessment: all geometry readiness assessments = NOT READY. No mechanism.
+
+**Status:** COMPLETE. See `docsV5_34/TRM_V5_34_Final_Synthesis.md`.
+
+### V5.35 — Mechanism Closure (MCP→MCA) — COMPLETE
+
+oPK = 1906× rescued/stopped. But all upstream correlations < 0.15.
+Chain NOT causally closed. c3OmgS role: Model B diagnostic.
+Falsification accepted. Chain is mechanistic trace, not causal.
+
+**Status:** COMPLETE. See `docsV5_35/TRM_V5_35_Final_Synthesis.md`.
+
+### V5.36 — c3OmegaShift Origin (COP→COI) — COMPLETE
+
+First c3OmgS separators identified: lambda1 (-0.619), omDist (-0.512), rebMag (-0.531).
+Partial causal evidence from Omega-proximity perturbation (later downgraded in V5.37).
+High-c3 failures explained by post-C3 Omega.
+
+**Status:** COMPLETE. See `docsV5_36/TRM_V5_36_Final_Synthesis.md`.
+
+### V5.37 — Omega Proximity Scaling (OPP→OPA) — COMPLETE
+
+Dose-response test (7 levels). Effect NOT monotonic. Directional consistency near chance.
+V5.36 causal claim DOWNGRADED to Model C — weak conditional.
+
+**Status:** COMPLETE. See `docsV5_37/TRM_V5_37_Final_Synthesis.md`.
+
+### V5.38 — Response-State Interaction (RIP→RII) — COMPLETE
+
+lambda1 confirmed strongest diagnostic separator (|corr| = 0.618).
+Dominance ranking: lambda1 > rebMag > omDist. Rescue paradox resolved.
+RII: lambda1 K-scaling perturbation FAILED — attractor absorbs. No causal signal.
+Model D — diagnostic hierarchy only. Causal closure NOT achieved. V6 NOT READY.
+
+**Status:** COMPLETE. See `docsV5_38/TRM_V5_38_Final_Synthesis.md`.
+
+### V5.39 — Attractor Absorption (AAP→AAS) — COMPLETE
+
+Why does the system absorb lambda1 perturbations? Traced perturbation through
+lambda1 → omT1 → omT2 → c3OmgS. K-scaling ±15% → lambda1 delta < 0.03.
+Attractor absorbs perturbation at lambda1 stage. Partial propagation downstream
+where Omega restoration dominates (Model C). All 6 gates reached.
+Explains V5.38 RII failure. Causal closure NOT improved. V6 NOT READY.
+
+**Key finding:** The attractor protects its internal state coordinates against
+external perturbation. Diagnostic hierarchy variables resist direct manipulation
+because they are attractor-stabilized. This explains why strong diagnostic
+separators cannot be converted to causal controls.
+
+**Status:** COMPLETE. See `docsV5_39/TRM_V5_39_Final_Synthesis.md`.
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -921,6 +1023,15 @@ Items classified as SUPPORTED under current governance (V5.2 baseline):
     enrichment ~5.5×. Validated as high-precision enrichment rule.
 27. **Rescue conversion (V5.26):** Probabilistic full-chain enrichment, not deterministic
     threshold. Movement quality dominates movement quantity.
+28. **Stop-Low policy (V5.28):** Post-C3 continuation policy — c3OmgS > 0.1 continue,
+    ≤ 0.1 stop. 75% work reduction, zero rescue loss. Boundary robust (V5.29), generalized
+    (V5.30), reproducible (V5.32), efficient (V5.33). Validated through V5.34 foundation audit.
+29. **Diagnostic hierarchy (V5.38):** lambda1 / K-state is the strongest diagnostic separator
+    of c3OmegaShift (|corr| ≈ 0.618). Hierarchy: lambda1 > rebMag > omDist > omT1 > kSens >
+    dTail. Diagnostic, not causal. Rescue paradox resolved.
+30. **Attractor absorption (V5.39):** K-state perturbation (±15%) produces only ~0.027 delta
+    in lambda1. The attractor resists direct state manipulation, explaining V5.38 RII's null
+    causal result. Model C — Omega restoration dominates downstream.
 
 ---
 
@@ -1009,6 +1120,13 @@ HYPOTHESIS pending larger-sample confirmation (Stage 2 LongRunning):
 - **H20:** c3OmegaShift and omegaPerK sign enrich rescue likelihood but do not determine it.
   No single layer is sufficient.
 
+### Attractor and Causal Testing Hypotheses (V5.39–V5.40 frontier)
+
+- **H21:** The attractor's resistance to simple K-state perturbation reflects a general
+  protection of internal state coordinates.
+- **H22:** Causal testing may require perturbation strategies that work with (not against)
+  attractor restoration dynamics.
+
 ---
 
 ## K. Current Not Claimed
@@ -1040,6 +1158,14 @@ maintained to prevent overinterpretation:
 13. **Gravitational redshift derived** — not claimed.
 14. **Shapiro time delay derived** — not claimed.
 15. **N→∞ continuum limit proven** — finite-N runs only.
+16. **lambda1 causality** — lambda1 is the strongest diagnostic separator, not a causal driver.
+17. **rebound causality** — rebMagnitude is a diagnostic companion, not a causal driver.
+18. **c3OmegaShift causal sufficiency** — c3OmgS is a predictive summary, not a causal mechanism.
+19. **Full causal closure** — the C3 gain chain is a mechanistic trace, not a causal chain.
+20. **Deterministic rescue** — rescue conversion is probabilistic, not deterministic.
+21. **V6 readiness** — all geometry candidates (length, space, velocity, c) remain NOT READY.
+22. **Attractor topology characterized** — V5.39 shows absorption but full topology is not mapped.
+23. **Causal control achieved** — no perturbation has been shown to causally control c3OmegaShift.
 16. **SPARC galaxy rotation curves explained** — effective comparator only.
 17. **Zero-parameter theory** — TRM has exactly 2 irreducible structural inputs (I1, I2).
 18. **Universal Low→High control is not claimed.**
@@ -1093,12 +1219,12 @@ maintained to prevent overinterpretation:
 | V5.25 | Omega Gain Sign Validation | — | COMPLETE |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | — | COMPLETE |
 | V5.38 | Response-State Interaction and K-Rebound Dominance | 6 | COMPLETE |
-| V5.39 | Attractor Absorption and Perturbation Resistance | — | INITIALIZED |
-| **Total** | | **2829** | **0 failed** |
+| V5.39 | Attractor Absorption and Perturbation Resistance | 4 | COMPLETE |
+| **Total** | | **2833** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2748 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 2833 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
-V5.6, 2590 at V5.13) are historical milestones.
+V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
 ---
 
