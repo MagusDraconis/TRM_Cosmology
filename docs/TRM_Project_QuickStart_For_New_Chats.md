@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.29 COMPLETE |
-| Current Branch | `feature/v5.30-stop-low-policy-generalization-and-efficiency` |
-| Total Tests | 2773 |
+| Current Version | V5.30 COMPLETE |
+| Current Branch | `feature/v5.31-policy-limit-mapping-and-failure-discovery` |
+| Total Tests | 2780 |
 | Failed Tests | 0 |
-| Current Status | V5.29 COMPLETE — boundary robustness confirmed. V5.30 INITIALIZED — policy generalization. |
+| Current Status | V5.30 COMPLETE — generalized with margin caveat. V5.31 INITIALIZED — failure discovery. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -93,10 +93,10 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
-| V5.29 | Boundary and Threshold Robustness | COMPLETE — 0.247 safety gap. Noise-robust. |
-| V5.30 | Policy Generalization and Efficiency | INITIALIZED — large-scale policy audit. |
+| V5.30 | Policy Generalization and Efficiency | COMPLETE — generalized with margin caveat. 73% work reduction. |
+| V5.31 | Policy Limit Mapping and Failure Discovery | INITIALIZED — active search for failure regimes. |
 
-**Cumulative total: 2773 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2780 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -267,10 +267,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. Do not overstate results. Do not claim physical
-constants, spacetime, relativity, quantum mechanics, cosmology, emergence, or
-universal control. The project has 2773 tests with 0 failures. V5.30 is the
-active research frontier.
+Do not introduce new theory. The project has 2780 tests with 0 failures. V5.31 is the active research frontier.
 ```
 
 ---
