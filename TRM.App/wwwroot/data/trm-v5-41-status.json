@@ -1,1 +1,1 @@
-{"releaseStatus":"V5.41 INITIALIZED","phase":"Causal Test Design Under Attractor Absorption","date":"2026-07-19","testSummary":{"total":2838,"passed":2838,"failed":0}}
+{"releaseStatus":"V5.41 COMPLETE","phase":"Causal Test Design Under Attractor Absorption","date":"2026-07-19","testSummary":{"total":2843,"passed":2843,"failed":0},"suites":[{"name":"TDP","status":"COMPLETE","tests":3},{"name":"TDE","status":"COMPLETE","tests":1},{"name":"TDA","status":"COMPLETE","tests":1},{"name":"TDS","status":"COMPLETE","tests":0}]}

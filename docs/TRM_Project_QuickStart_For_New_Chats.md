@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.40 COMPLETE |
-| Current Branch | `feature/v5.40-causal-closure-and-attractor-topology` |
-| Total Tests | 2838 |
+| Current Version | V5.41 COMPLETE |
+| Current Branch | `feature/v5.41-causal-test-design-under-attractor-absorption` |
+| Total Tests | 2843 |
 | Failed Tests | 0 |
-| Current Status | V5.40 COMPLETE — causal closure blocked. V5.41 PENDING. |
+| Current Status | V5.41 COMPLETE — causal test methodology. V5.42 PENDING. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -96,8 +96,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.38 | Response-State Interaction and K-Rebound Dominance | COMPLETE — diagnostic hierarchy, not causal. |
 | V5.39 | Attractor Absorption and Perturbation Resistance | COMPLETE — attractor absorbs K-perturb at lambda1. |
 | V5.40 | Causal Closure and Attractor Topology | COMPLETE — perturbations absorbed; causal closure blocked. |
+| V5.41 | Causal Test Design Under Attractor Absorption | COMPLETE — perturbation invalidated; Stop-Low outcome-validated. |
 
-**Cumulative total: 2838 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2843 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -138,6 +139,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 25. **c3OmegaShift origin — diagnostic hierarchy (V5.36–V5.38):** lambda1 is strongest separator (|corr|=0.618). Hierarchy: lambda1 > rebMag > omDist. Diagnostic, not causal. Rescue paradox resolved.
 26. **Attractor absorption (V5.39):** K-perturb (±15%) → lambda1 delta < 0.03. Attractor resists direct manipulation. Explains V5.38 RII null result. Model C — Omega restoration dominates.
 27. **Causal closure blocked (V5.40):** Attractor-aligned perturbations do NOT survive better. All families absorbed 87–99%. Weak directional signals are baseline-state artifacts (52.3% correct). Absorption direction-invariant (Model D).
+28. **Causal test methodology (V5.41):** Perturbation INVALIDATED. Natural variation = STABLE DIAGNOSTIC. 8 claims REJECTED. **Predictive validity (Stop-Low) does not require causal closure.**
 
 ---
 
@@ -230,23 +232,21 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.40
+### Current Frontier — V5.41
 
-**Status:** V5.40 COMPLETE → V5.41 PENDING
-**Branch:** `feature/v5.40-causal-closure-and-attractor-topology`
+**Status:** V5.41 COMPLETE → V5.42 PENDING
+**Branch:** `feature/v5.41-causal-test-design-under-attractor-absorption`
 
-**V5.39–V5.40 story arc:**
-V5.39 showed the attractor absorbs K-state perturbations. V5.40 tested whether
-attractor-compatible perturbations could penetrate this protection — they could not.
-All perturbation families (direct, Omega-aligned, rebound-aligned, d-tail-aligned,
-combined, mismatch) are absorbed 87–99% before c3OmgS. Weak directional signals
-(55%+ in CTE) collapse to 52.3% under CTA stratification — they are baseline-state
-artifacts. Absorption is direction-invariant (Model D). Causal closure remains BLOCKED.
+**V5.40–V5.41 story arc:**
+V5.40 confirmed all perturbation families are absorbed. V5.41 pivoted to causal-test
+methodology: evaluated D1–D7 test designs under attractor absorption. Perturbation = INVALIDATED.
+Natural variation = STABLE DIAGNOSTIC. 8 causal claims REJECTED. Central insight:
+**predictive validity (Stop-Low) does not require causal closure.** V6 remains NOT READY.
 
-**V5.41 direction:** Move from perturbation attempts to causal-test methodology design.
-What test designs remain valid under strong attractor restoration?
+**V5.42 direction:** Use counterfactual trace and natural variation to identify stronger
+causal rejection boundaries without perturbation.
 
-See `docsV5_40/TRM_V5_40_Final_Synthesis.md` for complete summary.
+See `docsV5_41/TRM_V5_41_Final_Synthesis.md` for complete summary.
 
 ---
 
@@ -277,7 +277,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. The project has 2838 tests with 0 failures. V5.40 is the active research frontier.
+Do not introduce new theory. The project has 2843 tests with 0 failures. V5.41 is the active research frontier.
 ```
 
 ---

@@ -3,9 +3,9 @@
 **Version:** 1.3
 **Date:** 2026-07-19
 
-**Current Version:** V5.40 COMPLETE
-**Current Branch:** `feature/v5.40-causal-closure-and-attractor-topology`
-**Cumulative Tests:** 2838
+**Current Version:** V5.41 COMPLETE
+**Current Branch:** `feature/v5.41-causal-test-design-under-attractor-absorption`
+**Cumulative Tests:** 2843
 **Failed:** 0
 
 ---
@@ -27,8 +27,11 @@ lambda1/K-state as the strongest diagnostic separator of c3OmegaShift. V5.39
 confirmed that the attractor absorbs K-state perturbations, explaining why
 diagnostic variables resist direct causal manipulation. V5.40 tested whether
 attractor-compatible perturbations could penetrate this protection — they could not.
-All perturbation families are absorbed similarly; weak directional signals are
-baseline-state artifacts. Causal closure remains blocked. V6 remains NOT READY.
+All perturbation families are absorbed; weak signals are artifacts. V5.41 pivoted
+to causal-test methodology: perturbation is INVALIDATED; natural variation,
+counterfactual trace, and causal rejection are viable alternatives. Central insight:
+predictive validity (Stop-Low) does not require causal closure. Causal closure
+remains blocked. V6 remains NOT READY.
 
 ---
 
@@ -56,6 +59,12 @@ Attractor-aligned perturbations do NOT survive better than mismatch. All
 perturbation families absorbed 87–99%. Weak c3OmgS directional signals are
 baseline-state artifacts (Model C — not causal). Absorption is direction-invariant
 (Model D). Causal closure remains BLOCKED.
+
+**Causal test methodology (V5.41):**
+Perturbation-based testing INVALIDATED. Natural variation = STABLE DIAGNOSTIC.
+Invariance = WEAKLY INVARIANT (N-dependent). Mediation = TEMPORALLY AMBIGUOUS.
+Counterfactual trace = OBSERVATIONAL. 8 causal claims REJECTED. Stop-Low is
+OUTCOME-VALIDATED — does not require causal closure. V6 remains NOT READY.
 
 ---
 
@@ -123,23 +132,24 @@ deterministic threshold rescue.
 | V5.37 | **COMPLETE** — Omega proximity scaling. Dose-response non-monotonic. V5.36 causal claim downgraded. Model C — weak conditional. |
 | V5.38 | **COMPLETE** — Response-state interaction. lambda1 = strongest diagnostic separator (|corr|=0.618). Diagnostic hierarchy only. |
 | V5.39 | **COMPLETE** — Attractor absorption. K-perturbation absorbed at lambda1 stage. Explains V5.38 RII failure. Model C — Omega restoration dominates. |
-| V5.40 | **COMPLETE** — Causal closure and attractor topology. Aligned perturbations do NOT survive better. Weak signals are artifacts (52.3%, near chance). Absorption direction-invariant. Causal closure BLOCKED. |
+| V5.40 | **COMPLETE** — Causal closure and attractor topology. Aligned perturbations do NOT survive better. Weak signals are artifacts. Absorption direction-invariant. Causal closure BLOCKED. |
+| V5.41 | **COMPLETE** — Causal test methodology. Perturbation INVALIDATED. Natural variation = diagnostic. 8 claims REJECTED. Stop-Low is OUTCOME-VALIDATED without causal closure. |
 
 ---
 
-## Current V5.40 Research Question
+## Current V5.41 Research Question
 
-**Can attractor-compatible perturbations test causal closure?**
+**What causal test designs remain valid under attractor absorption?**
 
-**Answer:** No. Attractor-aligned perturbations do not survive better than mismatch
-or direct K-scaling. All perturbation families absorbed 87–99% before c3OmgS.
-Weak directional signals collapse under stratification (52.3% correct, near chance)
-— they are baseline-state artifacts. Absorption is direction-invariant (Model D).
-**Causal closure remains BLOCKED.**
+**Answer:** Perturbation-based testing is INVALIDATED. Natural variation = STABLE
+DIAGNOSTIC (tercile sep=0.27). Invariance = WEAKLY INVARIANT (N-dependent).
+Mediation = TEMPORALLY AMBIGUOUS. Counterfactual trace = OBSERVATIONAL.
+8 causal claims REJECTED. **Predictive validity (Stop-Low) does not require
+causal closure.** V6 remains NOT READY.
 
 ---
 
-## V5.40 Constraints
+## V5.41 Constraints
 
 - Do not modify M3++.
 - Do not retune c3OmegaShift threshold (0.1 is frozen).
@@ -165,23 +175,27 @@ Weak directional signals collapse under stratification (52.3% correct, near chan
 - V5.38: Diagnostic hierarchy: lambda1 > rebMag > omDist.
 - V5.39: Attractor absorbs K-state perturbations at lambda1 stage (delta < 0.03 for ±15% K-scaling).
 - V5.39: Absorption model = Model C — Omega restoration dominates downstream.
-- V5.40: Attractor-aligned perturbations do not survive better than mismatch.
-- V5.40: All perturbation families absorbed 87–99% before c3OmegaShift.
-- V5.40: Weak c3OmgS directional signals are baseline-state artifacts (52.3% correct, near chance).
 - V5.40: Absorption is direction-invariant (Model D). Causal closure remains BLOCKED.
+- V5.41: Perturbation-based causal testing is INVALIDATED.
+- V5.41: Natural variation = STABLE DIAGNOSTIC RELATION (not causal).
+- V5.41: Invariance = WEAKLY INVARIANT (N-dependent).
+- V5.41: Mediation = TEMPORALLY AMBIGUOUS (no staged measurement).
+- V5.41: Counterfactual trace = OBSERVATIONAL (rebMag strongly separates outcomes).
+- V5.41: 8 causal claims REJECTED by prior evidence.
+- V5.41: Stop-Low is OUTCOME-VALIDATED — does not require causal closure.
+- V5.41: Predictive validity ≠ causal closure.
 
 ### CONDITIONAL
 
 - All findings are finite-N and operator-class limited.
 - V5.27 calibration is conservative, not precise.
 - N=50–64 is inaccessible. N=65–79 is adaptive-active.
-- V5.39 absorption model derived from 6 N, single perturbation class.
-- V5.40 artifact classification based on tested perturbation patterns.
+- V5.41 identifiability classifications are conditional on current pipeline design.
 - Diagnostic hierarchy is observational, not causal.
 
 ### HYPOTHESIS
 
-- V5.41: Causal test methodology may identify valid approaches under strong attractor restoration.
+- V5.42: Counterfactual trace and natural variation may strengthen causal rejection boundaries.
 
 ### NOT CLAIMED
 
@@ -202,35 +216,35 @@ Weak directional signals collapse under stratification (52.3% correct, near chan
 
 ---
 
-## Recommended V5.41 Next Prompt
+## Recommended V5.42 Next Prompt
 
 ```
-You are acting as a TRM/TQM V5.41 causal test design agent.
+You are acting as a TRM/TQM V5.42 counterfactual trace and causal rejection agent.
 
 Current branch:
-feature/v5.41-causal-test-design-under-attractor-absorption
+feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection
 
 Base:
-V5.40 COMPLETE
+V5.41 COMPLETE
 
 Current cumulative state:
-2838 tests passed
+2843 tests passed
 0 failed
 
 Purpose:
-If direct and attractor-aligned perturbations are absorbed, what causal test
-designs remain valid under strong attractor restoration?
+Use counterfactual trace and natural variation to identify stronger causal
+rejection boundaries without relying on perturbation.
 
 Frozen:
 M3++, Stop-Low policy, c3OmegaShift > 0.1 threshold.
 
 Core questions:
-1. Which causal tests are invalidated by attractor absorption?
-2. Can causal influence be tested using natural variation instead of perturbation?
-3. Can causal closure be approached through invariance, mediation, or counterfactual trace?
-4. What evidence would establish causality under strong restoration?
-5. Are current variables sufficient for causal testing?
-6. Does Stop-Low require causal closure, or only predictive stability?
+1. Which causal claims can be rejected using counterfactual trace?
+2. Which variables remain diagnostic under matched-profile comparison?
+3. Can matched profiles reveal why c3OmgS differs without perturbation?
+4. Does natural variation strengthen or weaken the diagnostic hierarchy?
+5. Can causal closure be narrowed by eliminating impossible causal paths?
+6. Does Stop-Low remain operationally sufficient?
 7. Does V6 remain not ready?
 
 Do not modify M3++.

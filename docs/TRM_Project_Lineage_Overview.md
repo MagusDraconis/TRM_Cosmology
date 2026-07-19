@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2838 verified, 0 failed
-**Branch:** `feature/v5.40-causal-closure-and-attractor-topology`
-**Current Frontier:** V5.40 COMPLETE → V5.41 PENDING
+**Tests:** 2843 verified, 0 failed
+**Branch:** `feature/v5.41-causal-test-design-under-attractor-absorption`
+**Current Frontier:** V5.41 COMPLETE → V5.42 PENDING
 
 ---
 
@@ -948,6 +948,27 @@ V6 NOT READY.
 
 **Status:** COMPLETE. See `docsV5_40/TRM_V5_40_Final_Synthesis.md`.
 
+### V5.41 — Causal Test Design Under Attractor Absorption (TDP→TDA) — COMPLETE
+
+Pivoted from perturbation attempts to causal-test methodology. Evaluated 7 test design
+families (D1–D7) under attractor absorption constraints with natural-variation
+grounding data.
+
+**TDE:** D1 (perturbation) REJECTED. D2 (natural variation) FEASIBLE. D3 (invariance)
+WEAK/N-dependent. D4 (mediation) PARTIAL. D5 (counterfactual trace) FEASIBLE.
+D6 (causal rejection) RECOMMENDED. D7 (operational sufficiency) ACCEPTED.
+
+**TDA:** Natural variation = STABLE DIAGNOSTIC RELATION (tercile sep=0.27).
+Invariance = WEAKLY INVARIANT (std=0.224). Mediation = TEMPORALLY AMBIGUOUS.
+Counterfactual trace = OBSERVATIONAL (rebMag diff=-1.94). 8 causal claims REJECTED.
+Stop-Low = OUTCOME-VALIDATED.
+
+**Central contribution:** Predictive validity ≠ causal closure. Stop-Low is
+operationally valid without causal understanding. This removes pressure to achieve
+causal closure for operational purposes. V6 remains NOT READY.
+
+**Status:** COMPLETE. See `docsV5_41/TRM_V5_41_Final_Synthesis.md`.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1248,9 +1269,10 @@ maintained to prevent overinterpretation:
 | V5.38 | Response-State Interaction and K-Rebound Dominance | 6 | COMPLETE |
 | V5.39 | Attractor Absorption and Perturbation Resistance | 4 | COMPLETE |
 | V5.40 | Causal Closure and Attractor Topology | 5 | COMPLETE |
-| **Total** | | **2838** | **0 failed** |
+| V5.41 | Causal Test Design Under Attractor Absorption | 5 | COMPLETE |
+| **Total** | | **2843** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2838 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 2843 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
 V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
