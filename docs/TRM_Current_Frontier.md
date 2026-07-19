@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 1.1
+**Version:** 1.2
 **Date:** 2026-07-19
 
-**Current Version:** V5.28 INITIALIZED
-**Current Branch:** `feature/v5.28-rescue-risk-stratum-and-control-policy`
-**Cumulative Tests:** 2762
+**Current Version:** V5.29 INITIALIZED
+**Current Branch:** `feature/v5.29-risk-stratum-boundary-and-threshold-robustness`
+**Cumulative Tests:** 2768
 **Failed:** 0
 
 ---
@@ -22,22 +22,17 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-The project has completed V5.27 probability calibration: c3OmegaShift > 0.1 defines a validated
-rescue-enriched risk stratum (P_B=9.6%, P_A=0.0%). V5.28 now moves to policy evaluation of this
-risk stratum.
+V5.28 validated Stop-Low as a safe post-C3 continuation policy (75% work reduction, zero
+rescue loss). V5.29 now stress-tests the c3OmgS = 0.1 boundary robustness without retuning.
 
 ---
 
 ## Current Preferred Model
 
-**M3++** — unchanged from V5.17–V5.18.
-
-**V5.27 Risk Stratum:**
-- **c3OmegaShift > 0.1** defines a rescue-enriched stratum
-- P(rescue | c3OmgS > 0.1) = 9.6% [6.6%–13.6%]
-- P(rescue | c3OmgS ≤ 0.1) = 0.0% [0.0%–0.3%]
-- Full C3 gain chain is mechanistically valid but not the best practical predictor
-- c3OmegaShift is the minimal robust sufficient summary
+**M3++** — unchanged. **Stop-Low policy:**
+- c3OmgS > 0.1: continue M3++ persistence validation
+- c3OmgS ≤ 0.1: stop continuation (low rescue probability)
+- Preserves all rescues. Zero damage. 75% work reduction.
 
 ---
 

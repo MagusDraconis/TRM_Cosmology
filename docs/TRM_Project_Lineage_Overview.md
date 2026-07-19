@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.27
-**Tests:** 2762 verified, 0 failed
-**Branch:** `feature/v5.28-rescue-risk-stratum-and-control-policy`
-**Current Frontier:** V5.27 COMPLETE → V5.28 INITIALIZED
+**Tests:** 2768 verified, 0 failed
+**Branch:** `feature/v5.29-risk-stratum-boundary-and-threshold-robustness`
+**Current Frontier:** V5.28 COMPLETE → V5.29 INITIALIZED
 
 ---
 
@@ -1092,8 +1092,9 @@ maintained to prevent overinterpretation:
 | V5.24 | Omega-per-K Gain and Response Conversion | — | COMPLETE |
 | V5.25 | Omega Gain Sign Validation | — | COMPLETE |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | — | COMPLETE |
-| V5.27 | Full Chain Rescue Calibration and Probability | 14 | COMPLETE |
-| **Total** | | **2762** | **0 failed** |
+| V5.28 | Rescue Risk Stratum and Control Policy | 6 | COMPLETE |
+| V5.29 | Boundary and Threshold Robustness | — | INITIALIZED |
+| **Total** | | **2768** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2748 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
@@ -1173,10 +1174,10 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2762 tests, 0 failed. V5.27 COMPLETE — c3OmgS>0.1 risk stratum
-validated. V5.28 INITIALIZED — risk-stratum control policy evaluation.
-Current branch: `feature/v5.28-rescue-risk-stratum-and-control-policy`.
-Preferred model: M3++ (adaptive) with frozen c3OmgS>0.1 two-stratum risk table.
+**Current status:** 2768 tests, 0 failed. V5.28 COMPLETE — Stop-Low policy validated.
+V5.29 INITIALIZED — boundary robustness audit.
+Current branch: `feature/v5.29-risk-stratum-boundary-and-threshold-robustness`.
+Preferred model: M3++ with Stop-Low post-C3 continuation policy.
 See section F2 for V5.7–V5.27 details.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein

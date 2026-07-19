@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.27 COMPLETE |
-| Current Branch | `feature/v5.28-rescue-risk-stratum-and-control-policy` |
-| Total Tests | 2762 |
+| Current Version | V5.28 COMPLETE |
+| Current Branch | `feature/v5.29-risk-stratum-boundary-and-threshold-robustness` |
+| Total Tests | 2768 |
 | Failed Tests | 0 |
-| Current Status | V5.27 COMPLETE — rescue-risk stratum calibrated. V5.28 INITIALIZED — policy evaluation. |
+| Current Status | V5.28 COMPLETE — Stop-Low policy validated. V5.29 INITIALIZED — boundary robustness audit. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -93,9 +93,10 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.24 | Omega-per-K Gain and Response Conversion | Sign rule discovered: omDist < 0.5 AND lambda1 < 0.95. |
 | V5.25 | Omega Gain Sign Validation | Sign rule validated: precision ~81%, enrichment ~5.5×. Not sufficient. |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | Quality vs quantity. Rescue is probabilistic, not deterministic. |
-| V5.27 | Full Chain Rescue Calibration | COMPLETE — c3OmgS>0.1 two-stratum risk table. P_A=0.0%, P_B=9.6%. |
+| V5.28 | Rescue Risk Stratum and Control Policy | COMPLETE — Stop-Low policy validated. 75% work reduction. |
+| V5.29 | Boundary and Threshold Robustness | INITIALIZED — stress-test Stop-Low boundary. |
 
-**Cumulative total: 2762 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2768 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -223,22 +224,19 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.28
+### Current Frontier — V5.29
 
-**Status:** V5.27 COMPLETE → V5.28 INITIALIZED
-**Branch:** `feature/v5.28-rescue-risk-stratum-and-control-policy`
+**Status:** V5.28 COMPLETE → V5.29 INITIALIZED
+**Branch:** `feature/v5.29-risk-stratum-boundary-and-threshold-robustness`
 
-**V5.27 validated model:**
-- Frozen c3OmegaShift > 0.1 two-stratum risk table
-- P_A = 0.0% [0.0%–0.3%], P_B = 9.6% [6.6%–13.6%]
-- Full C3 gain chain retained as mechanistic explanation
-- c3OmegaShift is the minimal robust predictive summary
+**V5.28 validated policy:** Stop-Low — post-C3 continuation policy.
+c3OmgS > 0.1: continue. c3OmgS ≤ 0.1: stop.
+Preserves all rescues. Zero damage. 75% work reduction.
 
-**V5.28 question:** Can the validated c3OmegaShift risk stratum define a safe
-adaptive control policy that reduces wasted interventions while preserving zero damage?
+**V5.29 question:** How robust is the Stop-Low policy around the c3OmgS = 0.1 boundary?
+Stress-test without retuning.
 
-**Key constraint:** M3++ is frozen. No retuning. Policy evaluation only. See
-`docsV5_27/TRM_V5_27_Final_Synthesis.md` for complete V5.27 summary.
+See `docsV5_28/TRM_V5_28_Final_Synthesis.md` for complete summary.
 
 ---
 
@@ -271,7 +269,7 @@ explicitly differentiate between:
 
 Do not introduce new theory. Do not overstate results. Do not claim physical
 constants, spacetime, relativity, quantum mechanics, cosmology, emergence, or
-universal control. The project has 2762 tests with 0 failures. V5.28 is the
+universal control. The project has 2768 tests with 0 failures. V5.29 is the
 active research frontier.
 ```
 
