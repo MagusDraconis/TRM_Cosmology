@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.27
-**Tests:** 2812 verified, 0 failed
-**Branch:** `feature/v5.36-c3omegashift-origin-and-response-state-discovery`
-**Current Frontier:** V5.35 COMPLETE → V5.36 INITIALIZED
+**Tests:** 2818 verified, 0 failed
+**Branch:** `feature/v5.37-omega-proximity-causal-scaling-and-threshold-response`
+**Current Frontier:** V5.36 COMPLETE → V5.37 INITIALIZED
 
 ---
 
@@ -1092,9 +1092,9 @@ maintained to prevent overinterpretation:
 | V5.24 | Omega-per-K Gain and Response Conversion | — | COMPLETE |
 | V5.25 | Omega Gain Sign Validation | — | COMPLETE |
 | V5.26 | C3 Gain Magnitude and Rescue Conversion | — | COMPLETE |
-| V5.35 | omegaPerK and c3OmgS Mechanism Closure | 5 | COMPLETE |
-| V5.36 | c3OmegaShift Origin and Response-State Discovery | — | INITIALIZED |
-| **Total** | | **2812** | **0 failed** |
+| V5.36 | c3OmegaShift Origin and Response-State Discovery | 6 | COMPLETE |
+| V5.37 | Omega Proximity Causal Scaling | — | INITIALIZED |
+| **Total** | | **2818** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2748 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
