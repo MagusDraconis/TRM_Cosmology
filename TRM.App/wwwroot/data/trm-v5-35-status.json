@@ -1,0 +1,1 @@
+{"releaseStatus":"V5.35 INITIALIZED","phase":"omegaPerK and c3OmegaShift Mechanism Closure","date":"2026-07-19","testSummary":{"total":2807,"passed":2807,"failed":0},"baselineModel":"M3++ (unchanged), Stop-Low policy, threshold 0.1 frozen","nextVersion":null,"suites":[{"id":"MCP","status":"PLANNED","tests":0}]}
