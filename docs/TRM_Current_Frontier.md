@@ -3,9 +3,9 @@
 **Version:** 1.3
 **Date:** 2026-07-19
 
-**Current Version:** V5.41 COMPLETE
-**Current Branch:** `feature/v5.41-causal-test-design-under-attractor-absorption`
-**Cumulative Tests:** 2843
+**Current Version:** V5.42 COMPLETE
+**Current Branch:** `feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection`
+**Cumulative Tests:** 2848
 **Failed:** 0
 
 ---
@@ -29,9 +29,11 @@ diagnostic variables resist direct causal manipulation. V5.40 tested whether
 attractor-compatible perturbations could penetrate this protection — they could not.
 All perturbation families are absorbed; weak signals are artifacts. V5.41 pivoted
 to causal-test methodology: perturbation is INVALIDATED; natural variation,
-counterfactual trace, and causal rejection are viable alternatives. Central insight:
-predictive validity (Stop-Low) does not require causal closure. Causal closure
-remains blocked. V6 remains NOT READY.
+counterfactual trace, and causal rejection are viable alternatives. V5.42 applied counterfactual trace:
+7/11 near-identical profiles diverge on c3OmgS (63.6%). 7 sufficiency claims
+REJECTED — no single variable determines the outcome. Causal closure narrowed
+but not achieved. Central insight: predictive validity (Stop-Low) does not
+require causal closure. Causal closure remains blocked. V6 remains NOT READY.
 
 ---
 
@@ -134,18 +136,18 @@ deterministic threshold rescue.
 | V5.39 | **COMPLETE** — Attractor absorption. K-perturbation absorbed at lambda1 stage. Explains V5.38 RII failure. Model C — Omega restoration dominates. |
 | V5.40 | **COMPLETE** — Causal closure and attractor topology. Aligned perturbations do NOT survive better. Weak signals are artifacts. Absorption direction-invariant. Causal closure BLOCKED. |
 | V5.41 | **COMPLETE** — Causal test methodology. Perturbation INVALIDATED. Natural variation = diagnostic. 8 claims REJECTED. Stop-Low is OUTCOME-VALIDATED without causal closure. |
+| V5.42 | **COMPLETE** — Counterfactual trace and causal rejection. 7/11 near-identical pairs diverge (63.6%). 7 sufficiency claims REJECTED. No single variable determines outcome. |
 
 ---
 
-## Current V5.41 Research Question
+## Current V5.42 Research Question
 
-**What causal test designs remain valid under attractor absorption?**
+**Which causal explanations can be rejected through matched-profile comparison?**
 
-**Answer:** Perturbation-based testing is INVALIDATED. Natural variation = STABLE
-DIAGNOSTIC (tercile sep=0.27). Invariance = WEAKLY INVARIANT (N-dependent).
-Mediation = TEMPORALLY AMBIGUOUS. Counterfactual trace = OBSERVATIONAL.
-8 causal claims REJECTED. **Predictive validity (Stop-Low) does not require
-causal closure.** V6 remains NOT READY.
+**Answer:** 7 sufficiency claims REJECTED. Near-identical profiles (matched on lam,
+omDist, reb) diverge 63.6% of the time. No single measured variable is sufficient
+for c3OmgS or rescue. Causal closure = Model B (narrowed, not achieved). Stop-Low
+remains operationally valid without causal closure. V6 NOT READY.
 
 ---
 
@@ -216,39 +218,37 @@ causal closure.** V6 remains NOT READY.
 
 ---
 
-## Recommended V5.42 Next Prompt
+## Recommended V5.43 Next Prompt
 
 ```
-You are acting as a TRM/TQM V5.42 counterfactual trace and causal rejection agent.
+You are acting as a TRM/TQM V5.43 hidden response state and temporal trace agent.
 
 Current branch:
-feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection
+feature/v5.43-hidden-response-state-and-temporal-trace-discovery
 
 Base:
-V5.41 COMPLETE
+V5.42 COMPLETE
 
 Current cumulative state:
-2843 tests passed
-0 failed
+2848 tests passed, 0 failed
 
 Purpose:
-Use counterfactual trace and natural variation to identify stronger causal
-rejection boundaries without relying on perturbation.
+If measured same-state profiles diverge in c3OmgS (63.6%), what unmeasured
+or temporal trace factor separates them?
 
 Frozen:
 M3++, Stop-Low policy, c3OmegaShift > 0.1 threshold.
 
 Core questions:
-1. Which causal claims can be rejected using counterfactual trace?
-2. Which variables remain diagnostic under matched-profile comparison?
-3. Can matched profiles reveal why c3OmgS differs without perturbation?
-4. Does natural variation strengthen or weaken the diagnostic hierarchy?
-5. Can causal closure be narrowed by eliminating impossible causal paths?
-6. Does Stop-Low remain operationally sufficient?
+1. What differs between near-identical profiles that diverge in c3OmgS?
+2. Is divergence explained by temporal ordering not captured in current vars?
+3. Is there a prior-state trace before the matched profile snapshot?
+4. Are path-history variables needed?
+5. Can divergence be reduced by adding temporal trace information?
+6. Does this improve causal closure?
 7. Does V6 remain not ready?
 
-Do not modify M3++.
-Do not retune c3OmegaShift threshold.
+Do not modify M3++. Do not retune c3OmegaShift threshold.
 Do not add new variables or correction classes.
 Do not claim physical interpretation.
 Do not attempt length, space, velocity, or c derivations.

@@ -1,1 +1,1 @@
-{"releaseStatus":"V5.42 INITIALIZED","phase":"Counterfactual Trace and Natural Variation Causal Rejection","date":"2026-07-19","testSummary":{"total":2843,"passed":2843,"failed":0}}
+{"releaseStatus":"V5.42 COMPLETE","phase":"Counterfactual Trace and Natural Variation Causal Rejection","date":"2026-07-19","testSummary":{"total":2848,"passed":2848,"failed":0},"suites":[{"name":"CRP","status":"COMPLETE","tests":3},{"name":"CRE","status":"COMPLETE","tests":1},{"name":"CRA","status":"COMPLETE","tests":1},{"name":"CRS","status":"COMPLETE","tests":0}]}

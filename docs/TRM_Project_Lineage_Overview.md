@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2843 verified, 0 failed
-**Branch:** `feature/v5.41-causal-test-design-under-attractor-absorption`
-**Current Frontier:** V5.41 COMPLETE → V5.42 PENDING
+**Tests:** 2848 verified, 0 failed
+**Branch:** `feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection`
+**Current Frontier:** V5.42 COMPLETE → V5.43 PENDING
 
 ---
 
@@ -969,6 +969,26 @@ causal closure for operational purposes. V6 remains NOT READY.
 
 **Status:** COMPLETE. See `docsV5_41/TRM_V5_41_Final_Synthesis.md`.
 
+### V5.42 — Counterfactual Trace and Natural Variation Causal Rejection (CRP→CRA) — COMPLETE
+
+Applied counterfactual trace methodology to reject unsupported causal sufficiency
+claims. 6 matched-profile families (M1–M6) tested across 73 natural-variation profiles.
+
+**CRE:** 5/11 near-identical profiles (lam<0.02, omDist<0.1, reb<0.3) diverge on
+c3OmgS. All 4 tested single-variable claims fail sufficiency.
+
+**CRA:** Divergence strengthened to 7/11 (63.6%). 7 sufficiency claims consolidated
+as REJECTED. Striking example: lam 0.932 vs 0.927 → c3 1.360 vs 0.021 (Δ=1.339).
+Causal closure = Model B (narrowed, not achieved). Necessity NOT ESTABLISHED
+for any variable except c3OmgS>0.1 (operational). 7 surviving explanations
+inventoried.
+
+**Central contribution:** All single-variable sufficiency paths are CLOSED.
+Near-identical starting conditions produce divergent outcomes — the measured
+variables do not uniquely determine c3OmgS or rescue. Stop-Low valid. V6 NOT READY.
+
+**Status:** COMPLETE. See `docsV5_42/TRM_V5_42_Final_Synthesis.md`.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1270,9 +1290,10 @@ maintained to prevent overinterpretation:
 | V5.39 | Attractor Absorption and Perturbation Resistance | 4 | COMPLETE |
 | V5.40 | Causal Closure and Attractor Topology | 5 | COMPLETE |
 | V5.41 | Causal Test Design Under Attractor Absorption | 5 | COMPLETE |
-| **Total** | | **2843** | **0 failed** |
+| V5.42 | Counterfactual Trace and Natural Variation Causal Rejection | 5 | COMPLETE |
+| **Total** | | **2848** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2843 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 2848 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
 V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 

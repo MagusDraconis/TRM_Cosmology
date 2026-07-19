@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.41 COMPLETE |
-| Current Branch | `feature/v5.41-causal-test-design-under-attractor-absorption` |
-| Total Tests | 2843 |
+| Current Version | V5.42 COMPLETE |
+| Current Branch | `feature/v5.42-counterfactual-trace-and-natural-variation-causal-rejection` |
+| Total Tests | 2848 |
 | Failed Tests | 0 |
-| Current Status | V5.41 COMPLETE — causal test methodology. V5.42 PENDING. |
+| Current Status | V5.42 COMPLETE — 7 sufficiency claims rejected. V5.43 PENDING. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -97,8 +97,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.39 | Attractor Absorption and Perturbation Resistance | COMPLETE — attractor absorbs K-perturb at lambda1. |
 | V5.40 | Causal Closure and Attractor Topology | COMPLETE — perturbations absorbed; causal closure blocked. |
 | V5.41 | Causal Test Design Under Attractor Absorption | COMPLETE — perturbation invalidated; Stop-Low outcome-validated. |
+| V5.42 | Counterfactual Trace and Natural Variation Causal Rejection | COMPLETE — 7 sufficiency claims rejected; 63.6% divergence. |
 
-**Cumulative total: 2843 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2848 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -277,7 +278,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. The project has 2843 tests with 0 failures. V5.41 is the active research frontier.
+Do not introduce new theory. The project has 2848 tests with 0 failures. V5.42 is the active research frontier.
 ```
 
 ---
