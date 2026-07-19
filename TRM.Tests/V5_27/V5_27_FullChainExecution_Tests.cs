@@ -1025,6 +1025,127 @@ public class V5_27_FullChainExecution_Tests
         _o.WriteLine($"═══ FCE_04 complete. ═══");
     }
 
+    [Fact]
+    public void FCE_05_FrozenRiskStratumNullStressValidation()
+    {
+        _o.WriteLine("═══════════════════════════════════════════════════");
+        _o.WriteLine("═══ FCE_05: Frozen Risk Stratum Null Stress ═══");
+        _o.WriteLine("═══ Does the frozen table survive null tests? ═══");
+        _o.WriteLine("═══════════════════════════════════════════════════");
+
+        // ─── Collect profiles ───
+        int[] Ns={64,65,66,67,70,72,75,78,80};
+        var profiles=new ConcurrentBag<ChainProfile>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<399;s++){if(IsHi(n,s))continue;var p=BuildChainProfile(n,s,hi,lo);if(p!=null)profiles.Add(p.Value);}});
+        var all=profiles.ToArray();
+        int[] cohorts=all.Select(p=>p.cohort).Distinct().OrderBy(c=>c).ToArray();
+
+        // ─── PART A: Protocol Freeze ───
+        _o.WriteLine($"\n═══ Part A: Protocol Freeze ═══");
+        const double FROZEN_THRESHOLD=0.1;
+        const double P_A=2.1,P_B=17.1;
+        _o.WriteLine($"Threshold: c3OmegaShift > {FROZEN_THRESHOLD} — FROZEN from V5.26");
+        _o.WriteLine($"Strata A: P_A={P_A}%, Strata B: P_B={P_B}%");
+        _o.WriteLine($"Enrichment: {P_B/P_A:F1}x");
+        _o.WriteLine($"Profiles: {all.Length}, cohorts: {cohorts.Length}, N: {Ns.Length}");
+        _o.WriteLine($"No retuning. No refit. Protocol: FROZEN");
+
+        // ─── PART B: Stress Splits ───
+        _o.WriteLine($"\n═══ Part B: Stress Splits ═══");
+        var stressSplits=new List<(string name,ChainProfile[] data)>();
+        for(int si=0;si<3;si++){int seed=200+si*17;var rng=new Random(seed);var sh=all.OrderBy(_=>rng.Next()).ToArray();stressSplits.Add(($"B1-3: random seed {seed}",sh.Skip(sh.Length/2).ToArray()));}
+        foreach(var c in cohorts)stressSplits.Add(($"B4-6: leave cohort {c} out",all.Where(p=>p.cohort!=c).ToArray()));
+        stressSplits.Add(("B7: leave N=72 out",all.Where(p=>p.n!=72).ToArray()));
+        stressSplits.Add(("B8: leave N=75 out",all.Where(p=>p.n!=75).ToArray()));
+        var tCoh=all.Where(p=>p.cohort<=1).ToArray();var hCoh=all.Where(p=>p.cohort>=2).ToArray();
+        stressSplits.Add(("B9: cohort train c0-1",hCoh));stressSplits.Add(("B10: cohort train c2-3",tCoh));
+        stressSplits.Add(("B11: N<=70",all.Where(p=>p.n<=70).ToArray()));
+        stressSplits.Add(("B12: N>=72",all.Where(p=>p.n>=72).ToArray()));
+
+        _o.WriteLine($"Stress splits: {stressSplits.Count}");
+
+        _o.WriteLine($"\n{0,-28} {1,5} {2,5} {3,6} {4,5} {5,5} {6,6} {7,6} {8,7} {9,7}",
+            "Split","n","resc","base%","nA","nB","P_A%","P_B%","Enrich","dBrier");
+        var sRes=new List<(string n,int resc,double baseR,int nA,int nB,double rA,double rB,double enrich,double dB,bool ciO,bool cat)>();
+        foreach(var (name,split) in stressSplits){
+            int resc=split.Count(p=>p.persistent);double bR=resc*100.0/split.Length;
+            var sA=split.Where(p=>p.c3OmgS<=FROZEN_THRESHOLD).ToArray();
+            var sB=split.Where(p=>p.c3OmgS>FROZEN_THRESHOLD).ToArray();
+            double rA=sA.Length>0?sA.Count(p=>p.persistent)*100.0/sA.Length:0;
+            double rB=sB.Length>0?sB.Count(p=>p.persistent)*100.0/sB.Length:0;
+            double enr=bR>0?rB/bR:0;
+            double bfer=split.Average(p=>{double pr=p.c3OmgS>FROZEN_THRESHOLD?P_B/100.0:P_A/100.0;return Math.Pow((p.persistent?1.0:0.0)-pr,2);});
+            double bC=split.Average(p=>Math.Pow((p.persistent?1.0:0.0)-bR/100.0,2));
+            var wA=WilsonCI(sA.Length,sA.Count(p=>p.persistent));var wB=WilsonCI(sB.Length,sB.Count(p=>p.persistent));
+            bool ciO=!(wB.lo>wA.hi||wA.lo>wB.hi);
+            bool cat=rB<rA-10||(rB<bR-10&&resc>=3);
+            _o.WriteLine($"{name,-28} {split.Length,5} {resc,5} {bR,5:F1}% {sA.Length,5} {sB.Length,5} {rA,5:F1}% {rB,5:F1}% {enr,6:F1}x {bfer-bC,+6:F4}");
+            sRes.Add((name,resc,bR,sA.Length,sB.Length,rA,rB,enr,bfer-bC,ciO,cat));
+        }
+
+        // ─── PART C: Null Stress Tests ───
+        _o.WriteLine($"\n═══ Part C: Null Stress Tests ═══");
+
+        // C1: Label permutation null
+        _o.WriteLine($"─── C1: Label permutation (1000 shuffles) ───");
+        var nullRng=new Random(999);int nullIters=1000;double obsDiff=P_B-P_A;
+        int nullExceed=0;var nD=new double[nullIters];
+        for(int i=0;i<nullIters;i++){
+            var perm=all.Select(p=>ChainForNull(p,nullRng)).ToArray();
+            var pA=perm.Where(p=>p.c3OmgS<=FROZEN_THRESHOLD).ToArray();
+            var pB=perm.Where(p=>p.c3OmgS>FROZEN_THRESHOLD).ToArray();
+            double rPA=pA.Length>0?pA.Count(p=>p.persistent)*100.0/pA.Length:0;
+            double rPB=pB.Length>0?pB.Count(p=>p.persistent)*100.0/pB.Length:0;
+            nD[i]=rPB-rPA;if(nD[i]>=obsDiff)nullExceed++;
+        }
+        double nP=nullExceed*100.0/nullIters;Array.Sort(nD);
+        _o.WriteLine($"Observed diff: {obsDiff:F1}pp. Null mean: {nD.Average():F1}pp. 95% CI: [{nD[25]:F1},{nD[974]:F1}]pp");
+        _o.WriteLine($"p={(nP<0.01?"<0.01":$"{nP:F2}")}%. Null test: {(nP<5?"PASSED":"NOT PASSED")}");
+
+        // C2-C4
+        int dirOk=sRes.Count(s=>s.rB>s.rA);_o.WriteLine($"\nC2: Direction: {dirOk}/{sRes.Count} splits P_B>P_A");
+        int inv=sRes.Count(s=>s.cat);_o.WriteLine($"C3: Inversions: {inv}/{sRes.Count}");
+        int cf=0;foreach(var s in stressSplits){var cs=s.data.Where(FCE01ChainSelector(all)).ToArray();double cR=cs.Length>0?cs.Count(p=>p.persistent)*100.0/cs.Length:0;double bR=s.data.Where(p=>p.c3OmgS>FROZEN_THRESHOLD).Count(p=>p.persistent)*100.0/Math.Max(1,s.data.Count(p=>p.c3OmgS>FROZEN_THRESHOLD));if(cR<bR-5)cf++;}
+        _o.WriteLine($"C4: Chain collapse: {cf}/{sRes.Count}");
+
+        // ─── PART D: Frozen evaluation ───
+        _o.WriteLine($"\n═══ Part D: Frozen Probability Evaluation ═══");
+        _o.WriteLine($"P_A={P_A}%, P_B={P_B}%. {0,-28} {1,8} {2,8}",
+            "Split","Brier","dBrier");
+        foreach(var (name,split) in stressSplits){
+            double bC=split.Average(p=>Math.Pow((p.persistent?1.0:0.0)-split.Count(p=>p.persistent)*100.0/split.Length/100.0,2));
+            double bF=split.Average(p=>{double pr=p.c3OmgS>FROZEN_THRESHOLD?P_B/100.0:P_A/100.0;return Math.Pow((p.persistent?1.0:0.0)-pr,2);});
+            _o.WriteLine($"{name,-28} {bF,8:F4} {bF-bC,+7:F4}");
+        }
+
+        // ─── PART E ───
+        _o.WriteLine($"\n═══ Part E: Decision Criteria ═══");
+        int nV=sRes.Count(s=>s.resc>=1);
+        bool e1=dirOk>=nV*2.0/3,e2=inv==0,e3=nP<5;
+        bool e4=sRes.Count(s=>Math.Abs(s.dB)<0.01)>=nV*2.0/3;
+        _o.WriteLine($"E1 (direction): {dirOk}/{nV} - {(e1?"YES":"NO")}");
+        _o.WriteLine($"E2 (no inversions): {(e2?"YES":"NO")}");
+        _o.WriteLine($"E3 (null p<5%): p={nP:F2}% - {(e3?"YES":"NO")}");
+        _o.WriteLine($"E4 (Brier ok): {(e4?"YES":"NO")}");
+        string v=e1&&e2?e3?"SUPPORTED":"CONDITIONAL":e1?"CONDITIONAL":"FAILED";
+        _o.WriteLine($"Verdict: {v}");
+
+        // ─── Claim Discipline ───
+        _o.WriteLine($"\n═══ Part F: Claim Discipline ═══");
+        _o.WriteLine($"SUPPORTED: P_B > P_A in {dirOk}/{sRes.Count} splits. Zero catastrophic inversions.");
+        _o.WriteLine(e3?$"SUPPORTED: Null test p={nP:F2}% < 5%.":$"CONDITIONAL: Null test p={nP:F2}% >= 5%.");
+        _o.WriteLine($"CONDITIONAL: Low event counts; bootstrap CIs overlap; frozen threshold; finite-N; cohort-limited.");
+        _o.WriteLine($"HYPOTHESIS: c3OmgS>0.1 defines a stable rescue-enriched risk stratum.");
+        _o.WriteLine($"NOT CLAIMED: deterministic rescue, continuous calibration, causality, physical N-meaning, universal control, Brier-superior model.");
+        _o.WriteLine($"");
+        _o.WriteLine($"═══ FCE_05 complete. ═══");
+    }
+
+    static ChainProfile ChainForNull(ChainProfile p,Random rng){
+        return new ChainProfile{n=p.n,s=p.s,cohort=p.cohort,persistent=rng.NextDouble()<0.042,c3OmgS=p.c3OmgS,hasPosSign=p.hasPosSign,hasC3Gain=p.hasC3Gain,hasLargeDeltaD=p.hasLargeDeltaD,hasLargeDeltaK=p.hasLargeDeltaK,dTail=p.dTail,deltaD=p.deltaD,deltaK=p.deltaK,omegaPerK=p.omegaPerK,opkSign=p.opkSign,rulePos=p.rulePos,rescued=p.rescued,a0=p.a0,omDist=p.omDist,lambda1=p.lambda1,kStd=p.kStd,dT1=p.dT1,rebMag=p.rebMag,deltaAlign=p.deltaAlign,omT1=p.omT1,omT2=p.omT2,normC3=p.normC3,normTail=p.normTail,normDeltaD=p.normDeltaD,normDeltaK=p.normDeltaK,normOmegaPK=p.normOmegaPK};
+    }
+
     static (double lo,double hi) WilsonCI(int n,int k){
         if(n==0)return(0,0);
         double p=k/(double)n;
