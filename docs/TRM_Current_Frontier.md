@@ -3,9 +3,9 @@
 **Version:** 1.3
 **Date:** 2026-07-19
 
-**Current Version:** V5.45 COMPLETE
-**Current Branch:** `feature/v5.45-c3-response-autonomy-and-n-dependent-bridge`
-**Cumulative Tests:** 2865
+**Current Version:** V5.46 COMPLETE
+**Current Branch:** `feature/v5.46-entry-state-distribution-shape-and-n-window-origin`
+**Cumulative Tests:** 2871
 **Failed:** 0
 
 ---

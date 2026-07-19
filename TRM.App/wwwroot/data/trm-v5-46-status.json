@@ -1,1 +1,1 @@
-{"releaseStatus":"V5.46 INITIALIZED","phase":"Entry-State Distribution Shape and N-Window Origin","date":"2026-07-19","testSummary":{"total":2865,"passed":2865,"failed":0}}
+{"releaseStatus":"V5.46 COMPLETE","phase":"Entry-State Distribution Shape and N-Window Origin","date":"2026-07-19","testSummary":{"total":2871,"passed":2871,"failed":0},"suites":[{"name":"EDP","status":"COMPLETE","tests":3},{"name":"EDE","status":"COMPLETE","tests":1},{"name":"EDA","status":"COMPLETE","tests":1},{"name":"EDI","status":"COMPLETE","tests":1},{"name":"EDS","status":"COMPLETE","tests":0}]}

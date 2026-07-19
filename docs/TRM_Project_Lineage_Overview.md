@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2865 verified, 0 failed
-**Branch:** `feature/v5.45-c3-response-autonomy-and-n-dependent-bridge`
-**Current Frontier:** V5.45 COMPLETE → V5.46 PENDING
+**Tests:** 2871 verified, 0 failed
+**Branch:** `feature/v5.46-entry-state-distribution-shape-and-n-window-origin`
+**Current Frontier:** V5.46 COMPLETE → V5.47 PENDING
 
 ---
 
@@ -1351,7 +1351,8 @@ maintained to prevent overinterpretation:
 | V5.43 | Hidden Response State and Temporal Trace Discovery | 5 | COMPLETE |
 | V5.44 | C3 Correction Response Instrumentation and Microstate Audit | 7 | COMPLETE |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | 7 | COMPLETE |
-| **Total** | | **2865** | **0 failed** |
+| V5.46 | Entry-State Distribution Shape and N-Window Origin | 7 | COMPLETE |
+| **Total** | | **2871** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at

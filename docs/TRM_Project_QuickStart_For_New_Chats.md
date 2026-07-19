@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.45 COMPLETE |
-| Current Branch | `feature/v5.45-c3-response-autonomy-and-n-dependent-bridge` |
-| Total Tests | 2865 |
+| Current Version | V5.46 COMPLETE |
+| Current Branch | `feature/v5.46-entry-state-distribution-shape-and-n-window-origin` |
+| Total Tests | 2871 |
 | Failed Tests | 0 |
-| Current Status | V5.45 COMPLETE — Bridge explained via distribution shape. V5.46 PENDING. |
+| Current Status | V5.46 COMPLETE — T0 inherited spread, N=75 uniquely broad. V5.47 PENDING. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -101,8 +101,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.43 | Hidden Response State and Temporal Trace Discovery | COMPLETE — C3 computation sensitivity; unrecorded microstate. |
 | V5.44 | C3 Correction Response Instrumentation | COMPLETE — c3ExitOm2 identified; N-dependent bridge. |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | COMPLETE — Bridge explained via IQR/distribution shape. |
+| V5.46 | Entry-State Distribution Shape and N-Window Origin | COMPLETE — T0 inherited spread dominates; N=75 uniquely broad. |
 
-**Cumulative total: 2865 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2871 tests, 0 failed as of 2026-07-19.**
 
 ---
 
@@ -281,7 +282,7 @@ explicitly differentiate between:
 - HYPOTHESES
 - NOT CLAIMED
 
-Do not introduce new theory. The project has 2865 tests with 0 failures. V5.45 is the active research frontier.
+Do not introduce new theory. The project has 2871 tests with 0 failures. V5.46 is the active research frontier.
 ```
 
 ---
