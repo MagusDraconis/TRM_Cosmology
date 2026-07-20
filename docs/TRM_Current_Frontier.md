@@ -3,9 +3,9 @@
 **Version:** 1.4
 **Date:** 2026-07-20
 
-**Current Version:** V5.52 COMPLETE
-**Current Branch:** feature/v5.52-raw-frequency-ensemble-sampling-origin
-**Cumulative Tests:** 2896
+**Current Version:** V5.53 COMPLETE
+**Current Branch:** feature/v5.53-selectandclassify-predicate-origin
+**Cumulative Tests:** 2901
 **Failed:** 0
 
 ---
@@ -22,10 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.52 traced kernel-class ordering to the SelectAndClassify retention pipeline.
-K1>K3>K2 is absent in the full population and CREATED by P1/P1b branch assignment.
-P1 selectively retains higher-mean profiles; K2 enters P1 at 75% (vs 55% K1, 50% K3).
-Branch composition, not identity, explains the ordering. Stop-Low safe. V6 NOT READY.
+V5.53 identified the SAC P1/P1b predicate: rawIQR (spread) is the dominant discriminator
+(10× normalized), with rawMean providing independent per-N stabilization. A rank-based
+rawIQR+rawMean composite yields consistent P1>P1b direction across all N. This refines
+V5.52 — SAC creates ordering through a spread-dominant profile predicate. Stop-Low safe.
+Causal closure blocked. V6 NOT READY.
 
 ---
 

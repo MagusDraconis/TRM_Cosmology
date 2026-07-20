@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.52 COMPLETE |
-| Current Branch | feature/v5.52-raw-frequency-ensemble-sampling-origin |
-| Total Tests | 2896 |
+| Current Version | V5.53 COMPLETE |
+| Current Branch | feature/v5.53-selectandclassify-predicate-origin |
+| Total Tests | 2901 |
 | Failed Tests | 0 |
-| Current Status | V5.52 COMPLETE - Spread-order origin traced to raw-frequency ensemble means. |
+| Current Status | V5.53 COMPLETE - Spread-order origin traced to raw-frequency ensemble means. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
