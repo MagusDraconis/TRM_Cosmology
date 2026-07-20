@@ -2,10 +2,10 @@
 
 **Version:** 2.0
 **Date:** 2026-07-19
-**Scope:** Clockwork Cosmology V1 through V5.49
-**Tests:** 2884 verified, 0 failed
-**Branch:** feature/v5.50-kernel-class-assignment-and-boundary-origin
-**Current Frontier:** V5.50 COMPLETE
+**Scope:** Clockwork Cosmology V1 through V5.51
+**Tests:** 2890 verified, 0 failed
+**Branch:** feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism
+**Current Frontier:** V5.51 COMPLETE
 
 ---
 
@@ -1356,7 +1356,8 @@ maintained to prevent overinterpretation:
 | V5.48 | Distribution Shape vs Mean State — N-Window Formation | 1 | COMPLETE |
 | V5.49 | Spread Generation and Distribution Origin | 4 | COMPLETE |
 | V5.50 | Kernel-Class Assignment and Boundary Origin | 2 | COMPLETE |
-| **Total** | | **2884** | **0 failed** |
+| V5.51 | Spread-Order Origin and Kernel-Assignment Mechanism | 6 | COMPLETE |
+| **Total** | | **2890** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at

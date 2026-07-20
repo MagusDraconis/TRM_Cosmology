@@ -1,39 +1,46 @@
 {
-  "releaseStatus": "V5.51 ACTIVE",
+  "releaseStatus": "V5.51 COMPLETE",
   "phase": "Spread Order Origin and Kernel-Assignment Mechanism",
   "date": "2026-07-20",
   "branch": "feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism",
   "base": "V5.50 COMPLETE",
-  "testSummary": { "total": 2889, "passed": 2889, "failed": 0 },
+  "testSummary": {
+    "total": 2890,
+    "passed": 2890,
+    "failed": 0
+  },
   "suites": [
-    { "name": "SOO", "status": "COMPLETE", "tests": 1, "model": "Model A — Ordering inherited from w0" },
-    { "name": "PWO", "status": "COMPLETE", "tests": 1, "model": "Model B — Ordering generated at init->w0" },
-    { "name": "FEG", "status": "COMPLETE", "tests": 1, "model": "Model A — Ordering first appears at Sim(om), disrupted by DL, restored by Cupd" },
-    { "name": "PSO", "status": "COMPLETE", "tests": 1, "model": "Model G — Ordering is ensemble-level, not within-profile" },
-    { "name": "ERO", "status": "COMPLETE", "tests": 1, "model": "Model C — Raw freq ensemble means already K1>K3>K2. Sim amplifies." }
+    {
+      "name": "SOO",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PWO",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "FEG",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PSO",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "ERO",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "RFO",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "TSS",
+      "status": "COMPLETE"
+    }
   ],
-  "commits": [
-    "930cdb1 (SOO_01)",
-    "8f224b9 (PWO_01)",
-    "37508b6 (FEG_01)",
-    "7c45f7e (PSO_01)",
-    "43adb3d (ERO_01)"
-  ],
-  "keyFindings": [
-    "Spread ordering K1>K3>K2 is absent at init (random graph, uniform K=0.5)",
-    "Ordering first appears at Sim(om) — the between-profile mean omega IQR",
-    "DL(d) disrupts ordering (K3 becomes largest); Cupd(km) restores it",
-    "Within-profile omega, raw freq IQR, and phase spread show NO ordering",
-    "Between-profile raw frequency means already show K1>K3>K2 preordering",
-    "Sim AMPLIFIES K1 (1.1x) while slightly compressing K3/K2 (0.9x)",
-    "Ordering traces back to seed-to-seed raw frequency sampling variability by N"
-  ],
+  "finalModel": "A+G Ensemble-Origin Spread Ordering",
   "causalClosure": "BLOCKED",
-  "stopLowSafety": "SAFE — 42 stop, 0 rescues",
-  "v6Status": "NOT READY",
-  "openQuestions": [
-    "Why does seed-to-seed raw frequency mean variability differ by N?",
-    "Is differential profile selection (IsHi filter) the source of preordering?",
-    "Pre-init instrumentation still NOT AVAILABLE"
-  ]
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY"
 }

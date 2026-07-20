@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.50 COMPLETE |
-| Current Branch | feature/v5.50-kernel-class-assignment-and-boundary-origin |
-| Total Tests | 2884 |
+| Current Version | V5.51 COMPLETE |
+| Current Branch | feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism |
+| Total Tests | 2890 |
 | Failed Tests | 0 |
-| Current Status | V5.50 COMPLETE - Spread-ordered kernel-class assignment. Regression-to-mean. |
+| Current Status | V5.51 COMPLETE - Spread-order origin traced to raw-frequency ensemble means. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

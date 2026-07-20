@@ -3,9 +3,9 @@
 **Version:** 1.4
 **Date:** 2026-07-20
 
-**Current Version:** V5.50 COMPLETE
-**Current Branch:** `feature/v5.50-kernel-class-assignment-and-boundary-origin`
-**Cumulative Tests:** 2884
+**Current Version:** V5.51 COMPLETE
+**Current Branch:** feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism
+**Cumulative Tests:** 2890
 **Failed:** 0
 
 ---
@@ -22,11 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.50 identified a regression-to-mean signature in kernel-class assignment. Pre-transition
-km/lambda spread preorders the stable kernel classes: K1 (largest spread → compresses),
-K3 (intermediate → stable), K2 (smallest → expands). Mean-state explanations fail.
-Amp ratio separates classes cross-domain. Assignment is jackknife-stable and synthesis-ready.
-Stop-Low safe. Causal closure blocked. V6 NOT READY.
+V5.51 traced the spread-order origin to stable between-profile raw-frequency ensemble means.
+Ordering K1>K3>K2 is absent at init, present in raw frequencies, amplified by Sim, disrupted
+by DL, restored by Cupd, and destroyed by the regression-to-mean kernel. The ordering is
+ensemble-level (not within-profile), stable under jackknife (100%), and represents the
+deepest currently instrumented origin. Stop-Low safe. Causal closure blocked. V6 NOT READY.
 
 ---
 
