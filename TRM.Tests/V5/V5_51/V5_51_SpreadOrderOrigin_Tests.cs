@@ -286,6 +286,124 @@ public class V5_51_SpreadOrderOrigin_Tests
         _o.WriteLine($"\n=== PWO_01 complete. Commit: PWO_01_PreW0SpreadOrderOriginInstrumentationAudit ===");
     }
 
+    [Fact]
+    public void FEG_01_FirstEpochSpreadGenerationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== FEG_01: First Epoch Spread Generation Audit ===");
+        _o.WriteLine("=== V5.51. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        // Instrument: init K, post-Sim omega, post-DL d, post-Cupd K/lambda
+        var bag=new ConcurrentBag<(int N,double initKm,double iLam,double w0Om,double w0Dm,double w0Km,double w0Lam,double cs4,bool resc4)>();
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){if(IsHi(n,s))continue;
+                var K=KS(n,s);
+                double initKm=Km(K,n);
+                // First epoch Sim
+                var h=Sim(K,n,S,s);
+                double w0Om=Of(h,n).Average();
+                var R=RP(h,n);var Rn=Nm(R,n);var d=DL(Rn,n);
+                double w0Dm=Dm(d,n);
+                K=Cupd(d,n);
+                double w0Km=Km(K,n),w0Lam=Lambda1(K,n);
+                // Continue sim for c3/rescue...
+                var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);if(sb==null)continue;
+                double d0Pre=sb.Value.d0;bool isP2=sb.Value.cls=="P2";double tgt=isP2?d0Pre*0.90:d0Pre*0.50;
+                for(int e=1;e<WARMUP_EPOCHS;e++){var he=Sim(K,n,S,s+e);var de=DL(Nm(RP(he,n),n),n);K=Cupd(de,n);}
+                var hT0=Sim(K,n,S,s+50);var h4=Sim(K,n,S,s+3);var d4=DL(Nm(RP(h4,n),n),n);double cur=Dm(d4,n);
+                double frac=Math.Clamp((tgt+1e-9)/(cur+1e-9),0.01,100.0);var dM=CD(d4,n);
+                for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dM[i,j]*=frac;K=Cupd(dM,n);
+                var h5=Sim(K,n,S,s+4);K=Cupd(DL(Nm(RP(h5,n),n),n),n);
+                var hT1=Sim(K,n,S,s+100);var KT1=Cupd(DL(Nm(RP(hT1,n),n),n),n);double omT1=Of(hT1,n).Average();
+                var hT2=Sim(Cupd(DL(Nm(RP(hT1,n),n),n),n),n,S,s+200);double omT2=Of(hT2,n).Average();bool a0=omT2>THR;
+                double c3=0;if(!double.IsNaN(hi.dm)){var dmat3=DL(Nm(RP(hT1,n),n),n);double dmPre=Dm(dmat3,n);double nd=dmPre+(hi.dm-dmPre)*0.2;double f3=Math.Clamp((nd+1e-9)/(dmPre+1e-9),0.5,1.5);for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dmat3[i,j]*=f3;var hc3cc=Sim(Cupd(DL(Nm(RP(Sim(Cupd(dmat3,n),n,S,s+300),n),n),n),n),n,S,s+400);double omC3=Of(hc3cc,n).Average();c3=omC3-(a0?THR:omT2);}
+                bag.Add((n,initKm,w0Lam,w0Om,w0Dm,w0Km,w0Lam,c3,c3>0.1&&omT2>THR));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART A+B — Substage Audit
+        // ========================
+        _o.WriteLine("\nPART A+B — First-Epoch Substage Spread Ordering");
+        _o.WriteLine("Substages: init(K) -> Sim(om) -> DL(d) -> Cupd(km,lam)");
+
+        string[] sub={"init(km)","Sim(om)","DL(d)","Cupd(km)","Cupd(lam)"};
+        // Compute per-substage IQR by class
+        _o.WriteLine($"\n{"Substage",-14} {"K1 IQR",10} {"K3 IQR",10} {"K2 IQR",10} {"K1>K3>K2?",14} {"K1/K2",8} {"Origin?",12}");
+        _o.WriteLine(new string('-',85));
+
+        // init km
+        double iKm1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.initKm));
+        double iKm3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.initKm));
+        double iKm2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.initKm));
+        bool iOrd=iKm1>iKm3&&iKm3>iKm2;
+        _o.WriteLine($"{"init(km)",-14} {iKm1,10:F4} {iKm3,10:F4} {iKm2,10:F4} {(iOrd?"YES":"no"),14} {(iKm2>0.001?iKm1/iKm2:0),8:F2} {"—",12}");
+
+        // post-Sim omega
+        double oOm1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.w0Om));
+        double oOm3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.w0Om));
+        double oOm2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.w0Om));
+        bool oOrd=oOm1>oOm3&&oOm3>oOm2;
+        _o.WriteLine($"{"Sim(om)",-14} {oOm1,10:F4} {oOm3,10:F4} {oOm2,10:F4} {(oOrd?"YES":"no"),14} {(oOm2>0.001?oOm1/oOm2:0),8:F2} {(oOrd?"<-- omega domain":"no ordering yet"),12}");
+
+        // post-DL d
+        double dDm1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.w0Dm));
+        double dDm3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.w0Dm));
+        double dDm2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.w0Dm));
+        bool dOrd=dDm1>dDm3&&dDm3>dDm2;
+        _o.WriteLine($"{"DL(d)",-14} {dDm1,10:F4} {dDm3,10:F4} {dDm2,10:F4} {(dOrd?"YES":"no"),14} {(dDm2>0.001?dDm1/dDm2:0),8:F2} {(dOrd?"<-- d domain":"no ordering yet"),12}");
+
+        // post-Cupd km
+        double cKm1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.w0Km));
+        double cKm3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.w0Km));
+        double cKm2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.w0Km));
+        bool cOrd=cKm1>cKm3&&cKm3>cKm2;
+        _o.WriteLine($"{"Cupd(km)",-14} {cKm1,10:F4} {cKm3,10:F4} {cKm2,10:F4} {(cOrd?"YES":"no"),14} {(cKm2>0.001?cKm1/cKm2:0),8:F2} {(cOrd?"<-- K domain":"no ordering yet"),12}");
+
+        // post-Cupd lam
+        double cLm1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.w0Lam));
+        double cLm3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.w0Lam));
+        double cLm2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.w0Lam));
+        bool lOrd=cLm1>cLm3&&cLm3>cLm2;
+        _o.WriteLine($"{"Cupd(lam)",-14} {cLm1,10:F4} {cLm3,10:F4} {cLm2,10:F4} {(lOrd?"YES":"no"),14} {(cLm2>0.001?cLm1/cLm2:0),8:F2} {(lOrd?"<-- lam domain":"no ordering yet"),12}");
+
+        // ========================
+        // PART C+D — Gain Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C+D — Class-Specific Gain Across Substages");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine($"{"Transition",-16} {"K1 gain",10} {"K3 gain",10} {"K2 gain",10} {"Winner",10}");
+        _o.WriteLine(new string('-',60));
+        _o.WriteLine($"{"init->Sim(om)",-16} {oOm1-iKm1,10:F4} {oOm3-iKm3,10:F4} {oOm2-iKm2,10:F4} {(oOm1-iKm1>oOm3-iKm3&&oOm1-iKm1>oOm2-iKm2?"K1":oOm3-iKm3>oOm2-iKm2?"K3":"K2"),10}");
+        _o.WriteLine($"{"Sim(om)->DL(d)",-16} {dDm1-oOm1,10:F4} {dDm3-oOm3,10:F4} {dDm2-oOm2,10:F4} {(dDm1-oOm1>dDm3-oOm3&&dDm1-oOm1>dDm2-oOm2?"K1":dDm3-oOm3>dDm2-oOm2?"K3":"K2"),10}");
+        _o.WriteLine($"{"DL(d)->Cupd(km)",-16} {cKm1-dDm1,10:F4} {cKm3-dDm3,10:F4} {cKm2-dDm2,10:F4} {(cKm1-dDm1>cKm3-dDm3&&cKm1-dDm1>cKm2-dDm2?"K1":cKm3-dDm3>cKm2-dDm2?"K3":"K2"),10}");
+
+        // ========================
+        // PART I — Decision
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        string firstOrd="none";
+        if(oOrd)firstOrd="Sim(om)";
+        else if(dOrd)firstOrd="DL(d)";
+        else if(cOrd)firstOrd="Cupd(km)";
+        else if(lOrd)firstOrd="Cupd(lam)";
+
+        string dec=firstOrd=="Sim(om)"?"Model A: Ordering appears at first phase update (omega domain). Phase dynamics initiate ordering.":
+                   firstOrd=="DL(d)"?"Model B: Ordering appears at distance computation. Coherence structure creates ordering.":
+                   firstOrd=="Cupd(km)"?"Model C: Ordering appears at K update. Cupd transform creates ordering from d-spread.":
+                   "Model F: Ordering emerges gradually or is not classifiable by single substage.";
+
+        _o.WriteLine($"\nPART I — Decision: {dec}");
+        _o.WriteLine($"First substage with K1>K3>K2: {firstOrd}");
+        _o.WriteLine("CLAIMS: Substage-instrumented. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== FEG_01 complete. Commit: FEG_01_FirstEpochSpreadGenerationAudit ===");
+    }
+
     static double IqrVals(IEnumerable<double> vals){var s=vals.OrderBy(v=>v).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
