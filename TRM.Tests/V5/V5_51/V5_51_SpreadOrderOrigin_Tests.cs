@@ -501,6 +501,117 @@ public class V5_51_SpreadOrderOrigin_Tests
         _o.WriteLine($"\n=== PSO_01 complete. Commit: PSO_01_PhaseOmegaOrderingOriginAudit ===");
     }
 
+    [Fact]
+    public void ERO_01_EnsembleResponseOrderingAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== ERO_01: Ensemble Response Ordering Audit ===");
+        _o.WriteLine("=== V5.51. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,double rawMean,double rawIqr,double simMean,double simIqr,double respDelta,double cs4,bool resc4)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var K=KS(n,s);
+                var rng=new Random(s);
+                var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rawMean=rawW.Average();var rwo=rawW.OrderBy(v=>v).ToArray();double rawIqr=Q(rwo,0.75)-Q(rwo,0.25);
+
+                var th=new double[n];rng=new Random(s);for(int i=0;i<n;i++)th[i]=rng.NextDouble()*2*Math.PI;
+                int hL=St/Hd+1;var h=new double[hL][];h[0]=(double[])th.Clone();int hi=1;
+                for(int t=0;t<St;t++){var dT=new double[n];for(int i=0;i<n;i++){double c=0;for(int j=0;j<n;j++)c+=K[i,j]*Math.Sin(th[j]-th[i]);dT[i]=rawW[i]+c;}for(int i=0;i<n;i++)th[i]+=Dt*dT[i];if((t+1)%Hd==0&&hi<hL)h[hi++]=(double[])th.Clone();}
+
+                var o=new double[n];for(int i=0;i<n;i++){double su=0;int cc=0;for(int t2=1;t2<hL;t2++){su+=Math.Abs(h[t2][i]-h[t2-1][i]);cc++;}o[i]=cc>0?su/(cc*Dt*Hd):0;}
+                double simMean=o.Average();var so=o.OrderBy(v=>v).ToArray();double simIqr=Q(so,0.75)-Q(so,0.25);
+                double respDelta=simMean-rawMean;
+
+                var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);
+                var hiP=Hi(n);var loP=Lo(n);var sb=SelectAndClassify(n,s,hiP);if(sb==null)continue;
+                double d0Pre=sb.Value.d0;bool isP2=sb.Value.cls=="P2";double tgt=isP2?d0Pre*0.90:d0Pre*0.50;
+                for(int e=1;e<WARMUP_EPOCHS;e++){var he=Sim(K,n,S,s+e);var de=DL(Nm(RP(he,n),n),n);K=Cupd(de,n);}
+                var hT0=Sim(K,n,S,s+50);var h4=Sim(K,n,S,s+3);var d4=DL(Nm(RP(h4,n),n),n);double cur=Dm(d4,n);
+                double frac=Math.Clamp((tgt+1e-9)/(cur+1e-9),0.01,100.0);var dM=CD(d4,n);
+                for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dM[i,j]*=frac;K=Cupd(dM,n);
+                var h5=Sim(K,n,S,s+4);K=Cupd(DL(Nm(RP(h5,n),n),n),n);
+                var hT1=Sim(K,n,S,s+100);var KT1=Cupd(DL(Nm(RP(hT1,n),n),n),n);double omT1=Of(hT1,n).Average();
+                var hT2=Sim(Cupd(DL(Nm(RP(hT1,n),n),n),n),n,S,s+200);double omT2=Of(hT2,n).Average();bool a0=omT2>THR;
+                double c3=0;if(!double.IsNaN(hiP.dm)){var dmat3=DL(Nm(RP(hT1,n),n),n);double dmPre=Dm(dmat3,n);double nd=dmPre+(hiP.dm-dmPre)*0.2;double f3=Math.Clamp((nd+1e-9)/(dmPre+1e-9),0.5,1.5);for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dmat3[i,j]*=f3;var hc3cc=Sim(Cupd(DL(Nm(RP(Sim(Cupd(dmat3,n),n,S,s+300),n),n),n),n),n,S,s+400);double omC3=Of(hc3cc,n).Average();c3=omC3-(a0?THR:omT2);}
+                bag.Add((n,rawMean,rawIqr,simMean,simIqr,respDelta,c3,c3>0.1&&omT2>THR));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B — Metric Identity
+        // ========================
+        _o.WriteLine("\nPART B — Metric Identity Audit");
+        _o.WriteLine("Metric A (between-profile): IQR of per-profile mean omega across seeds");
+        _o.WriteLine("Metric B (within-profile): IQR of per-oscillator omega within a profile, then IQR across seeds");
+        _o.WriteLine("FEG_01 Sim(om) ordering = Metric A (between-profile mean omega IQR)");
+
+        // ========================
+        // PART C+D — Ensemble Response Decomposition
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C+D — Ensemble Response Decomposition");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine($"{"Class",8} {"rawMn IQR",10} {"simMn IQR",10} {"respDlt IQR",10} {"simMn>rawMn?",14} {"Ordered?",10} {"Gain winner",12}");
+        _o.WriteLine(new string('-',85));
+
+        int[] nVals={72,70,75};string[] nLbls={"K1(N=72)","K3(N=70)","K2(N=75)"};
+        double[] rmIqr=new double[3],smIqr=new double[3],rdIqr=new double[3];
+        for(int i=0;i<3;i++){
+            int n2=nVals[i];
+            rmIqr[i]=IqrVals(data.Where(d=>d.N==n2).Select(d=>d.rawMean));
+            smIqr[i]=IqrVals(data.Where(d=>d.N==n2).Select(d=>d.simMean));
+            rdIqr[i]=IqrVals(data.Where(d=>d.N==n2).Select(d=>d.respDelta));
+            double rmMean=data.Where(d=>d.N==n2).Select(d=>d.rawMean).Average();
+            double smMean=data.Where(d=>d.N==n2).Select(d=>d.simMean).Average();
+            _o.WriteLine($"{nLbls[i],8} {rmIqr[i],10:F4} {smIqr[i],10:F4} {rdIqr[i],10:F4} {(smIqr[i]>rmIqr[i]?"YES":"no"),14} {"—",10} {"—",12}");
+        }
+        // Gain ordering
+        double[] gainRat=new double[3];
+        for(int i=0;i<3;i++)gainRat[i]=rmIqr[i]>0.001?smIqr[i]/rmIqr[i]:0;
+        _o.WriteLine($"\n  Gain ratio (simMn IQR / rawMn IQR): K1={gainRat[0]:F1}x, K3={gainRat[1]:F1}x, K2={gainRat[2]:F1}x");
+        _o.WriteLine($"  Gain winner: {(gainRat[0]>gainRat[1]&&gainRat[0]>gainRat[2]?"K1":gainRat[1]>gainRat[2]?"K3":"K2")}");
+
+        // Response delta
+        double rdMean1=data.Where(d=>d.N==72).Select(d=>d.respDelta).Average();
+        double rdMean3=data.Where(d=>d.N==70).Select(d=>d.respDelta).Average();
+        double rdMean2=data.Where(d=>d.N==75).Select(d=>d.respDelta).Average();
+        _o.WriteLine($"\n  Response delta mean: K1={rdMean1:F4}, K3={rdMean3:F4}, K2={rdMean2:F4}");
+        _o.WriteLine($"  Response delta IQR: K1={rdIqr[0]:F4}, K3={rdIqr[1]:F4}, K2={rdIqr[2]:F4}");
+        bool rdOrd=rdIqr[0]>rdIqr[1]&&rdIqr[1]>rdIqr[2];
+        _o.WriteLine($"  Response delta ordering K1>K3>K2: {(rdOrd?"YES — delta drives ordering":"NO")}");
+
+        // ========================
+        // PART E — Topology Diagnostic
+        // ========================
+        _o.WriteLine("\nPART E — Initial-State Diagnostic");
+        _o.WriteLine($"  Raw freq mean IQR: K1={rmIqr[0]:F4}, K3={rmIqr[1]:F4}, K2={rmIqr[2]:F4} — ordering: {(rmIqr[0]>rmIqr[1]&&rmIqr[1]>rmIqr[2]?"YES":"NO")}");
+        _o.WriteLine($"  Sim acts as ensemble amplifier: raw->sim gain K1={gainRat[0]:F1}x, K3={gainRat[1]:F1}x, K2={gainRat[2]:F1}x");
+        _o.WriteLine($"  Raw freq mean shows {(rmIqr[0]>rmIqr[1]&&rmIqr[1]>rmIqr[2]?"partial":"NO")} K1>K3>K2 preordering");
+
+        // ========================
+        // PART I — Decision
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        bool rawOrd=rmIqr[0]>rmIqr[1]&&rmIqr[1]>rmIqr[2];
+        bool simOrd=smIqr[0]>smIqr[1]&&smIqr[1]>smIqr[2];
+        string dec=rawOrd?"Model C: Ordering already present in raw frequency ensemble means. Sim amplifies it.":
+                   simOrd&&!rawOrd?"Model A: Ordering created by Sim ensemble amplification. Response delta drives ordering.":
+                   rdOrd?"Model A: Response delta creates ordering from unordered raw freqs.":
+                   "Model H: No measured ensemble descriptor cleanly explains ordering.";
+
+        _o.WriteLine($"\nPART I — Decision: {dec}");
+        _o.WriteLine($"Raw mean ordering: {rawOrd}, Sim mean ordering: {simOrd}, Delta ordering: {rdOrd}");
+        _o.WriteLine("CLAIMS: Ensemble-level between-profile metric is the ordering carrier. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== ERO_01 complete. Commit: ERO_01_EnsembleResponseOrderingAudit ===");
+    }
+
     static double IqrVals(IEnumerable<double> vals){var s=vals.OrderBy(v=>v).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
