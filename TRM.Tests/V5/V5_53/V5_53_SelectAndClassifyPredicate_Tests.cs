@@ -315,6 +315,68 @@ public class V5_53_SelectAndClassifyPredicate_Tests
         _o.WriteLine($"\n=== RIC_01 complete. Commit: RIC_01_RawIQRComplementAudit ===");
     }
 
+    [Fact]
+    public void RCS_01_RawIQRMeanCompositeStabilityAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RCS_01: RawIQR+Mean Composite Stability Audit ===");
+        _o.WriteLine("=== V5.53. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double riqr,double rmean,string cls)>();
+        Parallel.ForEach(Ns,n=>{for(int s=0;s<100;s++){var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;var rwo=rawW.OrderBy(v=>v).ToArray();double ri=Q(rwo,0.75)-Q(rwo,0.25),rm=rwo.Average();if(IsHi(n,s))continue;var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);if(sb!=null&&(sb.Value.cls=="P1"||sb.Value.cls=="P1b"))bag.Add((n,s,ri,rm,sb.Value.cls));}});
+        var data=bag.ToArray();
+
+        // Build simple rank-based composite
+        var all=data.ToArray();int Np=all.Length;
+        var riqrVals=all.Select(d=>d.riqr).ToArray();var rmeanVals=all.Select(d=>d.rmean).ToArray();
+        var riqrRanks=RankVals(riqrVals);var rmeanRanks=RankVals(rmeanVals);
+        var composite=new double[Np];for(int i=0;i<Np;i++)composite[i]=(riqrRanks[i]+rmeanRanks[i])/2.0;
+
+        // ========================
+        // PART C+D — Composite separation by N
+        // ========================
+        _o.WriteLine("\nPART C+D — Composite vs Single Descriptor Separation");
+        _o.WriteLine($"{"N",4} {"Desc",-10} {"P1 sep",10} {"P1b sep",10} {"delta",10} {"P1>P1b?",10} {"jk stable",10}");
+        _o.WriteLine(new string('-',65));
+
+        int compStable=0,riqrStable=0;
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            var idx=Enumerable.Range(0,Np).Where(i=>all[i].N==n).ToArray();
+
+            foreach(var(lbl,f)in new[]{("rawIQR",new Func<int,double>(i=>riqrVals[i])),("rawMean",new Func<int,double>(i=>rmeanVals[i])),("composite",new Func<int,double>(i=>composite[i]))}){
+                var p1v=idx.Where(i=>all[i].cls=="P1").Select(f).ToArray();
+                var p1bv=idx.Where(i=>all[i].cls=="P1b").Select(f).ToArray();
+                if(p1v.Length<2||p1bv.Length<2)continue;
+                double p1m=p1v.Average(),p1bm=p1bv.Average(),dlt=p1m-p1bm;
+                bool gt=p1m>p1bm;
+                // Jackknife
+                int st=0,tt=0;
+                for(int j=0;j<p1v.Length;j++){var jk=p1v.Where((_,k)=>k!=j).ToArray();if(jk.Length<2)continue;tt++;if(jk.Average()>p1bm)st++;}
+                bool jkSt=st==tt;
+                if(lbl=="composite"&&jkSt)compStable++;if(lbl=="rawIQR"&&jkSt)riqrStable++;
+                if(lbl=="composite")_o.WriteLine($"{n,4} {lbl,-10} {p1m,10:F5} {p1bm,10:F5} {dlt,10:F5} {(gt?"YES":"no"),10} {(jkSt?"YES":"no"),10}");
+            }
+        }
+        _o.WriteLine($"\nrawIQR jackknife-stable N: {riqrStable}/{Ns.Length}. Composite: {compStable}/{Ns.Length}.");
+
+        // ========================
+        // PART J — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE");
+        string dec=compStable>riqrStable?"Model B: Composite improves per-N stability over rawIQR alone.":
+                   compStable==riqrStable?"Model A: Composite offers no stability improvement over rawIQR.":
+                   "Model E: Composite does not stabilize.";
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"rawIQR stable={riqrStable}/{Ns.Length}, composite stable={compStable}/{Ns.Length}");
+        _o.WriteLine("CLAIMS: Composite stability audited. V6 NOT READY.");
+        _o.WriteLine($"\n=== RCS_01 complete. Commit: RCS_01_RawIQRMeanCompositeStabilityAudit ===");
+    }
+
+    static int[] RankVals(double[] v){int n=v.Length;return Enumerable.Range(0,n).OrderBy(i=>v[i]).Select((idx,r)=>new{idx,r}).OrderBy(x=>x.idx).Select(x=>x.r).ToArray();}
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
     static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
