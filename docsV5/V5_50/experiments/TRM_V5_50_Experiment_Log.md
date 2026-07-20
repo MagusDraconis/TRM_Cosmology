@@ -1,7 +1,8 @@
 # V5.50 Experiment Log | **Created:** 2026-07-20
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
-| KCA | COMPLETE | 1 (KCA_01) | Model D — Pre-spread preorders kernel classes. Larger pre-IQR → compression, smaller → expansion. |
+| KCA | COMPLETE | 1 (KCA_01) | Model D — Pre-spread preorders kernel classes. Regression-to-mean signature. |
+| KAS | COMPLETE | 1 (KAS_01) | Model A — Assignment STABLE. Amp constraints jackknife-robust. Synthesis-ready. |
 
 ## KCA_01 — Kernel Class Assignment Origin Audit (2026-07-20)
 - **Passed.** 47s execution. **Decision: Model D — Pre-transition spread preorders kernel classes.**
