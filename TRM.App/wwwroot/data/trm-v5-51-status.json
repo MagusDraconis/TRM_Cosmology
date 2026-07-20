@@ -37,6 +37,11 @@
     {
       "name": "TSS",
       "status": "COMPLETE"
+    },
+    {
+      "name": "TSS",
+      "status": "COMPLETE",
+      "tests": 0
     }
   ],
   "finalModel": "A+G Ensemble-Origin Spread Ordering",
