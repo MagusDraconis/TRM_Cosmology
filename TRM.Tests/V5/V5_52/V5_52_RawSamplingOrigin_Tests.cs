@@ -273,6 +273,91 @@ public class V5_52_RawSamplingOrigin_Tests
         _o.WriteLine($"\n=== PSA_01 complete. Commit: PSA_01_ProfileSelectionMechanismAudit ===");
     }
 
+    [Fact]
+    public void SCD_01_SelectAndClassifyDiscriminatorAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== SCD_01: SelectAndClassify Discriminator Audit ===");
+        _o.WriteLine("=== V5.52. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double rawMean,double rawIqr,bool saPass,string cls)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rm=rawW.Average();var rwo=rawW.OrderBy(v=>v).ToArray();double ri=Q(rwo,0.75)-Q(rwo,0.25);
+                if(IsHi(n,s))continue; // IsHi returns true if HIGH -> skip those
+                var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);
+                string cls=sb?.cls??"rejected";
+                bag.Add((n,s,rm,ri,sb!=null,cls));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART A-D — Retained vs Rejected
+        // ========================
+        _o.WriteLine("\nPART A-D — SAC Retained vs Rejected Feature Audit");
+        _o.WriteLine($"{"N-Cls",-10} {"Group",-10} {"n",5} {"mean",9} {"IQR",9} {"med",9} {"q10",9} {"q90",9}");
+        _o.WriteLine(new string('-',75));
+
+        foreach(var n in Ns){
+            var ih=data.Where(d=>d.N==n).ToArray();
+            var kept=ih.Where(d=>d.saPass).ToArray();
+            var rej=ih.Where(d=>!d.saPass).ToArray();
+            foreach(var(grp,arr)in new[]{("retained",kept),("rejected",rej)}){
+                if(arr.Length<3)continue;
+                var rm=arr.Select(d=>d.rawMean).OrderBy(v=>v).ToArray();
+                var ri=arr.Select(d=>d.rawIqr).OrderBy(v=>v).ToArray();
+                _o.WriteLine($"{$"N={n}",-10} {grp,-10} {arr.Length,5} {rm.Average(),9:F4} {Q(ri,0.75)-Q(ri,0.25),9:F4} {rm[rm.Length/2],9:F4} {Q(rm,0.10),9:F4} {Q(rm,0.90),9:F4}");
+            }
+            // Class breakdown
+            foreach(var cls in new[]{"P1","P1b","P3","P4"}){
+                var cp=kept.Where(d=>d.cls==cls).ToArray();
+                if(cp.Length>0)_o.WriteLine($"{$"  {cls}",-10} {"kept",-10} {cp.Length,5} {cp.Average(d=>d.rawMean),9:F4} {"—",9} {"—",9} {"—",9} {"—",9}");
+            }
+        }
+
+        // ========================
+        // PART E — Descriptor Ranking
+        // ========================
+        _o.WriteLine($"\nPART E — Discrimination Power (rawMean separation retained vs rejected)");
+        _o.WriteLine($"{"N",4} {"retMean",10} {"rejMean",10} {"delta",10} {"retIQR",10} {"Retains?",20}");
+        _o.WriteLine(new string('-',70));
+        foreach(var n in Ns){
+            var ih=data.Where(d=>d.N==n).ToArray();
+            var k=ih.Where(d=>d.saPass).Select(d=>d.rawMean).ToArray();
+            var r=ih.Where(d=>!d.saPass).Select(d=>d.rawMean).ToArray();
+            if(k.Length<3||r.Length<3)continue;
+            double km=k.Average(),rm2=r.Average(),dlt=km-rm2;
+            double ki=Q(k.OrderBy(v=>v).ToArray(),0.75)-Q(k.OrderBy(v=>v).ToArray(),0.25);
+            string dir=dlt>0?"SAC keeps HIGHER mean":dlt<0?"SAC keeps LOWER mean":"no difference";
+            _o.WriteLine($"{n,4} {km,10:F4} {rm2,10:F4} {dlt,10:F4} {ki,10:F4} {dir,20}");
+        }
+
+        // ========================
+        // PART H — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE (from prior suites)");
+
+        bool k1MeanShift=false,k2MeanShift=false;
+        var ih72=data.Where(d=>d.N==72).ToArray();var k72=ih72.Where(d=>d.saPass).Select(d=>d.rawMean).ToArray();var r72=ih72.Where(d=>!d.saPass).Select(d=>d.rawMean).ToArray();
+        var ih75=data.Where(d=>d.N==75).ToArray();var k75=ih75.Where(d=>d.saPass).Select(d=>d.rawMean).ToArray();var r75=ih75.Where(d=>!d.saPass).Select(d=>d.rawMean).ToArray();
+        if(k72.Length>3&&r72.Length>3)k1MeanShift=Math.Abs(k72.Average()-r72.Average())>0.001;
+        if(k75.Length>3&&r75.Length>3)k2MeanShift=Math.Abs(k75.Average()-r75.Average())>0.001;
+
+        string dec=k1MeanShift&&k2MeanShift?"Model A: SAC discriminates by raw-frequency mean (retained vs rejected means differ).":
+                   !k1MeanShift&&!k2MeanShift?"Model G: Multi-factor. Mean alone doesn't separate; spread + quantile may contribute.":
+                   "Model H: Mixed pattern. Partial separation.";
+
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"K1 retained mean={k72.Average():F4} vs rejected={r72.Average():F4} (shift: {k1MeanShift})");
+        _o.WriteLine($"K2 retained mean={k75.Average():F4} vs rejected={r75.Average():F4} (shift: {k2MeanShift})");
+        _o.WriteLine("CLAIMS: SAC discriminator audited. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== SCD_01 complete. Commit: SCD_01_SelectAndClassifyDiscriminatorAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double IqrVals(IEnumerable<double> v){var s=v.OrderBy(x=>x).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
