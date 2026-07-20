@@ -43,5 +43,61 @@
   "deepestOrigin": "SelectAndClassify retention pipeline (P1/P1b branch assignment)",
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
-  "v6Status": "NOT READY"
+  "v6Status": "NOT READY",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "researchQuestion": "Why do raw-frequency ensemble means show K1>K3>K2? Is it sampling, selection, or hidden structure?",
+  "answer": "The ordering is NOT present in the full pre-selection population. It is CREATED by the SelectAndClassify retention pipeline. P1 preferentially retains higher-mean profiles; K2 enters P1 at 75% (vs 55% K1, 50% K3). Branch composition creates the direction flip.",
+  "supportedFindings": [
+    "No K1>K3>K2 ordering in full pre-selection population",
+    "Ordering appears only after SelectAndClassify",
+    "IsHi creates retention imbalance but NOT ordering",
+    "SAC discriminates by raw-frequency mean; K2 direction flip",
+    "P1 preferentially retains higher-mean profiles",
+    "K2 has highest P1 share (75% vs 55% K1 vs 50% K3)",
+    "Branch composition, not identity, explains ordering",
+    "Mean + spread jointly support P1 assignment",
+    "All findings survive stability audit",
+    "Stop-Low safe. V6 NOT READY."
+  ],
+  "conditionalFindings": [
+    "finite-N",
+    "selection-pipeline limits",
+    "seed/profile sampling limits",
+    "instrumentation limits",
+    "diagnostic not causal",
+    "hidden SAC discriminator may remain"
+  ],
+  "hypotheses": [
+    "Kernel-class assignment may originate from selective ensemble construction",
+    "P1 composition may seed subsequent ordering propagation",
+    "Branch composition may matter more than branch identity"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "nextSteps": [
+    "Identify SAC predicate - what discriminates P1 vs P1b"
+  ]
 }

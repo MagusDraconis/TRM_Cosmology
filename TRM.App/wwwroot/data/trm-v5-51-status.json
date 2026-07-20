@@ -46,6 +46,60 @@
   ],
   "finalModel": "A+G Ensemble-Origin Spread Ordering",
   "causalClosure": "BLOCKED",
-  "stopLowSafety": "SAFE",
-  "v6Status": "NOT READY"
+  "stopLowSafety": "SAFE - 42 stop, 0 rescues",
+  "v6Status": "NOT READY",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "researchQuestion": "Where does the pre-transition spread ordering K1>K3>K2 originate?",
+  "answer": "Traced to stable between-profile raw-frequency ensemble means. Present before any simulation. Amplified by Sim, disrupted by DL, restored by Cupd, strengthened at w1, destroyed by w1->w2 kernel. Deepest instrumented origin is raw-frequency ensemble means.",
+  "supportedFindings": [
+    "K1>K3>K2 ordering absent at init(K) (random graph)",
+    "Ordering present in raw-frequency ensemble means (before Sim)",
+    "Raw-frequency ordering stable (jackknife 100%, splits 80%, null 16%)",
+    "Sim amplifies raw-frequency ordering",
+    "Ordering is between-profile, not within-profile",
+    "DL(d) disrupts ordering; Cupd(km) restores it",
+    "w0->w1 strengthens; w1->w2 kernel destroys (regression-to-mean)",
+    "Stop-Low safe. V6 NOT READY."
+  ],
+  "conditionalFindings": [
+    "finite-N",
+    "seed/profile sampling limits",
+    "instrumentation limits (no pre-init)",
+    "raw-freq ordering may partially reflect profile-count structure",
+    "diagnostic not causal"
+  ],
+  "hypotheses": [
+    "Raw-frequency ensemble sampling may seed kernel-class assignment",
+    "Sim may amplify seed/profile-level ensemble differences",
+    "Rank-inverting kernel may transform ensemble preordering into classes"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "nextSteps": [
+    "Investigate why raw-freq ensemble means differ by N",
+    "Check profile selection pipeline"
+  ]
 }

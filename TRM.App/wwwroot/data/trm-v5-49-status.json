@@ -1,1 +1,99 @@
-{"releaseStatus":"V5.49 COMPLETE","phase":"Spread Generation and Distribution Origin","date":"2026-07-20","branch":"feature/v5.49-spread-generation-and-distribution-origin","testSummary":{"total":2882,"passed":2882,"failed":0},"suites":[{"name":"DSG","status":"COMPLETE","tests":1},{"name":"DGT","status":"COMPLETE","tests":1},{"name":"RTK","status":"COMPLETE","tests":1},{"name":"KBD","status":"COMPLETE","tests":1},{"name":"TSS","status":"COMPLETE","tests":0}],"finalModel":"A+D — Stable Rank-Inverting Transition Kernel","causalClosure":"BLOCKED","stopLowSafety":"SAFE — 35 stop, 0 rescues","v6Status":"NOT READY"}
+{
+  "releaseStatus": "V5.49 COMPLETE",
+  "phase": "Spread Generation and Distribution Origin",
+  "date": "2026-07-20",
+  "branch": "feature/v5.49-spread-generation-and-distribution-origin",
+  "testSummary": {
+    "total": 2882,
+    "passed": 2882,
+    "failed": 0
+  },
+  "suites": [
+    {
+      "name": "DSG",
+      "status": "COMPLETE",
+      "tests": 1
+    },
+    {
+      "name": "DGT",
+      "status": "COMPLETE",
+      "tests": 1
+    },
+    {
+      "name": "RTK",
+      "status": "COMPLETE",
+      "tests": 1
+    },
+    {
+      "name": "KBD",
+      "status": "COMPLETE",
+      "tests": 1
+    },
+    {
+      "name": "TSS",
+      "status": "COMPLETE",
+      "tests": 0
+    }
+  ],
+  "finalModel": "A+D \u00e2\u20ac\u201d Stable Rank-Inverting Transition Kernel",
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE - 35 stop, 0 rescues",
+  "v6Status": "NOT READY",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "researchQuestion": "Why do km/lambda spread distributions differ before the handoff? Where does the spread come from?",
+  "answer": "Spread differences are generated during w1->w2 warmup transition. N=75 starts NARROWER than N=72 at w0. IQR ratio 75/72 flips from 0.42x at w0 to 1.48x at w2. N=72 collapses (0.57x) while N=75 grows (1.50x) during w1->w2.",
+  "supportedFindings": [
+    "Spread differences generated during w1->w2, not inherited from w0",
+    "N=75 starts narrower than N=72 at w0 (km IQR 0.024 vs 0.057)",
+    "IQR ratio 75/72 flips from 0.42x (w0) to 1.48x (w2)",
+    "N=72 collapses (0.57x); N=75 grows (1.50x) during w1->w2",
+    "Rank inversion occurs in 6/6 tested N-transition pairs",
+    "Three stable kernel classes: K1 compression, K2 expansion, K3 stable",
+    "Kernel class preserved across stages - an N-window property",
+    "Distribution shape/spread dominates mean state",
+    "Amplification ratio alone cleanly separates K1/K2/K3 (jackknife-robust)",
+    "Stop-Low safe. V6 NOT READY."
+  ],
+  "conditionalFindings": [
+    "finite-N",
+    "tested N-windows only (70,72,75)",
+    "tested operators only (P1/P1b)",
+    "2 transitions tested",
+    "3 warmup epochs",
+    "diagnostic only - no causal closure"
+  ],
+  "hypotheses": [
+    "N-window formation may proceed through stable rank-inverting transition kernels",
+    "Amplification ratio may be the primary kernel-class diagnostic",
+    "Spread generation may precede and determine handoff formation outcome"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "nextSteps": [
+    "Stability audit across transitions",
+    "Kernel boundary discriminator"
+  ]
+}

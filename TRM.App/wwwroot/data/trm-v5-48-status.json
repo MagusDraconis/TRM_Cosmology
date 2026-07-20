@@ -1,22 +1,85 @@
 {
   "releaseStatus": "V5.48 COMPLETE",
-  "phase": "Distribution Shape vs Mean State — N-Window Formation",
+  "phase": "Distribution Shape vs Mean State \u00e2\u20ac\u201d N-Window Formation",
   "date": "2026-07-20",
   "branch": "feature/v5.48-distribution-shape-vs-mean-state-n-window-formation",
   "base": "V5.47 COMPLETE",
-  "testSummary": { "total": 2878, "passed": 2878, "failed": 0 },
+  "testSummary": {
+    "total": 2878,
+    "passed": 2878,
+    "failed": 0
+  },
   "suites": [
-    { "name": "DSM", "status": "COMPLETE", "tests": 1, "model": "Model B — Shape/spread, not mean state, distinguishes N-window outcome" }
+    {
+      "name": "DSM",
+      "status": "COMPLETE",
+      "tests": 1,
+      "model": "Model B \u00e2\u20ac\u201d Shape/spread, not mean state, distinguishes N-window outcome"
+    }
   ],
-  "finalModel": "Model B — Distribution shape/spread explains N-window outcome. Mean state does not.",
+  "finalModel": "Model B \u00e2\u20ac\u201d Distribution shape/spread explains N-window outcome. Mean state does not.",
   "keyFindings": [
-    "d_w2 mean: N=72=0.457, N=75=0.458 — NEARLY IDENTICAL (ratio=1.00)",
-    "km_w2 IQR: N=72=0.087, N=75=0.129 — 1.48x difference",
-    "km IQR gap / mean gap = 46.1x — shape separation dwarfs mean separation",
+    "d_w2 mean: N=72=0.457, N=75=0.458 \u00e2\u20ac\u201d NEARLY IDENTICAL (ratio=1.00)",
+    "km_w2 IQR: N=72=0.087, N=75=0.129 \u00e2\u20ac\u201d 1.48x difference",
+    "km IQR gap / mean gap = 46.1x \u00e2\u20ac\u201d shape separation dwarfs mean separation",
     "Mean-only N-level prediction: 0/3 accuracy",
     "Shape superiority persists under leave-one-N-out"
   ],
   "causalClosure": "BLOCKED",
-  "stopLowSafety": "SAFE — 35 stop, 0 rescues",
-  "v6Status": "NOT READY"
+  "stopLowSafety": "SAFE - 35 stop, 0 rescues",
+  "v6Status": "NOT READY",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "researchQuestion": "Does N-window formation depend more on distribution shape than on mean state?",
+  "answer": "Distribution shape/spread explains N-window outcome. Mean d_w2 is nearly identical across N (0.457 vs 0.458). km_w2 IQR differs 1.48x. The gap ratio is 46.1x favoring shape over mean.",
+  "supportedFindings": [
+    "d_w2 mean N=72=0.457, N=75=0.458 - NEARLY IDENTICAL (ratio=1.00)",
+    "km_w2 IQR N=72=0.087, N=75=0.129 - 1.48x difference",
+    "lam_w2 IQR N=72=0.086, N=75=0.127 - 1.48x difference",
+    "km IQR gap / mean gap = 46.1x - shape separation dwarfs mean",
+    "Mean-only N-level prediction: 0/3 accuracy",
+    "Shape superiority persists under leave-one-N-out",
+    "Stop-Low safe. V6 NOT READY."
+  ],
+  "conditionalFindings": [
+    "finite-N (3 N values)",
+    "P1/P1b profiles only",
+    "3 N values limit statistical power",
+    "diagnostic only - no causal closure",
+    "no physical meaning of N or distribution shape",
+    "hidden handoff operator may remain"
+  ],
+  "hypotheses": [
+    "Shape-driven N-window formation: spread determines outcome",
+    "Hidden spread operator: what creates w2-state distribution shape?",
+    "Distribution-mediated handoff: spread controls rank inversion magnitude"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "nextSteps": [
+    "Extend to more N values",
+    "Investigate origin of w2-state distribution shape"
+  ]
 }

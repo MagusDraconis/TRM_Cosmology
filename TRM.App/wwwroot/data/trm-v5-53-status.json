@@ -37,5 +37,59 @@
   ],
   "finalModel": "B+ \u2014 Spread-Primary, Mean-Complement Predicate",
   "causalClosure": "BLOCKED",
-  "v6Status": "NOT READY"
+  "v6Status": "NOT READY",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "researchQuestion": "What predicate drives SelectAndClassify P1 vs P1b assignment?",
+  "answer": "P1/P1b assignment is primarily rawIQR-driven (spread), with rawMean providing independent complementary stabilization. rawIQR dominates 10x in normalized terms. A rank-based rawIQR+rawMean composite yields consistent P1>P1b direction across all N.",
+  "supportedFindings": [
+    "rawIQR is strongest P1/P1b discriminator (10x normalized dominance)",
+    "P1 selects higher rawIQR profiles in pooled IsHi-pass population",
+    "rawIQR alone not uniformly stable per-N (jackknife 1/3 N)",
+    "rawMean adds independent complementary information",
+    "Rank-based rawIQR+rawMean composite improves per-N stability (2/3 N)",
+    "Composite yields consistent P1>P1b direction across all 3 N",
+    "Stop-Low safe. V6 NOT READY."
+  ],
+  "conditionalFindings": [
+    "finite-N (10-11 P1, 3-10 P1b per N)",
+    "per-N rawIQR instability under jackknife",
+    "seed/profile sampling limits",
+    "selection-pipeline limits",
+    "diagnostic not causal"
+  ],
+  "hypotheses": [
+    "rawIQR may encode dominant SAC/P1 spread discriminator",
+    "rawMean may stabilize rawIQR ambiguity across N",
+    "P1/P1b assignment may depend on composite profile-shape signal"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "nextSteps": [
+    "Further refine SAC predicate",
+    "Consider additional profile descriptors"
+  ],
+  "stopLowSafety": "SAFE"
 }

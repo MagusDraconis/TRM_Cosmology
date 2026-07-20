@@ -1,1 +1,86 @@
-{"releaseStatus":"V5.50 COMPLETE","phase":"Kernel Class Assignment and Boundary Origin","date":"2026-07-20","branch":"feature/v5.50-kernel-class-assignment-and-boundary-origin","testSummary":{"total":2884,"passed":2884,"failed":0},"suites":[{"name":"KCA","status":"COMPLETE","tests":1},{"name":"KAS","status":"COMPLETE","tests":1},{"name":"TSS","status":"COMPLETE","tests":0}],"finalModel":"D+ — Spread-Ordered Kernel-Class Assignment","causalClosure":"BLOCKED","stopLowSafety":"SAFE — 35 stop, 0 rescues","v6Status":"NOT READY"}
+{
+  "releaseStatus": "V5.50 COMPLETE",
+  "phase": "Kernel Class Assignment and Boundary Origin",
+  "date": "2026-07-20",
+  "branch": "feature/v5.50-kernel-class-assignment-and-boundary-origin",
+  "testSummary": {
+    "total": 2884,
+    "passed": 2884,
+    "failed": 0
+  },
+  "suites": [
+    {
+      "name": "KCA",
+      "status": "COMPLETE",
+      "tests": 1
+    },
+    {
+      "name": "KAS",
+      "status": "COMPLETE",
+      "tests": 1
+    },
+    {
+      "name": "TSS",
+      "status": "COMPLETE",
+      "tests": 0
+    }
+  ],
+  "finalModel": "D+ \u00e2\u20ac\u201d Spread-Ordered Kernel-Class Assignment",
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE - 35 stop, 0 rescues",
+  "v6Status": "NOT READY",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "researchQuestion": "What determines kernel-class assignment? Why N=72 compression, N=75 expansion, N=70 stable?",
+  "answer": "Pre-transition km/lambda spread preorders the stable kernel classes. A regression-to-mean signature: wide profiles compress (K1), narrow expand (K2), intermediate stay stable (K3). Mean-state explanations fail.",
+  "supportedFindings": [
+    "Kernel classes remain stable (K1 compression, K2 expansion, K3 stable)",
+    "Amplification ratio alone separates all three classes (jackknife-robust)",
+    "Pre-transition km spread preorders classes: K1 > K3 > K2",
+    "Lambda spread independently supports same preordering",
+    "Regression-to-mean signature: wide compresses, narrow expands",
+    "Mean-state explanations fail (ratios ~1.00 across all mean descriptors)",
+    "Amp ordering K1<K3<K2 cross-domain stable (both w1->w2 and w2->T0)",
+    "No single profile controls class assignment (jackknife verified)",
+    "Stop-Low safe. V6 NOT READY."
+  ],
+  "conditionalFindings": [
+    "finite-N (3 N values, 12-20 profiles per N)",
+    "P1/P1b only",
+    "pre-spread ordering domain-specific",
+    "diagnostic not causal",
+    "no physical meaning of N"
+  ],
+  "hypotheses": [
+    "Kernel-class assignment may emerge from pre-transition spread ordering",
+    "Regression-to-mean may be characteristic property of rank-inverting kernels",
+    "km/lambda spread may jointly encode class-assignment signal"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "nextSteps": [
+    "Trace spread-order origin earlier in pipeline"
+  ]
+}
