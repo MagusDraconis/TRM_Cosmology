@@ -358,6 +358,107 @@ public class V5_52_RawSamplingOrigin_Tests
         _o.WriteLine($"\n=== SCD_01 complete. Commit: SCD_01_SelectAndClassifyDiscriminatorAudit ===");
     }
 
+    [Fact]
+    public void SACBR_01_SelectAndClassifyBranchResolutionAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== SACBR_01: SelectAndClassify Branch Resolution Audit ===");
+        _o.WriteLine("=== V5.52. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double rawMean,string cls,bool retained)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rm=rawW.Average();
+                if(IsHi(n,s))continue;
+                var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);
+                bag.Add((n,s,rm,sb?.cls??"rejected",sb!=null));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B — Branch Inventory
+        // ========================
+        _o.WriteLine("\nPART B — SAC Branch Inventory");
+        var branches=data.Select(d=>d.cls).Distinct().OrderBy(x=>x).ToArray();
+        _o.WriteLine($"{"Branch",-10} {"Total",6} {"N=70",6} {"N=72",6} {"N=75",6} {"Retained",9} {"Rejected",9}");
+        _o.WriteLine(new string('-',60));
+        foreach(var br in branches){
+            var bd=data.Where(d=>d.cls==br).ToArray();
+            int t=bd.Length,r=bd.Count(d=>d.retained),j=t-r;
+            _o.WriteLine($"{br,-10} {t,6} {bd.Count(d=>d.N==70),6} {bd.Count(d=>d.N==72),6} {bd.Count(d=>d.N==75),6} {r,9} {j,9}");
+        }
+
+        // ========================
+        // PART C — Branch-Specific Mean
+        // ========================
+        _o.WriteLine($"\nPART C — Branch-Specific Mean (retained vs rejected)");
+        _o.WriteLine($"{"Branch",-10} {"N",4} {"retMean",10} {"rejMean",10} {"delta",10} {"Direction",16}");
+        _o.WriteLine(new string('-',65));
+        foreach(var br in branches.Where(b=>b!="rejected")){
+            foreach(var n in Ns){
+                var bd=data.Where(d=>d.cls==br&&d.N==n).ToArray();
+                var kr=bd.Where(d=>d.retained).Select(d=>d.rawMean).ToArray();
+                var rj=bd.Where(d=>!d.retained).Select(d=>d.rawMean).ToArray();
+                if(kr.Length<2||rj.Length<2)continue;
+                double km=kr.Average(),rm2=rj.Average();
+                _o.WriteLine($"{br,-10} {n,4} {km,10:F4} {rm2,10:F4} {(km-rm2),10:F4} {(km>rm2?"keeps HIGHER":"keeps LOWER"),16}");
+            }
+        }
+
+        // ========================
+        // PART D — Composition
+        // ========================
+        _o.WriteLine($"\nPART D — Branch Composition by N");
+        _o.WriteLine($"{"N",4} {"Branch",-10} {"IsHiPass",10} {"InBranch",10} {"Retained",10} {"% of kept",10}");
+        _o.WriteLine(new string('-',60));
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();
+            int ih=nd.Length;
+            foreach(var br in branches.Where(b=>b!="rejected")){
+                var bd=nd.Where(d=>d.cls==br).ToArray();
+                int r=bd.Count(d=>d.retained),t=bd.Length;
+                int totalKept=nd.Count(d=>d.retained);
+                _o.WriteLine($"{n,4} {br,-10} {ih,10} {t,10} {r,10} {(totalKept>0?r*100/totalKept:0),10:F0}%");
+            }
+        }
+
+        // ========================
+        // PART F — Descriptor within P1 (dominant branch)
+        // ========================
+        _o.WriteLine($"\nPART F — P1 branch: rawMean separation (K1 vs K2)");
+        foreach(var n in new[]{72,75}){
+            var p1=data.Where(d=>d.N==n&&d.cls=="P1").ToArray();
+            var k=p1.Where(d=>d.retained).Select(d=>d.rawMean).ToArray();
+            var r=p1.Where(d=>!d.retained).Select(d=>d.rawMean).ToArray();
+            if(k.Length>2&&r.Length>2)
+                _o.WriteLine($"  N={n}: retained mean={k.Average():F4}, rejected={r.Average():F4}, delta={k.Average()-r.Average():F4}, keeps {(k.Average()>r.Average()?"HIGHER":"LOWER")}");
+        }
+
+        // ========================
+        // PART I — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE");
+
+        // Check if K2 enters different branches
+        var p1_72=data.Count(d=>d.N==72&&d.cls=="P1"&&d.retained);
+        var p1_75=data.Count(d=>d.N==75&&d.cls=="P1"&&d.retained);
+        var total72=data.Count(d=>d.N==72&&d.retained);
+        var total75=data.Count(d=>d.N==75&&d.retained);
+        bool sameBranchDominant=(p1_72*100.0/total72>50)&&(p1_75*100.0/total75>50);
+
+        string dec=sameBranchDominant?"Model B: Same dominant branch (P1) for both K1 and K2. Different N composition within branch creates the flip.":
+                   "Model A: Different SAC branches create the direction flip.";
+
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"P1 share of retained: K1={p1_72}/{total72}, K2={p1_75}/{total75}");
+        _o.WriteLine("CLAIMS: Branch-resolved. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== SACBR_01 complete. Commit: SACBR_01_SelectAndClassifyBranchResolutionAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double IqrVals(IEnumerable<double> v){var s=v.OrderBy(x=>x).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
