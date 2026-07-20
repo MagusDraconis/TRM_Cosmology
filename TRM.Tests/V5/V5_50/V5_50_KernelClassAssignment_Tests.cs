@@ -286,11 +286,11 @@ public class V5_50_KernelClassAssignment_Tests
             var ids70=Enumerable.Range(0,n70.Length).OrderBy(_=>rng.Next()).Take(n70.Length*2/3).ToArray();
             var ids75=Enumerable.Range(0,n75.Length).OrderBy(_=>rng.Next()).Take(n75.Length*2/3).ToArray();
             double pi1=PIqr(n72,ids72,d=>d.warmKm[1]),pi3=PIqr(n70,ids70,d=>d.warmKm[1]),pi2=PIqr(n75,ids75,d=>d.warmKm[1]);
-            double a1=PIqr(n72,ids72,d=>d.warmKm[2])/(PIqr(n72,ids72,d=>d.warmKm[1])+0.001);
-            double a3=PIqr(n70,ids70,d=>d.warmKm[2])/(PIqr(n70,ids70,d=>d.warmKm[1])+0.001);
-            double a2=PIqr(n75,ids75,d=>d.warmKm[2])/(PIqr(n75,ids75,d=>d.warmKm[1])+0.001);
-            bool ord=pi1>pi3&&pi3>pi2, aOrd=a1<a3&&a3<a2;
-            _o.WriteLine($"{s+1,6} {pi1,10:F3} {pi3,10:F3} {pi2,10:F3} {(ord?"PASS":"fail"),8} {a1,8:F2} {a3,8:F2} {a2,8:F2} {(aOrd?"PASS":"fail"),10}");
+            double sa1=PIqr(n72,ids72,d=>d.warmKm[2])/(PIqr(n72,ids72,d=>d.warmKm[1])+0.001);
+            double sa3=PIqr(n70,ids70,d=>d.warmKm[2])/(PIqr(n70,ids70,d=>d.warmKm[1])+0.001);
+            double sa2=PIqr(n75,ids75,d=>d.warmKm[2])/(PIqr(n75,ids75,d=>d.warmKm[1])+0.001);
+            bool ord=pi1>pi3&&pi3>pi2, aOrd=sa1<sa3&&sa3<sa2;
+            _o.WriteLine($"{s+1,6} {pi1,10:F3} {pi3,10:F3} {pi2,10:F3} {(ord?"PASS":"fail"),8} {sa1,8:F2} {sa3,8:F2} {sa2,8:F2} {(aOrd?"PASS":"fail"),10}");
         }
 
         // ========================
