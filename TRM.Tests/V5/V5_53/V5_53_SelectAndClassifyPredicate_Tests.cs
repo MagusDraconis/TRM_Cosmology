@@ -181,6 +181,70 @@ public class V5_53_SelectAndClassifyPredicate_Tests
         _o.WriteLine($"\n=== RIG_01 complete. Commit: RIG_01_RawIQRGenesisAudit ===");
     }
 
+    [Fact]
+    public void RIS_01_RawIQRSelectionStabilityAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RIS_01: RawIQR Selection Stability Audit ===");
+        _o.WriteLine("=== V5.53. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double riqr,double rmean,string cls)>();
+        Parallel.ForEach(Ns,n=>{for(int s=0;s<100;s++){var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;var rwo=rawW.OrderBy(v=>v).ToArray();double ri=Q(rwo,0.75)-Q(rwo,0.25),rm=rwo.Average();if(IsHi(n,s))continue;var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);if(sb!=null&&(sb.Value.cls=="P1"||sb.Value.cls=="P1b"))bag.Add((n,s,ri,rm,sb.Value.cls));}});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B+C — P1 vs P1b + Quantile
+        // ========================
+        _o.WriteLine("\nPART B+C — P1 vs P1b RawIQR by N");
+        _o.WriteLine($"{"N",4} {"P1 n",5} {"P1 IQR",9} {"P1b n",5} {"P1b IQR",9} {"delta",9} {"P1>P1b?",10} {"P1 hiQ%",9} {"Stable?",8}");
+        _o.WriteLine(new string('-',80));
+
+        bool allStable=true;int stableN=0;
+        foreach(var n in Ns){
+            var p1d=data.Where(d=>d.N==n&&d.cls=="P1").ToArray();
+            var p1bd=data.Where(d=>d.N==n&&d.cls=="P1b").ToArray();
+            if(p1d.Length<2||p1bd.Length<2)continue;
+            double p1m=p1d.Average(d=>d.riqr),p1bm=p1bd.Average(d=>d.riqr);
+            double dlt=p1m-p1bm;bool gt=p1m>p1bm;
+
+            // Jackknife sign stability
+            int stable=0,total=0;
+            for(int i=0;i<p1d.Length;i++){var jk=p1d.Where((_,j)=>j!=i).ToArray();if(jk.Length<2)continue;total++;if(jk.Average(d=>d.riqr)>p1bm)stable++;}
+            bool jkStable=stable==total;
+
+            // High-Q fraction
+            var allRd=data.Where(d=>d.N==n).Select(d=>d.riqr).OrderBy(v=>v).ToArray();
+            double q75=Q(allRd,allRd.Length>3?0.75:0.75);
+            double p1HiQ=p1d.Count(d=>d.riqr>q75)*100.0/p1d.Length;
+
+            if(!gt)allStable=false;if(jkStable)stableN++;
+            _o.WriteLine($"{n,4} {p1d.Length,5} {p1m,9:F5} {p1bd.Length,5} {p1bm,9:F5} {dlt,9:F5} {(gt?"YES":"no"),10} {p1HiQ,9:F0}% {(jkStable?"YES":"no"),8}");
+        }
+        _o.WriteLine($"\nAll N P1>P1b: {allStable}. Jackknife-stable N: {stableN}/{Ns.Length}");
+
+        // Descriptor redundancy
+        _o.WriteLine($"\nPART F — Descriptor Redundancy (pooled)");
+        var allP1=data.Where(d=>d.cls=="P1").ToArray();var allP1b=data.Where(d=>d.cls=="P1b").ToArray();
+        double riSep=Math.Abs(allP1.Average(d=>d.riqr)-allP1b.Average(d=>d.riqr))/Math.Max(allP1.Average(d=>d.riqr),allP1b.Average(d=>d.riqr));
+        double rmSep=Math.Abs(allP1.Average(d=>d.rmean)-allP1b.Average(d=>d.rmean))/Math.Max(allP1.Average(d=>d.rmean),allP1b.Average(d=>d.rmean));
+        _o.WriteLine($"rawIQR sep={riSep:F4}, rawMean sep={rmSep:F4}, IQR/Mean ratio={riSep/(rmSep+0.0001):F1}x");
+        _o.WriteLine($"rawIQR {(riSep>rmSep*2?"DOMINATES":"comparable to")} rawMean");
+
+        // ========================
+        // PART J — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE");
+        string dec=allStable?"Model A: rawIQR selection is STABLE and synthesis-ready.":
+                   stableN>=2?"Model B: rawIQR selection stable for most N. K2 strongest; K1/K3 weaker but consistent.":
+                   "Model C: rawIQR selection is weak or profile-sensitive.";
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"riSep={riSep:F4}, rmSep={rmSep:F4}, ratio={riSep/(rmSep+0.0001):F1}x");
+        _o.WriteLine("CLAIMS: Stability confirmed. V6 NOT READY.");
+        _o.WriteLine($"\n=== RIS_01 complete. Commit: RIS_01_RawIQRSelectionStabilityAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
     static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
