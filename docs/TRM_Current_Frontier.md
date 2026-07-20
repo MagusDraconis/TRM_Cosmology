@@ -3,9 +3,9 @@
 **Version:** 1.4
 **Date:** 2026-07-20
 
-**Current Version:** V5.47 COMPLETE
-**Current Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
-**Cumulative Tests:** 2877
+**Current Version:** V5.49 COMPLETE
+**Current Branch:** `feature/v5.49-spread-generation-and-distribution-origin`
+**Cumulative Tests:** 2882
 **Failed:** 0
 
 ---
@@ -22,12 +22,13 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.47 localized T0 spread origin to the post-warmup w2→T0 handoff transform. The handoff
-is rank-inverting. d/K at w2 near-perfectly diagnoses profile-level delta_omega (|r| > 0.92).
-N-window outcome is determined by w2-state distribution spread (km/lambda IQR, 1.48× ratio),
-not by mean d_w2. N=75 amplifies to bulk-wide T0 spread; N=72 collapses; N=70 remains stable
-compressed. All findings survive random-split and jackknife stability audits. Stop-Low remains
-safe (41 stop, 0 rescues). Causal closure remains blocked. V6 NOT READY.
+V5.49 identified a stable rank-inverting transition kernel underlying N-window formation.
+Spread differences are generated during the w1→w2 warmup transition, not inherited.
+Three stable kernel classes (K1 compression, K2 expansion, K3 stable) are defined by
+amplification ratio and preserved across stages. Amplification ratio alone cleanly separates
+all kernel classes (jackknife-robust). Rank inversion is observed in 6/6 tested
+N-transition pairs. Shape/spread dominates mean state for classification. Stop-Low
+remains safe. Causal closure remains blocked. V6 NOT READY.
 
 ---
 

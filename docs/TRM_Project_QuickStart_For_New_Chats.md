@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.47 COMPLETE |
-| Current Branch | `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation` |
-| Total Tests | 2877 |
+| Current Version | V5.49 COMPLETE |
+| Current Branch | `feature/v5.49-spread-generation-and-distribution-origin` |
+| Total Tests | 2882 |
 | Failed Tests | 0 |
-| Current Status | V5.47 COMPLETE — Handoff transform N-window formation. Model A+E. 2877 tests. |
+| Current Status | V5.49 COMPLETE — Stable rank-inverting transition kernel. K1/K2/K3 kernel classes. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
