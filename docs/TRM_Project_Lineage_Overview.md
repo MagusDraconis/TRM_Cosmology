@@ -5,7 +5,7 @@
 **Scope:** Clockwork Cosmology V1 through V5.39
 **Tests:** 2877 verified, 0 failed
 **Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
-**Current Frontier:** V5.46 COMPLETE → V5.47 ACTIVE — TSP + TSE + THD + TSA COMPLETE
+**Current Frontier:** V5.47 COMPLETE → V5.48 PENDING
 
 ---
 
@@ -1352,7 +1352,7 @@ maintained to prevent overinterpretation:
 | V5.44 | C3 Correction Response Instrumentation and Microstate Audit | 7 | COMPLETE |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | 7 | COMPLETE |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | 7 | COMPLETE |
-| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | 4 | ACTIVE |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | 5 | COMPLETE |
 | **Total** | | **2877** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
@@ -1363,21 +1363,20 @@ V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
 ## M. Current Research Frontier
 
-### V5.47 — Post-Warmup T0 Spread Origin and N-Window Formation — ACTIVE
+### V5.47 — Post-Warmup T0 Spread Origin and N-Window Formation — COMPLETE
 
-**Status:** TSP + TSE + THD + TSA COMPLETE (2026-07-20)
+**Status:** COMPLETE (2026-07-20). 5 suites: TSP, TSE, THD, TSA, TSS.
+**Final Model: A+E — Handoff Transform N-Window Formation.**
 
-**TSP_01:** Model A — T0 inherited spread dominates. N=75 bulk-wide at T0 origin.
-**TSE_01:** Model A — w2→T0 handoff amplifies N=75 spread (1.98x). N=72 collapses at T0.
-**THD_01:** Model E — d/K at w2 near-perfectly diagnostic. Rank-INVERTING handoff.
-**TSA_01:** SUPPORTED stability — all 8 claims survive robustness (splits + jackknife).
-
-**Key TSA_01 findings:**
-- 10 random splits + leave-one-profile jackknife: all correlations sign-stable
-- No single profile controls any conclusion
-- N=75 amp jackknife mean=9.26, min=1.59 — amplification direction stable despite magnitude variance
-- km/lam IQR differs between N=75 and N=72 (1.48x) while mean d_w2 nearly identical
-- Stop-Low: 41 stop, 0 damage → SAFE
+**Key findings:**
+- w2→T0 handoff is the key N-window formation transform
+- Handoff is rank-inverting (Spearman N=75=-0.671, N=72=-0.483)
+- d/K at w2 near-perfectly diagnoses profile-level delta_omega (|r| > 0.92)
+- N-window outcome determined by w2-state spread (km/lam IQR), not mean d_w2
+- N=75: S1 bulk-wide amplification; N=72: S2 bulk collapse; N=70: S3 stable compressed
+- All findings survive random-split and jackknife stability audits
+- Stop-Low: 41 stop, 0 rescues → SAFE
+- Causal closure remains blocked. V6 NOT READY.
 
 **Next:** TSA (stability), TSI (instrumentation), TSS (synthesis)
 

@@ -1,4 +1,4 @@
-# V5.47 T0 Spread Origin — Roadmap | **UPDATED 2026-07-20**
+# V5.47 T0 Spread Origin — Roadmap | **COMPLETE 2026-07-20**
 
 ## TSP_01 Results
 **Model A: T0 inherited spread dominates. N=75 is genuinely broad at origin.**

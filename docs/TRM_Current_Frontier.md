@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 1.3
-**Date:** 2026-07-19
+**Version:** 1.4
+**Date:** 2026-07-20
 
-**Current Version:** V5.46 COMPLETE
-**Current Branch:** `feature/v5.46-entry-state-distribution-shape-and-n-window-origin`
-**Cumulative Tests:** 2871
+**Current Version:** V5.47 COMPLETE
+**Current Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
+**Cumulative Tests:** 2877
 **Failed:** 0
 
 ---
@@ -22,21 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.28 validated Stop-Low as a safe post-C3 continuation policy. V5.38 established
-lambda1/K-state as the strongest diagnostic separator of c3OmegaShift. V5.39
-confirmed that the attractor absorbs K-state perturbations, explaining why
-diagnostic variables resist direct causal manipulation. V5.40 tested whether
-attractor-compatible perturbations could penetrate this protection — they could not.
-All perturbation families are absorbed; weak signals are artifacts. V5.41 pivoted
-to causal-test methodology: perturbation is INVALIDATED; natural variation,
-counterfactual trace, and causal rejection are viable alternatives. V5.42 applied counterfactual trace:
-7/11 near-identical profiles diverge on c3OmgS (63.6%). 7 sufficiency claims
-REJECTED — no single variable determines the outcome. Causal closure narrowed
-but not achieved. V5.43 added temporal trace: 62.5% of divergence appears
-only at T4 (c3OmgS computation). Pre-C3 trajectory does not explain
-most divergence. Hidden factor = Model G — unrecorded microstate in
-C3 correction response. Temporal trace LOCALIZES but does not EXPLAIN.
-Causal closure remains blocked. V6 remains NOT READY.
+V5.47 localized T0 spread origin to the post-warmup w2→T0 handoff transform. The handoff
+is rank-inverting. d/K at w2 near-perfectly diagnoses profile-level delta_omega (|r| > 0.92).
+N-window outcome is determined by w2-state distribution spread (km/lambda IQR, 1.48× ratio),
+not by mean d_w2. N=75 amplifies to bulk-wide T0 spread; N=72 collapses; N=70 remains stable
+compressed. All findings survive random-split and jackknife stability audits. Stop-Low remains
+safe (41 stop, 0 rescues). Causal closure remains blocked. V6 NOT READY.
 
 ---
 

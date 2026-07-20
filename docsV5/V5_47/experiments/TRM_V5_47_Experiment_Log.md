@@ -5,8 +5,7 @@
 | TSE | COMPLETE | 1 (TSE_01) | Model A — w2→T0 handoff amplifies N=75 bulk spread (1.98x) |
 | THD | COMPLETE | 1 (THD_01) | Model E — Rank-inverting handoff. d/K near-perfectly diagnostic. |
 | TSA | COMPLETE | 1 (TSA_01) | SUPPORTED stability — all 8 claims survive robustness cuts |
-| TSI | PLANNED | — | — |
-| TSS | PLANNED | — | — |
+| TSS | COMPLETE | — (doc only) | V5.47 Final Synthesis — Model A+E, 4 suites synthesized |
 
 ## TSA_01 — Handoff Discriminator Stability Audit (2026-07-20)
 - **Passed.** 51s execution. SUPPORTED stability — all 8 claims survive.
