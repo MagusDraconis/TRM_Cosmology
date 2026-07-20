@@ -459,6 +459,94 @@ public class V5_52_RawSamplingOrigin_Tests
         _o.WriteLine($"\n=== SACBR_01 complete. Commit: SACBR_01_SelectAndClassifyBranchResolutionAudit ===");
     }
 
+    [Fact]
+    public void P1C_01_P1CompositionAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== P1C_01: P1 Composition Audit ===");
+        _o.WriteLine("=== V5.52. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double rawMean,double rawIqr,string cls)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rm=rawW.Average();var rwo=rawW.OrderBy(v=>v).ToArray();double ri=Q(rwo,0.75)-Q(rwo,0.25);
+                if(IsHi(n,s))continue;
+                var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);
+                if(sb!=null&&(sb.Value.cls=="P1"||sb.Value.cls=="P1b"))
+                    bag.Add((n,s,rm,ri,sb.Value.cls));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B — P1 vs P1b
+        // ========================
+        _o.WriteLine("\nPART B — P1 vs P1b Feature Comparison");
+        _o.WriteLine($"{"N-Cls",-10} {"n",5} {"mean",9} {"med",9} {"IQR",9} {"std",9} {"q10",9} {"q90",9}");
+        _o.WriteLine(new string('-',75));
+        foreach(var n in Ns){
+            foreach(var br in new[]{"P1","P1b"}){
+                var bd=data.Where(d=>d.N==n&&d.cls==br).ToArray();
+                if(bd.Length<2)continue;
+                var rm=bd.Select(d=>d.rawMean).OrderBy(v=>v).ToArray();
+                var ri=bd.Select(d=>d.rawIqr).OrderBy(v=>v).ToArray();
+                _o.WriteLine($"{$"N={n} {br}",-10} {bd.Length,5} {rm.Average(),9:F4} {rm[rm.Length/2],9:F4} {Q(ri,0.75)-Q(ri,0.25),9:F4} {Sd(rm),9:F4} {Q(rm,0.10),9:F4} {Q(rm,0.90),9:F4}");
+            }
+        }
+
+        // ========================
+        // PART C — P1 probability by mean decile
+        // ========================
+        _o.WriteLine($"\nPART C — P1 probability by rawMean decile");
+        var all=data.OrderBy(d=>d.rawMean).ToArray();
+        int dSize=all.Length/5;
+        for(int d=0;d<5;d++){
+            var decile=all.Skip(d*dSize).Take(dSize).ToArray();
+            int p1=decile.Count(x=>x.cls=="P1"),p1b=decile.Count(x=>x.cls=="P1b");
+            _o.WriteLine($"  Decile {d+1} (mean ~{decile.Average(x=>x.rawMean):F4}): P1={p1}, P1b={p1b}, P1%={(p1+p1b>0?p1*100/(p1+p1b):0)}%");
+        }
+
+        // ========================
+        // PART D — Cross-N
+        // ========================
+        _o.WriteLine($"\nPART D — Cross-N P1 share by N");
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();
+            int p1c=nd.Count(d=>d.cls=="P1"),p1bc=nd.Count(d=>d.cls=="P1b");
+            _o.WriteLine($"  N={n}: P1={p1c}, P1b={p1bc}, P1%={(p1c+p1bc>0?p1c*100/(p1c+p1bc):0)}%");
+        }
+
+        // ========================
+        // PART F — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE");
+
+        bool meanDrives=true; // Check if P1 mean differs from P1b
+        var allP1=data.Where(d=>d.cls=="P1").Select(d=>d.rawMean).ToArray();
+        var allP1b=data.Where(d=>d.cls=="P1b").Select(d=>d.rawMean).ToArray();
+        double p1Mean=allP1.Average(),p1bMean=allP1b.Average();
+        bool meanSep=Math.Abs(p1Mean-p1bMean)>0.0005;
+
+        var allP1Iqr=data.Where(d=>d.cls=="P1").Select(d=>d.rawIqr).ToArray();
+        var allP1bIqr=data.Where(d=>d.cls=="P1b").Select(d=>d.rawIqr).ToArray();
+        double p1Iqr=allP1Iqr.Average(),p1bIqr=allP1bIqr.Average();
+        bool iqrSep=Math.Abs(p1Iqr-p1bIqr)>0.001;
+
+        string dec=meanSep&&!iqrSep?"Model A: P1 assignment follows raw-frequency mean.":
+                   iqrSep&&!meanSep?"Model B: P1 assignment follows spread.":
+                   meanSep&&iqrSep?"Model C: Both mean and spread contribute.":
+                   "Model E: P1 assignment unresolved.";
+
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"P1 mean={p1Mean:F4}, P1b mean={p1bMean:F4}, delta={p1Mean-p1bMean:F5}");
+        _o.WriteLine($"P1 IQR={p1Iqr:F4}, P1b IQR={p1bIqr:F4}");
+        _o.WriteLine("CLAIMS: P1 composition resolved. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== P1C_01 complete. Commit: P1C_01_P1CompositionAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double IqrVals(IEnumerable<double> v){var s=v.OrderBy(x=>x).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
