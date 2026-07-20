@@ -4,6 +4,7 @@
 | SOO | COMPLETE | 1 (SOO_01) | Model A — Spread ordering K1>K3>K2 INHERITED from w0 |
 | PWO | COMPLETE | 1 (PWO_01) | Model B — Ordering GENERATED at init→w0. Init K state has no ordering. |
 | FEG | COMPLETE | 1 (FEG_01) | Model A — Ordering first appears at omega domain (Sim). DL disrupts, Cupd restores. |
+| PSO | COMPLETE | 1 (PSO_01) | Model G — Raw freqs, phase, and within-profile omega show NO ordering. Ordering is ensemble-level. |
 
 ## SOO_01 — Spread Order Origin Audit (2026-07-20)
 - **Passed.** 37s execution. **Decision: Model A — Ordering INHERITED from w0.**

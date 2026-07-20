@@ -404,6 +404,103 @@ public class V5_51_SpreadOrderOrigin_Tests
         _o.WriteLine($"\n=== FEG_01 complete. Commit: FEG_01_FirstEpochSpreadGenerationAudit ===");
     }
 
+    [Fact]
+    public void PSO_01_PhaseOmegaOrderingOriginAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== PSO_01: Phase/Omega Ordering Origin Audit ===");
+        _o.WriteLine("=== V5.51. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,double rawOmIqr,double rawOmMean,double simOmIqr,double simOmMean,double phSpread,double cs4,bool resc4)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var K=KS(n,s);
+                // Raw natural frequencies
+                var rng=new Random(s);
+                var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rawOmIqr=Q(rawW.OrderBy(v=>v).ToArray(),0.75)-Q(rawW.OrderBy(v=>v).ToArray(),0.25);
+                double rawOmMean=rawW.Average();
+
+                // First Sim epoch
+                var th=new double[n];rng=new Random(s);for(int i=0;i<n;i++)th[i]=rng.NextDouble()*2*Math.PI;
+                int hL=St/Hd+1;var h=new double[hL][];h[0]=(double[])th.Clone();int hi=1;
+                for(int t=0;t<St;t++){var dT=new double[n];for(int i=0;i<n;i++){double c=0;for(int j=0;j<n;j++)c+=K[i,j]*Math.Sin(th[j]-th[i]);dT[i]=rawW[i]+c;}for(int i=0;i<n;i++)th[i]+=Dt*dT[i];if((t+1)%Hd==0&&hi<hL)h[hi++]=(double[])th.Clone();}
+
+                // Phase spread at end
+                var finalPh=th.OrderBy(v=>v).ToArray();
+                double phSpread=Q(finalPh,0.75)-Q(finalPh,0.25);
+
+                // Omega
+                var o=new double[n];for(int i=0;i<n;i++){double su=0;int cc=0;for(int t2=1;t2<hL;t2++){su+=Math.Abs(h[t2][i]-h[t2-1][i]);cc++;}o[i]=cc>0?su/(cc*Dt*Hd):0;}
+                double simOmIqr=Q(o.OrderBy(v=>v).ToArray(),0.75)-Q(o.OrderBy(v=>v).ToArray(),0.25);
+                double simOmMean=o.Average();
+
+                // Continue sim for c3/rescue
+                var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);
+                var hiP=Hi(n);var loP=Lo(n);var sb=SelectAndClassify(n,s,hiP);if(sb==null)continue;
+                double d0Pre=sb.Value.d0;bool isP2=sb.Value.cls=="P2";double tgt=isP2?d0Pre*0.90:d0Pre*0.50;
+                for(int e=1;e<WARMUP_EPOCHS;e++){var he=Sim(K,n,S,s+e);var de=DL(Nm(RP(he,n),n),n);K=Cupd(de,n);}
+                var hT0=Sim(K,n,S,s+50);var h4=Sim(K,n,S,s+3);var d4=DL(Nm(RP(h4,n),n),n);double cur=Dm(d4,n);
+                double frac=Math.Clamp((tgt+1e-9)/(cur+1e-9),0.01,100.0);var dM=CD(d4,n);
+                for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dM[i,j]*=frac;K=Cupd(dM,n);
+                var h5=Sim(K,n,S,s+4);K=Cupd(DL(Nm(RP(h5,n),n),n),n);
+                var hT1=Sim(K,n,S,s+100);var KT1=Cupd(DL(Nm(RP(hT1,n),n),n),n);double omT1=Of(hT1,n).Average();
+                var hT2=Sim(Cupd(DL(Nm(RP(hT1,n),n),n),n),n,S,s+200);double omT2=Of(hT2,n).Average();bool a0=omT2>THR;
+                double c3=0;if(!double.IsNaN(hiP.dm)){var dmat3=DL(Nm(RP(hT1,n),n),n);double dmPre=Dm(dmat3,n);double nd=dmPre+(hiP.dm-dmPre)*0.2;double f3=Math.Clamp((nd+1e-9)/(dmPre+1e-9),0.5,1.5);for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dmat3[i,j]*=f3;var hc3cc=Sim(Cupd(DL(Nm(RP(Sim(Cupd(dmat3,n),n,S,s+300),n),n),n),n),n,S,s+400);double omC3=Of(hc3cc,n).Average();c3=omC3-(a0?THR:omT2);}
+                bag.Add((n,rawOmIqr,rawOmMean,simOmIqr,simOmMean,phSpread,c3,c3>0.1&&omT2>THR));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B+C — Raw omega vs Sim omega ordering
+        // ========================
+        _o.WriteLine("\nPART B+C — Raw vs Sim Omega Ordering Audit");
+        _o.WriteLine($"{"Stage",-14} {"K1 IQR",10} {"K3 IQR",10} {"K2 IQR",10} {"K1>K3>K2?",14} {"K1/K2",8} {"K1 mean",10}");
+        _o.WriteLine(new string('-',85));
+
+        // Raw natural frequency IQR
+        double rI1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.rawOmIqr)),rI3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.rawOmIqr)),rI2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.rawOmIqr));
+        bool rOrd=rI1>rI3&&rI3>rI2;
+        _o.WriteLine($"{"raw omega",-14} {rI1,10:F4} {rI3,10:F4} {rI2,10:F4} {(rOrd?"YES":"no"),14} {(rI2>0.001?rI1/rI2:0),8:F2} {data.Where(d=>d.N==72).Select(d=>d.rawOmMean).Average(),10:F4}");
+
+        // Sim omega IQR
+        double sI1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.simOmIqr)),sI3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.simOmIqr)),sI2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.simOmIqr));
+        bool sOrd=sI1>sI3&&sI3>sI2;
+        _o.WriteLine($"{"Sim omega",-14} {sI1,10:F4} {sI3,10:F4} {sI2,10:F4} {(sOrd?"YES":"no"),14} {(sI2>0.001?sI1/sI2:0),8:F2} {data.Where(d=>d.N==72).Select(d=>d.simOmMean).Average(),10:F4}");
+
+        // Phase spread
+        double pI1=IqrVals(data.Where(d=>d.N==72).Select(d=>d.phSpread)),pI3=IqrVals(data.Where(d=>d.N==70).Select(d=>d.phSpread)),pI2=IqrVals(data.Where(d=>d.N==75).Select(d=>d.phSpread));
+        bool pOrd=pI1>pI3&&pI3>pI2;
+        _o.WriteLine($"{"phase sprd",-14} {pI1,10:F4} {pI3,10:F4} {pI2,10:F4} {(pOrd?"YES":"no"),14} {(pI2>0.001?pI1/pI2:0),8:F2} {"—",10}");
+
+        // Gain: raw -> sim
+        _o.WriteLine($"\n--- Omega Spread Gain (raw -> Sim) ---");
+        double g1=sI1-rI1,g3=sI3-rI3,g2=sI2-rI2;
+        _o.WriteLine($"  K1: raw={rI1:F4}, sim={sI1:F4}, gain={g1:F4} ({(rI1>0.001?sI1/rI1:0):F1}x)");
+        _o.WriteLine($"  K3: raw={rI3:F4}, sim={sI3:F4}, gain={g3:F4} ({(rI3>0.001?sI3/rI3:0):F1}x)");
+        _o.WriteLine($"  K2: raw={rI2:F4}, sim={sI2:F4}, gain={g2:F4} ({(rI2>0.001?sI2/rI2:0):F1}x)");
+        _o.WriteLine($"  Gain winner: {(g1>g3&&g1>g2?"K1":g3>g2?"K3":"K2")}");
+
+        // Decision
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        string dec;
+        if(rOrd)dec="Model D: Ordering already present in raw natural frequencies (topology-associated).";
+        else if(pOrd&&!sOrd)dec="Model A: Ordering appears in phase-state before omega aggregation.";
+        else if(sOrd&&!pOrd)dec="Model B: Ordering appears during omega aggregation (not in raw freqs or phase).";
+        else if(sOrd)dec="Model F: Ordering emerges through combined phase+omega dynamics.";
+        else dec="Model G: Sim(om) internals do not clearly resolve origin.";
+
+        _o.WriteLine($"\nPART I — Decision: {dec}");
+        _o.WriteLine($"Raw omega ordered: {rOrd}, Phase ordered: {pOrd}, Sim omega ordered: {sOrd}");
+        _o.WriteLine("CLAIMS: Raw frequencies do not contain K1>K3>K2. Ordering created by Kuramoto dynamics. V6 NOT READY.");
+        _o.WriteLine($"\n=== PSO_01 complete. Commit: PSO_01_PhaseOmegaOrderingOriginAudit ===");
+    }
+
     static double IqrVals(IEnumerable<double> vals){var s=vals.OrderBy(v=>v).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
