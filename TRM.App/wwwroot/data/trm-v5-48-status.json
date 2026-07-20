@@ -1,1 +1,22 @@
-{"releaseStatus":"V5.48 INITIALIZED","phase":"Distribution Shape vs Mean State — N-Window Formation","date":"2026-07-20","testSummary":{"total":2877,"passed":2877,"failed":0}}
+{
+  "releaseStatus": "V5.48 COMPLETE",
+  "phase": "Distribution Shape vs Mean State — N-Window Formation",
+  "date": "2026-07-20",
+  "branch": "feature/v5.48-distribution-shape-vs-mean-state-n-window-formation",
+  "base": "V5.47 COMPLETE",
+  "testSummary": { "total": 2878, "passed": 2878, "failed": 0 },
+  "suites": [
+    { "name": "DSM", "status": "COMPLETE", "tests": 1, "model": "Model B — Shape/spread, not mean state, distinguishes N-window outcome" }
+  ],
+  "finalModel": "Model B — Distribution shape/spread explains N-window outcome. Mean state does not.",
+  "keyFindings": [
+    "d_w2 mean: N=72=0.457, N=75=0.458 — NEARLY IDENTICAL (ratio=1.00)",
+    "km_w2 IQR: N=72=0.087, N=75=0.129 — 1.48x difference",
+    "km IQR gap / mean gap = 46.1x — shape separation dwarfs mean separation",
+    "Mean-only N-level prediction: 0/3 accuracy",
+    "Shape superiority persists under leave-one-N-out"
+  ],
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE — 35 stop, 0 rescues",
+  "v6Status": "NOT READY"
+}
