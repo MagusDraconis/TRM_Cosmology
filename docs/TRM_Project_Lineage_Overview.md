@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2871 verified, 0 failed
-**Branch:** `feature/v5.46-entry-state-distribution-shape-and-n-window-origin`
-**Current Frontier:** V5.46 COMPLETE → V5.47 PENDING
+**Tests:** 2874 verified, 0 failed
+**Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
+**Current Frontier:** V5.46 COMPLETE → V5.47 ACTIVE — TSP_01 COMPLETE
 
 ---
 
@@ -1352,7 +1352,8 @@ maintained to prevent overinterpretation:
 | V5.44 | C3 Correction Response Instrumentation and Microstate Audit | 7 | COMPLETE |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | 7 | COMPLETE |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | 7 | COMPLETE |
-| **Total** | | **2871** | **0 failed** |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | 1 | ACTIVE |
+| **Total** | | **2874** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
@@ -1362,32 +1363,27 @@ V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
 ## M. Current Research Frontier
 
-### V5.6 — Minimal Generative Core Analysis (MGCA) — COMPLETE
+### V5.47 — Post-Warmup T0 Spread Origin and N-Window Formation — ACTIVE
 
-**Status:** COMPLETE (historical reference)
-**Branch:** `feature/v5.6-recoverfp-minimal-generative-core`
+**Status:** TSP_01 COMPLETE (2026-07-20)
+**Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
 
-The V5.3–V5.5 RecoverFP program discovered a finite-N branch split (low-Omega and high-Omega
-branches) at N≈67. V5.6 asked: which stages of the 5-stage RecoverFP update map (Sm→RP→Nm→
-DL→Cupd) are necessary for branch generation?
+**Question:** Why does T0 post-warmup spread differ by N, especially why is N=75 uniquely broad?
 
-**MGCE (Execution) findings:**
-- Nm is not necessary — removing it doubles high-branch fraction (5→12/30).
-- Extra Cupd destroys branches (5→1/30).
+**TSP_01 findings:**
+- T0→entry IQR corr = 1.000 (confirms V5.46 Model A)
+- N=75 T0 IQR = 1.200 vs next highest = 0.047 (25×), IQR/range = 0.93 → bulk-wide
+- **Warmup trace:** N=75 NOT broad at epoch-0 (IQR=0.004), broadness appears post-warmup at T0
+- d/K pre-state: moderate diagnostic association (km0→T0=0.550, lam0→T0=0.552), not causal
+- Model A ROBUST without N=75 (T0→entry=0.740)
+- N=70/72 T1 broad, T2 collapse confirmed
+- Stop-Low: 41 profiles at c3≤0.1, 0 rescues → SAFE
+- **Decision:** Model A — T0 inherited spread dominates, N=75 genuinely broad at origin
+- **Open:** T0 origin not instrumented before warmup; hidden pre-warmup factor may remain
 
-**MGCA (Analysis) — 10 variants tested across N=67,69,72 with Stage 1 (30 seeds) and Stage 2 (100 seeds):**
-- **Nm confirmed as branch suppressor** — removal increases high-branch. Position matters:
-  Nm-after-DL and Nm-after-Cupd are MORE suppressive (2/30) than standard-Nm (5/30).
-- **RP is strictly necessary** — synthetic R matrices produce zero high-branch (0/30).
-- **Granularity is Nm-mediated** — Extra Cupd/DL destroys branches only WITH Nm. Without Nm,
-  Double-Cupd amplifies to 29/30 high (Omega=3.07, highest observed in V5.x).
-- **Minimal map: Sm→RP→DL→Cupd** (4 stages, skip Nm).
-- **DL→Cupd order unresolved** — borderline effect (3/30 vs 5/30), needs larger sample.
+**Next suites:** TSE (spread evolution), TSA (stability), TSI (instrumentation), TSS (synthesis)
 
-**Gates reached:** A (Nm Suppressor), C (Minimal Map Without Nm).
-**Gate unresolved:** B (Stage Ordering).
-
-For the current frontier (V5.27), see section F2 above.
+For the historical frontier context (V5.6+), see section F2 above.
 
 ---
 

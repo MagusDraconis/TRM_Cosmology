@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.46 COMPLETE |
-| Current Branch | `feature/v5.46-entry-state-distribution-shape-and-n-window-origin` |
-| Total Tests | 2871 |
+| Current Version | V5.47 ACTIVE (TSP_01 COMPLETE) |
+| Current Branch | `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation` |
+| Total Tests | 2874 |
 | Failed Tests | 0 |
-| Current Status | V5.46 COMPLETE — T0 inherited spread, N=75 uniquely broad. V5.47 PENDING. |
+| Current Status | V5.47 ACTIVE — TSP_01 passed. Model A ROBUST. N=75 bulk-wide at T0 origin. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -102,8 +102,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.44 | C3 Correction Response Instrumentation | COMPLETE — c3ExitOm2 identified; N-dependent bridge. |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | COMPLETE — Bridge explained via IQR/distribution shape. |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | COMPLETE — T0 inherited spread dominates; N=75 uniquely broad. |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — TSP_01 passed. Model A ROBUST. N=75 bulk-wide, warmup-instrumented. |
 
-**Cumulative total: 2871 tests, 0 failed as of 2026-07-19.**
+**Cumulative total: 2874 tests, 0 failed as of 2026-07-20.**
 
 ---
 
@@ -145,6 +146,8 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 26. **Attractor absorption (V5.39):** K-perturb (±15%) → lambda1 delta < 0.03. Attractor resists direct manipulation. Explains V5.38 RII null result. Model C — Omega restoration dominates.
 27. **Causal closure blocked (V5.40):** Attractor-aligned perturbations do NOT survive better. All families absorbed 87–99%. Weak directional signals are baseline-state artifacts (52.3% correct). Absorption direction-invariant (Model D).
 28. **Causal test methodology (V5.41):** Perturbation INVALIDATED. Natural variation = STABLE DIAGNOSTIC. 8 claims REJECTED. **Predictive validity (Stop-Low) does not require causal closure.**
+29. **T0 inherited spread dominates entry distribution (V5.46):** T0→entry IQR corr = 1.000. N=75 uniquely broad (IQR=1.200 vs 0.047). Model A ROBUST.
+30. **N=75 bulk-wide at T0 origin (V5.47 TSP_01):** IQR/range = 0.93 → genuinely wide bulk, not tail-driven. Broadness NOT present during warmup (epoch-0 IQR=0.004), appears post-warmup at T0. d/K pre-state provides moderate diagnostic association only (not causal). Stop-Low safe.
 
 ---
 
