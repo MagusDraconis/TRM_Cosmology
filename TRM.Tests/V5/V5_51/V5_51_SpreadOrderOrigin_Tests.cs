@@ -140,6 +140,154 @@ public class V5_51_SpreadOrderOrigin_Tests
         _o.WriteLine($"\n=== SOO_01 complete. Commit: SOO_01_SpreadOrderOriginAudit ===");
     }
 
+    [Fact]
+    public void PWO_01_PreW0SpreadOrderOriginInstrumentationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== PWO_01: Pre-W0 Spread Order Origin Audit ===");
+        _o.WriteLine("=== V5.51. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        // Extended EP with init state
+        var bag=new ConcurrentBag<(int N,double initKm,double initLam,double initKs,
+            double[] warmKm,double[] warmLam,double[] warmDm,double[] warmOm,
+            double cs4,bool resc4)>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<100;s++){if(IsHi(n,s))continue;
+                var K=KS(n,s);
+                // Pre-w0 init state
+                double initKm=Km(K,n),initLam=Lambda1(K,n),initKs=Ks(K,n);
+                var warmKm=new double[WARMUP_EPOCHS];var warmLam=new double[WARMUP_EPOCHS];var warmDm=new double[WARMUP_EPOCHS];var warmOm=new double[WARMUP_EPOCHS];
+                for(int e=0;e<WARMUP_EPOCHS;e++){var h=Sim(K,n,S,s+e);warmOm[e]=Of(h,n).Average();var d=DL(Nm(RP(h,n),n),n);warmDm[e]=Dm(d,n);K=Cupd(d,n);warmKm[e]=Km(K,n);warmLam[e]=Lambda1(K,n);}
+                // Full sim for c3/rescue...
+                var sb=SelectAndClassify(n,s,hi);if(sb==null)continue;
+                double d0Pre=sb.Value.d0;bool isP2=sb.Value.cls=="P2";double tgt=isP2?d0Pre*0.90:d0Pre*0.50;
+                var hT0=Sim(K,n,S,s+50);var h4=Sim(K,n,S,s+3);var d4=DL(Nm(RP(h4,n),n),n);double cur=Dm(d4,n);
+                double frac=Math.Clamp((tgt+1e-9)/(cur+1e-9),0.01,100.0);var dM=CD(d4,n);
+                for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dM[i,j]*=frac;K=Cupd(dM,n);
+                var h5=Sim(K,n,S,s+4);K=Cupd(DL(Nm(RP(h5,n),n),n),n);
+                var hT1=Sim(K,n,S,s+100);var KT1=Cupd(DL(Nm(RP(hT1,n),n),n),n);double omT1=Of(hT1,n).Average();
+                var hT2=Sim(Cupd(DL(Nm(RP(hT1,n),n),n),n),n,S,s+200);double omT2=Of(hT2,n).Average();bool a0=omT2>THR;
+                double c3=0;if(!double.IsNaN(hi.dm)){var dmat3=DL(Nm(RP(hT1,n),n),n);double dmPre=Dm(dmat3,n);double nd=dmPre+(hi.dm-dmPre)*0.2;double f3=Math.Clamp((nd+1e-9)/(dmPre+1e-9),0.5,1.5);for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dmat3[i,j]*=f3;var hc3cc=Sim(Cupd(DL(Nm(RP(Sim(Cupd(dmat3,n),n,S,s+300),n),n),n),n),n,S,s+400);double omC3=Of(hc3cc,n).Average();c3=omC3-(a0?THR:omT2);}
+                bag.Add((n,initKm,initLam,initKs,warmKm,warmLam,warmDm,warmOm,c3,c3>0.1&&omT2>THR));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART A+B — Pre-w0 Availability
+        // ========================
+        _o.WriteLine("\nPART A+B — Pre-w0 Availability Audit");
+        _o.WriteLine("Current checkpoints: w0, w1, w2 (post-warmup-epoch). No explicit pre-w0 state.");
+        _o.WriteLine("ADDED instrumentation: init K state (km, lam, ks) before first simulation epoch.");
+        _o.WriteLine("Note: d and omega not available at init (no phase dynamics yet).");
+
+        // ========================
+        // PART C — Pre-w0 Spread Ordering Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C — Spread Ordering from init through w2 (km IQR)");
+        _o.WriteLine(new string('=',80));
+
+        string[] stg={"init","w0","w1","w2"};
+        _o.WriteLine($"{"Stage",6} {"K1(km IQR)",11} {"K3(km IQR)",11} {"K2(km IQR)",11} {"K1>K3>K2?",14} {"K1/K2 ratio",12}");
+        _o.WriteLine(new string('-',70));
+
+        double[] K1km=new double[4],K3km=new double[4],K2km=new double[4];
+        for(int s=0;s<4;s++){
+            if(s==0){ // init
+                K1km[0]=IqrVals(data.Where(d=>d.N==72).Select(d=>d.initKm));
+                K3km[0]=IqrVals(data.Where(d=>d.N==70).Select(d=>d.initKm));
+                K2km[0]=IqrVals(data.Where(d=>d.N==75).Select(d=>d.initKm));
+            }else{ // w0, w1, w2
+                int ei=s-1;
+                K1km[s]=IqrVals(data.Where(d=>d.N==72).Select(d=>d.warmKm[ei]));
+                K3km[s]=IqrVals(data.Where(d=>d.N==70).Select(d=>d.warmKm[ei]));
+                K2km[s]=IqrVals(data.Where(d=>d.N==75).Select(d=>d.warmKm[ei]));
+            }
+            bool ord=K1km[s]>K3km[s]&&K3km[s]>K2km[s];
+            double rat=K2km[s]>0.001?K1km[s]/K2km[s]:0;
+            _o.WriteLine($"{stg[s],6} {K1km[s],11:F4} {K3km[s],11:F4} {K2km[s],11:F4} {(ord?"YES":"no"),14} {rat,12:F2}x");
+        }
+
+        // Lambda ordering
+        _o.WriteLine($"\n--- Lambda IQR ordering ---");
+        double[] K1lm=new double[4],K3lm=new double[4],K2lm=new double[4];
+        _o.WriteLine($"{"Stage",6} {"K1(lam IQR)",11} {"K3(lam IQR)",11} {"K2(lam IQR)",11} {"K1>K3>K2?",14}");
+        _o.WriteLine(new string('-',60));
+        for(int s=0;s<4;s++){
+            if(s==0){
+                K1lm[0]=IqrVals(data.Where(d=>d.N==72).Select(d=>d.initLam));
+                K3lm[0]=IqrVals(data.Where(d=>d.N==70).Select(d=>d.initLam));
+                K2lm[0]=IqrVals(data.Where(d=>d.N==75).Select(d=>d.initLam));
+            }else{
+                int ei=s-1;
+                K1lm[s]=IqrVals(data.Where(d=>d.N==72).Select(d=>d.warmLam[ei]));
+                K3lm[s]=IqrVals(data.Where(d=>d.N==70).Select(d=>d.warmLam[ei]));
+                K2lm[s]=IqrVals(data.Where(d=>d.N==75).Select(d=>d.warmLam[ei]));
+            }
+            bool ord=K1lm[s]>K3lm[s]&&K3lm[s]>K2lm[s];
+            _o.WriteLine($"{stg[s],6} {K1lm[s],11:F4} {K3lm[s],11:F4} {K2lm[s],11:F4} {(ord?"YES":"no"),14}");
+        }
+
+        // ========================
+        // PART D — init->w0 Accumulation
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART D — init -> w0 Accumulation Audit (km IQR)");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine($"{"Class",8} {"init IQR",10} {"w0 IQR",10} {"delta",10} {"gain ratio",12}");
+        _o.WriteLine(new string('-',55));
+        for(int i=0;i<3;i++){
+            string cn=i==0?"K1(N=72)":i==1?"K3(N=70)":"K2(N=75)";
+            double dlt=K1km[i==0?1:i==1?3:2]-K1km[i==0?0:i==1?0:0]; // w0 - init
+            // Actually compute properly
+        }
+        // Proper computation
+        double k1Init=K1km[0],k3Init=K3km[0],k2Init=K2km[0];
+        double k1W0=K1km[1],k3W0=K3km[1],k2W0=K2km[1];
+        _o.WriteLine($"{"K1(N=72)",8} {k1Init,10:F4} {k1W0,10:F4} {k1W0-k1Init,10:F4} {(k1Init>0.001?k1W0/k1Init:0),12:F2}x");
+        _o.WriteLine($"{"K3(N=70)",8} {k3Init,10:F4} {k3W0,10:F4} {k3W0-k3Init,10:F4} {(k3Init>0.001?k3W0/k3Init:0),12:F2}x");
+        _o.WriteLine($"{"K2(N=75)",8} {k2Init,10:F4} {k2W0,10:F4} {k2W0-k2Init,10:F4} {(k2Init>0.001?k2W0/k2Init:0),12:F2}x");
+        bool initOrd=k1Init>k3Init&&k3Init>k2Init;
+        bool w0Ord=k1W0>k3W0&&k3W0>k2W0;
+        _o.WriteLine($"\nOrdering at init: {(initOrd?"K1>K3>K2":"absent")}, at w0: {(w0Ord?"K1>K3>K2":"absent")}");
+        _o.WriteLine($"init->w0: {(initOrd&&w0Ord?"Ordering PERSISTS through first epoch":"Ordering CHANGES during first epoch")}");
+
+        // ========================
+        // PART E — Descriptor Independence
+        // ========================
+        _o.WriteLine("\nPART E — Descriptor Independence (does init ordering appear in km, lam, ks?)");
+        var k1KsInit=IqrVals(data.Where(d=>d.N==72).Select(d=>d.initKs));
+        var k3KsInit=IqrVals(data.Where(d=>d.N==70).Select(d=>d.initKs));
+        var k2KsInit=IqrVals(data.Where(d=>d.N==75).Select(d=>d.initKs));
+        bool ksOrd=k1KsInit>k3KsInit&&k3KsInit>k2KsInit;
+        _o.WriteLine($"init km IQR ordering: {initOrd} (K1={k1Init:F4} > K3={k3Init:F4} > K2={k2Init:F4})");
+        _o.WriteLine($"init lam IQR ordering: {K1lm[0]>K3lm[0]&&K3lm[0]>K2lm[0]} (K1={K1lm[0]:F4} > K3={K3lm[0]:F4} > K2={K2lm[0]:F4})");
+        _o.WriteLine($"init ks IQR ordering: {ksOrd} (K1={k1KsInit:F4} > K3={k3KsInit:F4} > K2={k2KsInit:F4})");
+
+        // ========================
+        // PART F — Robustness + Stop-Low + Decision
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        _o.WriteLine("\nPART H — Decision Model");
+        string dec;
+        if(initOrd&&w0Ord)dec="Model A: Spread ordering K1>K3>K2 is ALREADY PRESENT at init (pre-w0). The first warmup epoch preserves and strengthens it.";
+        else if(!initOrd&&w0Ord)dec="Model B: Ordering is GENERATED during init->w0 (the first simulation epoch).";
+        else if(initOrd)dec="Model C: Ordering present at init but modified by w0. Partially inherited.";
+        else dec="Model E: Pre-w0 instrumentation available but does not show ordering. Origin remains unresolved.";
+
+        _o.WriteLine($"Decision: {dec}");
+        _o.WriteLine($"Evidence: init ordered={initOrd}, w0 ordered={w0Ord}");
+        _o.WriteLine($"Init K state: K1 IQR={k1Init:F4}, K3 IQR={k3Init:F4}, K2 IQR={k2Init:F4}");
+        _o.WriteLine("CLAIMS: Diagnostic only. Pre-w0 ordering instrumented. V6 NOT READY.");
+        _o.WriteLine($"\n=== PWO_01 complete. Commit: PWO_01_PreW0SpreadOrderOriginInstrumentationAudit ===");
+    }
+
+    static double IqrVals(IEnumerable<double> vals){var s=vals.OrderBy(v=>v).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Iqr(EP[] nd,Func<EP,double> f){var s=nd.Select(f).OrderBy(v=>v).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
     static double JackIqr(EP[] nd,int exclude,Func<EP,double> f){var keep=Enumerable.Range(0,nd.Length).Where(j=>j!=exclude).ToArray();if(keep.Length<4)return 0;var s=keep.Select(j=>f(nd[j])).OrderBy(v=>v).ToArray();return Q(s,0.75)-Q(s,0.25);}

@@ -1,7 +1,8 @@
 # V5.51 Experiment Log | 2026-07-20
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
-| SOO | COMPLETE | 1 (SOO_01) | Model A — Spread ordering K1>K3>K2 INHERITED from w0, strengthened at w0→w1. |
+| SOO | COMPLETE | 1 (SOO_01) | Model A — Spread ordering K1>K3>K2 INHERITED from w0 |
+| PWO | COMPLETE | 1 (PWO_01) | Model B — Ordering GENERATED at init→w0. Init K state has no ordering. |
 
 ## SOO_01 — Spread Order Origin Audit (2026-07-20)
 - **Passed.** 37s execution. **Decision: Model A — Ordering INHERITED from w0.**
