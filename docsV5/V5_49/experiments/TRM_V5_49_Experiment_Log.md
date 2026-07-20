@@ -1,9 +1,20 @@
 # V5.49 Experiment Log | **Created:** 2026-07-20
 | Suite | Status | Tests | Outcome |
 |-------|--------|-------|---------|
-| DSG | COMPLETE | 1 (DSG_01) | Model C — Spread generated in w1→w2 transition. N=72 collapses while N=75 grows. |
-| DGT | COMPLETE | 1 (DGT_01) | Model C — w1→w2 is rank-inverting. N=72 compresses inward, N=75 expands outward. |
+| DSG | COMPLETE | 1 (DSG_01) | Model C — Spread generated in w1→w2 transition |
+| DGT | COMPLETE | 1 (DGT_01) | Model C — w1→w2 rank-inverting, N=72 compresses, N=75 expands |
+| RTK | COMPLETE | 1 (RTK_01) | Model A+C — Rank inversion is GENERIC kernel. N-window direction consistent across transitions. |
 | DSS | PLANNED | — | — |
+
+## RTK_01 — Rank Inversion Transition Kernel Audit (2026-07-20)
+- **Passed.** 47s execution. **Decision: Model A+C — Rank inversion is a GENERIC transition-kernel feature.**
+- **6/6 transitions rank-inverting** across N=70/72/75 and both w1→w2 and w2→T0
+- N-window direction CONSISTENT: N=72=K1 compression in both, N=75=K2 expansion in both, N=70=K3 stable in both
+- d/K diagnostics MIRROR across transition types (signs flip by variable domain)
+- All Spearman signs jackknife-stable (no flips)
+- N=75 amp always >1 (jackknife min=1.59 for w1→w2, 1.03 for w2→T0)
+- N=72 amp always <1 (jackknife max=0.62 for w1→w2, 0.20 for w2→T0)
+- Stop-Low: 35 stop, 0 rescues → SAFE
 
 ## DGT_01 — w1→w2 Growth/Collapse Transition Audit (2026-07-20)
 - **Passed.** 47s execution. **Decision: Model C — w1→w2 is rank-inverting. N=72 compresses inward, N=75 expands outward.**

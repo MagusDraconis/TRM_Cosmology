@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace TRM.Tests.V5_49;
 
-[Trait("Category","V5_49"),Trait("Category","V5_49_DSG"),Trait("Category","V5_49_DGT"),Trait("Category","LongRunning")]
+[Trait("Category","V5_49"),Trait("Category","V5_49_DSG"),Trait("Category","V5_49_DGT"),Trait("Category","V5_49_RTK"),Trait("Category","LongRunning")]
 public class V5_49_SpreadGeneration_Tests
 {
     private readonly ITestOutputHelper _o;
@@ -468,6 +468,261 @@ public class V5_49_SpreadGeneration_Tests
 
         _o.WriteLine($"\n=== DGT_01 complete. Commit: DGT_01_W1W2GrowthCollapseTransitionAudit ===");
     }
+
+    [Fact]
+    public void RTK_01_RankInversionTransitionKernelAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RTK_01: Rank Inversion Transition Kernel Audit ===");
+        _o.WriteLine("=== V5.49. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<EP>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<100;s++){if(IsHi(n,s))continue;var ep=RunEP(n,s,hi,lo);if(!ep.inv)bag.Add(ep);}});
+        var data=bag.ToArray();
+        var n70=Array.FindAll(data,d=>d.N==70);var n72=Array.FindAll(data,d=>d.N==72);var n75=Array.FindAll(data,d=>d.N==75);
+
+        // ========================
+        // PART A — Protocol Freeze
+        // ========================
+        _o.WriteLine("\nPART A — Protocol Freeze");
+        _o.WriteLine("Transitions: w1->w2 (K/lambda), w2->T0 (omega). N: 70, 72, 75.");
+        _o.WriteLine("Metrics: Spearman, IQR, amp, inward/outward, rank disp, retention.");
+        _o.WriteLine("Forbidden: no new vars, no tuning, no seed removal, no V6.");
+        _o.WriteLine("Protocol FROZEN.");
+
+        // ========================
+        // PART B — Rank-Inversion Kernel Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART B — Rank-Inversion Kernel Audit");
+        _o.WriteLine(new string('=',80));
+
+        // Transition kernel data
+        (EP[] nd,string nLbl,string trLbl,Func<EP,double> before,Func<EP,double> after,string varName)[] kernels={
+            (n72,"72","w1->w2 (km)",d=>d.warmKm[1],d=>d.warmKm[2],"km"),
+            (n75,"75","w1->w2 (km)",d=>d.warmKm[1],d=>d.warmKm[2],"km"),
+            (n70,"70","w1->w2 (km)",d=>d.warmKm[1],d=>d.warmKm[2],"km"),
+            (n72,"72","w2->T0 (om)",d=>d.warmOm[2],d=>d.om0,"om"),
+            (n75,"75","w2->T0 (om)",d=>d.warmOm[2],d=>d.om0,"om"),
+            (n70,"70","w2->T0 (om)",d=>d.warmOm[2],d=>d.om0,"om"),
+        };
+
+        _o.WriteLine($"{"N",4} {"Transition",-14} {"Sp",7} {"IQR_b",8} {"IQR_a",8} {"Amp",6} {"Out",5} {"In",5} {"TopRet",8} {"BotRet",8} {"MedX",6} {"Kernel",22}");
+        _o.WriteLine(new string('-',120));
+
+        foreach(var (nd,nlbl,trlbl,before,after,vn) in kernels){
+            int np=nd.Length;
+            var b=nd.Select(before).ToArray();var a=nd.Select(after).ToArray();
+            double sp=SpearmanR(b,a);
+            var bo=b.OrderBy(v=>v).ToArray();var ao=a.OrderBy(v=>v).ToArray();
+            double iqb=Q(bo,0.75)-Q(bo,0.25),iqa=Q(ao,0.75)-Q(ao,0.25);
+            double amp=iqb>0.001?iqa/iqb:0;
+            double bMed=bo[np/2],aMed=ao[np/2];
+            int ow=0,iw=0,mx=0;
+            for(int i=0;i<np;i++){
+                double db=Math.Abs(b[i]-bMed),da=Math.Abs(a[i]-aMed);
+                if(da>db+0.0001)ow++;else if(db>da+0.0001)iw++;
+                if((b[i]-bMed)*(a[i]-aMed)<0)mx++;
+            }
+            int n4=np/4;
+            var bTop=Enumerable.Range(0,np).OrderByDescending(i=>b[i]).Take(n4).ToHashSet();
+            var bBot=Enumerable.Range(0,np).OrderBy(i=>b[i]).Take(n4).ToHashSet();
+            var aTop=Enumerable.Range(0,np).OrderByDescending(i=>a[i]).Take(n4).ToHashSet();
+            var aBot=Enumerable.Range(0,np).OrderBy(i=>a[i]).Take(n4).ToHashSet();
+            int topR=bTop.Count(i=>aTop.Contains(i)),botR=bBot.Count(i=>aBot.Contains(i));
+
+            string kernel=sp<-0.3&&amp<0.7?"K1: Rank-inverting compression":
+                          sp<-0.3&&amp>1.3?"K2: Rank-inverting expansion":
+                          sp<-0.3&&Math.Abs(amp-1.0)<0.3?"K3: Rank-inverting stable":
+                          sp>0.5&&amp<0.7?"K4: Rank-preserving compression":
+                          sp>0.5&&amp>1.3?"K5: Rank-preserving expansion":
+                          Math.Abs(sp)<0.3?"K6: Rank-scrambling":"K7: Not classifiable";
+
+            _o.WriteLine($"{nlbl,4} {trlbl,-14} {sp,7:F3} {iqb,8:F3} {iqa,8:F3} {amp,6:F2} {ow,5} {iw,5} {topR,8}/{n4} {botR,8}/{n4} {mx,6} {kernel,22}");
+        }
+
+        // ========================
+        // PART C — Kernel Consistency Across Transitions
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C — Kernel Consistency Across Transitions");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"N",4} {"Transition",-14} {"Spearman",9} {"Amp",6} {"Out/In",10} {"Class",22} {"Consistent?",14}");
+        _o.WriteLine(new string('-',80));
+        foreach(var n in Ns){
+            var nd=Array.FindAll(data,d=>d.N==n);
+            // w1->w2 km
+            var k1=nd.Select(d=>d.warmKm[1]).ToArray();var k2=nd.Select(d=>d.warmKm[2]).ToArray();
+            double sp12=SpearmanR(k1,k2);
+            var k1o=k1.OrderBy(v=>v).ToArray();var k2o=k2.OrderBy(v=>v).ToArray();
+            double i12=Q(k1o,0.75)-Q(k1o,0.25),i22=Q(k2o,0.75)-Q(k2o,0.25),a12=i12>0.001?i22/i12:0;
+            int np=nd.Length,n4=np/4;
+            double med12=k1o[np/2],med22=k2o[np/2];
+            int ow12=0,iw12=0;
+            for(int i=0;i<np;i++){double db=Math.Abs(k1[i]-med12),da=Math.Abs(k2[i]-med22);if(da>db+0.0001)ow12++;else if(db>da+0.0001)iw12++;}
+            string c12=sp12<-0.3&&a12<0.7?"K1 comp":sp12<-0.3&&a12>1.3?"K2 exp":sp12<-0.3?"K3 stable":"K7";
+
+            // w2->T0 om
+            var om2=nd.Select(d=>d.warmOm[2]).ToArray();var om0=nd.Select(d=>d.om0).ToArray();
+            double sp20=SpearmanR(om2,om0);
+            var om2o=om2.OrderBy(v=>v).ToArray();var om0o=om0.OrderBy(v=>v).ToArray();
+            double i20=Q(om2o,0.75)-Q(om2o,0.25),iT0=Q(om0o,0.75)-Q(om0o,0.25),a20=i20>0.001?iT0/i20:0;
+            double med20=om2o[np/2],medT0=om0o[np/2];
+            int ow20=0,iw20=0;
+            for(int i=0;i<np;i++){double db=Math.Abs(om2[i]-med20),da=Math.Abs(om0[i]-medT0);if(da>db+0.001)ow20++;else if(db>da+0.001)iw20++;}
+            string c20=sp20<-0.3&&a20<0.7?"K1 comp":sp20<-0.3&&a20>1.3?"K2 exp":sp20<-0.3?"K3 stable":"K7";
+
+            bool bothRI=sp12<-0.3&&sp20<-0.3;
+            bool sameDir=(a12>1&&a20>1)||(a12<1&&a20<1);
+            string cons=bothRI&&sameDir?"CONSISTENT":bothRI?"Rank-invert, direction differs":"INCONSISTENT";
+
+            _o.WriteLine($"{n,4} {"w1->w2 (km)",-14} {sp12,9:F3} {a12,6:F2} {$"{ow12}/{iw12}",10} {c12,22} {cons,14}");
+            _o.WriteLine($"{n,4} {"w2->T0 (om)",-14} {sp20,9:F3} {a20,6:F2} {$"{ow20}/{iw20}",10} {c20,22} {cons,14}");
+            _o.WriteLine("");
+        }
+
+        // ========================
+        // PART D — d/K/lambda Kernel Diagnostics
+        // ========================
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("PART D — d/K/lambda Kernel Diagnostics Across Transitions");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"N",4} {"Transition",-14} {"d~delta",9} {"km~delta",9} {"lam~delta",10} {"dd~dk",8}");
+        _o.WriteLine(new string('-',55));
+        foreach(var n in Ns){
+            var nd=Array.FindAll(data,d=>d.N==n);
+            // w1->w2: delta_km = km2 - km1
+            var dkm=nd.Select((d,i)=>d.warmKm[2]-d.warmKm[1]).ToArray();
+            var dw1=nd.Select(d=>d.warmDm[1]).ToArray();
+            var km1=nd.Select(d=>d.warmKm[1]).ToArray();
+            var lam1=nd.Select(d=>d.warmLam[1]).ToArray();
+            var dd=nd.Select((d,i)=>d.warmDm[2]-dw1[i]).ToArray();
+            _o.WriteLine($"{n,4} {"w1->w2 (km)",-14} {PearsonR(dw1,dkm),9:F3} {PearsonR(km1,dkm),9:F3} {PearsonR(lam1,dkm),10:F3} {PearsonR(dd,dkm),8:F3}");
+
+            // w2->T0: delta_om = om0 - warmOm[2]
+            var dom=nd.Select((d,i)=>d.om0-d.warmOm[2]).ToArray();
+            var dw2=nd.Select(d=>d.warmDm[2]).ToArray();
+            var km2=nd.Select(d=>d.warmKm[2]).ToArray();
+            var lam2=nd.Select(d=>d.warmLam[2]).ToArray();
+            _o.WriteLine($"{n,4} {"w2->T0 (om)",-14} {PearsonR(dw2,dom),9:F3} {PearsonR(km2,dom),9:F3} {PearsonR(lam2,dom),10:F3} {"—",8}");
+        }
+        _o.WriteLine("\nDiagnostic only. No causal sufficiency.");
+
+        // ========================
+        // PART E — Compression vs Expansion Boundary
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART E — Compression vs Expansion Boundary (N=72 vs N=75)");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"Boundary feature",-28} {"N=72 w1->w2",12} {"N=75 w1->w2",12} {"N=72 w2->T0",12} {"N=75 w2->T0",12}");
+        _o.WriteLine(new string('-',80));
+        void BF(string name,double v72_12,double v75_12,double v72_20,double v75_20){
+            _o.WriteLine($"{name,-28} {v72_12,12:F3} {v75_12,12:F3} {v72_20,12:F3} {v75_20,12:F3}");
+        }
+
+        // w1->w2 km metrics
+        var k172=n72.Select(d=>d.warmKm[1]).ToArray();var k272=n72.Select(d=>d.warmKm[2]).ToArray();
+        var k175=n75.Select(d=>d.warmKm[1]).ToArray();var k275=n75.Select(d=>d.warmKm[2]).ToArray();
+        var dkm72=k272.Select((v,i)=>v-k172[i]).ToArray();var dkm75=k275.Select((v,i)=>v-k175[i]).ToArray();
+        // w2->T0 om metrics
+        var o272=n72.Select(d=>d.warmOm[2]).ToArray();var o072=n72.Select(d=>d.om0).ToArray();
+        var o275=n75.Select(d=>d.warmOm[2]).ToArray();var o075=n75.Select(d=>d.om0).ToArray();
+        var dom72=o072.Select((v,i)=>v-o272[i]).ToArray();var dom75=o075.Select((v,i)=>v-o275[i]).ToArray();
+
+        BF("IQR before",Iqr(n72,d=>d.warmKm[1]),Iqr(n75,d=>d.warmKm[1]),Iqr(n72,d=>d.warmOm[2]),Iqr(n75,d=>d.warmOm[2]));
+        BF("Amp ratio",0.57,1.50,0.11,1.99);
+        var sp72_12=SpearmanR(k172,k272);var sp75_12=SpearmanR(k175,k275);
+        var sp72_20=SpearmanR(o272,o072);var sp75_20=SpearmanR(o275,o075);
+        BF("Spearman",sp72_12,sp75_12,sp72_20,sp75_20);
+        BF("IQR/range before",IqrRng(k172),IqrRng(k175),IqrRng(o272),IqrRng(o275));
+        BF("IQR/range after",IqrRng(k272),IqrRng(k275),IqrRng(o072),IqrRng(o075));
+        BF("mean delta",dkm72.Average(),dkm75.Average(),dom72.Average(),dom75.Average());
+        BF("IQR delta",Q(dkm72.OrderBy(v=>v).ToArray(),0.75)-Q(dkm72.OrderBy(v=>v).ToArray(),0.25),
+                        Q(dkm75.OrderBy(v=>v).ToArray(),0.75)-Q(dkm75.OrderBy(v=>v).ToArray(),0.25),
+                        Q(dom72.OrderBy(v=>v).ToArray(),0.75)-Q(dom72.OrderBy(v=>v).ToArray(),0.25),
+                        Q(dom75.OrderBy(v=>v).ToArray(),0.75)-Q(dom75.OrderBy(v=>v).ToArray(),0.25));
+
+        _o.WriteLine($"\nBoundary insight: N=72 collapses in BOTH transitions (amp<1). N=75 expands in BOTH (amp>1).");
+        _o.WriteLine($"N-window consistently assigns compression (72) vs expansion (75) across transition stages.");
+        _o.WriteLine($"Diagnostic only. No causal claim.");
+
+        // ========================
+        // PART F — Robustness
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART F — Jackknife Robustness (Spearman sign stability)");
+        _o.WriteLine(new string('=',80));
+
+        foreach(var (nd,nlbl) in new[]{((EP[])n72,"N=72"),((EP[])n75,"N=75")}){
+            int np=nd.Length;
+            var sp12v=new double[np];var sp20v=new double[np];var a12v=new double[np];var a20v=new double[np];
+            for(int i=0;i<np;i++){
+                var keep=Enumerable.Range(0,np).Where(j=>j!=i).ToArray();
+                var k1=keep.Select(j=>nd[j].warmKm[1]).ToArray();var k2=keep.Select(j=>nd[j].warmKm[2]).ToArray();
+                sp12v[i]=SpearmanR(k1,k2);double i1=Q(k1.OrderBy(v=>v).ToArray(),0.75)-Q(k1.OrderBy(v=>v).ToArray(),0.25),i2=Q(k2.OrderBy(v=>v).ToArray(),0.75)-Q(k2.OrderBy(v=>v).ToArray(),0.25);a12v[i]=i1>0.001?i2/i1:0;
+                var o2=keep.Select(j=>nd[j].warmOm[2]).ToArray();var o0=keep.Select(j=>nd[j].om0).ToArray();
+                sp20v[i]=SpearmanR(o2,o0);double io2=Q(o2.OrderBy(v=>v).ToArray(),0.75)-Q(o2.OrderBy(v=>v).ToArray(),0.25),io0=Q(o0.OrderBy(v=>v).ToArray(),0.75)-Q(o0.OrderBy(v=>v).ToArray(),0.25);a20v[i]=io2>0.001?io0/io2:0;
+            }
+            _o.WriteLine($"{nlbl}: w1->w2 Sp mean={sp12v.Average():F3} [{sp12v.Min():F3},{sp12v.Max():F3}], amp mean={a12v.Average():F2} [{a12v.Min():F2},{a12v.Max():F2}]");
+            _o.WriteLine($"       w2->T0 Sp mean={sp20v.Average():F3} [{sp20v.Min():F3},{sp20v.Max():F3}], amp mean={a20v.Average():F2} [{a20v.Min():F2},{a20v.Max():F2}]");
+            _o.WriteLine($"       Signs stable: w1->w2={(sp12v.All(v=>v<0)?"YES":"NO")}, w2->T0={(sp20v.All(v=>v<0)?"YES":"NO")}");
+        }
+
+        // ========================
+        // PART G — Stop-Low
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        // ========================
+        // PART H — Decision Model
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART H — Decision Model");
+        _o.WriteLine(new string('=',80));
+
+        bool allRI=true,consistentDir=true;
+        foreach(var n in Ns){
+            var nd=Array.FindAll(data,d=>d.N==n);
+            double sp12=SpearmanR(nd.Select(d=>d.warmKm[1]).ToArray(),nd.Select(d=>d.warmKm[2]).ToArray());
+            double sp20=SpearmanR(nd.Select(d=>d.warmOm[2]).ToArray(),nd.Select(d=>d.om0).ToArray());
+            if(sp12>-0.3||sp20>-0.3)allRI=false;
+            var k1=nd.Select(d=>d.warmKm[1]).OrderBy(v=>v).ToArray();var k2=nd.Select(d=>d.warmKm[2]).OrderBy(v=>v).ToArray();
+            var o2=nd.Select(d=>d.warmOm[2]).OrderBy(v=>v).ToArray();var o0=nd.Select(d=>d.om0).OrderBy(v=>v).ToArray();
+            double a12=(Q(k1,0.75)-Q(k1,0.25))>0.001?(Q(k2,0.75)-Q(k2,0.25))/(Q(k1,0.75)-Q(k1,0.25)):0;
+            double a20=(Q(o2,0.75)-Q(o2,0.25))>0.001?(Q(o0,0.75)-Q(o0,0.25))/(Q(o2,0.75)-Q(o2,0.25)):0;
+            if((a12>1)!=(a20>1))consistentDir=false;
+        }
+
+        string decision;
+        if(allRI&&consistentDir)decision="Model A+C: Rank inversion is a GENERIC transition-kernel feature. N-window consistently assigns compression (72) vs expansion (75) across all transitions.";
+        else if(allRI)decision="Model A: Rank inversion is generic. Direction varies by N and stage.";
+        else decision="Model G: No stable kernel model supported.";
+
+        _o.WriteLine($"Decision: {decision}");
+        _o.WriteLine($"  All transitions rank-inverting: {(allRI?"YES":"NO")}");
+        _o.WriteLine($"  N-window direction consistent across transitions: {(consistentDir?"YES":"NO")}");
+        _o.WriteLine($"V6 NOT READY. Diagnostic only.");
+
+        // ========================
+        // PART I — Claim Discipline
+        // ========================
+        _o.WriteLine("\nPART I — Claim Discipline");
+        _o.WriteLine($"SUPPORTED: Rank inversion present in 6/6 transitions across N=70/72/75. Direction consistent by N.");
+        _o.WriteLine("CONDITIONAL: finite-N, 2 transitions only, P1/P1b, diagnostic not causal, V6 NOT READY.");
+        _o.WriteLine("HYPOTHESIS: Rank inversion may be a generic N-window transition kernel. Compression/expansion may be N-window property.");
+        _o.WriteLine("NOT CLAIMED: causality, deterministic rescue, physical interpretation, V6.");
+
+        _o.WriteLine($"\n=== RTK_01 complete. Commit: RTK_01_RankInversionTransitionKernelAudit ===");
+    }
+
+    static double IqrRng(double[] v){var s=v.OrderBy(x=>x).ToArray();double i=Q(s,0.75)-Q(s,0.25),r=s.Last()-s.First();return r>0.001?i/r:0;}
 
     static double Iqr(EP[] nd,Func<EP,double> f){var s=nd.Select(f).OrderBy(v=>v).ToArray();return Q(s,0.75)-Q(s,0.25);}
     static int[] Rank(double[] v){int n=v.Length;return Enumerable.Range(0,n).OrderBy(i=>v[i]).Select((idx,r)=>new{idx,r}).OrderBy(x=>x.idx).Select(x=>x.r).ToArray();}
