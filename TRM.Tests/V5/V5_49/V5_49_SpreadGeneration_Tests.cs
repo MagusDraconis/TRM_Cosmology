@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace TRM.Tests.V5_49;
 
-[Trait("Category","V5_49"),Trait("Category","V5_49_DSG"),Trait("Category","LongRunning")]
+[Trait("Category","V5_49"),Trait("Category","V5_49_DSG"),Trait("Category","V5_49_DGT"),Trait("Category","LongRunning")]
 public class V5_49_SpreadGeneration_Tests
 {
     private readonly ITestOutputHelper _o;
@@ -254,6 +254,225 @@ public class V5_49_SpreadGeneration_Tests
 
         _o.WriteLine($"\n=== DSG_01 complete. Commit: DSG_01_SpreadGenerationAudit ===");
     }
+
+    [Fact]
+    public void DGT_01_W1W2GrowthCollapseTransitionAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== DGT_01: w1->w2 Growth/Collapse Transition Audit ===");
+        _o.WriteLine("=== V5.49. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<EP>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<100;s++){if(IsHi(n,s))continue;var ep=RunEP(n,s,hi,lo);if(!ep.inv)bag.Add(ep);}});
+        var data=bag.ToArray();
+        var n70=Array.FindAll(data,d=>d.N==70);var n72=Array.FindAll(data,d=>d.N==72);var n75=Array.FindAll(data,d=>d.N==75);
+
+        // ========================
+        // PART A — Protocol Freeze
+        // ========================
+        _o.WriteLine("\nPART A — Protocol Freeze");
+        _o.WriteLine("Primary transition: w1->w2. N: 70, 72, 75.");
+        _o.WriteLine("Vars: om, d, km, lam. Forbidden: no new vars, no tuning, no V6.");
+        _o.WriteLine("Protocol FROZEN.");
+
+        // ========================
+        // PART B — Profile-Level w1->w2 Transition Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART B — Profile-Level w1->w2 Transition Audit");
+        _o.WriteLine(new string('=',80));
+
+        foreach(var (nd,nlbl) in new[]{((EP[])n70,"N=70"),((EP[])n72,"N=72"),((EP[])n75,"N=75")}){
+            int np=nd.Length;if(np<4)continue;
+            var km1=nd.Select(d=>d.warmKm[1]).ToArray();
+            var km2=nd.Select(d=>d.warmKm[2]).ToArray();
+            var lam1=nd.Select(d=>d.warmLam[1]).ToArray();
+            var lam2=nd.Select(d=>d.warmLam[2]).ToArray();
+            var dkm=km1.Select((v,i)=>km2[i]-v).ToArray();
+            var dlam=lam1.Select((v,i)=>lam2[i]-v).ToArray();
+
+            double meanDkm=dkm.Average(),iqrDkm=Q(dkm.OrderBy(v=>v).ToArray(),0.75)-Q(dkm.OrderBy(v=>v).ToArray(),0.25);
+            double meanDlam=dlam.Average(),iqrDlam=Q(dlam.OrderBy(v=>v).ToArray(),0.75)-Q(dlam.OrderBy(v=>v).ToArray(),0.25);
+            double spKm=SpearmanR(km1,km2),spLam=SpearmanR(lam1,lam2);
+
+            // Inward/outward from median
+            double km1Med=km1.OrderBy(v=>v).ToArray()[np/2];
+            double km2Med=km2.OrderBy(v=>v).ToArray()[np/2];
+            int ow=0,iw=0;
+            for(int i=0;i<np;i++){
+                double d1=Math.Abs(km1[i]-km1Med),d2=Math.Abs(km2[i]-km2Med);
+                if(d2>d1+0.0001)ow++;else if(d1>d2+0.0001)iw++;
+            }
+
+            _o.WriteLine($"\n{nlbl} (n={np}):");
+            _o.WriteLine($"  km: mean delta={meanDkm:F4}, IQR delta={iqrDkm:F4}, Spearman={spKm:F3}");
+            _o.WriteLine($"  lam: mean delta={meanDlam:F4}, IQR delta={iqrDlam:F4}, Spearman={spLam:F3}");
+            _o.WriteLine($"  Outward from median: {ow}, Inward: {iw} -> {(ow>iw?"OUTWARD growth":"INWARD compression")}");
+        }
+
+        // ========================
+        // PART C — Growth vs Collapse Shape Transform
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C — Growth vs Collapse Shape Transform (km)");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"N",6} {"w1_IQR",9} {"w2_IQR",9} {"w1_I/R",8} {"w2_I/R",8} {"w1->w2",8} {"MedShft",9} {"Sp",7} {"Out",5} {"In",5} {"Model",22}");
+        _o.WriteLine(new string('-',110));
+        foreach(var (nd,nlbl) in new[]{((EP[])n70,"70"),((EP[])n72,"72"),((EP[])n75,"75")}){
+            int np=nd.Length;
+            var km1=nd.Select(d=>d.warmKm[1]).OrderBy(v=>v).ToArray();
+            var km2=nd.Select(d=>d.warmKm[2]).OrderBy(v=>v).ToArray();
+            double w1i=Q(km1,0.75)-Q(km1,0.25),w2i=Q(km2,0.75)-Q(km2,0.25);
+            double w1ir=(km1.Last()-km1.First())>0.001?w1i/(km1.Last()-km1.First()):0;
+            double w2ir=(km2.Last()-km2.First())>0.001?w2i/(km2.Last()-km2.First()):0;
+            double amp=w1i>0.001?w2i/w1i:0;
+            double mSh=km2[np/2]-km1[np/2];
+            double sp=SpearmanR(km1,km2);
+            double km1Med=km1[np/2],km2Med=km2[np/2];
+            int ow2=0,iw2=0;
+            for(int i=0;i<np;i++){double d1=Math.Abs(nd[i].warmKm[1]-km1Med),d2=Math.Abs(nd[i].warmKm[2]-km2Med);if(d2>d1+0.0001)ow2++;else if(d1>d2+0.0001)iw2++;}
+
+            string model=amp>1.3&&w2ir>0.3?"S1: Bulk-wide growth":
+                         amp<0.7&&w2ir<0.2?"S2: Bulk collapse":
+                         Math.Abs(amp-1.0)<0.2&&w2ir>0.25?"S3: Stable broad":
+                         Math.Abs(amp-1.0)<0.2&&w2ir<0.2?"S3: Stable compressed":
+                         sp<0.3?"S6: Rank scrambling":
+                         Math.Abs(mSh)>0.02?"S7: Median shift":
+                         "SX: Mixed";
+            _o.WriteLine($"{nlbl,6} {w1i,9:F3} {w2i,9:F3} {w1ir,8:F2} {w2ir,8:F2} {amp,8:F2} {mSh,9:F4} {sp,7:F3} {ow2,5} {iw2,5} {model,22}");
+        }
+
+        // ========================
+        // PART D — d/K/lambda Transition Discriminator
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART D — d/K/lambda Transition Discriminator");
+        _o.WriteLine(new string('=',80));
+
+        foreach(var (nd,nlbl) in new[]{((EP[])n72,"N=72"),((EP[])n75,"N=75")}){
+            int np=nd.Length;
+            var km1=nd.Select(d=>d.warmKm[1]).ToArray();
+            var lam1=nd.Select(d=>d.warmLam[1]).ToArray();
+            var d1=nd.Select(d=>d.warmDm[1]).ToArray();
+            var dkm=nd.Select((d,i)=>d.warmKm[2]-km1[i]).ToArray();
+            var dlam=nd.Select((d,i)=>d.warmLam[2]-lam1[i]).ToArray();
+            var dd=nd.Select((d,i)=>d.warmDm[2]-d1[i]).ToArray();
+
+            _o.WriteLine($"\n{nlbl} (n={np}) — w1 state ~ delta correlations:");
+            _o.WriteLine($"  d_w1 ~ delta_km:  {PearsonR(d1,dkm):F3}");
+            _o.WriteLine($"  km_w1 ~ delta_km: {PearsonR(km1,dkm):F3}");
+            _o.WriteLine($"  lam_w1 ~ delta_lam: {PearsonR(lam1,dlam):F3}");
+            _o.WriteLine($"  delta_d ~ delta_km: {PearsonR(dd,dkm):F3}");
+            _o.WriteLine($"  delta_km ~ delta_lam: {PearsonR(dkm,dlam):F3}");
+        }
+
+        _o.WriteLine("\nDiagnostic only. No causal sufficiency.");
+
+        // ========================
+        // PART E — N=72 vs N=75 Flip Discriminator
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART E — N=72 vs N=75 Flip Discriminator");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"Feature",-22} {"N=72",10} {"N=75",10} {"Ratio",8} {"Direction",18}");
+        _o.WriteLine(new string('-',70));
+        void PF(string name,double v72,double v75){
+            double r=Math.Abs(v72)>0.001?v75/v72:0;
+            string d=v75>v72?"N=75 HIGHER":"N=72 HIGHER";
+            _o.WriteLine($"{name,-22} {v72,10:F4} {v75,10:F4} {r,8:F2} {d,18}");
+        }
+
+        PF("km_w1 mean",n72.Average(d=>d.warmKm[1]),n75.Average(d=>d.warmKm[1]));
+        PF("km_w1 IQR",Iqr(n72,d=>d.warmKm[1]),Iqr(n75,d=>d.warmKm[1]));
+        PF("km_w2 mean",n72.Average(d=>d.warmKm[2]),n75.Average(d=>d.warmKm[2]));
+        PF("km_w2 IQR",Iqr(n72,d=>d.warmKm[2]),Iqr(n75,d=>d.warmKm[2]));
+        PF("lam_w1 IQR",Iqr(n72,d=>d.warmLam[1]),Iqr(n75,d=>d.warmLam[1]));
+        PF("lam_w2 IQR",Iqr(n72,d=>d.warmLam[2]),Iqr(n75,d=>d.warmLam[2]));
+        PF("d_w1 IQR",Iqr(n72,d=>d.warmDm[1]),Iqr(n75,d=>d.warmDm[1]));
+        PF("d_w2 IQR",Iqr(n72,d=>d.warmDm[2]),Iqr(n75,d=>d.warmDm[2]));
+
+        // Delta comparison
+        var dkm72=n72.Select((d,i)=>d.warmKm[2]-d.warmKm[1]).ToArray();
+        var dkm75=n75.Select((d,i)=>d.warmKm[2]-d.warmKm[1]).ToArray();
+        PF("delta_km IQR",Q(dkm72.OrderBy(v=>v).ToArray(),0.75)-Q(dkm72.OrderBy(v=>v).ToArray(),0.25),
+                              Q(dkm75.OrderBy(v=>v).ToArray(),0.75)-Q(dkm75.OrderBy(v=>v).ToArray(),0.25));
+        PF("delta_km mean",dkm72.Average(),dkm75.Average());
+        double sp72=SpearmanR(n72.Select(d=>d.warmKm[1]).ToArray(),n72.Select(d=>d.warmKm[2]).ToArray());
+        double sp75=SpearmanR(n75.Select(d=>d.warmKm[1]).ToArray(),n75.Select(d=>d.warmKm[2]).ToArray());
+        PF("Spearman km w1->w2",sp72,sp75);
+
+        // Key question
+        double kmW1ratio=Iqr(n72,d=>d.warmKm[1])>0.001?Iqr(n75,d=>d.warmKm[1])/Iqr(n72,d=>d.warmKm[1]):0;
+        double kmW2ratio=Iqr(n72,d=>d.warmKm[2])>0.001?Iqr(n75,d=>d.warmKm[2])/Iqr(n72,d=>d.warmKm[2]):0;
+        _o.WriteLine($"\nIQR ratio flip: w1={kmW1ratio:F2}x -> w2={kmW2ratio:F2}x");
+        _o.WriteLine($"  N=72 collapse: mean delta_km={dkm72.Average():F4} (negative = compression)");
+        _o.WriteLine($"  N=75 growth: mean delta_km={dkm75.Average():F4} (positive = expansion)");
+        _o.WriteLine($"Diagnostic only. No causal claim.");
+
+        // ========================
+        // PART F — Robustness Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART F — Jackknife Robustness (km w1->w2)");
+        _o.WriteLine(new string('=',80));
+
+        foreach(var (nd,nlbl) in new[]{((EP[])n72,"N=72"),((EP[])n75,"N=75")}){
+            int np=nd.Length;if(np<4)continue;
+            var spV=new double[np];var ampV=new double[np];
+            for(int i=0;i<np;i++){
+                var keep=Enumerable.Range(0,np).Where(j=>j!=i).ToArray();
+                var k1=keep.Select(j=>nd[j].warmKm[1]).ToArray();
+                var k2=keep.Select(j=>nd[j].warmKm[2]).ToArray();
+                spV[i]=SpearmanR(k1,k2);
+                double w1i=Q(k1.OrderBy(v=>v).ToArray(),0.75)-Q(k1.OrderBy(v=>v).ToArray(),0.25);
+                double w2i=Q(k2.OrderBy(v=>v).ToArray(),0.75)-Q(k2.OrderBy(v=>v).ToArray(),0.25);
+                ampV[i]=w1i>0.001?w2i/w1i:0;
+            }
+            _o.WriteLine($"{nlbl}: Spearman mean={spV.Average():F3} [{spV.Min():F3},{spV.Max():F3}], amp mean={ampV.Average():F2} [{ampV.Min():F2},{ampV.Max():F2}]");
+        }
+
+        // ========================
+        // PART G — Stop-Low
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        int hi=data.Count(d=>d.cs4>0.1),hiR=data.Count(d=>d.cs4>0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo} (resc={loR}), c3>0.1={hi} (resc={hiR}) => SAFE");
+
+        // ========================
+        // PART H — Decision Model
+        // ========================
+        _o.WriteLine("\nPART H — Decision Model");
+        double spKm72=SpearmanR(n72.Select(d=>d.warmKm[1]).ToArray(),n72.Select(d=>d.warmKm[2]).ToArray());
+        double spKm75=SpearmanR(n75.Select(d=>d.warmKm[1]).ToArray(),n75.Select(d=>d.warmKm[2]).ToArray());
+        string dec=spKm72<0.3?"Model C: N=72 collapses via rank scrambling":
+                   spKm75>0.5&&dkm75.Average()>0?"Model A: N=75 grows via bulk-wide outward movement":
+                   dkm72.Average()<0&&spKm72>0.5?"Model B: N=72 collapses via inward bulk compression":
+                   "Model G: Hidden transition operator remains";
+        _o.WriteLine($"Decision: {dec}");
+        _o.WriteLine($"  N=72: Spearman={spKm72:F3}, mean delta_km={dkm72.Average():F4}");
+        _o.WriteLine($"  N=75: Spearman={spKm75:F3}, mean delta_km={dkm75.Average():F4}");
+
+        // ========================
+        // PART I — Claim Discipline
+        // ========================
+        _o.WriteLine("\nPART I — Claim Discipline");
+        _o.WriteLine($"SUPPORTED: N=72 w1->w2 Spearman={spKm72:F3}, N=75={spKm75:F3}, IQR flip {kmW1ratio:F2}x->{kmW2ratio:F2}x");
+        _o.WriteLine("CONDITIONAL: finite-N, P1/P1b only, diagnostic not causal, V6 NOT READY");
+        _o.WriteLine($"HYPOTHESIS: w1->w2 transition creates N-window spread hierarchy");
+        _o.WriteLine("NOT CLAIMED: causality, deterministic rescue, physical interpretation, V6");
+
+        _o.WriteLine($"\n=== DGT_01 complete. Commit: DGT_01_W1W2GrowthCollapseTransitionAudit ===");
+    }
+
+    static double Iqr(EP[] nd,Func<EP,double> f){var s=nd.Select(f).OrderBy(v=>v).ToArray();return Q(s,0.75)-Q(s,0.25);}
+    static int[] Rank(double[] v){int n=v.Length;return Enumerable.Range(0,n).OrderBy(i=>v[i]).Select((idx,r)=>new{idx,r}).OrderBy(x=>x.idx).Select(x=>x.r).ToArray();}
+    static double SpearmanR(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);if(n<3)return 0;var rx=Rank(x);var ry=Rank(y);return PearsonR(rx.Select(v=>(double)v).ToArray(),ry.Select(v=>(double)v).ToArray());}
+    static double PearsonR(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);if(n<3)return 0;double mx=x.Average(),my=y.Average(),sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return sxy/Math.Sqrt(sx*sy+1e-15);}
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
