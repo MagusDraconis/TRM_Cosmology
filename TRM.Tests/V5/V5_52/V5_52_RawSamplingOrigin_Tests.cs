@@ -172,6 +172,107 @@ public class V5_52_RawSamplingOrigin_Tests
         _o.WriteLine($"\n=== RSO_01 complete. Commit: RSO_01_RawSamplingOriginAudit ===");
     }
 
+    [Fact]
+    public void PSA_01_ProfileSelectionMechanismAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== PSA_01: Profile Selection Mechanism Audit ===");
+        _o.WriteLine("=== V5.52. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        // Capture: rawMean, IsHi pass, SelectAndClassify pass, seed
+        var bag=new ConcurrentBag<(int N,int seed,double rawMean,bool isHiPass,bool saPass)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rm=rawW.Average();
+                bool isHi=!IsHi(n,s); // IsHi returns true if HIGH (omega > THR). We want LOW (not high).
+                bool saPass=false;
+                if(isHi){
+                    var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);
+                    saPass=sb!=null;
+                }
+                bag.Add((n,s,rm,isHi,saPass));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART A-C — Selection Stage Audit
+        // ========================
+        _o.WriteLine("\nPART A-C — Selection Stage Attribution");
+        _o.WriteLine($"{"Stage",-18} {"K1(n)",6} {"K3(n)",6} {"K2(n)",6} {"K1 IQR",9} {"K3 IQR",9} {"K2 IQR",9} {"K1>K3>K2?",14}");
+        _o.WriteLine(new string('-',85));
+
+        double[] All(int n2)=>data.Where(d=>d.N==n2).Select(d=>d.rawMean).ToArray();
+        double[] IsHiPass(int n2)=>data.Where(d=>d.N==n2&&d.isHiPass).Select(d=>d.rawMean).ToArray();
+        double[] SAPass(int n2)=>data.Where(d=>d.N==n2&&d.saPass).Select(d=>d.rawMean).ToArray();
+
+        void PR(string label,int[]cnts,double[]i1,double[]i3,double[]i2){
+            if(i1.Length<4||i3.Length<4||i2.Length<4)return;
+            var s1=i1.OrderBy(v=>v).ToArray();var s3=i3.OrderBy(v=>v).ToArray();var s2=i2.OrderBy(v=>v).ToArray();
+            double qi1=Q(s1,0.75)-Q(s1,0.25),qi3=Q(s3,0.75)-Q(s3,0.25),qi2=Q(s2,0.75)-Q(s2,0.25);
+            bool ord=qi1>qi3&&qi3>qi2;
+            _o.WriteLine($"{label,-18} {cnts[0],6} {cnts[1],6} {cnts[2],6} {qi1,9:F4} {qi3,9:F4} {qi2,9:F4} {(ord?"YES":"no"),14}");
+        }
+
+        PR("All (pre-select)",new[]{100,100,100},All(72),All(70),All(75));
+        PR("IsHi pass",new[]{IsHiPass(72).Length,IsHiPass(70).Length,IsHiPass(75).Length},IsHiPass(72),IsHiPass(70),IsHiPass(75));
+        PR("SAC pass (final)",new[]{SAPass(72).Length,SAPass(70).Length,SAPass(75).Length},SAPass(72),SAPass(70),SAPass(75));
+
+        // Retention
+        int ih72=IsHiPass(72).Length,ih70=IsHiPass(70).Length,ih75=IsHiPass(75).Length;
+        int sp72=SAPass(72).Length,sp70=SAPass(70).Length,sp75=SAPass(75).Length;
+        _o.WriteLine($"\nIsHi retention: K1={ih72}/100, K3={ih70}/100, K2={ih75}/100");
+        _o.WriteLine($"SAC retention: K1={sp72}/{ih72}, K3={sp70}/{ih70}, K2={sp75}/{ih75}");
+
+        // ========================
+        // PART E — Quantile Selection
+        // ========================
+        _o.WriteLine($"\nPART E — Quantile Selection (IsHi pass -> SAC pass)");
+        foreach(var n in new[]{72,70,75}){
+            var pre=All(n).OrderBy(v=>v).ToArray();int np=pre.Length;
+            double q25=Q(pre,0.25),q75=Q(pre,0.75);
+            var kept=SAPass(n);int loQ=kept.Count(v=>v<q25),midQ=kept.Count(v=>v>=q25&&v<=q75),hiQ=kept.Count(v=>v>q75);
+            _o.WriteLine($"  N={n}: kept in low={loQ}, mid={midQ}, high={hiQ} quantiles (out of {kept.Length} total)");
+        }
+
+        // ========================
+        // PART F — Seed-Level
+        // ========================
+        _o.WriteLine($"\nPART F — Seed-Level Selection");
+        var seeds=Enumerable.Range(0,100);
+        int seedAllPass=0,seedNone=0;
+        foreach(var sd in seeds){
+            bool p72=data.Any(d=>d.N==72&&d.seed==sd&&d.saPass);
+            bool p70=data.Any(d=>d.N==70&&d.seed==sd&&d.saPass);
+            bool p75=data.Any(d=>d.N==75&&d.seed==sd&&d.saPass);
+            if(p72&&p70&&p75)seedAllPass++;
+            if(!p72&&!p70&&!p75)seedNone++;
+        }
+        _o.WriteLine($"Seeds with all 3 N passing: {seedAllPass}/100");
+        _o.WriteLine($"Seeds with 0 passing: {seedNone}/100");
+
+        // ========================
+        // Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE (from RSO_01: 39 stop, 0 rescues)");
+
+        bool isHiOrd=false,saOrd=false;
+        if(IsHiPass(72).Length>3){var s1=IsHiPass(72).OrderBy(v=>v).ToArray();var s3=IsHiPass(70).OrderBy(v=>v).ToArray();var s2=IsHiPass(75).OrderBy(v=>v).ToArray();double i1=Q(s1,0.75)-Q(s1,0.25),i3=Q(s3,0.75)-Q(s3,0.25),i2=Q(s2,0.75)-Q(s2,0.25);isHiOrd=i1>i3&&i3>i2;}
+        if(SAPass(72).Length>3){var s1=SAPass(72).OrderBy(v=>v).ToArray();var s3=SAPass(70).OrderBy(v=>v).ToArray();var s2=SAPass(75).OrderBy(v=>v).ToArray();double i1=Q(s1,0.75)-Q(s1,0.25),i3=Q(s3,0.75)-Q(s3,0.25),i2=Q(s2,0.75)-Q(s2,0.25);saOrd=i1>i3&&i3>i2;}
+
+        string dec=!isHiOrd&&saOrd?"Model B: SelectAndClassify creates the ordering. IsHi does not.":
+                   isHiOrd&&saOrd?"Model A: IsHi creates ordering. SAC preserves it.":
+                   "Model C: Both stages contribute. Mechanism partially resolved.";
+
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"IsHi ordering: {isHiOrd}, SAC ordering: {saOrd}");
+        _o.WriteLine("CLAIMS: Selection mechanism traced. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== PSA_01 complete. Commit: PSA_01_ProfileSelectionMechanismAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double IqrVals(IEnumerable<double> v){var s=v.OrderBy(x=>x).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
