@@ -1,1 +1,96 @@
-{"releaseStatus":"V5.47 INITIALIZED","phase":"Post-Warmup T0 Spread Origin and N-Window Formation","date":"2026-07-19","testSummary":{"total":2871,"passed":2871,"failed":0}}
+{
+  "releaseStatus": "V5.47 COMPLETE",
+  "phase": "Post-Warmup T0 Spread Origin and N-Window Formation",
+  "date": "2026-07-20",
+  "branch": "feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation",
+  "base": "V5.46 COMPLETE (commit 443e068)",
+  "testSummary": {
+    "total": 2877,
+    "passed": 2877,
+    "failed": 0
+  },
+  "suites": [
+    { "name": "TSP", "status": "COMPLETE", "tests": 1, "model": "Model A" },
+    { "name": "TSE", "status": "COMPLETE", "tests": 1, "model": "Model A" },
+    { "name": "THD", "status": "COMPLETE", "tests": 1, "model": "Model E" },
+    { "name": "TSA", "status": "COMPLETE", "tests": 1, "model": "SUPPORTED stability" },
+    { "name": "TSS", "status": "COMPLETE", "tests": 0, "model": "Final Synthesis Model A+E" }
+  ],
+  "commits": [
+    "2c0a587 (init)",
+    "f7b2e05 (TSP_01)",
+    "a9c5906 (TSE_01)",
+    "1082d92 (THD_01)",
+    "7c12810 (TSA_01)",
+    "be109fa (TSS_01)"
+  ],
+  "finalModel": "A+E — Handoff Transform N-Window Formation",
+  "researchQuestion": "Why does T0 post-warmup spread differ by N, especially why is N=75 uniquely broad before the later entry bridge stage?",
+  "answer": "The post-warmup w2->T0 handoff is the key N-window formation transform. The transform is rank-inverting. d/K at w2 near-perfectly diagnoses profile-level delta_omega (|r| > 0.92). N-window outcome is determined by w2-state distribution SPREAD (km/lambda IQR), not by mean d_w2. N=75 amplifies to bulk-wide T0 spread (1.98x); N=72 collapses (0.11x); N=70 remains stable compressed.",
+  "supportedFindings": [
+    { "id": 1, "finding": "T0 inherited spread dominates entry IQR (corr = 1.000, confirms V5.46)", "source": "TSP_01" },
+    { "id": 2, "finding": "N=75 is uniquely broad at T0 (IQR=1.200, 25x next highest)", "source": "TSP_01" },
+    { "id": 3, "finding": "N=75 bulk-wide broadness emerges between w2 and T0 (w2 IQR/range=0.20 -> T0 IQR/range=0.93)", "source": "TSE_01" },
+    { "id": 4, "finding": "w2->T0 handoff amplifies N=75 (1.98x) and collapses N=72 (0.11x)", "source": "TSE_01" },
+    { "id": 5, "finding": "Handoff is rank-inverting (Spearman N=75=-0.671, N=72=-0.483)", "source": "THD_01" },
+    { "id": 6, "finding": "d_w2 anti-correlates with delta_omega: N=72=-0.923, N=75=-0.964 (sign-stable)", "source": "THD_01" },
+    { "id": 7, "finding": "km_w2 correlates with delta_omega: N=72=0.956, N=75=0.964 (sign-stable)", "source": "THD_01" },
+    { "id": 8, "finding": "N=75 shape class = S1 bulk-wide amplification; N=72 = S2 bulk collapse; N=70 = S3 stable compressed", "source": "THD_01" },
+    { "id": 9, "finding": "w2-state spread (km/lam IQR, 1.48x ratio), not mean d_w2 (1.00x ratio), distinguishes N=72 vs N=75", "source": "TSA_01" },
+    { "id": 10, "finding": "Stop-Low remains safe: c3OmgS <= 0.1 has 0 rescues across all N and cuts", "source": "all" },
+    { "id": 11, "finding": "No single profile controls the results (jackknife verified)", "source": "TSA_01" },
+    { "id": 12, "finding": "All 8 stability claims survive random splits and leave-one-profile jackknife", "source": "TSA_01" }
+  ],
+  "conditionalFindings": [
+    "finite-N limitation (12-20 profiles per N for N=70/72/75)",
+    "tested operator classes only (P1/P1b profiles)",
+    "available instrumentation only (warmup epochs w0-w2, T0-T3, C3)",
+    "N=72 vs N=75 comparison is sensitive to profile-count limits",
+    "diagnostic only — no causal closure claimed",
+    "no physical meaning of N",
+    "hidden pre-warmup factor may remain",
+    "hidden handoff operator may remain",
+    "V6 NOT READY"
+  ],
+  "hypotheses": [
+    "w2->T0 handoff transform may be a stable N-window formation mechanism",
+    "Distribution spread/IQR may determine whether handoff produces amplification or collapse",
+    "km/lambda IQR may be the key diagnostic signature distinguishing N=75 from N=72",
+    "A hidden handoff operator may remain uninstrumented",
+    "Future instrumentation may need to capture the exact w2->T0 operation mechanism"
+  ],
+  "notClaimed": [
+    "causal mechanism for handoff amplification vs collapse",
+    "deterministic rescue",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE — 41 stop, 0 rescues",
+  "nextSteps": [
+    "TSI: Add pre-warmup instrumentation to capture state before w0",
+    "W2->T0 mechanism: Measure the exact handoff operation rather than inferring from transform output",
+    "Cross-N N-window formation: Extend analysis beyond 4 N values for broader validation",
+    "V6 derivation, causal closure, and physical interpretation remain NOT READY"
+  ]
+}
