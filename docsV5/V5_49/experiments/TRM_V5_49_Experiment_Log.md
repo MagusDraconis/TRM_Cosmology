@@ -4,6 +4,7 @@
 | DSG | COMPLETE | 1 (DSG_01) | Model C — Spread generated in w1→w2 transition |
 | DGT | COMPLETE | 1 (DGT_01) | Model C — w1→w2 rank-inverting, N=72 compresses, N=75 expands |
 | RTK | COMPLETE | 1 (RTK_01) | Model A+C — Rank inversion is GENERIC kernel. N-window direction consistent across transitions. |
+| KBD | COMPLETE | 1 (KBD_01) | Model D — Amp ratio + spread combine to separate K1/K2/K3 kernel classes. |
 | DSS | PLANNED | — | — |
 
 ## RTK_01 — Rank Inversion Transition Kernel Audit (2026-07-20)

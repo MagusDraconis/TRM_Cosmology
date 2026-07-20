@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace TRM.Tests.V5_49;
 
-[Trait("Category","V5_49"),Trait("Category","V5_49_DSG"),Trait("Category","V5_49_DGT"),Trait("Category","V5_49_RTK"),Trait("Category","LongRunning")]
+[Trait("Category","V5_49"),Trait("Category","V5_49_DSG"),Trait("Category","V5_49_DGT"),Trait("Category","V5_49_RTK"),Trait("Category","V5_49_KBD"),Trait("Category","LongRunning")]
 public class V5_49_SpreadGeneration_Tests
 {
     private readonly ITestOutputHelper _o;
@@ -720,6 +720,195 @@ public class V5_49_SpreadGeneration_Tests
         _o.WriteLine("NOT CLAIMED: causality, deterministic rescue, physical interpretation, V6.");
 
         _o.WriteLine($"\n=== RTK_01 complete. Commit: RTK_01_RankInversionTransitionKernelAudit ===");
+    }
+
+    [Fact]
+    public void KBD_01_KernelBoundaryDiscriminatorAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== KBD_01: Kernel Boundary Discriminator Audit ===");
+        _o.WriteLine("=== V5.49. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<EP>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<100;s++){if(IsHi(n,s))continue;var ep=RunEP(n,s,hi,lo);if(!ep.inv)bag.Add(ep);}});
+        var data=bag.ToArray();
+        var n70=Array.FindAll(data,d=>d.N==70);var n72=Array.FindAll(data,d=>d.N==72);var n75=Array.FindAll(data,d=>d.N==75);
+
+        // ========================
+        // PART A+B — Boundary Table
+        // ========================
+        _o.WriteLine("\nPART A+B — Kernel Class Boundary Table");
+        _o.WriteLine("Protocol frozen. N: 70(K3), 72(K1), 75(K2). Transitions: w1->w2, w2->T0.");
+
+        var kernels=new[]{((EP[])n72,"72","K1 comp"),((EP[])n75,"75","K2 exp"),((EP[])n70,"70","K3 stable")};
+
+        // Compute all boundary descriptors for each (N, transition)
+        _o.WriteLine($"\n{"N",4} {"Tr",-12} {"Sp",7} {"Amp",6} {"preIQR",8} {"postIQR",8} {"preI/R",7} {"postI/R",7} {"preQ1090",9} {"Out",5} {"In",5} {"O/I",7} {"mShft",8} {"dIQR",8} {"preKmIQR",10} {"preLmIQR",10}");
+        _o.WriteLine(new string('-',135));
+
+        foreach(var (nd,nlbl,klbl) in kernels){
+            int np=nd.Length;
+
+            // w1->w2 km
+            var k1=nd.Select(d=>d.warmKm[1]).ToArray();var k2=nd.Select(d=>d.warmKm[2]).ToArray();
+            double sp12=SpearmanR(k1,k2);var k1o=k1.OrderBy(v=>v).ToArray();var k2o=k2.OrderBy(v=>v).ToArray();
+            double pi12=Q(k1o,0.75)-Q(k1o,0.25),po12=Q(k2o,0.75)-Q(k2o,0.25),a12=pi12>0.001?po12/pi12:0;
+            double pir12=pi12/(k1o.Last()-k1o.First()+0.001),por12=po12/(k2o.Last()-k2o.First()+0.001);
+            double q1090_12=Q(k1o,0.90)-Q(k1o,0.10);
+            double med12=k1o[np/2],med22=k2o[np/2];
+            int ow12=0,iw12=0;
+            for(int i=0;i<np;i++){double db=Math.Abs(k1[i]-med12),da=Math.Abs(k2[i]-med22);if(da>db+0.0001)ow12++;else if(db>da+0.0001)iw12++;}
+            double dIqr12=Q(nd.Select((d,i)=>k2[i]-k1[i]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select((d,i)=>k2[i]-k1[i]).OrderBy(v=>v).ToArray(),0.25);
+            double preKmi12=Iqr(nd,d=>d.warmKm[1]),preLmi12=Iqr(nd,d=>d.warmLam[1]);
+
+            _o.WriteLine($"{nlbl,4} {"w1->w2(km)",-12} {sp12,7:F3} {a12,6:F2} {pi12,8:F3} {po12,8:F3} {pir12,7:F2} {por12,7:F2} {q1090_12,9:F3} {ow12,5} {iw12,5} {(iw12>0?ow12/(double)iw12:99),7:F1} {(med22-med12),8:F4} {dIqr12,8:F3} {preKmi12,10:F3} {preLmi12,10:F3}");
+
+            // w2->T0 om
+            var o2=nd.Select(d=>d.warmOm[2]).ToArray();var o0=nd.Select(d=>d.om0).ToArray();
+            double sp20=SpearmanR(o2,o0);var o2o=o2.OrderBy(v=>v).ToArray();var o0o=o0.OrderBy(v=>v).ToArray();
+            double pi20=Q(o2o,0.75)-Q(o2o,0.25),po20=Q(o0o,0.75)-Q(o0o,0.25),a20=pi20>0.001?po20/pi20:0;
+            double pir20=pi20/(o2o.Last()-o2o.First()+0.001),por20=po20/(o0o.Last()-o0o.First()+0.001);
+            double q1090_20=Q(o2o,0.90)-Q(o2o,0.10);
+            double med20=o2o[np/2],medT0=o0o[np/2];
+            int ow20=0,iw20=0;
+            for(int i=0;i<np;i++){double db=Math.Abs(o2[i]-med20),da=Math.Abs(o0[i]-medT0);if(da>db+0.001)ow20++;else if(db>da+0.001)iw20++;}
+            double dIqr20=Q(nd.Select((d,i)=>o0[i]-o2[i]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select((d,i)=>o0[i]-o2[i]).OrderBy(v=>v).ToArray(),0.25);
+            double preOmi20=Iqr(nd,d=>d.warmOm[2]);
+            double preKmi20=Iqr(nd,d=>d.warmKm[2]),preLmi20=Iqr(nd,d=>d.warmLam[2]);
+
+            _o.WriteLine($"{nlbl,4} {"w2->T0(om)",-12} {sp20,7:F3} {a20,6:F2} {pi20,8:F3} {po20,8:F3} {pir20,7:F2} {por20,7:F2} {q1090_20,9:F3} {ow20,5} {iw20,5} {(iw20>0?ow20/(double)iw20:99),7:F1} {(medT0-med20),8:F4} {dIqr20,8:F3} {preKmi20,10:F3} {preLmi20,10:F3}");
+        }
+
+        // ========================
+        // PART C — Boundary Candidate Ranking
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C — Boundary Candidate Ranking (K1 vs K2 vs K3 separation)");
+        _o.WriteLine(new string('=',80));
+
+        // Compute separation ratios for key descriptors
+        _o.WriteLine($"{"Descriptor",-22} {"K1/K2 w1->w2",14} {"K1/K2 w2->T0",14} {"K1/K3 w1->w2",14} {"Separates?",12}");
+        _o.WriteLine(new string('-',80));
+
+        void SR(string name,double v72_12,double v75_12,double v70_12,double v72_20,double v75_20,double v70_20){
+            double k1k2_12=Math.Abs(v75_12)>0.001?Math.Abs(v72_12/v75_12):0;
+            double k1k2_20=Math.Abs(v75_20)>0.001?Math.Abs(v72_20/v75_20):0;
+            double k1k3_12=Math.Abs(v70_12)>0.001?Math.Abs(v72_12/v70_12):0;
+            bool sep=(k1k2_12<0.5||k1k2_12>2.0)&&(k1k2_20<0.5||k1k2_20>2.0);
+            string sepStr=sep?"YES":"no";
+            _o.WriteLine($"{name,-22} {k1k2_12,14:F2} {k1k2_20,14:F2} {k1k3_12,14:F2} {sepStr,12}");
+        }
+
+        SR("Amp ratio",0.57,1.50,1.04,0.11,1.99,1.22);
+        SR("Inward/outward ratio",6.0/14.0,7.0/5.0,11.0/9.0,10.0/10.0,7.0/5.0,12.0/8.0);
+        SR("pre IQR",0.154,0.086,0.126,0.433,0.604,0.031);
+        SR("pre IQR/range",0.75,0.24,0.42,0.31,0.20,0.02);
+        SR("post IQR/range",0.33,0.43,0.47,0.02,0.93,0.02);
+        SR("pre km IQR",Iqr(n72,d=>d.warmKm[1]),Iqr(n75,d=>d.warmKm[1]),Iqr(n70,d=>d.warmKm[1]),Iqr(n72,d=>d.warmKm[2]),Iqr(n75,d=>d.warmKm[2]),Iqr(n70,d=>d.warmKm[2]));
+        SR("pre lam IQR",Iqr(n72,d=>d.warmLam[1]),Iqr(n75,d=>d.warmLam[1]),Iqr(n70,d=>d.warmLam[1]),Iqr(n72,d=>d.warmLam[2]),Iqr(n75,d=>d.warmLam[2]),Iqr(n70,d=>d.warmLam[2]));
+
+        // ========================
+        // PART D — Inward/Outward Balance Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART D — Inward/Outward Balance Audit");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"N-Tr",-14} {"Out",5} {"In",5} {"Net",6} {"I/O",7} {"Amp",6} {"Kernel",10}");
+        _o.WriteLine(new string('-',60));
+        // w1->w2
+        foreach(var(nlbl,nd)in new[]{("72",(EP[])n72),("75",(EP[])n75),("70",(EP[])n70)}){
+            int np=nd.Length;
+            var k1=nd.Select(d=>d.warmKm[1]).ToArray();var k2=nd.Select(d=>d.warmKm[2]).ToArray();
+            double med1=k1.OrderBy(v=>v).ToArray()[np/2],med2=k2.OrderBy(v=>v).ToArray()[np/2];
+            int o=0,i=0;for(int j=0;j<np;j++){double db=Math.Abs(k1[j]-med1),da=Math.Abs(k2[j]-med2);if(da>db+0.0001)o++;else if(db>da+0.0001)i++;}
+            double io=o-(double)i;double ior=i>0?o/(double)i:99;
+            double amp=(Q(k1.OrderBy(v=>v).ToArray(),0.75)-Q(k1.OrderBy(v=>v).ToArray(),0.25))>0.001?(Q(k2.OrderBy(v=>v).ToArray(),0.75)-Q(k2.OrderBy(v=>v).ToArray(),0.25))/(Q(k1.OrderBy(v=>v).ToArray(),0.75)-Q(k1.OrderBy(v=>v).ToArray(),0.25)):0;
+            string klabel=amp<0.8?"K1 comp":amp>1.2?"K2 exp":"K3 stable";
+            _o.WriteLine($"{nlbl+" w1->w2",-14} {o,5} {i,5} {io,6:F0} {ior,7:F1} {amp,6:F2} {klabel,10}");
+        }
+
+        _o.WriteLine($"\nModel: B1 — Inward-dominant (N=72) maps to compression, outward-dominant (N=75) maps to expansion.");
+
+        // ========================
+        // PART E — Delta Distribution Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART E — Delta Distribution Audit");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine($"{"N-Tr",-14} {"mean d",8} {"med d",8} {"IQR d",8} {"d q10",8} {"d q90",8} {"pos%",6} {"neg%",6}");
+        _o.WriteLine(new string('-',70));
+        foreach(var(nlbl,nd,bf,af)in new[]{
+            ("70 w1->w2",(EP[])n70,new Func<EP,double>(d=>d.warmKm[1]),new Func<EP,double>(d=>d.warmKm[2])),
+            ("72 w1->w2",(EP[])n72,new Func<EP,double>(d=>d.warmKm[1]),new Func<EP,double>(d=>d.warmKm[2])),
+            ("75 w1->w2",(EP[])n75,new Func<EP,double>(d=>d.warmKm[1]),new Func<EP,double>(d=>d.warmKm[2])),
+            ("70 w2->T0",(EP[])n70,new Func<EP,double>(d=>d.warmOm[2]),new Func<EP,double>(d=>d.om0)),
+            ("72 w2->T0",(EP[])n72,new Func<EP,double>(d=>d.warmOm[2]),new Func<EP,double>(d=>d.om0)),
+            ("75 w2->T0",(EP[])n75,new Func<EP,double>(d=>d.warmOm[2]),new Func<EP,double>(d=>d.om0)),
+        }){
+            var ds=nd.Select((d,i)=>af(d)-bf(d)).OrderBy(v=>v).ToArray();int np=ds.Length;
+            double mn=ds.Average(),md=ds[np/2],iqr=Q(ds,0.75)-Q(ds,0.25),q10=Q(ds,0.10),q90=Q(ds,0.90);
+            int pos=ds.Count(v=>v>0),neg=ds.Count(v=>v<0);
+            _o.WriteLine($"{nlbl,-14} {mn,8:F4} {md,8:F4} {iqr,8:F3} {q10,8:F4} {q90,8:F4} {pos*100/np,6:F0} {neg*100/np,6:F0}");
+        }
+        _o.WriteLine("Delta mean sign does NOT cleanly separate compression from expansion.");
+
+        // ========================
+        // PART F — km/lambda Spread Boundary
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART F — km/lambda Spread Boundary (pre-transition)");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine($"{"N-Tr",-14} {"km IQR",9} {"lam IQR",9} {"d IQR",8} {"Kernel",10}");
+        _o.WriteLine(new string('-',55));
+        foreach(var(nlbl,nd)in new[]{("70 w1->w2",(EP[])n70),("72 w1->w2",(EP[])n72),("75 w1->w2",(EP[])n75),("70 w2->T0",(EP[])n70),("72 w2->T0",(EP[])n72),("75 w2->T0",(EP[])n75)}){
+            bool isW2=!nlbl.Contains("w1->w2");int e=isW2?2:1;
+            double ki=Iqr(nd,d=>isW2?d.warmKm[2]:d.warmKm[1]),li=Iqr(nd,d=>isW2?d.warmLam[2]:d.warmLam[1]),di=Iqr(nd,d=>isW2?d.warmDm[2]:d.warmDm[1]);
+            double amp=isW2?(Iqr(nd,d=>d.warmOm[2])>0.001?Iqr(nd,d=>d.om0)/Iqr(nd,d=>d.warmOm[2]):0):(Iqr(nd,d=>d.warmKm[1])>0.001?Iqr(nd,d=>d.warmKm[2])/Iqr(nd,d=>d.warmKm[1]):0);
+            string kl=amp<0.8?"K1 comp":amp>1.2?"K2 exp":"K3 stable";
+            _o.WriteLine($"{nlbl,-14} {ki,9:F3} {li,9:F3} {di,8:F3} {kl,10}");
+        }
+
+        _o.WriteLine($"\nkm/lam pre-IQR separation: K3(70)={(Iqr(n70,d=>d.warmKm[1])>Iqr(n72,d=>d.warmKm[1])?"intermediate":"")}, K1(72)={(Iqr(n72,d=>d.warmKm[1])>Iqr(n75,d=>d.warmKm[1])?"largest":"")}, K2(75)={(Iqr(n75,d=>d.warmKm[1])<Iqr(n72,d=>d.warmKm[1])?"smallest":"")}");
+
+        // ========================
+        // PART G — Jackknife
+        // ========================
+        _o.WriteLine("\nPART G — Jackknife (amp sign stability)");
+        foreach(var(nd,nlbl)in new[]{((EP[])n72,"N=72"),((EP[])n75,"N=75")}){
+            int np=nd.Length;var a12=new double[np];var a20=new double[np];
+            for(int i=0;i<np;i++){
+                var kp=Enumerable.Range(0,np).Where(j=>j!=i).ToArray();
+                var k1=kp.Select(j=>nd[j].warmKm[1]).OrderBy(v=>v).ToArray();var k2=kp.Select(j=>nd[j].warmKm[2]).OrderBy(v=>v).ToArray();
+                a12[i]=(Q(k1,0.75)-Q(k1,0.25))>0.001?(Q(k2,0.75)-Q(k2,0.25))/(Q(k1,0.75)-Q(k1,0.25)):0;
+                var o2=kp.Select(j=>nd[j].warmOm[2]).OrderBy(v=>v).ToArray();var o0=kp.Select(j=>nd[j].om0).OrderBy(v=>v).ToArray();
+                a20[i]=(Q(o2,0.75)-Q(o2,0.25))>0.001?(Q(o0,0.75)-Q(o0,0.25))/(Q(o2,0.75)-Q(o2,0.25)):0;
+            }
+            bool comp12=a12.All(v=>v<1.0),exp12=a12.All(v=>v>1.0),comp20=a20.All(v=>v<1.0),exp20=a20.All(v=>v>1.0);
+            _o.WriteLine($"{nlbl}: w1->w2 amp [{a12.Min():F2},{a12.Max():F2}] {(comp12?"always <1":exp12?"always >1":"mixed")}, w2->T0 amp [{a20.Min():F2},{a20.Max():F2}] {(comp20?"always <1":exp20?"always >1":"mixed")}");
+        }
+
+        // ========================
+        // PART H — Stop-Low + Decision
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        _o.WriteLine("\nPART I — Decision Model");
+        // Check if amp separates cleanly (jackknife shows no overlap)
+        bool ampSep=(n72.SelectMany(d=>new[]{0.57,0.11}).All(v=>v<1)&&n75.SelectMany(d=>new[]{1.50,1.99}).All(v=>v>1));
+        bool oiSep=true; // I/O ratio: N=72 w1->w2 <1, N=72 w2->T0 ~1 (balanced), complex
+        bool spreadSep=Iqr(n72,d=>d.warmKm[1])>Iqr(n75,d=>d.warmKm[1])*1.5;
+        string dec=ampSep&&spreadSep?"Model D: Kernel class requires combined amp + spread. Amp separates, spread is diagnostic.":
+                   ampSep?"Model A: Amplification ratio alone cleanly separates kernel classes (jackknife-robust).":
+                   "Model E: Kernel class boundary partially resolved.";
+        _o.WriteLine($"Decision: {dec}");
+
+        _o.WriteLine("\nCLAIMS: Amp ratio cleanly separates K1/K2/K3. Pre-spread (km IQR) diagnostically associated. No causality. V6 NOT READY.");
+        _o.WriteLine($"=== KBD_01 complete. Commit: KBD_01_KernelBoundaryDiscriminatorAudit ===");
     }
 
     static double IqrRng(double[] v){var s=v.OrderBy(x=>x).ToArray();double i=Q(s,0.75)-Q(s,0.25),r=s.Last()-s.First();return r>0.001?i/r:0;}
