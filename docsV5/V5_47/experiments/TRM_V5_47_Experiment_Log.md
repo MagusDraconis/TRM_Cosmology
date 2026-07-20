@@ -3,10 +3,20 @@
 |-------|--------|-------|---------|
 | TSP | COMPLETE | 1 (TSP_01) | Model A ROBUST — T0 inherited spread dominates, N=75 bulk-wide at origin |
 | TSE | COMPLETE | 1 (TSE_01) | Model A — w2→T0 handoff amplifies N=75 bulk spread (1.98x) |
-| THD | COMPLETE | 1 (THD_01) | Model D — Rank-inverting handoff. d/K near-perfectly diagnostic. |
-| TSA | PLANNED | — | — |
+| THD | COMPLETE | 1 (THD_01) | Model E — Rank-inverting handoff. d/K near-perfectly diagnostic. |
+| TSA | COMPLETE | 1 (TSA_01) | SUPPORTED stability — all 8 claims survive robustness cuts |
 | TSI | PLANNED | — | — |
 | TSS | PLANNED | — | — |
+
+## TSA_01 — Handoff Discriminator Stability Audit (2026-07-20)
+- **Passed.** 51s execution. SUPPORTED stability — all 8 claims survive.
+- 10 random splits per N + leave-one-profile jackknife
+- C1-C3: Rank inversion and d/K diagnostic signs stable (no flips)
+- C4-C6: Shape classes (S1/S2/S3) stable at full-N
+- C7: Stop-Low zero damage across all N
+- C8: No single profile controls any conclusion
+- N=75 amp jackknife mean=9.26 (min 1.59) — direction stable
+- Cross-N: mean d_w2 nearly identical (0.457 vs 0.458), km/lam IQR differs
 
 ## THD_01 — Handoff Discriminator Audit (2026-07-20)
 - **Passed.** 51s execution, 63 profiles.

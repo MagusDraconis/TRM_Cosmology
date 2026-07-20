@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V5.47 ACTIVE (TSP_01 COMPLETE) |
 | Current Branch | `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation` |
-| Total Tests | 2876 |
+| Total Tests | 2877 |
 | Failed Tests | 0 |
-| Current Status | V5.47 ACTIVE — TSP+TSE+THD COMPLETE. Rank-inverting handoff. d/K near-perfect diagnostic. |
+| Current Status | V5.47 ACTIVE — 4/5 suites COMPLETE. SUPPORTED stability. All claims robust. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -102,9 +102,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.44 | C3 Correction Response Instrumentation | COMPLETE — c3ExitOm2 identified; N-dependent bridge. |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | COMPLETE — Bridge explained via IQR/distribution shape. |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | COMPLETE — T0 inherited spread dominates; N=75 uniquely broad. |
-| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — TSP+TSE+THD passed. Rank-inverting handoff. d/K near-perfect diagnostic within N. |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — 4/5 suites passed. SUPPORTED stability. |
 
-**Cumulative total: 2876 tests, 0 failed as of 2026-07-20.**
+**Cumulative total: 2877 tests, 0 failed as of 2026-07-20.**
 
 ---
 

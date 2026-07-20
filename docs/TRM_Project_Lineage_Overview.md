@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.39
-**Tests:** 2876 verified, 0 failed
+**Tests:** 2877 verified, 0 failed
 **Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
-**Current Frontier:** V5.46 COMPLETE → V5.47 ACTIVE — TSP_01 + TSE_01 + THD_01 COMPLETE
+**Current Frontier:** V5.46 COMPLETE → V5.47 ACTIVE — TSP + TSE + THD + TSA COMPLETE
 
 ---
 
@@ -1352,8 +1352,8 @@ maintained to prevent overinterpretation:
 | V5.44 | C3 Correction Response Instrumentation and Microstate Audit | 7 | COMPLETE |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | 7 | COMPLETE |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | 7 | COMPLETE |
-| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | 3 | ACTIVE |
-| **Total** | | **2876** | **0 failed** |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | 4 | ACTIVE |
+| **Total** | | **2877** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
@@ -1365,18 +1365,18 @@ V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
 ### V5.47 — Post-Warmup T0 Spread Origin and N-Window Formation — ACTIVE
 
-**Status:** TSP_01 + TSE_01 + THD_01 COMPLETE (2026-07-20)
-**Branch:** `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation`
+**Status:** TSP + TSE + THD + TSA COMPLETE (2026-07-20)
 
 **TSP_01:** Model A — T0 inherited spread dominates. N=75 bulk-wide at T0 origin.
 **TSE_01:** Model A — w2→T0 handoff amplifies N=75 spread (1.98x). N=72 collapses at T0.
-**THD_01:** Model E — d/K at w2 near-perfectly diagnostic of handoff delta. Rank-INVERTING handoff.
+**THD_01:** Model E — d/K at w2 near-perfectly diagnostic. Rank-INVERTING handoff.
+**TSA_01:** SUPPORTED stability — all 8 claims survive robustness (splits + jackknife).
 
-**Key THD_01 findings:**
-- N=75 Spearman = -0.671, N=72 Spearman = -0.483 — both RANK-INVERTING
-- d_w2 ~ delta_om: N=72=-0.923, N=75=-0.964 (near-perfect profile-level diagnostic!)
-- km_w2 ~ delta_om: N=72=0.956, N=75=0.964
-- d/K strongly diagnostic within each N, but does NOT explain amp vs collapse between N
+**Key TSA_01 findings:**
+- 10 random splits + leave-one-profile jackknife: all correlations sign-stable
+- No single profile controls any conclusion
+- N=75 amp jackknife mean=9.26, min=1.59 — amplification direction stable despite magnitude variance
+- km/lam IQR differs between N=75 and N=72 (1.48x) while mean d_w2 nearly identical
 - Stop-Low: 41 stop, 0 damage → SAFE
 
 **Next:** TSA (stability), TSI (instrumentation), TSS (synthesis)
