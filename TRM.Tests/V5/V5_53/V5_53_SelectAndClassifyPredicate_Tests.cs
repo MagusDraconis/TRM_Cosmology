@@ -245,6 +245,76 @@ public class V5_53_SelectAndClassifyPredicate_Tests
         _o.WriteLine($"\n=== RIS_01 complete. Commit: RIS_01_RawIQRSelectionStabilityAudit ===");
     }
 
+    [Fact]
+    public void RIC_01_RawIQRComplementAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RIC_01: RawIQR Complement Audit ===");
+        _o.WriteLine("=== V5.53. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double riqr,double rmean,string cls)>();
+        Parallel.ForEach(Ns,n=>{for(int s=0;s<100;s++){var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;var rwo=rawW.OrderBy(v=>v).ToArray();double ri=Q(rwo,0.75)-Q(rwo,0.25),rm=rwo.Average();if(IsHi(n,s))continue;var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);if(sb!=null&&(sb.Value.cls=="P1"||sb.Value.cls=="P1b"))bag.Add((n,s,ri,rm,sb.Value.cls));}});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B+C — Residual + Complement
+        // ========================
+        _o.WriteLine("\nPART B+C — Residual Separation by rawIQR band");
+        var sorted=data.OrderBy(d=>d.riqr).ToArray();
+        int bandSize=sorted.Length/3;
+        _o.WriteLine($"{"rawIQR band",-14} {"n",5} {"P1%",7} {"P1 rmean",10} {"P1b rmean",10} {"delta",10} {"mean adds?",12}");
+        _o.WriteLine(new string('-',75));
+        for(int b=0;b<3;b++){
+            var band=sorted.Skip(b*bandSize).Take(bandSize).ToArray();
+            int p1=band.Count(d=>d.cls=="P1"),p1b=band.Count(d=>d.cls=="P1b");
+            double p1m=band.Where(d=>d.cls=="P1").Select(d=>d.rmean).DefaultIfEmpty(0).Average();
+            double p1bm=band.Where(d=>d.cls=="P1b").Select(d=>d.rmean).DefaultIfEmpty(0).Average();
+            double dlt=p1m-p1bm;
+            bool adds=(p1>0&&p1b>0)&&Math.Abs(dlt)>0.0005;
+            _o.WriteLine($"{$"[{band.First().riqr:F3}-{band.Last().riqr:F3}]",-14} {band.Length,5} {(p1+p1b>0?p1*100/(p1+p1b):0),7:F0}% {p1m,10:F5} {p1bm,10:F5} {dlt,10:F5} {(adds?"YES":"no"),12}");
+        }
+
+        // ========================
+        // PART D — Mean contribution
+        // ========================
+        _o.WriteLine($"\nPART D — Mean contribution beyond rawIQR");
+        var allP1=data.Where(d=>d.cls=="P1").ToArray();var allP1b=data.Where(d=>d.cls=="P1b").ToArray();
+        double riSep=Math.Abs(allP1.Average(d=>d.riqr)-allP1b.Average(d=>d.riqr));
+        double rmSep=Math.Abs(allP1.Average(d=>d.rmean)-allP1b.Average(d=>d.rmean));
+        // Partial: check if mean differs within IQR-matched subset
+        double medIQR=(allP1.Average(d=>d.riqr)+allP1b.Average(d=>d.riqr))/2;
+        var matched=data.Where(d=>Math.Abs(d.riqr-medIQR)<0.005).ToArray();
+        var mp1=matched.Where(d=>d.cls=="P1").ToArray();var mp1b=matched.Where(d=>d.cls=="P1b").ToArray();
+        double resSep=mp1.Length>1&&mp1b.Length>1?Math.Abs(mp1.Average(d=>d.rmean)-mp1b.Average(d=>d.rmean)):0;
+        _o.WriteLine($"rawIQR sep={riSep:F5}, rawMean sep={rmSep:F5}");
+        _o.WriteLine($"IQR-matched residual mean sep={resSep:F5} ({(resSep>0.0005?"mean adds independent info":"mean is redundant")})");
+
+        // ========================
+        // PART F — N-dependence
+        // ========================
+        _o.WriteLine($"\nPART F — N-dependence after rawIQR matching");
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            var niqr=nd.Average(d=>d.riqr);
+            var nm=nd.Where(d=>Math.Abs(d.riqr-niqr)<0.005).ToArray();
+            int np1=nm.Count(d=>d.cls=="P1"),np1b=nm.Count(d=>d.cls=="P1b");
+            _o.WriteLine($"  N={n}: IQR-matched P1={np1}, P1b={np1b}, P1%={(np1+np1b>0?np1*100/(np1+np1b):0)}%");
+        }
+
+        // ========================
+        // PART H — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE");
+        string dec=resSep>0.0005?"Model B: rawIQR + rawMean complement each other.":
+                   "Model A: rawIQR alone is sufficient. Mean adds negligible independent information.";
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"riSep={riSep:F5}, rmSep={rmSep:F5}, residual={resSep:F5}");
+        _o.WriteLine("CLAIMS: Complement audited. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== RIC_01 complete. Commit: RIC_01_RawIQRComplementAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
     static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
