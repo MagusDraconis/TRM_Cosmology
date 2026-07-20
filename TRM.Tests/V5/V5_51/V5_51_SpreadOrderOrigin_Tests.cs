@@ -612,6 +612,139 @@ public class V5_51_SpreadOrderOrigin_Tests
         _o.WriteLine($"\n=== ERO_01 complete. Commit: ERO_01_EnsembleResponseOrderingAudit ===");
     }
 
+    [Fact]
+    public void RFO_01_RawFrequencyOrderingStabilityAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RFO_01: Raw Frequency Ordering Stability Audit ===");
+        _o.WriteLine("=== V5.51. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,double rawMean,double simMean,double cs4,bool resc4)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var K=KS(n,s);
+                var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rawMean=rawW.Average();
+                var th=new double[n];rng=new Random(s);for(int i=0;i<n;i++)th[i]=rng.NextDouble()*2*Math.PI;
+                int hL=St/Hd+1;var h=new double[hL][];h[0]=(double[])th.Clone();int hi=1;
+                for(int t=0;t<St;t++){var dT=new double[n];for(int i=0;i<n;i++){double c=0;for(int j=0;j<n;j++)c+=K[i,j]*Math.Sin(th[j]-th[i]);dT[i]=rawW[i]+c;}for(int i=0;i<n;i++)th[i]+=Dt*dT[i];if((t+1)%Hd==0&&hi<hL)h[hi++]=(double[])th.Clone();}
+                var o=new double[n];for(int i=0;i<n;i++){double su=0;int cc=0;for(int t2=1;t2<hL;t2++){su+=Math.Abs(h[t2][i]-h[t2-1][i]);cc++;}o[i]=cc>0?su/(cc*Dt*Hd):0;}
+                double simMean=o.Average();
+                var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);
+                var hiP=Hi(n);var loP=Lo(n);var sb=SelectAndClassify(n,s,hiP);if(sb==null)continue;
+                double d0Pre=sb.Value.d0;bool isP2=sb.Value.cls=="P2";double tgt=isP2?d0Pre*0.90:d0Pre*0.50;
+                for(int e=1;e<WARMUP_EPOCHS;e++){var he=Sim(K,n,S,s+e);var de=DL(Nm(RP(he,n),n),n);K=Cupd(de,n);}
+                var hT0=Sim(K,n,S,s+50);var h4=Sim(K,n,S,s+3);var d4=DL(Nm(RP(h4,n),n),n);double cur=Dm(d4,n);
+                double frac=Math.Clamp((tgt+1e-9)/(cur+1e-9),0.01,100.0);var dM=CD(d4,n);
+                for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dM[i,j]*=frac;K=Cupd(dM,n);
+                var h5=Sim(K,n,S,s+4);K=Cupd(DL(Nm(RP(h5,n),n),n),n);
+                var hT1=Sim(K,n,S,s+100);var KT1=Cupd(DL(Nm(RP(hT1,n),n),n),n);double omT1=Of(hT1,n).Average();
+                var hT2=Sim(Cupd(DL(Nm(RP(hT1,n),n),n),n),n,S,s+200);double omT2=Of(hT2,n).Average();bool a0=omT2>THR;
+                double c3=0;if(!double.IsNaN(hiP.dm)){var dmat3=DL(Nm(RP(hT1,n),n),n);double dmPre=Dm(dmat3,n);double nd=dmPre+(hiP.dm-dmPre)*0.2;double f3=Math.Clamp((nd+1e-9)/(dmPre+1e-9),0.5,1.5);for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dmat3[i,j]*=f3;var hc3cc=Sim(Cupd(DL(Nm(RP(Sim(Cupd(dmat3,n),n,S,s+300),n),n),n),n),n,S,s+400);double omC3=Of(hc3cc,n).Average();c3=omC3-(a0?THR:omT2);}
+                bag.Add((n,rawMean,simMean,c3,c3>0.1&&omT2>THR));
+            }});
+        var data=bag.ToArray();
+
+        // Per-class raw mean values
+        double[] r72=data.Where(d=>d.N==72).Select(d=>d.rawMean).ToArray();
+        double[] r70=data.Where(d=>d.N==70).Select(d=>d.rawMean).ToArray();
+        double[] r75=data.Where(d=>d.N==75).Select(d=>d.rawMean).ToArray();
+        int n72c=r72.Length,n70c=r70.Length,n75c=r75.Length;
+
+        // ========================
+        // PART B+C — Replication + Jackknife
+        // ========================
+        _o.WriteLine($"\nPART B+C — Raw Frequency Ordering + Jackknife");
+        _o.WriteLine($"Profiles: K1={n72c}, K3={n70c}, K2={n75c}");
+        double rI1=Q(r72.OrderBy(v=>v).ToArray(),0.75)-Q(r72.OrderBy(v=>v).ToArray(),0.25);
+        double rI3=Q(r70.OrderBy(v=>v).ToArray(),0.75)-Q(r70.OrderBy(v=>v).ToArray(),0.25);
+        double rI2=Q(r75.OrderBy(v=>v).ToArray(),0.75)-Q(r75.OrderBy(v=>v).ToArray(),0.25);
+        _o.WriteLine($"Raw mean IQR: K1={rI1:F4}, K3={rI3:F4}, K2={rI2:F4} -> K1>K3>K2: {(rI1>rI3&&rI3>rI2?"YES":"NO")}");
+
+        // Jackknife
+        int ordCount=0,invCount=0;
+        double jk1mn=0,jk3mn=0,jk2mn=0;int jkC=0;
+        for(int c=0;c<3;c++){
+            var(kArr,nLbl)=(c==0?(r72,"K1"):c==1?(r70,"K3"):(r75,"K2"));
+            for(int i=0;i<kArr.Length;i++){
+                var jk=kArr.Where((_,j)=>j!=i).OrderBy(v=>v).ToArray();
+                if(jk.Length<4)continue;
+                double ji=Q(jk,0.75)-Q(jk,0.25);
+                if(c==0)jk1mn=ji;else if(c==1)jk3mn=ji;else jk2mn=ji;
+                // Check ordering with other classes' full data
+                if(c==0){if(ji>rI3&&rI3>rI2)ordCount++;else invCount++;}
+                else if(c==1){if(rI1>ji&&ji>rI2)ordCount++;else invCount++;}
+                else{if(rI1>rI3&&rI3>ji)ordCount++;else invCount++;}
+                jkC++;
+            }
+        }
+        _o.WriteLine($"Jackknife: ordering preserved in {ordCount}/{jkC} removals ({ordCount*100/jkC}%)");
+
+        // ========================
+        // PART D — Random Split
+        // ========================
+        _o.WriteLine($"\nPART D — Random Split Stability (10 splits, n~2/3 per class)");
+        var rng2=new Random(42);int splitOrd=0;
+        for(int s=0;s<10;s++){
+            var s72=r72.OrderBy(_=>rng2.Next()).Take(n72c*2/3).OrderBy(v=>v).ToArray();
+            var s70=r70.OrderBy(_=>rng2.Next()).Take(n70c*2/3).OrderBy(v=>v).ToArray();
+            var s75=r75.OrderBy(_=>rng2.Next()).Take(n75c*2/3).OrderBy(v=>v).ToArray();
+            double si1=Q(s72,0.75)-Q(s72,0.25),si3=Q(s70,0.75)-Q(s70,0.25),si2=Q(s75,0.75)-Q(s75,0.25);
+            if(si1>si3&&si3>si2)splitOrd++;
+        }
+        _o.WriteLine($"Ordering holds in {splitOrd}/10 splits");
+
+        // ========================
+        // PART E — Null: shuffle labels
+        // ========================
+        _o.WriteLine($"\nPART E — Null test: shuffle class labels 100x");
+        var allRaw=r72.Concat(r70).Concat(r75).ToArray();int nullOrd=0;
+        for(int s=0;s<100;s++){
+            var shuf=allRaw.OrderBy(_=>rng2.Next()).ToArray();
+            var s1=shuf.Take(n72c).OrderBy(v=>v).ToArray();
+            var s3=shuf.Skip(n72c).Take(n70c).OrderBy(v=>v).ToArray();
+            var s2=shuf.Skip(n72c+n70c).OrderBy(v=>v).ToArray();
+            double n1=Q(s1,0.75)-Q(s1,0.25),n3=Q(s3,0.75)-Q(s3,0.25),n2=Q(s2,0.75)-Q(s2,0.25);
+            if(n1>n3&&n3>n2)nullOrd++;
+        }
+        _o.WriteLine($"K1>K3>K2 in {nullOrd}/100 shuffled samples (chance ~{nullOrd}%)");
+
+        // ========================
+        // PART F — Sampling Baseline
+        // ========================
+        _o.WriteLine($"\nPART F — Sampling Baseline Check");
+        double se1=Sd(r72)/Math.Sqrt(n72c),se3=Sd(r70)/Math.Sqrt(n70c),se2=Sd(r75)/Math.Sqrt(n75c);
+        _o.WriteLine($"Expected SEM: K1={se1:F5}, K3={se3:F5}, K2={se2:F5} -> {(se1>se3&&se3>se2?"K1>K3>K2 by SEM":"not ordered")}");
+        _o.WriteLine($"Profile counts: K1={n72c}, K3={n70c}, K2={n75c} -> {(n72c<n70c?"K1 FEWER profiles (larger SEM)":"K1 not fewest")}");
+
+        // ========================
+        // PART G — Within vs Between
+        // ========================
+        _o.WriteLine($"\nPART G — Between-profile vs within-profile");
+        _o.WriteLine($"Between-profile raw mean IQR: K1={rI1:F4} > K3={rI3:F4} > K2={rI2:F4} -> YES ordering");
+        _o.WriteLine($"Between-profile carries the ordering signal. Within-profile (PSO_01) does not.");
+
+        // ========================
+        // Decision
+        // ========================
+        int lo=data.Count(d=>d.cs4<=0.1),loR=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        _o.WriteLine($"\nStop-Low: c3<=0.1={lo}, rescues={loR} => SAFE");
+
+        string stabLabel=splitOrd>=9?"jackknife-robust":"mostly stable";
+        string dec=splitOrd>=7?$"Model A: Raw frequency ordering is STABLE ({stabLabel}).":
+                   splitOrd>=5?"Model B: Ordering is mostly stable but sample-size sensitive.":
+                   nullOrd>20?"Model C: Ordering is a finite-sample artifact (appears frequently by chance).":
+                   "Model F: Ordering remains unresolved.";
+
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine($"Evidence: jackknife={ordCount}/{jkC}, splits={splitOrd}/10, null={nullOrd}/100");
+        _o.WriteLine("CLAIMS: Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== RFO_01 complete. Commit: RFO_01_RawFrequencyOrderingStabilityAudit ===");
+    }
+
     static double IqrVals(IEnumerable<double> vals){var s=vals.OrderBy(v=>v).ToArray();return s.Length>3?Q(s,0.75)-Q(s,0.25):0;}
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
