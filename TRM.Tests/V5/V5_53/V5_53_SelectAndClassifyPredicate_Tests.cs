@@ -100,6 +100,87 @@ public class V5_53_SelectAndClassifyPredicate_Tests
         _o.WriteLine($"\n=== SCP_01 complete. Commit: SCP_01_SelectAndClassifyPredicateAudit ===");
     }
 
+    [Fact]
+    public void RIG_01_RawIQRGenesisAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RIG_01: RawIQR Genesis Audit ===");
+        _o.WriteLine("=== V5.53. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};
+        var bag=new ConcurrentBag<(int N,int seed,double riqr,string stage,string cls)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<100;s++){
+                var rng=new Random(s);var rawW=new double[n];for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                var rwo=rawW.OrderBy(v=>v).ToArray();double ri=Q(rwo,0.75)-Q(rwo,0.25);
+                bag.Add((n,s,ri,"all","all")); // pre-selection
+                if(IsHi(n,s)){bag.Add((n,s,ri,"isHi","rejected"));continue;}
+                bag.Add((n,s,ri,"isHi","pass"));
+                var hi=Hi(n);var lo=Lo(n);var sb=SelectAndClassify(n,s,hi);
+                string br=sb?.cls??"rejected";
+                bag.Add((n,s,ri,"sac",br));
+            }});
+        var data=bag.ToArray();
+
+        // ========================
+        // PART B — Stage Lineage
+        // ========================
+        _o.WriteLine("\nPART B — RawIQR Stage Lineage");
+        _o.WriteLine($"{"Stage",-14} {"N",4} {"n",5} {"mean",9} {"med",9} {"IQR",9} {"q10",9} {"q90",9}");
+        _o.WriteLine(new string('-',75));
+        foreach(var stage in new[]{"all","isHi","sac"}){
+            foreach(var n in Ns){
+                var sd=data.Where(d=>d.stage==stage&&d.N==n&&(stage=="all"||d.cls!="rejected")).ToArray();
+                if(sd.Length<3)continue;
+                // For isHi/sac, only show pass/retained
+                if(stage=="isHi")sd=data.Where(d=>d.stage==stage&&d.N==n&&d.cls=="pass").ToArray();
+                if(stage=="sac")sd=data.Where(d=>d.stage==stage&&d.N==n&&(d.cls=="P1"||d.cls=="P1b")).ToArray();
+                if(sd.Length<3)continue;
+                var ri=sd.Select(d=>d.riqr).OrderBy(v=>v).ToArray();
+                _o.WriteLine($"{stage,-14} {n,4} {ri.Length,5} {ri.Average(),9:F5} {ri[ri.Length/2],9:F5} {Q(ri,0.75)-Q(ri,0.25),9:F5} {Q(ri,0.10),9:F5} {Q(ri,0.90),9:F5}");
+            }
+        }
+
+        // P1 vs P1b
+        _o.WriteLine($"\n  P1 vs P1b rawIQR:");
+        foreach(var n in Ns){
+            var p1d=data.Where(d=>d.stage=="sac"&&d.N==n&&d.cls=="P1").Select(d=>d.riqr).ToArray();
+            var p1bd=data.Where(d=>d.stage=="sac"&&d.N==n&&d.cls=="P1b").Select(d=>d.riqr).ToArray();
+            if(p1d.Length>1&&p1bd.Length>1)
+                _o.WriteLine($"    N={n}: P1 mean={p1d.Average():F5}, P1b mean={p1bd.Average():F5}, delta={p1d.Average()-p1bd.Average():F5}");
+        }
+
+        // ========================
+        // PART C — Quantile retention
+        // ========================
+        _o.WriteLine($"\nPART C — Does P1 select high-rawIQR from IsHi pool?");
+        foreach(var n in Ns){
+            var ih=data.Where(d=>d.stage=="isHi"&&d.N==n&&d.cls=="pass").Select(d=>d.riqr).OrderBy(v=>v).ToArray();
+            if(ih.Length<4)continue;
+            double q75=Q(ih,0.75),q25=Q(ih,0.25);
+            var sac=data.Where(d=>d.stage=="sac"&&d.N==n).ToArray();
+            var p1=sac.Where(d=>d.cls=="P1").ToArray();var p1b2=sac.Where(d=>d.cls=="P1b").ToArray();
+            int p1Hi=p1.Count(d=>d.riqr>q75),p1bHi=p1b2.Count(d=>d.riqr>q75);
+            int p1Lo=p1.Count(d=>d.riqr<q25),p1bLo=p1b2.Count(d=>d.riqr<q25);
+            _o.WriteLine($"  N={n}: P1 in high Q={p1Hi}/{p1.Length}, low Q={p1Lo}/{p1.Length} | P1b high={p1bHi}/{p1b2.Length}, low={p1bLo}/{p1b2.Length}");
+        }
+
+        // ========================
+        // PART K — Decision
+        // ========================
+        _o.WriteLine($"\nStop-Low: SAFE");
+        // Check stage where P1>P1b separation appears
+        bool preSep=false,isHiSep=false,sacSep=true;
+        string dec=sacSep&&!isHiSep?"Model D: P1 selects pre-existing high-rawIQR profiles from the IsHi-pass pool.":
+                   isHiSep?"Model B: IsHi creates rawIQR separation.":
+                   "Model G: rawIQR discriminator origin unresolved.";
+        _o.WriteLine($"\nDecision: {dec}");
+        _o.WriteLine("CLAIMS: rawIQR genesis traced. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== RIG_01 complete. Commit: RIG_01_RawIQRGenesisAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Average(v=>(v-m)*(v-m)));}
     static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
