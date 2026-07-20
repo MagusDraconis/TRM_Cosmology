@@ -3,9 +3,9 @@
 **Version:** 1.4
 **Date:** 2026-07-20
 
-**Current Version:** V5.51 COMPLETE
-**Current Branch:** feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism
-**Cumulative Tests:** 2890
+**Current Version:** V5.52 COMPLETE
+**Current Branch:** feature/v5.52-raw-frequency-ensemble-sampling-origin
+**Cumulative Tests:** 2896
 **Failed:** 0
 
 ---
@@ -22,11 +22,10 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.51 traced the spread-order origin to stable between-profile raw-frequency ensemble means.
-Ordering K1>K3>K2 is absent at init, present in raw frequencies, amplified by Sim, disrupted
-by DL, restored by Cupd, and destroyed by the regression-to-mean kernel. The ordering is
-ensemble-level (not within-profile), stable under jackknife (100%), and represents the
-deepest currently instrumented origin. Stop-Low safe. Causal closure blocked. V6 NOT READY.
+V5.52 traced kernel-class ordering to the SelectAndClassify retention pipeline.
+K1>K3>K2 is absent in the full population and CREATED by P1/P1b branch assignment.
+P1 selectively retains higher-mean profiles; K2 enters P1 at 75% (vs 55% K1, 50% K3).
+Branch composition, not identity, explains the ordering. Stop-Low safe. V6 NOT READY.
 
 ---
 

@@ -2,10 +2,10 @@
 
 **Version:** 2.0
 **Date:** 2026-07-19
-**Scope:** Clockwork Cosmology V1 through V5.51
-**Tests:** 2890 verified, 0 failed
-**Branch:** feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism
-**Current Frontier:** V5.51 COMPLETE
+**Scope:** Clockwork Cosmology V1 through V5.52
+**Tests:** 2896 verified, 0 failed
+**Branch:** feature/v5.52-raw-frequency-ensemble-sampling-origin
+**Current Frontier:** V5.52 COMPLETE
 
 ---
 
@@ -1357,7 +1357,8 @@ maintained to prevent overinterpretation:
 | V5.49 | Spread Generation and Distribution Origin | 4 | COMPLETE |
 | V5.50 | Kernel-Class Assignment and Boundary Origin | 2 | COMPLETE |
 | V5.51 | Spread-Order Origin and Kernel-Assignment Mechanism | 6 | COMPLETE |
-| **Total** | | **2890** | **0 failed** |
+| V5.52 | Raw-Frequency Ensemble Sampling Origin | 6 | COMPLETE |
+| **Total** | | **2896** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at

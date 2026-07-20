@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.51 COMPLETE |
-| Current Branch | feature/v5.51-spread-order-origin-and-kernel-assignment-mechanism |
-| Total Tests | 2890 |
+| Current Version | V5.52 COMPLETE |
+| Current Branch | feature/v5.52-raw-frequency-ensemble-sampling-origin |
+| Total Tests | 2896 |
 | Failed Tests | 0 |
-| Current Status | V5.51 COMPLETE - Spread-order origin traced to raw-frequency ensemble means. |
+| Current Status | V5.52 COMPLETE - Spread-order origin traced to raw-frequency ensemble means. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

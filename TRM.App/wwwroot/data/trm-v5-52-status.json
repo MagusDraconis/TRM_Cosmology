@@ -1,1 +1,47 @@
-{"releaseStatus":"V5.52 INITIALIZED","phase":"Raw-Frequency Ensemble Sampling Origin","date":"2026-07-20","testSummary":{"total":2890,"passed":2890,"failed":0}}
+{
+  "releaseStatus": "V5.52 COMPLETE",
+  "phase": "Raw-Frequency Ensemble Sampling Origin",
+  "date": "2026-07-20",
+  "branch": "feature/v5.52-raw-frequency-ensemble-sampling-origin",
+  "base": "V5.51 COMPLETE",
+  "testSummary": {
+    "total": 2896,
+    "passed": 2896,
+    "failed": 0
+  },
+  "suites": [
+    {
+      "name": "RSO",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PSA",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "SCD",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "SACBR",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "P1C",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "P1S",
+      "status": "COMPLETE"
+    },
+    {
+      "name": "TSS",
+      "status": "COMPLETE"
+    }
+  ],
+  "finalModel": "B+C \u2014 Selection-Origin Ensemble Ordering",
+  "deepestOrigin": "SelectAndClassify retention pipeline (P1/P1b branch assignment)",
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY"
+}
