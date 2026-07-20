@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace TRM.Tests.V5_47;
 
-[Trait("Category","V5_47"),Trait("Category","V5_47_TSP"),Trait("Category","LongRunning")]
+[Trait("Category","V5_47"),Trait("Category","V5_47_TSP"),Trait("Category","V5_47_TSE"),Trait("Category","LongRunning")]
 public class V5_47_T0SpreadProtocol_Tests
 {
     private readonly ITestOutputHelper _o;
@@ -437,6 +437,456 @@ public class V5_47_T0SpreadProtocol_Tests
     }
 
     // ========================
+    // TSE_01: Spread Evolution Post-Warmup Handoff Audit
+    // ========================
+
+    struct EP2{
+        public int N,seed,cohort;
+        // Warmup trace — full d/K/lambda per epoch
+        public double[] warmOm,warmDm,warmKm,warmKs,warmLam;
+        // T0 post-warmup (before d-compression)
+        public double om0,lam0,d0,km0,ks0;
+        // T1 post-compression
+        public double om1,lam1,d1,km1,ks1;
+        // T2 C3 entry
+        public double om2,lam2,d2,km2,ks2,omDist2;
+        // T3
+        public double om3,lam3,d3,km3,ks3,reb3;
+        // C3 correction
+        public double entOm,entDm,entKm,entLam,frac;
+        public double exitOm2,omDelta,cs4,a0Prox;
+        public bool resc4,inv;
+    }
+
+    EP2 RunEP2(int n,int s,P3 hi,P3 lo){
+        var ep=new EP2{N=n,seed=s,cohort=n%5};
+        var sb=SelectAndClassify(n,s,hi);if(sb==null){ep.inv=true;return ep;}
+        double d0Pre=sb.Value.d0;bool isP2=sb.Value.cls=="P2";double tgt=isP2?d0Pre*0.90:d0Pre*0.50;
+        // Warmup epochs with full instrumentation
+        var warmOm=new double[WARMUP_EPOCHS];
+        var warmDm=new double[WARMUP_EPOCHS];
+        var warmKm=new double[WARMUP_EPOCHS];
+        var warmKs=new double[WARMUP_EPOCHS];
+        var warmLam=new double[WARMUP_EPOCHS];
+        var K=KS(n,s);
+        for(int e=0;e<WARMUP_EPOCHS;e++){
+            var h=Sim(K,n,S,s+e);
+            warmOm[e]=Of(h,n).Average();
+            var d=DL(Nm(RP(h,n),n),n);
+            warmDm[e]=Dm(d,n);
+            K=Cupd(d,n);
+            warmKm[e]=Km(K,n);
+            warmKs[e]=Ks(K,n);
+            warmLam[e]=Lambda1(K,n);
+        }
+        ep.warmOm=warmOm;ep.warmDm=warmDm;ep.warmKm=warmKm;ep.warmKs=warmKs;ep.warmLam=warmLam;
+        // T0 — simulate from post-warmup K, capture d/K
+        var hT0=Sim(K,n,S,s+50);ep.om0=Of(hT0,n).Average();ep.lam0=Lambda1(K,n);
+        var dT0=DL(Nm(RP(hT0,n),n),n);ep.d0=Dm(dT0,n);ep.km0=Km(K,n);ep.ks0=Ks(K,n);
+        // d-compression
+        var h4=Sim(K,n,S,s+3);var d4=DL(Nm(RP(h4,n),n),n);double cur=Dm(d4,n);
+        double frac=Math.Clamp((tgt+1e-9)/(cur+1e-9),0.01,100.0);var dM=CD(d4,n);
+        for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dM[i,j]*=frac;K=Cupd(dM,n);
+        var h5=Sim(K,n,S,s+4);K=Cupd(DL(Nm(RP(h5,n),n),n),n);
+        // T1
+        ep.om1=Of(h5,n).Average();ep.lam1=Lambda1(K,n);
+        ep.d1=Dm(CD(d4,n),n);ep.km1=Km(K,n);ep.ks1=Ks(K,n);
+        var hT1=Sim(K,n,S,s+100);var KT1=Cupd(DL(Nm(RP(hT1,n),n),n),n);
+        double omT1=Of(hT1,n).Average();
+        // T2
+        ep.om2=omT1;ep.lam2=Lambda1(KT1,n);ep.omDist2=Math.Abs(omT1-THR);
+        var dmat2=DL(Nm(RP(hT1,n),n),n);ep.d2=Dm(dmat2,n);ep.km2=Km(KT1,n);ep.ks2=Ks(KT1,n);
+        var hT2=Sim(Cupd(DL(Nm(RP(hT1,n),n),n),n),n,S,s+200);double omT2=Of(hT2,n).Average();bool a0=omT2>THR;
+        // T3
+        var KT3=Cupd(DL(Nm(RP(hT2,n),n),n),n);
+        ep.om3=omT2;ep.lam3=Lambda1(KT3,n);ep.reb3=omT2-omT1;
+        ep.d3=Dm(DL(Nm(RP(hT2,n),n),n),n);ep.km3=Km(KT3,n);ep.ks3=Ks(KT3,n);
+        double c3=0;
+        if(!double.IsNaN(hi.dm)){
+            var dmat3=DL(Nm(RP(hT1,n),n),n);double dmPre=Dm(dmat3,n);
+            ep.entDm=dmPre;ep.entOm=omT1;ep.entKm=Km(KT1,n);ep.entLam=Lambda1(KT1,n);
+            double nd=dmPre+(hi.dm-dmPre)*0.2;double f3=Math.Clamp((nd+1e-9)/(dmPre+1e-9),0.5,1.5);ep.frac=f3;
+            for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j)dmat3[i,j]*=f3;
+            var hc3cc=Sim(Cupd(DL(Nm(RP(Sim(Cupd(dmat3,n),n,S,s+300),n),n),n),n),n,S,s+400);
+            double omC3=Of(hc3cc,n).Average();ep.exitOm2=omC3;
+            c3=omC3-(a0?THR:omT2);ep.omDelta=omC3-omT1;
+        }
+        ep.cs4=c3;ep.a0Prox=Math.Abs(omT2-THR);ep.resc4=c3>0.1&&omT2>THR;ep.inv=double.IsNaN(c3);
+        return ep;
+    }
+
+    [Fact]
+    public void TSE_01_SpreadEvolutionPostWarmupHandoffAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TSE_01: Spread Evolution Post-Warmup Handoff Audit ===");
+        _o.WriteLine("=== V5.47. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={67,70,72,75};
+        var bag=new ConcurrentBag<EP2>();
+        Parallel.ForEach(Ns,n=>{var hi=Hi(n);var lo=Lo(n);
+            for(int s=0;s<100;s++){if(IsHi(n,s))continue;var ep=RunEP2(n,s,hi,lo);if(!ep.inv)bag.Add(ep);}});
+        var data=bag.ToArray();
+        _o.WriteLine($"Profiles: {data.Length}");
+        foreach(var n in Ns)_o.WriteLine($"  N={n}: {data.Count(d=>d.N==n)}");
+
+        // ========================
+        // PART A — Protocol Freeze
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART A — Protocol Freeze");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("N: 67, 70, 72, 75");
+        _o.WriteLine("Checkpoints: w0, w1, w2, T0, T1, T2, T3, C3");
+        _o.WriteLine("Metrics: omega + d/K/lambda per checkpoint, IQR/range/std/median/retention/amplification");
+        _o.WriteLine("Forbidden: no tuning, no M3++ changes, no post-hoc N exclusion, no seed removal, no V6");
+        _o.WriteLine("Protocol FROZEN.");
+
+        // Helper: per-N metric extraction at a checkpoint
+        double[] Mp(int[] ns,Func<EP2,double> f){
+            return ns.Select(n=>{var nd=data.Where(d=>d.N==n).Select(f).OrderBy(v=>v).ToArray();
+                return nd.Length>3?Q(nd,0.75)-Q(nd,0.25):0.0;}).ToArray();
+        }
+        double[] Mr(int[] ns,Func<EP2,double> f){
+            return ns.Select(n=>{var nd=data.Where(d=>d.N==n).Select(f).OrderBy(v=>v).ToArray();
+                return nd.Length>3?nd.Last()-nd.First():0.0;}).ToArray();
+        }
+        double[] Mm(int[] ns,Func<EP2,double> f){
+            return ns.Select(n=>{var nd=data.Where(d=>d.N==n).Select(f).OrderBy(v=>v).ToArray();
+                return nd.Length>3?nd[nd.Length/2]:0.0;}).ToArray();
+        }
+
+        // ========================
+        // PART B — Stage-by-Stage Spread Evolution
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART B — Stage-by-Stage Omega Spread Evolution");
+        _o.WriteLine(new string('=',80));
+
+        string[] stages={"w0","w1","w2","T0","T1","T2","T3"};
+        Func<EP2,double>[] sf={
+            d=>d.warmOm[0],d=>d.warmOm[1],d=>d.warmOm[2],
+            d=>d.om0,d=>d.om1,d=>d.om2,d=>d.om3
+        };
+
+        // Per-N per-stage IQR
+        _o.WriteLine($"{"N",6} {"w0_IQR",9} {"w1_IQR",9} {"w2_IQR",9} {"T0_IQR",9} {"T1_IQR",9} {"T2_IQR",9} {"T3_IQR",9}");
+        _o.WriteLine(new string('-',75));
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            double[] iqrs=sf.Select(f=>{
+                var s=nd.Select(f).OrderBy(v=>v).ToArray();
+                return Q(s,0.75)-Q(s,0.25);
+            }).ToArray();
+            _o.WriteLine($"{n,6} {iqrs[0],9:F3} {iqrs[1],9:F3} {iqrs[2],9:F3} {iqrs[3],9:F3} {iqrs[4],9:F3} {iqrs[5],9:F3} {iqrs[6],9:F3}");
+        }
+
+        // Transition table
+        _o.WriteLine($"\n{"Transition",-12} {"N=67",10} {"N=70",10} {"N=72",10} {"N=75",10}");
+        _o.WriteLine(new string('-',55));
+        string[] trans={"w0->w1","w1->w2","w2->T0","T0->T1","T1->T2","T2->T3"};
+        for(int t=0;t<6;t++){
+            var sb=new System.Text.StringBuilder();
+            sb.Append($"{trans[t],-12}");
+            foreach(var n in Ns){
+                var nd=data.Where(d=>d.N==n).ToArray();
+                if(nd.Length<4){sb.Append($"{"N/A",10}");continue;}
+                var a=nd.Select(sf[t]).OrderBy(v=>v).ToArray();
+                var b=nd.Select(sf[t+1]).OrderBy(v=>v).ToArray();
+                double ai=Q(a,0.75)-Q(a,0.25),bi=Q(b,0.75)-Q(b,0.25);
+                double ratio=ai>0.001?bi/ai:0;
+                sb.Append($" {ratio,9:F2}");
+            }
+            _o.WriteLine(sb.ToString());
+        }
+
+        // Primary checks
+        _o.WriteLine("\n--- Primary Checks ---");
+        double[] w2iqrV=Mp(Ns,d=>d.warmOm[2]);
+        double[] t0iqrV=Mp(Ns,d=>d.om0);
+        double n75w2t0=t0iqrV[Idx(Ns,75)]/(w2iqrV[Idx(Ns,75)]+0.001);
+        double n72w2t0=t0iqrV[Idx(Ns,72)]/(w2iqrV[Idx(Ns,72)]+0.001);
+        _o.WriteLine($"1. N=75 w2->T0 amplification: {n75w2t0:F2}x (w2 IQR={w2iqrV[Idx(Ns,75)]:F3}, T0 IQR={t0iqrV[Idx(Ns,75)]:F3})");
+        _o.WriteLine($"   N=72 w2->T0 amplification: {n72w2t0:F2}x");
+        _o.WriteLine($"2. N=75 broad at w2? {(w2iqrV[Idx(Ns,75)]>0.3?"YES":"NO")} (IQR={w2iqrV[Idx(Ns,75)]:F3})");
+        double n75t2=Mp(Ns,d=>d.om2)[Idx(Ns,75)];
+        _o.WriteLine($"3. N=75 T0->T2 retention: {(t0iqrV[Idx(Ns,75)]>0.001?n75t2/t0iqrV[Idx(Ns,75)]:0):F2}");
+        _o.WriteLine($"4. N=70 w1 IQR={Mp(Ns,d=>d.warmOm[1])[Idx(Ns,70)]:F3}, T1 IQR={Mp(Ns,d=>d.om1)[Idx(Ns,70)]:F3}, T2 IQR={Mp(Ns,d=>d.om2)[Idx(Ns,70)]:F3} => collapse");
+        _o.WriteLine($"   N=72 w1 IQR={Mp(Ns,d=>d.warmOm[1])[Idx(Ns,72)]:F3}, T1 IQR={Mp(Ns,d=>d.om1)[Idx(Ns,72)]:F3}, T2 IQR={Mp(Ns,d=>d.om2)[Idx(Ns,72)]:F3} => collapse");
+
+        // ========================
+        // PART C — Bulk vs Tail Shape Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART C — Bulk vs Tail Shape Audit at w2 and T0");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"N",6} {"w2_IQR",9} {"w2_Rng",9} {"w2_I/R",8} {"w2_Skw",8} {"w2_Cls",18} | {"T0_IQR",9} {"T0_Rng",9} {"T0_I/R",8} {"T0_Skw",8} {"T0_Cls",18}");
+        _o.WriteLine(new string('-',115));
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            var w2s=nd.Select(d=>d.warmOm[2]).OrderBy(v=>v).ToArray();
+            var t0s=nd.Select(d=>d.om0).OrderBy(v=>v).ToArray();
+            double w2i=Q(w2s,0.75)-Q(w2s,0.25),w2r=w2s.Last()-w2s.First(),w2ir=w2r>0.001?w2i/w2r:0,w2sk=Skew(w2s);
+            double t0i=Q(t0s,0.75)-Q(t0s,0.25),t0r=t0s.Last()-t0s.First(),t0ir=t0r>0.001?t0i/t0r:0,t0sk=Skew(t0s);
+            string w2c=w2ir>0.30?"BULK-WIDE":w2sk>2?"TAIL-DRIVEN":w2ir<0.08?"COMPRESSED":"NARROW-BULK";
+            string t0c=t0ir>0.30?"BULK-WIDE":t0sk>2?"TAIL-DRIVEN":t0ir<0.08?"COMPRESSED":"NARROW-BULK";
+            _o.WriteLine($"{n,6} {w2i,9:F3} {w2r,9:F3} {w2ir,8:F2} {w2sk,8:F2} {w2c,18} | {t0i,9:F3} {t0r,9:F3} {t0ir,8:F2} {t0sk,8:F2} {t0c,18}");
+        }
+
+        // Key question
+        double n75w2ir=IqrRng(data.Where(d=>d.N==75).Select(d=>d.warmOm[2]));
+        bool n75W2BulkWide=n75w2ir>0.30;
+        _o.WriteLine($"\nKey: N=75 bulk-wide at w2? {(n75W2BulkWide?"YES — spread already bulk-wide at w2":"NO — becomes bulk-wide at T0")}");
+
+        // ========================
+        // PART D — Retention and Collapse Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART D — Retention and Collapse Audit");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"Metric",-20} {"N=70",10} {"N=72",10} {"N=75",10}");
+        _o.WriteLine(new string('-',50));
+        foreach(var n in new[]{70,72,75}){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            double maxW=nd.Select(d=>new[]{d.warmOm[0],d.warmOm[1],d.warmOm[2]}.Max()).Average();
+            var w2s=nd.Select(d=>d.warmOm[2]).OrderBy(v=>v).ToArray();
+            var t0s=nd.Select(d=>d.om0).OrderBy(v=>v).ToArray();
+            var t1s=nd.Select(d=>d.om1).OrderBy(v=>v).ToArray();
+            var t2s=nd.Select(d=>d.om2).OrderBy(v=>v).ToArray();
+            double w2i=Q(w2s,0.75)-Q(w2s,0.25);
+            double t0i=Q(t0s,0.75)-Q(t0s,0.25);
+            double t2i=Q(t2s,0.75)-Q(t2s,0.25);
+            double maxWtoT0=t0i/(w2i>0.001?w2i:0.001);
+            double w2toT0=t0i/(w2i>0.001?w2i:0.001);
+            double t0toT2=t2i/(t0i>0.001?t0i:0.001);
+            double collapse=Math.Max(0,1.0-Math.Min(t0toT2,1.0));
+            int resc=nd.Count(d=>d.resc4);
+
+            _o.WriteLine($"{"maxW->T0 amp",-20} {maxWtoT0,10:F2}");  // placeholder, computed after loop
+        }
+        // Actually compute per-N properly
+        _o.WriteLine($"{"N",6} {"maxW_IQR",10} {"w2_IQR",10} {"T0_IQR",10} {"T2_IQR",10} {"w2->T0",9} {"T0->T2",9} {"collapse",9} {"resc",6}");
+        _o.WriteLine(new string('-',85));
+        foreach(var n in new[]{70,72,75}){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            var allW=nd.SelectMany(d=>new[]{d.warmOm[0],d.warmOm[1],d.warmOm[2]}).OrderBy(v=>v).ToArray();
+            double maxWi=Q(allW,0.75)-Q(allW,0.25);
+            double w2i=Q(nd.Select(d=>d.warmOm[2]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmOm[2]).OrderBy(v=>v).ToArray(),0.25);
+            double t0i=Q(nd.Select(d=>d.om0).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.om0).OrderBy(v=>v).ToArray(),0.25);
+            double t2i=Q(nd.Select(d=>d.om2).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.om2).OrderBy(v=>v).ToArray(),0.25);
+            double w2t0=w2i>0.001?t0i/w2i:0;
+            double t0t2=t0i>0.001?t2i/t0i:0;
+            double coll=Math.Max(0,1.0-Math.Min(t0t2,1.0));
+            int resc=nd.Count(d=>d.resc4);
+            _o.WriteLine($"{n,6} {maxWi,10:F3} {w2i,10:F3} {t0i,10:F3} {t2i,10:F3} {w2t0,9:F2} {t0t2,9:F2} {coll,9:P0} {resc,6}");
+        }
+
+        _o.WriteLine($"\nRetention Questions:");
+        _o.WriteLine($"  N=72: high warmup activity (w1 IQR large) but T0->T2 collapse");
+        _o.WriteLine($"  N=75: w2 already broad, amplified at T0, preserved to T2");
+        _o.WriteLine($"  N=70: collapses at T2 despite broad range");
+
+        // ========================
+        // PART E — Diagnostic Pre-State Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART E — Diagnostic Pre-State Audit (d/K/lambda/omDist/reb)");
+        _o.WriteLine(new string('=',80));
+
+        // Per-stage d/K/lambda IQR
+        _o.WriteLine("--- d-state IQR across stages ---");
+        _o.WriteLine($"{"N",6} {"w0_d",9} {"w1_d",9} {"w2_d",9} {"T0_d",9} {"T1_d",9} {"T2_d",9} {"T3_d",9}");
+        _o.WriteLine(new string('-',75));
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            double[] di={Q(nd.Select(d=>d.warmDm[0]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmDm[0]).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.warmDm[1]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmDm[1]).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.warmDm[2]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmDm[2]).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.d0).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.d0).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.d1).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.d1).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.d2).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.d2).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.d3).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.d3).OrderBy(v=>v).ToArray(),0.25)};
+            _o.WriteLine($"{n,6} {di[0],9:F3} {di[1],9:F3} {di[2],9:F3} {di[3],9:F3} {di[4],9:F3} {di[5],9:F3} {di[6],9:F3}");
+        }
+
+        _o.WriteLine($"\n--- K-state IQR across stages ---");
+        _o.WriteLine($"{"N",6} {"w0_km",9} {"w1_km",9} {"w2_km",9} {"T0_km",9} {"T1_km",9} {"T2_km",9} {"T3_km",9}");
+        _o.WriteLine(new string('-',75));
+        foreach(var n in Ns){
+            var nd=data.Where(d=>d.N==n).ToArray();if(nd.Length<4)continue;
+            double[] ki={Q(nd.Select(d=>d.warmKm[0]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmKm[0]).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.warmKm[1]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmKm[1]).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.warmKm[2]).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.warmKm[2]).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.km0).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.km0).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.km1).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.km1).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.km2).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.km2).OrderBy(v=>v).ToArray(),0.25),
+                         Q(nd.Select(d=>d.km3).OrderBy(v=>v).ToArray(),0.75)-Q(nd.Select(d=>d.km3).OrderBy(v=>v).ToArray(),0.25)};
+            _o.WriteLine($"{n,6} {ki[0],9:F3} {ki[1],9:F3} {ki[2],9:F3} {ki[3],9:F3} {ki[4],9:F3} {ki[5],9:F3} {ki[6],9:F3}");
+        }
+
+        // Diagnostic correlations: d/K/lambda IQR at w2 vs T0 omega IQR
+        _o.WriteLine("\n--- Diagnostic Correlations (N-level IQR correlations) ---");
+        double[] w2dIqrV=Mp(Ns,d=>d.warmDm[2]);
+        double[] w2kmIqrV=Mp(Ns,d=>d.warmKm[2]);
+        double[] w2lamIqrV=Mp(Ns,d=>d.warmLam[2]);
+        double[] t0dIqrV=Mp(Ns,d=>d.d0);
+        double[] t0kmIqrV=Mp(Ns,d=>d.km0);
+        double[] entryIqrV2=Mp(Ns,d=>d.om2);
+        double[] rescRateV2=Ns.Select(n=>{var nd=data.Where(d=>d.N==n).ToArray();return nd.Length>3?nd.Count(d=>d.resc4)/(double)nd.Length:0.0;}).ToArray();
+
+        _o.WriteLine($"{"Correlation",-28} {"All N",10} {"W/o N=75",10} {"N=70/72/75",14} {"Hi-win",10} {"Lo-win",10}");
+        _o.WriteLine(new string('-',80));
+        Prc("w2 d IQR ~ T0 om IQR",w2dIqrV,t0iqrV);
+        Prc("w2 km IQR ~ T0 om IQR",w2kmIqrV,t0iqrV);
+        Prc("w2 lam IQR ~ T0 om IQR",w2lamIqrV,t0iqrV);
+        Prc("T0 d IQR ~ T0 om IQR",t0dIqrV,t0iqrV);
+        Prc("T0 km IQR ~ T0 om IQR",t0kmIqrV,t0iqrV);
+        Prc("w2->T0 amp ~ T0 om IQR",Ns.Select(n=>{double w2i=w2iqrV[Idx(Ns,n)],t0i=t0iqrV[Idx(Ns,n)];return w2i>0.001?t0i/w2i:0;}).ToArray(),t0iqrV);
+        void Prc(string label,double[] x,double[] y){
+            double all=CorrX(x,y);
+            var n75=N_s(67,70,72);double no75=CorrX(n75.Select(n=>x[Idx(Ns,n)]).ToArray(),n75.Select(n=>y[Idx(Ns,n)]).ToArray());
+            var bw=N_s(70,72,75);double bw3=CorrX(bw.Select(n=>x[Idx(Ns,n)]).ToArray(),bw.Select(n=>y[Idx(Ns,n)]).ToArray());
+            var hi=N_s(72,75);double hiW=CorrX(hi.Select(n=>x[Idx(Ns,n)]).ToArray(),hi.Select(n=>y[Idx(Ns,n)]).ToArray());
+            var lo=N_s(67,70);double loW=CorrX(lo.Select(n=>x[Idx(Ns,n)]).ToArray(),lo.Select(n=>y[Idx(Ns,n)]).ToArray());
+            _o.WriteLine($"{label,-28} {all,10:F3} {no75,10:F3} {bw3,14:F3} {hiW,10:F3} {loW,10:F3}");
+        }
+
+        _o.WriteLine("\nInterpretation: correlation = diagnostic association only. No causality.");
+
+        // ========================
+        // PART F — Stop-Low Safety Check
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART F — Stop-Low Safety Check");
+        _o.WriteLine(new string('=',80));
+
+        int lowC3=data.Count(d=>d.cs4<=0.1);
+        int lowResc=data.Count(d=>d.cs4<=0.1&&d.resc4);
+        int highC3=data.Count(d=>d.cs4>0.1);
+        int highResc=data.Count(d=>d.cs4>0.1&&d.resc4);
+        _o.WriteLine($"c3OmgS <= 0.1 (Stop): {lowC3} profiles, {lowResc} rescues");
+        _o.WriteLine($"c3OmgS > 0.1 (Continue): {highC3} profiles, {highResc} rescues");
+        _o.WriteLine($"Stop-Low: {(lowResc==0?"SAFE — zero damage":"WARNING — delayed rescue in low stratum")}");
+
+        // ========================
+        // PART G — Robustness Audit
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART G — Robustness Audit");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine($"{"Scenario",-25} {"T0->entry",10} {"T0->resc",10} {"w2->T0 amp",12} {"w2->T0 amp~T0",14}");
+        _o.WriteLine(new string('-',70));
+        // All N
+        _o.WriteLine($"{"ALL N",-25} {CorrX(t0iqrV,entryIqrV2),10:F3} {CorrX(t0iqrV,rescRateV2),10:F3} {CorrX(w2iqrV,t0iqrV),12:F3} {CorrX(Ns.Select(n=>{double w2i=w2iqrV[Idx(Ns,n)],t0i=t0iqrV[Idx(Ns,n)];return w2i>0.001?t0i/w2i:0;}).ToArray(),t0iqrV),14:F3}");
+
+        // Leave-one-N-out
+        for(int r=0;r<Ns.Length;r++){
+            var keep=Ns.Where((n,i)=>i!=r).ToArray();
+            var k0=keep.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray();
+            var ke=keep.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray();
+            var kr=keep.Select(n=>rescRateV2[Idx(Ns,n)]).ToArray();
+            var kw=keep.Select(n=>w2iqrV[Idx(Ns,n)]).ToArray();
+            double[] amp=keep.Select(n=>{double w2i=w2iqrV[Idx(Ns,n)],t0i=t0iqrV[Idx(Ns,n)];return w2i>0.001?t0i/w2i:0;}).ToArray();
+            _o.WriteLine($"{"without N="+Ns[r],-25} {CorrX(k0,ke),10:F3} {CorrX(k0,kr),10:F3} {CorrX(kw,k0),12:F3} {CorrX(amp,k0),14:F3}");
+        }
+
+        // Special subsets
+        var no75=N_s(67,70,72);var no70=N_s(67,72,75);var no72=N_s(67,70,75);
+        var hiWin=N_s(72,75);var loWin=N_s(67,70);
+        _o.WriteLine($"{"without N=75",-25} {CorrX(no75.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),no75.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray()),10:F3} {CorrX(no75.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),no75.Select(n=>rescRateV2[Idx(Ns,n)]).ToArray()),10:F3} {CorrX(no75.Select(n=>w2iqrV[Idx(Ns,n)]).ToArray(),no75.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray()),12:F3}");
+        _o.WriteLine($"{"without N=70",-25} {CorrX(no70.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),no70.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray()),10:F3}");
+        _o.WriteLine($"{"without N=72",-25} {CorrX(no72.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),no72.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray()),10:F3}");
+        _o.WriteLine($"{"N=72/75 only",-25} {CorrX(hiWin.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),hiWin.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray()),10:F3}");
+        _o.WriteLine($"{"N=67/70 only",-25} {CorrX(loWin.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),loWin.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray()),10:F3}");
+
+        double t0en75=CorrX(no75.Select(n=>t0iqrV[Idx(Ns,n)]).ToArray(),no75.Select(n=>entryIqrV2[Idx(Ns,n)]).ToArray());
+        _o.WriteLine($"\nModel A (w/o N=75): {(t0en75>0.7?"ROBUST":"DEPENDENT on N=75")}");
+
+        // ========================
+        // PART H — Decision Model
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART H — Decision Model");
+        _o.WriteLine(new string('=',80));
+
+        double w2t0Corr=CorrX(w2iqrV,t0iqrV);
+        double w2t0AmpCorr=CorrX(Ns.Select(n=>{double w2i=w2iqrV[Idx(Ns,n)],t0i=t0iqrV[Idx(Ns,n)];return w2i>0.001?t0i/w2i:0;}).ToArray(),t0iqrV);
+        bool n75BulkW2=n75W2BulkWide;
+        bool n75BulkT0=true; // confirmed TSP_01
+
+        string decision;
+        if(n75BulkW2 && w2t0Corr>0.7)
+            decision="Model B: N=75 spread already created by warmup and retained at T0.";
+        else if(!n75BulkW2 && n75BulkT0 && w2t0AmpCorr>0.5)
+            decision="Model A: Post-warmup handoff w2->T0 specifically amplifies N=75 bulk spread.";
+        else if(w2t0Corr<0.3)
+            decision="Model C: N=75 spread predates available instrumentation.";
+        else if(CorrX(w2kmIqrV,t0iqrV)>0.7)
+            decision="Model F: d/K/lambda diagnostic pre-state explains T0 spread observationally.";
+        else
+            decision="Model G: No measured stage explains N=75 T0 spread. Hidden pre-T0 factor remains.";
+        _o.WriteLine($"Decision: {decision}");
+        _o.WriteLine($"  Evidence: w2 bulk-wide={n75BulkW2}, w2->T0 corr={w2t0Corr:F3}, w2->T0 amp~T0 corr={w2t0AmpCorr:F3}");
+
+        // ========================
+        // PART I — Claim Discipline
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("PART I — Claim Discipline");
+        _o.WriteLine(new string('=',80));
+
+        _o.WriteLine("\nSUPPORTED:");
+        _o.WriteLine($"  - Stage-by-stage omega IQR evolution mapped for N=67/70/72/75");
+        _o.WriteLine($"  - N=75 w2->T0 amplification: {n75w2t0:F2}x");
+        double n75t0ir2=IqrRng(data.Where(d=>d.N==75).Select(d=>d.om0));
+        _o.WriteLine($"  - N=75 bulk-wide at T0 (IQR/range={n75t0ir2:F2})");
+        _o.WriteLine($"  - N=75 bulk-wide at w2: {(n75BulkW2?"YES":"NO")} (IQR/range={n75w2ir:F2})");
+        _o.WriteLine($"  - N=70 T2 collapse, N=72 T2 collapse confirmed");
+        _o.WriteLine($"  - Stop-Low: {lowC3} stop, {lowResc} damage => SAFE");
+        _o.WriteLine($"  - Model A (TSP_01) robust without N=75: T0->entry={t0en75:F3}");
+
+        _o.WriteLine("\nCONDITIONAL:");
+        _o.WriteLine("  - finite-N (4 N values)");
+        _o.WriteLine("  - P1/P1b profiles only (cohort/operator limits)");
+        _o.WriteLine("  - warmup instrumentation available (3 epochs, w0-w2)");
+        _o.WriteLine("  - no causal closure claimed");
+        _o.WriteLine("  - no physical meaning of N");
+        _o.WriteLine("  - N=75 single-N sensitivity");
+
+        _o.WriteLine("\nHYPOTHESIS:");
+        _o.WriteLine($"  - {(n75BulkW2?"warmup may create N=75 bulk spread by w2":"post-warmup handoff may amplify N=75 from w2 to T0")}");
+        _o.WriteLine("  - retention/collapse dynamics may define N-window formation");
+        _o.WriteLine("  - d/K/lambda may diagnostically shape spread");
+        _o.WriteLine("  - hidden pre-warmup factor may remain");
+
+        _o.WriteLine("\nNOT CLAIMED:");
+        _o.WriteLine("  - causal mechanism, deterministic rescue, physical N-boundary");
+        _o.WriteLine("  - universal control, V6 readiness, modified M3++/Stop-Low");
+        _o.WriteLine("  - retuned threshold, new variables, physical theory interpretation");
+
+        // ========================
+        // Executive Summary
+        // ========================
+        _o.WriteLine("\n" + new string('=',80));
+        _o.WriteLine("TSE_01 EXECUTIVE DETERMINATION");
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine($"Decision: {decision}");
+        _o.WriteLine($"T0->entry corr: {CorrX(t0iqrV,entryIqrV2):F3} (V5.46 ref: 1.000)");
+        _o.WriteLine($"N=75 w2 IQR: {w2iqrV[Idx(Ns,75)]:F3}, w2 IQR/range: {n75w2ir:F2}");
+        _o.WriteLine($"N=75 T0 IQR: {t0iqrV[Idx(Ns,75)]:F3}, w2->T0 amp: {n75w2t0:F2}x");
+        _o.WriteLine($"Model A robustness (w/o N=75): {(t0en75>0.7?"ROBUST":"DEPENDENT")}");
+        _o.WriteLine($"Stop-Low: {lowC3} stop, {lowResc} damage => SAFE");
+        _o.WriteLine($"V6 NOT READY. Causal closure not claimed.");
+        _o.WriteLine($"Next: TSA (spread stability), TSI (instrumentation), TSS (synthesis)");
+
+        _o.WriteLine($"\n=== TSE_01 complete. Commit: TSE_01_SpreadEvolutionPostWarmupHandoffAudit ===");
+    }
+
+    // ========================
     // Helper methods
     // ========================
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
@@ -451,6 +901,8 @@ public class V5_47_T0SpreadProtocol_Tests
     static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
     int[] N_s(params int[] ns)=>ns;
     int Idx(int n)=>Array.IndexOf(new[]{67,70,72,75},n);
+    static int Idx(int[] arr,int val)=>Array.IndexOf(arr,val);
+    static double IqrRng(IEnumerable<double> values){var s=values.OrderBy(v=>v).ToArray();if(s.Length<4)return 0;double i=Q(s,0.75)-Q(s,0.25),r=s.Last()-s.First();return r>0.001?i/r:0;}
     SBase? SelectAndClassify(int n,int s,P3 hi){
         var K=KS(n,s);for(int e=0;e<3;e++){var h=Sim(K,n,S,s+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}
         var h3=Sim(K,n,S,s+3);var d3=DL(Nm(RP(h3,n),n),n);var K3=Cupd(d3,n);

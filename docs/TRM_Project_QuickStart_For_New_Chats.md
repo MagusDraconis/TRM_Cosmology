@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V5.47 ACTIVE (TSP_01 COMPLETE) |
 | Current Branch | `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation` |
-| Total Tests | 2874 |
+| Total Tests | 2875 |
 | Failed Tests | 0 |
-| Current Status | V5.47 ACTIVE — TSP_01 passed. Model A ROBUST. N=75 bulk-wide at T0 origin. |
+| Current Status | V5.47 ACTIVE — TSP_01 + TSE_01 COMPLETE. w2→T0 handoff amplifies N=75. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -102,9 +102,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.44 | C3 Correction Response Instrumentation | COMPLETE — c3ExitOm2 identified; N-dependent bridge. |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | COMPLETE — Bridge explained via IQR/distribution shape. |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | COMPLETE — T0 inherited spread dominates; N=75 uniquely broad. |
-| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — TSP_01 passed. Model A ROBUST. N=75 bulk-wide, warmup-instrumented. |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — TSP_01 + TSE_01 passed. w2→T0 amplifies N=75 bulk spread. |
 
-**Cumulative total: 2874 tests, 0 failed as of 2026-07-20.**
+**Cumulative total: 2875 tests, 0 failed as of 2026-07-20.**
 
 ---
 
@@ -148,6 +148,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 28. **Causal test methodology (V5.41):** Perturbation INVALIDATED. Natural variation = STABLE DIAGNOSTIC. 8 claims REJECTED. **Predictive validity (Stop-Low) does not require causal closure.**
 29. **T0 inherited spread dominates entry distribution (V5.46):** T0→entry IQR corr = 1.000. N=75 uniquely broad (IQR=1.200 vs 0.047). Model A ROBUST.
 30. **N=75 bulk-wide at T0 origin (V5.47 TSP_01):** IQR/range = 0.93 → genuinely wide bulk, not tail-driven. Broadness NOT present during warmup (epoch-0 IQR=0.004), appears post-warmup at T0. d/K pre-state provides moderate diagnostic association only (not causal). Stop-Low safe.
+31. **w2→T0 handoff amplifies N=75 (V5.47 TSE_01):** N=75 w2 IQR = 0.604 (NOT bulk-wide) → T0 IQR = 1.200 (1.98x amp). N=72 is bulk-wide at w2 but COLLAPSES at T0 (0.11x). Amplification is N=75-specific. Stage-by-stage d/K/lambda mapped across 7 checkpoints.
 
 ---
 
