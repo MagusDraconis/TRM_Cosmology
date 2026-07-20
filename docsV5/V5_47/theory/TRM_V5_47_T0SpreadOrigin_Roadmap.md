@@ -16,10 +16,21 @@
 - Full d/K/lambda per-stage instrumentation confirms moderate diagnostic, not causal
 - Stop-Low safe. V6 NOT READY.
 
+## THD_01 Results
+**Model E: d/K at w2 near-perfectly diagnostic of handoff delta within each N. Rank-inverting transform.**
+
+- N=75 Spearman = -0.671 (rank-INVERTING), N=72 Spearman = -0.483 (rank-inverting)
+- **Contrary to hypothesis:** ranks are NOT preserved during handoff
+- d_w2 ~ delta_om: N=72=-0.923, N=75=-0.964 (near-perfect!)
+- km_w2 ~ delta_om: N=72=0.956, N=75=0.964 (near-perfect!)
+- d/K at w2 strongly diagnostic within each N, but does NOT explain amp vs collapse between N
+- N=75 shape: S1 Bulk-wide amplification, N=72: S2 Bulk collapse, N=70: S3 Stable compressed
+- Stop-Low safe. V6 NOT READY.
+
 ## Open Questions
-- Why does N=75 amplify in the w2→T0 handoff while N=72 collapses?
-- What mechanism distinguishes N=75 from N=72 at the w2 state?
-- Pre-warmup to w0 still NOT INSTRUMENTED.
+- Why does rank inversion produce amplification in N=75 but collapse in N=72?
+- d/K baseline differs between N (N=72 d_w2=0.439, N=75 d_w2=0.358) — does this baseline gap determine direction?
+- Pre-warmup instrumentation still unresolved.
 
 ## Next Steps
 - TSA: Spread stability audit (how reproducible are w2→T0 dynamics across re-runs?)

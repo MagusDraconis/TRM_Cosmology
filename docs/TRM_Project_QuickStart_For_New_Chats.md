@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V5.47 ACTIVE (TSP_01 COMPLETE) |
 | Current Branch | `feature/v5.47-post-warmup-t0-spread-origin-and-n-window-formation` |
-| Total Tests | 2875 |
+| Total Tests | 2876 |
 | Failed Tests | 0 |
-| Current Status | V5.47 ACTIVE — TSP_01 + TSE_01 COMPLETE. w2→T0 handoff amplifies N=75. |
+| Current Status | V5.47 ACTIVE — TSP+TSE+THD COMPLETE. Rank-inverting handoff. d/K near-perfect diagnostic. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -102,9 +102,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.44 | C3 Correction Response Instrumentation | COMPLETE — c3ExitOm2 identified; N-dependent bridge. |
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | COMPLETE — Bridge explained via IQR/distribution shape. |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | COMPLETE — T0 inherited spread dominates; N=75 uniquely broad. |
-| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — TSP_01 + TSE_01 passed. w2→T0 amplifies N=75 bulk spread. |
+| V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | ACTIVE — TSP+TSE+THD passed. Rank-inverting handoff. d/K near-perfect diagnostic within N. |
 
-**Cumulative total: 2875 tests, 0 failed as of 2026-07-20.**
+**Cumulative total: 2876 tests, 0 failed as of 2026-07-20.**
 
 ---
 
@@ -149,6 +149,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 29. **T0 inherited spread dominates entry distribution (V5.46):** T0→entry IQR corr = 1.000. N=75 uniquely broad (IQR=1.200 vs 0.047). Model A ROBUST.
 30. **N=75 bulk-wide at T0 origin (V5.47 TSP_01):** IQR/range = 0.93 → genuinely wide bulk, not tail-driven. Broadness NOT present during warmup (epoch-0 IQR=0.004), appears post-warmup at T0. d/K pre-state provides moderate diagnostic association only (not causal). Stop-Low safe.
 31. **w2→T0 handoff amplifies N=75 (V5.47 TSE_01):** N=75 w2 IQR = 0.604 (NOT bulk-wide) → T0 IQR = 1.200 (1.98x amp). N=72 is bulk-wide at w2 but COLLAPSES at T0 (0.11x). Amplification is N=75-specific. Stage-by-stage d/K/lambda mapped across 7 checkpoints.
+32. **Handoff is rank-INVERTING, d/K near-perfectly diagnostic (V5.47 THD_01):** N=75 Spearman = -0.671, N=72 Spearman = -0.483 — both invert ranks. d_w2 ~ delta_om: N=72=-0.923, N=75=-0.964; km_w2 ~ delta_om: N=72=0.956, N=75=0.964. d/K at w2 near-perfectly associated with handoff delta within each N, but does not explain amplification vs collapse direction between N.
 
 ---
 

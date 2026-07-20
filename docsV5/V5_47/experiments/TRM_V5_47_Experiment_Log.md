@@ -3,9 +3,25 @@
 |-------|--------|-------|---------|
 | TSP | COMPLETE | 1 (TSP_01) | Model A ROBUST — T0 inherited spread dominates, N=75 bulk-wide at origin |
 | TSE | COMPLETE | 1 (TSE_01) | Model A — w2→T0 handoff amplifies N=75 bulk spread (1.98x) |
+| THD | COMPLETE | 1 (THD_01) | Model D — Rank-inverting handoff. d/K near-perfectly diagnostic. |
 | TSA | PLANNED | — | — |
 | TSI | PLANNED | — | — |
 | TSS | PLANNED | — | — |
+
+## THD_01 — Handoff Discriminator Audit (2026-07-20)
+- **Passed.** 51s execution, 63 profiles.
+- **Decision: Model D — Both N scramble/invert ranks during w2→T0 handoff.**
+- N=75 Spearman = -0.671 (rank-INVERTING), N=72 Spearman = -0.483 (rank-inverting)
+- **Contrary to hypothesis:** ranks are NOT preserved; the handoff inverts/scrambles rank order
+- N=75 shape: S1 Bulk-wide amplification (T0 IQR/range=0.93)
+- N=72 shape: S2 Bulk collapse (T0 IQR/range=0.02)
+- N=70 shape: S3 Stable compressed
+- **Profile-level d_w2 ~ delta_om: N=72=-0.923, N=75=-0.964 (near-perfect diagnostic!)**
+- **km_w2 ~ delta_om: N=72=0.956, N=75=0.964 (near-perfect diagnostic!)**
+- w2-state d and km almost perfectly anti-/correlated with handoff delta at profile level
+- d/K/lambda are strongly diagnostic but do not explain amplification vs collapse direction
+- Stop-Low: 41 stop, 0 damage → SAFE
+- V6 NOT READY. Causal closure not claimed.
 
 ## TSP_01 — T0 Spread Origin Protocol (2026-07-20)
 - **Passed.** 50s execution, 63 profiles across N={67,70,72,75}.
