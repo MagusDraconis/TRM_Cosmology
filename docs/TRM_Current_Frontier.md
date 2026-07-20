@@ -3,9 +3,9 @@
 **Version:** 1.4
 **Date:** 2026-07-20
 
-**Current Version:** V5.49 COMPLETE
-**Current Branch:** `feature/v5.49-spread-generation-and-distribution-origin`
-**Cumulative Tests:** 2882
+**Current Version:** V5.50 COMPLETE
+**Current Branch:** `feature/v5.50-kernel-class-assignment-and-boundary-origin`
+**Cumulative Tests:** 2884
 **Failed:** 0
 
 ---
@@ -22,13 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.49 identified a stable rank-inverting transition kernel underlying N-window formation.
-Spread differences are generated during the w1→w2 warmup transition, not inherited.
-Three stable kernel classes (K1 compression, K2 expansion, K3 stable) are defined by
-amplification ratio and preserved across stages. Amplification ratio alone cleanly separates
-all kernel classes (jackknife-robust). Rank inversion is observed in 6/6 tested
-N-transition pairs. Shape/spread dominates mean state for classification. Stop-Low
-remains safe. Causal closure remains blocked. V6 NOT READY.
+V5.50 identified a regression-to-mean signature in kernel-class assignment. Pre-transition
+km/lambda spread preorders the stable kernel classes: K1 (largest spread → compresses),
+K3 (intermediate → stable), K2 (smallest → expands). Mean-state explanations fail.
+Amp ratio separates classes cross-domain. Assignment is jackknife-stable and synthesis-ready.
+Stop-Low safe. Causal closure blocked. V6 NOT READY.
 
 ---
 

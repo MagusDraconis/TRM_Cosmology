@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.49 COMPLETE |
-| Current Branch | `feature/v5.49-spread-generation-and-distribution-origin` |
-| Total Tests | 2882 |
+| Current Version | V5.50 COMPLETE |
+| Current Branch | feature/v5.50-kernel-class-assignment-and-boundary-origin |
+| Total Tests | 2884 |
 | Failed Tests | 0 |
-| Current Status | V5.49 COMPLETE — Stable rank-inverting transition kernel. K1/K2/K3 kernel classes. |
+| Current Status | V5.50 COMPLETE - Spread-ordered kernel-class assignment. Regression-to-mean. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

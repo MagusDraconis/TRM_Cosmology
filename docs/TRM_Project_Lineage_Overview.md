@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-19
 **Scope:** Clockwork Cosmology V1 through V5.49
-**Tests:** 2882 verified, 0 failed
-**Branch:** `feature/v5.49-spread-generation-and-distribution-origin`
-**Current Frontier:** V5.49 COMPLETE → V5.50 PENDING
+**Tests:** 2884 verified, 0 failed
+**Branch:** feature/v5.50-kernel-class-assignment-and-boundary-origin
+**Current Frontier:** V5.50 COMPLETE
 
 ---
 
@@ -1355,7 +1355,8 @@ maintained to prevent overinterpretation:
 | V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | 5 | COMPLETE |
 | V5.48 | Distribution Shape vs Mean State — N-Window Formation | 1 | COMPLETE |
 | V5.49 | Spread Generation and Distribution Origin | 4 | COMPLETE |
-| **Total** | | **2882** | **0 failed** |
+| V5.50 | Kernel-Class Assignment and Boundary Origin | 2 | COMPLETE |
+| **Total** | | **2884** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
 tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
