@@ -1,0 +1,51 @@
+{
+  "releaseStatus": "V5.55 INITIALIZED",
+  "phase": "Residual Selection Preference",
+  "date": "2026-07-21",
+  "branch": "feature/v5.55-residual-selection-preference",
+  "base": "V5.54 COMPLETE",
+  "baseCommit": "8043005",
+  "testSummary": {
+    "total": 2908,
+    "passed": 2908,
+    "failed": 0
+  },
+  "suites": [],
+  "finalModel": null,
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY",
+  "purpose": "Why is SAC sensitive to the 6.4% residual component rather than the dominant 93.6% seed component?",
+  "primaryQuestion": "Does SAC prefer residual spread over seed-level spread for P1/P1b discrimination?",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true
+  },
+  "supportedFindings": [],
+  "conditionalFindings": [
+    "finite-N limited",
+    "sparse SAC retention",
+    "diagnostic not causal"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical interpretation",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold"
+  ],
+  "recommendedFirstSuite": "RSP_01_ResidualSelectionPreferenceAudit",
+  "nextSteps": [
+    "Compare seed vs residual rawIQR discrimination strength",
+    "Compute variance efficiency ratio",
+    "Determine if seed information dilutes or improves discrimination"
+  ]
+}
