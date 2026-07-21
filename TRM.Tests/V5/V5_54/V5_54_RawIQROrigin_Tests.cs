@@ -1058,6 +1058,151 @@ public class V5_54_RawIQROrigin_Tests
         _o.WriteLine($"\n=== SRX_01 complete. Commit: SRX_01_SparseRetentionExpansionAudit ===");
     }
 
+    [Fact]
+    public void RLP_01_RawIQRLocalProfileAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RLP_01: RawIQR Local Profile Audit ===");
+        _o.WriteLine("=== V5.54. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: What profile-local feature distinguishes P1 within a seed? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // Pre-compute seed IQRs
+        var seedIQRs=new ConcurrentDictionary<int,double>();
+        Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[70];
+            for(int i=0;i<70;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            seedIQRs[s]=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+        });
+
+        // Run pipeline
+        var pipeBag=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd,bool isHiPass,bool sacRetained,string sacCls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{
+            var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                var rng=new Random(s);var rawW=new double[n];
+                for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                var rwo=rawW.OrderBy(v=>v).ToArray();
+                double ri=Q(rwo,0.75)-Q(rwo,0.25),rm=rwo.Average(),rmed=rwo[n/2],rstd=Sd(rwo);
+                bool isHiPass=IsHi(n,s);
+                if(!isHiPass){pipeBag.Add((n,s,ri,rm,rmed,rstd,false,false,"IsHi-fail"));return;}
+                var sb=SelectAndClassify(n,s,hi);
+                if(sb==null){pipeBag.Add((n,s,ri,rm,rmed,rstd,true,false,"SAC-reject"));return;}
+                pipeBag.Add((n,s,ri,rm,rmed,rstd,true,true,sb.Value.cls));
+            });});
+        var pipeData=pipeBag.ToArray();
+
+        // ============================================================
+        // PART B+C — Within-Seed Comparison (matched seed, different outcome)
+        // ============================================================
+        _o.WriteLine($"\n=== PART B+C: Within-Seed Matched Comparison ===");
+
+        // Find seeds with both P1 and P1b, or P1 and rejected
+        var seedGroups=pipeData.Where(d=>d.isHiPass).GroupBy(d=>d.seed).ToArray();
+        var mixedSeeds=seedGroups.Where(g=>{
+            var cls=g.Select(d=>d.sacCls).Distinct().ToArray();
+            return cls.Contains("P1")&&(cls.Contains("P1b")||cls.Contains("SAC-reject"));
+        }).ToArray();
+
+        _o.WriteLine($"Seeds with mixed outcomes (P1 + other): {mixedSeeds.Length}/{seeds}");
+        if(mixedSeeds.Length<3){
+            _o.WriteLine("INSUFFICIENT mixed seeds for within-seed comparison.");
+            _o.WriteLine("Decision: Model E — no stable local discriminator detectable.");
+            _o.WriteLine("CLAIMS: Local profile audit incomplete (sample too sparse). V6 NOT READY.");
+            _o.WriteLine($"\n=== RLP_01 complete (incomplete). Commit: RLP_01_RawIQRLocalProfileAudit ===");
+            return;
+        }
+
+        // Build matched pairs: same seed, different outcome
+        var matchedPairs=new List<(int seed,int N,string cls,double riqr,double rmean,double rmed,double rstd)>();
+        foreach(var g in mixedSeeds){
+            var p1=g.Where(d=>d.sacCls=="P1").ToArray();
+            var other=g.Where(d=>d.sacCls!="P1").ToArray();
+            foreach(var p in p1)foreach(var o in other)
+                matchedPairs.Add((p.seed,p.N,p.sacCls,p.riqr,p.rmean,p.rmed,p.rstd));
+        }
+
+        _o.WriteLine($"Matched pairs (P1 vs other within same seed): {matchedPairs.Count}");
+
+        // Compare P1 vs P1b within same seed
+        var p1vsP1b=matchedPairs.Where(m=>pipeData.Any(d=>d.seed==m.seed&&d.N==m.N&&d.sacCls=="P1b")).ToArray();
+        var onlyP1=pipeData.Where(d=>d.sacCls=="P1").ToArray();
+        var onlyP1b=pipeData.Where(d=>d.sacCls=="P1b").ToArray();
+        var onlyRej=pipeData.Where(d=>d.isHiPass&&d.sacCls=="SAC-reject").ToArray();
+
+        _o.WriteLine($"\nPooled descriptor comparison (all profiles, not matched):");
+        _o.WriteLine($"{"Descriptor",-12} {"P1(n="+onlyP1.Length+")",12} {"P1b(n="+onlyP1b.Length+")",12} {"Rej(n="+onlyRej.Length+")",12} {"P1-P1b",9}");
+        _o.WriteLine(new string('-',65));
+        void Comp(string n,Func<(int,int,string,double,double,double,double),double> f){
+            double p1=onlyP1.Length>0?onlyP1.Select(d=>f((d.N,d.seed,d.sacCls,d.riqr,d.rmean,d.rmed,d.rstd))).Average():0;
+            double p1b=onlyP1b.Length>0?onlyP1b.Select(d=>f((d.N,d.seed,d.sacCls,d.riqr,d.rmean,d.rmed,d.rstd))).Average():0;
+            double rej=onlyRej.Length>0?onlyRej.Select(d=>f((d.N,d.seed,d.sacCls,d.riqr,d.rmean,d.rmed,d.rstd))).Average():0;
+            _o.WriteLine($"{n,-12} {p1,12:F5} {p1b,12:F5} {rej,12:F5} {p1-p1b,9:F5}");
+        }
+        Comp("rawIQR",d=>d.Item4);Comp("rawMean",d=>d.Item5);
+        Comp("rawMedian",d=>d.Item6);Comp("rawStd",d=>d.Item7);
+
+        // ============================================================
+        // PART D — Descriptor Ranking (pooled)
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Descriptor Ranking (pooled, P1 vs P1b) ===");
+        var allRet=pipeData.Where(d=>d.sacRetained).ToArray();
+        var allP1=allRet.Where(d=>d.sacCls=="P1").ToArray();
+        var allP1b=allRet.Where(d=>d.sacCls=="P1b").ToArray();
+
+        double dIQR=Math.Abs(allP1.Average(d=>d.riqr)-allP1b.Average(d=>d.riqr));
+        double dMean=Math.Abs(allP1.Average(d=>d.rmean)-allP1b.Average(d=>d.rmean));
+        double dMed=Math.Abs(allP1.Average(d=>d.rmed)-allP1b.Average(d=>d.rmed));
+        double dStd=Math.Abs(allP1.Average(d=>d.rstd)-allP1b.Average(d=>d.rstd));
+
+        double maxD=Math.Max(Math.Max(dIQR,dMean),Math.Max(dMed,dStd));
+        _o.WriteLine($"rawIQR delta={dIQR:F5} (norm={dIQR/maxD*100:F0}%)");
+        _o.WriteLine($"rawMean delta={dMean:F5} (norm={dMean/maxD*100:F0}%)");
+        _o.WriteLine($"rawMedian delta={dMed:F5} (norm={dMed/maxD*100:F0}%)");
+        _o.WriteLine($"rawStd delta={dStd:F5} (norm={dStd/maxD*100:F0}%)");
+
+        // ============================================================
+        // PART E — Residual rawIQR (within-seed centering)
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Residual rawIQR after seed-centering ===");
+        var seedMeans2=pipeData.GroupBy(d=>d.seed).ToDictionary(g=>g.Key,g=>g.Average(d=>d.riqr));
+        var residData=pipeData.Select(d=>(
+            d.N,d.seed,d.sacCls,d.isHiPass,d.sacRetained,
+            riqr:d.riqr-seedMeans2.GetValueOrDefault(d.seed,0),
+            rmean:d.rmean
+        )).ToArray();
+
+        var resP1=residData.Where(d=>d.sacCls=="P1").ToArray();
+        var resP1b=residData.Where(d=>d.sacCls=="P1b").ToArray();
+        double resP1m=resP1.Length>0?resP1.Average(d=>d.riqr):0;
+        double resP1bm=resP1b.Length>0?resP1b.Average(d=>d.riqr):0;
+        _o.WriteLine($"Residual rawIQR: P1={resP1m:F5}, P1b={resP1bm:F5}, delta={resP1m-resP1bm:F5}");
+        _o.WriteLine($"Seed-centering {(Math.Abs(resP1m-resP1bm)>0.001?"PRESERVES":"ELIMINATES")} P1/P1b separation.");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        bool iqrWins=dIQR>dMean&&dIQR>dMed;
+        bool residualSurvives=Math.Abs(resP1m-resP1bm)>0.001;
+        if(iqrWins&&residualSurvives)decision="Model A: rawIQR survives seed matching. Local spread remains the dominant profile-local discriminator.";
+        else if(!iqrWins&&dMean>dIQR)decision="Model B: rawMean survives seed matching. Central tendency dominates locally.";
+        else if(iqrWins)decision="Model C: rawIQR + rawMean joint signal — IQR dominates pooled but residual is weak.";
+        else decision="Model E: no stable local discriminator detected.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: IQR delta={dIQR:F5}, Mean delta={dMean:F5}, Residual={resP1m-resP1bm:F5}");
+        _o.WriteLine("CLAIMS: Local profile audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RLP_01 complete. Commit: RLP_01_RawIQRLocalProfileAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
