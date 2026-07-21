@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 1.8
+**Version:** 1.9
 **Date:** 2026-07-21
 
-**Current Version:** V5.56 INITIALIZED (RGP_01 complete)
-**Current Branch:** feature/v5.56-relative-gate-preference
-**Cumulative Tests:** 2917
+**Current Version:** V5.57 INITIALIZED (ART_01 complete)
+**Current Branch:** feature/v5.57-artifact-audit
+**Cumulative Tests:** 2923
 **Failed:** 0
 
 ---
@@ -144,15 +144,13 @@ deterministic threshold rescue.
 
 ---
 
-## Current V5.55 Research Question
+## Current V5.57 Research Question
 
-**Why is SAC sensitive to the 6.4% residual component rather than the 93.6% seed component?**
+**Is the low-rawIQR preference a genuine SAC discriminator or a pipeline artifact?**
 
-**Answer:** SAC discriminates on *relative* position within a seed, not absolute spread. Within-seed rank is the dominant signal (0.41σ SAC, 1.27σ pooled). Residual rawIQR provides independent complement (0.43σ). SAC-retained profiles break normal rank-residual coupling (Pearson 0.70→0.00). Most coupled: 0% P1; most decoupled: 83% P1. Gate operates at SAC, not IsHi. V6 NOT READY.
+**Answer (ART_01): Pipeline artifact.** Permutation test: 18/20 survivals — shuffling rank labels within seeds does NOT destroy the rank-outcome association. The preference is structural, not a genuine discriminator. V5.55–V5.56 rank findings are artifact-driven, not SAC mechanism.
 
-**V5.56 RGP_01:** SAC prefers lowest-rank profiles (9% retained) over highest (0%). Preference is monotonic. Residual provides secondary discrimination within rank bins. V6 NOT READY.
-
-**Final syntheses:** `docsV5/V5_55/TRM_V5_55_Final_Synthesis.md`
+**Final synthesis:** `docsV5/V5_55/TRM_V5_55_Final_Synthesis.md`
 
 ---
 
