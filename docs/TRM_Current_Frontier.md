@@ -1,9 +1,9 @@
 # TRM Current Frontier
 
-**Version:** 1.4
-**Date:** 2026-07-20
+**Version:** 1.5
+**Date:** 2026-07-21
 
-**Current Version:** V5.53 COMPLETE
+**Current Version:** V5.53 COMPLETE (TSS_01 Final Synthesis complete)
 **Current Branch:** feature/v5.53-selectandclassify-predicate-origin
 **Cumulative Tests:** 2901
 **Failed:** 0
@@ -131,17 +131,31 @@ deterministic threshold rescue.
 | V5.41 | **COMPLETE** — Causal test methodology. Perturbation INVALIDATED. Natural variation = diagnostic. 8 claims REJECTED. Stop-Low is OUTCOME-VALIDATED without causal closure. |
 | V5.42 | **COMPLETE** — Counterfactual trace and causal rejection. 7/11 near-identical pairs diverge (63.6%). 7 sufficiency claims REJECTED. No single variable determines outcome. |
 | V5.43 | **COMPLETE** — Hidden trace discovery. 62.5% divergence at T4 (C3 computation). Paradox resolved (late-stage amplification). Hidden factor = unrecorded microstate. |
+| V5.44 | **COMPLETE** — C3 Correction Response Instrumentation. c3ExitOm2 identified; N-dependent bridge. |
+| V5.45 | **COMPLETE** — C3 Response Autonomy and N-Dependent Bridge. Bridge explained via IQR/distribution shape. |
+| V5.46 | **COMPLETE** — Entry-State Distribution Shape and N-Window Origin. T0 inherited spread dominates; N=75 uniquely broad. |
+| V5.47 | **COMPLETE** — Post-Warmup T0 Spread Origin and N-Window Formation. Handoff transform. d/K near-perfect diagnostic. Model A+E. |
+| V5.48 | **COMPLETE** — Distribution Shape vs Mean State — N-Window Formation. |
+| V5.49 | **COMPLETE** — Spread Generation and Distribution Origin. |
+| V5.50 | **COMPLETE** — Kernel-Class Assignment and Boundary Origin. |
+| V5.51 | **COMPLETE** — Spread-Order Origin and Kernel-Assignment Mechanism. |
+| V5.52 | **COMPLETE** — Raw-Frequency Ensemble Sampling Origin. SAC creates K1>K3>K2 ordering. |
+| V5.53 | **COMPLETE** — SelectAndClassify Predicate Origin. rawIQR dominant discriminator (10×). rawMean complementary stabilizer. Model B+. TSS_01 Final Synthesis complete. |
 
 ---
 
-## Current V5.42 Research Question
+## Current V5.53 Research Question
 
-**Which causal explanations can be rejected through matched-profile comparison?**
+**What predicate drives SelectAndClassify P1 vs P1b assignment, creating the K1 > K3 > K2 ordering?**
 
-**Answer:** 7 sufficiency claims REJECTED. Near-identical profiles (matched on lam,
-omDist, reb) diverge 63.6% of the time. No single measured variable is sufficient
-for c3OmgS or rescue. Causal closure = Model B (narrowed, not achieved). Stop-Low
-remains operationally valid without causal closure. V6 NOT READY.
+**Answer:** P1/P1b assignment is primarily rawIQR-driven (spread), with rawMean providing
+independent complementary stabilization. rawIQR dominates by ~10× in normalized separation.
+A rank-based rawIQR + rawMean composite yields consistent P1 > P1b direction across all N
+(jackknife-stable at 2/3 N). This refines V5.52: SAC creates ordering through a
+spread-dominant profile predicate rather than pure mean selection. Stop-Low safe.
+Causal closure blocked. V6 NOT READY.
+
+**Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
 ---
 
@@ -180,6 +194,9 @@ remains operationally valid without causal closure. V6 NOT READY.
 - V5.41: 8 causal claims REJECTED by prior evidence.
 - V5.41: Stop-Low is OUTCOME-VALIDATED — does not require causal closure.
 - V5.41: Predictive validity ≠ causal closure.
+- V5.53: rawIQR is the strongest P1/P1b discriminator (~10× normalized dominance over rawMean).
+- V5.53: rawIQR + rawMean rank composite yields consistent P1>P1b direction (2/3 N jackknife-stable).
+- V5.53: V5.52 mean-only interpretation is incomplete — SAC predicate is spread-primary, mean-complement (Model B+).
 
 ### CONDITIONAL
 
@@ -188,10 +205,17 @@ remains operationally valid without causal closure. V6 NOT READY.
 - N=50–64 is inaccessible. N=65–79 is adaptive-active.
 - V5.41 identifiability classifications are conditional on current pipeline design.
 - Diagnostic hierarchy is observational, not causal.
+- V5.53 findings are conditional on profile-count limits (10–11 P1, 3–10 P1b per N).
+- V5.53 rawIQR per-N stability is profile-count-sensitive.
+- V5.53 composite is diagnostic, not causal.
 
 ### HYPOTHESIS
 
 - V5.42: Counterfactual trace and natural variation may strengthen causal rejection boundaries.
+- V5.53: rawIQR may encode the dominant SAC predicate.
+- V5.53: rawMean may stabilize the predicate across N.
+- V5.53: SAC may operate on profile-shape descriptors.
+- V5.53: A hidden SAC discriminator may remain.
 
 ### NOT CLAIMED
 

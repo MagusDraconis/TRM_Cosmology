@@ -1,9 +1,10 @@
 {
   "releaseStatus": "V5.53 COMPLETE",
   "phase": "SelectAndClassify Predicate Origin",
-  "date": "2026-07-20",
+  "date": "2026-07-21",
   "branch": "feature/v5.53-selectandclassify-predicate-origin",
   "base": "V5.52 COMPLETE",
+  "finalSynthesisCommit": "ba2d3c9",
   "testSummary": {
     "total": 2901,
     "passed": 2901,
@@ -11,32 +12,52 @@
   },
   "suites": [
     {
-      "name": "SCP",
+      "name": "SCP_01",
+      "title": "SelectAndClassify Predicate Audit",
+      "commit": "584553b",
+      "finding": "rawIQR is strongest P1/P1b discriminator; approximately 10x normalized dominance over rawMean",
       "status": "COMPLETE"
     },
     {
-      "name": "RIG",
+      "name": "RIG_01",
+      "title": "RawIQR Genesis Audit",
+      "commit": "ef530a4",
+      "finding": "P1 selects pre-existing high-rawIQR profiles from IsHi-pass pool; differences exist before SAC",
       "status": "COMPLETE"
     },
     {
-      "name": "RIS",
+      "name": "RIS_01",
+      "title": "RawIQR Selection Stability Audit",
+      "commit": "LATEST",
+      "finding": "Global rawIQR dominance confirmed; per-N stability limited by profile count (jackknife 1/3 N)",
       "status": "COMPLETE"
     },
     {
-      "name": "RIC",
+      "name": "RIC_01",
+      "title": "RawIQR Complement Audit",
+      "commit": "LATEST",
+      "finding": "rawMean adds independent complementary information; residual exceeds either descriptor alone",
       "status": "COMPLETE"
     },
     {
-      "name": "RCS",
+      "name": "RCS_01",
+      "title": "RawIQR+Mean Composite Stability Audit",
+      "commit": "LATEST",
+      "finding": "Rank-based rawIQR+rawMean composite improves per-N stability (2/3 N jackknife-stable); consistent P1>P1b direction across all N",
       "status": "COMPLETE"
     },
     {
-      "name": "TSS",
+      "name": "TSS_01",
+      "title": "V5.53 Final Synthesis",
+      "commit": "ba2d3c9",
+      "finding": "V5.53 COMPLETE; Model B+ (spread-primary, mean-complement predicate); V5.52 mean-centric interpretation refined",
       "status": "COMPLETE"
     }
   ],
   "finalModel": "B+ \u2014 Spread-Primary, Mean-Complement Predicate",
+  "modelDescription": "SAC P1/P1b assignment is best described by a rawIQR+rawMean rank composite. rawIQR supplies the dominant spread signal (~10x normalized); rawMean stabilizes per-N ambiguity. Diagnostic only, not causal.",
   "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
   "v6Status": "NOT READY",
   "frozenConstraints": {
     "M3++": "unchanged",
@@ -52,31 +73,39 @@
     "noPostHocNExclusion": true
   },
   "researchQuestion": "What predicate drives SelectAndClassify P1 vs P1b assignment?",
-  "answer": "P1/P1b assignment is primarily rawIQR-driven (spread), with rawMean providing independent complementary stabilization. rawIQR dominates 10x in normalized terms. A rank-based rawIQR+rawMean composite yields consistent P1>P1b direction across all N.",
+  "answer": "P1/P1b assignment is primarily rawIQR-driven (spread), with rawMean providing independent complementary stabilization. rawIQR dominates ~10x in normalized terms. A rank-based rawIQR+rawMean composite yields consistent P1>P1b direction across all N (2/3 N jackknife-stable). This refines V5.52 by replacing a mean-centric interpretation with a spread-primary predicate model.",
   "supportedFindings": [
-    "rawIQR is strongest P1/P1b discriminator (10x normalized dominance)",
-    "P1 selects higher rawIQR profiles in pooled IsHi-pass population",
+    "rawIQR is strongest P1/P1b discriminator (10x normalized dominance over rawMean)",
+    "P1 preferentially contains higher rawIQR profiles in pooled IsHi-pass population",
     "rawIQR alone not uniformly stable per-N (jackknife 1/3 N)",
-    "rawMean adds independent complementary information",
-    "Rank-based rawIQR+rawMean composite improves per-N stability (2/3 N)",
-    "Composite yields consistent P1>P1b direction across all 3 N",
-    "Stop-Low safe. V6 NOT READY."
+    "rawMean contributes independent complementary information",
+    "rawIQR+rawMean rank composite improves per-N stability (2/3 N jackknife-stable)",
+    "Composite yields consistent P1>P1b direction across all tested N",
+    "V5.52 mean-only interpretation is incomplete; SAC predicate is spread-primary",
+    "Stop-Low remains safe across all suites",
+    "Causal closure remains blocked",
+    "V6 NOT READY"
   ],
   "conditionalFindings": [
     "finite-N (10-11 P1, 3-10 P1b per N)",
-    "per-N rawIQR instability under jackknife",
+    "per-N rawIQR instability under jackknife (profile-count-sensitive)",
     "seed/profile sampling limits",
-    "selection-pipeline limits",
-    "diagnostic not causal"
+    "selection-pipeline limits (IsHi + SAC specific)",
+    "branch instrumentation limits",
+    "diagnostic not causal",
+    "hidden SAC/P1 discriminator may remain",
+    "no physical meaning of N"
   ],
   "hypotheses": [
     "rawIQR may encode dominant SAC/P1 spread discriminator",
     "rawMean may stabilize rawIQR ambiguity across N",
-    "P1/P1b assignment may depend on composite profile-shape signal"
+    "SAC may operate on profile-shape descriptors",
+    "A hidden discriminator may remain beyond rawIQR+rawMean"
   ],
   "notClaimed": [
     "causal mechanism",
     "deterministic rescue",
+    "physical interpretation",
     "physical N-boundary or physical interpretation of N",
     "universal adaptive control",
     "V6 readiness",
@@ -88,8 +117,6 @@
     "physical length, c, GR, spacetime, or cosmology derivation"
   ],
   "nextSteps": [
-    "Further refine SAC predicate",
-    "Consider additional profile descriptors"
-  ],
-  "stopLowSafety": "SAFE"
+    "V5.54: Investigate what generates rawIQR variation between profiles before SAC/P1 assignment"
+  ]
 }

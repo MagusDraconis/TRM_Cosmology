@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 2.0
-**Date:** 2026-07-19
+**Version:** 2.1
+**Date:** 2026-07-21
 **Scope:** Clockwork Cosmology V1 through V5.53
 **Tests:** 2901 verified, 0 failed
 **Branch:** feature/v5.53-selectandclassify-predicate-origin
-**Current Frontier:** V5.53 COMPLETE
+**Current Frontier:** V5.53 COMPLETE (TSS_01 Final Synthesis)
 
 ---
 
@@ -1358,11 +1358,11 @@ maintained to prevent overinterpretation:
 | V5.50 | Kernel-Class Assignment and Boundary Origin | 2 | COMPLETE |
 | V5.51 | Spread-Order Origin and Kernel-Assignment Mechanism | 6 | COMPLETE |
 | V5.52 | Raw-Frequency Ensemble Sampling Origin | 6 | COMPLETE |
-| V5.53 | SelectAndClassify Predicate Origin | 5 | COMPLETE |
+| V5.53 | SelectAndClassify Predicate Origin | 6 | COMPLETE |
 | **Total** | | **2901** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2859 verified
-tests with 0 failed is the authoritative current count as of 2026-07-19. Earlier totals (2386 at
+Note: Test counts represent version-specific test suites. The cumulative total of 2901 verified
+tests with 0 failed is the authoritative current count as of 2026-07-21. Earlier totals (2386 at
 V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 
 ---
@@ -1384,7 +1384,29 @@ V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
 - Stop-Low: 41 stop, 0 rescues → SAFE
 - Causal closure remains blocked. V6 NOT READY.
 
-**Next:** TSA (stability), TSI (instrumentation), TSS (synthesis)
+### V5.48–V5.52 — Spread-Order and Kernel-Assignment Origin Chain — COMPLETE
+
+**Status:** COMPLETE (2026-07-20). V5.48–V5.52 traced the spread-order origin through
+distribution shape, spread generation, kernel-class assignment, and raw-frequency
+ensemble sampling. V5.52 established that SelectAndClassify creates K1 > K3 > K2
+ordering through P1 composition.
+
+### V5.53 — SelectAndClassify Predicate Origin — COMPLETE
+
+**Status:** COMPLETE (2026-07-21). 6 suites: SCP_01, RIG_01, RIS_01, RIC_01, RCS_01, TSS_01.
+**Final Model: B+ — Spread-Primary, Mean-Complement Predicate.**
+
+**Key findings:**
+- rawIQR is the strongest P1/P1b discriminator (~10× normalized dominance over rawMean)
+- P1 selects pre-existing high-spread profiles (differences exist before SAC)
+- rawIQR alone is not uniformly per-N stable (jackknife 1/3 N)
+- rawMean contributes independent complementary information
+- rawIQR + rawMean rank composite improves per-N stability (jackknife 2/3 N)
+- Composite yields consistent P1 > P1b direction across all tested N
+- Refines V5.52: SAC predicate is spread-primary, not mean-centric
+- Stop-Low safe. Causal closure blocked. V6 NOT READY.
+
+**Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
 For the historical frontier context (V5.6+), see section F2 above.
 
@@ -1431,10 +1453,10 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2773 tests, 0 failed. V5.29 COMPLETE — boundary robustness confirmed.
-V5.30 INITIALIZED — policy generalization audit.
-Current branch: `feature/v5.30-stop-low-policy-generalization-and-efficiency`.
-Preferred policy: Stop-Low post-C3 continuation (c3OmgS=0.1, gap=0.247).
+**Current status:** 2901 tests, 0 failed. V5.53 COMPLETE — TSS_01 Final Synthesis complete.
+Current branch: `feature/v5.53-selectandclassify-predicate-origin`.
+Preferred model: M3++ with Stop-Low policy (c3OmgS > 0.1 continue, ≤ 0.1 stop).
+SAC predicate: rawIQR (spread-primary, ~10× dominance) + rawMean (complementary stabilizer) = Model B+.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -1443,7 +1465,7 @@ equations, dark matter replacement, physical theory proven.
 
 ---
 
-*Generated 2026-07-16, last updated 2026-07-19. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V5.27. It is intended for onboarding
+*Generated 2026-07-21. This document is the authoritative historical overview of the
+TRM/TQM project from Clockwork Cosmology V1 through V5.53. It is intended for onboarding
 new researchers, reviewers, Copilot sessions, and LLM chats. Maintain strict claim
 discipline when referencing any finding described herein.*

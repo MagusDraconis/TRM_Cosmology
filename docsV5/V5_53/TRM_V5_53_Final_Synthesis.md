@@ -1,8 +1,9 @@
 # TRM V5.53 Final Synthesis — SelectAndClassify Predicate Origin
 
-**Version:** 1.0 | **Date:** 2026-07-20
+**Version:** 1.1 | **Date:** 2026-07-21
 **Branch:** `feature/v5.53-selectandclassify-predicate-origin`
 **Status:** COMPLETE
+**Final Synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
 ---
 
@@ -143,7 +144,7 @@ Answer: **P1/P1b assignment is primarily rawIQR-driven (spread), with rawMean pr
 | RIS | 1 | COMPLETE |
 | RIC | 1 | COMPLETE |
 | RCS | 1 | COMPLETE |
-| TSS | — | THIS DOCUMENT |
+| TSS | — | THIS DOCUMENT (see also TSS_01) |
 | **Total** | **6** | **0 failed** |
 
 Cumulative: 2901 tests, 0 failed.

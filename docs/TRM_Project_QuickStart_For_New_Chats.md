@@ -1,7 +1,7 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 2.0
-**Date:** 2026-07-19
+**Version:** 2.1
+**Date:** 2026-07-21
 **Read time:** < 5 minutes
 **Primary reference:** `docs/TRM_Project_Lineage_Overview.md`, `docs/TRM_Current_Frontier.md`
 
@@ -15,7 +15,7 @@
 | Current Branch | feature/v5.53-selectandclassify-predicate-origin |
 | Total Tests | 2901 |
 | Failed Tests | 0 |
-| Current Status | V5.53 COMPLETE - Spread-order origin traced to raw-frequency ensemble means. |
+| Current Status | V5.53 COMPLETE — TSS_01 Final Synthesis. SAC P1/P1b predicate identified: rawIQR (spread-primary, ~10× dominance) + rawMean (complementary stabilizer) = Model B+. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -103,8 +103,14 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.45 | C3 Response Autonomy and N-Dependent Bridge | COMPLETE — Bridge explained via IQR/distribution shape. |
 | V5.46 | Entry-State Distribution Shape and N-Window Origin | COMPLETE — T0 inherited spread dominates; N=75 uniquely broad. |
 | V5.47 | Post-Warmup T0 Spread Origin and N-Window Formation | COMPLETE — Handoff transform. d/K near-perfect diagnostic. Model A+E. |
+| V5.48 | Distribution Shape vs Mean State — N-Window Formation | COMPLETE |
+| V5.49 | Spread Generation and Distribution Origin | COMPLETE |
+| V5.50 | Kernel-Class Assignment and Boundary Origin | COMPLETE |
+| V5.51 | Spread-Order Origin and Kernel-Assignment Mechanism | COMPLETE |
+| V5.52 | Raw-Frequency Ensemble Sampling Origin | COMPLETE — SAC creates K1>K3>K2 ordering. |
+| V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
 
-**Cumulative total: 2877 tests, 0 failed as of 2026-07-20.**
+**Cumulative total: 2901 tests, 0 failed as of 2026-07-21.**
 
 ---
 
@@ -150,6 +156,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 30. **N=75 bulk-wide at T0 origin (V5.47 TSP_01):** IQR/range = 0.93 → genuinely wide bulk, not tail-driven. Broadness NOT present during warmup (epoch-0 IQR=0.004), appears post-warmup at T0. d/K pre-state provides moderate diagnostic association only (not causal). Stop-Low safe.
 31. **w2→T0 handoff amplifies N=75 (V5.47 TSE_01):** N=75 w2 IQR = 0.604 (NOT bulk-wide) → T0 IQR = 1.200 (1.98x amp). N=72 is bulk-wide at w2 but COLLAPSES at T0 (0.11x). Amplification is N=75-specific. Stage-by-stage d/K/lambda mapped across 7 checkpoints.
 32. **Handoff is rank-INVERTING, d/K near-perfectly diagnostic (V5.47 THD_01):** N=75 Spearman = -0.671, N=72 Spearman = -0.483 — both invert ranks. d_w2 ~ delta_om: N=72=-0.923, N=75=-0.964; km_w2 ~ delta_om: N=72=0.956, N=75=0.964. d/K at w2 near-perfectly associated with handoff delta within each N, but does not explain amplification vs collapse direction between N.
+33. **V5.53: rawIQR is the strongest P1/P1b discriminator** — ~10× normalized dominance over rawMean. P1 selects pre-existing high-spread profiles.
+34. **V5.53: rawIQR + rawMean composite stabilizes per-N** — 2/3 N jackknife-stable vs 1/3 for rawIQR alone. Consistent P1 > P1b direction across all N.
+35. **V5.53: V5.52 mean-only interpretation incomplete** — SAC predicate is spread-primary, mean-complement (Model B+).
 
 ---
 
@@ -242,21 +251,21 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.41
+### Current Frontier — V5.53
 
-**Status:** V5.41 COMPLETE → V5.42 PENDING
-**Branch:** `feature/v5.41-causal-test-design-under-attractor-absorption`
+**Status:** V5.53 COMPLETE — TSS_01 Final Synthesis complete.
+**Branch:** `feature/v5.53-selectandclassify-predicate-origin`
 
-**V5.40–V5.41 story arc:**
-V5.40 confirmed all perturbation families are absorbed. V5.41 pivoted to causal-test
-methodology: evaluated D1–D7 test designs under attractor absorption. Perturbation = INVALIDATED.
-Natural variation = STABLE DIAGNOSTIC. 8 causal claims REJECTED. Central insight:
-**predictive validity (Stop-Low) does not require causal closure.** V6 remains NOT READY.
+**V5.53 story arc:**
+V5.52 established that SAC creates K1 > K3 > K2 ordering through P1 composition but did not
+identify the P1/P1b discriminator. V5.53 identified the predicate: rawIQR (spread) is the
+dominant discriminator (~10× normalized dominance over rawMean), with rawMean providing
+independent complementary per-N stabilization. A rank-based rawIQR + rawMean composite
+yields consistent P1 > P1b direction across all N (2/3 N jackknife-stable). This refines
+V5.52 from a mean-centric to a spread-primary predicate model (Model B+). Stop-Low safe.
+Causal closure blocked. V6 NOT READY.
 
-**V5.42 direction:** Use counterfactual trace and natural variation to identify stronger
-causal rejection boundaries without perturbation.
-
-See `docsV5_41/TRM_V5_41_Final_Synthesis.md` for complete summary.
+See `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md` for complete synthesis.
 
 ---
 
@@ -305,6 +314,6 @@ Do not introduce new theory. The project has 2871 tests with 0 failures. V5.46 i
 
 ---
 
-*Generated 2026-07-16, last updated 2026-07-19. This document is a short operational briefing — not a replacement
+*Generated 2026-07-16, last updated 2026-07-21. This document is a short operational briefing — not a replacement
 for the full lineage overview or the current frontier document. Read `TRM_Project_Lineage_Overview.md` for the
 complete historical context and `TRM_Current_Frontier.md` for the active research state.*

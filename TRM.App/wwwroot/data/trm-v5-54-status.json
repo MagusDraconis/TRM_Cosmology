@@ -1,0 +1,82 @@
+{
+  "releaseStatus": "V5.54 INITIALIZED",
+  "phase": "RawIQR Origin and Profile Structure",
+  "date": "2026-07-21",
+  "branch": "feature/v5.54-rawiqr-origin-and-profile-structure",
+  "base": "V5.53 COMPLETE",
+  "baseCommit": "ba2d3c9",
+  "testSummary": {
+    "total": 2901,
+    "passed": 2901,
+    "failed": 0
+  },
+  "suites": [],
+  "finalModel": null,
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY",
+  "purpose": "Investigate what generates rawIQR variation between profiles before SelectAndClassify.",
+  "primaryQuestion": "What generates rawIQR differences between profiles before SAC/P1 assignment?",
+  "candidateOriginFamilies": [
+    "seed realization",
+    "frequency sampling geometry",
+    "profile construction",
+    "graph/topology realization",
+    "generator variance structure",
+    "hidden profile-structure factor"
+  ],
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1,
+    "noCorrectionClasses": true,
+    "noThresholdRetuning": true,
+    "noV6Derivations": true,
+    "noPhysicalInterpretation": true,
+    "noNewModelVariables": true,
+    "noSeedRemoval": true,
+    "noOutlierDeletion": true,
+    "noPostHocNExclusion": true
+  },
+  "constraints": [
+    "do not modify M3++",
+    "do not modify Stop-Low",
+    "do not retune c3OmegaShift threshold",
+    "do not add correction classes",
+    "do not add rescue policies",
+    "do not add model variables",
+    "do not claim deterministic rescue",
+    "do not claim physical interpretation",
+    "do not claim causal closure",
+    "do not attempt V6 derivation"
+  ],
+  "supportedFindings": [],
+  "conditionalFindings": [
+    "all findings will be finite-N limited",
+    "profile-count limited",
+    "selection-pipeline limited",
+    "diagnostic not causal"
+  ],
+  "hypotheses": [],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical interpretation",
+    "physical N-boundary or physical interpretation of N",
+    "universal adaptive control",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low policy",
+    "retuned c3OmegaShift threshold",
+    "new model variables or correction classes",
+    "physical theory interpretation",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
+  "recommendedFirstSuite": "RIO_01_RawIQRProfileStructureOriginAudit",
+  "nextSteps": [
+    "Create RIO_01 test protocol",
+    "Audit rawIQR decomposition by candidate origin family",
+    "Determine which origin family dominates rawIQR generation",
+    "Trace rawIQR signal to pre-SAC source"
+  ]
+}
