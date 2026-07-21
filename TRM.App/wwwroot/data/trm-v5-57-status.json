@@ -1,16 +1,24 @@
 {
-  "releaseStatus": "V5.57 INITIALIZED",
-  "phase": "Pipeline Artifact Audit",
+  "releaseStatus": "V5.57 COMPLETE",
+  "phase": "Pipeline Origin Audit",
   "date": "2026-07-21",
   "branch": "feature/v5.57-artifact-audit",
   "base": "V5.56 COMPLETE",
   "baseCommit": "3fe911e",
-  "testSummary": { "total": 2922, "passed": 2922, "failed": 0 },
-  "suites": [],
-  "finalModel": null,
+  "finalSynthesisCommit": "TBD",
+  "testSummary": { "total": 2928, "passed": 2928, "failed": 0 },
+  "suites": [
+    {"name":"ART_01","title":"Pipeline Artifact Audit","commit":"f1259b5","status":"COMPLETE"},
+    {"name":"PIPE_01","title":"Discrimination Origin Audit","commit":"9a2b446","status":"COMPLETE"},
+    {"name":"SAC_01","title":"Internal Discriminator Audit","commit":"85499fa","status":"COMPLETE"},
+    {"name":"D0_01","title":"d0 Origin Audit","commit":"9199ad4","status":"COMPLETE"},
+    {"name":"D2_01","title":"Epoch-2 Emergence Audit","commit":"20a992d","status":"COMPLETE"},
+    {"name":"SV_01","title":"Structural Variable Audit","commit":"1436464","status":"COMPLETE"},
+    {"name":"TSS_01","title":"V5.57 Final Synthesis","commit":"TBD","status":"COMPLETE"}
+  ],
+  "finalModel": "d0 is the dominant structural variable (1.74σ). rawIQR and rank are shadow signals — pipeline artifacts. SAC discriminates via d0 classifier thresholds (0.50/0.65). RP+DL creates 54% of d-separation.",
+  "baseForNextVersion": "V5.58",
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
-  "v6Status": "NOT READY",
-  "purpose": "Is the low-rawIQR preference a genuine SAC discriminator or a pipeline artifact?",
-  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 }
+  "v6Status": "NOT READY"
 }
