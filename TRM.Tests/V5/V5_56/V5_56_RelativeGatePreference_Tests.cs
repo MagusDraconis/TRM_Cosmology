@@ -347,6 +347,163 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"\n=== GEO_01 complete. Commit: GEO_01_ProfileSpaceAudit ===");
     }
 
+    [Fact]
+    public void NBR_01_LocalReferenceAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== NBR_01: Local Reference Audit ===");
+        _o.WriteLine("=== V5.56. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Are retained profiles neighborhood centers? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo)));
+        });});
+
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rank,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                string cls=sb==null?"reject":(sb.Value.cls=="P1"||sb.Value.cls=="P1b"?sb.Value.cls:"reject");
+                pipeBag.Add((n,s,seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1,cls));
+            });});
+        var pd=pipeBag.ToArray();
+
+        // ============================================================
+        // PART A+B — Neighborhood structure per seed
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: Neighborhood Structure ===");
+        // For each seed, compute: mean similarity of each profile to all others
+        // Similarity = 1 / (1 + Euclidean distance in normalized space)
+        var nbrResults=new ConcurrentBag<(int seed,int N,double rank,double centrality,bool isRetained,bool isMostCentral,string cls)>();
+
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var members=g.ToArray();if(members.Length<2)continue;
+            // Normalize within seed
+            double iqrMin=members.Min(p=>p.riqr),iqrMax=members.Max(p=>p.riqr);
+            double mnMin=members.Min(p=>p.rmean),mnMax=members.Max(p=>p.rmean);
+            double mdMin=members.Min(p=>p.rmed),mdMax=members.Max(p=>p.rmed);
+            double sdMin=members.Min(p=>p.rstd),sdMax=members.Max(p=>p.rstd);
+            double iqrR=iqrMax-iqrMin,mnR=mnMax-mnMin,mdR=mdMax-mdMin,sdR=sdMax-sdMin;
+
+            // Compute pairwise similarities
+            int M=members.Length;
+            var sims=new double[M];
+            for(int i=0;i<M;i++){
+                double totalSim=0;
+                for(int j=0;j<M;j++)if(i!=j){
+                    double di=(iqrR>0.001?(members[i].riqr-members[j].riqr)/iqrR:0);
+                    double dm=(mnR>0.001?(members[i].rmean-members[j].rmean)/mnR:0);
+                    double dd=(mdR>0.001?(members[i].rmed-members[j].rmed)/mdR:0);
+                    double ds=(sdR>0.001?(members[i].rstd-members[j].rstd)/sdR:0);
+                    double dist=Math.Sqrt(di*di+dm*dm+dd*dd+ds*ds);
+                    totalSim+=1.0/(1.0+dist);
+                }
+                sims[i]=totalSim/(M-1); // mean similarity = centrality
+            }
+
+            // Most central profile
+            int mostCentralIdx=0;double maxSim=sims[0];
+            for(int i=1;i<M;i++)if(sims[i]>maxSim){maxSim=sims[i];mostCentralIdx=i;}
+
+            for(int i=0;i<M;i++){
+                double rank=seedRanks.GetValueOrDefault(g.Key)?.GetValueOrDefault(members[i].N,-1)??-1;
+                string cls=pd.FirstOrDefault(x=>x.N==members[i].N&&x.seed==members[i].seed).cls??"unknown";
+                bool retained=cls!="reject"&&cls!="unknown";
+                nbrResults.Add((members[i].seed,members[i].N,rank,sims[i],retained,i==mostCentralIdx,cls));
+            }
+        }
+        var nb=nbrResults.ToArray();
+
+        // ============================================================
+        // PART B — Centrality comparison
+        // ============================================================
+        _o.WriteLine($"\nCentrality comparison:");
+        var nbRet=nb.Where(d=>d.isRetained).ToArray();
+        var nbRej=nb.Where(d=>d.cls=="reject").ToArray();
+        _o.WriteLine($"Retained centrality: {nbRet.Average(d=>d.centrality):F4} (n={nbRet.Length})");
+        _o.WriteLine($"Rejected centrality: {nbRej.Average(d=>d.centrality):F4} (n={nbRej.Length})");
+        _o.WriteLine($"Delta: {nbRet.Average(d=>d.centrality)-nbRej.Average(d=>d.centrality):F4}");
+
+        // Is the most-central profile retained?
+        int mostCentralRetained=nb.Count(d=>d.isMostCentral&&d.isRetained);
+        int mostCentralTotal=nb.Count(d=>d.isMostCentral);
+        _o.WriteLine($"Most-central profiles retained: {mostCentralRetained}/{mostCentralTotal} ({mostCentralRetained*100.0/Math.Max(1,mostCentralTotal):F0}%)");
+
+        // Is the retained profile also the most central in its seed?
+        var seedSummary=nb.GroupBy(d=>d.seed).Select(g=>{
+            var ret=g.FirstOrDefault(d=>d.isRetained);
+            var mc=g.FirstOrDefault(d=>d.isMostCentral);
+            return (seed:g.Key,retainedIsMC:ret.isRetained&&ret.isMostCentral,mcIsRet:mc.isRetained);
+        }).ToArray();
+        int retIsMC=seedSummary.Count(s=>s.retainedIsMC);
+        int mcIsRet=seedSummary.Count(s=>s.mcIsRet);
+        _o.WriteLine($"Seeds where retained=most-central: {retIsMC}/{seedSummary.Length} ({retIsMC*100.0/seedSummary.Length:F0}%)");
+        _o.WriteLine($"Seeds where most-central=retained: {mcIsRet}/{seedSummary.Length} ({mcIsRet*100.0/seedSummary.Length:F0}%)");
+
+        // ============================================================
+        // PART C — Model comparison
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Model Comparison ===");
+        // Model A: lowest rank → retained?
+        var rankSorted=nb.OrderBy(d=>d.rank).ToArray();
+        int lowestRank=nb.Where(d=>d.rank==0).Count(d=>d.isRetained);
+        int totalLowest=nb.Count(d=>d.rank==0);
+        _o.WriteLine($"Lowest-rank retained: {lowestRank}/{totalLowest} ({lowestRank*100.0/Math.Max(1,totalLowest):F0}%)");
+
+        // Model B: most central → retained?
+        _o.WriteLine($"Most-central retained: {mostCentralRetained}/{mostCentralTotal} ({mostCentralRetained*100.0/Math.Max(1,mostCentralTotal):F0}%)");
+
+        // Correlation: rank vs centrality
+        double rRC=Pearson(nb.Select(d=>d.rank).ToArray(),nb.Select(d=>d.centrality).ToArray());
+        _o.WriteLine($"Rank vs centrality: r={rRC:F4}");
+
+        // ============================================================
+        // PART D — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Robustness ===");
+        var rng2=new Random(42);int centWins=0,rankWins=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=nb.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+            var s1=shuf.Take(h).ToArray();
+            double cR=Math.Abs(s1.Where(d=>d.isRetained).DefaultIfEmpty().Average(d=>d.rank)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.rank));
+            double cC=Math.Abs(s1.Where(d=>d.isRetained).DefaultIfEmpty().Average(d=>d.centrality)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.centrality));
+            if(cC>cR*0.1)centWins++;else rankWins++;
+        }
+        _o.WriteLine($"50 splits: centrality wins={centWins}, rank wins={rankWins}");
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        if(retIsMC>seedSummary.Length*0.5)decision="Model A: Retained profiles ARE neighborhood centers. SAC selects central profiles.";
+        else if(rRC<-0.5)decision="Model B: Rank and centrality are negatively coupled — low rank = high centrality. Rank is a centrality proxy.";
+        else if(centWins>rankWins&&mostCentralRetained>totalLowest)decision="Model C: Centrality beats rank. SAC selects neighborhood representatives.";
+        else decision="Model D: Rank remains dominant over centrality. Retained profiles are NOT specially central.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: retIsMC={retIsMC}/{seedSummary.Length}, mcIsRet={mcIsRet}/{seedSummary.Length}, rank-cent r={rRC:F4}, centWins={centWins}");
+        _o.WriteLine("CLAIMS: Neighborhood audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== NBR_01 complete. Commit: NBR_01_LocalReferenceAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
