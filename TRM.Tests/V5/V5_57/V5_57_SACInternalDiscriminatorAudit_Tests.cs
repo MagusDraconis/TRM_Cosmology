@@ -170,10 +170,93 @@ public class V5_57_SACInternalDiscriminatorAudit_Tests
     static double[]Of(double[][]h,int n){int T=h.Length;var o=new double[n];for(int i=0;i<n;i++){double su=0;int c=0;for(int t=1;t<T;t++){su+=Math.Abs(h[t][i]-h[t-1][i]);c++;}o[i]=c>0?su/(c*Dt*Hd):0;}return o;}
     static double[,]KS(int n,int seed){var rng=new Random(seed);var adj=new HashSet<int>[n];for(int i=0;i<n;i++)adj[i]=new HashSet<int>();double p=6.0/(n-1);for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)if(rng.NextDouble()<p){adj[i].Add(j);adj[j].Add(i);}var v=new bool[n];var cs=new List<List<int>>();for(int i=0;i<n;i++){if(v[i])continue;var c=new List<int>();var q=new Queue<int>();v[i]=true;q.Enqueue(i);while(q.Count>0){int u=q.Dequeue();c.Add(u);foreach(int x in adj[u])if(!v[x]){v[x]=true;q.Enqueue(x);}}cs.Add(c);}for(int i=1;i<cs.Count;i++){adj[cs[i][0]].Add(cs[i-1][0]);adj[cs[i-1][0]].Add(cs[i][0]);}var K=new double[n,n];for(int i=0;i<n;i++)foreach(int j in adj[i])if(i<j){K[i,j]=0.5;K[j,i]=0.5;}return K;}
     static double Dm(double[,]d,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){s+=d[i,j];c++;}return c>0?s/c:0;}
+    static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
     static double Km(double[,]K,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){s+=K[i,j];c++;}return c>0?s/c:0;}
     static double Ks(double[,]K,int n){var v=new double[n*(n-1)/2];int idx=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)v[idx++]=K[i,j];double m=v.Average();return Math.Sqrt(v.Sum(x=>(x-m)*(x-m))/v.Length);}
     static SBase Classify(SBase b,P3 hi){string cls;if(b.d0>0.65)cls="P1b";else if(b.d0>0.50)cls="P1";else if(b.d0<=0.40&&b.km0>0.98&&DistK(b.km0,b.ks0,hi)<0.15)cls="P2";else if(b.d0>0.40&&b.d0<=0.50)cls="P3";else cls="P4";return new SBase{seed=b.seed,d0=b.d0,km0=b.km0,ks0=b.ks0,cls=cls};}
     static double DistK(double km,double ks,P3 hi){double dk=km-hi.km,dks=ks-hi.ks;return Math.Sqrt(dk*dk+dks*dks);}
     bool IsHi(int n,int seed){var K=KS(n,seed);for(int e=0;e<5;e++){var h=Sim(K,n,S,seed+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}return Of(Sim(K,n,S,seed+5),n).Average()>THR;}
     static P3 PCent(int n,bool hi){double d=0,k=0,ks=0;int c=0;for(int sd=0;sd<100;sd++){var K=KS(n,sd);double dm=0,km=0,kss=0;for(int e=0;e<5;e++){var h=Sim(K,n,S,sd+e);var dd=DL(Nm(RP(h,n),n),n);dm+=Dm(dd,n);K=Cupd(dd,n);km+=Km(K,n);kss+=Ks(K,n);}double om=Of(Sim(K,n,S,sd+5),n).Average();if((om>THR)==hi){d+=dm/5;k+=km/5;ks+=kss/5;c++;}}if(c==0)return new P3{dm=double.NaN,km=double.NaN,ks=double.NaN};return new P3{dm=d/c,km=k/c,ks=ks/c};}
+
+    [Fact]
+    public void D0_01_DistanceOriginAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== D0_01: d0 Origin Audit ===");
+        _o.WriteLine("=== V5.57. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Does d0 fully explain P1/P1b? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=200;
+
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,double,double,string)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                var K=KS(n,s);double d1=0,d2=0;
+                for(int e=0;e<3;e++){var h=Sim(K,n,S,s+e);var R=RP(h,n);var Rn=Nm(R,n);var d=DL(Rn,n);K=Cupd(d,n);double dm=Dm(d,n);if(e==0)d1=dm;else if(e==1)d2=dm;}
+                var h3=Sim(K,n,S,s+3);var d3=DL(Nm(RP(h3,n),n),n);var K3=Cupd(d3,n);
+                var h3E=Sim(K3,n,S,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);
+                double d0=Dm(d3E,n);double km=Km(Cupd(d3E,n),n);double lam=Lambda1(Cupd(d3E,n),n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks;
+                double vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false)){bag.Add((n,s,rawIQR,d0,d1,d2,km,lam,"reject"));return;}
+                bag.Add((n,s,rawIQR,d0,d1,d2,km,lam,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1x=bd.Where(d=>d.Item9=="P1").ToArray();var p1bx=bd.Where(d=>d.Item9=="P1b").ToArray();
+        _o.WriteLine($"SAC: P1={p1x.Length}, P1b={p1bx.Length}");
+
+        // ============================================================
+        // PART A — SAC quantity effects
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: SAC Quantity Effect Sizes ===");
+        _o.WriteLine($"{"Quantity",-12} {"P1",10} {"P1b",10} {"Delta",10} {"Eff(σ)",10}");
+        _o.WriteLine(new string('-',55));
+        void D0Q(string name,double[] p1v,double[] p1bv,double[] allv){
+            double pm=p1v.Average(),pbm=p1bv.Average(),delta=Math.Abs(pm-pbm),std=Sd(allv),eff=std>0.001?delta/std:0;
+            _o.WriteLine($"{name,-12} {pm,10:F5} {pbm,10:F5} {delta,10:F5} {eff,10:F3}σ");
+        }
+        var iqrAll=bd.Select(d=>d.Item3).ToArray();var iqrP1=p1x.Select(d=>d.Item3).ToArray();var iqrP1b=p1bx.Select(d=>d.Item3).ToArray();
+        var d0All=bd.Select(d=>d.Item4).ToArray();var d0P1=p1x.Select(d=>d.Item4).ToArray();var d0P1b=p1bx.Select(d=>d.Item4).ToArray();
+        var d1All=bd.Select(d=>d.Item5).ToArray();var d1P1=p1x.Select(d=>d.Item5).ToArray();var d1P1b=p1bx.Select(d=>d.Item5).ToArray();
+        var d2All=bd.Select(d=>d.Item6).ToArray();var d2P1=p1x.Select(d=>d.Item6).ToArray();var d2P1b=p1bx.Select(d=>d.Item6).ToArray();
+        var kmAll=bd.Select(d=>d.Item7).ToArray();var kmP1=p1x.Select(d=>d.Item7).ToArray();var kmP1b=p1bx.Select(d=>d.Item7).ToArray();
+        var lamAll=bd.Select(d=>d.Item8).ToArray();var lamP1=p1x.Select(d=>d.Item8).ToArray();var lamP1b=p1bx.Select(d=>d.Item8).ToArray();
+        D0Q("rawIQR",iqrP1,iqrP1b,iqrAll);D0Q("d0",d0P1,d0P1b,d0All);D0Q("d1",d1P1,d1P1b,d1All);
+        D0Q("d2",d2P1,d2P1b,d2All);D0Q("km",kmP1,kmP1b,kmAll);D0Q("lambda",lamP1,lamP1b,lamAll);
+
+        // ============================================================
+        // PART B+D — Stage contributions
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS B+D: d0 Evolution ===");
+        var allD0=bd.Select(d=>d.Item4).ToArray();var allD1=bd.Select(d=>d.Item5).ToArray();var allD2=bd.Select(d=>d.Item6).ToArray();
+        var p1D0=p1x.Select(d=>d.Item4).ToArray();var p1bD0=p1bx.Select(d=>d.Item4).ToArray();
+        var p1D1=p1x.Select(d=>d.Item5).ToArray();var p1bD1=p1bx.Select(d=>d.Item5).ToArray();
+        _o.WriteLine($"d1: mean={allD1.Average():F4}, P1={p1D1.Average():F4}, P1b={p1bD1.Average():F4}, sep={Math.Abs(p1D1.Average()-p1bD1.Average()):F5}");
+        _o.WriteLine($"d0: mean={allD0.Average():F4}, P1={p1D0.Average():F4}, P1b={p1bD0.Average():F4}, sep={Math.Abs(p1D0.Average()-p1bD0.Average()):F5}");
+        _o.WriteLine($"Separation growth: d1→d0: {Math.Abs(p1D1.Average()-p1bD1.Average()):F5}→{Math.Abs(p1D0.Average()-p1bD0.Average()):F5}");
+
+        // PART E — Decision
+        _o.WriteLine($"\n=== PART E: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+        double d0Sep=Math.Abs(p1D0.Average()-p1bD0.Average());
+        double d1Sep=Math.Abs(p1D1.Average()-p1bD1.Average());
+        string decision=d0Sep>0.05&&d0Sep>d1Sep*2?"Model A: d0 fully explains P1/P1b.":d0Sep>d1Sep?"Model B: d0 dominant but multi-stage.":"Model D: Unresolved.";
+        _o.WriteLine($"Decision: {decision}");
+        _o.WriteLine($"Evidence: d0 sep={d0Sep:F5}, d1 sep={d1Sep:F5}, P1 d0={p1D0.Average():F4}, P1b d0={p1bD0.Average():F4}");
+        _o.WriteLine("CLAIMS: d0 origin audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== D0_01 complete. Commit: D0_01_DistanceOriginAudit ===");
+    }
 }
