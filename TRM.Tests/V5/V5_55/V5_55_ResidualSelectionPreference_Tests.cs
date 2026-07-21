@@ -512,9 +512,9 @@ public class V5_55_ResidualSelectionPreference_Tests
         // PART B — Rank Survival: condition on rank, check residuals
         // ============================================================
         _o.WriteLine($"\n=== PART B: Rank Survival Audit ===");
-        double rankMed=pd.Select(d=>d.rank).OrderBy(v=>v).ToArray()[pd.Length/2];
-        var loRank=pd.Where(d=>d.rank<=rankMed).ToArray();
-        var hiRank=pd.Where(d=>d.rank>rankMed).ToArray();
+        double rankMed=pd.Select(d=>d.Item3).OrderBy(v=>v).ToArray()[pd.Length/2];
+        var loRank=pd.Where(d=>d.Item3<=rankMed).ToArray();
+        var hiRank=pd.Where(d=>d.Item3>rankMed).ToArray();
         _o.WriteLine($"Low rank (≤{rankMed:F2}): P1={loRank.Count(d=>d.cls=="P1")}, P1b={loRank.Count(d=>d.cls=="P1b")}, P1%={loRank.Count(d=>d.cls=="P1")*100.0/Math.Max(1,loRank.Length):F0}%");
         _o.WriteLine($"High rank (>{rankMed:F2}): P1={hiRank.Count(d=>d.cls=="P1")}, P1b={hiRank.Count(d=>d.cls=="P1b")}, P1%={hiRank.Count(d=>d.cls=="P1")*100.0/Math.Max(1,hiRank.Length):F0}%");
 
@@ -536,10 +536,10 @@ public class V5_55_ResidualSelectionPreference_Tests
         double residMed=pd.Select(d=>d.resid).OrderBy(v=>v).ToArray()[pd.Length/2];
         var loRes=pd.Where(d=>d.resid<=residMed).ToArray();
         var hiRes=pd.Where(d=>d.resid>residMed).ToArray();
-        double loRankP1=loRes.Where(d=>d.cls=="P1").Select(d=>d.rank).DefaultIfEmpty(0).Average();
-        double loRankP1b=loRes.Where(d=>d.cls=="P1b").Select(d=>d.rank).DefaultIfEmpty(0).Average();
-        double hiRankP1=hiRes.Where(d=>d.cls=="P1").Select(d=>d.rank).DefaultIfEmpty(0).Average();
-        double hiRankP1b=hiRes.Where(d=>d.cls=="P1b").Select(d=>d.rank).DefaultIfEmpty(0).Average();
+        double loRankP1=loRes.Where(d=>d.cls=="P1").Select(d=>d.Item3).DefaultIfEmpty(0).Average();
+        double loRankP1b=loRes.Where(d=>d.cls=="P1b").Select(d=>d.Item3).DefaultIfEmpty(0).Average();
+        double hiRankP1=hiRes.Where(d=>d.cls=="P1").Select(d=>d.Item3).DefaultIfEmpty(0).Average();
+        double hiRankP1b=hiRes.Where(d=>d.cls=="P1b").Select(d=>d.Item3).DefaultIfEmpty(0).Average();
         _o.WriteLine($"  Low resid: P1 rank={loRankP1:F3}, P1b rank={loRankP1b:F3}, delta={Math.Abs(loRankP1-loRankP1b):F3}");
         _o.WriteLine($"  High resid: P1 rank={hiRankP1:F3}, P1b rank={hiRankP1b:F3}, delta={Math.Abs(hiRankP1-hiRankP1b):F3}");
         bool residAbsorbs=Math.Abs(loRankP1-loRankP1b)<0.1&&Math.Abs(hiRankP1-hiRankP1b)<0.1;
@@ -553,7 +553,7 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine(new string('-',35));
         for(int q=0;q<4;q++){
             double loQ=q/4.0,hiQ=(q+1)/4.0;
-            var qd=pd.Where(d=>d.rank>=loQ&&d.rank<hiQ+(q==3?0.01:0)).ToArray();
+            var qd=pd.Where(d=>d.Item3>=loQ&&d.rank<hiQ+(q==3?0.01:0)).ToArray();
             int qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b");
             _o.WriteLine($"{$"{loQ*100:F0}-{hiQ*100:F0}%",-12} {qd.Length,5} {qp1,4} {qp1b,4} {(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0),7:F0}%");
         }
@@ -568,12 +568,12 @@ public class V5_55_ResidualSelectionPreference_Tests
             double d=Math.Abs(a.DefaultIfEmpty(0).Average()-b.DefaultIfEmpty(0).Average()),s=Sd(all);
             return s>0.001?d/s:0;
         }
-        var allV=pd.Select(d=>d.rawIQR).ToArray();var allRes=pd.Select(d=>d.resid).ToArray();var allRank=pd.Select(d=>d.rank).ToArray();
-        var allMean=pd.Select(d=>d.rmean).ToArray();
+        var allV=pd.Select(d=>d.rawIQR).ToArray();var allRes=pd.Select(d=>d.resid).ToArray();var allRank=pd.Select(d=>d.Item3).ToArray();
+        var allMean=pd.Select(d=>d.Item6).ToArray();
         _o.WriteLine($"{"absolute rawIQR",-18} {EvalEff(p1.Select(d=>d.rawIQR).ToArray(),p1b.Select(d=>d.rawIQR).ToArray(),allV),10:F4}σ {Math.Abs(p1.Average(d=>d.rawIQR)-p1b.Average(d=>d.rawIQR)),10:F5}");
         _o.WriteLine($"{"residual rawIQR",-18} {EvalEff(p1.Select(d=>d.resid).ToArray(),p1b.Select(d=>d.resid).ToArray(),allRes),10:F4}σ {Math.Abs(p1.Average(d=>d.resid)-p1b.Average(d=>d.resid)),10:F5}");
-        _o.WriteLine($"{"rank percentile",-18} {EvalEff(p1.Select(d=>d.rank).ToArray(),p1b.Select(d=>d.rank).ToArray(),allRank),10:F4}σ {Math.Abs(p1.Average(d=>d.rank)-p1b.Average(d=>d.rank)),10:F5}");
-        _o.WriteLine($"{"rawMean",-18} {EvalEff(p1.Select(d=>d.rmean).ToArray(),p1b.Select(d=>d.rmean).ToArray(),allMean),10:F4}σ {Math.Abs(p1.Average(d=>d.rmean)-p1b.Average(d=>d.rmean)),10:F5}");
+        _o.WriteLine($"{"rank percentile",-18} {EvalEff(p1.Select(d=>d.Item3).ToArray(),p1b.Select(d=>d.Item3).ToArray(),allRank),10:F4}σ {Math.Abs(p1.Average(d=>d.Item3)-p1b.Average(d=>d.Item3)),10:F5}");
+        _o.WriteLine($"{"rawMean",-18} {EvalEff(p1.Select(d=>d.Item6).ToArray(),p1b.Select(d=>d.Item6).ToArray(),allMean),10:F4}σ {Math.Abs(p1.Average(d=>d.Item6)-p1b.Average(d=>d.Item6)),10:F5}");
 
         // ============================================================
         // PART F — Robustness
@@ -584,8 +584,8 @@ public class V5_55_ResidualSelectionPreference_Tests
         for(int sp=0;sp<50;sp++){
             var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h2=shuf.Length/2;
             var s1=shuf.Take(h2).ToArray();var s2=shuf.Skip(h2).ToArray();
-            bool s1r=s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.rank)<s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.rank);
-            bool s2r=s2.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.rank)<s2.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.rank);
+            bool s1r=s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item3)<s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item3);
+            bool s2r=s2.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item3)<s2.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item3);
             if(s1r==s2r)rankStable++;
         }
         _o.WriteLine($"Rank sign stability (50 splits): {rankStable}/50 ({rankStable*2}%)");
@@ -657,15 +657,15 @@ public class V5_55_ResidualSelectionPreference_Tests
         // PART B — Independence
         // ============================================================
         _o.WriteLine($"\n=== PART B: Rank vs Residual Independence ===");
-        var ranks=pd.Select(d=>d.rank).ToArray();var resids=pd.Select(d=>d.resid).ToArray();
+        var ranks=pd.Select(d=>d.Item3).ToArray();var resids=pd.Select(d=>d.resid).ToArray();
         double rPR=Pearson(ranks,resids),sPR=Spearman(ranks,resids);
         _o.WriteLine($"Pearson r(rank,resid)={rPR:F4}, Spearman={sPR:F4}");
         _o.WriteLine($"Independence: {(Math.Abs(rPR)<0.3?"STRONG — near-orthogonal":Math.Abs(rPR)<0.6?"MODERATE — partially independent":"WEAK — redundant")}");
 
         // Overlap: top/bottom quartiles
         double rQ25=Q(ranks,0.25),rQ75=Q(ranks,0.75),sQ25=Q(resids,0.25),sQ75=Q(resids,0.75);
-        int bothHigh=pd.Count(d=>d.rank>rQ75&&d.resid>sQ75),bothLow=pd.Count(d=>d.rank<rQ25&&d.resid<sQ25);
-        int hiRankLoRes=pd.Count(d=>d.rank>rQ75&&d.resid<sQ25),loRankHiRes=pd.Count(d=>d.rank<rQ25&&d.resid>sQ75);
+        int bothHigh=pd.Count(d=>d.Item3>rQ75&&d.resid>sQ75),bothLow=pd.Count(d=>d.Item3<rQ25&&d.resid<sQ25);
+        int hiRankLoRes=pd.Count(d=>d.Item3>rQ75&&d.resid<sQ25),loRankHiRes=pd.Count(d=>d.Item3<rQ25&&d.resid>sQ75);
         _o.WriteLine($"Quartile overlap: both-high={bothHigh}, both-low={bothLow}, hiRank-loRes={hiRankLoRes}, loRank-hiRes={loRankHiRes}");
         _o.WriteLine($"Expected overlap (indep): ~{pd.Length/16:F0}. Observed high={bothHigh}, low={bothLow}");
 
@@ -677,7 +677,7 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"{"Bin",-10} {"P1 resid",10} {"P1b resid",10} {"Delta",10}");
         for(int b=0;b<3;b++){
             double lo=b/3.0,hi=(b+1)/3.0+(b==2?0.01:0);
-            var bd=pd.Where(d=>d.rank>=lo&&d.rank<hi).ToArray();
+            var bd=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();
             var bp1=bd.Where(d=>d.cls=="P1").ToArray();var bp1b=bd.Where(d=>d.cls=="P1b").ToArray();
             double d=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.resid)-bp1b.DefaultIfEmpty().Average(d=>d.resid));
             _o.WriteLine($"{$"{lo*100:F0}-{hi*100:F0}%",-10} {bp1.DefaultIfEmpty().Average(d=>d.resid),10:F5} {bp1b.DefaultIfEmpty().Average(d=>d.resid),10:F5} {d,10:F5}");
@@ -695,8 +695,8 @@ public class V5_55_ResidualSelectionPreference_Tests
             double lo=resSorted[b*tN],hi=resSorted[Math.Min((b+1)*tN,resSorted.Length-1)];
             var bd=pd.Where(d=>d.resid>=lo&&(b<2?d.resid<hi:d.resid<=hi)).ToArray();
             var bp1=bd.Where(d=>d.cls=="P1").ToArray();var bp1b=bd.Where(d=>d.cls=="P1b").ToArray();
-            double d=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.rank)-bp1b.DefaultIfEmpty().Average(d=>d.rank));
-            _o.WriteLine($"{$"resid {b+1}/3",-10} {bp1.DefaultIfEmpty().Average(d=>d.rank),10:F3} {bp1b.DefaultIfEmpty().Average(d=>d.rank),10:F3} {d,10:F3}");
+            double d=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.Item3)-bp1b.DefaultIfEmpty().Average(d=>d.Item3));
+            _o.WriteLine($"{$"resid {b+1}/3",-10} {bp1.DefaultIfEmpty().Average(d=>d.Item3),10:F3} {bp1b.DefaultIfEmpty().Average(d=>d.Item3),10:F3} {d,10:F3}");
         }
 
         // ============================================================
@@ -704,12 +704,12 @@ public class V5_55_ResidualSelectionPreference_Tests
         // ============================================================
         _o.WriteLine($"\n=== PART D: Composite Improvement ===");
         // Simple composite: rank - resid (rank low good, resid low good for P1 → both point same direction)
-        var compVals=pd.Select(d=>d.rank-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).ToArray();
-        double rankOnly=Math.Abs(p1.Average(d=>d.rank)-p1b.Average(d=>d.rank));
+        var compVals=pd.Select(d=>d.Item3-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).ToArray();
+        double rankOnly=Math.Abs(p1.Average(d=>d.Item3)-p1b.Average(d=>d.Item3));
         double residOnly=Math.Abs(p1.Average(d=>d.resid)-p1b.Average(d=>d.resid));
         // Composite separation
-        var compP1=p1.Select(d=>d.rank-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).DefaultIfEmpty(0).Average();
-        var compP1b=p1b.Select(d=>d.rank-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).DefaultIfEmpty(0).Average();
+        var compP1=p1.Select(d=>d.Item3-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).DefaultIfEmpty(0).Average();
+        var compP1b=p1b.Select(d=>d.Item3-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).DefaultIfEmpty(0).Average();
         double compOnly=Math.Abs(compP1-compP1b);
 
         _o.WriteLine($"Rank-only delta: {rankOnly:F4}");
@@ -730,7 +730,7 @@ public class V5_55_ResidualSelectionPreference_Tests
             string row="";
             for(int si=0;si<3;si++){
                 double sLo=sTert[si*tn],sHi=sTert[Math.Min((si+1)*tn,sTert.Length-1)];
-                var cell=pd.Where(d=>d.rank>=rLo&&(ri<2?d.rank<rHi:d.rank<=rHi)&&d.resid>=sLo&&(si<2?d.resid<sHi:d.resid<=sHi)).ToArray();
+                var cell=pd.Where(d=>d.Item3>=rLo&&(ri<2?d.rank<rHi:d.rank<=rHi)&&d.resid>=sLo&&(si<2?d.resid<sHi:d.resid<=sHi)).ToArray();
                 int p1c=cell.Count(d=>d.cls=="P1"),p1bc=cell.Count(d=>d.cls=="P1b");
                 row+=$"{(p1c+p1bc>0?$"{p1c}P/{p1bc}b":"-"),10}";
             }
@@ -746,7 +746,7 @@ public class V5_55_ResidualSelectionPreference_Tests
         for(int sp=0;sp<50;sp++){
             var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h2=shuf.Length/2;
             var s1=shuf.Take(h2).ToArray();var s2=shuf.Skip(h2).ToArray();
-            double rD=Math.Abs(s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.rank)-s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.rank));
+            double rD=Math.Abs(s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item3)-s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item3));
             double sD=Math.Abs(s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.resid)-s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.resid));
             if(rD>sD*3)rankWins++;else if(sD>rD*0.5)residWins++;else compWins++;
         }
@@ -1031,8 +1031,8 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine(new string('-',42));
         void Rpt2(string n,double[] y){double r=Pearson(allCR,y);_o.WriteLine($"{n,-18} {r,12:F4} {0,10:F4}");}
         Rpt2("rawIQR residual",pd.Select(d=>d.resid).ToArray());
-        Rpt2("within-seed rank",pd.Select(d=>d.rank).ToArray());
-        Rpt2("rawMean",pd.Select(d=>d.rmean).ToArray());
+        Rpt2("within-seed rank",pd.Select(d=>d.Item3).ToArray());
+        Rpt2("rawMean",pd.Select(d=>d.Item6).ToArray());
 
         // ============================================================
         // PART D — Decoupling Quantile
@@ -1083,6 +1083,178 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"Evidence: retained coupling={retainedCoupling:F6}, rejected coupling={rejected.Average(d=>d.coupResid):F6}, delta={coupDelta:F6}");
         _o.WriteLine("CLAIMS: Decoupling audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== RDC_01 complete. Commit: RDC_01_RankResidualDecouplingAudit ===");
+    }
+
+    [Fact]
+    public void RGM_01_RankResidualGateMechanismAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RGM_01: Rank-Residual Gate Mechanism Audit ===");
+        _o.WriteLine("=== V5.55. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is decoupling the gate, or a byproduct? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo)));
+            seedIQRd.AddOrUpdate(s,Q(wo,0.75)-Q(wo,0.25),(_,v)=>v+Q(wo,0.75)-Q(wo,0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        // Build full data + expected residual
+        var fd=new List<(int N,int seed,double riqr,double rmean,double rmed,double rstd,double resid,double rank)>();
+        foreach(var p in allProf){
+            double resid=p.riqr-siQ.GetValueOrDefault(p.seed,0),rank=seedRanks.GetValueOrDefault(p.seed)?.GetValueOrDefault(p.N,-1)??-1;
+            if(rank>=0)fd.Add((p.N,p.seed,p.riqr,p.rmean,p.rmed,p.rstd,resid,rank));
+        }
+        // Expected residual | rank
+        var expRes=new double[11];
+        for(int b=0;b<=10;b++){double lo=b/10.0,hi=(b+1)/10.0+(b==10?0.01:0);expRes[b]=fd.Where(p=>p.rank>=lo&&p.rank<hi).Select(p=>p.resid).DefaultIfEmpty(0).Average();}
+
+        // Pipeline with decoupling score
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rank,double resid,double decouple,double rmean,string stage,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                var prof=allProf.FirstOrDefault(p=>p.N==n&&p.seed==s);
+                double resid=prof.riqr-siQ.GetValueOrDefault(s,0),rank=seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1;
+                if(rank<0)return;int b=Math.Clamp((int)(rank*10),0,10);double decouple=resid-expRes[b];
+                // Pre-selection
+                pipeBag.Add((n,s,rank,resid,decouple,prof.rmean,"pre","pre"));
+                // IsHi
+                bool ih=IsHi(n,s);pipeBag.Add((n,s,rank,resid,decouple,prof.rmean,"IsHi",ih?"pass":"fail"));
+                if(!ih)return;
+                // SAC
+                var sb=SelectAndClassify(n,s,hi);
+                string cls=sb==null?"reject":(sb.Value.cls=="P1"||sb.Value.cls=="P1b"?sb.Value.cls:"reject");
+                pipeBag.Add((n,s,rank,resid,decouple,prof.rmean,"SAC",cls));
+            });});
+        var pd=pipeBag.ToArray();
+
+        // ============================================================
+        // PART B — Decoupling Dominance
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Decoupling Dominance Audit ===");
+        var sacRet=pd.Where(d=>d.stage=="SAC"&&(d.cls=="P1"||d.cls=="P1b")).ToArray();
+        var p1d=sacRet.Where(d=>d.cls=="P1").ToArray();var p1bd=sacRet.Where(d=>d.cls=="P1b").ToArray();
+        _o.WriteLine($"SAC retained: P1={p1d.Length}, P1b={p1bd.Length}");
+
+        _o.WriteLine($"{"Descriptor",-14} {"P1 mean",10} {"P1b mean",10} {"Delta",10} {"Effect(σ)",12} {"Rank",6}");
+        _o.WriteLine(new string('-',65));
+        void G(string n,Func<(int,int,double,double,double,double,string,string),double> f,double[] all){
+            double p1m=p1d.Average(f),p1bm=p1bd.Average(f),d=Math.Abs(p1m-p1bm),s=Sd(all);
+            double eff=s>0.001?d/s:0;
+            _o.WriteLine($"{n,-14} {p1m,10:F5} {p1bm,10:F5} {d,10:F5} {eff,12:F4}σ");
+        }
+        var allR=pd.Where(d=>d.stage=="SAC").Select(d=>d.Item3).ToArray();
+        var allResid=pd.Where(d=>d.stage=="SAC").Select(d=>d.resid).ToArray();
+        var allDec=pd.Where(d=>d.stage=="SAC").Select(d=>d.Item5).ToArray();
+        G("rank",d=>d.Item3,allR);
+        G("residual",d=>d.Item4,allResid);
+        G("decoupling",d=>d.Item5,allDec);
+        G("rawMean",d=>d.Item6,pd.Where(d=>d.stage=="SAC").Select(d=>d.Item6).ToArray());
+
+        // ============================================================
+        // PART C — Conditional Decoupling
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Conditional Decoupling Audit ===");
+        double rMed=allR.OrderBy(v=>v).ToArray()[allR.Length/2];
+        var loR=sacRet.Where(d=>d.Item3<=rMed).ToArray();var hiR=sacRet.Where(d=>d.Item3>rMed).ToArray();
+        double loRd=Math.Abs(loR.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item5)-loR.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item5));
+        double hiRd=Math.Abs(hiR.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item5)-hiR.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item5));
+        _o.WriteLine($"After rank control: decouple delta (P1-P1b) = low={loRd:F5}, high={hiRd:F5}");
+        _o.WriteLine($"Decoupling {(loRd>0.0005||hiRd>0.0005?"SURVIVES":"does NOT survive")} rank control");
+
+        double sMed=allResid.OrderBy(v=>v).ToArray()[allResid.Length/2];
+        var loS=sacRet.Where(d=>d.resid<=sMed).ToArray();var hiS=sacRet.Where(d=>d.resid>sMed).ToArray();
+        double loSd=Math.Abs(loS.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item5)-loS.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item5));
+        double hiSd=Math.Abs(hiS.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item5)-hiS.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item5));
+        _o.WriteLine($"After resid control: decouple delta = low={loSd:F5}, high={hiSd:F5}");
+        _o.WriteLine($"Decoupling {(loSd>0.0005||hiSd>0.0005?"SURVIVES":"does NOT survive")} residual control");
+
+        // ============================================================
+        // PART D — Gate Localization
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Gate Localization Audit ===");
+        foreach(var stage in new[]{"pre","IsHi","SAC"}){
+            var sd=pd.Where(d=>d.stage==stage).ToArray();
+            var sP1=sd.Where(d=>d.cls=="P1").ToArray();var sP1b=sd.Where(d=>d.cls=="P1b").ToArray();
+            var sPass=sd.Where(d=>d.cls=="pass").ToArray();var sFail=sd.Where(d=>d.cls=="fail").ToArray();
+            var sRej=sd.Where(d=>d.cls=="reject").ToArray();
+            _o.WriteLine($"{stage}: total={sd.Length}, decouple mean={sd.Average(d=>d.Item5):F6}, std={Sd(sd.Select(d=>d.Item5).ToArray()):F6}");
+            if(stage=="IsHi")_o.WriteLine($"  pass decouple={sPass.DefaultIfEmpty().Average(d=>d.Item5):F6}, fail={sFail.DefaultIfEmpty().Average(d=>d.Item5):F6}");
+            if(stage=="SAC")_o.WriteLine($"  P1 decouple={sP1.DefaultIfEmpty().Average(d=>d.Item5):F6}, P1b={sP1b.DefaultIfEmpty().Average(d=>d.Item5):F6}, rej={sRej.DefaultIfEmpty().Average(d=>d.Item5):F6}");
+        }
+
+        // ============================================================
+        // PART E — Decoupling Quantile
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decoupling Quantile Audit ===");
+        var dSorted=allDec.OrderBy(v=>v).ToArray();
+        for(int q=0;q<4;q++){
+            double lo=new[]{dSorted[0]-0.001,Q(dSorted,0.25),Q(dSorted,0.50),Q(dSorted,0.75)}[q];
+            double hi=new[]{Q(dSorted,0.25),Q(dSorted,0.50),Q(dSorted,0.75),dSorted[^1]+0.001}[q];
+            var qd=sacRet.Where(d=>d.Item5>=lo&&d.decouple<hi+(q==3?0.01:0)).ToArray();
+            int qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b");
+            _o.WriteLine($"Decouple Q{q+1}: P1={qp1}, P1b={qp1b}, P1%={(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0):F0}%");
+        }
+
+        // ============================================================
+        // PART F — Competing Descriptor
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Competing Descriptor Audit ===");
+        // Correlation between decoupling and rawMean residual
+        var allMean=pd.Where(d=>d.stage=="SAC").Select(d=>d.Item6).ToArray();
+        _o.WriteLine($"Decouple vs rawMean: r={Pearson(allDec,allMean):F4}");
+        _o.WriteLine($"Decouple vs rank: r={Pearson(allDec,allR):F4}");
+        _o.WriteLine($"Decouple vs resid: r={Pearson(allDec,allResid):F4}");
+        _o.WriteLine($"Decoupling is {(Math.Abs(Pearson(allDec,allResid))>0.5?"RESIDUAL-DOMINATED — decoupling ≈ residual with rank adjustment":"INDEPENDENT — not a proxy for other descriptors")}");
+
+        // ============================================================
+        // PART G — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Robustness ===");
+        var rng2=new Random(42);int decStable=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=sacRet.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+            bool s1d=shuf.Take(h).Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item5)>shuf.Take(h).Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item5);
+            bool s2d=shuf.Skip(h).Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.Item5)>shuf.Skip(h).Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.Item5);
+            if(s1d==s2d)decStable++;
+        }
+        _o.WriteLine($"Decoupling sign stability: {decStable}/50");
+
+        // ============================================================
+        // PART H — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART H: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double rankEff=Sd(allR)>0.001?Math.Abs(p1d.Average(d=>d.Item3)-p1bd.Average(d=>d.Item3))/Sd(allR):0;
+        double decEff=Sd(allDec)>0.001?Math.Abs(p1d.Average(d=>d.Item5)-p1bd.Average(d=>d.Item5))/Sd(allDec):0;
+
+        string decision;
+        if(decEff>rankEff*1.5)decision="Model A: Decoupling score is the dominant SAC gate.";
+        else if(rankEff>decEff*1.5)decision="Model B: Rank remains dominant; decoupling secondary.";
+        else if(Math.Abs(Pearson(allDec,allResid))>0.7)decision="Model D: Decoupling is a byproduct — largely residual-driven.";
+        else decision="Model C: Mixed — decoupling contributes independently.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: rank effect={rankEff:F4}σ, decouple effect={decEff:F4}σ, decouple vs resid r={Pearson(allDec,allResid):F4}");
+        _o.WriteLine("CLAIMS: Gate mechanism audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RGM_01 complete. Commit: RGM_01_RankResidualGateMechanismAudit ===");
     }
 
     // ============================================================
