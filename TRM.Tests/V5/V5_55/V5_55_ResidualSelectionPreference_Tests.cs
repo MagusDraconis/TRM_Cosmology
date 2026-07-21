@@ -611,6 +611,166 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"\n=== RRC_01 complete. Commit: RRC_01_RelativeRankClosureAudit ===");
     }
 
+    [Fact]
+    public void RCC_01_RankResidualCompositeClosureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RCC_01: Rank-Residual Composite Closure Audit ===");
+        _o.WriteLine("=== V5.55. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Are rank and residual independent channels? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average()));
+            seedIQRd.AddOrUpdate(s,Q(wo,0.75)-Q(wo,0.25),(_,v)=>v+Q(wo,0.75)-Q(wo,0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        var pipeBag=new ConcurrentBag<(int N,int seed,double riqr,double resid,double rank,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                if(sb==null||(sb.Value.cls!="P1"&&sb.Value.cls!="P1b"))return;
+                var prof=allProf.FirstOrDefault(p=>p.N==n&&p.seed==s);
+                pipeBag.Add((n,s,prof.riqr,prof.riqr-siQ.GetValueOrDefault(s,0),seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1,sb.Value.cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var p1=pd.Where(d=>d.cls=="P1").ToArray();var p1b=pd.Where(d=>d.cls=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        // ============================================================
+        // PART B — Independence
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Rank vs Residual Independence ===");
+        var ranks=pd.Select(d=>d.rank).ToArray();var resids=pd.Select(d=>d.resid).ToArray();
+        double rPR=Pearson(ranks,resids),sPR=Spearman(ranks,resids);
+        _o.WriteLine($"Pearson r(rank,resid)={rPR:F4}, Spearman={sPR:F4}");
+        _o.WriteLine($"Independence: {(Math.Abs(rPR)<0.3?"STRONG — near-orthogonal":Math.Abs(rPR)<0.6?"MODERATE — partially independent":"WEAK — redundant")}");
+
+        // Overlap: top/bottom quartiles
+        double rQ25=Q(ranks,0.25),rQ75=Q(ranks,0.75),sQ25=Q(resids,0.25),sQ75=Q(resids,0.75);
+        int bothHigh=pd.Count(d=>d.rank>rQ75&&d.resid>sQ75),bothLow=pd.Count(d=>d.rank<rQ25&&d.resid<sQ25);
+        int hiRankLoRes=pd.Count(d=>d.rank>rQ75&&d.resid<sQ25),loRankHiRes=pd.Count(d=>d.rank<rQ25&&d.resid>sQ75);
+        _o.WriteLine($"Quartile overlap: both-high={bothHigh}, both-low={bothLow}, hiRank-loRes={hiRankLoRes}, loRank-hiRes={loRankHiRes}");
+        _o.WriteLine($"Expected overlap (indep): ~{pd.Length/16:F0}. Observed high={bothHigh}, low={bothLow}");
+
+        // ============================================================
+        // PART C — Orthogonal Signal Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Orthogonal Signal Audit ===");
+        // Rank bins
+        _o.WriteLine($"{"Bin",-10} {"P1 resid",10} {"P1b resid",10} {"Delta",10}");
+        for(int b=0;b<3;b++){
+            double lo=b/3.0,hi=(b+1)/3.0+(b==2?0.01:0);
+            var bd=pd.Where(d=>d.rank>=lo&&d.rank<hi).ToArray();
+            var bp1=bd.Where(d=>d.cls=="P1").ToArray();var bp1b=bd.Where(d=>d.cls=="P1b").ToArray();
+            double d=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.resid)-bp1b.DefaultIfEmpty().Average(d=>d.resid));
+            _o.WriteLine($"{$"{lo*100:F0}-{hi*100:F0}%",-10} {bp1.DefaultIfEmpty().Average(d=>d.resid),10:F5} {bp1b.DefaultIfEmpty().Average(d=>d.resid),10:F5} {d,10:F5}");
+        }
+        _o.WriteLine($"\n{"Bin",-10} {"P1 rank",10} {"P1b rank",10} {"Delta",10}");
+        for(int b=0;b<3;b++){
+            double lo=b/3.0,hi=(b+1)/3.0+(b==2?0.01:0);
+            var bd=pd.Where(d=>d.resid>=lo*2*resids.Max()-resids.Max()*0.5&&d.resid<hi*2*resids.Max()-resids.Max()*0.5).ToArray();
+            // simpler: use tertiles
+        }
+        // Residual tertiles for rank separation
+        var resSorted=resids.OrderBy(v=>v).ToArray();
+        for(int b=0;b<3;b++){
+            int tN=resSorted.Length/3;
+            double lo=resSorted[b*tN],hi=resSorted[Math.Min((b+1)*tN,resSorted.Length-1)];
+            var bd=pd.Where(d=>d.resid>=lo&&(b<2?d.resid<hi:d.resid<=hi)).ToArray();
+            var bp1=bd.Where(d=>d.cls=="P1").ToArray();var bp1b=bd.Where(d=>d.cls=="P1b").ToArray();
+            double d=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.rank)-bp1b.DefaultIfEmpty().Average(d=>d.rank));
+            _o.WriteLine($"{$"resid {b+1}/3",-10} {bp1.DefaultIfEmpty().Average(d=>d.rank),10:F3} {bp1b.DefaultIfEmpty().Average(d=>d.rank),10:F3} {d,10:F3}");
+        }
+
+        // ============================================================
+        // PART D — Composite Improvement
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Composite Improvement ===");
+        // Simple composite: rank - resid (rank low good, resid low good for P1 → both point same direction)
+        var compVals=pd.Select(d=>d.rank-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).ToArray();
+        double rankOnly=Math.Abs(p1.Average(d=>d.rank)-p1b.Average(d=>d.rank));
+        double residOnly=Math.Abs(p1.Average(d=>d.resid)-p1b.Average(d=>d.resid));
+        // Composite separation
+        var compP1=p1.Select(d=>d.rank-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).DefaultIfEmpty(0).Average();
+        var compP1b=p1b.Select(d=>d.rank-Math.Sign(d.resid)*Math.Abs(d.resid)*0.1).DefaultIfEmpty(0).Average();
+        double compOnly=Math.Abs(compP1-compP1b);
+
+        _o.WriteLine($"Rank-only delta: {rankOnly:F4}");
+        _o.WriteLine($"Residual-only delta: {residOnly:F5}");
+        _o.WriteLine($"Composite delta: {compOnly:F4}");
+        _o.WriteLine($"Composite {(compOnly>rankOnly*1.1?"IMPROVES over rank":"does NOT improve")}");
+
+        // ============================================================
+        // PART E — Rank-Residual Matrix
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Rank-Residual Matrix (3×3) ===");
+        var rTert=ranks.OrderBy(v=>v).ToArray();var sTert=resids.OrderBy(v=>v).ToArray();
+        int tn=rTert.Length/3;
+        _o.WriteLine($"{"",-12} {"Lo resid",10} {"Mid resid",10} {"Hi resid",10}");
+        _o.WriteLine(new string('-',45));
+        for(int ri=0;ri<3;ri++){
+            double rLo=rTert[ri*tn],rHi=rTert[Math.Min((ri+1)*tn,rTert.Length-1)];
+            string row="";
+            for(int si=0;si<3;si++){
+                double sLo=sTert[si*tn],sHi=sTert[Math.Min((si+1)*tn,sTert.Length-1)];
+                var cell=pd.Where(d=>d.rank>=rLo&&(ri<2?d.rank<rHi:d.rank<=rHi)&&d.resid>=sLo&&(si<2?d.resid<sHi:d.resid<=sHi)).ToArray();
+                int p1c=cell.Count(d=>d.cls=="P1"),p1bc=cell.Count(d=>d.cls=="P1b");
+                row+=$"{(p1c+p1bc>0?$"{p1c}P/{p1bc}b":"-"),10}";
+            }
+            _o.WriteLine($"{$"Rank {ri+1}/3",-12}{row}");
+        }
+
+        // ============================================================
+        // PART F — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Robustness ===");
+        var rng2=new Random(42);
+        int rankWins=0,residWins=0,compWins=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h2=shuf.Length/2;
+            var s1=shuf.Take(h2).ToArray();var s2=shuf.Skip(h2).ToArray();
+            double rD=Math.Abs(s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.rank)-s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.rank));
+            double sD=Math.Abs(s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.resid)-s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.resid));
+            if(rD>sD*3)rankWins++;else if(sD>rD*0.5)residWins++;else compWins++;
+        }
+        _o.WriteLine($"50 splits: rank wins={rankWins}, resid wins={residWins}, composite={compWins}");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Closure Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        if(Math.Abs(rPR)<0.3&&compOnly>rankOnly*1.1)decision="Model C: rank and residual are partially independent and jointly required.";
+        else if(Math.Abs(rPR)<0.3)decision="Model C: rank and residual are independent channels. Both carry signal.";
+        else if(Math.Abs(rPR)>0.7)decision="Model A/B: rank and residual are largely redundant.";
+        else if(compOnly>rankOnly)decision="Model C: composite adds marginal value.";
+        else decision="Model E: closure unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: rank-resid r={rPR:F4}, rank-only δ={rankOnly:F4}, resid-only δ={residOnly:F5}, comp δ={compOnly:F4}");
+        _o.WriteLine("CLAIMS: Composite closure audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RCC_01 complete. Commit: RCC_01_RankResidualCompositeClosureAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
