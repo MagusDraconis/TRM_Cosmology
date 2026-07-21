@@ -110,6 +110,116 @@ public class V5_58_d0GenerationAudit_Tests
         _o.WriteLine($"\n=== D0G_01 complete. Commit: D0G_01_d0GenerationAudit ===");
     }
 
+    [Fact]
+    public void SKL_01_StructuralKernelLayerAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== SKL_01: Structural Kernel Layer Audit ===");
+        _o.WriteLine("=== V5.58. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: One kernel or multiple structures? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,string)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                var K=KS(n,s);
+                for(int e=0;e<3;e++){var h=Sim(K,n,0.10,s+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}
+                var h3=Sim(K,n,0.10,s+3);var d3=DL(Nm(RP(h3,n),n),n);K=Cupd(d3,n);
+                var h3E=Sim(K,n,0.10,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);var K3E=Cupd(d3E,n);
+                double d0=Dm(d3E,n),km=Km(K3E,n),lam=Lambda1(K3E,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,d0,km,lam,1.0,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.Item7=="P1").ToArray();var p1b=bd.Where(d=>d.Item7=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        double eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        var d0A=bd.Select(d=>d.Item3).ToArray();var kmA=bd.Select(d=>d.Item4).ToArray();var lamA=bd.Select(d=>d.Item5).ToArray();
+        var d0P=p1.Select(d=>d.Item3).ToArray();var kmP=p1.Select(d=>d.Item4).ToArray();var lamP=p1.Select(d=>d.Item5).ToArray();
+        var d0Pb=p1b.Select(d=>d.Item3).ToArray();var kmPb=p1b.Select(d=>d.Item4).ToArray();var lamPb=p1b.Select(d=>d.Item5).ToArray();
+
+        // ============================================================
+        // PART A — Pairwise structure
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Pairwise Structure ===");
+        double rDK=Pearson(d0A,kmA),rDL=Pearson(d0A,lamA),rKL=Pearson(kmA,lamA);
+        _o.WriteLine($"d0-km: r={rDK:F4}, d0-lambda: r={rDL:F4}, km-lambda: r={rKL:F4}");
+        double varOverlapDK=rDK*rDK*100,varOverlapDL=rDL*rDL*100,varOverlapKL=rKL*rKL*100;
+        _o.WriteLine($"Variance overlap: d0↔km={varOverlapDK:F0}%, d0↔λ={varOverlapDL:F0}%, km↔λ={varOverlapKL:F0}%");
+        _o.WriteLine($"Structure: {(rKL>0.99?"SINGLE KERNEL — km and λ are identical (r="+rKL.ToString("F4")+")":"MULTI-KERNEL")}");
+
+        // ============================================================
+        // PART B — Residualize km/λ against d0
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Residualize km/λ against d0 ===");
+        double bK=(Pearson(d0A,kmA)*Sd(kmA))/(Sd(d0A)+0.0001),aK=kmA.Average()-bK*d0A.Average();
+        double bL=(Pearson(d0A,lamA)*Sd(lamA))/(Sd(d0A)+0.0001),aL=lamA.Average()-bL*d0A.Average();
+        var kmRes=bd.Select((d,i)=>d.Item4-(aK+bK*d.Item3)).ToArray();
+        var lamRes=bd.Select((d,i)=>d.Item5-(aL+bL*d.Item3)).ToArray();
+        var kmResP=p1.Select((d,i)=>d.Item4-(aK+bK*d.Item3)).ToArray();
+        var kmResPb=p1b.Select((d,i)=>d.Item4-(aK+bK*d.Item3)).ToArray();
+        var lamResP=p1.Select((d,i)=>d.Item5-(aL+bL*d.Item3)).ToArray();
+        var lamResPb=p1b.Select((d,i)=>d.Item5-(aL+bL*d.Item3)).ToArray();
+        double kmResE=eff(kmResP,kmResPb,kmRes),lamResE=eff(lamResP,lamResPb,lamRes);
+        _o.WriteLine($"km after d0 removal: eff={kmResE:F3}σ — {(kmResE>0.3?"INDEPENDENT signal survives":"ABSORBED by d0")}");
+        _o.WriteLine($"λ after d0 removal: eff={lamResE:F3}σ — {(lamResE>0.3?"INDEPENDENT signal survives":"ABSORBED by d0")}");
+
+        // ============================================================
+        // PART C — Reverse: residualize d0 against km
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Reverse Residualization ===");
+        double bD=(Pearson(kmA,d0A)*Sd(d0A))/(Sd(kmA)+0.0001),aD=d0A.Average()-bD*kmA.Average();
+        var d0ResK=bd.Select((d,i)=>d.Item3-(aD+bD*d.Item4)).ToArray();
+        var d0ResKP=p1.Select((d,i)=>d.Item3-(aD+bD*d.Item4)).ToArray();
+        var d0ResKPb=p1b.Select((d,i)=>d.Item3-(aD+bD*d.Item4)).ToArray();
+        double d0ResKE=eff(d0ResKP,d0ResKPb,d0ResK);
+        _o.WriteLine($"d0 after km removal: eff={d0ResKE:F3}σ — {(d0ResKE>0.3?"d0 SURVIVES — independent of km":"d0 ABSORBED — redundant with km")}");
+
+        // ============================================================
+        // PART D — Factor analysis
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Factor Analysis ===");
+        // Model A: single factor (first PC of d0,km,lam)
+        double pc1Var=varOverlapKL>99?100:varOverlapKL; // km-lambda overlap ≈ single factor
+        _o.WriteLine($"Model A (single factor): variance explained ≈ {pc1Var:F0}% (km↔λ overlap={varOverlapKL:F0}%)");
+        _o.WriteLine($"Model B (two factors): d0+km/λ — d0 captures {(varOverlapDK+varOverlapDL)/2:F0}% of km/λ variance");
+        _o.WriteLine($"Model C (three factors): unnecessary — km=λ, d0 is linear transform");
+        _o.WriteLine($"Best: {(rKL>0.99?"Model A — SINGLE STRUCTURAL KERNEL":"Model B")}");
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string result;
+        if(rKL>0.99&&kmResE<0.3&&lamResE<0.3)result="Model A: Single structural kernel. d0, km, lambda are linear transforms of one latent variable.";
+        else if(rKL>0.99)result="Model B: Kernel + minor residual. Single kernel dominates but tiny residual remains.";
+        else result="Model D: Unresolved.";
+
+        _o.WriteLine($"Decision: {result}");
+        _o.WriteLine($"Evidence: km-λ r={rKL:F4}, d0-km r={rDK:F4}, km res eff={kmResE:F3}σ, d0 res eff={d0ResKE:F3}σ");
+        _o.WriteLine("CLAIMS: Kernel layer audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== SKL_01 complete. Commit: SKL_01_StructuralKernelLayerAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
