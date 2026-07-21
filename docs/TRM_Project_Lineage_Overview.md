@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 2.1
+**Version:** 2.3
 **Date:** 2026-07-21
-**Scope:** Clockwork Cosmology V1 through V5.53
-**Tests:** 2901 verified, 0 failed
-**Branch:** feature/v5.53-selectandclassify-predicate-origin
-**Current Frontier:** V5.53 COMPLETE (TSS_01 Final Synthesis)
+**Scope:** Clockwork Cosmology V1 through V5.56
+**Tests:** 2917 verified, 0 failed
+**Branch:** feature/v5.56-relative-gate-preference
+**Current Frontier:** V5.56 INITIALIZED (RGP_01 complete)
 
 ---
 

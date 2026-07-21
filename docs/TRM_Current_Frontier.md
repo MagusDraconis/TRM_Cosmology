@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 1.6
+**Version:** 1.8
 **Date:** 2026-07-21
 
-**Current Version:** V5.54 COMPLETE (TSS_01 Final Synthesis)
-**Current Branch:** feature/v5.54-rawiqr-origin-and-profile-structure
-**Cumulative Tests:** 2908
+**Current Version:** V5.56 INITIALIZED (RGP_01 complete)
+**Current Branch:** feature/v5.56-relative-gate-preference
+**Cumulative Tests:** 2917
 **Failed:** 0
 
 ---
@@ -144,13 +144,15 @@ deterministic threshold rescue.
 
 ---
 
-## Current V5.54 Research Question
+## Current V5.55 Research Question
 
-**Where does rawIQR variation come from, and does it propagate into P1/P1b?**
+**Why is SAC sensitive to the 6.4% residual component rather than the 93.6% seed component?**
 
-**Answer:** rawIQR has two components. Between-seed (93.6%): generator seed realization — large but SAC-irrelevant (seed→P1 r=0.044). Within-seed residual (6.4%): N-driven sampling — small but SAC-relevant (P1−P1b delta=0.00105). Residual rawIQR is orthogonal to residual rawMean (r=0.0000) and dominates (8.7×). Pooled composite (V5.53) and residual discriminator (V5.54) are distinct layers. V6 NOT READY.
+**Answer:** SAC discriminates on *relative* position within a seed, not absolute spread. Within-seed rank is the dominant signal (0.41σ SAC, 1.27σ pooled). Residual rawIQR provides independent complement (0.43σ). SAC-retained profiles break normal rank-residual coupling (Pearson 0.70→0.00). Most coupled: 0% P1; most decoupled: 83% P1. Gate operates at SAC, not IsHi. V6 NOT READY.
 
-**Final synthesis:** `docsV5/V5_54/TRM_V5_54_Final_Synthesis.md`
+**V5.56 RGP_01:** SAC prefers lowest-rank profiles (9% retained) over highest (0%). Preference is monotonic. Residual provides secondary discrimination within rank bins. V6 NOT READY.
+
+**Final syntheses:** `docsV5/V5_55/TRM_V5_55_Final_Synthesis.md`
 
 ---
 

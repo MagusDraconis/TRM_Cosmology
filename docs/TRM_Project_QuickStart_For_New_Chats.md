@@ -11,9 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.54 COMPLETE |
-| Current Branch | feature/v5.54-rawiqr-origin-and-profile-structure |
-| Total Tests | 2908 |
+| Current Version | V5.56 INITIALIZED |
+| Current Branch | feature/v5.56-relative-gate-preference |
+| Total Tests | 2917 |
+| Failed Tests | 0 |
+| Current Status | V5.56 INITIALIZED — RGP_01 complete. V5.55 COMPLETE: rank-primary, residual-secondary SAC discriminator. SAC selects on relative position within seed. |
 | Failed Tests | 0 |
 | Current Status | V5.54 COMPLETE — TSS_01 Final Synthesis. Two-level rawIQR: seed-level (SAC-irrelevant) + residual-level (SAC-relevant). Model A+. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
