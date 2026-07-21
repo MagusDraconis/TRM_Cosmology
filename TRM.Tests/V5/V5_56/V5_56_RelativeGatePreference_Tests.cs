@@ -71,14 +71,14 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine(new string('-',50));
         for(int q=0;q<4;q++){
             double lo=q/4.0,hi=(q+1)/4.0+(q==3?0.01:0);
-            var qd=pd.Where(d=>d.rank>=lo&&d.rank<hi).ToArray();
+            var qd=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();
             int qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b"),qr=qd.Count(d=>d.cls=="reject");
             _o.WriteLine($"{$"{lo*100:F0}-{hi*100:F0}%",-10} {qd.Length,6} {qp1,4} {qp1b,4} {qr,5} {(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0),7:F0}% {(qp1+qp1b)*100.0/qd.Length,7:F0}%");
         }
 
         // Monotonicity check
         var rates=new double[4];
-        for(int q=0;q<4;q++){double lo=q/4.0,hi=(q+1)/4.0+(q==3?0.01:0);var qd=pd.Where(d=>d.rank>=lo&&d.rank<hi).ToArray();rates[q]=qd.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/qd.Length;}
+        for(int q=0;q<4;q++){double lo=q/4.0,hi=(q+1)/4.0+(q==3?0.01:0);var qd=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();rates[q]=qd.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/qd.Length;}
         bool monotonic=true;for(int q=1;q<4;q++)if(rates[q]>rates[q-1])monotonic=false;
         _o.WriteLine($"Retention monotonic (decreasing with rank): {(monotonic?"YES":"NO")}");
 
@@ -86,8 +86,8 @@ public class V5_56_RelativeGatePreference_Tests
         // PART C — Boundary Audit
         // ============================================================
         _o.WriteLine($"\n=== PART C: Boundary Audit ===");
-        var loQ=pd.Where(d=>d.rank<0.25).ToArray();
-        var others=pd.Where(d=>d.rank>=0.25).ToArray();
+        var loQ=pd.Where(d=>d.Item3<0.25).ToArray();
+        var others=pd.Where(d=>d.Item3>=0.25).ToArray();
         _o.WriteLine($"Lowest quartile (0-25%): retained={loQ.Count(d=>d.cls=="P1"||d.cls=="P1b")}/{loQ.Length} ({loQ.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/loQ.Length:F0}%), P1%={loQ.Count(d=>d.cls=="P1")*100.0/Math.Max(1,loQ.Count(d=>d.cls=="P1"||d.cls=="P1b")):F0}%");
         _o.WriteLine($"Others (25-100%): retained={others.Count(d=>d.cls=="P1"||d.cls=="P1b")}/{others.Length} ({others.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/others.Length:F0}%), P1%={others.Count(d=>d.cls=="P1")*100.0/Math.Max(1,others.Count(d=>d.cls=="P1"||d.cls=="P1b")):F0}%");
         double rr=loQ.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/Math.Max(1,loQ.Length)/(others.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/Math.Max(1,others.Length)+0.01);
@@ -99,7 +99,7 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"\n=== PART D: Local Competition Audit ===");
         int loRet=0,midRet=0,hiRet=0,loTot=0,midTot=0,hiTot=0;
         foreach(var g in pd.GroupBy(d=>d.seed)){
-            var ordered=g.OrderBy(d=>d.rank).ToArray();if(ordered.Length<3)continue;
+            var ordered=g.OrderBy(d=>d.Item3).ToArray();if(ordered.Length<3)continue;
             var lowest=ordered[0];var middle=ordered[1];var highest=ordered[2];
             loTot++;midTot++;hiTot++;
             if(lowest.cls!="reject")loRet++;if(middle.cls!="reject")midRet++;if(highest.cls!="reject")hiRet++;
@@ -112,8 +112,8 @@ public class V5_56_RelativeGatePreference_Tests
         // PART E — Profile Contrast (lowest-rank retained vs rejected)
         // ============================================================
         _o.WriteLine($"\n=== PART E: Profile Contrast Audit ===");
-        var loRankRet=pd.Where(d=>d.rank<0.25&&(d.cls=="P1"||d.cls=="P1b")).ToArray();
-        var loRankRej=pd.Where(d=>d.rank<0.25&&d.cls=="reject").ToArray();
+        var loRankRet=pd.Where(d=>d.Item3<0.25&&(d.cls=="P1"||d.cls=="P1b")).ToArray();
+        var loRankRej=pd.Where(d=>d.Item3<0.25&&d.cls=="reject").ToArray();
         _o.WriteLine($"low-rank retained={loRankRet.Length}, low-rank rejected={loRankRej.Length}");
         _o.WriteLine($"{"Descriptor",-14} {"Retained",10} {"Rejected",10} {"Delta",10}");
         _o.WriteLine(new string('-',45));
@@ -130,7 +130,7 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"\n=== PART F: Rank Sufficiency Audit ===");
         foreach(var lo in new[]{0.0,0.25,0.5}){
             double hi=lo+0.25+(lo>0.4?0.01:0);
-            var bin=pd.Where(d=>d.rank>=lo&&d.rank<hi).ToArray();
+            var bin=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();
             var bp1=bin.Where(d=>d.cls=="P1").ToArray();var bp1b=bin.Where(d=>d.cls=="P1b").ToArray();
             double rd=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.Item4)-bp1b.DefaultIfEmpty().Average(d=>d.Item4));
             _o.WriteLine($"Rank [{lo:F2},{hi:F2}): n={bin.Length}, P1={bp1.Length}, P1b={bp1b.Length}, resid delta={rd:F5} {(rd>0.0005?"residual MATTERS":"residual negligible")}");
@@ -143,8 +143,8 @@ public class V5_56_RelativeGatePreference_Tests
         var rng2=new Random(42);int loStable=0;
         for(int sp=0;sp<50;sp++){
             var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
-            double s1r=shuf.Take(h).Where(d=>d.rank<0.25).Count(d=>d.cls!="reject")*100.0/Math.Max(1,shuf.Take(h).Count(d=>d.rank<0.25));
-            double s2r=shuf.Skip(h).Where(d=>d.rank<0.25).Count(d=>d.cls!="reject")*100.0/Math.Max(1,shuf.Skip(h).Count(d=>d.rank<0.25));
+            double s1r=shuf.Take(h).Where(d=>d.Item3<0.25).Count(d=>d.cls!="reject")*100.0/Math.Max(1,shuf.Take(h).Count(d=>d.Item3<0.25));
+            double s2r=shuf.Skip(h).Where(d=>d.Item3<0.25).Count(d=>d.cls!="reject")*100.0/Math.Max(1,shuf.Skip(h).Count(d=>d.Item3<0.25));
             if(Math.Abs(s1r-s2r)<20)loStable++;
         }
         _o.WriteLine($"Low-rank retention stable (50 splits): {loStable}/50");
@@ -165,6 +165,186 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"Evidence: lo-ret={loRet*100.0/loTot:F0}%, mid={midRet*100.0/midTot:F0}%, hi={hiRet*100.0/hiTot:F0}%, monotonic={monotonic}, low/other ratio={rr:F1}x");
         _o.WriteLine("CLAIMS: Gate preference audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== RGP_01 complete. Commit: RGP_01_RelativeGatePreferenceAudit ===");
+    }
+
+    [Fact]
+    public void GEO_01_ProfileSpaceAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== GEO_01: Profile Space Audit ===");
+        _o.WriteLine("=== V5.56. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is rank primitive or geometric projection? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // Build profile descriptors + pipeline outcomes
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo)));
+        });});
+
+        // Within-seed ranks
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        // Run pipeline for outcomes
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rank,double resid,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        var siQ=new ConcurrentDictionary<int,double>();
+        foreach(var g in allProf.GroupBy(p=>p.seed))siQ[g.Key]=g.Average(p=>p.riqr);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                string cls=sb==null?"reject":(sb.Value.cls=="P1"||sb.Value.cls=="P1b"?sb.Value.cls:"reject");
+                var p=allProf.FirstOrDefault(x=>x.N==n&&x.seed==s);
+                pipeBag.Add((n,s,seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1,p.riqr-siQ.GetValueOrDefault(s,0),cls));
+            });});
+        var pd=pipeBag.ToArray();
+
+        // ============================================================
+        // PART A+B — Build profile space + compute geometry per seed
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: Profile Space Geometry ===");
+        // For each seed, compute geometric features in (rawIQR, rawMean, rawMed, rawStd) space
+        var geoResults=new ConcurrentBag<(int seed,int N,double rank,double nnDist,double centDist,double isol,string cls)>();
+
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var members=g.ToArray();if(members.Length<2)continue;
+            // Normalize each dimension to [0,1] within seed
+            double iqrMin=members.Min(p=>p.riqr),iqrMax=members.Max(p=>p.riqr);
+            double mnMin=members.Min(p=>p.rmean),mnMax=members.Max(p=>p.rmean);
+            double mdMin=members.Min(p=>p.rmed),mdMax=members.Max(p=>p.rmed);
+            double sdMin=members.Min(p=>p.rstd),sdMax=members.Max(p=>p.rstd);
+            double iqrRng=iqrMax-iqrMin,mnRng=mnMax-mnMin,mdRng=mdMax-mdMin,sdRng=sdMax-sdMin;
+
+            // Centroid
+            double ci=(iqrRng>0.001?members.Average(p=>p.riqr):0),cm=(mnRng>0.001?members.Average(p=>p.rmean):0);
+            double cmd=(mdRng>0.001?members.Average(p=>p.rmed):0),cs=(sdRng>0.001?members.Average(p=>p.rstd):0);
+
+            foreach(var m in members){
+                double ni=(iqrRng>0.001?(m.riqr-iqrMin)/iqrRng:0),nmn=(mnRng>0.001?(m.rmean-mnMin)/mnRng:0);
+                double nmd=(mdRng>0.001?(m.rmed-mdMin)/mdRng:0),nsd=(sdRng>0.001?(m.rstd-sdMin)/sdRng:0);
+
+                // Centroid distance
+                double cd=Math.Sqrt((ni-ci)*(ni-ci)+(nmn-cm)*(nmn-cm)+(nmd-cmd)*(nmd-cmd)+(nsd-cs)*(nsd-cs));
+
+                // Nearest-neighbor distance
+                double nn=double.MaxValue;
+                foreach(var o in members)if(o.N!=m.N||o.seed!=m.seed){
+                    double oi=(iqrRng>0.001?(o.riqr-iqrMin)/iqrRng:0),omn=(mnRng>0.001?(o.rmean-mnMin)/mnRng:0);
+                    double omd=(mdRng>0.001?(o.rmed-mdMin)/mdRng:0),osd=(sdRng>0.001?(o.rstd-sdMin)/sdRng:0);
+                    double d=Math.Sqrt((ni-oi)*(ni-oi)+(nmn-omn)*(nmn-omn)+(nmd-omd)*(nmd-omd)+(nsd-osd)*(nsd-osd));
+                    if(d<nn)nn=d;
+                }
+                if(nn>1e10)nn=0;
+
+                // Isolation = centroid distance / nearest neighbor (higher = more isolated)
+                double isol=nn>0.001?cd/nn:0;
+
+                double rank=seedRanks.GetValueOrDefault(g.Key)?.GetValueOrDefault(m.N,-1)??-1;
+                string cls=pd.FirstOrDefault(x=>x.N==m.N&&x.seed==m.seed).cls??"unknown";
+                geoResults.Add((m.seed,m.N,rank,nn,cd,isol,cls));
+            }
+        }
+        var geo=geoResults.ToArray();
+
+        // ============================================================
+        // PART B — Geometric isolation of retained profiles
+        // ============================================================
+        _o.WriteLine($"\nGeometric comparison (retained vs rejected):");
+        var gRet=geo.Where(d=>d.cls=="P1"||d.cls=="P1b").ToArray();
+        var gRej=geo.Where(d=>d.cls=="reject").ToArray();
+        _o.WriteLine($"{"Metric",-14} {"Retained",10} {"Rejected",10} {"Delta",10} {"Effect",10}");
+        _o.WriteLine(new string('-',55));
+        void GeoComp(string n,Func<(int,int,double,double,double,double,string),double> f){
+            double r=gRet.DefaultIfEmpty().Average(f),j=gRej.DefaultIfEmpty().Average(f);
+            double allStd=Sd(geo.Select(d=>f(d)).ToArray());
+            double eff=allStd>0.001?Math.Abs(r-j)/allStd:0;
+            _o.WriteLine($"{n,-14} {r,10:F4} {j,10:F4} {r-j,10:F4} {eff,10:F3}σ");
+        }
+        GeoComp("nnDist",d=>d.Item4);GeoComp("centroidDist",d=>d.Item5);
+        GeoComp("isolation",d=>d.Item6);GeoComp("rank",d=>d.Item3);
+
+        // ============================================================
+        // PART C — Model comparison
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Model Comparison ===");
+        // Simple logistic-style ranking: separation of retained vs rejected
+        double rankSep=Math.Abs(gRet.Average(d=>d.Item3)-gRej.Average(d=>d.Item3));
+        double isolSep=Math.Abs(gRet.Average(d=>d.Item6)-gRej.Average(d=>d.Item6));
+        double nnSep=Math.Abs(gRet.Average(d=>d.Item4)-gRej.Average(d=>d.Item4));
+        double centSep=Math.Abs(gRet.Average(d=>d.Item5)-gRej.Average(d=>d.Item5));
+
+        _o.WriteLine($"Rank separation: {rankSep:F4}");
+        _o.WriteLine($"Isolation separation: {isolSep:F4}");
+        _o.WriteLine($"NN-distance separation: {nnSep:F4}");
+        _o.WriteLine($"Centroid-distance separation: {centSep:F4}");
+
+        string bestGeo=isolSep>nnSep&&isolSep>centSep?"isolation":nnSep>centSep?"nnDist":"centDist";
+        _o.WriteLine($"Best geometric descriptor: {bestGeo}");
+
+        // ============================================================
+        // PART D — Rank independence from geometry
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Rank Independence Test ===");
+        // Within each seed, rank should be near-perfectly correlated with rawIQR
+        // But does rank add information beyond geometric position?
+        double rankVsIso=Pearson(geo.Select(d=>d.Item3).ToArray(),geo.Select(d=>d.Item6).ToArray());
+        double rankVsNn=Pearson(geo.Select(d=>d.Item3).ToArray(),geo.Select(d=>d.Item4).ToArray());
+        double rankVsCent=Pearson(geo.Select(d=>d.Item3).ToArray(),geo.Select(d=>d.Item5).ToArray());
+        _o.WriteLine($"Rank vs isolation: r={rankVsIso:F4}");
+        _o.WriteLine($"Rank vs nnDist: r={rankVsNn:F4}");
+        _o.WriteLine($"Rank vs centDist: r={rankVsCent:F4}");
+
+        // Control for isolation: within isolation bins, does rank still separate?
+        var isos=geo.Select(d=>d.Item6).OrderBy(v=>v).ToArray();
+        double iMed=isos[isos.Length/2];
+        var loIso=geo.Where(d=>d.Item6<=iMed).ToArray();var hiIso=geo.Where(d=>d.Item6>iMed).ToArray();
+        double loRankSep=Math.Abs(loIso.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.Item3)-loIso.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item3));
+        double hiRankSep=Math.Abs(hiIso.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.Item3)-hiIso.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item3));
+        _o.WriteLine($"Rank separation after isolation control: lo={loRankSep:F4}, hi={hiRankSep:F4}");
+        bool rankSurvivesGeo=loRankSep>0.01||hiRankSep>0.01;
+        _o.WriteLine($"Rank {(rankSurvivesGeo?"SURVIVES":"does NOT survive")} geometry control");
+
+        // ============================================================
+        // PART E — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Robustness ===");
+        var rng2=new Random(42);int rankBetter=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=geo.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+            var s1=shuf.Take(h).ToArray();var s2=shuf.Skip(h).ToArray();
+            double r1r=Math.Abs(s1.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.Item3)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item3));
+            double r1i=Math.Abs(s1.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.Item6)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item6));
+            if(r1r>r1i)rankBetter++;
+        }
+        _o.WriteLine($"Rank beats isolation in {rankBetter}/50 splits");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        if(rankSurvivesGeo&&rankSep>isolSep*2)decision="Model A: Rank is primitive. Geometry adds no independent signal.";
+        else if(rankSurvivesGeo)decision="Model B: Rank + geometry both contribute. Rank survives geometry control but geometry adds marginal information.";
+        else if(isolSep>rankSep)decision="Model C: Local geometric position dominates. Rank is a projection.";
+        else decision="Model D: Rank + geometry jointly required.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: rankSep={rankSep:F4}, isolSep={isolSep:F4}, rank survives geo={rankSurvivesGeo}, rank beats isol={rankBetter}/50");
+        _o.WriteLine("CLAIMS: Profile space audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== GEO_01 complete. Commit: GEO_01_ProfileSpaceAudit ===");
     }
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
