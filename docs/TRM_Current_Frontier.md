@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 1.5
+**Version:** 1.6
 **Date:** 2026-07-21
 
-**Current Version:** V5.53 COMPLETE (TSS_01 Final Synthesis complete)
-**Current Branch:** feature/v5.53-selectandclassify-predicate-origin
-**Cumulative Tests:** 2901
+**Current Version:** V5.54 COMPLETE (TSS_01 Final Synthesis)
+**Current Branch:** feature/v5.54-rawiqr-origin-and-profile-structure
+**Cumulative Tests:** 2908
 **Failed:** 0
 
 ---
@@ -144,18 +144,13 @@ deterministic threshold rescue.
 
 ---
 
-## Current V5.53 Research Question
+## Current V5.54 Research Question
 
-**What predicate drives SelectAndClassify P1 vs P1b assignment, creating the K1 > K3 > K2 ordering?**
+**Where does rawIQR variation come from, and does it propagate into P1/P1b?**
 
-**Answer:** P1/P1b assignment is primarily rawIQR-driven (spread), with rawMean providing
-independent complementary stabilization. rawIQR dominates by ~10× in normalized separation.
-A rank-based rawIQR + rawMean composite yields consistent P1 > P1b direction across all N
-(jackknife-stable at 2/3 N). This refines V5.52: SAC creates ordering through a
-spread-dominant profile predicate rather than pure mean selection. Stop-Low safe.
-Causal closure blocked. V6 NOT READY.
+**Answer:** rawIQR has two components. Between-seed (93.6%): generator seed realization — large but SAC-irrelevant (seed→P1 r=0.044). Within-seed residual (6.4%): N-driven sampling — small but SAC-relevant (P1−P1b delta=0.00105). Residual rawIQR is orthogonal to residual rawMean (r=0.0000) and dominates (8.7×). Pooled composite (V5.53) and residual discriminator (V5.54) are distinct layers. V6 NOT READY.
 
-**Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
+**Final synthesis:** `docsV5/V5_54/TRM_V5_54_Final_Synthesis.md`
 
 ---
 

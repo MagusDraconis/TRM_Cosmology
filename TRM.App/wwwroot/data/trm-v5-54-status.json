@@ -1,5 +1,5 @@
 {
-  "releaseStatus": "V5.54 IN PROGRESS",
+  "releaseStatus": "V5.54 COMPLETE",
   "phase": "RawIQR Origin and Profile Structure",
   "date": "2026-07-21",
   "branch": "feature/v5.54-rawiqr-origin-and-profile-structure",
@@ -66,10 +66,19 @@
       "finding": "rIQR orthogonal to rMean (r=0.0000). rIQR P1-P1b delta=0.00105 (8.7x rMean). Residual composite degrades separation. rQ10/rQ90 weakly correlate (|r|~0.14). Same-seed same-N matching impossible. Model A.",
       "status": "COMPLETE",
       "doc": "docsV5/V5_54/TRM_V5_54_RPC_01_RawIQRResidualPredicateClosureAudit.md"
+    },
+    {
+      "name": "TSS_01",
+      "title": "V5.54 Final Synthesis",
+      "commit": "TBD",
+      "finding": "V5.54 COMPLETE. Model A+: Two-level rawIQR — seed-level (93.6%, SAC-irrelevant) and residual-level (6.4%, SAC-relevant). Residual rawIQR orthogonal to mean, dominates 8.7x. Pooled composite (V5.53) and residual discriminator (V5.54) are distinct layers.",
+      "status": "COMPLETE",
+      "doc": "docsV5/V5_54/TRM_V5_54_Final_Synthesis.md"
     }
   ],
-  "finalModel": null,
-  "decisionModel": "Model A: rawIQR is mostly seed realization. Between-seed variance dominates; topology is independent.",
+  "finalModel": "Model A+ — Two-level rawIQR structure: seed-level (93.6% variance, SAC-irrelevant) + residual-level (6.4% variance, SAC-relevant). Pooled composite (V5.53) ≠ residual discriminator (V5.54).",
+  "decisionModel": "Model A+: Between-seed rawIQR (generator realization) dominates variance but does NOT propagate to P1. Within-seed residual (N-driven sampling) carries P1/P1b signal. Residual rawIQR orthogonal to residual rawMean (r=0.0000), dominates 8.7x.",
+  "baseForNextVersion": "V5.55",
   "primaryFinding": "RawIQR variation originates from seed-determined random weight sampling from the uniform[0.90, 1.10] generator. The generator explains the mean rawIQR within 0.23% bias. Between-seed variance is ~10x larger than within-seed variance. Topology and graph structure show no association (all |r| < 0.1). High-rawIQR profiles differ from low-rawIQR only in spread metrics (rawStd, rawIQR), not in central tendency or bounds.",
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
@@ -110,15 +119,18 @@
     "do not attempt V6 derivation"
   ],
   "supportedFindings": [
-    "RawIQR mean = 0.0998, matches generator expectation S=0.10 (bias=-0.23%)",
-    "Between-seed variance dominates within-seed variance (ratio=0.097, ~10x)",
-    "Topology and graph structure show no association with rawIQR (all |r|<0.1, all p>0.1)",
-    "High-rawIQR profiles differ from low-rawIQR only in spread metrics (rawStd, rawIQR)",
-    "Central tendency (rawMean, rawMedian) and bounds (rawMin, rawMax) are identical across rawIQR quartiles",
-    "RawIQR distribution is robust under jackknife, random split, and leave-one-N",
-    "Generator (uniform[0.90,1.10]) fully explains rawIQR mean value",
-    "Seed realization explains rawIQR variation (50% variance explained)",
-    "Stop-Low safe. Causal closure blocked. V6 NOT READY."
+    "rawIQR origin traced to generator + seed realization (mean bias=-0.23%)",
+    "Between-seed variance dominates (93.6% of total)",
+    "Cross-N stability explained by generator seed-reuse (common-70 r=1.0000)",
+    "Seed-level rawIQR does NOT propagate to P1 assignment (r=0.044)",
+    "IsHi pass rates are rawIQR-independent (45-49% across strata)",
+    "rawIQR survives seed matching — residual separates P1/P1b",
+    "Within-seed residual is N-driven sampling variation",
+    "Residual rawIQR orthogonal to residual rawMean (r=0.0000)",
+    "Residual rawIQR dominates residual rawMean (8.7x delta)",
+    "Residual composite degrades separation",
+    "Pooled composite (V5.53) and residual discriminator (V5.54) are different layers",
+    "Stop-Low remains safe"
   ],
   "conditionalFindings": [
     "finite-N limited (N=70,72,75, 100 seeds each)",
@@ -149,9 +161,8 @@
   ],
   "recommendedFirstSuite": "RIO_01_RawIQRProfileStructureOriginAudit (COMPLETE)",
   "nextSteps": [
-    "Complete remaining V5.54 suites",
-    "Consider rawIQR scaling with S parameter variation",
-    "Audit rawIQR stability across alternative RNG implementations",
-    "Trace pre-selection rawIQR to post-selection P1/P1b assignment"
+    "V5.55: Explore residual-level discriminator structure",
+    "Investigate whether SAC uses spread residuals directly",
+    "Consider S-parameter sensitivity analysis"
   ]
 }

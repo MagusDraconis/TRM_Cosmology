@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.53 COMPLETE |
-| Current Branch | feature/v5.53-selectandclassify-predicate-origin |
-| Total Tests | 2901 |
+| Current Version | V5.54 COMPLETE |
+| Current Branch | feature/v5.54-rawiqr-origin-and-profile-structure |
+| Total Tests | 2908 |
 | Failed Tests | 0 |
-| Current Status | V5.53 COMPLETE — TSS_01 Final Synthesis. SAC P1/P1b predicate identified: rawIQR (spread-primary, ~10× dominance) + rawMean (complementary stabilizer) = Model B+. |
+| Current Status | V5.54 COMPLETE — TSS_01 Final Synthesis. Two-level rawIQR: seed-level (SAC-irrelevant) + residual-level (SAC-relevant). Model A+. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
