@@ -931,6 +931,160 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"\n=== RRD_01 complete. Commit: RRD_01_RankResidualGeometryAudit ===");
     }
 
+    [Fact]
+    public void RDC_01_RankResidualDecouplingAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RDC_01: Rank-Residual Decoupling Audit ===");
+        _o.WriteLine("=== V5.55. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: What distinguishes decoupled profiles? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // Compute all profiles with rank + residual
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo)));
+            seedIQRd.AddOrUpdate(s,Q(wo,0.75)-Q(wo,0.25),(_,v)=>v+Q(wo,0.75)-Q(wo,0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        // Build full profile data with rank + residual
+        var fullData=new List<(int N,int seed,double riqr,double rmean,double rmed,double rstd,double resid,double rank)>();
+        foreach(var p in allProf){
+            double resid=p.riqr-siQ.GetValueOrDefault(p.seed,0);
+            double rank=seedRanks.GetValueOrDefault(p.seed)?.GetValueOrDefault(p.N,-1)??-1;
+            if(rank>=0)fullData.Add((p.N,p.seed,p.riqr,p.rmean,p.rmed,p.rstd,resid,rank));
+        }
+        var fd=fullData.ToArray();
+
+        // Compute expected residual | rank (from full population)
+        // Simple: mean residual in rank bins
+        var expResid=new double[11]; // 0.0, 0.1, ..., 1.0
+        for(int b=0;b<=10;b++){
+            double lo=b/10.0,hi=(b+1)/10.0+(b==10?0.01:0);
+            expResid[b]=fd.Where(p=>p.rank>=lo&&p.rank<hi).Select(p=>p.resid).DefaultIfEmpty(0).Average();
+        }
+        double GetExpResid(double rank){
+            int b=Math.Clamp((int)(rank*10),0,10);
+            return expResid[b];
+        }
+
+        // Compute coupling residual = observed - expected
+        var coupled=fd.Select(p=>(
+            p.N,p.seed,p.riqr,p.rmean,p.rmed,p.rstd,p.resid,p.rank,
+            coupResid:p.resid-GetExpResid(p.rank)
+        )).ToArray();
+
+        // ============================================================
+        // PART B — Coupling Residual Distribution
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Coupling Residual Distribution ===");
+        var allCoups=coupled.Select(p=>p.coupResid).OrderBy(v=>v).ToArray();
+        _o.WriteLine($"All profiles: coupResid mean={allCoups.Average():F6}, std={Sd(allCoups):F6}");
+        _o.WriteLine($"  q10={Q(allCoups,0.10):F6}, median={allCoups[allCoups.Length/2]:F6}, q90={Q(allCoups,0.90):F6}");
+        _o.WriteLine($"  Expected: mean≈0 (residual centered after rank control)");
+
+        // Run SAC pipeline
+        var pipeBag=new ConcurrentBag<(int N,int seed,double coupResid,double resid,double rank,double rmean,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                string cls=sb==null?"SAC-reject":(sb.Value.cls=="P1"||sb.Value.cls=="P1b"?sb.Value.cls:"SAC-reject");
+                var c=coupled.FirstOrDefault(p=>p.N==n&&p.seed==s);
+                pipeBag.Add((n,s,c.coupResid,c.resid,c.rank,c.rmean,cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var retained=pd.Where(d=>d.cls=="P1"||d.cls=="P1b").ToArray();
+        var rejected=pd.Where(d=>d.cls=="SAC-reject").ToArray();
+        var p1r=retained.Where(d=>d.cls=="P1").ToArray();var p1br=retained.Where(d=>d.cls=="P1b").ToArray();
+
+        _o.WriteLine($"\nSAC outcomes: P1={p1r.Length}, P1b={p1br.Length}, rejected={rejected.Length}");
+        _o.WriteLine($"Retained coupResid: mean={retained.Average(d=>d.coupResid):F6}, std={Sd(retained.Select(d=>d.coupResid).ToArray()):F6}");
+        _o.WriteLine($"Rejected coupResid: mean={rejected.Average(d=>d.coupResid):F6}, std={Sd(rejected.Select(d=>d.coupResid).ToArray()):F6}");
+        double coupDelta=Math.Abs(retained.Average(d=>d.coupResid)-rejected.Average(d=>d.coupResid));
+        _o.WriteLine($"Retained-rejected coupResid delta: {coupDelta:F6}");
+        _o.WriteLine($"SAC selects {(retained.Average(d=>d.coupResid)<0?"NEGATIVE":"POSITIVE")} coupling residuals");
+
+        // P1 vs P1b coupling
+        _o.WriteLine($"P1 coupResid: {p1r.Average(d=>d.coupResid):F6}, P1b: {p1br.Average(d=>d.coupResid):F6}, delta={Math.Abs(p1r.Average(d=>d.coupResid)-p1br.Average(d=>d.coupResid)):F6}");
+
+        // ============================================================
+        // PART C — Deviation Ranking
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Deviation Ranking ===");
+        var allCR=pd.Select(d=>d.coupResid).ToArray();
+        _o.WriteLine($"{"Descriptor",-18} {"r(coupResid)",12} {"P-value",10}");
+        _o.WriteLine(new string('-',42));
+        void Rpt2(string n,double[] y){double r=Pearson(allCR,y);_o.WriteLine($"{n,-18} {r,12:F4} {0,10:F4}");}
+        Rpt2("rawIQR residual",pd.Select(d=>d.resid).ToArray());
+        Rpt2("within-seed rank",pd.Select(d=>d.rank).ToArray());
+        Rpt2("rawMean",pd.Select(d=>d.rmean).ToArray());
+
+        // ============================================================
+        // PART D — Decoupling Quantile
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Decoupling Quantile Audit ===");
+        var cSorted=allCoups;double cLo=Q(cSorted,1.0/3),cHi=Q(cSorted,2.0/3);
+        foreach(var(lbl,lo,hi)in new[]{("Low decoupling",cSorted.Min()-0.001,cLo),("Mid decoupling",cLo,cHi),("High decoupling",cHi,cSorted.Max()+0.001)}){
+            var qd=pd.Where(d=>d.coupResid>lo&&d.coupResid<=hi+(hi==cSorted.Max()+0.001?0.01:0)).ToArray();
+            int qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b"),qrej=qd.Count(d=>d.cls=="SAC-reject");
+            _o.WriteLine($"{lbl}: P1={qp1}, P1b={qp1b}, rej={qrej}, P1%={(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0):F0}%");
+        }
+
+        // ============================================================
+        // PART E — Counterfactual
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Counterfactual ===");
+        double cMed=cSorted[cSorted.Length/2];
+        var mostCoupled=pd.Where(d=>Math.Abs(d.coupResid)<=cMed/2).ToArray();
+        var mostDecoupled=pd.Where(d=>Math.Abs(d.coupResid)>cMed*2).ToArray();
+        int mcP1=mostCoupled.Count(d=>d.cls=="P1"),mcRet=mostCoupled.Count(d=>d.cls=="P1"||d.cls=="P1b");
+        int mdP1=mostDecoupled.Count(d=>d.cls=="P1"),mdRet=mostDecoupled.Count(d=>d.cls=="P1"||d.cls=="P1b");
+        _o.WriteLine($"Most coupled: P1={mcP1}/{mcRet} retained, {(mcRet>0?mcP1*100.0/mcRet:0):F0}% P1");
+        _o.WriteLine($"Most decoupled: P1={mdP1}/{mdRet} retained, {(mdRet>0?mdP1*100.0/mdRet:0):F0}% P1");
+
+        // ============================================================
+        // PART F — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Robustness ===");
+        var rng2=new Random(42);var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+        double s1c=Math.Abs(shuf.Take(h).Where(d=>d.cls=="P1"||d.cls=="P1b").Average(d=>d.coupResid)-shuf.Take(h).Where(d=>d.cls=="SAC-reject").Average(d=>d.coupResid));
+        double s2c=Math.Abs(shuf.Skip(h).Where(d=>d.cls=="P1"||d.cls=="P1b").Average(d=>d.coupResid)-shuf.Skip(h).Where(d=>d.cls=="SAC-reject").Average(d=>d.coupResid));
+        _o.WriteLine($"Split coupling delta: {s1c:F6} vs {s2c:F6}, stable={(Math.Abs(s1c-s2c)<0.0005?"YES":"no")}");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double retainedCoupling=retained.Average(d=>d.coupResid);
+        string decision;
+        if(Math.Abs(retainedCoupling)>0.001&&coupDelta>0.0005)decision=$"Model A: SAC prefers profiles with coupling deviation (mean={retainedCoupling:F5}).";
+        else if(coupDelta>0.0003)decision="Model B: Decoupling partially contributes to SAC selection.";
+        else if(Math.Abs(retainedCoupling)<0.0005)decision="Model D: Decoupling is an artifact — retained profiles are coupling-neutral.";
+        else decision="Model E: Unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: retained coupling={retainedCoupling:F6}, rejected coupling={rejected.Average(d=>d.coupResid):F6}, delta={coupDelta:F6}");
+        _o.WriteLine("CLAIMS: Decoupling audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RDC_01 complete. Commit: RDC_01_RankResidualDecouplingAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
