@@ -14,9 +14,10 @@
     {
       "name": "RIO_01",
       "title": "RawIQR Origin Audit",
-      "commit": "TBD",
+      "commit": "2363d51",
       "finding": "rawIQR is a pure function of seed-determined weight sampling + N. Generator (uniform[0.90,1.10]) explains mean (bias=-0.23%). Between-seed variance dominates (ratio=0.097). Topology independent (all |r|<0.1). Decision: Model A.",
-      "status": "COMPLETE"
+      "status": "COMPLETE",
+      "doc": "docsV5/V5_54/TRM_V5_54_RIO_01_RawIQROriginAudit.md"
     }
   ],
   "finalModel": null,
