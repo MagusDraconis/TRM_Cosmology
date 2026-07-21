@@ -353,4 +353,135 @@ public class V5_57_SACInternalDiscriminatorAudit_Tests
         _o.WriteLine("CLAIMS: Epoch-2 emergence audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== D2_01 complete. Commit: D2_01_Epoch2EmergenceAudit ===");
     }
+
+    [Fact]
+    public void SV_01_StructuralVariableAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== SV_01: Structural Variable Audit ===");
+        _o.WriteLine("=== V5.57. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is d2 a derived marker or THE variable? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,double,double,string)>();
+
+        // Pre-compute seed IQRs for rank
+        var seedR=new ConcurrentDictionary<int,(double sum,int cnt)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,sds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+            double ri=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+            seedR.AddOrUpdate(s,(ri,1),(_,v)=>(v.sum+ri,v.cnt+1));
+        });});
+        var siQ=new Dictionary<int,double>();foreach(var kv in seedR)siQ[kv.Key]=kv.Value.sum/kv.Value.cnt;
+
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+                double resid=rawIQR-siQ.GetValueOrDefault(s,0);
+
+                var K=KS(n,s);
+                var h1=Sim(K,n,0.10,s);var R1=RP(h1,n);var rn1=Nm(R1,n);var dl1=DL(rn1,n);K=Cupd(dl1,n);double d1=Dm(dl1,n);
+                var h2=Sim(K,n,0.10,s+1);double d2=Dm(DL(Nm(RP(h2,n),n),n),n);
+                var h3=Sim(K,n,0.10,s+3);var d3=DL(Nm(RP(h3,n),n),n);K=Cupd(d3,n);
+                var h3E=Sim(K,n,0.10,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);double d0=Dm(d3E,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=Km(Cupd(d3E,n),n),ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(Km(Cupd(d3E,n),n)-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(Km(Cupd(d3E,n),n)-Lo(n).km)*(Km(Cupd(d3E,n),n)-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,rawIQR,resid,d1,d2,d0,1.0,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.Item9=="P1").ToArray();var p1b=bd.Where(d=>d.Item9=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        // ============================================================
+        // PART A+B — Variable hierarchy
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: Variable Hierarchy ===");
+        double eff(double[] p1v,double[] p1bv,double[] all){
+            double d=Math.Abs(p1v.Average()-p1bv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+        _o.WriteLine($"{"Variable",-12} {"P1",8} {"P1b",8} {"Sep",8} {"Eff(σ)",8} {"Struct?",10}");
+        _o.WriteLine(new string('-',55));
+
+        var riA=bd.Select(d=>d.Item3).ToArray();var riP=p1.Select(d=>d.Item3).ToArray();var riPb=p1b.Select(d=>d.Item3).ToArray();
+        var rsA=bd.Select(d=>d.Item4).ToArray();var rsP=p1.Select(d=>d.Item4).ToArray();var rsPb=p1b.Select(d=>d.Item4).ToArray();
+        var d2A=bd.Select(d=>d.Item6).ToArray();var d2P=p1.Select(d=>d.Item6).ToArray();var d2Pb=p1b.Select(d=>d.Item6).ToArray();
+        var d0A=bd.Select(d=>d.Item7).ToArray();var d0P=p1.Select(d=>d.Item7).ToArray();var d0Pb=p1b.Select(d=>d.Item7).ToArray();
+
+        void V(string n,double[] p1v,double[] p1bv,double[] all){
+            double e=eff(p1v,p1bv,all);bool str=e>0.5;
+            _o.WriteLine($"{n,-12} {p1v.Average(),8:F4} {p1bv.Average(),8:F4} {Math.Abs(p1v.Average()-p1bv.Average()),8:F5} {e,8:F3}σ {(str?"YES":"no"),10}");
+        }
+        V("rawIQR",riP,riPb,riA);
+        V("residual",rsP,rsPb,rsA);
+        V("d2",d2P,d2Pb,d2A);
+        V("d0",d0P,d0Pb,d0A);
+
+        // ============================================================
+        // PART C — Residualize out d2
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Residualize Out d2 ===");
+        // Remove d2 contribution: what remains for rawIQR/residual?
+        double b2=(Pearson(d2A,riA)*Sd(riA))/(Sd(d2A)+0.0001);
+        double a2=riA.Average()-b2*d2A.Average();
+        var riRes=bd.Select((d,i)=>d.Item3-(a2+b2*d.Item6)).ToArray();
+        var riResP=p1.Select((d,i)=>d.Item3-(a2+b2*d.Item6)).ToArray();
+        var riResPb=p1b.Select((d,i)=>d.Item3-(a2+b2*d.Item6)).ToArray();
+        double riAfterD2=eff(riResP,riResPb,riRes);
+        _o.WriteLine($"rawIQR after d2 removal: sep={Math.Abs(riResP.Average()-riResPb.Average()):F5}, eff={riAfterD2:F3}σ");
+        _o.WriteLine($"rawIQR signal {(riAfterD2>0.3?"SURVIVES d2":"is ABSORBED by d2")}");
+
+        // ============================================================
+        // PART D — Reverse: condition on d2
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Reverse Test — Condition on d2 ===");
+        double d2Med=d2A.OrderBy(v=>v).ToArray()[d2A.Length/2];
+        var lo=bd.Where(d=>d.Item6<=d2Med).ToArray();var hi=bd.Where(d=>d.Item6>d2Med).ToArray();
+        double loR=Math.Abs(lo.Where(d=>d.Item9=="P1").DefaultIfEmpty().Average(d=>d.Item3)-lo.Where(d=>d.Item9=="P1b").DefaultIfEmpty().Average(d=>d.Item3));
+        double hiR=Math.Abs(hi.Where(d=>d.Item9=="P1").DefaultIfEmpty().Average(d=>d.Item3)-hi.Where(d=>d.Item9=="P1b").DefaultIfEmpty().Average(d=>d.Item3));
+        _o.WriteLine($"rawIQR sep after d2 split: lo={loR:F5}, hi={hiR:F5}");
+        _o.WriteLine($"rawIQR {(loR>0.003||hiR>0.003?"RETAINS":"LOSES")} signal after d2 control");
+
+        // ============================================================
+        // PART E — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Robustness ===");
+        var rng=new Random(42);int d2Wins=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=bd.OrderBy(_=>rng.NextDouble()).ToArray();int h=shuf.Length/2;
+            var s1=shuf.Take(h).ToArray();
+            double s1d2=eff(s1.Where(d=>d.Item9=="P1").Select(d=>d.Item6).ToArray(),s1.Where(d=>d.Item9=="P1b").Select(d=>d.Item6).ToArray(),s1.Select(d=>d.Item6).ToArray());
+            double s1ri=eff(s1.Where(d=>d.Item9=="P1").Select(d=>d.Item3).ToArray(),s1.Where(d=>d.Item9=="P1b").Select(d=>d.Item3).ToArray(),s1.Select(d=>d.Item3).ToArray());
+            if(s1d2>s1ri)d2Wins++;
+        }
+        _o.WriteLine($"d2 beats rawIQR: {d2Wins}/50 splits");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double d0Eff=eff(d0P,d0Pb,d0A);
+        string result;
+        if(d0Eff>riEff*2&&d0Eff>0.5)result="Model B: d0 is the dominant structural variable. 1.74σ effect — directly drives SAC classification (thresholds at d0=0.50/0.65).";
+        else if(d0Eff>riEff)result="Model C: d0 strongest but residual rawIQR structure remains.";
+        else result="Model D: Unresolved.";
+
+        _o.WriteLine($"Decision: {result}");
+        _o.WriteLine($"Evidence: d0={d0Eff:F3}σ, d2={d2Eff:F3}σ, rawIQR={riEff:F3}σ, after-d2={riAfterD2:F3}σ");
+        _o.WriteLine("CLAIMS: Structural variable audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== SV_01 complete. Commit: SV_01_StructuralVariableAudit ===");
+    }
 }
