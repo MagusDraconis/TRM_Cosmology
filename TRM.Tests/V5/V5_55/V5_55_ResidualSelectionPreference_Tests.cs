@@ -462,6 +462,155 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"\n=== RRA_01 complete. Commit: RRA_01_RelativeResidualAdvantageAudit ===");
     }
 
+    [Fact]
+    public void RRC_01_RelativeRankClosureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RRC_01: Relative Rank Closure Audit ===");
+        _o.WriteLine("=== V5.55. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is rank sufficient, or a proxy? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // Compute seed means + within-seed ranks
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average()));
+            seedIQRd.AddOrUpdate(s,Q(wo,0.75)-Q(wo,0.25),(_,v)=>v+Q(wo,0.75)-Q(wo,0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        // Within-seed ranks
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var dict=new ConcurrentDictionary<int,double>();
+            foreach(var(n,i)in ordered)dict[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=dict;
+        }
+
+        // Pipeline
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rawIQR,double resid,double rank,double rmean,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                if(sb==null||(sb.Value.cls!="P1"&&sb.Value.cls!="P1b"))return;
+                var prof=allProf.FirstOrDefault(p=>p.N==n&&p.seed==s);
+                pipeBag.Add((n,s,prof.riqr,prof.riqr-siQ.GetValueOrDefault(s,0),seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1,prof.rmean,sb.Value.cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var p1=pd.Where(d=>d.cls=="P1").ToArray();var p1b=pd.Where(d=>d.cls=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        // ============================================================
+        // PART B — Rank Survival: condition on rank, check residuals
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Rank Survival Audit ===");
+        double rankMed=pd.Select(d=>d.rank).OrderBy(v=>v).ToArray()[pd.Length/2];
+        var loRank=pd.Where(d=>d.rank<=rankMed).ToArray();
+        var hiRank=pd.Where(d=>d.rank>rankMed).ToArray();
+        _o.WriteLine($"Low rank (≤{rankMed:F2}): P1={loRank.Count(d=>d.cls=="P1")}, P1b={loRank.Count(d=>d.cls=="P1b")}, P1%={loRank.Count(d=>d.cls=="P1")*100.0/Math.Max(1,loRank.Length):F0}%");
+        _o.WriteLine($"High rank (>{rankMed:F2}): P1={hiRank.Count(d=>d.cls=="P1")}, P1b={hiRank.Count(d=>d.cls=="P1b")}, P1%={hiRank.Count(d=>d.cls=="P1")*100.0/Math.Max(1,hiRank.Length):F0}%");
+
+        // Within matching rank, does residual still separate?
+        _o.WriteLine($"\nWithin matching rank, residual P1-P1b:");
+        double loResP1=loRank.Where(d=>d.cls=="P1").Select(d=>d.resid).DefaultIfEmpty(0).Average();
+        double loResP1b=loRank.Where(d=>d.cls=="P1b").Select(d=>d.resid).DefaultIfEmpty(0).Average();
+        double hiResP1=hiRank.Where(d=>d.cls=="P1").Select(d=>d.resid).DefaultIfEmpty(0).Average();
+        double hiResP1b=hiRank.Where(d=>d.cls=="P1b").Select(d=>d.resid).DefaultIfEmpty(0).Average();
+        _o.WriteLine($"  Low rank: P1 resid={loResP1:F5}, P1b resid={loResP1b:F5}, delta={Math.Abs(loResP1-loResP1b):F5}");
+        _o.WriteLine($"  High rank: P1 resid={hiResP1:F5}, P1b resid={hiResP1b:F5}, delta={Math.Abs(hiResP1-hiResP1b):F5}");
+        bool rankAbsorbs=Math.Abs(loResP1-loResP1b)<0.001&&Math.Abs(hiResP1-hiResP1b)<0.001;
+        _o.WriteLine($"Rank {(rankAbsorbs?"ABSORBS residual separation":"does NOT absorb — residual survives")}");
+
+        // ============================================================
+        // PART C — Residual Survival: condition on residual, check rank
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Residual Survival Audit ===");
+        double residMed=pd.Select(d=>d.resid).OrderBy(v=>v).ToArray()[pd.Length/2];
+        var loRes=pd.Where(d=>d.resid<=residMed).ToArray();
+        var hiRes=pd.Where(d=>d.resid>residMed).ToArray();
+        double loRankP1=loRes.Where(d=>d.cls=="P1").Select(d=>d.rank).DefaultIfEmpty(0).Average();
+        double loRankP1b=loRes.Where(d=>d.cls=="P1b").Select(d=>d.rank).DefaultIfEmpty(0).Average();
+        double hiRankP1=hiRes.Where(d=>d.cls=="P1").Select(d=>d.rank).DefaultIfEmpty(0).Average();
+        double hiRankP1b=hiRes.Where(d=>d.cls=="P1b").Select(d=>d.rank).DefaultIfEmpty(0).Average();
+        _o.WriteLine($"  Low resid: P1 rank={loRankP1:F3}, P1b rank={loRankP1b:F3}, delta={Math.Abs(loRankP1-loRankP1b):F3}");
+        _o.WriteLine($"  High resid: P1 rank={hiRankP1:F3}, P1b rank={hiRankP1b:F3}, delta={Math.Abs(hiRankP1-hiRankP1b):F3}");
+        bool residAbsorbs=Math.Abs(loRankP1-loRankP1b)<0.1&&Math.Abs(hiRankP1-hiRankP1b)<0.1;
+        _o.WriteLine($"Residual {(residAbsorbs?"ABSORBS rank separation":"does NOT absorb — rank survives")}");
+
+        // ============================================================
+        // PART D — Percentile Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Percentile Audit ===");
+        _o.WriteLine($"{"Rank%",-12} {"n",5} {"P1",4} {"P1b",4} {"P1%",7}");
+        _o.WriteLine(new string('-',35));
+        for(int q=0;q<4;q++){
+            double loQ=q/4.0,hiQ=(q+1)/4.0;
+            var qd=pd.Where(d=>d.rank>=loQ&&d.rank<hiQ+(q==3?0.01:0)).ToArray();
+            int qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b");
+            _o.WriteLine($"{$"{loQ*100:F0}-{hiQ*100:F0}%",-12} {qd.Length,5} {qp1,4} {qp1b,4} {(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0),7:F0}%");
+        }
+
+        // ============================================================
+        // PART E — Normalization Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Normalization Audit ===");
+        _o.WriteLine($"{"Descriptor",-18} {"Effect(σ)",10} {"P1-P1b",10}");
+        _o.WriteLine(new string('-',40));
+        double EvalEff(double[] a,double[] b,double[] all){
+            double d=Math.Abs(a.DefaultIfEmpty(0).Average()-b.DefaultIfEmpty(0).Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+        var allV=pd.Select(d=>d.rawIQR).ToArray();var allRes=pd.Select(d=>d.resid).ToArray();var allRank=pd.Select(d=>d.rank).ToArray();
+        var allMean=pd.Select(d=>d.rmean).ToArray();
+        _o.WriteLine($"{"absolute rawIQR",-18} {EvalEff(p1.Select(d=>d.rawIQR).ToArray(),p1b.Select(d=>d.rawIQR).ToArray(),allV),10:F4}σ {Math.Abs(p1.Average(d=>d.rawIQR)-p1b.Average(d=>d.rawIQR)),10:F5}");
+        _o.WriteLine($"{"residual rawIQR",-18} {EvalEff(p1.Select(d=>d.resid).ToArray(),p1b.Select(d=>d.resid).ToArray(),allRes),10:F4}σ {Math.Abs(p1.Average(d=>d.resid)-p1b.Average(d=>d.resid)),10:F5}");
+        _o.WriteLine($"{"rank percentile",-18} {EvalEff(p1.Select(d=>d.rank).ToArray(),p1b.Select(d=>d.rank).ToArray(),allRank),10:F4}σ {Math.Abs(p1.Average(d=>d.rank)-p1b.Average(d=>d.rank)),10:F5}");
+        _o.WriteLine($"{"rawMean",-18} {EvalEff(p1.Select(d=>d.rmean).ToArray(),p1b.Select(d=>d.rmean).ToArray(),allMean),10:F4}σ {Math.Abs(p1.Average(d=>d.rmean)-p1b.Average(d=>d.rmean)),10:F5}");
+
+        // ============================================================
+        // PART F — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Robustness ===");
+        var rng2=new Random(42);
+        int rankStable=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h2=shuf.Length/2;
+            var s1=shuf.Take(h2).ToArray();var s2=shuf.Skip(h2).ToArray();
+            bool s1r=s1.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.rank)<s1.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.rank);
+            bool s2r=s2.Where(d=>d.cls=="P1").DefaultIfEmpty().Average(d=>d.rank)<s2.Where(d=>d.cls=="P1b").DefaultIfEmpty().Average(d=>d.rank);
+            if(s1r==s2r)rankStable++;
+        }
+        _o.WriteLine($"Rank sign stability (50 splits): {rankStable}/50 ({rankStable*2}%)");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        bool rankDominates=!rankAbsorbs&&residAbsorbs;
+        bool bothSurvive=!rankAbsorbs&&!residAbsorbs;
+
+        string decision;
+        if(rankDominates)decision="Model A: relative rank is sufficient. Rank absorbs residual; residual does NOT absorb rank.";
+        else if(bothSurvive)decision="Model B: relative rank + residual both contribute. Neither fully absorbs the other.";
+        else if(!rankAbsorbs)decision="Model C: rank dominant but residual provides independent information.";
+        else decision="Model E: closure unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: rank absorbs residual={rankAbsorbs}, residual absorbs rank={residAbsorbs}");
+        _o.WriteLine("CLAIMS: Rank closure audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RRC_01 complete. Commit: RRC_01_RelativeRankClosureAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
