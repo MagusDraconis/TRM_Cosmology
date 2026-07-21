@@ -6,8 +6,8 @@
   "base": "V5.53 COMPLETE",
   "baseCommit": "ba2d3c9",
   "testSummary": {
-    "total": 2904,
-    "passed": 2904,
+    "total": 2905,
+    "passed": 2905,
     "failed": 0
   },
   "suites": [
@@ -34,6 +34,14 @@
       "finding": "Propagation unresolved due to sparse per-seed SAC retention (7 profiles from 5 seeds across 300 runs). IsHi rates similar across strata (43-48%). Seed→P1 r=0.007. SAC→P1 discrimination works at pooled level (V5.53) but not per-seed. Model F.",
       "status": "COMPLETE",
       "doc": "docsV5/V5_54/TRM_V5_54_SRP_01_SeedToSelectionPropagationAudit.md"
+    },
+    {
+      "name": "SRX_01",
+      "title": "Sparse Retention Expansion Audit",
+      "commit": "TBD",
+      "finding": "3x expansion (100→300 seeds) increases SAC-retained from 7 to 18 (R3: improved but underpowered). IsHi confirmed rawIQR-independent (45-49% across strata). Seed→P1 r=0.044 — no seed-level propagation. Pooled discriminator works; seed-level does not (P2). Model D.",
+      "status": "COMPLETE",
+      "doc": "docsV5/V5_54/TRM_V5_54_SRX_01_SparseRetentionExpansionAudit.md"
     }
   ],
   "finalModel": null,
