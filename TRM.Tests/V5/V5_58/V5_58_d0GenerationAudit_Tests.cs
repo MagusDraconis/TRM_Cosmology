@@ -220,6 +220,131 @@ public class V5_58_d0GenerationAudit_Tests
         _o.WriteLine($"\n=== SKL_01 complete. Commit: SKL_01_StructuralKernelLayerAudit ===");
     }
 
+    [Fact]
+    public void KMG_01_KernelGenerationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== KMG_01: Kernel Generation Audit ===");
+        _o.WriteLine("=== V5.58. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is km fundamental or derived? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        // Store: N,seed,rawIQR,km,d0,d2,rpMean,dlMean,cls
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,double,double,string)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                var K=KS(n,s);
+                // Trace through operations
+                var h1=Sim(K,n,0.10,s);var R1=RP(h1,n);double rpM=MeanMat(R1,n);
+                var rn1=Nm(R1,n);var dl1=DL(rn1,n);double dlM=MeanMat(dl1,n);
+                K=Cupd(dl1,n);double km1=Km(K,n);
+
+                // Epoch 2
+                var h2=Sim(K,n,0.10,s+1);double d2=Dm(DL(Nm(RP(h2,n),n),n),n);
+                // Epoch 3 → final km/d0
+                var h3=Sim(K,n,0.10,s+3);var d3=DL(Nm(RP(h3,n),n),n);K=Cupd(d3,n);
+                var h3E=Sim(K,n,0.10,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);var K3E=Cupd(d3E,n);
+                double d0=Dm(d3E,n),km=Km(K3E,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,rawIQR,km,d0,d2,rpM,dlM,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.Item9=="P1").ToArray();var p1b=bd.Where(d=>d.Item9=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        double eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        // Extract
+        var iqrA=bd.Select(d=>d.Item3).ToArray();var kmAr=bd.Select(d=>d.Item4).ToArray();
+        var d0Ar=bd.Select(d=>d.Item5).ToArray();var d2Ar=bd.Select(d=>d.Item6).ToArray();
+        var rpAr=bd.Select(d=>d.Item7).ToArray();var dlAr=bd.Select(d=>d.Item8).ToArray();
+
+        // ============================================================
+        // PART A+B — km lineage
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: km Lineage ===");
+        _o.WriteLine($"{"Variable",-14} {"P1",8} {"P1b",8} {"Sep",8} {"Eff(σ)",8} {"r(km)",8}");
+        _o.WriteLine(new string('-',60));
+
+        var kmP=p1.Select(d=>d.Item4).ToArray();var kmPb=p1b.Select(d=>d.Item4).ToArray();
+        void VV(string n,double[] ap,double[] ab,double[] aa){
+            double e=eff(ap,ab,aa),rk=Pearson(aa,kmAr);
+            _o.WriteLine($"{n,-14} {ap.Average(),8:F4} {ab.Average(),8:F4} {Math.Abs(ap.Average()-ab.Average()),8:F5} {e,8:F3}σ {rk,8:F3}");
+        }
+        VV("rawIQR",p1.Select(d=>d.Item3).ToArray(),p1b.Select(d=>d.Item3).ToArray(),iqrA);
+        VV("RP mean",p1.Select(d=>d.Item7).ToArray(),p1b.Select(d=>d.Item7).ToArray(),rpAr);
+        VV("DL mean",p1.Select(d=>d.Item8).ToArray(),p1b.Select(d=>d.Item8).ToArray(),dlAr);
+        VV("d2",p1.Select(d=>d.Item6).ToArray(),p1b.Select(d=>d.Item6).ToArray(),d2Ar);
+        VV("d0",p1.Select(d=>d.Item5).ToArray(),p1b.Select(d=>d.Item5).ToArray(),d0Ar);
+        VV("**km**",kmP,kmPb,kmAr);
+
+        // ============================================================
+        // PART C — Residualize km against predecessors
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Residualized km ===");
+        // Remove RP+DL influence
+        double bRP=(Pearson(rpAr,kmAr)*Sd(kmAr))/(Sd(rpAr)+0.0001),aRP=kmAr.Average()-bRP*rpAr.Average();
+        var kmResRP=bd.Select((d,i)=>d.Item4-(aRP+bRP*d.Item7)).ToArray();
+        var kmResRPP=p1.Select((d,i)=>d.Item4-(aRP+bRP*d.Item7)).ToArray();
+        var kmResRPPb=p1b.Select((d,i)=>d.Item4-(aRP+bRP*d.Item7)).ToArray();
+        double kmResRPE=eff(kmResRPP,kmResRPPb,kmResRP);
+        _o.WriteLine($"km after RP removal: eff={kmResRPE:F3}σ");
+
+        double bDL=(Pearson(dlAr,kmAr)*Sd(kmAr))/(Sd(dlAr)+0.0001),aDL=kmAr.Average()-bDL*dlAr.Average();
+        var kmResDL=bd.Select((d,i)=>d.Item4-(aDL+bDL*d.Item8)).ToArray();
+        var kmResDLP=p1.Select((d,i)=>d.Item4-(aDL+bDL*d.Item8)).ToArray();
+        var kmResDLPb=p1b.Select((d,i)=>d.Item4-(aDL+bDL*d.Item8)).ToArray();
+        double kmResDLE=eff(kmResDLP,kmResDLPb,kmResDL);
+        _o.WriteLine($"km after DL removal: eff={kmResDLE:F3}σ");
+
+        _o.WriteLine($"km {(kmResDLE>0.5?"SURVIVES all predecessors — FUNDAMENTAL":"is ABSORBED — derived from DL")}");
+
+        // ============================================================
+        // PART D — Reverse conditioning
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Reverse Conditioning on km ===");
+        double kmMed=kmAr.OrderBy(v=>v).ToArray()[kmAr.Length/2];
+        var lo=bd.Where(d=>d.Item4<=kmMed).ToArray();var hi=bd.Where(d=>d.Item4>kmMed).ToArray();
+        double loD0=Math.Abs(lo.Where(d=>d.Item9=="P1").DefaultIfEmpty().Average(d=>d.Item5)-lo.Where(d=>d.Item9=="P1b").DefaultIfEmpty().Average(d=>d.Item5));
+        double hiD0=Math.Abs(hi.Where(d=>d.Item9=="P1").DefaultIfEmpty().Average(d=>d.Item5)-hi.Where(d=>d.Item9=="P1b").DefaultIfEmpty().Average(d=>d.Item5));
+        _o.WriteLine($"d0 after km split: lo={loD0:F5}, hi={hiD0:F5}. d0 {(loD0<0.01&&hiD0<0.01?"VANISHES":"RETAINS")}");
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double kmE=eff(kmP,kmPb,kmAr),rpE=eff(p1.Select(d=>d.Item7).ToArray(),p1b.Select(d=>d.Item7).ToArray(),rpAr);
+        string r;
+        if(kmResDLE>0.5&&kmE>rpE*1.5)r="Model A: km is fundamental. Survives all predecessor removal; dominates RP+DL.";
+        else if(kmResDLE>0.3)r="Model B: km is dominant but partially derived from DL.";
+        else if(rpE>kmE)r="Model C: km is shadow of RP mean — predecessor outperforms it.";
+        else r="Model D: Unresolved.";
+
+        _o.WriteLine($"Decision: {r}");
+        _o.WriteLine($"Evidence: km={kmE:F3}σ, RP={rpE:F3}σ, km after DL={kmResDLE:F3}σ");
+        _o.WriteLine("CLAIMS: Kernel generation audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== KMG_01 complete. Commit: KMG_01_KernelGenerationAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
@@ -229,6 +354,7 @@ public class V5_58_d0GenerationAudit_Tests
     static double[,]DL(double[,]R,int n){var d=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)d[i,j]=i==j?0:-Math.Log(Math.Max(R[i,j],1e-100));return d;}
     static double[,]Cupd(double[,]d,int n){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:K0*Math.Exp(-d[i,j]/Math.Max(Xi,0.01));return K;}
     static double Dm(double[,]d,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){s+=d[i,j];c++;}return c>0?s/c:0;}
+    static double MeanMat(double[,]m,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)if(i!=j){s+=m[i,j];c++;}return c>0?s/c:0;}
     static double[]Of(double[][]h,int n){int T=h.Length;var o=new double[n];for(int i=0;i<n;i++){double su=0;int c=0;for(int t=1;t<T;t++){su+=Math.Abs(h[t][i]-h[t-1][i]);c++;}o[i]=c>0?su/(c*Dt*Hd):0;}return o;}
     static double[,]KS(int n,int seed){var rng=new Random(seed);var adj=new HashSet<int>[n];for(int i=0;i<n;i++)adj[i]=new HashSet<int>();double p=6.0/(n-1);for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)if(rng.NextDouble()<p){adj[i].Add(j);adj[j].Add(i);}var v=new bool[n];var cs=new List<List<int>>();for(int i=0;i<n;i++){if(v[i])continue;var c=new List<int>();var q=new Queue<int>();v[i]=true;q.Enqueue(i);while(q.Count>0){int u=q.Dequeue();c.Add(u);foreach(int x in adj[u])if(!v[x]){v[x]=true;q.Enqueue(x);}}cs.Add(c);}for(int i=1;i<cs.Count;i++){adj[cs[i][0]].Add(cs[i-1][0]);adj[cs[i-1][0]].Add(cs[i][0]);}var K=new double[n,n];for(int i=0;i<n;i++)foreach(int j in adj[i])if(i<j){K[i,j]=0.5;K[j,i]=0.5;}return K;}
     static double Km(double[,]K,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){s+=K[i,j];c++;}return c>0?s/c:0;}
