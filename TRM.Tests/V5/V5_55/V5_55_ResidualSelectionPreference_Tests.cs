@@ -186,6 +186,142 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"\n=== RSP_01 complete. Commit: RSP_01_ResidualSelectionPreferenceAudit ===");
     }
 
+    [Fact]
+    public void RSR_01_ResidualSignReversalAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RSR_01: Residual Sign Reversal Audit ===");
+        _o.WriteLine("=== V5.55. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is pooled/residual sign reversal stable? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // Run pipeline
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rawIQR,double residIQR,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        // Pre-compute seed means
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            seedIQRd.AddOrUpdate(s,Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25),(_,v)=>v+Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        // Run SAC pipeline
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                if(sb==null||(sb.Value.cls!="P1"&&sb.Value.cls!="P1b"))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                var wo=w.OrderBy(v=>v).ToArray();double ri=Q(wo,0.75)-Q(wo,0.25);
+                pipeBag.Add((n,s,ri,ri-siQ.GetValueOrDefault(s,0),sb.Value.cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var p1=pd.Where(d=>d.cls=="P1").ToArray();var p1b=pd.Where(d=>d.cls=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        // ============================================================
+        // PART B — Reversal Replication
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Reversal Replication ===");
+        double poolP1=p1.Average(d=>d.rawIQR),poolP1b=p1b.Average(d=>d.rawIQR);
+        double resP1=p1.Average(d=>d.residIQR),resP1b=p1b.Average(d=>d.residIQR);
+        _o.WriteLine($"Pooled: P1={poolP1:F5}, P1b={poolP1b:F5}, sign={(poolP1>poolP1b?"POS":"NEG")} (P1 {(poolP1>poolP1b?">":"<")} P1b)");
+        _o.WriteLine($"Residual: P1={resP1:F5}, P1b={resP1b:F5}, sign={(resP1>resP1b?"POS":"NEG")} (P1 {(resP1>resP1b?">":"<")} P1b)");
+        bool reversal=(poolP1>poolP1b)!=(resP1>resP1b);
+        _o.WriteLine($"Sign reversal: {(reversal?"YES — pooled and residual signs OPPOSE":"NO — signs align")}");
+
+        // ============================================================
+        // PART C — Leave-One-Seed
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Leave-One-Seed Audit ===");
+        var allSeeds=pd.Select(d=>d.seed).Distinct().OrderBy(s=>s).ToArray();
+        int revCount=0,sameCount=0;
+        foreach(var skip in allSeeds){
+            var jk=pd.Where(d=>d.seed!=skip).ToArray();
+            var jp1=jk.Where(d=>d.cls=="P1").ToArray();var jp1b=jk.Where(d=>d.cls=="P1b").ToArray();
+            if(jp1.Length<2||jp1b.Length<2)continue;
+            bool jkPool=jp1.Average(d=>d.rawIQR)>jp1b.Average(d=>d.rawIQR);
+            bool jkRes=jp1.Average(d=>d.residIQR)>jp1b.Average(d=>d.residIQR);
+            if(jkPool!=jkRes)revCount++;else sameCount++;
+        }
+        _o.WriteLine($"Leave-one-seed: reversal={revCount}, same-sign={sameCount}, reversal%={revCount*100.0/(revCount+sameCount+0.1):F0}%");
+        _o.WriteLine($"Stability: {(revCount*100.0/(revCount+sameCount+0.1)>80?"STABLE REVERSAL":revCount*100.0/(revCount+sameCount+0.1)>50?"MOSTLY STABLE":"UNSTABLE")}");
+
+        // ============================================================
+        // PART D — Random Split
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Random Split Audit ===");
+        int splits=100;int revSplit=0;
+        var rng2=new Random(42);
+        for(int sp=0;sp<splits;sp++){
+            var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+            var s1=shuf.Take(h).ToArray();
+            var sp1=s1.Where(d=>d.cls=="P1").ToArray();var sp1b=s1.Where(d=>d.cls=="P1b").ToArray();
+            if(sp1.Length<2||sp1b.Length<2)continue;
+            bool sPool=sp1.Average(d=>d.rawIQR)>sp1b.Average(d=>d.rawIQR);
+            bool sRes=sp1.Average(d=>d.residIQR)>sp1b.Average(d=>d.residIQR);
+            if(sPool!=sRes)revSplit++;
+        }
+        _o.WriteLine($"Random splits: {revSplit}/{splits} show reversal ({revSplit*100.0/splits:F0}%)");
+
+        // ============================================================
+        // PART E — N-Stratified
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: N-Stratified Audit ===");
+        _o.WriteLine($"{"N",5} {"P1",4} {"P1b",4} {"Pool sign",10} {"Res sign",10} {"Reversal?",10}");
+        _o.WriteLine(new string('-',50));
+        foreach(var n in Ns){
+            var nd=pd.Where(d=>d.N==n).ToArray();
+            var np1=nd.Where(d=>d.cls=="P1").ToArray();var np1b=nd.Where(d=>d.cls=="P1b").ToArray();
+            if(np1.Length<1||np1b.Length<1){_o.WriteLine($"{n,5} {np1.Length,4} {np1b.Length,4} {"sparse",10}");continue;}
+            bool nPool=np1.Average(d=>d.rawIQR)>np1b.Average(d=>d.rawIQR);
+            bool nRes=np1.Average(d=>d.residIQR)>np1b.Average(d=>d.residIQR);
+            _o.WriteLine($"{n,5} {np1.Length,4} {np1b.Length,4} {(nPool?"POS":"NEG"),10} {(nRes?"POS":"NEG"),10} {(nPool!=nRes?"YES":"no"),10}");
+        }
+
+        // ============================================================
+        // PART F — Effect-Scale Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Effect-Scale Audit ===");
+        double betStd=Sd(pd.Select(d=>d.rawIQR).ToArray()),resStd=Sd(pd.Select(d=>d.residIQR).ToArray());
+        double poolEff=Math.Abs(poolP1-poolP1b)/betStd,resEff=Math.Abs(resP1-resP1b)/resStd;
+        _o.WriteLine($"Between-seed signal: std={betStd:F5}, P1-P1b delta={Math.Abs(poolP1-poolP1b):F5}, effect={poolEff:F4}σ");
+        _o.WriteLine($"Residual signal: std={resStd:F5}, P1-P1b delta={Math.Abs(resP1-resP1b):F5}, effect={resEff:F4}σ");
+        _o.WriteLine($"Effect ratio (residual/pooled): {resEff/(poolEff+0.0001):F2}x");
+        _o.WriteLine($"Reversal mechanism: {(resEff>poolEff?"Residual signal dominates — reversal is EFFECT-driven":"Pooled signal dominates — reversal is ARTIFACT of level-crossing")}");
+
+        // ============================================================
+        // PART G — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Robustness Summary ===");
+        _o.WriteLine($"Replication: {(reversal?"CONFIRMED":"FAILED")}");
+        _o.WriteLine($"Leave-one-seed: {revCount*100.0/(revCount+sameCount+0.1):F0}% reversal");
+        _o.WriteLine($"Random split: {revSplit*100.0/splits:F0}% reversal");
+        _o.WriteLine($"Overall: {(revCount*100.0/(revCount+sameCount+0.1)>70&&revSplit*100.0/splits>60?"STABLE REVERSAL":"WEAK/UNSTABLE")}");
+
+        // ============================================================
+        // PART H — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART H: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        int stabScore=(revCount*100.0/(revCount+sameCount+0.1)>70?3:revCount*100.0/(revCount+sameCount+0.1)>50?2:1)+(revSplit*100.0/splits>60?2:revSplit*100.0/splits>40?1:0);
+        if(stabScore>=5)decision="Model A: stable sign reversal. Pooled and residual rawIQR oppose in SAC.";
+        else if(stabScore>=3)decision="Model B: mostly stable sign reversal. Reversal survives most perturbations.";
+        else if(stabScore>=2)decision="Model C: mixed/underpowered. Reversal present but unstable.";
+        else decision="Model D: artifact. Sign reversal likely a finite-sample fluctuation.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"CLAIMS: Sign reversal audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RSR_01 complete. Commit: RSR_01_ResidualSignReversalAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
