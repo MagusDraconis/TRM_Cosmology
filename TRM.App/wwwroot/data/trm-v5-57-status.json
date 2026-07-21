@@ -14,7 +14,7 @@
     {"name":"D0_01","title":"d0 Origin Audit","commit":"9199ad4","status":"COMPLETE"},
     {"name":"D2_01","title":"Epoch-2 Emergence Audit","commit":"20a992d","status":"COMPLETE"},
     {"name":"SV_01","title":"Structural Variable Audit","commit":"1436464","status":"COMPLETE"},
-    {"name":"TSS_01","title":"V5.57 Final Synthesis","commit":"TBD","status":"COMPLETE"}
+    {"name":"TSS_01","title":"V5.57 Final Synthesis","commit":"6aa026f","status":"COMPLETE"}
   ],
   "finalModel": "d0 is the dominant structural variable (1.74σ). rawIQR and rank are shadow signals — pipeline artifacts. SAC discriminates via d0 classifier thresholds (0.50/0.65). RP+DL creates 54% of d-separation.",
   "baseForNextVersion": "V5.58",

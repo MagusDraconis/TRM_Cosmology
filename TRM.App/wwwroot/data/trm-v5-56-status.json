@@ -1,17 +1,22 @@
 {
-  "releaseStatus": "V5.56 INITIALIZED",
+  "releaseStatus": "V5.56 COMPLETE",
   "phase": "Relative Gate Preference",
   "date": "2026-07-21",
   "branch": "feature/v5.56-relative-gate-preference",
   "base": "V5.55 COMPLETE",
   "baseCommit": "c5c7e88",
-  "testSummary": { "total": 2916, "passed": 2916, "failed": 0 },
-  "suites": [],
-  "finalModel": null,
+  "testSummary": { "total": 2922, "passed": 2922, "failed": 0 },
+  "suites": [
+    {"name":"RGP_01","title":"Relative Gate Preference Audit","commit":"c97e3d2","status":"COMPLETE"},
+    {"name":"GEO_01","title":"Profile Space Audit","commit":"f9b002a","status":"COMPLETE"},
+    {"name":"NBR_01","title":"Local Reference Audit","commit":"b7021af","status":"COMPLETE"},
+    {"name":"RGS_01","title":"Relative Gate Structure Audit","commit":"9e3c1b6","status":"COMPLETE"},
+    {"name":"RG0_01","title":"Rank-Zero Gate Audit","commit":"95d188f","status":"COMPLETE"},
+    {"name":"RKO_01","title":"Rank Origin Audit","commit":"3fe911e","status":"COMPLETE"}
+  ],
+  "finalModel": "SAC prefers lower within-seed rawIQR ordering. Rank is rawIQR ordering. Preference is continuous, not binary Rank0 gate. Retained profiles are NOT geometric centers or outliers.",
+  "baseForNextVersion": "V5.57",
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
-  "v6Status": "NOT READY",
-  "purpose": "Why does SAC prefer lower-ranked profiles within a seed?",
-  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
-  "recommendedFirstSuite": "RGP_01_RelativeGatePreferenceAudit"
+  "v6Status": "NOT READY"
 }
