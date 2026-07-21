@@ -259,4 +259,98 @@ public class V5_57_SACInternalDiscriminatorAudit_Tests
         _o.WriteLine("CLAIMS: d0 origin audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== D0_01 complete. Commit: D0_01_DistanceOriginAudit ===");
     }
+
+    [Fact]
+    public void D2_01_Epoch2EmergenceAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== D2_01: Epoch-2 Emergence Audit ===");
+        _o.WriteLine("=== V5.57. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Why does discrimination peak at d2? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,double,string)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                var K=KS(n,s);
+                // Epoch 1
+                var h1=Sim(K,n,0.10,s);var R1=RP(h1,n);var rn1=Nm(R1,n);var dl1=DL(rn1,n);K=Cupd(dl1,n);double d1=Dm(dl1,n);
+                // Epoch 2
+                var h2=Sim(K,n,0.10,s+1);var R2=RP(h2,n);
+                double dRP=Dm(DL(Nm(R2,n),n),n); // d after Sim→RP→Nm→DL
+                var rn2=Nm(R2,n);var dl2=DL(rn2,n);K=Cupd(dl2,n);double d2=Dm(dl2,n);
+                // Epoch 3 → d0
+                var h3=Sim(K,n,0.10,s+3);var d3=DL(Nm(RP(h3,n),n),n);K=Cupd(d3,n);
+                var h3E=Sim(K,n,0.10,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);double d0=Dm(d3E,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=Km(Cupd(d3E,n),n),ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(Km(Cupd(d3E,n),n)-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(Km(Cupd(d3E,n),n)-Lo(n).km)*(Km(Cupd(d3E,n),n)-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,rawIQR,d1,d2,dRP,d0,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.Item8=="P1").ToArray();var p1b=bd.Where(d=>d.Item8=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        // ============================================================
+        // Stage-by-stage separation
+        // ============================================================
+        _o.WriteLine($"\n=== Stage-by-Stage Separation ===");
+        var d1a=bd.Select(d=>d.Item4).ToArray();var d2a=bd.Select(d=>d.Item5).ToArray();
+        var dRPa=bd.Select(d=>d.Item6).ToArray();var d0a=bd.Select(d=>d.Item7).ToArray();
+
+        double p1d1=p1.Select(d=>d.Item4).DefaultIfEmpty(0).Average();
+        double p1bd1=p1b.Select(d=>d.Item4).DefaultIfEmpty(0).Average();
+        double p1dRP=p1.Select(d=>d.Item6).DefaultIfEmpty(0).Average();
+        double p1bdRP=p1b.Select(d=>d.Item6).DefaultIfEmpty(0).Average();
+        double p1d2v=p1.Select(d=>d.Item5).DefaultIfEmpty(0).Average();
+        double p1bd2v=p1b.Select(d=>d.Item5).DefaultIfEmpty(0).Average();
+        double p1d0v=p1.Select(d=>d.Item7).DefaultIfEmpty(0).Average();
+        double p1bd0v=p1b.Select(d=>d.Item7).DefaultIfEmpty(0).Average();
+
+        double sep1=Math.Abs(p1d1-p1bd1),sepRP=Math.Abs(p1dRP-p1bdRP);
+        double sep2=Math.Abs(p1d2v-p1bd2v),sep0=Math.Abs(p1d0v-p1bd0v);
+
+        _o.WriteLine($"{"Stage",-10} {"P1",8} {"P1b",8} {"Sep",8} {"Growth",8}");
+        _o.WriteLine(new string('-',45));
+        _o.WriteLine($"{"d1",-10} {p1d1,8:F4} {p1bd1,8:F4} {sep1,8:F5} {"-",8}");
+        _o.WriteLine($"{"RP→DL",-10} {p1dRP,8:F4} {p1bdRP,8:F4} {sepRP,8:F5} {sepRP/(sep1+0.0001),8:F2}x");
+        _o.WriteLine($"{"d2",-10} {p1d2v,8:F4} {p1bd2v,8:F4} {sep2,8:F5} {sep2/(sepRP+0.0001),8:F2}x");
+        _o.WriteLine($"{"d0",-10} {p1d0v,8:F4} {p1bd0v,8:F4} {sep0,8:F5} {sep0/(sep2+0.0001),8:F2}x");
+
+        // ============================================================
+        // Operation contributions
+        // ============================================================
+        _o.WriteLine($"\n=== Operation Contributions ===");
+        double stepRP=sepRP-sep1,step2=sep2-sepRP,step0=sep0-sep2,total=sep0;
+        double pctRP=stepRP/(total+0.0001)*100,pct2=step2/(total+0.0001)*100,pct0=step0/(total+0.0001)*100;
+        _o.WriteLine($"RP+DL contribution: {stepRP:+0.00000;-0.00000} ({pctRP:F0}%)");
+        _o.WriteLine($"Cupd→d2 contribution: {step2:+0.00000;-0.00000} ({pct2:F0}%)");
+        _o.WriteLine($"d2→d0 contribution: {step0:+0.00000;-0.00000} ({pct0:F0}%)");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine($"\n=== Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+        string result;
+        if(pctRP>50)result="Model A: Single-operation origin — RP+DL creates most separation.";
+        else if(pct2>40)result="Model B: Interaction origin — Cupd coupling update amplifies signal.";
+        else result="Model C: Distributed multi-step origin.";
+        _o.WriteLine($"Decision: {result}");
+        _o.WriteLine($"Evidence: RP+DL={pctRP:F0}%, Cupd={pct2:F0}%, 3rd epoch={pct0:F0}%");
+        _o.WriteLine("CLAIMS: Epoch-2 emergence audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== D2_01 complete. Commit: D2_01_Epoch2EmergenceAudit ===");
+    }
 }
