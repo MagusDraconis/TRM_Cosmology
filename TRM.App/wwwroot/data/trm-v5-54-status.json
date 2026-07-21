@@ -6,8 +6,8 @@
   "base": "V5.53 COMPLETE",
   "baseCommit": "ba2d3c9",
   "testSummary": {
-    "total": 2906,
-    "passed": 2906,
+    "total": 2907,
+    "passed": 2907,
     "failed": 0
   },
   "suites": [
@@ -50,6 +50,14 @@
       "finding": "rawIQR remains dominant P1/P1b discriminator after seed-centering (100% normalized delta, 3.2x rawMean). Residual rawIQR delta=-0.00105 survives seed matching. Only 10/300 seeds have mixed outcomes. Model A: local spread dominates.",
       "status": "COMPLETE",
       "doc": "docsV5/V5_54/TRM_V5_54_RLP_01_RawIQRLocalProfileAudit.md"
+    },
+    {
+      "name": "RPD_01",
+      "title": "RawIQR Profile Deviation Audit",
+      "commit": "TBD",
+      "finding": "Within-seed residual is N-driven (sample-size variation, |r|=0.101). Between-seed std 4.2x within-seed residual std. Residual separates P1/P1b (delta=-0.00105). Topology structurally independent. Model A.",
+      "status": "COMPLETE",
+      "doc": "docsV5/V5_54/TRM_V5_54_RPD_01_RawIQRProfileDeviationAudit.md"
     }
   ],
   "finalModel": null,

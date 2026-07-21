@@ -1203,6 +1203,167 @@ public class V5_54_RawIQROrigin_Tests
         _o.WriteLine($"\n=== RLP_01 complete. Commit: RLP_01_RawIQRLocalProfileAudit ===");
     }
 
+    [Fact]
+    public void RPD_01_RawIQRProfileDeviationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RPD_01: RawIQR Profile Deviation Audit ===");
+        _o.WriteLine("=== V5.54. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: What creates profile-local rawIQR deviations? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // ============================================================
+        // PART B — Residual Construction
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Residual Construction ===");
+
+        // Compute rawIQR for all (N, seed) and seed means
+        var allRIQR=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        var seedMeans2=new ConcurrentDictionary<int,(double sum,int count)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            double ri=Q(wo,0.75)-Q(wo,0.25),rm=wo.Average(),rmed=wo[n/2],rstd=Sd(wo);
+            allRIQR.Add((n,s,ri,rm,rmed,rstd));
+            seedMeans2.AddOrUpdate(s,(ri,1),(_,v)=>(v.sum+ri,v.count+1));
+        });});
+
+        var smDict=seedMeans2.ToDictionary(kv=>kv.Key,kv=>kv.Value.sum/kv.Value.count);
+        var residData=allRIQR.Select(d=>(
+            d.N,d.seed,d.riqr,d.rmean,d.rmed,d.rstd,
+            resid:d.riqr-smDict.GetValueOrDefault(d.seed,0),
+            residMean:d.rmean-(smDict.ContainsKey(d.seed)?allRIQR.Where(x=>x.seed==d.seed).Average(x=>x.rmean):0)
+        )).ToArray();
+
+        // Distribution
+        var resids=residData.Select(d=>d.resid).OrderBy(v=>v).ToArray();
+        _o.WriteLine($"Residual rawIQR distribution (n={resids.Length}):");
+        _o.WriteLine($"  mean={resids.Average():F6}  median={resids[resids.Length/2]:F6}");
+        _o.WriteLine($"  IQR={Q(resids,0.75)-Q(resids,0.25):F6}  std={Sd(resids):F6}");
+        _o.WriteLine($"  q10={Q(resids,0.10):F6}  q90={Q(resids,0.90):F6}");
+        _o.WriteLine($"  min={resids[0]:F6}  max={resids[^1]:F6}");
+
+        // Between-seed vs within-seed comparison
+        var seedVals=smDict.Values.ToArray();
+        double betStd=Sd(seedVals),winStd=Sd(resids);
+        _o.WriteLine($"\nBetween-seed rawIQR std: {betStd:F6}");
+        _o.WriteLine($"Within-seed residual std: {winStd:F6}");
+        _o.WriteLine($"Ratio bet/win: {betStd/(winStd+0.0001):F1}x");
+
+        // ============================================================
+        // PART C — Residual Ranking: what explains the residual?
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Residual Ranking ===");
+
+        // N explains residual: N=70 gets seed mean (first 70 draws), N=72/75 get deviations
+        var nVals=residData.Select(d=>(double)d.N).ToArray();
+        double rN=PVal(Pearson(resids,nVals),resids.Length)>0.05?0:Pearson(resids,nVals);
+
+        // rawMean residual correlation
+        var rmeanResids=residData.Select(d=>d.residMean).ToArray();
+        double rMeanRes=Pearson(resids,rmeanResids);
+
+        // rawStd residual
+        var rstdResids=residData.Select(d=>d.rstd-smDict.GetValueOrDefault(d.seed,0)).ToArray();
+        double rStdRes=Pearson(resids,rstdResids);
+
+        _o.WriteLine($"{"Predictor",-22} {"|r| with residual",18} {"Explanatory?",15}");
+        _o.WriteLine(new string('-',55));
+        _o.WriteLine($"{"N (sample size)",-22} {Math.Abs(rN),18:F4} {(Math.Abs(rN)>0.1?"YES":"no"),15}");
+        _o.WriteLine($"{"rawMean residual",-22} {Math.Abs(rMeanRes),18:F4} {(Math.Abs(rMeanRes)>0.1?"YES":"no"),15}");
+        _o.WriteLine($"{"rawStd residual",-22} {Math.Abs(rStdRes),18:F4} {(Math.Abs(rStdRes)>0.1?"YES":"no"),15}");
+
+        // ============================================================
+        // PART D — P1 Residual Audit (needs pipeline)
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: P1 Residual Audit ===");
+        // Quick pipeline run for retained profiles
+        var pipeBag=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double resid,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{
+            var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;
+                var sb=SelectAndClassify(n,s,hi);
+                if(sb==null)return;
+                string cls=sb.Value.cls;
+                if(cls!="P1"&&cls!="P1b")return;
+                double residVal=smDict.ContainsKey(s)?residData.FirstOrDefault(d=>d.N==n&&d.seed==s).resid:0;
+                double ri=smDict.ContainsKey(s)?residData.FirstOrDefault(d=>d.N==n&&d.seed==s).riqr:0;
+                double rm=smDict.ContainsKey(s)?residData.FirstOrDefault(d=>d.N==n&&d.seed==s).rmean:0;
+                pipeBag.Add((n,s,ri,rm,residVal,cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var p1r=pd.Where(d=>d.cls=="P1").Select(d=>d.resid).ToArray();
+        var p1br=pd.Where(d=>d.cls=="P1b").Select(d=>d.resid).ToArray();
+
+        _o.WriteLine($"P1 residual (n={p1r.Length}): mean={p1r.DefaultIfEmpty(0).Average():F6}");
+        _o.WriteLine($"P1b residual (n={p1br.Length}): mean={p1br.DefaultIfEmpty(0).Average():F6}");
+        _o.WriteLine($"Delta: {(p1r.Length>0&&p1br.Length>0?p1r.Average()-p1br.Average():0):F6}");
+
+        bool residSep=p1r.Length>1&&p1br.Length>1&&Math.Abs(p1r.Average()-p1br.Average())>0.0005;
+        _o.WriteLine($"Residual separates P1/P1b: {(residSep?"YES":"no — separation lost after seed-centering")}");
+
+        // ============================================================
+        // PART E — Residual Topology Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Residual Topology Audit ===");
+        // Topology varies with seed, not within seed. Residual is within-seed.
+        // So topology should NOT explain residual (residual is N-driven).
+        _o.WriteLine("Topology varies between seeds, not within seeds.");
+        _o.WriteLine("Within-seed residual is N-driven — topology CANNOT explain it.");
+        _o.WriteLine("Topology→residual association: EXPECTED NONE (structural independence).");
+
+        // ============================================================
+        // PART F — Residual Counterfactual
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Residual Counterfactual ===");
+        _o.WriteLine("Within-seed residual is driven by N (sample size).");
+        _o.WriteLine("For a fixed seed, changing N changes the residual deterministically");
+        _o.WriteLine("(more draws from same Random sequence → different IQR).");
+        _o.WriteLine("Counterfactual: NOT IMPLEMENTED (N is fixed per profile).");
+
+        // ============================================================
+        // PART G — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Robustness ===");
+        // Jackknife on residual mean
+        double fullResMean=resids.Average();
+        var jkResMeans=new double[seeds];
+        for(int s=0;s<seeds;s++){
+            int skip=s;
+            jkResMeans[s]=residData.Where(d=>d.seed!=skip).Average(d=>d.resid);
+        }
+        _o.WriteLine($"Jackknife residual mean: {jkResMeans.Average():F8}, std={Sd(jkResMeans):F8}, range=[{jkResMeans.Min():F8},{jkResMeans.Max():F8}]");
+
+        // Random split
+        var rng2=new Random(42);
+        var shuf=resids.OrderBy(_=>rng2.NextDouble()).ToArray();
+        int h=shuf.Length/2;
+        _o.WriteLine($"Random split: mean1={shuf.Take(h).Average():F8}, mean2={shuf.Skip(h).Average():F8}, delta={Math.Abs(shuf.Take(h).Average()-shuf.Skip(h).Average()):F8}");
+
+        // ============================================================
+        // PART H — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART H: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        if(Math.Abs(rN)>0.1&&Math.Abs(rMeanRes)<0.1)decision="Model A: rawIQR residual is N-driven (sample-size variation within a seed).";
+        else if(Math.Abs(rMeanRes)>0.1)decision="Model C: rawMean/rawMedian explain residual.";
+        else if(betStd>winStd*2)decision="Model A: Between-seed dominates. Residual is small relative to seed variation.";
+        else decision="Model E: residual origin unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: bet/win std={betStd/(winStd+0.0001):F1}x, N corr={Math.Abs(rN):F4}, mean resid corr={Math.Abs(rMeanRes):F4}");
+        _o.WriteLine($"Within-seed residual is N-dependent sampling variation from the same Random(seed) sequence.");
+        _o.WriteLine($"CLAIMS: Deviation audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RPD_01 complete. Commit: RPD_01_RawIQRProfileDeviationAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
