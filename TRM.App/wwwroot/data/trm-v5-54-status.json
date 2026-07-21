@@ -6,8 +6,8 @@
   "base": "V5.53 COMPLETE",
   "baseCommit": "ba2d3c9",
   "testSummary": {
-    "total": 2903,
-    "passed": 2903,
+    "total": 2904,
+    "passed": 2904,
     "failed": 0
   },
   "suites": [
@@ -15,17 +15,25 @@
       "name": "RIO_01",
       "title": "RawIQR Origin Audit",
       "commit": "2363d51",
-      "finding": "rawIQR is a pure function of seed-determined weight sampling + N. Generator (uniform[0.90,1.10]) explains mean (bias=-0.23%). Between-seed variance dominates (ratio=0.097). Topology independent (all |r|<0.1). Decision: Model A.",
+      "finding": "rawIQR is a pure function of seed-determined weight sampling + N. Generator (uniform[0.90,1.10]) explains mean (bias=-0.23%). Between-seed variance dominates (ratio=0.097). Topology independent. Decision: Model A.",
       "status": "COMPLETE",
       "doc": "docsV5/V5_54/TRM_V5_54_RIO_01_RawIQROriginAudit.md"
     },
     {
       "name": "SRA_01",
       "title": "Seed Realization Structure Audit",
-      "commit": "TBD",
-      "finding": "rawIQR is a stable shared seed-level trait across N (cross-N r=0.90-0.95, C1). Between-seed variance=93.6%. Top-10 retention=8/10. Common-70 verification r=1.0000 confirms generator seed-reuse fully explains cross-N consistency. rawIQR independent from rawMean (|r|<0.08). Model A.",
+      "commit": "45434d8",
+      "finding": "rawIQR is a stable shared seed-level trait across N (cross-N r=0.90-0.95, C1). Between-seed variance=93.6%. Generator seed-reuse fully explains cross-N consistency. rawIQR independent from rawMean. Model A.",
       "status": "COMPLETE",
       "doc": "docsV5/V5_54/TRM_V5_54_SRA_01_SeedRealizationStructureAudit.md"
+    },
+    {
+      "name": "SRP_01",
+      "title": "Seed-to-Selection Propagation Audit",
+      "commit": "TBD",
+      "finding": "Propagation unresolved due to sparse per-seed SAC retention (7 profiles from 5 seeds across 300 runs). IsHi rates similar across strata (43-48%). Seed→P1 r=0.007. SAC→P1 discrimination works at pooled level (V5.53) but not per-seed. Model F.",
+      "status": "COMPLETE",
+      "doc": "docsV5/V5_54/TRM_V5_54_SRP_01_SeedToSelectionPropagationAudit.md"
     }
   ],
   "finalModel": null,
