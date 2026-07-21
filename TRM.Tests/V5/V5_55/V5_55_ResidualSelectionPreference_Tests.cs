@@ -228,8 +228,8 @@ public class V5_55_ResidualSelectionPreference_Tests
         // PART B — Reversal Replication
         // ============================================================
         _o.WriteLine($"\n=== PART B: Reversal Replication ===");
-        double poolP1=p1.Average(d=>d.rawIQR),poolP1b=p1b.Average(d=>d.rawIQR);
-        double resP1=p1.Average(d=>d.residIQR),resP1b=p1b.Average(d=>d.residIQR);
+        double poolP1=p1.Average(d=>d.Item3),poolP1b=p1b.Average(d=>d.Item3);
+        double resP1=p1.Average(d=>d.Item4),resP1b=p1b.Average(d=>d.Item4);
         _o.WriteLine($"Pooled: P1={poolP1:F5}, P1b={poolP1b:F5}, sign={(poolP1>poolP1b?"POS":"NEG")} (P1 {(poolP1>poolP1b?">":"<")} P1b)");
         _o.WriteLine($"Residual: P1={resP1:F5}, P1b={resP1b:F5}, sign={(resP1>resP1b?"POS":"NEG")} (P1 {(resP1>resP1b?">":"<")} P1b)");
         bool reversal=(poolP1>poolP1b)!=(resP1>resP1b);
@@ -245,8 +245,8 @@ public class V5_55_ResidualSelectionPreference_Tests
             var jk=pd.Where(d=>d.seed!=skip).ToArray();
             var jp1=jk.Where(d=>d.cls=="P1").ToArray();var jp1b=jk.Where(d=>d.cls=="P1b").ToArray();
             if(jp1.Length<2||jp1b.Length<2)continue;
-            bool jkPool=jp1.Average(d=>d.rawIQR)>jp1b.Average(d=>d.rawIQR);
-            bool jkRes=jp1.Average(d=>d.residIQR)>jp1b.Average(d=>d.residIQR);
+            bool jkPool=jp1.Average(d=>d.Item3)>jp1b.Average(d=>d.Item3);
+            bool jkRes=jp1.Average(d=>d.Item4)>jp1b.Average(d=>d.Item4);
             if(jkPool!=jkRes)revCount++;else sameCount++;
         }
         _o.WriteLine($"Leave-one-seed: reversal={revCount}, same-sign={sameCount}, reversal%={revCount*100.0/(revCount+sameCount+0.1):F0}%");
@@ -263,8 +263,8 @@ public class V5_55_ResidualSelectionPreference_Tests
             var s1=shuf.Take(h).ToArray();
             var sp1=s1.Where(d=>d.cls=="P1").ToArray();var sp1b=s1.Where(d=>d.cls=="P1b").ToArray();
             if(sp1.Length<2||sp1b.Length<2)continue;
-            bool sPool=sp1.Average(d=>d.rawIQR)>sp1b.Average(d=>d.rawIQR);
-            bool sRes=sp1.Average(d=>d.residIQR)>sp1b.Average(d=>d.residIQR);
+            bool sPool=sp1.Average(d=>d.Item3)>sp1b.Average(d=>d.Item3);
+            bool sRes=sp1.Average(d=>d.Item4)>sp1b.Average(d=>d.Item4);
             if(sPool!=sRes)revSplit++;
         }
         _o.WriteLine($"Random splits: {revSplit}/{splits} show reversal ({revSplit*100.0/splits:F0}%)");
@@ -279,8 +279,8 @@ public class V5_55_ResidualSelectionPreference_Tests
             var nd=pd.Where(d=>d.N==n).ToArray();
             var np1=nd.Where(d=>d.cls=="P1").ToArray();var np1b=nd.Where(d=>d.cls=="P1b").ToArray();
             if(np1.Length<1||np1b.Length<1){_o.WriteLine($"{n,5} {np1.Length,4} {np1b.Length,4} {"sparse",10}");continue;}
-            bool nPool=np1.Average(d=>d.rawIQR)>np1b.Average(d=>d.rawIQR);
-            bool nRes=np1.Average(d=>d.residIQR)>np1b.Average(d=>d.residIQR);
+            bool nPool=np1.Average(d=>d.Item3)>np1b.Average(d=>d.Item3);
+            bool nRes=np1.Average(d=>d.Item4)>np1b.Average(d=>d.Item4);
             _o.WriteLine($"{n,5} {np1.Length,4} {np1b.Length,4} {(nPool?"POS":"NEG"),10} {(nRes?"POS":"NEG"),10} {(nPool!=nRes?"YES":"no"),10}");
         }
 
@@ -288,7 +288,7 @@ public class V5_55_ResidualSelectionPreference_Tests
         // PART F — Effect-Scale Audit
         // ============================================================
         _o.WriteLine($"\n=== PART F: Effect-Scale Audit ===");
-        double betStd=Sd(pd.Select(d=>d.rawIQR).ToArray()),resStd=Sd(pd.Select(d=>d.residIQR).ToArray());
+        double betStd=Sd(pd.Select(d=>d.Item3).ToArray()),resStd=Sd(pd.Select(d=>d.Item4).ToArray());
         double poolEff=Math.Abs(poolP1-poolP1b)/betStd,resEff=Math.Abs(resP1-resP1b)/resStd;
         _o.WriteLine($"Between-seed signal: std={betStd:F5}, P1-P1b delta={Math.Abs(poolP1-poolP1b):F5}, effect={poolEff:F4}σ");
         _o.WriteLine($"Residual signal: std={resStd:F5}, P1-P1b delta={Math.Abs(resP1-resP1b):F5}, effect={resEff:F4}σ");
@@ -320,6 +320,146 @@ public class V5_55_ResidualSelectionPreference_Tests
         _o.WriteLine($"\nDecision: {decision}");
         _o.WriteLine($"CLAIMS: Sign reversal audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== RSR_01 complete. Commit: RSR_01_ResidualSignReversalAudit ===");
+    }
+
+    [Fact]
+    public void RRA_01_RelativeResidualAdvantageAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RRA_01: Relative Residual Advantage Audit ===");
+        _o.WriteLine("=== V5.55. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Absolute spread or relative position within seed? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // Compute seed means + profile data
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();double ri=Q(wo,0.75)-Q(wo,0.25);
+            allProf.Add((n,s,ri));
+            seedIQRd.AddOrUpdate(s,ri,(_,v)=>v+ri);
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        // Run pipeline
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rawIQR,double resid,double rankPct,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        // Pre-compute within-seed ranks
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();
+            var dict=new ConcurrentDictionary<int,double>();
+            foreach(var(n,i)in ordered)dict[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=dict;
+        }
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                if(sb==null||(sb.Value.cls!="P1"&&sb.Value.cls!="P1b"))return;
+                var prof=allProf.FirstOrDefault(p=>p.N==n&&p.seed==s);
+                double resid=prof.riqr-siQ.GetValueOrDefault(s,0);
+                double rankPct=seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1;
+                pipeBag.Add((n,s,prof.riqr,resid,rankPct,sb.Value.cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var p1=pd.Where(d=>d.cls=="P1").ToArray();var p1b=pd.Where(d=>d.cls=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length}");
+
+        // ============================================================
+        // PART B — Within-Seed Rank Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Within-Seed Rank Audit ===");
+        double p1Rank=p1.Average(d=>d.Item5),p1bRank=p1b.Average(d=>d.Item5);
+        _o.WriteLine($"P1 mean rank percentile: {p1Rank:F3} (seed-internal)");
+        _o.WriteLine($"P1b mean rank percentile: {p1bRank:F3}");
+        _o.WriteLine($"P1 occupies {(p1Rank<0.5?"LOWER":"HIGHER")} within-seed ranks");
+
+        // ============================================================
+        // PART C — Relative Advantage Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Relative Advantage Audit ===");
+        _o.WriteLine($"{"Predictor",-18} {"P1 mean",10} {"P1b mean",10} {"Delta",10} {"Effect(σ)",12} {"Rank",6}");
+        _o.WriteLine(new string('-',70));
+        double allStd(double[] v)=>Sd(pd.Select(d=>d.Item3).ToArray()); // use full std for effect
+        void Adv(string n,Func<(int,int,double,double,double,string),double> f){
+            double p1m=p1.Average(f),p1bm=p1b.Average(f),d=Math.Abs(p1m-p1bm);
+            double std=Sd(pd.Select(d=>f(d)).ToArray());
+            _o.WriteLine($"{n,-18} {p1m,10:F5} {p1bm,10:F5} {d,10:F5} {(std>0.001?d/std:0),12:F4}σ");
+        }
+        Adv("absolute rawIQR",d=>d.Item3);
+        Adv("residual rawIQR",d=>d.Item4);
+        Adv("within-seed rank%",d=>d.Item5);
+
+        // ============================================================
+        // PART D — Residual Quantile Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Residual Quantile Audit ===");
+        var resids=pd.Select(d=>d.Item4).OrderBy(v=>v).ToArray();
+        double q33=Q(resids,1.0/3),q67=Q(resids,2.0/3);
+        var lo=pd.Where(d=>d.Item4<=q33).ToArray();var md=pd.Where(d=>d.Item4>q33&&d.Item4<=q67).ToArray();var hi=pd.Where(d=>d.Item4>q67).ToArray();
+        _o.WriteLine($"Low residual (≤{q33:F5}): P1={lo.Count(d=>d.cls=="P1")}, P1b={lo.Count(d=>d.cls=="P1b")}, P1%={lo.Count(d=>d.cls=="P1")*100.0/Math.Max(1,lo.Length):F0}%");
+        _o.WriteLine($"Mid residual: P1={md.Count(d=>d.cls=="P1")}, P1b={md.Count(d=>d.cls=="P1b")}, P1%={md.Count(d=>d.cls=="P1")*100.0/Math.Max(1,md.Length):F0}%");
+        _o.WriteLine($"High residual (>{q67:F5}): P1={hi.Count(d=>d.cls=="P1")}, P1b={hi.Count(d=>d.cls=="P1b")}, P1%={hi.Count(d=>d.cls=="P1")*100.0/Math.Max(1,hi.Length):F0}%");
+        string concentration=lo.Count(d=>d.cls=="P1")*100.0/Math.Max(1,lo.Length)>hi.Count(d=>d.cls=="P1")*100.0/Math.Max(1,hi.Length)?"LOW residual":"HIGH residual";
+        _o.WriteLine($"P1 concentrated in: {concentration}");
+
+        // ============================================================
+        // PART E — Cross-Seed Normalization
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Cross-Seed Normalization Audit ===");
+        // z-score: (rawIQR - seed_mean) / seed_std
+        var seedStd=new ConcurrentDictionary<int,double>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var vals=g.Select(p=>p.riqr).ToArray();
+            seedStd[g.Key]=Sd(vals);
+        }
+        var zScores=pd.Select(d=>{
+            double sm=siQ.GetValueOrDefault(d.seed,0),ss=seedStd.GetValueOrDefault(d.seed,0.001);
+            return (d.Item3-sm)/(ss+0.0001);
+        }).ToArray();
+        var p1Z=p1.Select(d=>(d.Item3-siQ.GetValueOrDefault(d.seed,0))/(seedStd.GetValueOrDefault(d.seed,0.001)+0.0001)).ToArray();
+        var p1bZ=p1b.Select(d=>(d.Item3-siQ.GetValueOrDefault(d.seed,0))/(seedStd.GetValueOrDefault(d.seed,0.001)+0.0001)).ToArray();
+        _o.WriteLine($"z-score rawIQR: P1={p1Z.DefaultIfEmpty(0).Average():F4}, P1b={p1bZ.DefaultIfEmpty(0).Average():F4}, delta={Math.Abs(p1Z.DefaultIfEmpty(0).Average()-p1bZ.DefaultIfEmpty(0).Average()):F5}");
+        _o.WriteLine($"Absolute rawIQR delta: {Math.Abs(p1.Average(d=>d.Item3)-p1b.Average(d=>d.Item3)):F5}");
+        _o.WriteLine($"z-score {(Math.Abs(p1Z.DefaultIfEmpty(0).Average()-p1bZ.DefaultIfEmpty(0).Average())>Math.Abs(p1.Average(d=>d.Item3)-p1b.Average(d=>d.Item3))/100?"PRESERVES":"REDUCES")} separation");
+
+        // ============================================================
+        // PART F — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Robustness ===");
+        var rng2=new Random(42);var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();
+        int h=shuf.Length/2;
+        var s1=shuf.Take(h).ToArray();var s2=shuf.Skip(h).ToArray();
+        double rankSign1=s1.Where(d=>d.cls=="P1").Average(d=>d.Item5)>s1.Where(d=>d.cls=="P1b").Average(d=>d.Item5)?1:-1;
+        double rankSign2=s2.Where(d=>d.cls=="P1").Average(d=>d.Item5)>s2.Where(d=>d.cls=="P1b").Average(d=>d.Item5)?1:-1;
+        _o.WriteLine($"Rank sign stability: split1={(rankSign1>0?"POS":"NEG")}, split2={(rankSign2>0?"POS":"NEG")}, stable={rankSign1==rankSign2}");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double absD=Math.Abs(p1.Average(d=>d.Item3)-p1b.Average(d=>d.Item3));
+        double resD=Math.Abs(p1.Average(d=>d.Item4)-p1b.Average(d=>d.Item4));
+        double rankD=Math.Abs(p1Rank-p1bRank);
+        double maxD=Math.Max(Math.Max(absD,resD*10),rankD); // scale resid to comparable
+
+        string decision;
+        if(absD>resD*2&&absD>rankD*2)decision="Model A: absolute rawIQR dominates.";
+        else if(resD>absD/5&&resD>rankD/3)decision="Model B: residual rawIQR dominates.";
+        else if(rankD>0.1)decision="Model C: relative rank dominates.";
+        else decision="Model E: unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: abs delta={absD:F5}, resid delta={resD:F5}, rank delta={rankD:F3}, P1 rank%={p1Rank:F3}");
+        _o.WriteLine("CLAIMS: Relative advantage audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RRA_01 complete. Commit: RRA_01_RelativeResidualAdvantageAudit ===");
     }
 
     // ============================================================
