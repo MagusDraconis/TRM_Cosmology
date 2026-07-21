@@ -8,16 +8,47 @@
   "finalSynthesisCommit": "TBD",
   "testSummary": { "total": 2928, "passed": 2928, "failed": 0 },
   "suites": [
-    {"name":"ART_01","title":"Pipeline Artifact Audit","commit":"f1259b5","status":"COMPLETE"},
-    {"name":"PIPE_01","title":"Discrimination Origin Audit","commit":"9a2b446","status":"COMPLETE"},
-    {"name":"SAC_01","title":"Internal Discriminator Audit","commit":"85499fa","status":"COMPLETE"},
-    {"name":"D0_01","title":"d0 Origin Audit","commit":"9199ad4","status":"COMPLETE"},
-    {"name":"D2_01","title":"Epoch-2 Emergence Audit","commit":"20a992d","status":"COMPLETE"},
-    {"name":"SV_01","title":"Structural Variable Audit","commit":"1436464","status":"COMPLETE"},
-    {"name":"TSS_01","title":"V5.57 Final Synthesis","commit":"6aa026f","status":"COMPLETE"}
+    {"name":"ART_01","title":"Pipeline Artifact Audit","commit":"f1259b5","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"PIPE_01","title":"Discrimination Origin Audit","commit":"9a2b446","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"SAC_01","title":"Internal Discriminator Audit","commit":"85499fa","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"D0_01","title":"d0 Origin Audit","commit":"9199ad4","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"D2_01","title":"Epoch-2 Emergence Audit","commit":"20a992d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"SV_01","title":"Structural Variable Audit","commit":"1436464","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"TSS_01","title":"V5.57 Final Synthesis","commit":"6aa026f","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
   "finalModel": "d0 is the dominant structural variable (1.74σ). rawIQR and rank are shadow signals — pipeline artifacts. SAC discriminates via d0 classifier thresholds (0.50/0.65). RP+DL creates 54% of d-separation.",
   "baseForNextVersion": "V5.58",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1
+  },
+  "supportedClaims": [
+    "d0 is the dominant structural variable (1.74σ)",
+    "rawIQR and d0 are decoupled (r=-0.03)",
+    "Rank preference is pipeline artifact (ART_01)",
+    "SAC creates discrimination, not IsHi (PIPE_01)",
+    "RP+DL creates 54% of d-separation (D2_01)",
+    "km is more fundamental than d0 (SKL_01)"
+  ],
+  "conditionalClaims": [
+    "finite-N limits",
+    "sparse SAC retention",
+    "classifier dependence",
+    "diagnostic not causal"
+  ],
+  "hypotheses": [
+    "RP operation may be ultimate source of d0 signal",
+    "Alternative classifiers may reveal different structure"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical interpretation",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low"
+  ],
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
   "v6Status": "NOT READY"

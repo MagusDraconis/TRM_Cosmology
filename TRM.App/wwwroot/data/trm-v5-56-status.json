@@ -5,17 +5,48 @@
   "branch": "feature/v5.56-relative-gate-preference",
   "base": "V5.55 COMPLETE",
   "baseCommit": "c5c7e88",
-  "testSummary": { "total": 2922, "passed": 2922, "failed": 0 },
+  "testSummary": {
+    "total": 2922,
+    "passed": 2922,
+    "failed": 0
+  },
   "suites": [
-    {"name":"RGP_01","title":"Relative Gate Preference Audit","commit":"c97e3d2","status":"COMPLETE"},
-    {"name":"GEO_01","title":"Profile Space Audit","commit":"f9b002a","status":"COMPLETE"},
-    {"name":"NBR_01","title":"Local Reference Audit","commit":"b7021af","status":"COMPLETE"},
-    {"name":"RGS_01","title":"Relative Gate Structure Audit","commit":"9e3c1b6","status":"COMPLETE"},
-    {"name":"RG0_01","title":"Rank-Zero Gate Audit","commit":"95d188f","status":"COMPLETE"},
-    {"name":"RKO_01","title":"Rank Origin Audit","commit":"3fe911e","status":"COMPLETE"}
+    {"name":"RGP_01","title":"Relative Gate Preference Audit","commit":"c97e3d2","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"GEO_01","title":"Profile Space Audit","commit":"f9b002a","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"NBR_01","title":"Local Reference Audit","commit":"b7021af","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"RGS_01","title":"Relative Gate Structure Audit","commit":"9e3c1b6","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"RG0_01","title":"Rank-Zero Gate Audit","commit":"95d188f","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"RKO_01","title":"Rank Origin Audit","commit":"3fe911e","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "finalModel": "SAC prefers lower within-seed rawIQR ordering. Rank is rawIQR ordering. Preference is continuous, not binary Rank0 gate. Retained profiles are NOT geometric centers or outliers.",
+  "finalModel": "SAC prefers lower within-seed rawIQR ordering. Rank is rawIQR ordering. Continuous preference, not binary gate.",
   "baseForNextVersion": "V5.57",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1
+  },
+  "supportedClaims": [
+    "SAC prefers lower within-seed rawIQR ordering",
+    "Rank = rawIQR ordering (RKO_01)",
+    "Continuous preference, not binary Rank0 gate (RG0_01)",
+    "Retained profiles are NOT outliers or centers (GEO_01, NBR_01)"
+  ],
+  "conditionalClaims": [
+    "finite-N limits (N=70,72,75)",
+    "sparse SAC retention",
+    "diagnostic not causal"
+  ],
+  "hypotheses": [
+    "SAC may operate on profile-local spread deviations"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical interpretation",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low"
+  ],
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
   "v6Status": "NOT READY"

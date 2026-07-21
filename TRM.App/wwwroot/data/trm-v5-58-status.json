@@ -5,14 +5,45 @@
   "branch": "feature/v5.58-d0-generation-audit",
   "base": "V5.57 COMPLETE",
   "baseCommit": "6aa026f",
-  "testSummary": { "total": 2931, "passed": 2931, "failed": 0 },
+  "testSummary": {
+    "total": 2931,
+    "passed": 2931,
+    "failed": 0
+  },
   "suites": [
-    {"name":"D0G_01","title":"d0 Generation Audit","commit":"d503425","finding":"d0 is fundamental. Survives d2 removal (1.75σ). km/lambda at 1.71σ are same structural quantity (r=-0.94).","status":"COMPLETE"},
-    {"name":"SKL_01","title":"Structural Kernel Layer Audit","commit":"b205c96","finding":"km is more fundamental than d0. km retains 0.73σ after d0 removal; d0 retains only 0.06σ. km-λ r=0.9998 (single kernel).","status":"COMPLETE"},
-    {"name":"KMG_01","title":"Kernel Generation Audit","commit":"ee518ed","finding":"km is FUNDAMENTAL. Survives all predecessor removal (1.67σ after DL). No predecessor outperforms. Bottom of SAC chain reached.","status":"COMPLETE"}
+    {"name":"D0G_01","title":"d0 Generation Audit","commit":"d503425","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"SKL_01","title":"Structural Kernel Layer Audit","commit":"b205c96","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"KMG_01","title":"Kernel Generation Audit","commit":"ee518ed","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "finalModel": "km (coupling matrix mean) is the fundamental structural variable. d0 and lambda are derived from km. km survives all predecessor removal. The structural kernel is the coupling matrix after 3-epoch SAC evolution.",
+  "finalModel": "km (coupling matrix mean) is the fundamental structural variable. d0 and lambda are derived. Bottom of SAC chain reached.",
   "baseForNextVersion": "V5.59",
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1
+  },
+  "supportedClaims": [
+    "km is the fundamental structural variable (1.71σ)",
+    "d0 and lambda derived from km (SKL_01)",
+    "km survives all predecessor removal (KMG_01)",
+    "d0 is absorbed by km (0.06σ vs 0.73σ)"
+  ],
+  "conditionalClaims": [
+    "finite-N limits",
+    "pipeline dependence",
+    "diagnostic not causal"
+  ],
+  "hypotheses": [
+    "km may be the deepest accessible layer"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical interpretation",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low"
+  ],
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
   "v6Status": "NOT READY"
