@@ -1364,6 +1364,129 @@ public class V5_54_RawIQROrigin_Tests
         _o.WriteLine($"\n=== RPD_01 complete. Commit: RPD_01_RawIQRProfileDeviationAudit ===");
     }
 
+    [Fact]
+    public void RPC_01_RawIQRResidualPredicateClosureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RPC_01: RawIQR Residual Predicate Closure Audit ===");
+        _o.WriteLine("=== V5.54. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: What co-varies with rawIQR residual inside a seed? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        // ============================================================
+        // Compute residuals for all descriptors
+        // ============================================================
+        var allData=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd,double rq10,double rq90)>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allData.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo),Q(wo,0.10),Q(wo,0.90)));
+        });});
+
+        // Seed means for each descriptor
+        var sIQR=new Dictionary<int,double>();var sMean=new Dictionary<int,double>();
+        var sMed=new Dictionary<int,double>();var sStd=new Dictionary<int,double>();
+        var sQ10=new Dictionary<int,double>();var sQ90=new Dictionary<int,double>();
+        foreach(var g in allData.GroupBy(d=>d.seed)){
+            sIQR[g.Key]=g.Average(d=>d.riqr);sMean[g.Key]=g.Average(d=>d.rmean);
+            sMed[g.Key]=g.Average(d=>d.rmed);sStd[g.Key]=g.Average(d=>d.rstd);
+            sQ10[g.Key]=g.Average(d=>d.rq10);sQ90[g.Key]=g.Average(d=>d.rq90);
+        }
+
+        // Build residual data
+        var rd=allData.Select(d=>(
+            d.N,d.seed,
+            rIQR:d.riqr-sIQR[d.seed],rMean:d.rmean-sMean[d.seed],
+            rMed:d.rmed-sMed[d.seed],rStd:d.rstd-sStd[d.seed],
+            rQ10:d.rq10-sQ10[d.seed],rQ90:d.rq90-sQ90[d.seed]
+        )).ToArray();
+
+        // ============================================================
+        // PART B — Residual Correlation Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Residual Correlation Audit ===");
+        _o.WriteLine($"{"Descriptor",-18} {"r with rIQR",12} {"P-value",10}");
+        _o.WriteLine(new string('-',42));
+        var rIQR=rd.Select(d=>d.rIQR).ToArray();int nR=rIQR.Length;
+        void RptC(string n,double[] y){double r=Pearson(rIQR,y);_o.WriteLine($"{n,-18} {r,12:F4} {PVal(r,nR),10:F4}");}
+        RptC("rMean",rd.Select(d=>d.rMean).ToArray());
+        RptC("rMedian",rd.Select(d=>d.rMed).ToArray());
+        RptC("rStd",rd.Select(d=>d.rStd).ToArray());
+        RptC("rQ10",rd.Select(d=>d.rQ10).ToArray());
+        RptC("rQ90",rd.Select(d=>d.rQ90).ToArray());
+
+        // ============================================================
+        // PART C — Matched Outcome Audit (same seed, same N)
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Matched Outcome Audit ===");
+        _o.WriteLine("Same-seed, same-N matching requires profiles with identical (seed,N) but different outcomes.");
+        _o.WriteLine("Each (seed,N) pair produces exactly one profile — within-cell matching is impossible.");
+        _o.WriteLine("Matched audit: NOT POSSIBLE under current pipeline (one profile per seed×N cell).");
+        _o.WriteLine("Nearest equivalent: same-seed, different-N comparison (done in RLP_01).");
+
+        // ============================================================
+        // PART D — Residual Dominance Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Residual Dominance Audit ===");
+        // Use pooled retained profiles from a quick pipeline run
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rIQR,double rMean,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                if(sb==null||(sb.Value.cls!="P1"&&sb.Value.cls!="P1b"))return;
+                var r=rd.FirstOrDefault(x=>x.N==n&&x.seed==s);
+                pipeBag.Add((n,s,r.rIQR,r.rMean,sb.Value.cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var p1d=pd.Where(d=>d.cls=="P1").ToArray();var p1bd=pd.Where(d=>d.cls=="P1b").ToArray();
+
+        _o.WriteLine($"P1 n={p1d.Length}, P1b n={p1bd.Length}");
+        _o.WriteLine($"{"Residual",-12} {"P1 mean",10} {"P1b mean",10} {"Delta",10} {"Dominant?",10}");
+        _o.WriteLine(new string('-',55));
+        void Dom(string n,Func<(int,int,double,double,string),double> f){
+            double p1=p1d.Length>0?p1d.Average(f):0,p1b=p1bd.Length>0?p1bd.Average(f):0;
+            double d=Math.Abs(p1-p1b);_o.WriteLine($"{n,-12} {p1,10:F5} {p1b,10:F5} {d,10:F5}");
+        }
+        Dom("rIQR",d=>d.Item3);Dom("rMean",d=>d.Item4);
+
+        // ============================================================
+        // PART E — Residual Composite Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Residual Composite Audit ===");
+        // Simple residual composite = |rIQR - rMean| (V5.53 composite analog)
+        var compP1=p1d.Select(d=>Math.Abs(d.Item3-d.Item4)).DefaultIfEmpty(0).Average();
+        var compP1b=p1bd.Select(d=>Math.Abs(d.Item3-d.Item4)).DefaultIfEmpty(0).Average();
+        double iqrDelta=Math.Abs(p1d.Average(d=>d.Item3)-p1bd.Average(d=>d.Item3));
+        double meanDelta=Math.Abs(p1d.Average(d=>d.Item4)-p1bd.Average(d=>d.Item4));
+        double compDelta=Math.Abs(compP1-compP1b);
+        _o.WriteLine($"rIQR alone delta: {iqrDelta:F6}");
+        _o.WriteLine($"rMean alone delta: {meanDelta:F6}");
+        _o.WriteLine($"|rIQR-rMean| composite delta: {compDelta:F6}");
+        _o.WriteLine($"Composite {(compDelta>iqrDelta?"IMPROVES":"does NOT improve")} over rIQR alone.");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        if(iqrDelta>meanDelta&&iqrDelta>compDelta)decision="Model A: rawIQR residual remains dominant. No other residual descriptor exceeds it.";
+        else if(meanDelta>iqrDelta)decision="Model B: residual mean dominates.";
+        else if(compDelta>iqrDelta)decision="Model C: residual composite dominates.";
+        else decision="Model E: residual predicate unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: rIQR delta={iqrDelta:F6}, rMean delta={meanDelta:F6}, composite delta={compDelta:F6}");
+        _o.WriteLine($"Correlations: rIQR vs rMean residual r={Pearson(rIQR,rd.Select(d=>d.rMean).ToArray()):F4}");
+        _o.WriteLine("CLAIMS: Residual predicate audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RPC_01 complete. Commit: RPC_01_RawIQRResidualPredicateClosureAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================

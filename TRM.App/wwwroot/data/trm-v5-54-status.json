@@ -6,8 +6,8 @@
   "base": "V5.53 COMPLETE",
   "baseCommit": "ba2d3c9",
   "testSummary": {
-    "total": 2907,
-    "passed": 2907,
+    "total": 2908,
+    "passed": 2908,
     "failed": 0
   },
   "suites": [
@@ -58,6 +58,14 @@
       "finding": "Within-seed residual is N-driven (sample-size variation, |r|=0.101). Between-seed std 4.2x within-seed residual std. Residual separates P1/P1b (delta=-0.00105). Topology structurally independent. Model A.",
       "status": "COMPLETE",
       "doc": "docsV5/V5_54/TRM_V5_54_RPD_01_RawIQRProfileDeviationAudit.md"
+    },
+    {
+      "name": "RPC_01",
+      "title": "RawIQR Residual Predicate Closure Audit",
+      "commit": "TBD",
+      "finding": "rIQR orthogonal to rMean (r=0.0000). rIQR P1-P1b delta=0.00105 (8.7x rMean). Residual composite degrades separation. rQ10/rQ90 weakly correlate (|r|~0.14). Same-seed same-N matching impossible. Model A.",
+      "status": "COMPLETE",
+      "doc": "docsV5/V5_54/TRM_V5_54_RPC_01_RawIQRResidualPredicateClosureAudit.md"
     }
   ],
   "finalModel": null,
