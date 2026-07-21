@@ -71,14 +71,14 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine(new string('-',50));
         for(int q=0;q<4;q++){
             double lo=q/4.0,hi=(q+1)/4.0+(q==3?0.01:0);
-            var qd=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();
+            var qd=pd.Where(d=>d.Item3>=lo&&d.Item3<hi).ToArray();
             int qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b"),qr=qd.Count(d=>d.cls=="reject");
             _o.WriteLine($"{$"{lo*100:F0}-{hi*100:F0}%",-10} {qd.Length,6} {qp1,4} {qp1b,4} {qr,5} {(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0),7:F0}% {(qp1+qp1b)*100.0/qd.Length,7:F0}%");
         }
 
         // Monotonicity check
         var rates=new double[4];
-        for(int q=0;q<4;q++){double lo=q/4.0,hi=(q+1)/4.0+(q==3?0.01:0);var qd=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();rates[q]=qd.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/qd.Length;}
+        for(int q=0;q<4;q++){double lo=q/4.0,hi=(q+1)/4.0+(q==3?0.01:0);var qd=pd.Where(d=>d.Item3>=lo&&d.Item3<hi).ToArray();rates[q]=qd.Count(d=>d.cls=="P1"||d.cls=="P1b")*100.0/qd.Length;}
         bool monotonic=true;for(int q=1;q<4;q++)if(rates[q]>rates[q-1])monotonic=false;
         _o.WriteLine($"Retention monotonic (decreasing with rank): {(monotonic?"YES":"NO")}");
 
@@ -130,7 +130,7 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"\n=== PART F: Rank Sufficiency Audit ===");
         foreach(var lo in new[]{0.0,0.25,0.5}){
             double hi=lo+0.25+(lo>0.4?0.01:0);
-            var bin=pd.Where(d=>d.Item3>=lo&&d.rank<hi).ToArray();
+            var bin=pd.Where(d=>d.Item3>=lo&&d.Item3<hi).ToArray();
             var bp1=bin.Where(d=>d.cls=="P1").ToArray();var bp1b=bin.Where(d=>d.cls=="P1b").ToArray();
             double rd=Math.Abs(bp1.DefaultIfEmpty().Average(d=>d.Item4)-bp1b.DefaultIfEmpty().Average(d=>d.Item4));
             _o.WriteLine($"Rank [{lo:F2},{hi:F2}): n={bin.Length}, P1={bp1.Length}, P1b={bp1b.Length}, resid delta={rd:F5} {(rd>0.0005?"residual MATTERS":"residual negligible")}");
@@ -460,7 +460,7 @@ public class V5_56_RelativeGatePreference_Tests
         // ============================================================
         _o.WriteLine($"\n=== PART C: Model Comparison ===");
         // Model A: lowest rank → retained?
-        var rankSorted=nb.OrderBy(d=>d.rank).ToArray();
+        var rankSorted=nb.OrderBy(d=>d.Item3).ToArray();
         int lowestRank=nb.Where(d=>d.rank==0).Count(d=>d.isRetained);
         int totalLowest=nb.Count(d=>d.rank==0);
         _o.WriteLine($"Lowest-rank retained: {lowestRank}/{totalLowest} ({lowestRank*100.0/Math.Max(1,totalLowest):F0}%)");
@@ -469,7 +469,7 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"Most-central retained: {mostCentralRetained}/{mostCentralTotal} ({mostCentralRetained*100.0/Math.Max(1,mostCentralTotal):F0}%)");
 
         // Correlation: rank vs centrality
-        double rRC=Pearson(nb.Select(d=>d.rank).ToArray(),nb.Select(d=>d.centrality).ToArray());
+        double rRC=Pearson(nb.Select(d=>d.Item3).ToArray(),nb.Select(d=>d.centrality).ToArray());
         _o.WriteLine($"Rank vs centrality: r={rRC:F4}");
 
         // ============================================================
@@ -480,7 +480,7 @@ public class V5_56_RelativeGatePreference_Tests
         for(int sp=0;sp<50;sp++){
             var shuf=nb.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
             var s1=shuf.Take(h).ToArray();
-            double cR=Math.Abs(s1.Where(d=>d.isRetained).DefaultIfEmpty().Average(d=>d.rank)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.rank));
+            double cR=Math.Abs(s1.Where(d=>d.isRetained).DefaultIfEmpty().Average(d=>d.Item3)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item3));
             double cC=Math.Abs(s1.Where(d=>d.isRetained).DefaultIfEmpty().Average(d=>d.centrality)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.centrality));
             if(cC>cR*0.1)centWins++;else rankWins++;
         }
@@ -563,7 +563,7 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"\n=== PART B: Winner-Take-All Audit ===");
         int winnerRet=0,secondRet=0,thirdRet=0,seedsWith3=0,seedsWithAnyRet=0;
         foreach(var g in pd.GroupBy(d=>d.seed)){
-            var ordered=g.OrderBy(d=>d.rank).ToArray();if(ordered.Length<3)continue;seedsWith3++;
+            var ordered=g.OrderBy(d=>d.Item3).ToArray();if(ordered.Length<3)continue;seedsWith3++;
             if(ordered[0].cls!="reject")winnerRet++;
             if(ordered[1].cls!="reject")secondRet++;
             if(ordered[2].cls!="reject")thirdRet++;
@@ -586,7 +586,7 @@ public class V5_56_RelativeGatePreference_Tests
         // Gap = rank difference to nearest competitor in same seed
         var gapResults=new List<(double gap,string cls)>();
         foreach(var g in pd.GroupBy(d=>d.seed)){
-            var ordered=g.OrderBy(d=>d.rank).ToArray();if(ordered.Length<2)continue;
+            var ordered=g.OrderBy(d=>d.Item3).ToArray();if(ordered.Length<2)continue;
             for(int i=0;i<ordered.Length;i++){
                 double nearestGap=i==0?ordered[1].rank-ordered[0].rank:i==ordered.Length-1?ordered[i].rank-ordered[i-1].rank:Math.Min(ordered[i].rank-ordered[i-1].rank,ordered[i+1].rank-ordered[i].rank);
                 gapResults.Add((nearestGap,ordered[i].cls));
@@ -607,7 +607,7 @@ public class V5_56_RelativeGatePreference_Tests
             var bin=pd.Where(d=>Math.Abs(d.rank-rc)<0.01).ToArray();
             var bRet=bin.Where(d=>d.cls!="reject").ToArray();var bRej=bin.Where(d=>d.cls=="reject").ToArray();
             if(bRet.Length<1||bRej.Length<1)continue;
-            double rd=Math.Abs(bRet.DefaultIfEmpty().Average(d=>d.resid)-bRej.DefaultIfEmpty().Average(d=>d.resid));
+            double rd=Math.Abs(bRet.DefaultIfEmpty().Average(d=>d.Item5)-bRej.DefaultIfEmpty().Average(d=>d.Item5));
             double md=Math.Abs(bRet.DefaultIfEmpty().Average(d=>d.rmean)-bRej.DefaultIfEmpty().Average(d=>d.rmean));
             _o.WriteLine($"Rank={rc:F1}: n_ret={bRet.Length}, n_rej={bRej.Length}, resid delta={rd:F5}, rmean delta={md:F5}");
         }
@@ -617,8 +617,8 @@ public class V5_56_RelativeGatePreference_Tests
         // ============================================================
         _o.WriteLine($"\n=== PART E: Model Comparison ===");
         // Simple ranking by retention separation
-        double rankSep=Math.Abs(pd.Where(d=>d.cls!="reject").Average(d=>d.rank)-pd.Where(d=>d.cls=="reject").Average(d=>d.rank));
-        double residSep=Math.Abs(pd.Where(d=>d.cls!="reject").Average(d=>d.resid)-pd.Where(d=>d.cls=="reject").Average(d=>d.resid));
+        double rankSep=Math.Abs(pd.Where(d=>d.cls!="reject").Average(d=>d.Item3)-pd.Where(d=>d.cls=="reject").Average(d=>d.Item3));
+        double residSep=Math.Abs(pd.Where(d=>d.cls!="reject").Average(d=>d.Item5)-pd.Where(d=>d.cls=="reject").Average(d=>d.Item5));
         double winnerRate=winnerRet*100.0/Math.Max(1,seedsWith3);
         double runnerRate=secondRet*100.0/Math.Max(1,seedsWith3);
 
@@ -640,12 +640,12 @@ public class V5_56_RelativeGatePreference_Tests
             // Count local winners retained in this split
             int w=0,ttl=0;
             foreach(var g in s1.GroupBy(d=>d.seed)){
-                var o=g.OrderBy(d=>d.rank).ToArray();if(o.Length<3)continue;ttl++;
+                var o=g.OrderBy(d=>d.Item3).ToArray();if(o.Length<3)continue;ttl++;
                 if(o[0].cls!="reject")w++;
             }
             double wr=ttl>0?w*100.0/ttl:0;
             if(wr>5)winnerTop++;
-            double rSep=Math.Abs(s1.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.rank)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.rank));
+            double rSep=Math.Abs(s1.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.Item3)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item3));
             if(rSep>0.01)rankTop++;
         }
         _o.WriteLine($"Rank stable (>0.01 sep): {rankTop}/50. Winner stable (>5%): {winnerTop}/50");
@@ -676,6 +676,125 @@ public class V5_56_RelativeGatePreference_Tests
 
         _o.WriteLine($"\nCLAIMS: Gate structure audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== RGS_01 complete. Commit: RGS_01_RelativeGateStructureAudit ===");
+    }
+
+    [Fact]
+    public void RG0_01_RankZeroGateAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RG0_01: Rank-Zero Gate Audit ===");
+        _o.WriteLine("=== V5.56. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Rank0 gate or continuous preference? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo)));
+            seedIQRd.AddOrUpdate(s,Q(wo,0.75)-Q(wo,0.25),(_,v)=>v+Q(wo,0.75)-Q(wo,0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        var pipeBag=new ConcurrentBag<(int N,int seed,double rank,bool isRank0,double resid,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                string cls=sb==null?"reject":(sb.Value.cls=="P1"||sb.Value.cls=="P1b"?sb.Value.cls:"reject");
+                var p=allProf.FirstOrDefault(x=>x.N==n&&x.seed==s);
+                double rank=seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1;
+                pipeBag.Add((n,s,rank,rank<0.01,p.riqr-siQ.GetValueOrDefault(s,0),cls));
+            });});
+        var pd=pipeBag.ToArray();
+        var ret=pd.Where(d=>d.cls!="reject").ToArray();var rej=pd.Where(d=>d.cls=="reject").ToArray();
+        _o.WriteLine($"Retained={ret.Length}, Rejected={rej.Length}");
+
+        // ============================================================
+        // PART A+B — Binary vs continuous rank
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: Binary Rank0 vs Continuous Rank ===");
+        _o.WriteLine($"{"Predictor",-20} {"Ret mean",10} {"Rej mean",10} {"Delta",10} {"Effect(σ)",12}");
+        _o.WriteLine(new string('-',65));
+        double rankContSep=Math.Abs(ret.Average(d=>d.Item3)-rej.Average(d=>d.Item3));
+        double rank0RateRet=ret.Count(d=>d.Item4)*100.0/ret.Length;
+        double rank0RateRej=rej.Count(d=>d.Item4)*100.0/rej.Length;
+        double allStd=Sd(pd.Select(d=>d.Item3).ToArray());
+        double eff=allStd>0.001?rankContSep/allStd:0;
+        _o.WriteLine($"{"continuous rank",-20} {ret.Average(d=>d.Item3),10:F4} {rej.Average(d=>d.Item3),10:F4} {rankContSep,10:F4} {eff,12:F4}σ");
+        _o.WriteLine($"{"Rank0 indicator",-20} {rank0RateRet,10:F1}% {rank0RateRej,10:F1}% {Math.Abs(rank0RateRet-rank0RateRej),10:F1}%");
+
+        // Threshold search: test rank < t for t in {0.01, 0.26, 0.51, 0.76}
+        _o.WriteLine($"\nThreshold search:");
+        _o.WriteLine($"{"Thresh",8} {"Ret%",8} {"Rej%",8} {"Diff",8} {"OR",8}");
+        _o.WriteLine(new string('-',42));
+        foreach(var t in new[]{0.01,0.26,0.51,0.76}){
+            double rr=pd.Where(d=>d.Item3<t).Count(d=>d.cls!="reject")*100.0/Math.Max(1,pd.Count(d=>d.Item3<t));
+            double rj=pd.Where(d=>d.rank>=t).Count(d=>d.cls!="reject")*100.0/Math.Max(1,pd.Count(d=>d.rank>=t));
+            double oddsR=pd.Where(d=>d.Item3<t).Count(d=>d.cls!="reject")*1.0/Math.Max(1,pd.Where(d=>d.Item3<t).Count(d=>d.cls=="reject"));
+            double oddsJ=pd.Where(d=>d.rank>=t).Count(d=>d.cls!="reject")*1.0/Math.Max(1,pd.Where(d=>d.rank>=t).Count(d=>d.cls=="reject"));
+            _o.WriteLine($"{t,8:F2} {rr,8:F1}% {rj,8:F1}% {rr-rj,8:F1}% {oddsR/(oddsJ+0.01),8:F2}x");
+        }
+
+        // ============================================================
+        // PART C — Model comparison
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Model Comparison ===");
+        // Simple rank-based accuracy
+        int rank0Correct=pd.Count(d=>d.Item4&&d.cls!="reject")+pd.Count(d=>!d.Item4&&d.cls=="reject");
+        double medRank=pd.Select(d=>d.Item3).OrderBy(v=>v).ToArray()[pd.Length/2];
+        int contCorrect=pd.Count(d=>d.Item3<medRank&&d.cls!="reject")+pd.Count(d=>d.rank>=medRank&&d.cls=="reject");
+        _o.WriteLine($"Rank0 rule accuracy: {rank0Correct}/{pd.Length} ({rank0Correct*100.0/pd.Length:F1}%)");
+        _o.WriteLine($"Median-rank rule accuracy: {contCorrect}/{pd.Length} ({contCorrect*100.0/pd.Length:F1}%)");
+
+        // Rank0 + residual refinement
+        var r0=pd.Where(d=>d.Item4).ToArray();
+        double r0ResidSep=Math.Abs(r0.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.Item5)-r0.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.Item5));
+        _o.WriteLine($"Rank0 + residual: resid sep within Rank0={r0ResidSep:F5}");
+        _o.WriteLine($"Model ranking: Rank0 {(rank0Correct>contCorrect?"BEATS":"loses to")} continuous. Residual {(r0ResidSep>0.0005?"ADDS value":"adds nothing")}.");
+
+        // ============================================================
+        // PART D — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Robustness ===");
+        var rng2=new Random(42);int rank0Wins=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+            var s1=shuf.Take(h).ToArray();
+            double r0r=s1.Where(d=>d.Item4).Count(d=>d.cls!="reject")*100.0/Math.Max(1,s1.Count(d=>d.Item4));
+            double cr=s1.Where(d=>d.Item3<0.26).Count(d=>d.cls!="reject")*100.0/Math.Max(1,s1.Count(d=>d.Item3<0.26));
+            if(r0r>cr)rank0Wins++;
+        }
+        _o.WriteLine($"Rank0 beats continuous threshold in splits: {rank0Wins}/50");
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double rank0RetRate=ret.Count(d=>d.Item4)*100.0/ret.Length;
+        string decision;
+        if(rank0RetRate>60)decision="Model B: Rank0 gate. SAC specifically targets the lowest-rank profile.";
+        else if(rank0RetRate>40&&r0ResidSep>0.001)decision="Model C: Rank0 gate + residual refinement. Rank0 is primary filter; residual refines within Rank0.";
+        else if(rankContSep>0.05)decision="Model A: Continuous rank preference. SAC prefers lower ranks along a spectrum.";
+        else decision="Model D: Unresolved. Rank effect too weak to distinguish gate from spectrum.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: Rank0 ret%={rank0RetRate:F0}%, continuous sep={rankContSep:F4}, resid within-Rank0={r0ResidSep:F5}");
+        _o.WriteLine("CLAIMS: Rank0 gate audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RG0_01 complete. Commit: RG0_01_RankZeroGateAudit ===");
     }
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
