@@ -1,0 +1,17 @@
+{
+  "releaseStatus": "V5.56 INITIALIZED",
+  "phase": "Relative Gate Preference",
+  "date": "2026-07-21",
+  "branch": "feature/v5.56-relative-gate-preference",
+  "base": "V5.55 COMPLETE",
+  "baseCommit": "c5c7e88",
+  "testSummary": { "total": 2916, "passed": 2916, "failed": 0 },
+  "suites": [],
+  "finalModel": null,
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY",
+  "purpose": "Why does SAC prefer lower-ranked profiles within a seed?",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "recommendedFirstSuite": "RGP_01_RelativeGatePreferenceAudit"
+}
