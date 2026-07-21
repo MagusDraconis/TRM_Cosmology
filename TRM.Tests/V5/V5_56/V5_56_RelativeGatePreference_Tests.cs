@@ -504,6 +504,180 @@ public class V5_56_RelativeGatePreference_Tests
         _o.WriteLine($"\n=== NBR_01 complete. Commit: NBR_01_LocalReferenceAudit ===");
     }
 
+    [Fact]
+    public void RGS_01_RelativeGateStructureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RGS_01: Relative Gate Structure Audit ===");
+        _o.WriteLine("=== V5.56. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: What gate structure does SAC use? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=300;
+
+        var allProf=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+        var seedIQRd=new ConcurrentDictionary<int,double>();
+        Parallel.ForEach(Ns,n=>{Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[n];
+            for(int i=0;i<n;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            allProf.Add((n,s,Q(wo,0.75)-Q(wo,0.25),wo.Average(),wo[n/2],Sd(wo)));
+            seedIQRd.AddOrUpdate(s,Q(wo,0.75)-Q(wo,0.25),(_,v)=>v+Q(wo,0.75)-Q(wo,0.25));
+        });});
+        var siQ=seedIQRd.ToDictionary(kv=>kv.Key,kv=>kv.Value/Ns.Length);
+
+        var seedRanks=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        foreach(var g in allProf.GroupBy(p=>p.seed)){
+            var ordered=g.OrderBy(p=>p.riqr).Select((p,i)=>(p.N,i)).ToArray();if(ordered.Length<2)continue;
+            var d2=new ConcurrentDictionary<int,double>();foreach(var(n,i)in ordered)d2[n]=(double)i/(ordered.Length-1);
+            seedRanks[g.Key]=d2;
+        }
+
+        var pipeBag=new ConcurrentBag<(int N,int seed,double riqr,double resid,double rank,double rmean,double rmed,double rstd,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,seeds,s=>{
+                if(!IsHi(n,s))return;var sb=SelectAndClassify(n,s,hi);
+                string cls=sb==null?"reject":(sb.Value.cls=="P1"||sb.Value.cls=="P1b"?sb.Value.cls:"reject");
+                var p=allProf.FirstOrDefault(x=>x.N==n&&x.seed==s);
+                pipeBag.Add((n,s,p.riqr,p.riqr-siQ.GetValueOrDefault(s,0),seedRanks.GetValueOrDefault(s)?.GetValueOrDefault(n,-1)??-1,p.rmean,p.rmed,p.rstd,cls));
+            });});
+        var pd=pipeBag.ToArray();
+
+        // ============================================================
+        // PART A — Rank Occupancy
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Rank Occupancy ===");
+        _o.WriteLine($"{"Rank class",-12} {"Total",6} {"Retained",9} {"Ret%",7} {"P1",4} {"P1b",4} {"P1%",7}");
+        _o.WriteLine(new string('-',55));
+        // Exact rank classes from {0, 0.5, 1.0}
+        foreach(var rc in new[]{0.0,0.5,1.0}){
+            var qd=pd.Where(d=>Math.Abs(d.rank-rc)<0.01).ToArray();
+            int qr=qd.Count(d=>d.cls!="reject"),qp1=qd.Count(d=>d.cls=="P1"),qp1b=qd.Count(d=>d.cls=="P1b");
+            _o.WriteLine($"{$"rank={rc:F1}",-12} {qd.Length,6} {qr,9} {qr*100.0/qd.Length,7:F1}% {qp1,4} {qp1b,4} {(qp1+qp1b>0?qp1*100.0/(qp1+qp1b):0),7:F0}%");
+        }
+
+        // ============================================================
+        // PART B — Winner-Take-All
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Winner-Take-All Audit ===");
+        int winnerRet=0,secondRet=0,thirdRet=0,seedsWith3=0,seedsWithAnyRet=0;
+        foreach(var g in pd.GroupBy(d=>d.seed)){
+            var ordered=g.OrderBy(d=>d.rank).ToArray();if(ordered.Length<3)continue;seedsWith3++;
+            if(ordered[0].cls!="reject")winnerRet++;
+            if(ordered[1].cls!="reject")secondRet++;
+            if(ordered[2].cls!="reject")thirdRet++;
+            if(ordered.Any(d=>d.cls!="reject"))seedsWithAnyRet++;
+        }
+        _o.WriteLine($"Seeds with 3 IsHi-pass: {seedsWith3}");
+        _o.WriteLine($"Winner (rank=0) retained: {winnerRet}/{seedsWith3} ({winnerRet*100.0/seedsWith3:F0}%)");
+        _o.WriteLine($"Runner-up (rank=0.5) retained: {secondRet}/{seedsWith3} ({secondRet*100.0/seedsWith3:F0}%)");
+        _o.WriteLine($"Third (rank=1.0) retained: {thirdRet}/{seedsWith3} ({thirdRet*100.0/seedsWith3:F0}%)");
+
+        // Concentration: what share of retained profiles are winners?
+        int totalRet=pd.Count(d=>d.cls!="reject");
+        _o.WriteLine($"Retention concentration: winner share={winnerRet}/{totalRet} ({winnerRet*100.0/Math.Max(1,totalRet):F0}%)");
+        _o.WriteLine($"Winner-take-all: {(winnerRet>secondRet*2?"YES — winner dominates":"NO — retention is distributed")}");
+
+        // ============================================================
+        // PART C — Rank Gap Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Rank Gap Audit ===");
+        // Gap = rank difference to nearest competitor in same seed
+        var gapResults=new List<(double gap,string cls)>();
+        foreach(var g in pd.GroupBy(d=>d.seed)){
+            var ordered=g.OrderBy(d=>d.rank).ToArray();if(ordered.Length<2)continue;
+            for(int i=0;i<ordered.Length;i++){
+                double nearestGap=i==0?ordered[1].rank-ordered[0].rank:i==ordered.Length-1?ordered[i].rank-ordered[i-1].rank:Math.Min(ordered[i].rank-ordered[i-1].rank,ordered[i+1].rank-ordered[i].rank);
+                gapResults.Add((nearestGap,ordered[i].cls));
+            }
+        }
+        var gaps=gapResults.ToArray();
+        var retGaps=gaps.Where(d=>d.cls!="reject").Select(d=>d.gap).ToArray();
+        var rejGaps=gaps.Where(d=>d.cls=="reject").Select(d=>d.gap).ToArray();
+        _o.WriteLine($"Retained gap: mean={retGaps.DefaultIfEmpty(0).Average():F4}, median={retGaps.OrderBy(v=>v).DefaultIfEmpty(0).ToArray()[retGaps.Length/2]:F4}");
+        _o.WriteLine($"Rejected gap: mean={rejGaps.Average():F4}, median={rejGaps.OrderBy(v=>v).ToArray()[rejGaps.Length/2]:F4}");
+        _o.WriteLine($"Gap type: {(retGaps.Length>0&&rejGaps.Length>0&&retGaps.Average()<rejGaps.Average()?"TIGHT — retained have smaller competitive gaps":"WIDE — retained have larger competitive gaps")}");
+
+        // ============================================================
+        // PART D — Residual Within-Rank
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Residual Within-Rank Audit ===");
+        foreach(var rc in new[]{0.0,0.5,1.0}){
+            var bin=pd.Where(d=>Math.Abs(d.rank-rc)<0.01).ToArray();
+            var bRet=bin.Where(d=>d.cls!="reject").ToArray();var bRej=bin.Where(d=>d.cls=="reject").ToArray();
+            if(bRet.Length<1||bRej.Length<1)continue;
+            double rd=Math.Abs(bRet.DefaultIfEmpty().Average(d=>d.resid)-bRej.DefaultIfEmpty().Average(d=>d.resid));
+            double md=Math.Abs(bRet.DefaultIfEmpty().Average(d=>d.rmean)-bRej.DefaultIfEmpty().Average(d=>d.rmean));
+            _o.WriteLine($"Rank={rc:F1}: n_ret={bRet.Length}, n_rej={bRej.Length}, resid delta={rd:F5}, rmean delta={md:F5}");
+        }
+
+        // ============================================================
+        // PART E — Model Comparison
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Model Comparison ===");
+        // Simple ranking by retention separation
+        double rankSep=Math.Abs(pd.Where(d=>d.cls!="reject").Average(d=>d.rank)-pd.Where(d=>d.cls=="reject").Average(d=>d.rank));
+        double residSep=Math.Abs(pd.Where(d=>d.cls!="reject").Average(d=>d.resid)-pd.Where(d=>d.cls=="reject").Average(d=>d.resid));
+        double winnerRate=winnerRet*100.0/Math.Max(1,seedsWith3);
+        double runnerRate=secondRet*100.0/Math.Max(1,seedsWith3);
+
+        _o.WriteLine($"{"Model",-30} {"Metric",12} {"Value",10}");
+        _o.WriteLine(new string('-',55));
+        _o.WriteLine($"{"A: rank only",-30} {"rank sep",12} {rankSep,10:F4}");
+        _o.WriteLine($"{"B: rank + residual",-30} {"resid sep",12} {residSep,10:F5}");
+        _o.WriteLine($"{"C: winner-take-all",-30} {"winner%",12} {winnerRate,10:F0}%");
+        _o.WriteLine($"{"D: rank anomaly",-30} {"runner%",12} {runnerRate,10:F0}%");
+
+        // ============================================================
+        // PART F — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Robustness ===");
+        var rng2=new Random(42);int rankTop=0,winnerTop=0;
+        for(int sp=0;sp<50;sp++){
+            var shuf=pd.OrderBy(_=>rng2.NextDouble()).ToArray();int h=shuf.Length/2;
+            var s1=shuf.Take(h).ToArray();
+            // Count local winners retained in this split
+            int w=0,ttl=0;
+            foreach(var g in s1.GroupBy(d=>d.seed)){
+                var o=g.OrderBy(d=>d.rank).ToArray();if(o.Length<3)continue;ttl++;
+                if(o[0].cls!="reject")w++;
+            }
+            double wr=ttl>0?w*100.0/ttl:0;
+            if(wr>5)winnerTop++;
+            double rSep=Math.Abs(s1.Where(d=>d.cls!="reject").DefaultIfEmpty().Average(d=>d.rank)-s1.Where(d=>d.cls=="reject").DefaultIfEmpty().Average(d=>d.rank));
+            if(rSep>0.01)rankTop++;
+        }
+        _o.WriteLine($"Rank stable (>0.01 sep): {rankTop}/50. Winner stable (>5%): {winnerTop}/50");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        string decision;
+        if(winnerRate>20&&winnerRate>runnerRate*2)decision="Model A: SAC operates as lowest-rank selection. Winner-take-all dominates.";
+        else if(winnerRate>runnerRate&&rankSep>0.01)decision="Model B: SAC operates as lowest-rank selection with residual refinement.";
+        else if(winnerRate<10)decision="Model C: SAC does NOT operate as winner-take-all. Retention is sparse across all ranks.";
+        else decision="Model E: Gate structure unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: winner={winnerRate:F0}%, runner={runnerRate:F0}%, rankSep={rankSep:F4}, residSep={residSep:F5}");
+
+        // ============================================================
+        // PART H — Frontier Impact
+        // ============================================================
+        _o.WriteLine($"\n=== PART H: Frontier Impact ===");
+        _o.WriteLine($"GEO_01: Retained are NOT outliers (strengthens B — marginal selection).");
+        _o.WriteLine($"NBR_01: Retained are NOT centers (strengthens B — rank drives selection).");
+        _o.WriteLine($"RGS_01: Winner retention={winnerRate:F0}%, rankSep={rankSep:F4}.");
+        _o.WriteLine($"Overall: {(winnerRate>15?"Model B strengthened — rank-primary gate confirmed.":"Model B weakened — rank effect is marginal.")}");
+
+        _o.WriteLine($"\nCLAIMS: Gate structure audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RGS_01 complete. Commit: RGS_01_RelativeGateStructureAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
