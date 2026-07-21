@@ -473,14 +473,14 @@ public class V5_57_SACInternalDiscriminatorAudit_Tests
         _o.WriteLine($"\n=== PART F: Decision Model ===");
         _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
 
-        double d0Eff=eff(d0P,d0Pb,d0A);
+        double d0Eff=eff(d0P,d0Pb,d0A),riE=eff(riP,riPb,riA),d2E=eff(d2P,d2Pb,d2A);
         string result;
-        if(d0Eff>riEff*2&&d0Eff>0.5)result="Model B: d0 is the dominant structural variable. 1.74σ effect — directly drives SAC classification (thresholds at d0=0.50/0.65).";
-        else if(d0Eff>riEff)result="Model C: d0 strongest but residual rawIQR structure remains.";
+        if(d0Eff>riE*2&&d0Eff>0.5)result="Model B: d0 is the dominant structural variable. 1.74σ effect — directly drives SAC classification (thresholds at d0=0.50/0.65).";
+        else if(d0Eff>riE)result="Model C: d0 strongest but residual rawIQR structure remains.";
         else result="Model D: Unresolved.";
 
         _o.WriteLine($"Decision: {result}");
-        _o.WriteLine($"Evidence: d0={d0Eff:F3}σ, d2={d2Eff:F3}σ, rawIQR={riEff:F3}σ, after-d2={riAfterD2:F3}σ");
+        _o.WriteLine($"Evidence: d0={d0Eff:F3}σ, d2={d2E:F3}σ, rawIQR={riE:F3}σ, after-d2={riAfterD2:F3}σ");
         _o.WriteLine("CLAIMS: Structural variable audited. Diagnostic only. Not causal. V6 NOT READY.");
         _o.WriteLine($"\n=== SV_01 complete. Commit: SV_01_StructuralVariableAudit ===");
     }

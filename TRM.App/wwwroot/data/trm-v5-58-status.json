@@ -1,0 +1,16 @@
+{
+  "releaseStatus": "V5.58 INITIALIZED",
+  "phase": "d0 Generation Audit",
+  "date": "2026-07-21",
+  "branch": "feature/v5.58-d0-generation-audit",
+  "base": "V5.57 COMPLETE",
+  "baseCommit": "6aa026f",
+  "testSummary": { "total": 2928, "passed": 2928, "failed": 0 },
+  "suites": [],
+  "finalModel": null,
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY",
+  "purpose": "Is d0 genuinely structural or another shadow signal hiding a deeper origin?",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "unchanged", "c3OmegaShiftThreshold": 0.1 }
+}
