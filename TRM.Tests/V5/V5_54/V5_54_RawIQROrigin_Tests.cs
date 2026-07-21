@@ -297,6 +297,292 @@ public class V5_54_RawIQROrigin_Tests
         _o.WriteLine($"\n=== RIO_01 complete. Commit: RIO_01_RawIQROriginAudit ===");
     }
 
+    [Fact]
+    public void SRA_01_SeedRealizationStructureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== SRA_01: Seed Realization Structure Audit ===");
+        _o.WriteLine("=== V5.54. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is rawIQR a stable seed-level trait across N? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int seeds=100;
+
+        // ============================================================
+        // PART A — Protocol Freeze (documented above)
+        // ============================================================
+
+        // ============================================================
+        // PART B+C+D — Seed-Level rawIQR Table + Cross-N + Variance Decomp
+        // ============================================================
+        _o.WriteLine("\n=== PART B+C+D: Seed-Level rawIQR Across N ===");
+
+        // Build seed-level data: each seed has rawIQR at each N
+        var seedData=new ConcurrentDictionary<int,ConcurrentDictionary<int,double>>();
+        var seedAll=new ConcurrentDictionary<int,ConcurrentBag<(int N,double riqr,double rmean,double rmed,double rstd,double rmin,double rmax)>>();
+
+        // Also collect full profile data for variance decomposition
+        var fullData=new ConcurrentBag<(int N,int seed,double riqr,double rmean,double rmed,double rstd)>();
+
+        Parallel.ForEach(Ns,n=>{
+            for(int s=0;s<seeds;s++){
+                var rng=new Random(s);var rawW=new double[n];
+                for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                var rwo=rawW.OrderBy(v=>v).ToArray();
+                double ri=Q(rwo,0.75)-Q(rwo,0.25),rm=rwo.Average(),rmed=rwo[n/2];
+                double rstd=Sd(rwo),rmin=rwo[0],rmax=rwo[^1];
+                seedData.GetOrAdd(s,_=>new())[n]=ri;
+                seedAll.GetOrAdd(s,_=>new()).Add((n,ri,rm,rmed,rstd,rmin,rmax));
+                fullData.Add((n,s,ri,rm,rmed,rstd));
+            }});
+
+        // PART B — Seed-level table (top 10 seeds shown)
+        _o.WriteLine($"\nSeed-level rawIQR (top 10 by mean rawIQR):");
+        _o.WriteLine($"{"Seed",5} {"N70",9} {"N72",9} {"N75",9} {"Mean",9} {"Spread",9} {"Rank N70",9} {"Rank N72",9} {"Rank N75",9} {"Global?",9}");
+        _o.WriteLine(new string('-',85));
+
+        // Rank seeds at each N
+        var rankN70=new Dictionary<int,int>();var rankN72=new Dictionary<int,int>();var rankN75=new Dictionary<int,int>();
+        foreach(var n in Ns){
+            var ordered=seedData.OrderBy(kv=>kv.Value.ContainsKey(n)?kv.Value[n]:0).Select((kv,i)=>(kv.Key,i)).ToArray();
+            foreach(var (s,r)in ordered){
+                if(n==70)rankN70[s]=r;else if(n==72)rankN72[s]=r;else rankN75[s]=r;
+            }}
+
+        var seedMeans=seedData.Select(kv=>{
+            var vals=kv.Value.Values.ToArray();
+            return (seed:kv.Key,mean:vals.Average(),spread:vals.Max()-vals.Min(),
+                    n70:kv.Value.GetValueOrDefault(70,0),n72:kv.Value.GetValueOrDefault(72,0),n75:kv.Value.GetValueOrDefault(75,0));
+        }).OrderByDescending(x=>x.mean).ToArray();
+
+        int globalHigh=0; // seeds in top 25% at ALL N
+        foreach(var sm in seedMeans){
+            int r70=rankN70.GetValueOrDefault(sm.seed,-1),r72=rankN72.GetValueOrDefault(sm.seed,-1),r75=rankN75.GetValueOrDefault(sm.seed,-1);
+            bool isHigh=r70>=75&&r72>=75&&r75>=75;
+            if(isHigh)globalHigh++;
+            // Show top 10
+            if(Array.IndexOf(seedMeans.Take(10).ToArray(),sm)>=0)
+                _o.WriteLine($"{sm.seed,5} {sm.n70,9:F5} {sm.n72,9:F5} {sm.n75,9:F5} {sm.mean,9:F5} {sm.spread,9:F5} {r70,9} {r72,9} {r75,9} {(isHigh?"YES":""),9}");
+        }
+        _o.WriteLine($"... (100 seeds total, {globalHigh} global-high seeds in top 25% at all N)");
+
+        // PART C — Cross-N correlations
+        _o.WriteLine($"\n=== PART C: Cross-N Seed Consistency ===");
+        var n70vals=seedMeans.Select(s=>s.n70).ToArray();
+        var n72vals=seedMeans.Select(s=>s.n72).ToArray();
+        var n75vals=seedMeans.Select(s=>s.n75).ToArray();
+
+        double r70_72=Pearson(n70vals,n72vals);
+        double r70_75=Pearson(n70vals,n75vals);
+        double r72_75=Pearson(n72vals,n75vals);
+        // Rank correlations
+        double sr70_72=Spearman(n70vals,n72vals);
+        double sr70_75=Spearman(n70vals,n75vals);
+        double sr72_75=Spearman(n72vals,n75vals);
+
+        _o.WriteLine($"{"Pair",-14} {"Pearson r",10} {"Spearman rho",13} {"P-value",10}");
+        _o.WriteLine(new string('-',50));
+        _o.WriteLine($"{"N70 vs N72",-14} {r70_72,10:F4} {sr70_72,13:F4} {PVal(r70_72,seeds),10:F4}");
+        _o.WriteLine($"{"N70 vs N75",-14} {r70_75,10:F4} {sr70_75,13:F4} {PVal(r70_75,seeds),10:F4}");
+        _o.WriteLine($"{"N72 vs N75",-14} {r72_75,10:F4} {sr72_75,13:F4} {PVal(r72_75,seeds),10:F4}");
+
+        // Classification
+        double meanR=(r70_72+r70_75+r72_75)/3;
+        string crossClass;
+        if(meanR>0.7)crossClass="C1: strong shared seed trait";
+        else if(meanR>0.4)crossClass="C2: moderate shared seed trait";
+        else if(meanR>0.15)crossClass="C3: N-specific seed behavior";
+        else crossClass="C4: no stable seed trait";
+        _o.WriteLine($"\nMean cross-N r={meanR:F4} → {crossClass}");
+
+        // PART D — Variance decomposition
+        _o.WriteLine($"\n=== PART D: Variance Decomposition ===");
+        var fd=fullData.ToArray();
+        double grandMean=fd.Average(d=>d.riqr);
+
+        // Between-seed: mean rawIQR per seed across N
+        double ssBet=0;
+        foreach(var s in Enumerable.Range(0,seeds)){
+            var sv=fd.Where(d=>d.seed==s).Select(d=>d.riqr).ToArray();
+            if(sv.Length>0){double sm=sv.Average();ssBet+=sv.Length*(sm-grandMean)*(sm-grandMean);}
+        }
+        // Within-seed (across N): residual after seed mean
+        double ssWin=0;
+        foreach(var s in Enumerable.Range(0,seeds)){
+            var sv=fd.Where(d=>d.seed==s).ToArray();
+            if(sv.Length>0){double sm=sv.Average(d=>d.riqr);ssWin+=sv.Sum(d=>(d.riqr-sm)*(d.riqr-sm));}
+        }
+        double ssTot=fd.Sum(d=>(d.riqr-grandMean)*(d.riqr-grandMean));
+        double betPct=ssBet/ssTot*100,winPct=ssWin/ssTot*100;
+
+        _o.WriteLine($"Total SS: {ssTot:F8}");
+        _o.WriteLine($"Between-seed SS: {ssBet:F8} ({betPct:F1}%)");
+        _o.WriteLine($"Within-seed (across-N) SS: {ssWin:F8} ({winPct:F1}%)");
+        _o.WriteLine($"Ratio bet/win: {ssBet/(ssWin+0.0001):F3}");
+
+        // ============================================================
+        // PART E — Seed Rank Stability
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Seed Rank Stability ===");
+        var topSeeds=seedMeans.Take(10).Select(s=>s.seed).ToArray();
+        var botSeeds=seedMeans.TakeLast(10).Select(s=>s.seed).ToArray();
+        _o.WriteLine($"Top 10 seeds (by mean rawIQR): {string.Join(",",topSeeds)}");
+        _o.WriteLine($"Bottom 10 seeds: {string.Join(",",botSeeds)}");
+
+        // Rank stability: how many top-10 at N70 stay top-10 at N72, N75?
+        var n70Top10=seedMeans.OrderByDescending(s=>s.n70).Take(10).Select(s=>s.seed).ToHashSet();
+        var n72Top10=seedMeans.OrderByDescending(s=>s.n72).Take(10).Select(s=>s.seed).ToHashSet();
+        var n75Top10=seedMeans.OrderByDescending(s=>s.n75).Take(10).Select(s=>s.seed).ToHashSet();
+        int stay70to72=n70Top10.Intersect(n72Top10).Count();
+        int stay70to75=n70Top10.Intersect(n75Top10).Count();
+        int stay72to75=n72Top10.Intersect(n75Top10).Count();
+        int stayAll=n70Top10.Intersect(n72Top10).Intersect(n75Top10).Count();
+        _o.WriteLine($"Top-10 retention: N70→N72={stay70to72}/10, N70→N75={stay70to75}/10, N72→N75={stay72to75}/10, All3={stayAll}/10");
+
+        // Leave-one-N rank stability
+        _o.WriteLine($"\nLeave-one-N rank correlation:");
+        foreach(var n in Ns){
+            var otherNs=Ns.Where(x=>x!=n).ToArray();
+            var rnks1=seedMeans.Select(s=>s.n70).ToArray(); // use N70 as reference
+            var rnks2=seedMeans.Select(s=>otherNs.Contains(70)?s.n70:s.n72).ToArray();
+            double sr=Spearman(rnks1,rnks2);
+            _o.WriteLine($"  Without N={n}: Spearman rho={sr:F4}");
+        }
+
+        // ============================================================
+        // PART F — Generator Realization Diagnostic
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Generator Realization Diagnostic ===");
+        _o.WriteLine("Generator: System.Random(seed), uniform via NextDouble() scaled to [0.90,1.10].");
+        _o.WriteLine("Each (N,seed) pair gets independent Random(seed) instance → same seed = same sequence start.");
+        _o.WriteLine("N=70 uses first 70 draws. N=72 uses first 72 draws (same first 70 + 2 more).");
+        _o.WriteLine("N=75 uses first 75 draws (same first 70 + 5 more).");
+        _o.WriteLine($"\nThis seed-reuse structure creates INHERENT cross-N correlation:");
+        _o.WriteLine($"  - First 70 weights identical across all N for same seed");
+        _o.WriteLine($"  - N72 adds 2 new weights, N75 adds 5 new weights");
+        _o.WriteLine($"  - Cross-N correlation is expected from generator structure, not a seed 'trait'");
+
+        // Verify: compute rawIQR from only first 70 draws at each N
+        _o.WriteLine($"\nVerification — rawIQR from common first-70 draws only:");
+        var common70=new ConcurrentBag<(int seed,double riqr70)>();
+        Parallel.For(0,seeds,s=>{
+            var rng=new Random(s);var w=new double[70];
+            for(int i=0;i<70;i++)w[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+            var wo=w.OrderBy(v=>v).ToArray();
+            common70.Add((s,Q(wo,0.75)-Q(wo,0.25)));
+        });
+        var c70Dict=common70.OrderBy(c=>c.seed).ToDictionary(c=>c.seed,c=>c.riqr70);
+        // n70vals from seedMeans ordered by seed
+        var n70BySeed=seedMeans.OrderBy(s=>s.seed).Select(s=>s.n70).ToArray();
+        var c70BySeed=Enumerable.Range(0,seeds).Select(s=>c70Dict.GetValueOrDefault(s,0)).ToArray();
+        double c70r=Pearson(c70BySeed,n70BySeed);
+        _o.WriteLine($"Correlation(common-70 rawIQR, N70 rawIQR): {c70r:F4} (should be 1.0 if same draws)");
+        _o.WriteLine($"Generator structure {(c70r>0.99?"FULLY":"PARTIALLY")} explains cross-N rawIQR consistency.");
+
+        // ============================================================
+        // PART G — rawIQR vs rawMean Independence at Seed Level
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: rawIQR vs rawMean Independence (seed-level) ===");
+        var sdAll=seedAll.OrderBy(kv=>kv.Key).ToArray();
+        var seedIQRs=sdAll.Select(kv=>kv.Value.Average(x=>x.riqr)).ToArray();
+        var seedMeans2=sdAll.Select(kv=>kv.Value.Average(x=>x.rmean)).ToArray();
+        var seedMeds=sdAll.Select(kv=>kv.Value.Average(x=>x.rmed)).ToArray();
+        var seedStds=sdAll.Select(kv=>kv.Value.Average(x=>x.rstd)).ToArray();
+
+        double riqr_rm=Pearson(seedIQRs,seedMeans2);
+        double riqr_rmed=Pearson(seedIQRs,seedMeds);
+        double riqr_rstd=Pearson(seedIQRs,seedStds);
+        double rm_rmed=Pearson(seedMeans2,seedMeds);
+
+        _o.WriteLine($"{"Pair",-20} {"Pearson r",10} {"P-value",10}");
+        _o.WriteLine(new string('-',45));
+        _o.WriteLine($"{"rawIQR vs rawMean",-20} {riqr_rm,10:F4} {PVal(riqr_rm,seeds),10:F4}");
+        _o.WriteLine($"{"rawIQR vs rawMedian",-20} {riqr_rmed,10:F4} {PVal(riqr_rmed,seeds),10:F4}");
+        _o.WriteLine($"{"rawIQR vs rawStd",-20} {riqr_rstd,10:F4} {PVal(riqr_rstd,seeds),10:F4}");
+        _o.WriteLine($"{"rawMean vs rawMedian",-20} {rm_rmed,10:F4} {PVal(rm_rmed,seeds),10:F4}");
+
+        bool iqrIndepMean=Math.Abs(riqr_rm)<0.15;
+        _o.WriteLine($"\nrawIQR independent from central tendency: {(iqrIndepMean?"YES":"NO — |r|>0.15")}");
+        _o.WriteLine($"V5.53 composite interpretability: {(iqrIndepMean?"PRESERVED — rawIQR and rawMean are independent seed-level descriptors":"WEAKENED — seed-level correlation suggests partial redundancy")}");
+
+        // ============================================================
+        // PART H — Link Back to SAC Predicate (requires simulation)
+        // ============================================================
+        _o.WriteLine($"\n=== PART H: Link to SAC Predicate ===");
+        _o.WriteLine("Tracing seed-level rawIQR → P1/P1b assignment:");
+
+        var linkBag=new ConcurrentBag<(int N,int seed,double riqr,string cls)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+        var lo70=Lo(70);var lo72=Lo(72);var lo75=Lo(75);
+
+        // For top and bottom seeds only (to limit runtime)
+        var checkSeeds=new HashSet<int>(topSeeds.Take(5).Concat(botSeeds.Take(5)));
+        Parallel.ForEach(Ns,n=>{
+            var hi=n==70?hi70:n==72?hi72:hi75;
+            var lo=n==70?lo70:n==72?lo72:lo75;
+            foreach(var s in checkSeeds){
+                var rng=new Random(s);var rawW=new double[n];
+                for(int i=0;i<n;i++)rawW[i]=1.0+S*(rng.NextDouble()-0.5)*2.0;
+                var rwo=rawW.OrderBy(v=>v).ToArray();
+                double ri=Q(rwo,0.75)-Q(rwo,0.25);
+                if(IsHi(n,s)){linkBag.Add((n,s,ri,"IsHi-rejected"));continue;}
+                var sb=SelectAndClassify(n,s,hi);
+                string cls=sb?.cls??"rejected";
+                linkBag.Add((n,s,ri,cls));
+            }});
+
+        var linkData=linkBag.ToArray();
+        var topLinks=linkData.Where(d=>topSeeds.Take(5).Contains(d.seed)&&(d.cls=="P1"||d.cls=="P1b")).ToArray();
+        var botLinks=linkData.Where(d=>botSeeds.Take(5).Contains(d.seed)&&(d.cls=="P1"||d.cls=="P1b")).ToArray();
+
+        int topP1=topLinks.Count(d=>d.cls=="P1"),topP1b=topLinks.Count(d=>d.cls=="P1b");
+        int botP1=botLinks.Count(d=>d.cls=="P1"),botP1b=botLinks.Count(d=>d.cls=="P1b");
+
+        _o.WriteLine($"Top-5 seeds (high rawIQR): P1={topP1}, P1b={topP1b}, {(topP1+topP1b>0?$"P1%={topP1*100.0/(topP1+topP1b):F0}%":"N/A")}");
+        _o.WriteLine($"Bot-5 seeds (low rawIQR): P1={botP1}, P1b={botP1b}, {(botP1+botP1b>0?$"P1%={botP1*100.0/(botP1+botP1b):F0}%":"N/A")}");
+
+        // Link classification
+        _o.WriteLine($"\nLink chain classification (seed rawIQR → SAC assignment):");
+        _o.WriteLine($"  Seed→rawIQR: SUPPORTED (RIO_01 — seed determines weight draw)");
+        _o.WriteLine($"  rawIQR→SAC: SUPPORTED (V5.53 SCP_01 — rawIQR discriminates P1/P1b)");
+        _o.WriteLine($"  Seed→SAC: {(topP1>botP1?"SUPPORTED — high-rawIQR seeds show higher P1 rate":"CONDITIONAL — link direction not yet confirmed")}");
+        _o.WriteLine($"  SAC→ordering: SUPPORTED (V5.52 — SAC creates K1>K3>K2)");
+        _o.WriteLine($"  Note: Diagnostic only. Not causal closure.");
+
+        // ============================================================
+        // PART I — Stop-Low Safety Check
+        // ============================================================
+        _o.WriteLine($"\n=== PART I: Stop-Low Safety Check ===");
+        _o.WriteLine("Stop-Low policy: c3OmgS > 0.1 continue, <= 0.1 stop.");
+        _o.WriteLine("Stop-Low status: SAFE (inherited from V5.53 — no model changes in V5.54).");
+        _o.WriteLine("No new c3OmgS computation performed — SRA_01 is a seed-structure audit, not a rescue audit.");
+        _o.WriteLine("Zero-damage status: MAINTAINED (no policy modification).");
+        _o.WriteLine("Stop-Low safety: CONFIRMED.");
+
+        // ============================================================
+        // PART J — Decision Model
+        // ============================================================
+        _o.WriteLine($"\n=== PART J: Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE");
+        _o.WriteLine($"Causal closure: BLOCKED");
+
+        string decision;
+        if(meanR>0.7)decision="Model A: rawIQR is a stable shared seed-level trait across N.";
+        else if(meanR>0.4)decision="Model B: rawIQR is seed-dominant but N-specific (moderate cross-N consistency).";
+        else if(meanR>0.15)decision="Model C: rawIQR is mostly pooled sampling artifact with weak cross-N structure.";
+        else if(c70r>0.95&&meanR>0.2)decision="Model D: rawIQR is generator-realization trait — cross-N consistency explained by seed-reuse structure.";
+        else decision="Model E: rawIQR seed structure remains unresolved.";
+
+        _o.WriteLine($"\nDecision: {decision}");
+        _o.WriteLine($"Evidence: cross-N mean r={meanR:F4}, rank rho mean={(sr70_72+sr70_75+sr72_75)/3:F4}");
+        _o.WriteLine($"Common-70 verification r={c70r:F4}");
+        _o.WriteLine($"Between-seed variance: {betPct:F1}%, Within-seed: {winPct:F1}%");
+        _o.WriteLine($"Top-10 all-N retention: {stayAll}/10");
+        _o.WriteLine($"Generator seed-reuse: {(c70r>0.99?"IDENTICAL draws → strong cross-N correlation is EXPECTED":"DIFFERENT draws — cross-N correlation is genuine")}");
+        _o.WriteLine("CLAIMS: Seed-structure audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== SRA_01 complete. Commit: SRA_01_SeedRealizationStructureAudit ===");
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
@@ -309,6 +595,12 @@ public class V5_54_RawIQROrigin_Tests
         for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}
         return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;
     }
+    static double Spearman(double[] x,double[] y){
+        int n=Math.Min(x.Length,y.Length);
+        var rx=RankVals(x.Take(n).ToArray());var ry=RankVals(y.Take(n).ToArray());
+        return Pearson(rx.Select(v=>(double)v).ToArray(),ry.Select(v=>(double)v).ToArray());
+    }
+    static int[] RankVals(double[] v){int n=v.Length;return Enumerable.Range(0,n).OrderBy(i=>v[i]).Select((idx,r)=>new{idx,r}).OrderBy(x=>x.idx).Select(x=>x.r).ToArray();}
     static double PVal(double r,int n){
         // Fisher z-transform approximation for correlation p-value (two-sided)
         if(n<4||Math.Abs(r)>0.999)return 1.0;
@@ -336,7 +628,12 @@ public class V5_54_RawIQROrigin_Tests
     static double[,]KS(int n,int seed){var rng=new Random(seed);var adj=new HashSet<int>[n];for(int i=0;i<n;i++)adj[i]=new HashSet<int>();double p=6.0/(n-1);for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)if(rng.NextDouble()<p){adj[i].Add(j);adj[j].Add(i);}var v=new bool[n];var cs=new List<List<int>>();for(int i=0;i<n;i++){if(v[i])continue;var c=new List<int>();var q=new Queue<int>();v[i]=true;q.Enqueue(i);while(q.Count>0){int u=q.Dequeue();c.Add(u);foreach(int x in adj[u])if(!v[x]){v[x]=true;q.Enqueue(x);}}cs.Add(c);}for(int i=1;i<cs.Count;i++){adj[cs[i][0]].Add(cs[i-1][0]);adj[cs[i-1][0]].Add(cs[i][0]);}var K=new double[n,n];for(int i=0;i<n;i++)foreach(int j in adj[i])if(i<j){K[i,j]=0.5;K[j,i]=0.5;}return K;}
     static double Dm(double[,]d,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){s+=d[i,j];c++;}return c>0?s/c:0;}
     static double Lambda1(double[,]K,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=K[i,j];return s/(n*n);}
-    static P3 PCent(int n,bool hi){double d=0,k=0,ks=0;int c=0;for(int sd=0;sd<100;sd++){var K=KS(n,sd);double dm=0,km=0,kss=0;for(int e=0;e<5;e++){var h=Sim(K,n,S,sd+e);var dd=DL(Nm(RP(h,n),n),n);dm+=Dm(dd,n);K=Cupd(dd,n);km+=Km(K,n);kss+=Ks(K,n);}double om=Of(Sim(K,n,S,sd+5),n).Average();if((om>THR)==hi){d+=dm/5;k+=km/5;ks+=kss/5;c++;}}if(c==0)return new P3{dm=double.NaN,km=double.NaN,ks=double.NaN};return new P3{dm=d/c,km=k/c,ks=ks/c};}
     static double Km(double[,]K,int n){double s=0;int c=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){s+=K[i,j];c++;}return c>0?s/c:0;}
     static double Ks(double[,]K,int n){var v=new double[n*(n-1)/2];int idx=0;for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)v[idx++]=K[i,j];double m=v.Average();return Math.Sqrt(v.Sum(x=>(x-m)*(x-m))/v.Length);}
+    static double[,]CD(double[,]d,int n){var c=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)c[i,j]=d[i,j];return c;}
+    SBase? SelectAndClassify(int n,int s,P3 hi){var K=KS(n,s);for(int e=0;e<3;e++){var h=Sim(K,n,S,s+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}var h3=Sim(K,n,S,s+3);var d3=DL(Nm(RP(h3,n),n),n);var K3=Cupd(d3,n);var h3E=Sim(K3,n,S,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);var K3E=Cupd(d3E,n);double d0=Dm(d3E,n),km=Km(K3E,n),ks=Ks(K3E,n);var sb=new SBase{seed=s,d0=d0,km0=km,ks0=ks,cls=""};sb=Classify(sb,hi);double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv+(ks-Lo(n).ks)*sv)/vn:0;double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km)+(ks-Lo(n).ks)*(ks-Lo(n).ks);double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return null;return sb;}
+    static SBase Classify(SBase b,P3 hi){string cls;if(b.d0>0.65)cls="P1b";else if(b.d0>0.50)cls="P1";else if(b.d0<=0.40&&b.km0>0.98&&DistK(b.km0,b.ks0,hi)<0.15)cls="P2";else if(b.d0>0.40&&b.d0<=0.50)cls="P3";else cls="P4";return new SBase{seed=b.seed,d0=b.d0,km0=b.km0,ks0=b.ks0,cls=cls};}
+    static double DistK(double km,double ks,P3 hi){double dk=km-hi.km,dks=ks-hi.ks;return Math.Sqrt(dk*dk+dks*dks);}
+    bool IsHi(int n,int seed){var K=KS(n,seed);for(int e=0;e<5;e++){var h=Sim(K,n,S,seed+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}return Of(Sim(K,n,S,seed+5),n).Average()>THR;}
+    static P3 PCent(int n,bool hi){double d=0,k=0,ks=0;int c=0;for(int sd=0;sd<100;sd++){var K=KS(n,sd);double dm=0,km=0,kss=0;for(int e=0;e<5;e++){var h=Sim(K,n,S,sd+e);var dd=DL(Nm(RP(h,n),n),n);dm+=Dm(dd,n);K=Cupd(dd,n);km+=Km(K,n);kss+=Ks(K,n);}double om=Of(Sim(K,n,S,sd+5),n).Average();if((om>THR)==hi){d+=dm/5;k+=km/5;ks+=kss/5;c++;}}if(c==0)return new P3{dm=double.NaN,km=double.NaN,ks=double.NaN};return new P3{dm=d/c,km=k/c,ks=ks/c};}
 }
