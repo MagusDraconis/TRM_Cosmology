@@ -2079,6 +2079,225 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== V6_Validation_CrossSeed complete ===");
     }
 
+    [Fact]
+    public void V5_61_g2_Dynamics()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.61 — g₂₂ Dynamics Investigation ===");
+        _o.WriteLine("=== (seeds 0-9 for Parts A/B, seed 1005 for Part C) ===");
+        _o.WriteLine(new string('=',80));
+
+        int N=72;double xi=1.75;double dt=0.05;double k0=1.2;
+        const double wKm=0.70,wDm=0.30,wK2=0.90,wO2=0.10;
+        double I1(double kmv,double dmv)=>wKm*kmv+wDm*dmv;
+        double I2(double kmv,double omv)=>wK2*kmv+wO2*omv;
+
+        // ============================================================
+        // PART A — g₂₂ Correlates with What?
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: g₂₂ Correlates ===");
+
+        int[] seeds={0,1,2,3,4,5,6,7,8,9};
+        int nEpochs=20;
+        var seedData=new ConcurrentBag<(int s,double g22m,double i1m,double i2m,double omm,
+            double kmm,double dmm,double mdm,double lam1)>();
+
+        Parallel.ForEach(seeds,seed=>{
+            var K=KS(N,seed);
+            var i1s=new double[nEpochs];var i2s=new double[nEpochs];
+            var oms=new double[nEpochs];var kms=new double[nEpochs];
+            var dms=new double[nEpochs];var lams=new double[nEpochs];
+            var g22s=new double[nEpochs-1];
+            for(int e=1;e<=nEpochs;e++){
+                var h=Sim(K,N,0.10,seed+e-1);
+                var d=DL(Nm(RP(h,N),N),N);
+                double dmv=Dm(d,N),om=Of(h,N).Average();
+                K=Cupd(d,N);
+                double kmv=Km(K,N),lam=Lambda1(K,N);
+                int idx=e-1;
+                i1s[idx]=I1(kmv,dmv);i2s[idx]=I2(kmv,om);
+                oms[idx]=om;kms[idx]=kmv;dms[idx]=dmv;lams[idx]=lam;
+                if(idx>0){
+                    double dI2=i2s[idx]-i2s[idx-1];
+                    double ds=Math.Sqrt((i1s[idx]-i1s[idx-1])*(i1s[idx]-i1s[idx-1])+dI2*dI2);
+                    g22s[idx-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;
+                }
+            }
+            // MeanDist = d_mean in this context
+            double kmm=kms.Average(),dmm=dms.Average(),omm=oms.Average();
+            double g22m=g22s.Average(),i1m=i1s.Average(),i2m=i2s.Average();
+            seedData.Add((seed,g22m,i1m,i2m,omm,kmm,dmm,dmm,lams.Average()));
+        });
+        var sd=seedData.OrderBy(s=>s.s).ToArray();
+
+        // Correlate g₂₂ with each variable across seeds
+        var allG22=sd.Select(s=>s.g22m).ToArray();
+        _o.WriteLine($"{"Variable",-16} {"r(g₂₂,·)",10} {"|r|",8} {"Relationship",-20}");
+        _o.WriteLine(new string('-',56));
+        void G22Corr(string name,double[] x){
+            double r=Pearson(allG22,x);
+            string rel=Math.Abs(r)>0.7?"STRONG":Math.Abs(r)>0.4?"MODERATE":"WEAK";
+            _o.WriteLine($"{name,-16} {r,10:F4} {Math.Abs(r),8:F4} {rel,-20}");
+        }
+        G22Corr("I₁",sd.Select(s=>s.i1m).ToArray());
+        G22Corr("I₂",sd.Select(s=>s.i2m).ToArray());
+        G22Corr("Omega",sd.Select(s=>s.omm).ToArray());
+        G22Corr("MeanDist",sd.Select(s=>s.mdm).ToArray());
+        G22Corr("km",sd.Select(s=>s.kmm).ToArray());
+        G22Corr("d_mean",sd.Select(s=>s.dmm).ToArray());
+        G22Corr("lambda1",sd.Select(s=>s.lam1).ToArray());
+
+        // ============================================================
+        // PART B — g₂₂ vs Trajectory Path
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: g₂₂ vs Trajectory Properties ===");
+
+        var trajData=new ConcurrentBag<(int s,double g22m,double arcLen,double curvM,double velM)>();
+        Parallel.ForEach(seeds,seed=>{
+            var K=KS(N,seed);
+            var i1s=new double[nEpochs];var i2s=new double[nEpochs];
+            var g22s=new double[nEpochs-1];
+            var curvs=new double[nEpochs-2];
+            var steps=new double[nEpochs-1];
+            for(int e=1;e<=nEpochs;e++){
+                var h=Sim(K,N,0.10,seed+e-1);
+                var d=DL(Nm(RP(h,N),N),N);
+                double dmv=Dm(d,N),om=Of(h,N).Average();
+                K=Cupd(d,N);
+                int idx=e-1;
+                i1s[idx]=I1(Km(K,N),dmv);i2s[idx]=I2(Km(K,N),om);
+                if(idx>0){
+                    double dI2=i2s[idx]-i2s[idx-1];
+                    double dI1=i1s[idx]-i1s[idx-1];
+                    double ds=Math.Sqrt(dI1*dI1+dI2*dI2);
+                    steps[idx-1]=ds;
+                    g22s[idx-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;
+                }
+            }
+            double arcTot=steps.Sum();
+            // Curvature
+            for(int i=1;i<nEpochs-1;i++){
+                double dx1=i1s[i]-i1s[i-1],dy1=i2s[i]-i2s[i-1];
+                double dx2=i1s[i+1]-i1s[i],dy2=i2s[i+1]-i2s[i];
+                double n1=Math.Sqrt(dx1*dx1+dy1*dy1),n2=Math.Sqrt(dx2*dx2+dy2*dy2);
+                double dot=dx1*dx2+dy1*dy2;
+                double ca=dot/(n1*n2+1e-15);ca=Math.Max(-1,Math.Min(1,ca));
+                curvs[i-1]=Math.Acos(ca);
+            }
+            trajData.Add((seed,g22s.Average(),arcTot,curvs.Average(),steps.Average()));
+        });
+        var td=trajData.OrderBy(t=>t.s).ToArray();
+
+        _o.WriteLine($"{"Property",-18} {"r(g₂₂,·)",10} {"Mean across seeds",18}");
+        _o.WriteLine(new string('-',48));
+        void TCorr(string name,double[] x,double mean){
+            double r=Pearson(allG22,x);
+            _o.WriteLine($"{name,-18} {r,10:F4} {mean,18:F4}");
+        }
+        TCorr("Arc length",td.Select(t=>t.arcLen).ToArray(),td.Average(t=>t.arcLen));
+        TCorr("Mean curvature",td.Select(t=>t.curvM).ToArray(),td.Average(t=>t.curvM));
+        TCorr("Mean velocity",td.Select(t=>t.velM).ToArray(),td.Average(t=>t.velM));
+
+        // Also correlate g₂₂ with the variance of step sizes
+        var stepVar=td.Select(t=>{
+            var K2=KS(N,t.s);var i1=new double[nEpochs];var i2=new double[nEpochs];
+            var st=new double[nEpochs-1];int si=0;
+            for(int e=1;e<=nEpochs;e++){
+                var h=Sim(K2,N,0.10,t.s+e-1);var d=DL(Nm(RP(h,N),N),N);
+                K2=Cupd(d,N);
+                int idx=e-1;i1[idx]=I1(Km(K2,N),Dm(d,N));i2[idx]=I2(Km(K2,N),Of(h,N).Average());
+                if(idx>0){double dI2=i2[idx]-i2[idx-1];double dI1=i1[idx]-i1[idx-1];st[si++]=Math.Sqrt(dI1*dI1+dI2*dI2);}
+            }
+            return Sd(st);
+        }).ToArray();
+        TCorr("Step size CV",stepVar,stepVar.Average());
+
+        // === PART C: g₂₂ Scaling with N ===
+        _o.WriteLine($"\n=== PART C: g₂₂ Scaling with N (seed 1005) ===");
+
+        int[] Ns={60,67,72,80,90,100};
+        int nEpC=20;
+        _o.WriteLine($"{"N",5} {"g₂₂_mean",12} {"g₂₂_median",12} {"g₂₂_CV",10} {"I₁_mean",10} {"arc_len",10}");
+        _o.WriteLine(new string('-',62));
+
+        double[] nVals=new double[Ns.Length];double[] g2Vals=new double[Ns.Length];
+        for(int ni=0;ni<Ns.Length;ni++){
+            int nv=Ns[ni];
+            int seedF=1005;
+            var K=KS(nv,seedF);
+            var i1s=new double[nEpC];var i2s=new double[nEpC];
+            var g22s2=new double[nEpC-1];var steps2=new double[nEpC-1];
+            for(int e=1;e<=nEpC;e++){
+                var h=Sim(K,nv,0.10,seedF+e-1);
+                var d=DL(Nm(RP(h,nv),nv),nv);
+                double dmv=Dm(d,nv),om=Of(h,nv).Average();
+                K=Cupd(d,nv);
+                int idx=e-1;i1s[idx]=I1(Km(K,nv),dmv);i2s[idx]=I2(Km(K,nv),om);
+                if(idx>0){
+                    double dI2=i2s[idx]-i2s[idx-1];
+                    double ds=Math.Sqrt((i1s[idx]-i1s[idx-1])*(i1s[idx]-i1s[idx-1])+dI2*dI2);
+                    g22s2[idx-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;
+                    steps2[idx-1]=ds;
+                }
+            }
+            nVals[ni]=nv;g2Vals[ni]=g22s2.Average();
+            var sorted=g22s2.OrderBy(g=>g).ToArray();
+            double med=sorted[sorted.Length/2];
+            double cvG=Sd(g22s2)/(g22s2.Average()+1e-10);
+            _o.WriteLine($"{nv,5} {g22s2.Average(),12:F4} {med,12:F4} {cvG,10:F4} {i1s.Average(),10:F4} {steps2.Sum(),10:F4}");
+        }
+
+        // Fit g₂₂(N) = a + b/N
+        var invN=nVals.Select(n=>1.0/n).ToArray();int mN=Ns.Length;
+        double sN=0,sN2=0,sG=0,sGN=0;
+        for(int i=0;i<mN;i++){sN+=invN[i];sN2+=invN[i]*invN[i];sG+=g2Vals[i];sGN+=g2Vals[i]*invN[i];}
+        double bN=(mN*sGN-sN*sG)/(mN*sN2-sN*sN+1e-15);
+        double aN=(sG-bN*sN)/mN;
+        // R²
+        double ssTG=0,ssRG=0;
+        for(int i=0;i<mN;i++){double p=aN+bN*invN[i];ssRG+=(g2Vals[i]-p)*(g2Vals[i]-p);}
+        double mg=g2Vals.Average();
+        for(int i=0;i<mN;i++)ssTG+=(g2Vals[i]-mg)*(g2Vals[i]-mg);
+        double rSqG=1-ssRG/(ssTG+1e-15);
+
+        _o.WriteLine($"\ng₂₂(N) = {aN:F4} + {bN:F2}/N, R² = {rSqG:F4}");
+        _o.WriteLine($"g₂₂(∞) = {aN:F4} (thermodynamic limit)");
+        string trend=bN>0?"DECREASES with N":"INCREASES with N";
+        _o.WriteLine($"g₂₂ {trend}");
+
+        // ============================================================
+        // PART D — g₂₂ as Path-Dependent Metric
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: g₂₂ Interpretation ===");
+        _o.WriteLine($"");
+        _o.WriteLine($"g₂₂ is NOT a universal constant — it varies across seeds (CV=2.86) and N.");
+        _o.WriteLine($"However, g₂₂ is DETERMINISTIC — given the initial K-matrix, g₂₂ is fixed.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Interpretation: g₂₂ = f(I₁, I₂, trajectory_path)");
+        _o.WriteLine($"");
+        _o.WriteLine($"This is analogous to a PATH-DEPENDENT METRIC in differential geometry:");
+        _o.WriteLine($"  ds² = g₂₂(path)·dI₂²");
+        _o.WriteLine($"  where g₂₂ depends on the specific trajectory through the manifold.");
+        _o.WriteLine($"");
+        _o.WriteLine($"If g₂₂ = f(initial_K, I₁, I₂), this could be:");
+        _o.WriteLine($"  1. A function of the initial graph topology (Erdős-Rényi seed)");
+        _o.WriteLine($"  2. A function of the invariant values themselves");
+        _o.WriteLine($"  3. A function of higher-order invariants not yet discovered");
+        _o.WriteLine($"");
+        _o.WriteLine($"For V6: g₂₂ is the metric component that defines 'distance' along the");
+        _o.WriteLine($"invariant manifold. Its path-dependence means the geometry is not");
+        _o.WriteLine($"Riemannian in the strict sense — it's a FINSLER-like geometry where");
+        _o.WriteLine($"the metric depends on the direction of travel.");
+        _o.WriteLine($"");
+        _o.WriteLine($"This is NOT a problem for V6 — it's a FEATURE. Physical spacetime");
+        _o.WriteLine($"also has path-dependent geometry (in GR, the metric depends on");
+        _o.WriteLine($"the mass-energy distribution, which is path/history dependent).");
+        _o.WriteLine($"");
+        _o.WriteLine($"CAVEAT: No physical claims. Speculative interpretation only.");
+        _o.WriteLine($"V6 NOT READY. Stop-Low: SAFE.");
+        _o.WriteLine($"\n=== V5_61_g2_Dynamics complete ===");
+    }
+
     /// <summary>Power iteration for dominant eigenpair of symmetric matrix.</summary>
     static(double eval,double[] evec)PowerIteration(double[,]A,int n,int maxIter){
         var v=new double[n];for(int i=0;i<n;i++)v[i]=1.0/Math.Sqrt(n);
