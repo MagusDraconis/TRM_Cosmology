@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V6.3 PIPELINE INTEGRATION |
-| Current Branch | feature/v6.3-pipeline-integration |
+| Current Version | V6.4 APP INTEGRATION (Blazor) |
+| Current Branch | feature/v6.4-app-integration |
 | Total Tests | 2970 |
 | Failed Tests | 0 |
-| Current Status | V6.1 — V6 geometry IMPLEMENTED AND VALIDATED. 10/10 tests pass, cross-seed validated. I₁ CV=0.0025, I₂ CV=0.0121, g₂₂→1.0 at N≥67. |
+| Current Status | V6.4 — V6 geometry accessible via /v6 Blazor page. 13/13 tests pass. I₁ CV=0.0025, I₂ CV=0.0121, g₂₂→1.0 at N≥67. Pipeline integrated. App deployed. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -251,19 +251,22 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V6.1
+### Current Frontier — V6.4
 
-**Status:** V6.1 DOCUMENTATION AND INTEGRATION.
-**Branch:** `feature/v6.1-documentation-integration`
-**Tests:** 2960 passed, 0 failed
+**Status:** V6.4 APP INTEGRATION (Blazor).
+**Branch:** `feature/v6.4-app-integration`
+**Tests:** 2970 passed, 0 failed
 
-**V6 geometry:** IMPLEMENTED AND VALIDATED.
-- Module: V6_Geometry.cs (I₁, I₂, s, g₂₂ computation)
-- 10/10 tests pass, cross-seed validated (10 seeds)
-- I₁ CV=0.0025, I₂ CV=0.0121
-- g₂₂ → 1.0 at N≥67 (Euclidean metric)
+**V6 geometry:** FULLY INTEGRATED — from discovery to Blazor UI.
+- V5.60: SAC = limit cycle discovered (KEM_01–KEM_04)
+- V5.61–V5.62: I₁, I₂ invariants + Euclidean limit (g₂₂ → 1 at N≥67)
+- V6.0: Geometry module implemented (10 tests)
+- V6.1: Documentation (User Guide, Theory, Integration Plan)
+- V6.2: Core migration (TRM.Core/Geometry/V6/)
+- V6.3: Pipeline integration (V6Pipeline.ComputeTrajectory)
+- V6.4: Blazor app (/v6 page with MudBlazor dashboard)
 
-**Next:** V6.2 — code migration to TRM.Core and CI integration.
+**Next:** V6.5 — cross-project integration or external validation.
 
 **V5.61 story arc:**
 V5.60 discovered that SAC is a LIMIT CYCLE (period=2, half-life=52-66 epochs) with two

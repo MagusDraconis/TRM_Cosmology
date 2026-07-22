@@ -1408,11 +1408,38 @@ ordering through P1 composition.
 
 **Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
-### V6.1 — Documentation and Integration — IN PROGRESS
+### V6.4 — Blazor App Integration — COMPLETE
 
-**Status:** DOCUMENTATION AND INTEGRATION (2026-07-22).
-**Key deliverables:** User Guide, Theory Document, Integration Plan, API documentation,
-project status updates, status JSON.
+**Status:** COMPLETE (2026-07-22).
+**Branch:** feature/v6.4-app-integration.
+
+**Key deliverables:**
+- V6GeometryService: server-side V6 computation for Blazor UI
+- /v6 page: MudBlazor dashboard (I₁, I₂, g₂₂, ε, arc length)
+- V6TrajectoryModel: POCO for UI data binding
+- NavMenu updated with "V6 Geometry" link
+
+### V6.3 — Pipeline Integration — COMPLETE
+
+**Status:** COMPLETE (2026-07-22). 3 pipeline tests, 13 total V6.
+**Branch:** feature/v6.3-pipeline-integration.
+
+**Key deliverables:**
+- V6Pipeline.ComputeTrajectory(): feed SAC data → V6Trajectory
+- V6Trajectory: summary stats + CSV/JSON export
+- 3 pipeline tests (V6_30–V6_32): all pass
+
+### V6.2 — Core Migration — COMPLETE
+
+**Status:** COMPLETE (2026-07-22).
+**Branch:** feature/v6.2-core-migration.
+
+**Key deliverables:**
+- V6Geometry moved to TRM.Core/Geometry/V6/
+- Namespace: TRM.Core.Geometry.V6
+- All 10 V6 tests pass after migration
+
+### V6.1 — Documentation and Integration — COMPLETE
 
 ### V6.0 — Geometry Implementation — COMPLETE
 
@@ -1465,7 +1492,7 @@ project status updates, status JSON.
 | SAC fixed point | ❌ FALSIFIED (limit cycle) |
 | Causal closure | ❌ BLOCKED (V5.40-41) |
 
-**V6 readiness:** NOT ACHIEVED. Stop-Low: SAFE. 2940 tests, 0 failed.
+**V6 readiness:** IMPLEMENTED AND VALIDATED. Stop-Low: SAFE.
 
 **Final synthesis:** `docsV5/V5_60/TRM_V5_60_Final_Synthesis.md`
 
@@ -1518,9 +1545,11 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2970 tests, 0 failed. V6.3 PIPELINE INTEGRATION.
-Current branch: `feature/v6.3-pipeline-integration`.
-V6Pipeline: V6Trajectory with CSV/JSON export. 13/13 V6 tests pass. V6: PIPELINE INTEGRATED.
+**Current status:** 2970 tests, 0 failed. V6.4 APP INTEGRATION (Blazor).
+Current branch: `feature/v6.4-app-integration`.
+Preferred model: M3++ with Stop-Low (unchanged — V5 operational).
+V6: IMPLEMENTED AND VALIDATED — accessible at /v6.
+V6Pipeline: V6Trajectory with CSV/JSON export. 13/13 V6 tests pass.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
