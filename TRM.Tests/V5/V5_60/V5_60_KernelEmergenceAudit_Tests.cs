@@ -1136,6 +1136,279 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== LCM_01 complete. Commit: LCM_01_LimitCycleMechanism ===");
     }
 
+    [Fact]
+    public void LCM_02_LimitCycleGeometry()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 LCM_02 — Limit Cycle Geometry ===");
+        _o.WriteLine("=== (seed 1005, no classification) ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;double xi=1.75;double dt=0.05;double k0=1.2;
+        int nEpochs=20;
+
+        // Collect 5D state vectors across epochs
+        // State: [km, d_mean, lambda1, Omega, MeanDist]
+        // d_mean computed from d-matrix after DL (before Cupd)
+        // Omega computed from final simulation phases
+        var states=new double[nEpochs+1][]; // state[0]=pre-epoch, state[e]=after epoch e
+        var Kcur=KS(N,seed);
+        states[0]=new double[]{Km(Kcur,N),0,0,0,0}; // epoch 0 has no d/Omega
+
+        for(int e=1;e<=nEpochs;e++){
+            var h=Sim(Kcur,N,0.10,seed+e-1);
+            var d=DL(Nm(RP(h,N),N),N);
+            double dm=Dm(d,N);
+            double omega=Of(h,N).Average();
+            double md=dm; // MeanDist = d_mean after DL
+            Kcur=Cupd(d,N);
+            double km=Km(Kcur,N);
+            double lam1=Lambda1(Kcur,N);
+            states[e]=new double[]{km,dm,lam1,omega,md};
+        }
+
+        // ============================================================
+        // PART A — Phase-Space Trajectory (PCA)
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Phase-Space Trajectory (20 epochs, N={N}) ===");
+
+        // Use states[1..nEpochs] for PCA (skip epoch 0 which lacks d/Omega)
+        int nPts=nEpochs;
+        var data=new double[nPts][];
+        for(int i=0;i<nPts;i++)data[i]=(double[])states[i+1].Clone();
+
+        // Variable labels
+        string[] varNames={"km","d_mean","lambda1","Omega","MeanDist"};
+
+        // Center data
+        var means=new double[5];
+        for(int v=0;v<5;v++){double s=0;for(int i=0;i<nPts;i++)s+=data[i][v];means[v]=s/nPts;}
+        var centered=new double[nPts][];
+        for(int i=0;i<nPts;i++){centered[i]=new double[5];for(int v=0;v<5;v++)centered[i][v]=data[i][v]-means[v];}
+
+        // Compute covariance matrix (5x5)
+        var cov=new double[5,5];
+        for(int i=0;i<5;i++)for(int j=i;j<5;j++){
+            double s=0;for(int p=0;p<nPts;p++)s+=centered[p][i]*centered[p][j];
+            cov[i,j]=cov[j,i]=s/(nPts-1);
+        }
+
+        // Power iteration for top 2 eigenvectors
+        var(eigVal1,eigVec1)=PowerIteration(cov,5,200);
+        // Deflate for second eigenvector
+        var covDeflated=new double[5,5];
+        for(int i=0;i<5;i++)for(int j=0;j<5;j++)
+            covDeflated[i,j]=cov[i,j]-eigVal1*eigVec1[i]*eigVec1[j];
+        var(eigVal2,eigVec2)=PowerIteration(covDeflated,5,200);
+
+        double totalVar=0;for(int i=0;i<5;i++)totalVar+=cov[i,i];
+        double pc1Var=eigVal1/totalVar*100;
+        double pc2Var=eigVal2/totalVar*100;
+        _o.WriteLine($"Total variance: {totalVar:F6}");
+        _o.WriteLine($"PC1: eigenvalue={eigVal1:F6}, explains {pc1Var:F1}% of variance");
+        _o.WriteLine($"PC2: eigenvalue={eigVal2:F6}, explains {pc2Var:F1}% of variance");
+        _o.WriteLine($"PC1+PC2: {pc1Var+pc2Var:F1}%");
+
+        // PCA loadings
+        _o.WriteLine($"\nPCA Loadings:");
+        _o.WriteLine($"{"Variable",-12} {"PC1",10} {"PC2",10}");
+        _o.WriteLine(new string('-',34));
+        for(int v=0;v<5;v++)
+            _o.WriteLine($"{varNames[v],-12} {eigVec1[v],10:F4} {eigVec2[v],10:F4}");
+
+        // Project data onto PC1 and PC2
+        _o.WriteLine($"\n{"Epoch",-8} {"PC1",10} {"PC2",10} {"km",10} {"d_mean",10} {"Omega",10}");
+        _o.WriteLine(new string('-',58));
+        var pc1Proj=new double[nPts];var pc2Proj=new double[nPts];
+        for(int i=0;i<nPts;i++){
+            pc1Proj[i]=Dot(centered[i],eigVec1);
+            pc2Proj[i]=Dot(centered[i],eigVec2);
+            int ep=i+1;
+            _o.WriteLine($"{ep,-8} {pc1Proj[i],10:F4} {pc2Proj[i],10:F4} {data[i][0],10:F4} {data[i][1],10:F4} {data[i][3],10:F4}");
+        }
+
+        // Trajectory shape analysis
+        // Compute distance from centroid
+        var distFromCenter=new double[nPts];
+        for(int i=0;i<nPts;i++)distFromCenter[i]=Math.Sqrt(pc1Proj[i]*pc1Proj[i]+pc2Proj[i]*pc2Proj[i]);
+        double meanDist=distFromCenter.Average();
+        double cvDist=Sd(distFromCenter)/meanDist;
+
+        _o.WriteLine($"\nTrajectory shape in PC1-PC2 plane:");
+        _o.WriteLine($"Mean distance from center: {meanDist:F4}");
+        _o.WriteLine($"CV of distance from center: {cvDist:F4} ({(cvDist<0.2?"CIRCULAR":"non-circular")})");
+
+        // Check if points form a loop (return to starting region)
+        double returnDist=Math.Sqrt(
+            (pc1Proj[0]-pc1Proj[nPts-1])*(pc1Proj[0]-pc1Proj[nPts-1])+
+            (pc2Proj[0]-pc2Proj[nPts-1])*(pc2Proj[0]-pc2Proj[nPts-1]));
+        _o.WriteLine($"Distance between epoch 1 and epoch {nEpochs}: {returnDist:F4}");
+
+        // ============================================================
+        // PART B — Limit Cycle Metric
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Limit Cycle Metric ===");
+
+        // Arc length and curvature in 5D state space
+        _o.WriteLine($"{"Epoch",-8} {"Step length",12} {"Cumul arc",12} {"Curvature",12} {"Tangent angle Δ",14}");
+        _o.WriteLine(new string('-',62));
+
+        double cumulArc=0;
+        var tangents=new double[nPts-1][]; // tangent vectors between consecutive points
+        for(int i=0;i<nPts-1;i++){
+            var diff=new double[5];double stepLen=0;
+            for(int v=0;v<5;v++){diff[v]=data[i+1][v]-data[i][v];stepLen+=diff[v]*diff[v];}
+            stepLen=Math.Sqrt(stepLen);
+            cumulArc+=stepLen;
+            tangents[i]=new double[5];
+            if(stepLen>1e-12)for(int v=0;v<5;v++)tangents[i][v]=diff[v]/stepLen;
+
+            // Curvature: angle between consecutive tangent vectors
+            double curv=0;
+            if(i>0&&stepLen>1e-12){
+                double dotT=0,normT1=0,normT2=0;
+                for(int v=0;v<5;v++){
+                    dotT+=tangents[i][v]*tangents[i-1][v];
+                    normT1+=tangents[i][v]*tangents[i][v];
+                    normT2+=tangents[i-1][v]*tangents[i-1][v];
+                }
+                double cosAngle=dotT/(Math.Sqrt(normT1*normT2)+1e-15);
+                cosAngle=Math.Max(-1,Math.Min(1,cosAngle));
+                curv=Math.Acos(cosAngle);
+            }
+            _o.WriteLine($"{i+1,-8} {stepLen,12:F6} {cumulArc,12:F6} {curv,12:F6} {(curv/Math.PI*180),13:F1}°");
+        }
+
+        _o.WriteLine($"\nTotal arc length (20 epochs): {cumulArc:F6}");
+        double meanCurv=0;int nCurv=0;
+        for(int i=1;i<nPts-1;i++){
+            if(i>0){
+                double dotT=0,n1=0,n2=0;
+                for(int v=0;v<5;v++){dotT+=tangents[i][v]*tangents[i-1][v];n1+=tangents[i][v]*tangents[i][v];n2+=tangents[i-1][v]*tangents[i-1][v];}
+                double ca=dotT/(Math.Sqrt(n1*n2)+1e-15);ca=Math.Max(-1,Math.Min(1,ca));
+                meanCurv+=Math.Acos(ca);nCurv++;
+            }
+        }
+        meanCurv/=nCurv;
+        double curvPi=meanCurv/Math.PI;
+        _o.WriteLine($"Mean curvature: {meanCurv:F4} rad ({curvPi*180:F1}° ≈ {curvPi:F2}π)");
+        string shape=curvPi>0.85?"near-U-turn (≈π, strong alternation)"
+            :curvPi>0.4?"moderate bending"
+            :"nearly straight segments";
+        _o.WriteLine($"Shape: {shape}");
+
+        // ============================================================
+        // PART C — Invariant on the Limit Cycle
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Invariant on the Limit Cycle ===");
+
+        // Test candidates: combinations of state variables
+        // State: [km, d_mean, lambda1, Omega, MeanDist]
+        var candidates=new List<(string name,Func<double[],double> compute)>();
+        candidates.Add(("km",s=>s[0]));
+        candidates.Add(("d_mean",s=>s[1]));
+        candidates.Add(("lambda1",s=>s[2]));
+        candidates.Add(("Omega",s=>s[3]));
+        candidates.Add(("MeanDist",s=>s[4]));
+        candidates.Add(("km+d_mean",s=>s[0]+s[1]));
+        candidates.Add(("km*d_mean",s=>s[0]*s[1]));
+        candidates.Add(("km*lambda1",s=>s[0]*s[2]));
+        candidates.Add(("km/Omega",s=>s[3]>0.01?s[0]/s[3]:0));
+        candidates.Add(("Omega/MeanDist",s=>s[4]>0.01?s[3]/s[4]:0));
+        candidates.Add(("Omega*MeanDist",s=>s[3]*s[4]));
+        candidates.Add(("km+Omega",s=>s[0]+s[3]));
+        candidates.Add(("km-d_mean",s=>s[0]-s[1]));
+        candidates.Add(("d_mean/lambda1",s=>s[2]>0.01?s[1]/s[2]:0));
+        candidates.Add(("km*Omega",s=>s[0]*s[3]));
+        candidates.Add(("km/(d_mean+eps)",s=>s[1]>0.01?s[0]/s[1]:0));
+
+        // Compute each candidate across all state points
+        var candVals=new Dictionary<string,double[]>();
+        foreach(var(name,f)in candidates){
+            var vals=new double[nPts];
+            for(int i=0;i<nPts;i++)vals[i]=f(data[i]);
+            candVals[name]=vals;
+        }
+
+        // Compute CV for each
+        _o.WriteLine($"{"Candidate",-18} {"Mean",12} {"Std",12} {"CV",10} {"Invariant?",12}");
+        _o.WriteLine(new string('-',66));
+        var results=new List<(string name,double cv,double mean,double std)>();
+        foreach(var(name,_)in candidates){
+            var vals=candVals[name];
+            double m=vals.Average();double s=Sd(vals);
+            double cv=m>0.001?s/Math.Abs(m):s;
+            bool invariant=cv<0.1;
+            results.Add((name,cv,m,s));
+            _o.WriteLine($"{name,-18} {m,12:F4} {s,12:F4} {cv,10:F4} {(invariant?"YES":"no"),12}");
+        }
+
+        // Best candidate
+        var best=results.OrderBy(r=>r.cv).First();
+        _o.WriteLine($"\nBest invariant candidate: {best.name} (CV={best.cv:F4})");
+
+        // Test weighted linear combinations via simple grid search
+        _o.WriteLine($"\n--- Grid search: w·km + (1-w)·d_mean ---");
+        double bestW=0,bestCvW=double.MaxValue;
+        for(int wi=0;wi<=20;wi++){
+            double w=wi/20.0;
+            var vals=new double[nPts];
+            for(int i=0;i<nPts;i++)vals[i]=w*data[i][0]+(1-w)*data[i][1];
+            double m=vals.Average();double s=Sd(vals);
+            double cv=m>0.001?s/Math.Abs(m):s;
+            if(cv<bestCvW){bestCvW=cv;bestW=w;}
+            if(wi%5==0)_o.WriteLine($"  w={w:F2}: mean={m:F4}, CV={cv:F4}");
+        }
+        _o.WriteLine($"Best: w={bestW:F2}, CV={bestCvW:F4}");
+
+        // Test w·km + (1-w)·lambda1
+        _o.WriteLine($"\n--- Grid search: w·km + (1-w)·lambda1 ---");
+        double bestW2=0,bestCvW2=double.MaxValue;
+        for(int wi=0;wi<=20;wi++){
+            double w=wi/20.0;
+            var vals=new double[nPts];
+            for(int i=0;i<nPts;i++)vals[i]=w*data[i][0]+(1-w)*data[i][2];
+            double m=vals.Average();double s=Sd(vals);
+            double cv=m>0.001?s/Math.Abs(m):s;
+            if(cv<bestCvW2){bestCvW2=cv;bestW2=w;}
+            if(wi%5==0)_o.WriteLine($"  w={w:F2}: mean={m:F4}, CV={cv:F4}");
+        }
+        _o.WriteLine($"Best: w={bestW2:F2}, CV={bestCvW2:F4}");
+
+        // Summary
+        _o.WriteLine($"\n=== LCM_02 Summary ===");
+        _o.WriteLine($"PCA: PC1+PC2 explain {pc1Var+pc2Var:F1}% variance. PC1 dominated by km, PC2 by Omega.");
+        _o.WriteLine($"Trajectory: {(cvDist<0.2?"CIRCULAR":"NON-CIRCULAR")} in PC1-PC2 plane (CV={cvDist:F3}).");
+        _o.WriteLine($"Curvature: {curvPi:F2}π per step. Shape: {shape}.");
+        _o.WriteLine($"Best invariant: {best.name} (CV={best.cv:F4}).");
+        if(bestCvW<best.cv)_o.WriteLine($"Grid search found better: w={bestW:F2}·km+(1-w)·d_mean (CV={bestCvW:F4}).");
+        _o.WriteLine($"Stop-Low: SAFE. V6 NOT READY.");
+        _o.WriteLine($"\n=== LCM_02 complete. Commit: LCM_02_LimitCycleGeometry ===");
+    }
+
+    /// <summary>Power iteration for dominant eigenpair of symmetric matrix.</summary>
+    static(double eval,double[] evec)PowerIteration(double[,]A,int n,int maxIter){
+        var v=new double[n];for(int i=0;i<n;i++)v[i]=1.0/Math.Sqrt(n);
+        double eval=0;
+        for(int iter=0;iter<maxIter;iter++){
+            // A·v
+            var Av=new double[n];
+            for(int i=0;i<n;i++){double s=0;for(int j=0;j<n;j++)s+=A[i,j]*v[j];Av[i]=s;}
+            // Rayleigh quotient
+            double rq=0,norm=0;
+            for(int i=0;i<n;i++){rq+=v[i]*Av[i];norm+=v[i]*v[i];}
+            eval=rq/norm;
+            // Normalize
+            double nAv=0;for(int i=0;i<n;i++)nAv+=Av[i]*Av[i];
+            nAv=Math.Sqrt(nAv);
+            if(nAv<1e-15)break;
+            for(int i=0;i<n;i++)v[i]=Av[i]/nAv;
+        }
+        return(eval,v);
+    }
+
+    static double Dot(double[]a,double[]b){double s=0;for(int i=0;i<a.Length;i++)s+=a[i]*b[i];return s;}
+
     /// <summary>Frobenius norm of matrix difference divided by N(N-1)/2 (mean squared diff per pair).</summary>
     static double FrobeniusDist(double[,]A,double[,]B,int n){
         double sum=0;int count=0;
