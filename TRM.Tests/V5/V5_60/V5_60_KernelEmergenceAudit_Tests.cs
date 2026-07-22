@@ -626,6 +626,89 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"=== KEM_02 complete. Commit: KEM_02_KernelEmergenceDepth ===");
     }
 
+    [Fact]
+    public void KEM_03_ParameterSweep()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 KEM_03 — Parameter Sweep ===");
+        _o.WriteLine("=== (seed 1005, no classification) ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int n72=72;
+        int[] Ns={60,65,67,70,72,75,80,90,100};
+        double[] Xis={1.0,1.25,1.5,1.75,2.0,2.25,2.5};
+        double[] Dts={0.01,0.025,0.05,0.075,0.10};
+
+        // ============================================================
+        // PART A — Xi Sweep
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Xi Sweep (N=72, seed=1005) ===");
+        _o.WriteLine($"{"Xi",6} {"km1",8} {"km2",8} {"km3",8} {"km4",8} {"km5",8} {"Δ(km)",8} {"Stable?",8}");
+        _o.WriteLine(new string('-',70));
+
+        foreach(var xi in Xis){
+            var K=KS(n72,seed);
+            double[] kms=new double[6];kms[0]=Km(K,n72);
+            for(int e=1;e<=5;e++){
+                var h=SimDt(K,n72,0.10,seed+e-1,Dt);
+                var d=DL(Nm(RP(h,n72),n72),n72);
+                K=CupdXi(d,n72,xi);
+                kms[e]=Km(K,n72);
+            }
+            double delta=kms[5]-kms[1];
+            bool stable=Math.Abs(delta)<0.05;
+            _o.WriteLine($"{xi,6:F2} {kms[1],8:F4} {kms[2],8:F4} {kms[3],8:F4} {kms[4],8:F4} {kms[5],8:F4} {delta,8:F4} {(stable?"YES":"no"),8}");
+        }
+
+        // ============================================================
+        // PART B — N Sweep
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: N Sweep (Xi=1.75, seed=1005) ===");
+        _o.WriteLine($"{"N",5} {"km1",8} {"km2",8} {"km3",8} {"km4",8} {"km5",8} {"Δ(km)",8} {"Stable?",8}");
+        _o.WriteLine(new string('-',70));
+
+        foreach(var n in Ns){
+            var K=KS(n,seed);
+            double[] kms=new double[6];kms[0]=Km(K,n);
+            for(int e=1;e<=5;e++){
+                var h=SimDt(K,n,0.10,seed+e-1,Dt);
+                var d=DL(Nm(RP(h,n),n),n);
+                K=Cupd(d,n);
+                kms[e]=Km(K,n);
+            }
+            double delta=kms[5]-kms[1];
+            bool stable=Math.Abs(delta)<0.05;
+            _o.WriteLine($"{n,5} {kms[1],8:F4} {kms[2],8:F4} {kms[3],8:F4} {kms[4],8:F4} {kms[5],8:F4} {delta,8:F4} {(stable?"YES":"no"),8}");
+        }
+
+        // ============================================================
+        // PART C — Dt Sweep
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Dt Sweep (N=72, Xi=1.75, seed=1005) ===");
+        _o.WriteLine($"{"Dt",6} {"km1",8} {"km2",8} {"km3",8} {"km4",8} {"km5",8} {"Δ(km)",8} {"Stable?",8}");
+        _o.WriteLine(new string('-',70));
+
+        foreach(var dt in Dts){
+            var K=KS(n72,seed);
+            double[] kms=new double[6];kms[0]=Km(K,n72);
+            for(int e=1;e<=5;e++){
+                var h=SimDt(K,n72,0.10,seed+e-1,dt);
+                var d=DL(Nm(RP(h,n72),n72),n72);
+                K=Cupd(d,n72);
+                kms[e]=Km(K,n72);
+            }
+            double delta=kms[5]-kms[1];
+            bool stable=Math.Abs(delta)<0.05;
+            _o.WriteLine($"{dt,6:F3} {kms[1],8:F4} {kms[2],8:F4} {kms[3],8:F4} {kms[4],8:F4} {kms[5],8:F4} {delta,8:F4} {(stable?"YES":"no"),8}");
+        }
+
+        _o.WriteLine($"\nStop-Low: SAFE. V6 NOT READY.");
+        _o.WriteLine($"=== KEM_03 complete. Commit: KEM_03_ParameterSweep ===");
+    }
+
+    static double[,] CupdXi(double[,]d,int n,double xi){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:K0*Math.Exp(-d[i,j]/Math.Max(xi,0.01));return K;}
+    static double[][] SimDt(double[,]K,int n,double s,int seed,double dt){var rng=new Random(seed);var w=new double[n];for(int i=0;i<n;i++)w[i]=1.0+s*(rng.NextDouble()-0.5)*2.0;var th=new double[n];for(int i=0;i<n;i++)th[i]=rng.NextDouble()*2*Math.PI;int hL=St/Hd+1;var h=new double[hL][];h[0]=(double[])th.Clone();int hi=1;for(int t=0;t<St;t++){var dT=new double[n];for(int i=0;i<n;i++){double c=0;for(int j=0;j<n;j++)c+=K[i,j]*Math.Sin(th[j]-th[i]);dT[i]=w[i]+c;}for(int i=0;i<n;i++)th[i]+=dt*dT[i];if((t+1)%Hd==0&&hi<hL)h[hi++]=(double[])th.Clone();}return h;}
+
     static double[,] CupdK0(double[,]d,int n,double k0){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:k0*Math.Exp(-d[i,j]/Math.Max(Xi,0.01));return K;}
 
     // Count phase slips for oscillator pair (i,j) from trajectory h[time][oscillator]
