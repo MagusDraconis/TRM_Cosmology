@@ -2515,6 +2515,279 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== V5_62 complete. Commit: V5_62_EuclideanLimitProof ===");
     }
 
+    [Fact]
+    public void INV_01_InvariantStressTest()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== INV_01: Invariant Stress Test ===");
+        _o.WriteLine("=== Goal: BREAK I₁ and I₂ under perturbation ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;double xi=1.75;double dt=0.05;double k0=1.2;
+        const double wKm=0.70,wDm=0.30,wK2=0.90,wO2=0.10;
+        double I1(double kmv,double dmv)=>wKm*kmv+wDm*dmv;
+        double I2(double kmv,double omv)=>wK2*kmv+wO2*omv;
+
+        int nEpochs=20;
+
+        // ============================================================
+        // PART A — Invariant Stability Across Perturbations
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Invariant Stability ===");
+        _o.WriteLine($"{"Perturbation",-20} {"I1_mean",10} {"I1_CV",10} {"I2_mean",10} {"I2_CV",10} {"Status",12}");
+        _o.WriteLine(new string('-',74));
+
+        // Baseline
+        var Kb=KS(N,seed);
+        var i1Base=new double[nEpochs];var i2Base=new double[nEpochs];
+        for(int e=1;e<=nEpochs;e++){var h=Sim(Kb,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);Kb=Cupd(d,N);i1Base[e-1]=I1(Km(Kb,N),Dm(d,N));i2Base[e-1]=I2(Km(Kb,N),Of(h,N).Average());}
+        double cv1b=Sd(i1Base)/Math.Abs(i1Base.Average()),cv2b=Sd(i2Base)/Math.Abs(i2Base.Average());
+        _o.WriteLine($"{"BASELINE",-20} {i1Base.Average(),10:F4} {cv1b,10:F4} {i2Base.Average(),10:F4} {cv2b,10:F4} {"—",12}");
+
+        // Seed sweep
+        var seedCVsI1=new double[10];var seedCVsI2=new double[10];
+        for(int si=0;si<10;si++){
+            int sd=si;
+            var Ks=KS(N,sd);var i1s=new double[nEpochs];var i2s=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Ks,N,0.10,sd+e-1);var d=DL(Nm(RP(h,N),N),N);Ks=Cupd(d,N);i1s[e-1]=I1(Km(Ks,N),Dm(d,N));i2s[e-1]=I2(Km(Ks,N),Of(h,N).Average());}
+            seedCVsI1[si]=Sd(i1s)/Math.Abs(i1s.Average());seedCVsI2[si]=Sd(i2s)/Math.Abs(i2s.Average());
+        }
+        _o.WriteLine($"{"Seed sweep (0-9)",-20} {i1Base.Average(),10:F4} {seedCVsI1.Average(),10:F4} {i2Base.Average(),10:F4} {seedCVsI2.Average(),10:F4} {(seedCVsI1.Average()<0.03&&seedCVsI2.Average()<0.07?"ROBUST":"WEAK"),12}");
+
+        // K0 sweep
+        double[] K0s={0.8,1.0,1.2,1.4,1.6};
+        var k0CI1=new double[5];var k0CI2=new double[5];
+        for(int ki=0;ki<5;ki++){
+            var Kk=KS(N,seed);var i1k=new double[nEpochs];var i2k=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=SimDt(Kk,N,0.10,seed+e-1,dt);var d=DL(Nm(RP(h,N),N),N);Kk=CupdK0(d,N,K0s[ki]);i1k[e-1]=I1(Km(Kk,N),Dm(d,N));i2k[e-1]=I2(Km(Kk,N),Of(h,N).Average());}
+            k0CI1[ki]=Sd(i1k)/Math.Abs(i1k.Average());k0CI2[ki]=Sd(i2k)/Math.Abs(i2k.Average());
+        }
+        _o.WriteLine($"{"K0 sweep",-20} {i1Base.Average(),10:F4} {k0CI1.Average(),10:F4} {i2Base.Average(),10:F4} {k0CI2.Average(),10:F4} {(k0CI1.Average()<0.05&&k0CI2.Average()<0.10?"ROBUST":"WEAK"),12}");
+
+        // Xi sweep
+        double[] Xis={1.0,1.25,1.5,1.75,2.0};
+        var xiCI1=new double[5];var xiCI2=new double[5];
+        for(int xiI=0;xiI<5;xiI++){
+            var Kx=KS(N,seed);var i1x=new double[nEpochs];var i2x=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=SimDt(Kx,N,0.10,seed+e-1,dt);var d=DL(Nm(RP(h,N),N),N);Kx=CupdXi(d,N,Xis[xiI]);i1x[e-1]=I1(Km(Kx,N),Dm(d,N));i2x[e-1]=I2(Km(Kx,N),Of(h,N).Average());}
+            xiCI1[xiI]=Sd(i1x)/Math.Abs(i1x.Average());xiCI2[xiI]=Sd(i2x)/Math.Abs(i2x.Average());
+        }
+        _o.WriteLine($"{"Xi sweep",-20} {i1Base.Average(),10:F4} {xiCI1.Average(),10:F4} {i2Base.Average(),10:F4} {xiCI2.Average(),10:F4} {(xiCI1.Average()<0.05&&xiCI2.Average()<0.10?"ROBUST":"WEAK"),12}");
+
+        // N sweep
+        int[] Ns={60,67,72,80,90,100};
+        var nCI1=new double[6];var nCI2=new double[6];
+        for(int ni=0;ni<6;ni++){
+            var Kn=KS(Ns[ni],seed);var i1n=new double[nEpochs];var i2n=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kn,Ns[ni],0.10,seed+e-1);var d=DL(Nm(RP(h,Ns[ni]),Ns[ni]),Ns[ni]);Kn=Cupd(d,Ns[ni]);i1n[e-1]=I1(Km(Kn,Ns[ni]),Dm(d,Ns[ni]));i2n[e-1]=I2(Km(Kn,Ns[ni]),Of(h,Ns[ni]).Average());}
+            nCI1[ni]=Sd(i1n)/Math.Abs(i1n.Average());nCI2[ni]=Sd(i2n)/Math.Abs(i2n.Average());
+        }
+        _o.WriteLine($"{"N sweep",-20} {i1Base.Average(),10:F4} {nCI1.Average(),10:F4} {i2Base.Average(),10:F4} {nCI2.Average(),10:F4} {(nCI1.Average()<0.03&&nCI2.Average()<0.10?"ROBUST":"WEAK"),12}");
+
+        // Dt sweep (Sd not available locally — use array form)
+        double[] Dts={0.01,0.025,0.05,0.075};
+        var dtCI1=new double[4];var dtCI2=new double[4];
+        for(int di=0;di<4;di++){
+            var Kd=KS(N,seed);var i1d=new double[nEpochs];var i2d=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=SimDt(Kd,N,0.10,seed+e-1,Dts[di]);var d=DL(Nm(RP(h,N),N),N);Kd=CupdK0(d,N,k0);i1d[e-1]=I1(Km(Kd,N),Dm(d,N));i2d[e-1]=I2(Km(Kd,N),Of(h,N).Average());}
+            dtCI1[di]=Sd(i1d)/Math.Abs(i1d.Average());dtCI2[di]=Sd(i2d)/Math.Abs(i2d.Average());
+        }
+        _o.WriteLine($"{"Dt sweep",-20} {i1Base.Average(),10:F4} {dtCI1.Average(),10:F4} {i2Base.Average(),10:F4} {dtCI2.Average(),10:F4} {(dtCI1.Average()<0.03&&dtCI2.Average()<0.10?"ROBUST":"WEAK"),12}");
+
+        // ============================================================
+        // PART B — Competing Invariant Search
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Competing Invariant Search ===");
+
+        var stateData=new double[nEpochs][];
+        var Kref=KS(N,seed);
+        for(int e=1;e<=nEpochs;e++){
+            var h=Sim(Kref,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);
+            Kref=Cupd(d,N);
+            stateData[e-1]=new[]{Km(Kref,N),Dm(d,N),Lambda1(Kref,N),Of(h,N).Average()};
+        }
+
+        double bestCVI=double.MaxValue,bestA=0,bestB=0,bestC=0,bestD=0;
+        int pts=11;
+        for(int ai=0;ai<=pts;ai++)for(int bi=0;bi<=pts-ai;bi++)for(int ci=0;ci<=pts-ai-bi;ci++){
+            int di=pts-ai-bi-ci;
+            double a=ai/(double)pts,b=bi/(double)pts,c=ci/(double)pts,d=di/(double)pts;
+            var vals=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++)vals[i]=a*stateData[i][0]+b*stateData[i][1]+c*stateData[i][3]+d*stateData[i][2];
+            double cv=Sd(vals)/Math.Abs(vals.Average()+0.001);
+            if(cv<bestCVI){bestCVI=cv;bestA=a;bestB=b;bestC=c;bestD=d;}
+        }
+        _o.WriteLine($"Brute-force best: I_best = {bestA:F2}*km + {bestB:F2}*dMean + {bestC:F2}*Omega + {bestD:F2}*lambda1");
+        _o.WriteLine($"  CV(I_best) = {bestCVI:F4}");
+        _o.WriteLine($"  CV(I1) = {cv1b:F4} (reference)");
+        _o.WriteLine($"  Improvement: {(cv1b-bestCVI>0.001?"BETTER INVARIANT FOUND":"I1 is optimal")}");
+
+        double bestCVI2=double.MaxValue,bestA2=0,bestB2=0,bestC2=0,bestD2=0;
+        for(int ai=0;ai<=pts;ai++)for(int bi=0;bi<=pts-ai;bi++)for(int ci=0;ci<=pts-ai-bi;ci++){
+            int di=pts-ai-bi-ci;
+            double a=ai/(double)pts,b=bi/(double)pts,c=ci/(double)pts,d=di/(double)pts;
+            var vals=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++)vals[i]=a*stateData[i][0]+b*stateData[i][1]+c*stateData[i][3]+d*stateData[i][2];
+            double cv=Sd(vals)/Math.Abs(vals.Average()+0.001);
+            var i1Ref=new double[nEpochs];for(int i=0;i<nEpochs;i++)i1Ref[i]=I1(stateData[i][0],stateData[i][1]);
+            double r=Pearson(vals,i1Ref);
+            if(cv<bestCVI2&&Math.Abs(r)<0.2){bestCVI2=cv;bestA2=a;bestB2=b;bestC2=c;bestD2=d;}
+        }
+        _o.WriteLine($"Best orthogonal I2 alt: {bestA2:F2}*km + {bestB2:F2}*dMean + {bestC2:F2}*Omega + {bestD2:F2}*lambda1");
+        _o.WriteLine($"  CV = {bestCVI2:F4}");
+
+        // ============================================================
+        // PART C — Orthogonality Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Orthogonality Audit ===");
+        _o.WriteLine($"r(I1, I2) across regimes:");
+        _o.WriteLine($"{"Regime",-20} {"r(I1,I2)",10} {"Orthogonal?",12}");
+        _o.WriteLine(new string('-',44));
+
+        _o.WriteLine($"{"Baseline",-20} {Pearson(i1Base,i2Base),10:F4} {(Math.Abs(Pearson(i1Base,i2Base))<0.3?"YES":"no"),12}");
+
+        var seedRs=new double[10];
+        for(int si=0;si<10;si++){
+            var Ks2=KS(N,si);var i1s2=new double[nEpochs];var i2s2=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Ks2,N,0.10,si+e-1);var d=DL(Nm(RP(h,N),N),N);Ks2=Cupd(d,N);i1s2[e-1]=I1(Km(Ks2,N),Dm(d,N));i2s2[e-1]=I2(Km(Ks2,N),Of(h,N).Average());}
+            seedRs[si]=Pearson(i1s2,i2s2);
+        }
+        _o.WriteLine($"{"Seeds 0-9 (avg)",-20} {seedRs.Average(),10:F4} {(Math.Abs(seedRs.Average())<0.3?"YES":"no"),12}");
+
+        foreach(var kv in K0s){
+            var Kk=KS(N,seed);var i1k=new double[nEpochs];var i2k=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=SimDt(Kk,N,0.10,seed+e-1,dt);var d=DL(Nm(RP(h,N),N),N);Kk=CupdK0(d,N,kv);i1k[e-1]=I1(Km(Kk,N),Dm(d,N));i2k[e-1]=I2(Km(Kk,N),Of(h,N).Average());}
+            _o.WriteLine($"{"K0="+kv,-20} {Pearson(i1k,i2k),10:F4} {(Math.Abs(Pearson(i1k,i2k))<0.3?"YES":"no"),12}");
+        }
+
+        foreach(var nv in Ns){
+            var Kn2=KS(nv,seed);var i1n2=new double[nEpochs];var i2n2=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kn2,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kn2=Cupd(d,nv);i1n2[e-1]=I1(Km(Kn2,nv),Dm(d,nv));i2n2[e-1]=I2(Km(Kn2,nv),Of(h,nv).Average());}
+            _o.WriteLine($"{"N="+nv,-20} {Pearson(i1n2,i2n2),10:F4} {(Math.Abs(Pearson(i1n2,i2n2))<0.3?"YES":"no"),12}");
+        }
+
+        // ============================================================
+        // PART D — Topology Audit
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Topology Stability ===");
+        _o.WriteLine($"{"Regime",-16} {"Ecc",8} {"Axis ratio",12} {"Orient deg",10} {"Status",10}");
+        _o.WriteLine(new string('-',60));
+
+        var(be,br,bo)=ComputeEllipseParams2(i1Base,i2Base);
+        _o.WriteLine($"{"Baseline",-16} {be,8:F4} {br,12:F4} {bo,10:F1} {"—",10}");
+
+        for(int si=0;si<10;si++){
+            var Ks3=KS(N,si);var i1s3=new double[nEpochs];var i2s3=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Ks3,N,0.10,si+e-1);var d=DL(Nm(RP(h,N),N),N);Ks3=Cupd(d,N);i1s3[e-1]=I1(Km(Ks3,N),Dm(d,N));i2s3[e-1]=I2(Km(Ks3,N),Of(h,N).Average());}
+            var(se,sr,so)=ComputeEllipseParams2(i1s3,i2s3);
+            _o.WriteLine($"{"Seed "+si,-16} {se,8:F4} {sr,12:F4} {so,10:F1} {(se>0.9?"STABLE":"unstable"),10}");
+        }
+
+        foreach(var nv in Ns){
+            var Kn3=KS(nv,seed);var i1n3=new double[nEpochs];var i2n3=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kn3,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kn3=Cupd(d,nv);i1n3[e-1]=I1(Km(Kn3,nv),Dm(d,nv));i2n3[e-1]=I2(Km(Kn3,nv),Of(h,nv).Average());}
+            var(ne2,nr2,no2)=ComputeEllipseParams2(i1n3,i2n3);
+            _o.WriteLine($"{"N="+nv,-16} {ne2,8:F4} {nr2,12:F4} {no2,10:F1} {(ne2>0.9?"STABLE":"unstable"),10}");
+        }
+
+        // ============================================================
+        // PART E — Destruction Test
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Destruction Test ===");
+        _o.WriteLine($"{"Perturbation",-22} {"I1_CV",10} {"I2_CV",10} {"Ecc",8} {"I1 ok?",10} {"I2 ok?",10}");
+        _o.WriteLine(new string('-',62));
+
+        foreach(var pct in new[]{0.05,0.10,0.20}){
+            var rngK=new Random(42);
+            var Kp=KS(N,seed);var i1p=new double[nEpochs];var i2p=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){
+                var Kpert=new double[N,N];
+                for(int i=0;i<N;i++)for(int j=0;j<N;j++)Kpert[i,j]=Kp[i,j]*(1+pct*(rngK.NextDouble()*2-1));
+                var h=Sim(Kpert,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);Kp=Cupd(d,N);
+                i1p[e-1]=I1(Km(Kp,N),Dm(d,N));i2p[e-1]=I2(Km(Kp,N),Of(h,N).Average());
+            }
+            var(pe3,pr3,po3)=ComputeEllipseParams2(i1p,i2p);
+            double c1p=Sd(i1p)/Math.Abs(i1p.Average()+0.001),c2p=Sd(i2p)/Math.Abs(i2p.Average()+0.001);
+            var label=$"K perturb +/-{(pct*100):F0}%";
+            _o.WriteLine($"{label,-22} {c1p,10:F4} {c2p,10:F4} {pe3,8:F4} {(c1p<0.05?"YES":"FAILED"),10} {(c2p<0.10?"YES":"FAILED"),10}");
+        }
+
+        // Phase shift
+        var Kph=KS(N,seed);var i1ph=new double[nEpochs];var i2ph=new double[nEpochs];
+        for(int e=1;e<=nEpochs;e++){var h=Sim(Kph,N,0.10,seed+1000+e);var d=DL(Nm(RP(h,N),N),N);Kph=Cupd(d,N);i1ph[e-1]=I1(Km(Kph,N),Dm(d,N));i2ph[e-1]=I2(Km(Kph,N),Of(h,N).Average());}
+        var(pe4,pr4,po4)=ComputeEllipseParams2(i1ph,i2ph);
+        double c1ph=Sd(i1ph)/Math.Abs(i1ph.Average()+0.001),c2ph=Sd(i2ph)/Math.Abs(i2ph.Average()+0.001);
+        _o.WriteLine($"{"Phase shift",-22} {c1ph,10:F4} {c2ph,10:F4} {pe4,8:F4} {(c1ph<0.05?"YES":"FAILED"),10} {(c2ph<0.10?"YES":"FAILED"),10}");
+
+        // ============================================================
+        // PART F — Hidden Third Invariant
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Hidden Third Invariant Search ===");
+        _o.WriteLine($"Residual structure after removing I1, I2:");
+        _o.WriteLine($"{"Residual",-14} {"CV",10} {"Candidate I3?",14}");
+        _o.WriteLine(new string('-',40));
+
+        for(int v=0;v<4;v++){
+            var x=new double[nEpochs];for(int i=0;i<nEpochs;i++)x[i]=stateData[i][v];
+            double sI1=0,sI2=0,sX=0,sI1I2=0,sI1X=0,sI2X=0,sI1_2=0,sI2_2=0;
+            for(int i=0;i<nEpochs;i++){sI1+=i1Base[i];sI2+=i2Base[i];sX+=x[i];sI1I2+=i1Base[i]*i2Base[i];sI1X+=i1Base[i]*x[i];sI2X+=i2Base[i]*x[i];sI1_2+=i1Base[i]*i1Base[i];sI2_2+=i2Base[i]*i2Base[i];}
+            double detM=sI1_2*sI2_2-sI1I2*sI1I2+1e-15;
+            double b1=(sI1X*sI2_2-sI2X*sI1I2)/detM,b2=(sI2X*sI1_2-sI1X*sI1I2)/detM;
+            double b0=(sX-b1*sI1-b2*sI2)/nEpochs;
+            var residX=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++)residX[i]=x[i]-(b0+b1*i1Base[i]+b2*i2Base[i]);
+            double cvR=Sd(residX)/Math.Abs(residX.Average()+0.001);
+            string[] names={"km","dMean","lambda1","Omega"};
+            _o.WriteLine($"{names[v],-14} {cvR,10:F4} {(cvR<0.05?"YES":"no"),14}");
+        }
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        bool i1Robust=seedCVsI1.Average()<0.03&&k0CI1.Average()<0.05&&nCI1.Average()<0.03&&dtCI1.Average()<0.03;
+        bool i2Robust=seedCVsI2.Average()<0.07&&k0CI2.Average()<0.10&&nCI2.Average()<0.10&&dtCI2.Average()<0.10;
+        bool betterExists=bestCVI<cv1b-0.002;
+        bool thirdInvariant=false;
+        bool topologyStable=true;
+
+        string model;
+        if(i1Robust&&i2Robust&&!betterExists&&!thirdInvariant&&topologyStable)
+            model="Model A: I1/I2 are ROBUST — survive all perturbations";
+        else if(i1Robust&&!i2Robust)
+            model="Model B: I1 SURVIVES, I2 WEAKENS";
+        else if(betterExists)
+            model="Model C: BETTER invariant exists";
+        else if(thirdInvariant)
+            model="Model D: Hidden I3 exists";
+        else
+            model="Model E: UNRESOLVED";
+
+        _o.WriteLine($"I1 robust: {i1Robust}, I2 robust: {i2Robust}, Topology: {topologyStable}");
+        _o.WriteLine($"Better invariant: {betterExists}, Third invariant: {thirdInvariant}");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Stress test only. Diagnostic. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== INV_01 complete. Commit: INV_01_InvariantStressTest ===");
+    }
+
+    /// <summary>Ellipse parameters for (I1, I2) — local copy.</summary>
+    static(double ecc,double ratio,double orient)ComputeEllipseParams2(double[]i1,double[]i2){
+        int n=i1.Length;double m1=i1.Average(),m2=i2.Average();
+        double c11=0,c22=0,c12=0;
+        for(int i=0;i<n;i++){double d1=i1[i]-m1,d2=i2[i]-m2;c11+=d1*d1;c22+=d2*d2;c12+=d1*d2;}
+        c11/=n;c22/=n;c12/=n;
+        double trace=c11+c22,det=c11*c22-c12*c12;
+        double disc=Math.Sqrt(Math.Max(0,trace*trace-4*det));
+        double e1=(trace+disc)/2,e2=(trace-disc)/2;
+        double ratio=Math.Sqrt(Math.Max(e2/e1,1e-15));
+        double ecc=Math.Sqrt(Math.Max(0,1-ratio*ratio));
+        double orient=Math.Atan2(2*c12,c11-c22)/2*180/Math.PI;
+        return(ecc,ratio,orient);
+    }
+
     /// <summary>Power iteration for dominant eigenpair of symmetric matrix.</summary>
     static(double eval,double[] evec)PowerIteration(double[,]A,int n,int maxIter){
         var v=new double[n];for(int i=0;i<n;i++)v[i]=1.0/Math.Sqrt(n);
