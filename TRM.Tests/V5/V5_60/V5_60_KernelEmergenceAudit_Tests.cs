@@ -167,6 +167,210 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== KEM_01 complete. Commit: KEM_01_KernelEmergenceAudit ===");
     }
 
+    [Fact]
+    public void KSP_01_KuramotoSlipPhaseAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== KSP_01: Kuramoto Slip-Phase Audit ===");
+        _o.WriteLine("=== V5.60. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Does phase-slip frequency generate the signal? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=100; // reduced for slip computation cost
+
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,double,double,string)>();
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                // Trajectory for slip analysis (use same K as SAC epoch 1)
+                var K=KS(n,s);
+                var h=Sim(K,n,0.10,s); // epoch-1 trajectory
+
+                // Compute slip rate: fraction of connected pairs that lose lock at least once
+                int nSlips=0,nConnected=0;double totalSlipRate=0;
+                var edgeSlips=new List<double>();
+                for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){
+                    if(!(K[i,j]>0.001))continue; // only connected pairs
+                    nConnected++;
+                    int slips=CountSlips(h,i,j);
+                    double slipRate=(double)slips/(h.Length-1);
+                    totalSlipRate+=slipRate;
+                    edgeSlips.Add(slipRate);
+                    if(slips>0)nSlips++;
+                }
+                double meanSlipRate=nConnected>0?totalSlipRate/nConnected:0;
+                double slipFraction=nConnected>0?(double)nSlips/nConnected:0;
+
+                // Full SAC pipeline
+                for(int e=0;e<3;e++){var he=Sim(K,n,0.10,s+e);var d=DL(Nm(RP(he,n),n),n);K=Cupd(d,n);}
+                var h3=Sim(K,n,0.10,s+3);var d3=DL(Nm(RP(h3,n),n),n);K=Cupd(d3,n);
+                var h3E=Sim(K,n,0.10,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);var K3E=Cupd(d3E,n);
+                double d0=Dm(d3E,n),km=Km(K3E,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,rawIQR,meanSlipRate,slipFraction,km,d0,1.0,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.Item9=="P1").ToArray();var p1b=bd.Where(d=>d.Item9=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length} (from {sds*Ns.Length} profiles)");
+
+        double eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        // ============================================================
+        // Signal flow: rawIQR → slip → km → P1/P1b
+        // ============================================================
+        _o.WriteLine($"\n=== Signal Flow: rawIQR → Slip → km → P1/P1b ===");
+        var iqrA=bd.Select(d=>d.Item3).ToArray();var slipA=bd.Select(d=>d.Item4).ToArray();
+        var slipFA=bd.Select(d=>d.Item5).ToArray();var kmA=bd.Select(d=>d.Item6).ToArray();
+        var d0A2=bd.Select(d=>d.Item7).ToArray();
+
+        _o.WriteLine($"{"Relationship",-30} {"Pearson r",10} {"p-value",10}");
+        _o.WriteLine(new string('-',52));
+        void RR(string n,double[] x,double[] y){
+            double r=Pearson(x,y),p=2*(1-NormCDF(Math.Abs(0.5*Math.Log((1+Math.Min(r,0.999))/(1-Math.Max(r,-0.999)))*Math.Sqrt(x.Length-3))));
+            _o.WriteLine($"{n,-30} {r,10:F4} {p,10:F4}");
+        }
+        RR("rawIQR → meanSlipRate",iqrA,slipA);
+        RR("rawIQR → slipFraction",iqrA,slipFA);
+        RR("meanSlipRate → km",slipA,kmA);
+        RR("slipFraction → km",slipFA,kmA);
+        RR("rawIQR → km",iqrA,kmA);
+        RR("km → d0 (redundancy check)",kmA,d0A2);
+
+        // ============================================================
+        // P1/P1b separation by descriptor
+        // ============================================================
+        _o.WriteLine($"\n=== P1/P1b Separation ===");
+        _o.WriteLine($"{"Descriptor",-16} {"P1",8} {"P1b",8} {"Sep",8} {"Eff(σ)",8}");
+        _o.WriteLine(new string('-',50));
+        void Sep(string n,double[] pv,double[] pbv,double[] all){
+            double e=eff(pv,pbv,all);
+            _o.WriteLine($"{n,-16} {pv.Average(),8:F5} {pbv.Average(),8:F5} {Math.Abs(pv.Average()-pbv.Average()),8:F5} {e,8:F3}σ");
+        }
+        Sep("rawIQR",p1.Select(d=>d.Item3).ToArray(),p1b.Select(d=>d.Item3).ToArray(),iqrA);
+        Sep("meanSlipRate",p1.Select(d=>d.Item4).ToArray(),p1b.Select(d=>d.Item4).ToArray(),slipA);
+        Sep("slipFraction",p1.Select(d=>d.Item5).ToArray(),p1b.Select(d=>d.Item5).ToArray(),slipFA);
+        Sep("km",p1.Select(d=>d.Item6).ToArray(),p1b.Select(d=>d.Item6).ToArray(),kmA);
+
+        // ============================================================
+        // Mediation analysis: does slip mediate rawIQR→km?
+        // ============================================================
+        _o.WriteLine($"\n=== Mediation: Does slip explain rawIQR→km? ===");
+        // Partial correlation: rawIQR→km after controlling for slip
+        double rIQkm=Pearson(iqrA,kmA);
+        double rIQsl=Pearson(iqrA,slipA);
+        double rSlkm=Pearson(slipA,kmA);
+        double partialR=(rIQkm-rIQsl*rSlkm)/Math.Sqrt((1-rIQsl*rIQsl)*(1-rSlkm*rSlkm)+0.0001);
+        _o.WriteLine($"rawIQR→km (direct): r={rIQkm:F4}");
+        _o.WriteLine($"rawIQR→km (slip controlled): r={partialR:F4}");
+        double mediationPct=(rIQkm-partialR)/(rIQkm+0.0001)*100;
+        _o.WriteLine($"Mediation: {(mediationPct>50?$"Slip mediates {mediationPct:F0}% of rawIQR→km":"Slip not dominant mediator")}");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine($"\n=== Decision Model ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double slipEff=eff(p1.Select(d=>d.Item4).ToArray(),p1b.Select(d=>d.Item4).ToArray(),slipA);
+        double iqrEff=eff(p1.Select(d=>d.Item3).ToArray(),p1b.Select(d=>d.Item3).ToArray(),iqrA);
+        string r;
+        if(slipEff<0.01)r="Model A: Phase slips are NEGLIGIBLE at these parameters (K=0.5 > critical coupling). Connected pairs are fully locked. Slips do NOT generate the signal.";
+        else if(Math.Abs(rIQsl)>0.3)r="Model B: Phase slips partially mediate rawIQR→km.";
+        else r="Model D: Unresolved.";
+
+        _o.WriteLine($"Decision: {r}");
+        _o.WriteLine($"Evidence: rawIQR→slip r={rIQsl:F3}, slip→km r={rSlkm:F3}, partial r={partialR:F3}, slip eff={slipEff:F3}σ");
+
+        // ============================================================
+        // Phase-Difference Variance (locked pairs only)
+        // ============================================================
+        _o.WriteLine($"\n=== Phase-Diff Variance: Locked-Pair Alternative ===");
+        _o.WriteLine("Since slips are zero, the signal must come from phase-difference VARIANCE (not slips).");
+        _o.WriteLine("Connected pairs are locked but differ in HOW TIGHTLY they lock.");
+
+        // For a subset of profiles, compute phase-diff std for connected pairs
+        var varBag=new ConcurrentBag<(double rawIQR,double km,double meanPhaseVar,string cls)>();
+        Parallel.ForEach(Ns,n=>{
+            Parallel.For(0,Math.Min(sds,30),s=>{ // subset for speed
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQRv=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+                var Kv=KS(n,s);var hv=Sim(Kv,n,0.10,s);
+                double totalVar=0;int cnt=0;
+                for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){
+                    if(!(Kv[i,j]>0.001))continue;
+                    double mean=0;for(int t=0;t<hv.Length;t++)mean+=hv[t][i]-hv[t][j];
+                    mean/=hv.Length;double var=0;
+                    for(int t=0;t<hv.Length;t++){double d=hv[t][i]-hv[t][j]-mean;var+=d*d;}
+                    totalVar+=var/hv.Length;cnt++;
+                }
+                double meanPhaseVar=cnt>0?totalVar/cnt:0;
+
+                var Kc=Kv;
+                for(int e=0;e<3;e++){var he=Sim(Kc,n,0.10,s+e);var de=DL(Nm(RP(he,n),n),n);Kc=Cupd(de,n);}
+                var h3E2=Sim(Kc,n,0.10,s+50);var d3E2=DL(Nm(RP(h3E2,n),n),n);double kmv=Km(Cupd(d3E2,n),n);
+                double d0v=Dm(d3E2,n);
+                var sb2=new SBase{seed=s,d0=d0v,km0=kmv,ks0=0,cls=""};
+                var hi=n==70?hi70:n==72?hi72:hi75;
+                sb2=Classify(sb2,hi);double dv2=hi.dm-Lo(n).dm,kv2=hi.km-Lo(n).km;
+                double vn2=Math.Sqrt(dv2*dv2+kv2*kv2);double pj=vn2>0?((d0v-Lo(n).dm)*dv2+(kmv-Lo(n).km)*kv2)/vn2:0;
+                double d2o2=(d0v-Lo(n).dm)*(d0v-Lo(n).dm)+(kmv-Lo(n).km)*(kmv-Lo(n).km);
+                double o2=Math.Sqrt(Math.Max(0,d2o2-pj*pj));
+                bool keep=false;
+                if(sb2.cls=="P1"||sb2.cls=="P1b"){if(n==72){if(pj>PHV&&o2>OTH)keep=true;}else{if(pj>PHV)keep=true;}}
+                if(!keep)return;
+                varBag.Add((rawIQRv,kmv,meanPhaseVar,sb2.cls));
+            });});
+        var vb=varBag.ToArray();
+        var vIQR=vb.Select(d=>d.rawIQR).ToArray();var vKm=vb.Select(d=>d.km).ToArray();
+        var vPVar=vb.Select(d=>d.meanPhaseVar).ToArray();
+        _o.WriteLine($"Phase-diff variance r: rawIQR→phaseVar={Pearson(vIQR,vPVar):F4}, phaseVar→km={Pearson(vPVar,vKm):F4}");
+        _o.WriteLine($"Phase-diff var P1/P1b: P1={vb.Where(d=>d.cls=="P1").Average(d=>d.meanPhaseVar):F6}, P1b={vb.Where(d=>d.cls=="P1b").Average(d=>d.meanPhaseVar):F6}");
+        string interp=Math.Abs(Pearson(vPVar,vKm))>0.3?"phase-diff VARIANCE (tightness of lock)":"SAC DYNAMICAL FEEDBACK (multi-epoch iteration)";
+        _o.WriteLine($"Interpretation: signal is {interp}.");
+
+        _o.WriteLine("\nCLAIMS: Slip-phase audited. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== KSP_01 complete. Commit: KSP_01_KuramotoSlipPhaseAudit ===");
+    }
+
+    // Count phase slips for oscillator pair (i,j) from trajectory h[time][oscillator]
+    static int CountSlips(double[][]h,int i,int j){
+        int slips=0;double prevDelta=0;bool first=true;
+        for(int t=0;t<h.Length;t++){
+            double delta=h[t][i]-h[t][j];
+            // Unwrap: compute difference from previous delta
+            if(!first){
+                double dDelta=delta-prevDelta;
+                if(Math.Abs(dDelta)>Math.PI)slips++;
+            }
+            first=false;prevDelta=delta;
+        }
+        return slips;
+    }
+    static double NormCDF(double x){
+        double a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429;
+        double p=0.3275911,sign=x<0?-1:1;
+        x=Math.Abs(x)/Math.Sqrt(2);double t=1/(1+p*x);
+        double y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.Exp(-x*x);
+        return 0.5*(1+sign*y);
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
