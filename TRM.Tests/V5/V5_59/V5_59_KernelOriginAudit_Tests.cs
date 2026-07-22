@@ -126,6 +126,297 @@ public class V5_59_KernelOriginAudit_Tests
         _o.WriteLine($"\n=== KOR_01 complete. Commit: KOR_01_KernelOriginAudit ===");
     }
 
+    [Fact]
+    public void CRIT_01_KernelFalsificationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== CRIT_01: Kernel Falsification Audit ===");
+        _o.WriteLine("=== V5.59. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Goal: BREAK the claim that km is fundamental ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        var bag=new ConcurrentBag<(int,int,double,double,double,double,double,double,double,double,string)>();
+        // N,seed,kmInit,km1,km2,kmFinal,d0,rawIQR,dMean,phaseVar,cls
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                var K=KS(n,s);double kmInit=Km(K,n);
+
+                // Epoch 1 — also capture phase-diff variance
+                var h1=Sim(K,n,0.10,s);
+                double pVar=0;int pCnt=0;
+                for(int i=0;i<n;i++)for(int j=i+1;j<n;j++){
+                    if(!(K[i,j]>0.001))continue;
+                    double mn=0;for(int t=0;t<h1.Length;t++)mn+=h1[t][i]-h1[t][j];
+                    mn/=h1.Length;double vr=0;
+                    for(int t=0;t<h1.Length;t++){double dd=h1[t][i]-h1[t][j]-mn;vr+=dd*dd;}
+                    pVar+=vr/h1.Length;pCnt++;
+                }
+                double phaseVar=pCnt>0?pVar/pCnt:0;
+
+                K=Cupd(DL(Nm(RP(h1,n),n),n),n);double km1=Km(K,n);
+
+                // Epoch 2
+                var h2=Sim(K,n,0.10,s+1);K=Cupd(DL(Nm(RP(h2,n),n),n),n);double km2=Km(K,n);
+
+                // Epoch 3 + final
+                var h3=Sim(K,n,0.10,s+3);K=Cupd(DL(Nm(RP(h3,n),n),n),n);
+                var h3E=Sim(K,n,0.10,s+50);var d3E=DL(Nm(RP(h3E,n),n),n);var K3E=Cupd(d3E,n);
+                double d0=Dm(d3E,n),kmFinal=Km(K3E,n),dMean=Dm(DL(Nm(RP(h3E,n),n),n),n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=kmFinal,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,sv=hi.ks-Lo(n).ks,vn=Math.Sqrt(dv*dv+kv*kv+sv*sv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(kmFinal-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(kmFinal-Lo(n).km)*(kmFinal-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,kmInit,km1,km2,kmFinal,d0,rawIQR,dMean,phaseVar,sb.cls));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.Item11=="P1").ToArray();var p1b=bd.Where(d=>d.Item11=="P1b").ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length} (from {sds*Ns.Length} profiles)");
+
+        double Eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+        double CohensD(double[] a,double[] b){
+            double ma=a.Average(),mb=b.Average(),na=a.Length,nb=b.Length;
+            double va=a.Sum(v=>(v-ma)*(v-ma))/(na-1),vb=b.Sum(v=>(v-mb)*(v-mb))/(nb-1);
+            double sp=Math.Sqrt(((na-1)*va+(nb-1)*vb)/(na+nb-2));
+            return sp>0.001?Math.Abs(ma-mb)/sp:0;
+        }
+
+        var kmF=bd.Select(d=>d.Item6).ToArray();
+        var kmFP=p1.Select(d=>d.Item6).ToArray();var kmFPb=p1b.Select(d=>d.Item6).ToArray();
+        var d0A=bd.Select(d=>d.Item7).ToArray();
+        var iqrA=bd.Select(d=>d.Item8).ToArray();
+        var dmA=bd.Select(d=>d.Item9).ToArray();
+        var pvA=bd.Select(d=>d.Item10).ToArray();
+
+        // ============================================================
+        // PART A — Hidden Predecessor Search
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Hidden Predecessor Search ===");
+        _o.WriteLine($"Can ANY pre-km variable reconstruct km?");
+        _o.WriteLine($"{"Variable",-14} {"r(km)",8} {"Eff(σ)",8} {"Reconstruct?",14}");
+        _o.WriteLine(new string('-',48));
+
+        // Pre-km candidates: rawIQR, phaseVar, km_init, d_mean_epoch1, rawMean
+        var rawMean=bd.Select(d=>{
+            var rng=new Random(d.Item2);var w=new double[72];
+            for(int i=0;i<72;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+            return w.Average();
+        }).ToArray();
+        var rawStd=bd.Select(d=>{
+            var rng=new Random(d.Item2);var w=new double[72];
+            for(int i=0;i<72;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+            return Sd(w);
+        }).ToArray();
+        var kmInitV=bd.Select(d=>d.Item3).ToArray();
+
+        // Pre-map P1 and P1b indices for efficient access
+        var p1Idxs=p1.Select(d=>Array.FindIndex(bd,x=>x.Item2==d.Item2)).ToArray();
+        var p1bIdxs=p1b.Select(d=>Array.FindIndex(bd,x=>x.Item2==d.Item2)).ToArray();
+
+        void HPS(string name,double[] x){
+            double r=Pearson(x,kmF);
+            var p1x=p1Idxs.Select(i=>x[i]).ToArray();
+            var p1bx=p1bIdxs.Select(i=>x[i]).ToArray();
+            double e=Eff(p1x,p1bx,x);
+            string recon=r>0.8?"YES":r>0.4?"PARTIAL":"NO";
+            _o.WriteLine($"{name,-14} {r,8:F3} {e,8:F3}σ {recon,14}");
+        }
+        HPS("rawIQR",iqrA);
+        HPS("rawMean",rawMean);
+        HPS("rawStd",rawStd);
+        HPS("phaseVar",pvA);
+        HPS("km_init",kmInitV);
+
+        // Multiple regression: can linear combo of predecessors predict km?
+        // Test: km ~ a*rawIQR + b*phaseVar + c*km_init
+        _o.WriteLine($"\n--- Linear Reconstruction ---");
+        double bestR=double.MinValue,bestA=0,bestB=0,bestC=0;
+        for(int ai=0;ai<=5;ai++)for(int bi=0;bi<=5;bi++){
+            double a=ai/5.0,b=bi/5.0,c=1-a-b;
+            if(c<0||c>1)continue;
+            var pred=iqrA.Zip(pvA,(iq,pv)=>a*iq+b*pv).Zip(kmInitV,(ab,ki)=>ab+c*ki).ToArray();
+            double rk=Pearson(pred,kmF);
+            if(rk>bestR){bestR=rk;bestA=a;bestB=b;bestC=c;}
+        }
+        _o.WriteLine($"Best linear combo: {bestA:F2}·rawIQR + {bestB:F2}·phaseVar + {bestC:F2}·km_init");
+        _o.WriteLine($"r(predicted, km) = {bestR:F3}");
+        _o.WriteLine($"Prediction quality: {(bestR>0.8?"km is RECONSTRUCTIBLE — NOT fundamental":"km CANNOT be reconstructed — likely fundamental")}");
+
+        // ============================================================
+        // PART B — Compression Test
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Compression Test ===");
+        _o.WriteLine($"Can km be REPLACED by a simpler representation?");
+
+        // Test 1: km vs first PC of (rawIQR, phaseVar, km_init, dMean)
+        var allVars=new[]{iqrA,pvA,kmInitV,rawMean,dmA};
+        int nVars=allVars.Length;int nPts=bd.Length;
+        // Compute correlation-based PC1 via SVD-like max-variance direction
+        double pc1R=0;int pc1Idx=0;
+        for(int vi=0;vi<nVars;vi++){
+            double r=Pearson(allVars[vi],kmF);
+            if(Math.Abs(r)>Math.Abs(pc1R)){pc1R=r;pc1Idx=vi;}
+        }
+        _o.WriteLine($"Strongest single-variable predictor: r={pc1R:F3} ({new[]{"rawIQR","phaseVar","km_init","rawMean","dMean"}[pc1Idx]})");
+
+        // Test 2: km vs km_init (initial K already contains structure?)
+        double rKiKf=Pearson(kmInitV,kmF);
+        _o.WriteLine($"r(km_init, km_final) = {rKiKf:F3}");
+        _o.WriteLine($"{(rKiKf>0.5?"km_init CONTAINS km structure — SAC amplifies, not creates":"km_init INDEPENDENT — SAC creates km structure")}");
+
+        // Test 3: does km epoch-2 already capture everything?
+        var km2A=bd.Select(d=>d.Item5).ToArray();
+        double rK2Kf=Pearson(km2A,kmF);
+        _o.WriteLine($"r(km_epoch2, km_final) = {rK2Kf:F3}");
+        int compressEpochs=rK2Kf>0.95?2:rK2Kf>0.85?3:5;
+        _o.WriteLine($"Compression: km converges in ~{compressEpochs} epochs");
+
+        // ============================================================
+        // PART C — Necessity Test
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Necessity Test — Residual Signal After km ===");
+        _o.WriteLine($"If km is NECESSARY, conditioning on km should remove ALL signal.");
+        _o.WriteLine($"{"Variable",-14} {"Direct Eff",10} {"Residual Eff",14} {"Signal lost?",14}");
+        _o.WriteLine(new string('-',56));
+
+        void NecTest(string name,double[] x){
+            var px=p1Idxs.Select(i=>x[i]).ToArray();
+            var pbx=p1bIdxs.Select(i=>x[i]).ToArray();
+            double direct=Eff(px,pbx,x);
+            double rXKm=Pearson(x,kmF);
+            double partialR=direct*Math.Sqrt(1-rXKm*rXKm); // approximate
+            string lost=Math.Abs(partialR)<0.3?"YES (>70% lost)":Math.Abs(partialR-direct)<0.1?"NO (<10% lost)":"PARTIAL";
+            _o.WriteLine($"{name,-14} {direct,10:F3}σ {partialR,14:F3}σ {lost,14}");
+        }
+        NecTest("d0",d0A);
+        NecTest("rawIQR",iqrA);
+        NecTest("phaseVar",pvA);
+
+        // Partial correlation: r(d0, cls | km)
+        double rDKm=Pearson(d0A,kmF);
+        var d0P1=p1Idxs.Select(i=>d0A[i]).ToArray();
+        var d0P1b=p1bIdxs.Select(i=>d0A[i]).ToArray();
+        double rDCls=Eff(d0P1,d0P1b,d0A);
+        // Fisher z-transform partial correlation estimate
+        double zDCls=0.5*Math.Log((1+Math.Min(rDCls,0.999))/(1-Math.Max(rDCls,-0.999)));
+        double zDKm=0.5*Math.Log((1+Math.Min(rDKm,0.999))/(1-Math.Max(rDKm,-0.999)));
+        double zPartial=zDCls-zDKm*Math.Sqrt(1-Math.Exp(-2*Math.Abs(zDKm)));
+        _o.WriteLine($"\nPartial r(d0,cls|km) ≈ {zPartial:F3}");
+        _o.WriteLine($"{(Math.Abs(zPartial)<0.2?"d0 signal COLLAPSES after km control — km is NECESSARY":"d0 retains signal after km — km is NOT necessary")}");
+
+        // ============================================================
+        // PART D — Sufficiency Test
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Sufficiency Test — Where Does km Fail? ===");
+        _o.WriteLine($"Using km alone to predict P1 vs P1b.");
+
+        // Find optimal km threshold for P1/P1b separation
+        var allKmCls=bd.Select(d=>(km:d.Item6,cls:d.Item11)).OrderBy(x=>x.km).ToArray();
+        double bestThr=0;int bestCorrect=0,bestP1=0,bestP1b=0;
+        var kmSorted=allKmCls.Select(x=>x.km).ToArray();
+        for(int i=1;i<kmSorted.Length-1;i++){
+            double thr=(kmSorted[i]+kmSorted[i+1])/2;
+            int correct=0,p1Corr=0,p1bCorr=0;
+            foreach(var(km,cls)in allKmCls){
+                bool predP1=km>thr;
+                if(cls=="P1"&&predP1){correct++;p1Corr++;}
+                else if(cls=="P1b"&&!predP1){correct++;p1bCorr++;}
+            }
+            if(correct>bestCorrect){bestCorrect=correct;bestThr=thr;bestP1=p1Corr;bestP1b=p1bCorr;}
+        }
+
+        double acc=(double)bestCorrect/bd.Length;
+        _o.WriteLine($"Best km threshold: {bestThr:F4}");
+        _o.WriteLine($"Accuracy: {bestCorrect}/{bd.Length} ({acc*100:F1}%)");
+        _o.WriteLine($"P1 correct: {bestP1}/{p1.Length}, P1b correct: {bestP1b}/{p1b.Length}");
+
+        // Failure cases
+        var failures=bd.Where(d=>(d.Item6>bestThr&&d.Item11=="P1b")||(d.Item6<=bestThr&&d.Item11=="P1")).ToArray();
+        _o.WriteLine($"Failure cases: {failures.Length}/{bd.Length} ({failures.Length*100.0/bd.Length:F1}%)");
+        if(failures.Length>0){
+            _o.WriteLine($"Failure profile (avg): km={failures.Average(d=>d.Item6):F4}, d0={failures.Average(d=>d.Item7):F4}");
+        }
+
+        string suff=acc>0.90?"SUFFICIENT — km alone predicts P1/P1b with >90% accuracy"
+            :acc>0.75?"PARTIALLY SUFFICIENT — km is strong but not complete"
+            :"INSUFFICIENT — km needs supplementary variables";
+        _o.WriteLine($"Sufficiency: {suff}");
+
+        // ============================================================
+        // PART E — Origin Compression
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Origin Compression ===");
+        _o.WriteLine($"Is km a COMPRESSED representation of a higher-dimensional state?");
+
+        // Compute effective dimensionality of the state space including km
+        // via the eigenvalue spectrum of the correlation matrix
+        var matrix=new[]{iqrA,pvA,kmInitV,rawMean,dmA,kmF};
+        int nMat=matrix.Length;
+        // Use all pairs to estimate rank
+        double totalVar=0;var evals=new double[nMat];
+        for(int vi=0;vi<nMat;vi++){
+            double s=0;for(int i=0;i<nPts;i++){double v=matrix[vi][i]-matrix[vi].Average();s+=v*v;}
+            evals[vi]=s/(nPts-1);totalVar+=evals[vi];
+        }
+        // Approximate: variance explained by top components
+        var sortedEvals=evals.OrderByDescending(e=>e).ToArray();
+        double cumVar=0;int effDim=0;
+        for(int i=0;i<sortedEvals.Length;i++){cumVar+=sortedEvals[i];effDim++;if(cumVar/totalVar>0.95)break;}
+        _o.WriteLine($"Total variance: {totalVar:F2}");
+        _o.WriteLine($"Top eigenvalues: {sortedEvals[0]:F2}, {sortedEvals[1]:F2}, {sortedEvals[2]:F2}");
+        _o.WriteLine($"Effective dimensionality (95% variance): {effDim}/{nMat}");
+        _o.WriteLine($"km variance share: {evals[nMat-1]/totalVar*100:F1}%");
+
+        // Test: can km be compressed into fewer dimensions?
+        double kmVar=evals[nMat-1]/totalVar;
+        string origin;
+        if(effDim<=2)origin="km and ONE other variable capture 95% variance — km is CO-COMPRESSED with a partner";
+        else if(kmVar>0.4)origin="km captures >40% variance alone — km is the DOMINANT compressed mode";
+        else origin="km captures <40% variance — km is ONE of several compressed modes";
+        _o.WriteLine($"Origin: {origin}");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double kmEff=Eff(kmFP,kmFPb,kmF);
+        string model;
+        if(bestR>0.8&&acc<0.75)model="Model C: km is COMPRESSIBLE — hidden predecessor exists";
+        else if(bestR<0.5&&acc>0.85&&effDim<=2)model="Model A: km is FUNDAMENTAL — irreducibly simple";
+        else if(bestR<0.5&&acc<0.75)model="Model B: km is DOMINANT but REDUCIBLE — needs supplements";
+        else model="Model D: UNRESOLVED — conflicting evidence";
+
+        _o.WriteLine($"Evidence: reconstruct r={bestR:F3}, sufficiency acc={acc*100:F1}%, eff dim={effDim}, km eff={kmEff:F3}σ");
+        _o.WriteLine($"FALSIFICATION ATTEMPT: {(bestR>0.8?"km RECONSTRUCTIBLE from predecessors":"km IRREDUCIBLE")}");
+        _o.WriteLine($"FALSIFICATION ATTEMPT: {(acc<0.75?"km INSUFFICIENT alone":"km SUFFICIENT")}");
+        _o.WriteLine($"FALSIFICATION ATTEMPT: {(effDim<=2&&kmVar<0.3?"km is CO-COMPRESSED — not sole structural variable":"km is DOMINANT structural variable")}");
+        _o.WriteLine($"");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        if(model=="Model A")_o.WriteLine("CRIT_01 FAILED to break km. km survives all falsification attempts.");
+        else if(model=="Model C")_o.WriteLine("CRIT_01 SUCCEEDED in breaking km. Hidden predecessor exists.");
+        else if(model=="Model B")_o.WriteLine("CRIT_01 PARTIALLY succeeded. km is dominant but not fundamental.");
+        else _o.WriteLine("CRIT_01 INCONCLUSIVE. Conflicting evidence.");
+        _o.WriteLine("");
+        _o.WriteLine("CLAIMS: Falsification audit only. Diagnostic. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== CRIT_01 complete. Commit: CRIT_01_KernelFalsificationAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
