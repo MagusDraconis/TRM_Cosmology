@@ -3,9 +3,9 @@
 **Version:** 2.0
 **Date:** 2026-07-21
 
-**Current Version:** V5.60 INITIALIZED (KEM_01 complete)
+**Current Version:** V5.60 COMPLETE
 **Current Branch:** feature/v5.60-kernel-emergence-audit
-**Cumulative Tests:** 2933
+**Cumulative Tests:** 2940
 **Failed:** 0
 
 ---
@@ -22,11 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.53 identified the SAC P1/P1b predicate: rawIQR (spread) is the dominant discriminator
-(10× normalized), with rawMean providing independent per-N stabilization. A rank-based
-rawIQR+rawMean composite yields consistent P1>P1b direction across all N. This refines
-V5.52 — SAC creates ordering through a spread-dominant profile predicate. Stop-Low safe.
-Causal closure blocked. V6 NOT READY.
+V5.60 COMPLETE — SAC kernel emergence audited. Three core V6 prerequisites FALSIFIED:
+c_eff is NOT invariant (CV=0.80), Omega/MeanDist are CORRELATED (r=0.81, not orthogonal),
+SAC is a LIMIT CYCLE (period=2 epochs, half-life=66 epochs), not a fixed point.
+V6 NOT READY. Stop-Low SAFE. V5.61 proposed: limit cycle mechanism or Omega-MeanDist
+correlation origin.
 
 ---
 
@@ -36,6 +36,23 @@ Causal closure blocked. V6 NOT READY.
 - c3OmgS > 0.1: continue M3++ persistence validation
 - c3OmgS ≤ 0.1: stop continuation (low rescue probability)
 - Preserves all rescues. Zero damage. 75% work reduction.
+- Frozen — V5.60 findings are diagnostic only, do not affect policy.
+
+**V5.60 SAC dynamics model:**
+- SAC chain: K→Sim→RP→Nm→DL→Cupd→K'
+- Cupd = K₀·exp(-d/ξ) — exponential coupling update
+- Emergence: AMNESIC (first Cupd erases initial K)
+- Dynamics: LIMIT CYCLE with period = 2 epochs
+- km(t) ≈ km_eq + A·exp(-λt)·sin(πt + φ) with λ ≈ 0.01
+- Phase slips: zero at K=0.5 (fully locked pairs)
+- Signal: phase-difference VARIANCE, not slips
+
+**V5.60 invariance findings:**
+- c_eff = Ω×MD: CV(seed)=0.80, CV(N)=1.08 — NOT invariant
+- Omega alone: CV(seed)=0.40, CV(N)=0.71
+- MeanDist alone: CV(seed)=0.45, CV(N)=0.49
+- Best candidate: MD/O (CV≈0.34-0.39) — still not invariant
+- Omega-MeanDist correlation: r=0.81 overall, up to r=0.95 at N=80
 
 **Diagnostic hierarchy (V5.38):**
 1. lambda1 / K-state (|corr| ≈ 0.618)
@@ -141,16 +158,24 @@ deterministic threshold rescue.
 | V5.51 | **COMPLETE** — Spread-Order Origin and Kernel-Assignment Mechanism. |
 | V5.52 | **COMPLETE** — Raw-Frequency Ensemble Sampling Origin. SAC creates K1>K3>K2 ordering. |
 | V5.53 | **COMPLETE** — SelectAndClassify Predicate Origin. rawIQR dominant discriminator (10×). rawMean complementary stabilizer. Model B+. TSS_01 Final Synthesis complete. |
+| V5.57 | **COMPLETE** — ART_01: Low-rawIQR preference is pipeline artifact (permutation test). |
+| **V5.60** | **COMPLETE** — KEM: SAC kernel emergence audited. c_eff=FALSIFIED, Ω/MD=CORRELATED (r=0.81), SAC=LIMIT CYCLE (T=2, half-life=66). V6 NOT READY. Final synthesis at docsV5/V5_60/TRM_V5_60_Final_Synthesis.md. |
 
 ---
 
-## Current V5.57 Research Question
+## Current Research Question (V5.60 → V5.61)
 
-**Is the low-rawIQR preference a genuine SAC discriminator or a pipeline artifact?**
+**V5.60 COMPLETE — Synthesis at docsV5/V5_60/TRM_V5_60_Final_Synthesis.md**
 
-**Answer (ART_01): Pipeline artifact.** Permutation test: 18/20 survivals — shuffling rank labels within seeds does NOT destroy the rank-outcome association. The preference is structural, not a genuine discriminator. V5.55–V5.56 rank findings are artifact-driven, not SAC mechanism.
+**V5.61 proposed: Limit cycle mechanism OR Omega-MeanDist correlation origin.**
 
-**Final synthesis:** `docsV5/V5_55/TRM_V5_55_Final_Synthesis.md`
+**Option A — Limit cycle mechanism:**
+WHY is the SAC period exactly 2 epochs? Track full K-matrix across epochs, trace Cupd output,
+test if the 2-epoch cycle is a property of exponential Cupd.
+
+**Option B — Omega-MeanDist correlation origin:**
+Why are Omega and MeanDist correlated (r=0.81)? Is the correlation pre-SAC (raw Kuramoto)?
+Does SAC amplify it? Is it graph-topology specific?
 
 ---
 
@@ -192,6 +217,19 @@ deterministic threshold rescue.
 - V5.53: rawIQR is the strongest P1/P1b discriminator (~10× normalized dominance over rawMean).
 - V5.53: rawIQR + rawMean rank composite yields consistent P1>P1b direction (2/3 N jackknife-stable).
 - V5.53: V5.52 mean-only interpretation is incomplete — SAC predicate is spread-primary, mean-complement (Model B+).
+- **V5.60: km emerges through SAC dynamical feedback across epochs (distributed growth, 0.25σ→1.45σ).**
+- **V5.60: First Cupd erases initial K structure — AMNESIC emergence (r=0.000).**
+- **V5.60: Phase slips are zero at K=0.5 — connected pairs are fully locked.**
+- **V5.60: Omega and MeanDist are CORRELATED (r=0.81 overall, r=0.95 at N=80, p<0.05 at all N).**
+- **V5.60: SAC is a LIMIT CYCLE with period=2 epochs, ω=π rad/epoch.**
+- **V5.60: Damping coefficient λ=0.0105, half-life=66 epochs — near-persistent oscillation.**
+- **V5.60: Convergence to fixed point requires high K0 (≥1.4) or large N (≥100).**
+
+### FALSIFIED
+
+- **V5.60: c_eff (= Ω×MD) is structurally invariant — FALSIFIED (CV=0.80-1.08).**
+- **V5.60: Omega and MeanDist are orthogonal — FALSIFIED (r=0.81).**
+- **V5.60: SAC converges to a fixed point — FALSIFIED (limit cycle).**
 
 ### CONDITIONAL
 
@@ -231,40 +269,62 @@ deterministic threshold rescue.
 
 ---
 
-## Recommended V5.43 Next Prompt
+## Recommended V5.61 Next Prompt
 
 ```
-You are acting as a TRM/TQM V5.43 hidden response state and temporal trace agent.
+You are acting as a TRM/TQM V5.61 limit cycle mechanism agent.
 
 Current branch:
-feature/v5.43-hidden-response-state-and-temporal-trace-discovery
+feature/v5.61-limit-cycle-mechanism (branch from feature/v5.60-kernel-emergence-audit)
 
 Base:
-V5.42 COMPLETE
+V5.60 COMPLETE — SAC kernel emergence fully audited.
 
 Current cumulative state:
-2848 tests passed, 0 failed
+2940 tests passed, 0 failed
 
 Purpose:
-If measured same-state profiles diverge in c3OmgS (63.6%), what unmeasured
-or temporal trace factor separates them?
+V5.60 proved SAC is a LIMIT CYCLE (period=2 epochs, half-life=66 epochs).
+V5.61 must explain WHY.
 
 Frozen:
 M3++, Stop-Low policy, c3OmegaShift > 0.1 threshold.
 
 Core questions:
-1. What differs between near-identical profiles that diverge in c3OmgS?
-2. Is divergence explained by temporal ordering not captured in current vars?
-3. Is there a prior-state trace before the matched profile snapshot?
-4. Are path-history variables needed?
-5. Can divergence be reduced by adding temporal trace information?
-6. Does this improve causal closure?
-7. Does V6 remain not ready?
+1. WHY is the SAC period exactly 2 epochs? What mechanism drives the flip-flop?
+2. Does the full K-matrix alternate between two configurations (K_even vs K_odd)?
+3. Is the period-2 cycle a property of the exponential Cupd (K = K0·exp(-d/xi))?
+4. Does the distance matrix d alternate between two configurations?
+5. Simulate 50+ epochs — does the oscillation persist or ultra-slowly converge?
+6. Is the cycle amplitude an attractor property or dependent on initial conditions?
+7. Can the cycle be characterized analytically from the SAC equations?
+8. Does V6 remain not ready?
 
 Do not modify M3++. Do not retune c3OmegaShift threshold.
 Do not add new variables or correction classes.
 Do not claim physical interpretation.
 Do not attempt length, space, velocity, or c derivations.
+```
+
+**Alternative V5.61 prompt (Omega-MeanDist correlation origin):**
+
+```
+You are acting as a TRM/TQM V5.61 Omega-MeanDist correlation agent.
+
+Current branch:
+feature/v5.61-omega-meandist-correlation (branch from feature/v5.60-kernel-emergence-audit)
+
+Purpose:
+V5.60 found Omega and MeanDist are CORRELATED (r=0.81, up to r=0.95 at N=80).
+V5.61 must explain WHY.
+
+Core questions:
+1. Is the correlation present in raw Kuramoto dynamics (pre-SAC)?
+2. Does SAC amplify or suppress the correlation?
+3. Is it graph-topology specific (Erdős-Rényi) or universal?
+4. Does the correlation depend on the ω_i distribution spread?
+5. Can an invariant be constructed despite the correlation?
+6. Does V6 remain not ready?
 ```
 
 ---

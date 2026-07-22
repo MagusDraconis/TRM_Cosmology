@@ -1,7 +1,7 @@
 # TRM Project QuickStart For New Chats
 
 **Version:** 2.1
-**Date:** 2026-07-21
+**Date:** 2026-07-22
 **Read time:** < 5 minutes
 **Primary reference:** `docs/TRM_Project_Lineage_Overview.md`, `docs/TRM_Current_Frontier.md`
 
@@ -11,13 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.57 INITIALIZED |
-| Current Branch | feature/v5.57-artifact-audit |
-| Total Tests | 2923 |
+| Current Version | V5.60 COMPLETE |
+| Current Branch | feature/v5.60-kernel-emergence-audit |
+| Total Tests | 2940 |
 | Failed Tests | 0 |
-| Current Status | V5.57 INITIALIZED — ART_01 complete. Pipeline artifact audit: rank preference is structural, not genuine discriminator. |
-| Failed Tests | 0 |
-| Current Status | V5.54 COMPLETE — TSS_01 Final Synthesis. Two-level rawIQR: seed-level (SAC-irrelevant) + residual-level (SAC-relevant). Model A+. |
+| Current Status | V5.60 COMPLETE — KEM Final Synthesis. SAC = LIMIT CYCLE (T=2, half-life=66 epochs). c_eff=FALSIFIED, Ω/MD=CORRELATED (r=0.81). V6 NOT READY. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -112,7 +110,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.52 | Raw-Frequency Ensemble Sampling Origin | COMPLETE — SAC creates K1>K3>K2 ordering. |
 | V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
 
-**Cumulative total: 2901 tests, 0 failed as of 2026-07-21.**
+**Cumulative total: 2940 tests, 0 failed as of 2026-07-22.**
 
 ---
 
@@ -253,21 +251,30 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.53
+### Current Frontier — V5.60
 
-**Status:** V5.53 COMPLETE — TSS_01 Final Synthesis complete.
-**Branch:** `feature/v5.53-selectandclassify-predicate-origin`
+**Status:** V5.60 COMPLETE — KEM Final Synthesis complete.
+**Branch:** `feature/v5.60-kernel-emergence-audit`
+**Tests:** 2940 passed, 0 failed
 
-**V5.53 story arc:**
-V5.52 established that SAC creates K1 > K3 > K2 ordering through P1 composition but did not
-identify the P1/P1b discriminator. V5.53 identified the predicate: rawIQR (spread) is the
-dominant discriminator (~10× normalized dominance over rawMean), with rawMean providing
-independent complementary per-N stabilization. A rank-based rawIQR + rawMean composite
-yields consistent P1 > P1b direction across all N (2/3 N jackknife-stable). This refines
-V5.52 from a mean-centric to a spread-primary predicate model (Model B+). Stop-Low safe.
-Causal closure blocked. V6 NOT READY.
+**V5.60 story arc:**
+V5.53 identified the SAC P1/P1b predicate as spread-primary (rawIQR). V5.60 asked deeper
+questions about the SAC dynamics itself: How does km emerge? Is c_eff invariant? Are Omega
+and MeanDist orthogonal? Does SAC converge?
 
-See `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md` for complete synthesis.
+**Answers (7 suites, 7/7 passed):**
+1. **km emergence:** AMNESIC — first Cupd erases initial K, builds P1/P1b signal across epochs (0.25σ→1.45σ).
+2. **Phase slips:** ZERO at K=0.5. Signal from phase-diff VARIANCE, not slips.
+3. **c_eff invariance:** FALSIFIED (CV=0.80-1.08).
+4. **Omega-MeanDist orthogonality:** FALSIFIED (r=0.81 overall, r=0.95 at N=80).
+5. **SAC fixed point:** FALSIFIED — SAC is a LIMIT CYCLE (period=2 epochs, λ=0.01, half-life=66 epochs).
+6. **Parameter sensitivity:** Convergence requires K0≥1.4 or N≥100. Oscillation robust otherwise.
+
+**V6 readiness:** NOT ACHIEVED. 3 of 4 core prerequisites falsified (c_eff invariance, Ω⊥MD, SAC fixed point). Causal closure already blocked (V5.40-41).
+
+**Next:** V5.61 proposed — limit cycle mechanism OR Omega-MeanDist correlation origin.
+
+See `docsV5/V5_60/TRM_V5_60_Final_Synthesis.md` for complete synthesis.
 
 ---
 
@@ -316,6 +323,6 @@ Do not introduce new theory. The project has 2871 tests with 0 failures. V5.46 i
 
 ---
 
-*Generated 2026-07-16, last updated 2026-07-21. This document is a short operational briefing — not a replacement
+*Generated 2026-07-16, last updated 2026-07-22. This document is a short operational briefing — not a replacement
 for the full lineage overview or the current frontier document. Read `TRM_Project_Lineage_Overview.md` for the
 complete historical context and `TRM_Current_Frontier.md` for the active research state.*

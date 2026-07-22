@@ -1408,6 +1408,36 @@ ordering through P1 composition.
 
 **Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
+### V5.60 — Kernel Emergence Audit — COMPLETE
+
+**Status:** COMPLETE (2026-07-22). 7 suites: KEM_01, KSP_01, EMG_01, EMG_02, KEM_02, KEM_03, KEM_04.
+**Final Model: SAC = LIMIT CYCLE with period 2 epochs, half-life 66 epochs.**
+
+**Key findings:**
+- **KEM_01:** km emerges through SAC dynamical feedback (amnesic: first Cupd erases initial K). P1/P1b separation grows from 0.25σ→1.45σ across 3 epochs. Distributed growth pattern.
+- **KSP_01:** Phase slips are ZERO at K=0.5. Signal originates in phase-diff VARIANCE (tightness of lock), not slips. Interpretation: SAC DYNAMICAL FEEDBACK.
+- **EMG_01:** c_eff (= Ω×MD) is NOT invariant. CV(seed)=0.80, CV(N)=1.08.
+- **EMG_02:** Omega and MeanDist are CORRELATED (r=0.81 overall, r=0.95 at N=80), not orthogonal. MD/O is closest to invariant (CV≈0.34).
+- **KEM_02:** K0 sweep shows km declines across epochs. Higher K0→larger epoch-1 overshoot.
+- **KEM_03:** km oscillates for most Xi/N/Dt. NO stable convergence to fixed point at 5 epochs.
+- **KEM_04:** SAC is a LIMIT CYCLE (period=2, ω=π). λ=0.0105, half-life=66 epochs. Convergence requires K0≥1.4 or N≥100.
+
+**Core falsifications for V6:**
+| Prerequisite | Status |
+|:-------------|:------|
+| c_eff invariant (CV<0.05) | ❌ FALSIFIED (CV=0.80) |
+| Ω⊥MD (orthogonal) | ❌ FALSIFIED (r=0.81) |
+| SAC fixed point | ❌ FALSIFIED (limit cycle) |
+| Causal closure | ❌ BLOCKED (V5.40-41) |
+
+**V6 readiness:** NOT ACHIEVED. Stop-Low: SAFE. 2940 tests, 0 failed.
+
+**Final synthesis:** `docsV5/V5_60/TRM_V5_60_Final_Synthesis.md`
+
+### V5.57 — Pipeline Artifact Audit — COMPLETE
+
+**Status:** COMPLETE. ART_01: Low-rawIQR preference is pipeline artifact (permutation test: 18/20 survivals).
+
 For the historical frontier context (V5.6+), see section F2 above.
 
 ---
@@ -1453,10 +1483,12 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2901 tests, 0 failed. V5.53 COMPLETE — TSS_01 Final Synthesis complete.
-Current branch: `feature/v5.53-selectandclassify-predicate-origin`.
+**Current status:** 2940 tests, 0 failed. V5.60 COMPLETE — KEM Final Synthesis complete.
+Current branch: `feature/v5.60-kernel-emergence-audit`.
 Preferred model: M3++ with Stop-Low policy (c3OmgS > 0.1 continue, ≤ 0.1 stop).
-SAC predicate: rawIQR (spread-primary, ~10× dominance) + rawMean (complementary stabilizer) = Model B+.
+SAC dynamics: LIMIT CYCLE (period=2 epochs, λ=0.01, half-life=66 epochs).
+Omega-MeanDist correlation: r=0.81 (not orthogonal). c_eff: NOT invariant.
+V6 readiness: NOT ACHIEVED (3 of 4 prerequisites falsified).
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
