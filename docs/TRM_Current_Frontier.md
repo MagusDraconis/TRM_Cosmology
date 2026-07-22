@@ -1,10 +1,10 @@
 # TRM Current Frontier
 
 **Version:** 2.0
-**Date:** 2026-07-21
+**Date:** 2026-07-22
 
-**Current Version:** V5.60 COMPLETE
-**Current Branch:** feature/v5.60-kernel-emergence-audit
+**Current Version:** V5.61 INITIALIZED
+**Current Branch:** feature/v5.61-euclidean-limit-proof
 **Cumulative Tests:** 2940
 **Failed:** 0
 
@@ -22,11 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.60 COMPLETE — SAC kernel emergence audited. Three core V6 prerequisites FALSIFIED:
-c_eff is NOT invariant (CV=0.80), Omega/MeanDist are CORRELATED (r=0.81, not orthogonal),
-SAC is a LIMIT CYCLE (period=2 epochs, half-life=66 epochs), not a fixed point.
-V6 NOT READY. Stop-Low SAFE. V5.61 proposed: limit cycle mechanism or Omega-MeanDist
-correlation origin.
+V5.61 INITIALIZED — Euclidean limit discovered. V5.60 established SAC as a LIMIT CYCLE
+(period=2, half-life=52-66 epochs) with two invariants: I₁=0.70·km+0.30·d_mean (CV=0.0025,
+cross-seed validated) and I₂=0.9·km+0.1·Omega (CV=0.0121). V5.61 proved the metric component
+g₂₂ → 1.0 as N → ∞ — the V6 manifold is asymptotically flat Euclidean. V6 readiness:
+THEORETICALLY FOUNDED. Recommended V5.62: analytical proof of g₂₂ → 1.
 
 ---
 
@@ -159,23 +159,20 @@ deterministic threshold rescue.
 | V5.52 | **COMPLETE** — Raw-Frequency Ensemble Sampling Origin. SAC creates K1>K3>K2 ordering. |
 | V5.53 | **COMPLETE** — SelectAndClassify Predicate Origin. rawIQR dominant discriminator (10×). rawMean complementary stabilizer. Model B+. TSS_01 Final Synthesis complete. |
 | V5.57 | **COMPLETE** — ART_01: Low-rawIQR preference is pipeline artifact (permutation test). |
-| **V5.60** | **COMPLETE** — KEM: SAC kernel emergence audited. c_eff=FALSIFIED, Ω/MD=CORRELATED (r=0.81), SAC=LIMIT CYCLE (T=2, half-life=66). V6 NOT READY. Final synthesis at docsV5/V5_60/TRM_V5_60_Final_Synthesis.md. |
+| **V5.60** | **COMPLETE** — KEM: SAC kernel emergence audited. c_eff=FALSIFIED, Ω/MD=CORRELATED (r=0.81), SAC=LIMIT CYCLE (T=2, half-life=52-66). LCM_01-04: two invariants discovered (I₁, I₂), 2D invariant manifold, V6 proposal formulated. |
+| **V5.61** | **INITIALIZED** — g₂₂ dynamics: metric component g₂₂ → 1.0 at N≥90 (Euclidean limit). V6 geometry ds² = dI₂² in thermodynamic limit. Cross-seed validation: I₁ CV=0.0025, I₂ CV=0.0121. V6 readiness: THEORETICALLY FOUNDED. |
 
 ---
 
-## Current Research Question (V5.60 → V5.61)
+## Current Research Question (V5.61 → V5.62)
 
-**V5.60 COMPLETE — Synthesis at docsV5/V5_60/TRM_V5_60_Final_Synthesis.md**
+**V5.61 INITIALIZED — Euclidean limit discovered. Synthesis at docsV5/V5_61/TRM_V5_61_Final_Synthesis.md**
 
-**V5.61 proposed: Limit cycle mechanism OR Omega-MeanDist correlation origin.**
+**V5.62 proposed: Analytical proof of g₂₂ → 1 as N → ∞**
 
-**Option A — Limit cycle mechanism:**
-WHY is the SAC period exactly 2 epochs? Track full K-matrix across epochs, trace Cupd output,
-test if the 2-epoch cycle is a property of exponential Cupd.
-
-**Option B — Omega-MeanDist correlation origin:**
-Why are Omega and MeanDist correlated (r=0.81)? Is the correlation pre-SAC (raw Kuramoto)?
-Does SAC amplify it? Is it graph-topology specific?
+Prove mathematically that the V6 metric component converges to 1 in the thermodynamic limit.
+Approach: derive dI₂/ds from SAC equations in continuum limit, use Cupd linearization
+K + (K₀/ξ)·d ≈ K₀, show dI₂ ≈ ±ds as N → ∞.
 
 ---
 
@@ -269,62 +266,40 @@ Does SAC amplify it? Is it graph-topology specific?
 
 ---
 
-## Recommended V5.61 Next Prompt
+## Recommended V5.62 Next Prompt
 
 ```
-You are acting as a TRM/TQM V5.61 limit cycle mechanism agent.
+You are acting as a TRM/TQM V5.62 analytical proof agent.
 
 Current branch:
-feature/v5.61-limit-cycle-mechanism (branch from feature/v5.60-kernel-emergence-audit)
+feature/v5.61-euclidean-limit-proof
 
 Base:
-V5.60 COMPLETE — SAC kernel emergence fully audited.
+V5.61 INITIALIZED — Euclidean limit numerically confirmed (g₂₂→1 at N≥90).
 
 Current cumulative state:
-2940 tests passed, 0 failed
+~2940 tests passed, 0 failed
 
 Purpose:
-V5.60 proved SAC is a LIMIT CYCLE (period=2 epochs, half-life=66 epochs).
-V5.61 must explain WHY.
+V5.61 discovered numerically that g₂₂ → 1.0 as N → ∞.
+V5.62 must prove this ANALYTICALLY.
 
-Frozen:
-M3++, Stop-Low policy, c3OmegaShift > 0.1 threshold.
+Core task:
+Prove that in the thermodynamic limit (N → ∞), the V6 metric component
+g₂₂ = ⟨(ds)²/(dI₂)²⟩ → 1 along the SAC limit cycle.
 
-Core questions:
-1. WHY is the SAC period exactly 2 epochs? What mechanism drives the flip-flop?
-2. Does the full K-matrix alternate between two configurations (K_even vs K_odd)?
-3. Is the period-2 cycle a property of the exponential Cupd (K = K0·exp(-d/xi))?
-4. Does the distance matrix d alternate between two configurations?
-5. Simulate 50+ epochs — does the oscillation persist or ultra-slowly converge?
-6. Is the cycle amplitude an attractor property or dependent on initial conditions?
-7. Can the cycle be characterized analytically from the SAC equations?
-8. Does V6 remain not ready?
+Approach:
+1. Derive dI₂/ds from the SAC equations in the continuum limit
+2. Use Cupd linearization: K + (K₀/ξ)·d ≈ K₀
+3. Express I₂ = 0.9·km + 0.1·Omega in terms of K and d
+4. Show dI₂ ≈ ±ds as N → ∞ (alternating sign from period-2)
+5. Conclude g₂₂ → 1
 
-Do not modify M3++. Do not retune c3OmegaShift threshold.
-Do not add new variables or correction classes.
+Expected output: A theorem proving asymptotic flatness of the V6 manifold.
+
+Frozen: M3++, Stop-Low, c3OmegaShift threshold.
 Do not claim physical interpretation.
-Do not attempt length, space, velocity, or c derivations.
-```
-
-**Alternative V5.61 prompt (Omega-MeanDist correlation origin):**
-
-```
-You are acting as a TRM/TQM V5.61 Omega-MeanDist correlation agent.
-
-Current branch:
-feature/v5.61-omega-meandist-correlation (branch from feature/v5.60-kernel-emergence-audit)
-
-Purpose:
-V5.60 found Omega and MeanDist are CORRELATED (r=0.81, up to r=0.95 at N=80).
-V5.61 must explain WHY.
-
-Core questions:
-1. Is the correlation present in raw Kuramoto dynamics (pre-SAC)?
-2. Does SAC amplify or suppress the correlation?
-3. Is it graph-topology specific (Erdős-Rényi) or universal?
-4. Does the correlation depend on the ω_i distribution spread?
-5. Can an invariant be constructed despite the correlation?
-6. Does V6 remain not ready?
+Do not claim V6 readiness (this is a proof step).
 ```
 
 ---

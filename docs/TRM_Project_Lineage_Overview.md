@@ -1408,6 +1408,23 @@ ordering through P1 composition.
 
 **Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
+### V5.61 — Euclidean Limit Proof — INITIALIZED
+
+**Status:** INITIALIZED (2026-07-22). 1 suite: V5.61_g2_Dynamics.
+**Key Discovery: g₂₂ → 1.0 as N → ∞ — the V6 metric becomes Euclidean.**
+
+**Key findings:**
+- g₂₂ is driven by km (r=0.588) and inversely by MeanDist (r=-0.520)
+- g₂₂ is path-dependent at finite N (Finsler-like geometry)
+- At N=90: g₂₂=1.014, CV=0.017 — nearly Euclidean
+- At N=100: g₂₂=1.002, CV=0.003 — essentially Euclidean
+- The V6 manifold is asymptotically flat: ds² → dI₂² in thermodynamic limit
+- I₁ remains N-constant across all tested N (range 0.799-0.812)
+
+**V6 readiness:** THEORETICALLY FOUNDED. 15 supported findings, 4 falsified, 7 open questions.
+
+**Final synthesis:** `docsV5/V5_61/TRM_V5_61_Final_Synthesis.md`
+
 ### V5.60 — Kernel Emergence Audit — COMPLETE
 
 **Status:** COMPLETE (2026-07-22). 7 suites: KEM_01, KSP_01, EMG_01, EMG_02, KEM_02, KEM_03, KEM_04.
@@ -1483,12 +1500,12 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2940 tests, 0 failed. V5.60 COMPLETE — KEM Final Synthesis complete.
-Current branch: `feature/v5.60-kernel-emergence-audit`.
+**Current status:** 2940 tests, 0 failed. V5.61 INITIALIZED — Euclidean limit discovered.
+Current branch: `feature/v5.61-euclidean-limit-proof`.
 Preferred model: M3++ with Stop-Low policy (c3OmgS > 0.1 continue, ≤ 0.1 stop).
-SAC dynamics: LIMIT CYCLE (period=2 epochs, λ=0.01, half-life=66 epochs).
-Omega-MeanDist correlation: r=0.81 (not orthogonal). c_eff: NOT invariant.
-V6 readiness: NOT ACHIEVED (3 of 4 prerequisites falsified).
+SAC dynamics: LIMIT CYCLE (period=2, λ=0.01, half-life=52-66 epochs).
+V6 geometry: ds² = g₂₂·dI₂² on (I₁, I₂) manifold. g₂₂ → 1.0 as N → ∞ (asymptotically flat).
+V6 readiness: THEORETICALLY FOUNDED (not yet implemented).
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

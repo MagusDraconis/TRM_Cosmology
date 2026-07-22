@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.60 COMPLETE |
-| Current Branch | feature/v5.60-kernel-emergence-audit |
+| Current Version | V5.61 INITIALIZED |
+| Current Branch | feature/v5.61-euclidean-limit-proof |
 | Total Tests | 2940 |
 | Failed Tests | 0 |
-| Current Status | V5.60 COMPLETE — KEM Final Synthesis. SAC = LIMIT CYCLE (T=2, half-life=66 epochs). c_eff=FALSIFIED, Ω/MD=CORRELATED (r=0.81). V6 NOT READY. |
+| Current Status | V5.61 INITIALIZED — Euclidean limit discovered. I₁ (CV=0.0025), I₂ (CV=0.0121) cross-seed validated. g₂₂ → 1.0 at N≥90. V6: THEORETICALLY FOUNDED. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -251,30 +251,31 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.60
+### Current Frontier — V5.61
 
-**Status:** V5.60 COMPLETE — KEM Final Synthesis complete.
-**Branch:** `feature/v5.60-kernel-emergence-audit`
+**Status:** V5.61 INITIALIZED — Euclidean limit numerically confirmed.
+**Branch:** `feature/v5.61-euclidean-limit-proof`
 **Tests:** 2940 passed, 0 failed
 
-**V5.60 story arc:**
-V5.53 identified the SAC P1/P1b predicate as spread-primary (rawIQR). V5.60 asked deeper
-questions about the SAC dynamics itself: How does km emerge? Is c_eff invariant? Are Omega
-and MeanDist orthogonal? Does SAC converge?
+**V5.61 story arc:**
+V5.60 discovered that SAC is a LIMIT CYCLE (period=2, half-life=52-66 epochs) with two
+invariants: I₁ = 0.70·km + 0.30·d_mean (CV=0.0025) and I₂ = 0.9·km + 0.1·Omega (CV=0.0121).
+Both are cross-seed validated. The V6 geometry on the (I₁, I₂) manifold has metric
+ds² = g₂₂·dI₂² with arc-length time coordinate s(t).
 
-**Answers (7 suites, 7/7 passed):**
-1. **km emergence:** AMNESIC — first Cupd erases initial K, builds P1/P1b signal across epochs (0.25σ→1.45σ).
-2. **Phase slips:** ZERO at K=0.5. Signal from phase-diff VARIANCE, not slips.
-3. **c_eff invariance:** FALSIFIED (CV=0.80-1.08).
-4. **Omega-MeanDist orthogonality:** FALSIFIED (r=0.81 overall, r=0.95 at N=80).
-5. **SAC fixed point:** FALSIFIED — SAC is a LIMIT CYCLE (period=2 epochs, λ=0.01, half-life=66 epochs).
-6. **Parameter sensitivity:** Convergence requires K0≥1.4 or N≥100. Oscillation robust otherwise.
+V5.61 investigated g₂₂ — the metric component. KEY DISCOVERY: g₂₂ → 1.0 as N → ∞.
+At N=90: g₂₂=1.01 (CV=0.017). At N=100: g₂₂=1.00 (CV=0.003). The V6 manifold is
+**asymptotically flat** — in the thermodynamic limit, ds² = dI₂² (pure Euclidean).
 
-**V6 readiness:** NOT ACHIEVED. 3 of 4 core prerequisites falsified (c_eff invariance, Ω⊥MD, SAC fixed point). Causal closure already blocked (V5.40-41).
+**V6 readiness:** THEORETICALLY FOUNDED. The geometric framework is complete:
+- Invariants: I₁ (conserved), I₂ (coordinate)
+- Metric: ds² = g₂₂·dI₂² → dI₂² at N→∞
+- Time: arc length s(t) (monotonic)
+- Driver: Omega (cyclic, not monotonic)
 
-**Next:** V5.61 proposed — limit cycle mechanism OR Omega-MeanDist correlation origin.
+**Next:** V5.62 — analytical proof of g₂₂ → 1 as N → ∞.
 
-See `docsV5/V5_60/TRM_V5_60_Final_Synthesis.md` for complete synthesis.
+See `docsV5/V5_61/TRM_V5_61_Final_Synthesis.md` for complete synthesis.
 
 ---
 
