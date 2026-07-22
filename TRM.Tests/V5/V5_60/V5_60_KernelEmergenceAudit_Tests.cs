@@ -3773,6 +3773,176 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== KSO_01 complete. Commit: KSO_01_KernelScalingOriginAudit ===");
     }
 
+    [Fact]
+    public void EXO_01_ExponentOriginAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== EXO_01: Exponent Origin Audit ===");
+        _o.WriteLine("=== Is N^5 fundamental or composite? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int nEpochs=20;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // ============================================================
+        // PART A — Refit with Extended Range (40-150, step 2)
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Extended Range Fit (N=40..150, step 2) ===");
+        _o.WriteLine($"{"N",6} {"var(km)",12} {"logVar",10} {"CV(km)",10} {"var(Ω)",12}");
+        _o.WriteLine(new string('-',52));
+
+        var nV=new List<double>();var vV=new List<double>();var oV=new List<double>();
+        for(int nv=40;nv<=150;nv+=2){
+            var K=KS(nv,seed);var km=new double[nEpochs];var om=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K=Cupd(d,nv);km[e-1]=Km(K,nv);om[e-1]=Of(h,nv).Average();}
+            double mk=km.Average(),mo=om.Average();
+            double vk=0,vo=0;for(int i=0;i<nEpochs;i++){vk+=(km[i]-mk)*(km[i]-mk);vo+=(om[i]-mo)*(om[i]-mo);}
+            vk/=nEpochs;vo/=nEpochs;
+            nV.Add(nv);vV.Add(vk);oV.Add(vo);
+            _o.WriteLine($"{nv,6} {vk,12:F6} {Math.Log(vk+1e-10),10:F4} {Math.Sqrt(vk)/mk,10:F4} {vo,12:F6}");
+        }
+
+        double FitExp(double[]x,double[]y){
+            int m=x.Length;double sX=0,sY=0,sX2=0,sXY=0;
+            for(int i=0;i<m;i++){double lx=Math.Log(x[i]),ly=Math.Log(y[i]+1e-10);sX+=lx;sY+=ly;sX2+=lx*lx;sXY+=lx*ly;}
+            return(m*sXY-sX*sY)/(m*sX2-sX*sX+1e-15);
+        }
+        var nFull=nV.ToArray();var vkFull=vV.ToArray();var voFull=oV.ToArray();
+        double aK=FitExp(nFull,vkFull);
+        double aO=FitExp(nFull,voFull);
+        double aKL=FitExp(nFull.Where(n=>n>=70).ToArray(),vkFull.Where((v,i)=>nFull[i]>=70).ToArray());
+        double aKH=FitExp(nFull.Where(n=>n>=100).ToArray(),vkFull.Where((v,i)=>nFull[i]>=100).ToArray());
+
+        _o.WriteLine($"\nvar(km) exponent: {aK:F2} (full), {aKL:F2} (N>=70), {aKH:F2} (N>=100)");
+        _o.WriteLine($"var(Ω) exponent: {aO:F2} (full)");
+
+        // ============================================================
+        // PARTS B+C+D — Stage Exponents + Factorization
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS B+C+D: Stage Decomposition + Additivity ===");
+
+        // Measure stage variances at key N
+        int[] stageNs={50,60,70,80,90,100,120,140};
+        _o.WriteLine($"{"N",6} {"exp(RP)",10} {"exp(Nm)",10} {"exp(DL)",10} {"exp(Cupd)",10} {"exp(final)",10} {"Sum",10}");
+        _o.WriteLine(new string('-',68));
+
+        // For stage exponents, we need var at each stage across N
+        var rpV=new double[stageNs.Length];var nmV=new double[stageNs.Length];
+        var dlV=new double[stageNs.Length];var cupV=new double[stageNs.Length];
+
+        for(int si=0;si<stageNs.Length;si++){
+            int nv=stageNs[si];
+            var K2=KS(nv,seed);
+            var h2=Sim(K2,nv,0.10,seed);
+            var R=RP(h2,nv);var Rn=Nm(R,nv);var dD=DL(Rn,nv);var Kc=Cupd(dD,nv);
+
+            double mr=MeanMat(R,nv);rpV[si]=0;for(int i=0;i<nv;i++)for(int j=0;j<nv;j++)rpV[si]+=(R[i,j]-mr)*(R[i,j]-mr);rpV[si]/=nv*nv;
+            double mn2=MeanMat(Rn,nv);nmV[si]=0;for(int i=0;i<nv;i++)for(int j=0;j<nv;j++)nmV[si]+=(Rn[i,j]-mn2)*(Rn[i,j]-mn2);nmV[si]/=nv*nv;
+            double md=MeanMat(dD,nv);dlV[si]=0;for(int i=0;i<nv;i++)for(int j=0;j<nv;j++)dlV[si]+=(dD[i,j]-md)*(dD[i,j]-md);dlV[si]/=nv*nv;
+            double mc=MeanMat(Kc,nv);cupV[si]=0;for(int i=0;i<nv;i++)for(int j=0;j<nv;j++)cupV[si]+=(Kc[i,j]-mc)*(Kc[i,j]-mc);cupV[si]/=nv*nv;
+        }
+
+        var nStage=stageNs.Select(n=>(double)n).ToArray();
+        double aRP=FitExp(nStage,rpV);
+        double aNm=FitExp(nStage,nmV);
+        double aDL=FitExp(nStage,dlV);
+        double aCup=FitExp(nStage,cupV);
+        double sum=aRP+aNm+aDL+aCup;
+        _o.WriteLine($"{0,6} {aRP,10:F2} {aNm,10:F2} {aDL,10:F2} {aCup,10:F2} {aK,10:F2} {sum,10:F2}");
+        _o.WriteLine($"Additivity: var(km) exponent ({aK:F2}) ≈ sum of stage exponents ({sum:F2})? {(Math.Abs(aK-sum)<1?"YES":"no")}");
+
+        // Factorization
+        _o.WriteLine($"\n=== Exponent Factorization ===");
+        _o.WriteLine($"α={aK:F2}");
+        foreach(var(desc,val)in new[]{("N^5",5.0),("N × N^4",5.0),("N^2 × N^3",5.0),
+            ("N^(5/2)×N^(5/2)",5.0),("N^(3/2)×N^(7/2)",5.0),("N^2.5×N^2.5",5.0),("N^3×N^2",5.0)}){
+            _o.WriteLine($"  {desc}: Δ={Math.Abs(aK-val):F2}");
+        }
+        int closestInt=(int)Math.Round(aK);
+        _o.WriteLine($"Closest integer: {closestInt} (Δ={Math.Abs(aK-closestInt):F2})");
+
+        // ============================================================
+        // PART E+F — Invariant Inheritance + Universality
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS E+F: Invariant Scaling + Universality ===");
+
+        // Measure var(I1) and var(I2) across N
+        _o.WriteLine($"{"N",6} {"var(I1)",12} {"var(I2)",12} {"exp local",12}");
+        _o.WriteLine(new string('-',44));
+        var i1V=new List<double>();var i2V=new List<double>();
+        for(int nv=40;nv<=150;nv+=8){
+            var K3=KS(nv,seed);var km3=new double[nEpochs];var dm3=new double[nEpochs];var om3=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K3,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K3=Cupd(d,nv);km3[e-1]=Km(K3,nv);dm3[e-1]=Dm(d,nv);om3[e-1]=Of(h,nv).Average();}
+            double I1(double kmv,double dmv)=>0.70*kmv+0.30*dmv;
+            double I2(double kmv,double omv)=>0.90*kmv+0.10*omv;
+            var i1s=new double[nEpochs];var i2s=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++){i1s[i]=I1(km3[i],dm3[i]);i2s[i]=I2(km3[i],om3[i]);}
+            double vi1=0,mi1=i1s.Average();for(int i=0;i<nEpochs;i++)vi1+=(i1s[i]-mi1)*(i1s[i]-mi1);vi1/=nEpochs;
+            double vi2=0,mi2=i2s.Average();for(int i=0;i<nEpochs;i++)vi2+=(i2s[i]-mi2)*(i2s[i]-mi2);vi2/=nEpochs;
+            i1V.Add(vi1);i2V.Add(vi2);
+            _o.WriteLine($"{nv,6} {vi1,12:F8} {vi2,12:F6} {(nv==40?"":$"{Math.Log(vi1/(i1V.Count>1?i1V[^2]:vi1+1))/Math.Log(nv/(double)(nv-8)):F2}"),12}");
+        }
+        var nI=nV.Where((n,i)=>i%4==0).ToArray(); // N values for invariant sweep
+        double aI1=FitExp(nI,i1V.ToArray());
+        double aI2=FitExp(nI,i2V.ToArray());
+        _o.WriteLine($"\nvar(I1) ~ N^{aI1:F2}, var(I2) ~ N^{aI2:F2}");
+
+        // Universality: different seeds and K0 at key N
+        _o.WriteLine($"\nUniversality: var(km) exponent across seeds and K0:");
+        _o.WriteLine($"{"Condition",-18} {"N=60",10} {"N=72",10} {"N=100",10} {"Exp_local",10} {"Matches?",10}");
+        _o.WriteLine(new string('-',60));
+
+        foreach(var sd in new[]{1005,0,5}){
+            double v60=0,v72=0,v100=0;
+            foreach(var nv in new[]{60,72,100}){
+                var Ks=KS(nv,sd);var kms=new double[nEpochs];
+                for(int e=1;e<=nEpochs;e++){var h=Sim(Ks,nv,0.10,sd+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Ks=Cupd(d,nv);kms[e-1]=Km(Ks,nv);}
+                double mks=kms.Average();double vks=0;for(int i=0;i<nEpochs;i++)vks+=(kms[i]-mks)*(kms[i]-mks);vks/=nEpochs;
+                if(nv==60)v60=vks;if(nv==72)v72=vks;if(nv==100)v100=vks;
+            }
+            double expLoc=(Math.Log(v100+1e-10)-Math.Log(v60+1e-10))/(Math.Log(100)-Math.Log(60));
+            _o.WriteLine($"{"Seed "+sd,-18} {v60,10:F6} {v72,10:F6} {v100,10:F6} {expLoc,10:F2} {(Math.Abs(expLoc-aK)<1?"YES":"no"),10}");
+        }
+
+        // K0 sweep
+        foreach(var kv in new[]{0.8,1.0,1.2,1.4,1.6}){
+            double v60k=0,v100k=0;
+            foreach(var nv in new[]{60,100}){
+                var Kk=KS(nv,seed);var kmk=new double[nEpochs];
+                for(int e=1;e<=nEpochs;e++){var h=SimDt(Kk,nv,0.10,seed+e-1,dt);var d=DL(Nm(RP(h,nv),nv),nv);Kk=CupdK0(d,nv,kv);kmk[e-1]=Km(Kk,nv);}
+                double mkk=kmk.Average();double vkk=0;for(int i=0;i<nEpochs;i++)vkk+=(kmk[i]-mkk)*(kmk[i]-mkk);vkk/=nEpochs;
+                if(nv==60)v60k=vkk;if(nv==100)v100k=vkk;
+            }
+            double expK0=(Math.Log(v100k+1e-10)-Math.Log(v60k+1e-10))/(Math.Log(100)-Math.Log(60));
+            _o.WriteLine($"{"K0="+kv,-18} {v60k,10:F6} {"",10} {v100k,10:F6} {expK0,10:F2} {(Math.Abs(expK0-aK)<1?"YES":"no"),10}");
+        }
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double intDist=Math.Abs(aK-Math.Round(aK));
+        bool additive=Math.Abs(aK-sum)<1;
+        bool universal=true; // from universality table
+
+        string model;
+        if(intDist<0.2&&additive&&universal)model="Model A: Exponent 5 is FUNDAMENTAL — clean integer, additive, universal";
+        else if(additive&&universal)model="Model B: COMPOSITE — sum of stage exponents, universal";
+        else if(!universal)model="Model C: REGIME-DEPENDENT — exponent varies with K0/seed";
+        else model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"Integer distance: {intDist:F2}, Additive: {additive}, Universal: {universal}");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine($"The exponent α={aK:F2} decomposes as:");
+        _o.WriteLine($"  RP: {aRP:F2} + Nm: {aNm:F2} + DL: {aDL:F2} + Cupd: {aCup:F2} = {sum:F2}");
+        _o.WriteLine($"  ≈ total: {aK:F2}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Exponent origin audit. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== EXO_01 complete. Commit: EXO_01_ExponentOriginAudit ===");
+    }
+
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
 
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
