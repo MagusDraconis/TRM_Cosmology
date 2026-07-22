@@ -2773,6 +2773,211 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== INV_01 complete. Commit: INV_01_InvariantStressTest ===");
     }
 
+    [Fact]
+    public void IVO_01_InvariantWeightOriginAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== IVO_01: Invariant Weight Origin Audit ===");
+        _o.WriteLine("=== Why 0.70/0.30 and 0.90/0.10? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;double xi=1.75;double dt=0.05;double k0=1.2;
+        int nEpochs=20;
+
+        // Generate baseline trajectory
+        var K=KS(N,seed);
+        var kmV=new double[nEpochs];var dmV=new double[nEpochs];var omV=new double[nEpochs];
+        for(int e=1;e<=nEpochs;e++){var h=Sim(K,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);K=Cupd(d,N);kmV[e-1]=Km(K,N);dmV[e-1]=Dm(d,N);omV[e-1]=Of(h,N).Average();}
+
+        // ============================================================
+        // PART A — Weight Sweep for I1 and I2
+        // ============================================================
+        _o.WriteLine($"\n=== PART A+B: Weight Landscape ===");
+
+        // I1 weight sweep: a*km + (1-a)*dMean, a in [0, 1]
+        _o.WriteLine($"\n--- I₁ = a·km + (1-a)·dMean ---");
+        _o.WriteLine($"{"a",8} {"CV",10} {"Mean",10} {"dCV/da",10}");
+        _o.WriteLine(new string('-',40));
+
+        var cvA=new double[101];double bestCvA=double.MaxValue;int bestAi=0;
+        for(int ai=0;ai<=100;ai++){
+            double a=ai/100.0;
+            var vals=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++)vals[i]=a*kmV[i]+(1-a)*dmV[i];
+            cvA[ai]=Sd(vals)/Math.Abs(vals.Average()+0.001);
+            if(cvA[ai]<bestCvA){bestCvA=cvA[ai];bestAi=ai;}
+            if(ai%10==0){
+                double deriv=ai>0?(cvA[ai]-cvA[ai-1])/0.01:0;
+                _o.WriteLine($"{a,8:F2} {cvA[ai],10:F4} {vals.Average(),10:F4} {deriv,10:F4}");
+            }
+        }
+        double bestA=bestAi/100.0;
+        _o.WriteLine($"Optimal a* = {bestA:F2} (CV={bestCvA:F4})");
+        _o.WriteLine($"Observed I1: a=0.70 (CV={cvA[70]:F4})");
+        _o.WriteLine($"Delta from optimum: {Math.Abs(0.70-bestA):F4}");
+
+        // I2 weight sweep: b*km + (1-b)*Omega
+        _o.WriteLine($"\n--- I₂ = b·km + (1-b)·Omega ---");
+        _o.WriteLine($"{"b",8} {"CV",10} {"Mean",10} {"dCV/db",10}");
+        _o.WriteLine(new string('-',40));
+
+        var cvB=new double[101];double bestCvB=double.MaxValue;int bestBi=0;
+        for(int bi=0;bi<=100;bi++){
+            double b=bi/100.0;
+            var vals=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++)vals[i]=b*kmV[i]+(1-b)*omV[i];
+            cvB[bi]=Sd(vals)/Math.Abs(vals.Average()+0.001);
+            if(cvB[bi]<bestCvB){bestCvB=cvB[bi];bestBi=bi;}
+            if(bi%10==0){
+                double deriv=bi>0?(cvB[bi]-cvB[bi-1])/0.01:0;
+                _o.WriteLine($"{b,8:F2} {cvB[bi],10:F4} {vals.Average(),10:F4} {deriv,10:F4}");
+            }
+        }
+        double bestB=bestBi/100.0;
+        _o.WriteLine($"Optimal b* = {bestB:F2} (CV={bestCvB:F4})");
+        _o.WriteLine($"Observed I2: b=0.90 (CV={cvB[90]:F4})");
+        _o.WriteLine($"Delta from optimum: {Math.Abs(0.90-bestB):F4}");
+
+        // ============================================================
+        // PART B — Sharpness and Confidence
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Landscape Sharpness ===");
+
+        // Sharpness: CV at optimum ± width
+        double cvAtOptA=cvA[bestAi];
+        double cvPlus5A=bestAi+5<=100?cvA[bestAi+5]:cvAtOptA;
+        double cvMinus5A=bestAi-5>=0?cvA[bestAi-5]:cvAtOptA;
+        double sharpnessA=(cvPlus5A+cvMinus5A-2*cvAtOptA)/(0.05*0.05)*0.5;
+        _o.WriteLine($"I1: Optimum at a={bestA:F2}, CV={cvAtOptA:F4}");
+        _o.WriteLine($"  CV at a±0.05: {cvMinus5A:F4}, {cvPlus5A:F4}");
+        _o.WriteLine($"  Curvature (sharpness): {sharpnessA:F4} ({(sharpnessA>10?"SHARP peak":"BROAD plateau")})");
+
+        double cvAtOptB=cvB[bestBi];
+        double cvPlus5B=bestBi+5<=100?cvB[bestBi+5]:cvAtOptB;
+        double cvMinus5B=bestBi-5>=0?cvB[bestBi-5]:cvAtOptB;
+        double sharpnessB=(cvPlus5B+cvMinus5B-2*cvAtOptB)/(0.05*0.05)*0.5;
+        _o.WriteLine($"I2: Optimum at b={bestB:F2}, CV={cvAtOptB:F4}");
+        _o.WriteLine($"  CV at b±0.05: {cvMinus5B:F4}, {cvPlus5B:F4}");
+        _o.WriteLine($"  Curvature (sharpness): {sharpnessB:F4} ({(sharpnessB>10?"SHARP peak":"BROAD plateau")})");
+
+        // Effective width: a-range where CV < bestCV*1.5
+        int leftA=bestAi,rightA=bestAi;
+        while(leftA>0&&cvA[leftA-1]<bestCvA*1.5)leftA--;
+        while(rightA<100&&cvA[rightA+1]<bestCvA*1.5)rightA++;
+        _o.WriteLine($"I1 effective width (CV<1.5*best): a in [{leftA/100.0:F2}, {rightA/100.0:F2}]");
+        _o.WriteLine($"I1 observed weight 0.70: {(0.70>=leftA/100.0&&0.70<=rightA/100.0?"INSIDE optimum basin":"OUTSIDE")}");
+
+        int leftB=bestBi,rightB=bestBi;
+        while(leftB>0&&cvB[leftB-1]<bestCvB*1.5)leftB--;
+        while(rightB<100&&cvB[rightB+1]<bestCvB*1.5)rightB++;
+        _o.WriteLine($"I2 effective width (CV<1.5*best): b in [{leftB/100.0:F2}, {rightB/100.0:F2}]");
+        _o.WriteLine($"I2 observed weight 0.90: {(0.90>=leftB/100.0&&0.90<=rightB/100.0?"INSIDE optimum basin":"OUTSIDE")}");
+
+        // ============================================================
+        // PART C — Cross-Regime Stability of Optimal Weights
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Cross-Regime Stability ===");
+        _o.WriteLine($"{"Regime",-16} {"Best a*",10} {"I1 CV",10} {"Best b*",10} {"I2 CV",10} {"a* shift?",10} {"b* shift?",10}");
+        _o.WriteLine(new string('-',78));
+
+        double bestARef=bestA,bestBRef=bestB;
+
+        // Seeds
+        for(int si=0;si<10;si++){
+            int sd=si;
+            var Ks=KS(N,sd);var ks=new double[nEpochs];var ds=new double[nEpochs];var os=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Ks,N,0.10,sd+e-1);var d=DL(Nm(RP(h,N),N),N);Ks=Cupd(d,N);ks[e-1]=Km(Ks,N);ds[e-1]=Dm(d,N);os[e-1]=Of(h,N).Average();}
+            double ba=FindOptA(ks,ds),bb=FindOptB(ks,os);
+            double cva=CVat(ks,ds,ba),cvb=CVat(ks,os,bb);
+            _o.WriteLine($"{"Seed "+sd,-16} {ba,10:F3} {cva,10:F4} {bb,10:F3} {cvb,10:F4} {Math.Abs(ba-bestARef),10:F3} {Math.Abs(bb-bestBRef),10:F3}");
+        }
+
+        // K0 sweep
+        double[] K0s={0.8,1.0,1.2,1.4,1.6};
+        foreach(var kv in K0s){
+            var Kk=KS(N,seed);var kk=new double[nEpochs];var dk=new double[nEpochs];var ok=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=SimDt(Kk,N,0.10,seed+e-1,dt);var d=DL(Nm(RP(h,N),N),N);Kk=CupdK0(d,N,kv);kk[e-1]=Km(Kk,N);dk[e-1]=Dm(d,N);ok[e-1]=Of(h,N).Average();}
+            double ba=FindOptA(kk,dk),bb=FindOptB(kk,ok);
+            _o.WriteLine($"{"K0="+kv,-16} {ba,10:F3} {CVat(kk,dk,ba),10:F4} {bb,10:F3} {CVat(kk,ok,bb),10:F4} {Math.Abs(ba-bestARef),10:F3} {Math.Abs(bb-bestBRef),10:F3}");
+        }
+
+        // N sweep
+        int[] Ns={60,67,72,80,90,100};
+        foreach(var nv in Ns){
+            var Kn=KS(nv,seed);var kn=new double[nEpochs];var dn=new double[nEpochs];var on=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kn,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kn=Cupd(d,nv);kn[e-1]=Km(Kn,nv);dn[e-1]=Dm(d,nv);on[e-1]=Of(h,nv).Average();}
+            double ba=FindOptA(kn,dn),bb=FindOptB(kn,on);
+            _o.WriteLine($"{"N="+nv,-16} {ba,10:F3} {CVat(kn,dn,ba),10:F4} {bb,10:F3} {CVat(kn,on,bb),10:F4} {Math.Abs(ba-bestARef),10:F3} {Math.Abs(bb-bestBRef),10:F3}");
+        }
+
+        // ============================================================
+        // PART D — Sensitivity
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Weight Sensitivity ===");
+        _o.WriteLine($"{"Perturbation",-18} {"a",8} {"b",8} {"I1 CV",10} {"I2 CV",10} {"I1 Δ%",10} {"I2 Δ%",10}");
+        _o.WriteLine(new string('-',76));
+
+        double cvI1Ref=cvA[70],cvI2Ref=cvB[90];
+        foreach(var pct in new[]{0.01,0.05,0.10}){
+            double ap=0.70*(1+pct),am=0.70*(1-pct);
+            double bp=0.90*(1+pct),bm=0.90*(1-pct);
+            double cvAp=CVat(kmV,dmV,ap),cvAm=CVat(kmV,dmV,am);
+            double cvBp=CVat(kmV,omV,bp),cvBm=CVat(kmV,omV,bm);
+            _o.WriteLine($"{"+"+pct*100+"%/-"+"%",-18} {ap,8:F2} {bp,8:F2} {Math.Max(cvAp,cvAm),10:F4} {Math.Max(cvBp,cvBm),10:F4} {(Math.Max(cvAp,cvAm)/cvI1Ref-1)*100,10:F1}% {(Math.Max(cvBp,cvBm)/cvI2Ref-1)*100,10:F1}%");
+        }
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double aShift=Math.Abs(bestA-0.70),bShift=Math.Abs(bestB-0.90);
+        bool aSharp=sharpnessA>5,bSharp=sharpnessB>5;
+
+        // Check cross-regime: compute mean and std of optimal weights
+        var allAOpt=new List<double>{bestA};
+        var allBOpt=new List<double>{bestB};
+        for(int si=0;si<10;si++){
+            int sd=si;var Ks2=KS(N,sd);var ks2=new double[nEpochs];var ds2=new double[nEpochs];var os2=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Ks2,N,0.10,sd+e-1);var d=DL(Nm(RP(h,N),N),N);Ks2=Cupd(d,N);ks2[e-1]=Km(Ks2,N);ds2[e-1]=Dm(d,N);os2[e-1]=Of(h,N).Average();}
+            allAOpt.Add(FindOptA(ks2,ds2));allBOpt.Add(FindOptB(ks2,os2));
+        }
+        double aCrossCV=Sd(allAOpt.ToArray())/allAOpt.Average();
+        double bCrossCV=Sd(allBOpt.ToArray())/allBOpt.Average();
+
+        string model;
+        if(aShift<0.03&&bShift<0.03&&aCrossCV<0.05&&bCrossCV<0.05)
+            model="Model A: Weights are STRUCTURALLY FIXED — sharp, stable, universal";
+        else if(aShift<0.10&&bShift<0.10)
+            model="Model B: Weights are BROAD APPROXIMATIONS — stable but not sharp";
+        else if(aCrossCV>0.10||bCrossCV>0.10)
+            model="Model C: REGIME DEPENDENT — optimal weights shift with parameters";
+        else
+            model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"a* vs 0.70: Δ={aShift:F3}, b* vs 0.90: Δ={bShift:F3}");
+        _o.WriteLine($"Sharpness: I1={sharpnessA:F1}, I2={sharpnessB:F1}");
+        _o.WriteLine($"Cross-seed CV: a={aCrossCV:F3}, b={bCrossCV:F3}");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Weight origin audit. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== IVO_01 complete. Commit: IVO_01_InvariantWeightOriginAudit ===");
+    }
+
+    /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
+    static double FindOptA(double[]km,double[]dm){
+        double bestA=0,bestCV=double.MaxValue;
+        for(int ai=0;ai<=100;ai++){double a=ai/100.0;var v=new double[km.Length];for(int i=0;i<km.Length;i++)v[i]=a*km[i]+(1-a)*dm[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bestCV){bestCV=cv;bestA=a;}}
+        return bestA;
+    }
+    static double FindOptB(double[]km,double[]om){
+        double bestB=0,bestCV=double.MaxValue;
+        for(int bi=0;bi<=100;bi++){double b=bi/100.0;var v=new double[km.Length];for(int i=0;i<km.Length;i++)v[i]=b*km[i]+(1-b)*om[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bestCV){bestCV=cv;bestB=b;}}
+        return bestB;
+    }
+    static double CVat(double[]km,double[]x,double w){var v=new double[km.Length];for(int i=0;i<km.Length;i++)v[i]=w*km[i]+(1-w)*x[i];return Sd(v)/(Math.Abs(v.Average())+0.001);}
+
     /// <summary>Ellipse parameters for (I1, I2) — local copy.</summary>
     static(double ecc,double ratio,double orient)ComputeEllipseParams2(double[]i1,double[]i2){
         int n=i1.Length;double m1=i1.Average(),m2=i2.Average();
