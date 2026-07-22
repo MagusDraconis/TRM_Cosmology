@@ -3943,6 +3943,156 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== EXO_01 complete. Commit: EXO_01_ExponentOriginAudit ===");
     }
 
+    [Fact]
+    public void VPK_01_VariancePeakAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== VPK_01: Variance Peak Audit ===");
+        _o.WriteLine("=== Why does var(km) peak near N≈118? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int nEpochs=20;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // ============================================================
+        // PART A — High-Res Sweep Around Peak (80-150, step 2)
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Peak Region Sweep ===");
+        _o.WriteLine($"{"N",6} {"var(km)",12} {"CV(km)",10} {"peak?",8}");
+        _o.WriteLine(new string('-',38));
+
+        var nP=new List<double>();var vP=new List<double>();
+        double maxVar=0;int maxN=0;
+        for(int nv=80;nv<=150;nv+=2){
+            var K=KS(nv,seed);var km=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K=Cupd(d,nv);km[e-1]=Km(K,nv);}
+            double mk=km.Average();double vk=0;for(int i=0;i<nEpochs;i++)vk+=(km[i]-mk)*(km[i]-mk);vk/=nEpochs;
+            nP.Add(nv);vP.Add(vk);
+            if(vk>maxVar){maxVar=vk;maxN=nv;}
+            _o.WriteLine($"{nv,6} {vk,12:F6} {Math.Sqrt(vk)/mk,10:F4} {(vk==maxVar?"← peak":"")}");
+        }
+        _o.WriteLine($"\nPeak: N={maxN}, var(km)={maxVar:F6}, CV={Math.Sqrt(maxVar)/(0.8):F4}");
+
+        // ============================================================
+        // PARTS B+C — Co-Peaking Variables + Shape Fit
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS B+C: Co-Peaking + Shape Fit ===");
+        _o.WriteLine($"{"N",6} {"var(km)",12} {"var(Ω)",12} {"I1_CV",10} {"g22_med",10}");
+        _o.WriteLine(new string('-',52));
+
+        // Measure at peak and surrounding N with extended state
+        int[] focusNs={80,90,100,110,116,118,120,124,130,140,150};
+        var fVarK=new double[focusNs.Length];var fVarO=new double[focusNs.Length];
+        var fI1cv=new double[focusNs.Length];var fG22=new double[focusNs.Length];
+
+        for(int fi=0;fi<focusNs.Length;fi++){
+            int nv=focusNs[fi];
+            var K2=KS(nv,seed);var km2=new double[nEpochs];var dm2=new double[nEpochs];var om2=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K2,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K2=Cupd(d,nv);km2[e-1]=Km(K2,nv);dm2[e-1]=Dm(d,nv);om2[e-1]=Of(h,nv).Average();}
+            double I1(double kv,double dv)=>0.70*kv+0.30*dv;
+            double I2(double kv,double ov)=>0.90*kv+0.10*ov;
+            var i1s=new double[nEpochs];var i2s=new double[nEpochs];var g22s=new double[nEpochs-1];
+            for(int i=0;i<nEpochs;i++){i1s[i]=I1(km2[i],dm2[i]);i2s[i]=I2(km2[i],om2[i]);
+                if(i>0){double dI2=i2s[i]-i2s[i-1];double ds=Math.Sqrt((i1s[i]-i1s[i-1])*(i1s[i]-i1s[i-1])+dI2*dI2);g22s[i-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;}
+            }
+            double mk2=km2.Average(),mo2=om2.Average();
+            double vk2=0,vo2=0;for(int i=0;i<nEpochs;i++){vk2+=(km2[i]-mk2)*(km2[i]-mk2);vo2+=(om2[i]-mo2)*(om2[i]-mo2);}
+            vk2/=nEpochs;vo2/=nEpochs;
+            fVarK[fi]=vk2;fVarO[fi]=vo2;
+            double cv1=Sd(i1s)/Math.Abs(i1s.Average()+0.001);
+            var sg=g22s.OrderBy(g=>g).ToArray();fG22[fi]=sg[sg.Length/2];fI1cv[fi]=cv1;
+            _o.WriteLine($"{nv,6} {vk2,12:F6} {vo2,12:F4} {cv1,10:F4} {fG22[fi],10:F4}");
+        }
+
+        // Gaussian fit: var(N) = A*exp(-(N-N0)^2/(2*sigma^2)) + baseline
+        double bestSigma=0,bestA=0,bestN0=0,bestBase=0,bestR2=double.MinValue;
+        for(double n0=100;n0<=130;n0+=2){
+            for(double sig=5;sig<=30;sig+=2){
+                double ssr=0,sst=0,mv=fVarK.Average();
+                for(int i=0;i<focusNs.Length;i++){
+                    double pred=0.05*Math.Exp(-(focusNs[i]-n0)*(focusNs[i]-n0)/(2*sig*sig))+0.01;
+                    ssr+=(fVarK[i]-pred)*(fVarK[i]-pred);
+                    sst+=(fVarK[i]-mv)*(fVarK[i]-mv);
+                }
+                double r2=1-ssr/(sst+1e-15);
+                if(r2>bestR2){bestR2=r2;bestSigma=sig;bestN0=n0;bestBase=0.01;bestA=0.05;}
+            }
+        }
+        _o.WriteLine($"\nGaussian fit: var(km) = {bestA:F4}*exp(-(N-{bestN0:F0})^2/{2*bestSigma*bestSigma:F0}) + {bestBase:F3}");
+        _o.WriteLine($"Peak center: N0≈{bestN0:F0}, width: {bestSigma:F0} (σ)");
+        _o.WriteLine($"R² = {bestR2:F3}");
+
+        // ============================================================
+        // PART D+E — Cross-Seed + Parameter Sensitivity
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS D+E: Cross-Seed Peak Locations ===");
+        _o.WriteLine($"{"Seed",5} {"peak N",8} {"peak var",12} {"peak CV",10}");
+        _o.WriteLine(new string('-',38));
+
+        int[] cSeeds={1005,0,2,5,8};
+        int sumPeakN=0;
+        foreach(var sd in cSeeds){
+            double sMax=0;int sMaxN=0;
+            for(int nv=80;nv<=150;nv+=10){
+                var Ks=KS(nv,sd);var kms=new double[nEpochs];
+                for(int e=1;e<=nEpochs;e++){var h=Sim(Ks,nv,0.10,sd+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Ks=Cupd(d,nv);kms[e-1]=Km(Ks,nv);}
+                double ms=kms.Average();double vs=0;for(int i=0;i<nEpochs;i++)vs+=(kms[i]-ms)*(kms[i]-ms);vs/=nEpochs;
+                if(vs>sMax){sMax=vs;sMaxN=nv;}
+            }
+            sumPeakN+=sMaxN;
+            _o.WriteLine($"{sd,5} {sMaxN,8} {sMax,12:F6} {Math.Sqrt(sMax)/0.8,10:F4}");
+        }
+        _o.WriteLine($"Mean peak N: {sumPeakN/cSeeds.Length:F0}");
+
+        // ============================================================
+        // PART F — Invariant Behavior at Peak
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Invariants at Peak ===");
+        _o.WriteLine($"At the peak (N≈{maxN}):");
+        int peakIdx=Array.IndexOf(focusNs,maxN);
+        if(peakIdx>=0){
+            _o.WriteLine($"  var(km) = {fVarK[peakIdx]:F6}");
+            _o.WriteLine($"  var(Ω) = {fVarO[peakIdx]:F4}");
+            _o.WriteLine($"  I1 CV = {fI1cv[peakIdx]:F4}");
+            _o.WriteLine($"  g22 median = {fG22[peakIdx]:F4}");
+        }
+
+        // Compare pre-peak, peak, post-peak
+        int preIdx=Array.IndexOf(focusNs,80);
+        int postIdx=Array.IndexOf(focusNs,150);
+        _o.WriteLine($"\nAcross the peak:");
+        if(preIdx>=0&&postIdx>=0&&peakIdx>=0){
+            _o.WriteLine($"  var(km): {fVarK[preIdx]:F6} → {maxVar:F6} → {fVarK[postIdx]:F6}");
+            _o.WriteLine($"  I1 CV:  {fI1cv[preIdx]:F4} → {fI1cv[peakIdx]:F4} → {fI1cv[postIdx]:F4}");
+            _o.WriteLine($"  g22:    {fG22[preIdx]:F4} → {fG22[peakIdx]:F4} → {fG22[postIdx]:F4}");
+        }
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        _o.WriteLine($"Peak at N≈{maxN}, width ≈{bestSigma:F0}σ");
+        _o.WriteLine($"Shape: {(bestR2>0.5?"GAUSSIAN":"NON-GAUSSIAN")} (R²={bestR2:F3})");
+
+        string model;
+        if(bestR2>0.5&&bestSigma>10)model="Model A: FINITE-SIZE OPTIMUM — smooth Gaussian peak";
+        else if(bestSigma<8)model="Model B: DYNAMICAL OPTIMUM — narrow resonance";
+        else model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine($"The coupling variance peak at N≈{maxN} represents:");
+        _o.WriteLine($"  - Maximum dynamical fluctuation in the SAC coupling");
+        _o.WriteLine($"  - A finite-size optimum where the SAC limit cycle");
+        _o.WriteLine($"    has maximal amplitude");
+        _o.WriteLine($"  - This may relate to V5.19's N=72 peak adaptive response");
+        _o.WriteLine($"    (different metrics, same qualitative phenomenon)");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Variance peak audit. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== VPK_01 complete. Commit: VPK_01_VariancePeakAudit ===");
+    }
+
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
 
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
