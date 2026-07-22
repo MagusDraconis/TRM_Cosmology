@@ -2965,6 +2965,166 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== IVO_01 complete. Commit: IVO_01_InvariantWeightOriginAudit ===");
     }
 
+    [Fact]
+    public void IRT_01_I2RegimeTransitionAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== IRT_01: I₂ Regime Transition Audit ===");
+        _o.WriteLine("=== Goal: Find and characterize the N-critical transition ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;double xi=1.75;double dt=0.05;double k0v=1.2;
+        int nEpochs=20;
+
+        // ============================================================
+        // PART A — Dense N Sweep (60-80, step 1)
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Dense N Sweep (60..80, seed={seed}) ===");
+        _o.WriteLine($"{"N",5} {"b*",8} {"I2_CV",10} {"km_mean",10} {"Ω_mean",10} {"Δb*",8} {"Deriv",8}");
+        _o.WriteLine(new string('-',62));
+
+        int nMin=60,nMax=80;
+        var bStars=new double[nMax-nMin+1];
+        var cvStars=new double[nMax-nMin+1];
+
+        for(int nv=nMin;nv<=nMax;nv++){
+            var K=KS(nv,seed);var kmV=new double[nEpochs];var omV=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K=Cupd(d,nv);kmV[e-1]=Km(K,nv);omV[e-1]=Of(h,nv).Average();}
+            double bestB=0,bestCV=double.MaxValue;
+            for(int bi=0;bi<=100;bi++){double b=bi/100.0;var v=new double[nEpochs];for(int i=0;i<nEpochs;i++)v[i]=b*kmV[i]+(1-b)*omV[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bestCV){bestCV=cv;bestB=b;}}
+            int idx=nv-nMin;bStars[idx]=bestB;cvStars[idx]=bestCV;
+            double db=idx>0?bestB-bStars[idx-1]:0;
+            _o.WriteLine($"{nv,5} {bestB,8:F3} {bestCV,10:F4} {kmV.Average(),10:F4} {omV.Average(),10:F4} {db,8:F3} {(db*10),8:F2}");
+        }
+
+        // ============================================================
+        // PART B — Transition Detection
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Transition Point Detection ===");
+
+        // Changepoint: find N where derivative peaks
+        var Nvals=Enumerable.Range(nMin,nMax-nMin+1).Select(v=>(double)v).ToArray();
+        var derivs=new double[Nvals.Length-1];
+        for(int i=1;i<Nvals.Length;i++)derivs[i-1]=bStars[i]-bStars[i-1];
+        int peakIdx=0;double peakVal=0;
+        for(int i=0;i<derivs.Length;i++)if(derivs[i]>peakVal){peakVal=derivs[i];peakIdx=i;}
+        double critN=nMin+peakIdx+0.5;
+
+        _o.WriteLine($"Derivative peaks at N≈{critN:F0} (Δb*={peakVal:F3})");
+
+        // Sigmoid fit: b*(N) = a + c/(1+exp(-(N-Nc)/w))
+        // Simplified: piecewise linear with breakpoint
+        double bestBic=double.MaxValue,bestNc=0;
+        for(int nc=nMin+1;nc<nMax;nc++){
+            // Two-segment linear fit
+            double sse=0;
+            for(int i=0;i<Nvals.Length;i++){
+                int Nv=(int)Nvals[i];
+                if(Nv<=nc){
+                    // Left segment: fit line through first few points
+                    int leftCount=i+1;double sumN=0,sumB=0;
+                    for(int j=0;j<leftCount;j++){sumN+=Nvals[j];sumB+=bStars[j];}
+                    double pred=sumB/leftCount; // mean
+                    sse+=(bStars[i]-pred)*(bStars[i]-pred);
+                }else{
+                    int rightStart=nc-nMin+1;int rightCount=i-rightStart+1;
+                    double sumN=0,sumB=0;
+                    for(int j=rightStart;j<=i;j++){sumN+=Nvals[j];sumB+=bStars[j];}
+                    double pred=sumB/rightCount;
+                    sse+=(bStars[i]-pred)*(bStars[i]-pred);
+                }
+            }
+            if(sse<bestBic){bestBic=sse;bestNc=nc;}
+        }
+        _o.WriteLine($"Piecewise breakpoint: N_crit = {bestNc}");
+        _o.WriteLine($"SSE = {bestBic:F4}");
+
+        // Pre/post weights
+        double bPre=0;int nPre=0;double bPost=0;int nPost=0;
+        for(int i=0;i<Nvals.Length;i++){if(Nvals[i]<=bestNc){bPre+=bStars[i];nPre++;}else{bPost+=bStars[i];nPost++;}}
+        bPre/=nPre;bPost/=nPost;
+        _o.WriteLine($"Pre-transition mean b* = {bPre:F3} (N ≤ {bestNc})");
+        _o.WriteLine($"Post-transition mean b* = {bPost:F3} (N > {bestNc})");
+        _o.WriteLine($"Transition size: {bPost-bPre:F3}");
+
+        string transitionType=peakVal>0.2?"SHARP critical transition":peakVal>0.1?"MODERATE transition":"SMOOTH drift";
+        _o.WriteLine($"Transition type: {transitionType}");
+
+        // ============================================================
+        // PART C — Cross-Seed Validation
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Cross-Seed Validation ===");
+
+        // Test at 4 key N, 5 seeds
+        int[] keyNs={60,65,68,70,72,75};
+        int[] tSeeds={1005,0,2,5,8};
+
+        _o.WriteLine($"{"Seed",5} {"N=60",7} {"N=65",7} {"N=68",7} {"N=70",7} {"N=72",7} {"N=75",7} {"Transition?",12}");
+        _o.WriteLine(new string('-',58));
+
+        foreach(var sd in tSeeds){
+            string row=$"{sd,5}";
+            var bsForSeed=new double[keyNs.Length];
+            for(int ki=0;ki<keyNs.Length;ki++){
+                int nv=keyNs[ki];
+                var Ks=KS(nv,sd);var ks=new double[nEpochs];var os=new double[nEpochs];
+                for(int e=1;e<=nEpochs;e++){var h=Sim(Ks,nv,0.10,sd+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Ks=Cupd(d,nv);ks[e-1]=Km(Ks,nv);os[e-1]=Of(h,nv).Average();}
+                double bb=0,bc=double.MaxValue;
+                for(int bi=0;bi<=100;bi++){double b=bi/100.0;var v=new double[nEpochs];for(int i=0;i<nEpochs;i++)v[i]=b*ks[i]+(1-b)*os[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bc){bc=cv;bb=b;}}
+                row+=$" {bb,7:F3}";bsForSeed[ki]=bb;
+            }
+            bool hasTrans=bsForSeed[^1]-bsForSeed[0]>0.5;
+            _o.WriteLine($"{row} {(hasTrans?"YES":"no"),12}");
+        }
+
+        // ============================================================
+        // PART D — Topology Comparison
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Topology Across Transition ===");
+
+        int[] compNs={60,62,64,66,68,70,72,74,76,78,80};
+        _o.WriteLine($"{"N",5} {"b*",8} {"I1_CV",10} {"I2_CV",10} {"g22_med",10} {"ECC",8} {"Regime",-12}");
+        _o.WriteLine(new string('-',66));
+
+        for(int ci=0;ci<compNs.Length;ci++){
+            int nv=compNs[ci];
+            var Kc=KS(nv,seed);var kc=new double[nEpochs];var dc=new double[nEpochs];var oc=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kc,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kc=Cupd(d,nv);kc[e-1]=Km(Kc,nv);dc[e-1]=Dm(d,nv);oc[e-1]=Of(h,nv).Average();}
+            double I1(double kmv,double dmv)=>0.70*kmv+0.30*dmv;
+            double I2(double kmv,double omv)=>0.90*kmv+0.10*omv;
+            var i1s=new double[nEpochs];var i2s=new double[nEpochs];var g22s=new double[nEpochs-1];
+            for(int i=0;i<nEpochs;i++){i1s[i]=I1(kc[i],dc[i]);i2s[i]=I2(kc[i],oc[i]);
+                if(i>0){double dI2=i2s[i]-i2s[i-1];double ds=Math.Sqrt((i1s[i]-i1s[i-1])*(i1s[i]-i1s[i-1])+dI2*dI2);g22s[i-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;}
+            }
+            double cvI1=Sd(i1s)/Math.Abs(i1s.Average()+0.001);
+            double bb=0,bcV=double.MaxValue;
+            for(int bi=0;bi<=100;bi++){double b=bi/100.0;var v=new double[nEpochs];for(int i=0;i<nEpochs;i++)v[i]=b*kc[i]+(1-b)*oc[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bcV){bcV=cv;bb=b;}}
+            var sortedG=g22s.OrderBy(g=>g).ToArray();double gMed=sortedG[sortedG.Length/2];
+            var(ec,rc,orc)=ComputeEllipseParams2(i1s,i2s);
+            string regime=nv<=bestNc?"pre-transition":"post-transition";
+            _o.WriteLine($"{nv,5} {bb,8:F3} {cvI1,10:F4} {bcV,10:F4} {gMed,10:F4} {ec,8:F4} {regime,-12}");
+        }
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double jumpSize=bPost-bPre;
+        string model;
+        if(jumpSize>0.5&&peakVal>0.2)model="Model B: CRITICAL TRANSITION — sharp jump at N≈"+bestNc;
+        else if(jumpSize>0.3)model="Model C: MULTIPLE REGIMES — piecewise structure";
+        else model="Model A: SMOOTH DRIFT — no critical point";
+
+        _o.WriteLine($"Jump size: {jumpSize:F3}, Peak derivative: {peakVal:F3}");
+        _o.WriteLine($"Critical N estimate: ~{bestNc}");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Transition audit. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== IRT_01 complete. Commit: IRT_01_I2RegimeTransitionAudit ===");
+    }
+
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
     static double FindOptA(double[]km,double[]dm){
         double bestA=0,bestCV=double.MaxValue;
