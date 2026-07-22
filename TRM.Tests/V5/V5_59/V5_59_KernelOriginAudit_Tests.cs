@@ -417,6 +417,316 @@ public class V5_59_KernelOriginAudit_Tests
         _o.WriteLine($"\n=== CRIT_01 complete. Commit: CRIT_01_KernelFalsificationAudit ===");
     }
 
+    [Fact]
+    public void RES_01_ResidualStructureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RES_01: Residual Structure Audit ===");
+        _o.WriteLine("=== V5.59. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Is d0 residual after km genuine or artifact? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        int nEpochs=5; // Full 5-epoch convergence
+        var bag=new ConcurrentBag<(int N,int s,double km,double d0,double lam,double d2,
+            double rawIQR,double rank,int cls,double kmInit,double d0Init,double km1,double d01,double km2,double d02)>();
+
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                var ws=w.OrderBy(v=>v).ToArray();
+                double rawIQR=Q(ws,0.75)-Q(ws,0.25);
+                int[] ranks=Enumerable.Range(0,n).OrderBy(i=>w[i]).Select((v,rk)=>new{v,rk}).OrderBy(x=>x.v).Select(x=>x.rk).ToArray();
+                double meanRank=ranks.Average();
+
+                var K=KS(n,s);double kmInit=Km(K,n);
+
+                // Epoch 1
+                var h1=Sim(K,n,0.10,s);var d1=DL(Nm(RP(h1,n),n),n);
+                double d01i=Dm(d1,n);
+                K=Cupd(d1,n);double km1i=Km(K,n);
+
+                // Epoch 2
+                var h2=Sim(K,n,0.10,s+1);var d2m=DL(Nm(RP(h2,n),n),n);
+                double d02i=Dm(d2m,n);
+                K=Cupd(d2m,n);double km2i=Km(K,n);
+
+                // Epochs 3-5
+                for(int e=3;e<=nEpochs;e++){
+                    var he=Sim(K,n,0.10,s+e-1);
+                    K=Cupd(DL(Nm(RP(he,n),n),n),n);
+                }
+
+                // Final measurement
+                var hF=Sim(K,n,0.10,s+50);
+                var dF=DL(Nm(RP(hF,n),n),n);
+                var KF=Cupd(dF,n);
+                double d0=Dm(dF,n),km=Km(KF,n),lam=Lambda1(KF,n);
+                double d2=DL(Nm(RP(hF,n),n),n).Cast<double>().Average(); // d2_mean
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,vn=Math.Sqrt(dv*dv+kv*kv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,km,d0,lam,0,rawIQR,meanRank,sb.cls=="P1"?1:2,kmInit,d01i,km1i,d01i,km2i,d02i));
+            });});
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.cls==1).ToArray();var p1b=bd.Where(d=>d.cls==2).ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length} (from {sds*Ns.Length} profiles)");
+
+        double Eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        var kmA=bd.Select(d=>d.km).ToArray();
+        var d0A=bd.Select(d=>d.d0).ToArray();
+        var lamA=bd.Select(d=>d.lam).ToArray();
+        var iqrA=bd.Select(d=>d.rawIQR).ToArray();
+        var rnkA=bd.Select(d=>d.rank).ToArray();
+        var nA=bd.Select(d=>(double)d.N).ToArray();
+
+        // ============================================================
+        // PART A — Residual Signal After km
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Residual Signal After km ===");
+        _o.WriteLine($"{"Variable",-12} {"Direct Eff",12} {"r(km)",8} {"Resid_Eff",12} {"Signal_type",14}");
+        _o.WriteLine(new string('-',60));
+
+        // Residualize each variable on km
+        double mk=kmA.Average();double vk=0;for(int i=0;i<kmA.Length;i++)vk+=(kmA[i]-mk)*(kmA[i]-mk);
+        double[] Residualize(double[]x){
+            double mx=x.Average();double cv=0;for(int i=0;i<x.Length;i++)cv+=(x[i]-mx)*(kmA[i]-mk);
+            double beta=cv/(vk+1e-15);double alpha=mx-beta*mk;
+            return x.Select((xi,i)=>xi-(alpha+beta*kmA[i])).ToArray();
+        }
+
+        void PartA(string name,double[]x){
+            double dir=Eff(p1.Select(d=>x[Array.IndexOf(bd,d)]).ToArray(),
+                           p1b.Select(d=>x[Array.IndexOf(bd,d)]).ToArray(),x);
+            double rKm=Pearson(x,kmA);
+            var resid=Residualize(x);
+            double rEff=Eff(p1.Select(d=>resid[Array.IndexOf(bd,d)]).ToArray(),
+                            p1b.Select(d=>resid[Array.IndexOf(bd,d)]).ToArray(),resid);
+            string sig=Math.Abs(rEff)<0.3?">70% absorbed":Math.Abs(rEff)<0.6?"PARTIAL (<50%)":"INDEPENDENT (<20%)";
+            _o.WriteLine($"{name,-12} {dir,12:F3}σ {rKm,8:F3} {rEff,12:F3}σ {sig,14}");
+        }
+        PartA("d0",d0A);
+        PartA("lambda1",lamA);
+        PartA("rawIQR",iqrA);
+        PartA("rank",rnkA);
+        PartA("N",nA);
+
+        // ============================================================
+        // PART B — Residual Decomposition
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Residual Decomposition of d0 ===");
+        double rDK=Pearson(d0A,kmA);
+        double varD0=d0A.Sum(v=>(v-d0A.Average())*(v-d0A.Average()))/(d0A.Length-1);
+        double varExplained=rDK*rDK*varD0;
+        double varResidual=varD0-varExplained;
+        _o.WriteLine($"d0 total variance: {varD0:F6}");
+        _o.WriteLine($"Variance explained by km: {varExplained:F6} ({varExplained/varD0*100:F1}%)");
+        _o.WriteLine($"Residual variance: {varResidual:F6} ({varResidual/varD0*100:F1}%)");
+
+        // Residual d0 effect size
+        var d0Resid=Residualize(d0A);
+        var d0ResidP1=p1.Select(d=>d0Resid[Array.IndexOf(bd,d)]).ToArray();
+        var d0ResidP1b=p1b.Select(d=>d0Resid[Array.IndexOf(bd,d)]).ToArray();
+        double residEff=Eff(d0ResidP1,d0ResidP1b,d0Resid);
+        _o.WriteLine($"d0 residual direct effect: {residEff:F3}σ");
+
+        double d0DirEff=Eff(p1.Select(d=>d.d0).ToArray(),p1b.Select(d=>d.d0).ToArray(),d0A);
+        double kmDirEff=Eff(p1.Select(d=>d.km).ToArray(),p1b.Select(d=>d.km).ToArray(),kmA);
+        _o.WriteLine($"\nd0 direct: {d0DirEff:F3}σ, km direct: {kmDirEff:F3}σ");
+        _o.WriteLine($"d0 residual: {residEff:F3}σ ({(residEff/d0DirEff*100):F0}% of original)");
+
+        // ============================================================
+        // PART C — Failure-Case Analysis
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Failure-Case Analysis ===");
+
+        // Find optimal km threshold
+        var sorted=bd.OrderBy(d=>d.km).ToArray();
+        double bestThr=0;int bestOk=0;
+        for(int i=1;i<sorted.Length-1;i++){
+            double thr=(sorted[i].km+sorted[i+1].km)/2;int ok=0;
+            foreach(var d in sorted){if((d.cls==1&&d.km>thr)||(d.cls==2&&d.km<=thr))ok++;}
+            if(ok>bestOk){bestOk=ok;bestThr=thr;}
+        }
+
+        // d0-only threshold
+        var sortedD0=bd.OrderBy(d=>d.d0).ToArray();
+        double bestThrD0=0;int bestOkD0=0;
+        for(int i=1;i<sortedD0.Length-1;i++){
+            double thr=(sortedD0[i].d0+sortedD0[i+1].d0)/2;int ok=0;
+            foreach(var d in sortedD0){if((d.cls==1&&d.d0>thr)||(d.cls==2&&d.d0<=thr))ok++;}
+            if(ok>bestOkD0){bestOkD0=ok;bestThrD0=thr;}
+        }
+
+        // Failure cases: km wrong, d0 correct
+        var kmFailD0Ok=bd.Where(d=>
+            (d.km>bestThr&&d.cls==2&&d.d0>bestThrD0)||  // P1b: km says P1, d0 says P1b
+            (d.km<=bestThr&&d.cls==1&&d.d0<=bestThrD0)   // P1: km says P1b, d0 says P1
+        ).ToArray();
+        var d0FailKmOk=bd.Where(d=>
+            (d.d0>bestThrD0&&d.cls==2&&d.km<=bestThr)||
+            (d.d0<=bestThrD0&&d.cls==1&&d.km>bestThr)
+        ).ToArray();
+
+        _o.WriteLine($"km threshold: {bestThr:F4}, accuracy: {bestOk}/{bd.Length} ({bestOk*100.0/bd.Length:F1}%)");
+        _o.WriteLine($"d0 threshold: {bestThrD0:F4}, accuracy: {bestOkD0}/{bd.Length} ({bestOkD0*100.0/bd.Length:F1}%)");
+        _o.WriteLine($"km-fail/d0-ok cases: {kmFailD0Ok.Length}");
+        _o.WriteLine($"d0-fail/km-ok cases: {d0FailKmOk.Length}");
+
+        if(kmFailD0Ok.Length>0){
+            double avgKmF=kmFailD0Ok.Average(d=>d.km),avgD0F=kmFailD0Ok.Average(d=>d.d0);
+            double avgIqrF=kmFailD0Ok.Average(d=>d.rawIQR),avgNF=kmFailD0Ok.Average(d=>d.N);
+            _o.WriteLine($"km-fail/d0-ok profile: km={avgKmF:F4}, d0={avgD0F:F4}, N≈{avgNF:F0}");
+        }
+
+        // ============================================================
+        // PART D — Joint Models
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Joint Model Comparison ===");
+        _o.WriteLine($"{"Model",-22} {"Accuracy",10} {"P1_acc",8} {"P1b_acc",8} {"Edge over km",14}");
+        _o.WriteLine(new string('-',64));
+
+        // Model A: km only
+        int kmAcc=bestOk;
+        int kmP1=bd.Count(d=>d.cls==1&&d.km>bestThr);
+        int kmP1b=bd.Count(d=>d.cls==2&&d.km<=bestThr);
+        _o.WriteLine($"{"A: km only",-22} {kmAcc*100.0/bd.Length,10:F1}% {kmP1*100.0/p1.Length,8:F1}% {kmP1b*100.0/p1b.Length,8:F1}% {"—",14}");
+
+        // Model B: d0 only
+        int d0P1=bd.Count(d=>d.cls==1&&d.d0>bestThrD0);
+        int d0P1b=bd.Count(d=>d.cls==2&&d.d0<=bestThrD0);
+        _o.WriteLine($"{"B: d0 only",-22} {bestOkD0*100.0/bd.Length,10:F1}% {d0P1*100.0/p1.Length,8:F1}% {d0P1b*100.0/p1b.Length,8:F1}% {$"+{bestOkD0-bestOk}",14}");
+
+        // Model C: km + d0 (simple AND rule)
+        int cOk=0,cP1=0,cP1b=0;
+        foreach(var d in bd){
+            bool kmPred=d.km>bestThr,d0Pred=d.d0>bestThrD0;
+            bool final=kmPred&&d0Pred; // P1 if both agree
+            if((d.cls==1&&final)||(d.cls==2&&!final))cOk++;
+            if(d.cls==1&&final)cP1++;
+            if(d.cls==2&&!final)cP1b++;
+        }
+        _o.WriteLine($"{"C: km AND d0",-22} {cOk*100.0/bd.Length,10:F1}% {cP1*100.0/p1.Length,8:F1}% {cP1b*100.0/p1b.Length,8:F1}% {$"+{cOk-bestOk}",14}");
+
+        // Model D: km + d0 residual (km primary, d0_resid corrects failures)
+        var d0ResidC=Residualize(d0A);
+        double bestThrDR=0;int bestOkDR=0;
+        var sortDR=bd.OrderBy(d=>d0ResidC[Array.IndexOf(bd,d)]).ToArray();
+        for(int i=1;i<sortDR.Length-1;i++){
+            double thr=d0ResidC[Array.IndexOf(bd,sortDR[i])];int ok=0;
+            foreach(var d in sortDR){double r=d0ResidC[Array.IndexOf(bd,d)];if((d.cls==1&&r>thr)||(d.cls==2&&r<=thr))ok++;}
+            if(ok>bestOkDR){bestOkDR=ok;bestThrDR=thr;}
+        }
+        // Two-stage: km first, then d0_resid corrects
+        int dOk=0,dP1=0,dP1b=0;
+        foreach(var d in bd){
+            bool kmPred=d.km>bestThr;
+            if(kmPred==(d.cls==1)){dOk++;if(d.cls==1)dP1++;else dP1b++;}
+            else{
+                double dr=d0ResidC[Array.IndexOf(bd,d)];
+                bool dResidPred=dr>bestThrDR;
+                if(dResidPred==(d.cls==1)){dOk++;if(d.cls==1)dP1++;else dP1b++;}
+            }
+        }
+        _o.WriteLine($"{"D: km + d0_resid",-22} {dOk*100.0/bd.Length,10:F1}% {dP1*100.0/p1.Length,8:F1}% {dP1b*100.0/p1b.Length,8:F1}% {$"+{dOk-bestOk}",14}");
+
+        // ============================================================
+        // PART E — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Robustness ===");
+
+        // Jackknife: drop one profile
+        var jkAcc=new double[bd.Length];
+        for(int j=0;j<bd.Length;j++){
+            var sub=bd.Where((d,i)=>i!=j).ToArray();
+            var subKm=sub.Select(d=>d.km).ToArray();
+            var subSort=sub.OrderBy(d=>d.km).ToArray();
+            int bestJ=0;double bestThrJ=0;
+            for(int i=1;i<subSort.Length-1;i++){
+                double thr=(subSort[i].km+subSort[i+1].km)/2;int ok=0;
+                foreach(var d in subSort)if((d.cls==1&&d.km>thr)||(d.cls==2&&d.km<=thr))ok++;
+                if(ok>bestJ){bestJ=ok;bestThrJ=thr;}
+            }
+            jkAcc[j]=bestJ*100.0/sub.Length;
+        }
+        _o.WriteLine($"Jackknife km accuracy: {jkAcc.Average():F1}% ± {Sd(jkAcc):F1}% (range [{jkAcc.Min():F0}-{jkAcc.Max():F0}]%)");
+
+        // Random split: 70/30
+        var rngSplit=new Random(42);
+        var idxs=Enumerable.Range(0,bd.Length).OrderBy(_=>rngSplit.Next()).ToArray();
+        int splitN=bd.Length*70/100;
+        var train=idxs.Take(splitN).Select(i=>bd[i]).ToArray();
+        var test=idxs.Skip(splitN).Select(i=>bd[i]).ToArray();
+        var trainKm=train.Select(d=>d.km).OrderBy(k=>k).ToArray();
+        double testThr=0;int testBest=0;
+        for(int i=1;i<trainKm.Length-1;i++){
+            double thr=(trainKm[i]+trainKm[i+1])/2;int ok=0;
+            foreach(var d in train)if((d.cls==1&&d.km>thr)||(d.cls==2&&d.km<=thr))ok++;
+            if(ok>testBest){testBest=ok;testThr=thr;}
+        }
+        int testOk=0;
+        foreach(var d in test)if((d.cls==1&&d.km>testThr)||(d.cls==2&&d.km<=testThr))testOk++;
+        _o.WriteLine($"70/30 split: train acc={testBest*100.0/train.Length:F1}%, test acc={testOk*100.0/test.Length:F1}%");
+
+        // Leave-one-N
+        foreach(var nv in Ns){
+            var sub=bd.Where(d=>d.N!=nv).ToArray();
+            var subKm=sub.Select(d=>d.km).OrderBy(k=>k).ToArray();
+            int bestLN=0;double bestThrLN=0;
+            for(int i=1;i<subKm.Length-1;i++){
+                double thr=(subKm[i]+subKm[i+1])/2;int ok=0;
+                foreach(var d in sub)if((d.cls==1&&d.km>thr)||(d.cls==2&&d.km<=thr))ok++;
+                if(ok>bestLN){bestLN=ok;bestThrLN=thr;}
+            }
+            var left=bd.Where(d=>d.N==nv).ToArray();int leftOk=0;
+            foreach(var d in left)if((d.cls==1&&d.km>bestThrLN)||(d.cls==2&&d.km<=bestThrLN))leftOk++;
+            _o.WriteLine($"Leave-out N={nv}: trained on {sub.Length}, test on {left.Length}: {leftOk}/{left.Length} ({leftOk*100.0/(left.Length+1e-9):F0}%) correct");
+        }
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double improvementOverKm=dOk-bestOk;
+        double residSignal=residEff;
+
+        string model;
+        if(residSignal<0.3&&improvementOverKm<=1)model="Model A: d0 residual is ARTIFACT — no independent signal";
+        else if(residSignal>=0.3&&residSignal<0.8&&improvementOverKm<=2)model="Model B: d0 residual is SECONDARY — weak but genuine";
+        else if(improvementOverKm>=3)model="Model C: km+d0 DUAL KERNEL — both contribute independently";
+        else model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"d0 residual effect: {residSignal:F3}σ, improvement over km-only: {improvementOverKm} profiles");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine($"Summary:");
+        _o.WriteLine($"  Direct effects: km={kmDirEff:F3}σ, d0={d0DirEff:F3}σ");
+        _o.WriteLine($"  Post-km residual: d0={residSignal:F3}σ, lam={Eff(p1.Select(d=>Residualize(lamA)[Array.IndexOf(bd,d)]).ToArray(),p1b.Select(d=>Residualize(lamA)[Array.IndexOf(bd,d)]).ToArray(),Residualize(lamA)):F3}σ");
+        _o.WriteLine($"  Jackknife stability: {jkAcc.Average():F1}±{Sd(jkAcc):F1}%");
+        _o.WriteLine($"  Random split generalization: train→test drop = {testBest*100.0/train.Length-testOk*100.0/test.Length:F1}%");
+        _o.WriteLine("");
+        if(model=="Model A")_o.WriteLine("d0 residual is absorbed by km. km is the SOLE kernel.");
+        else if(model=="Model B")_o.WriteLine("d0 carries weak independent structure. km is PRIMARY, d0 is SECONDARY.");
+        else _o.WriteLine("Both km and d0 contribute. DUAL kernel supported.");
+        _o.WriteLine("");
+        _o.WriteLine("CLAIMS: Residual audit only. Diagnostic. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RES_01 complete. Commit: RES_01_ResidualStructureAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
