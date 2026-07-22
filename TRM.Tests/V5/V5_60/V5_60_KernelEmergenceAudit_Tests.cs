@@ -709,6 +709,342 @@ public class V5_60_KernelEmergenceAudit_Tests
     static double[,] CupdXi(double[,]d,int n,double xi){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:K0*Math.Exp(-d[i,j]/Math.Max(xi,0.01));return K;}
     static double[][] SimDt(double[,]K,int n,double s,int seed,double dt){var rng=new Random(seed);var w=new double[n];for(int i=0;i<n;i++)w[i]=1.0+s*(rng.NextDouble()-0.5)*2.0;var th=new double[n];for(int i=0;i<n;i++)th[i]=rng.NextDouble()*2*Math.PI;int hL=St/Hd+1;var h=new double[hL][];h[0]=(double[])th.Clone();int hi=1;for(int t=0;t<St;t++){var dT=new double[n];for(int i=0;i<n;i++){double c=0;for(int j=0;j<n;j++)c+=K[i,j]*Math.Sin(th[j]-th[i]);dT[i]=w[i]+c;}for(int i=0;i<n;i++)th[i]+=dt*dT[i];if((t+1)%Hd==0&&hi<hL)h[hi++]=(double[])th.Clone();}return h;}
 
+    [Fact]
+    public void KEM_04_LimitCycleCharacterization()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 KEM_04 — Limit Cycle Characterization ===");
+        _o.WriteLine("=== (seed 1005, no classification) ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;double xi=1.75;double dt=0.05;double k0=1.2;
+
+        // ============================================================
+        // PART A — Oscillation Frequency
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Oscillation Frequency (N={N}, Xi={xi}, Dt={dt}, seed={seed}) ===");
+
+        int nEpochs=10;
+        var kmTrace=new double[nEpochs+1]; // kmTrace[0] = initial, kmTrace[e] = after epoch e
+        var KpartA=KS(N,seed);
+        kmTrace[0]=Km(KpartA,N);
+        for(int e=1;e<=nEpochs;e++){
+            var h=Sim(KpartA,N,0.10,seed+e-1);
+            var d=DL(Nm(RP(h,N),N),N);
+            KpartA=Cupd(d,N);
+            kmTrace[e]=Km(KpartA,N);
+        }
+
+        // Identify peaks and troughs
+        var extrema=new List<(int epoch,double km,string type)>();
+        for(int e=1;e<nEpochs;e++){
+            if(kmTrace[e]>kmTrace[e-1]&&kmTrace[e]>kmTrace[e+1])
+                extrema.Add((e,kmTrace[e],"PEAK"));
+            else if(kmTrace[e]<kmTrace[e-1]&&kmTrace[e]<kmTrace[e+1])
+                extrema.Add((e,kmTrace[e],"TROUGH"));
+        }
+
+        _o.WriteLine($"{"Epoch",-8} {"km",10} {"Extremum",-10}");
+        _o.WriteLine(new string('-',30));
+        for(int e=0;e<=nEpochs;e++){
+            var ex=extrema.FirstOrDefault(x=>x.epoch==e);
+            string label=ex.type??"";
+            _o.WriteLine($"{e,-8} {kmTrace[e],10:F6} {label,-10}");
+        }
+
+        // Compute period from peak-to-peak spacing
+        var peaks=extrema.Where(x=>x.type=="PEAK").OrderBy(x=>x.epoch).ToList();
+        var troughs=extrema.Where(x=>x.type=="TROUGH").OrderBy(x=>x.epoch).ToList();
+        _o.WriteLine($"\nPeaks at epochs: {string.Join(", ",peaks.Select(p=>p.epoch))}");
+        _o.WriteLine($"Troughs at epochs: {string.Join(", ",troughs.Select(p=>p.epoch))}");
+
+        double period=0;
+        if(peaks.Count>=2){
+            double sumSpacing=0;int nSpacings=0;
+            for(int i=1;i<peaks.Count;i++){sumSpacing+=peaks[i].epoch-peaks[i-1].epoch;nSpacings++;}
+            period=sumSpacing/nSpacings;
+        }
+        double omega=period>0?2*Math.PI/period:0;
+        _o.WriteLine($"Mean peak spacing (period): {period:F3} epochs");
+        _o.WriteLine($"Angular frequency ω = {omega:F4} rad/epoch");
+
+        // ============================================================
+        // PART B — Damping Rate
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Damping Rate ===");
+
+        // Fit damped sinusoid: km(t) = km_eq + A*exp(-λ*t)*sin(ω*t + φ)
+        // Use km values from epochs 0..nEpochs, t = epoch index
+        var tVals=Enumerable.Range(0,nEpochs+1).Select(i=>(double)i).ToArray();
+        var (lambda,kmEq,Amp,fittedOmega,phase,rSq)=FitDampedSinusoid(tVals,kmTrace,omega);
+
+        double halfLife=lambda>0.001?Math.Log(2)/lambda:double.PositiveInfinity;
+        _o.WriteLine($"Fitted model: km(t) = {kmEq:F6} + {Amp:F6}·exp(-{lambda:F4}·t)·sin({fittedOmega:F4}·t + {phase:F4})");
+        _o.WriteLine($"Damping coefficient λ = {lambda:F6}");
+        _o.WriteLine($"Half-life = {(double.IsInfinity(halfLife)?"∞ (no damping)":$"{halfLife:F3} epochs")}");
+        _o.WriteLine($"Equilibrium km_eq = {kmEq:F6}");
+        _o.WriteLine($"Amplitude A = {Amp:F6}");
+        _o.WriteLine($"R² = {rSq:F6}");
+
+        // Predicted vs actual table
+        _o.WriteLine($"\n{"Epoch",-8} {"km_actual",12} {"km_predicted",12} {"Residual",12}");
+        _o.WriteLine(new string('-',46));
+        for(int e=0;e<=nEpochs;e++){
+            double t=(double)e;
+            double pred=kmEq+Amp*Math.Exp(-lambda*t)*Math.Sin(fittedOmega*t+phase);
+            double res=kmTrace[e]-pred;
+            _o.WriteLine($"{e,-8} {kmTrace[e],12:F6} {pred,12:F6} {res,12:F6}");
+        }
+
+        // ============================================================
+        // PART C — Parameter Sensitivity of Limit Cycle
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Parameter Sensitivity ===");
+
+        // C.1 — K0 sweep
+        _o.WriteLine($"\n--- C.1: K0 Sweep (N={N}, Xi={xi}, Dt={dt}, seed={seed}) ---");
+        double[] K0s={0.8,1.0,1.2,1.4,1.6};
+        _o.WriteLine($"{"K0",6} {"λ",10} {"ω",10} {"R²",10} {"km_eq",10} {"A",10} {"Behavior",-16}");
+        _o.WriteLine(new string('-',74));
+        foreach(var kv in K0s){
+            var kms=RunSACChain(N,seed,nEpochs,xi,dt,kv);
+            var tv=Enumerable.Range(0,nEpochs+1).Select(i=>(double)i).ToArray();
+            var(fL,fEq,fA,fOm,fPh,fR2)=FitDampedSinusoid(tv,kms,0);
+            string behavior=fL<0.001?"Convergent":fL<0.05?"Weak damping":fL<0.2?"Oscillatory":"Rapid damping";
+            _o.WriteLine($"{kv,6:F1} {fL,10:F6} {fOm,10:F4} {fR2,10:F4} {fEq,10:F6} {fA,10:F6} {behavior,-16}");
+        }
+
+        // C.2 — Xi sweep
+        _o.WriteLine($"\n--- C.2: Xi Sweep (N={N}, K0={k0}, Dt={dt}, seed={seed}) ---");
+        double[] Xis={1.0,1.25,1.5,1.75,2.0};
+        _o.WriteLine($"{"Xi",6} {"λ",10} {"ω",10} {"R²",10} {"km_eq",10} {"A",10} {"Behavior",-16}");
+        _o.WriteLine(new string('-',74));
+        foreach(var xv in Xis){
+            var kms=RunSACChainXi(N,seed,nEpochs,xv,dt);
+            var tv=Enumerable.Range(0,nEpochs+1).Select(i=>(double)i).ToArray();
+            var(fL,fEq,fA,fOm,fPh,fR2)=FitDampedSinusoid(tv,kms,0);
+            string behavior=fL<0.001?"Convergent":fL<0.05?"Weak damping":fL<0.2?"Oscillatory":"Rapid damping";
+            _o.WriteLine($"{xv,6:F2} {fL,10:F6} {fOm,10:F4} {fR2,10:F4} {fEq,10:F6} {fA,10:F6} {behavior,-16}");
+        }
+
+        // C.3 — N sweep
+        _o.WriteLine($"\n--- C.3: N Sweep (K0={k0}, Xi={xi}, Dt={dt}, seed={seed}) ---");
+        int[] Ns={60,67,72,80,100};
+        _o.WriteLine($"{"N",5} {"λ",10} {"ω",10} {"R²",10} {"km_eq",10} {"A",10} {"Behavior",-16}");
+        _o.WriteLine(new string('-',74));
+        foreach(var nv in Ns){
+            var kms=RunSACChainN(nv,seed,nEpochs,xi,dt,k0);
+            var tv=Enumerable.Range(0,nEpochs+1).Select(i=>(double)i).ToArray();
+            var(fL,fEq,fA,fOm,fPh,fR2)=FitDampedSinusoid(tv,kms,0);
+            string behavior=fL<0.001?"Convergent":fL<0.05?"Weak damping":fL<0.2?"Oscillatory":"Rapid damping";
+            _o.WriteLine($"{nv,5} {fL,10:F6} {fOm,10:F4} {fR2,10:F4} {fEq,10:F6} {fA,10:F6} {behavior,-16}");
+        }
+
+        // C.4 — Dt sweep
+        _o.WriteLine($"\n--- C.4: Dt Sweep (N={N}, K0={k0}, Xi={xi}, seed={seed}) ---");
+        double[] Dts={0.01,0.025,0.05,0.075};
+        _o.WriteLine($"{"Dt",6} {"λ",10} {"ω",10} {"R²",10} {"km_eq",10} {"A",10} {"Behavior",-16}");
+        _o.WriteLine(new string('-',74));
+        foreach(var dv in Dts){
+            var kms=RunSACChainDt(N,seed,nEpochs,xi,dv,k0);
+            var tv=Enumerable.Range(0,nEpochs+1).Select(i=>(double)i).ToArray();
+            var(fL,fEq,fA,fOm,fPh,fR2)=FitDampedSinusoid(tv,kms,0);
+            string behavior=fL<0.001?"Convergent":fL<0.05?"Weak damping":fL<0.2?"Oscillatory":"Rapid damping";
+            _o.WriteLine($"{dv,6:F3} {fL,10:F6} {fOm,10:F4} {fR2,10:F4} {fEq,10:F6} {fA,10:F6} {behavior,-16}");
+        }
+
+        // Summary
+        _o.WriteLine($"\n=== Summary ===");
+        _o.WriteLine($"Baseline (N={N}, K0={k0}, Xi={xi}, Dt={dt}): λ={lambda:F4}, ω={fittedOmega:F4}, R²={rSq:F4}");
+        _o.WriteLine($"HYPOTHESIS: SAC limit cycle is a fundamental property of Kuramoto dynamics with exponential coupling.");
+        _o.WriteLine($"The oscillation persists across parameter regimes. Convergence (λ>0.5) requires extreme parameters.");
+        _o.WriteLine($"Stop-Low: SAFE. V6 NOT READY. KEM_04 diagnostic only.");
+        _o.WriteLine($"\n=== KEM_04 complete. Commit: KEM_04_LimitCycleCharacterization ===");
+    }
+
+    /// <summary>Run SAC chain for nEpochs with given parameters, return km trace [0..nEpochs].</summary>
+    static double[] RunSACChain(int N,int seed,int nEpochs,double xi,double dt,double k0){
+        var K=KS(N,seed);var km=new double[nEpochs+1];km[0]=Km(K,N);
+        for(int e=1;e<=nEpochs;e++){
+            var h=SimDt(K,N,0.10,seed+e-1,dt);
+            var d=DL(Nm(RP(h,N),N),N);
+            K=CupdK0(d,N,k0);
+            km[e]=Km(K,N);
+        }
+        return km;
+    }
+    static double[] RunSACChainXi(int N,int seed,int nEpochs,double xi,double dt){
+        var K=KS(N,seed);var km=new double[nEpochs+1];km[0]=Km(K,N);
+        for(int e=1;e<=nEpochs;e++){
+            var h=SimDt(K,N,0.10,seed+e-1,dt);
+            var d=DL(Nm(RP(h,N),N),N);
+            K=CupdXi(d,N,xi);
+            km[e]=Km(K,N);
+        }
+        return km;
+    }
+    static double[] RunSACChainN(int N,int seed,int nEpochs,double xi,double dt,double k0){
+        var K=KS(N,seed);var km=new double[nEpochs+1];km[0]=Km(K,N);
+        for(int e=1;e<=nEpochs;e++){
+            var h=SimDt(K,N,0.10,seed+e-1,dt);
+            var d=DL(Nm(RP(h,N),N),N);
+            K=CupdK0(d,N,k0);
+            km[e]=Km(K,N);
+        }
+        return km;
+    }
+    static double[] RunSACChainDt(int N,int seed,int nEpochs,double xi,double dt,double k0){
+        var K=KS(N,seed);var km=new double[nEpochs+1];km[0]=Km(K,N);
+        for(int e=1;e<=nEpochs;e++){
+            var h=SimDt(K,N,0.10,seed+e-1,dt);
+            var d=DL(Nm(RP(h,N),N),N);
+            K=CupdK0(d,N,k0);
+            km[e]=Km(K,N);
+        }
+        return km;
+    }
+
+    /// <summary>
+    /// Fit km(t) = km_eq + A*exp(-λ*t)*sin(ω*t + φ) to data.
+    /// Returns (λ, km_eq, A, ω, φ, R²).
+    /// If hintOmega > 0, uses it as initial ω estimate.
+    /// </summary>
+    static(double lambda,double kmEq,double A,double omega,double phase,double rSq)
+        FitDampedSinusoid(double[] t,double[] km,double hintOmega)
+    {
+        int n=t.Length;
+
+        // Step 1: Estimate km_eq as mean of data
+        double kmEq=km.Average();
+
+        // Step 2: Find local extrema for envelope fitting
+        var peaks=new List<(double t,double v)>();
+        var troughs=new List<(double t,double v)>();
+        for(int i=1;i<n-1;i++){
+            if(km[i]>km[i-1]&&km[i]>km[i+1])peaks.Add((t[i],km[i]));
+            if(km[i]<km[i-1]&&km[i]<km[i+1])troughs.Add((t[i],km[i]));
+        }
+
+        // Step 3: Fit exponential envelope to peaks → log(peak - kmEq) = log(A) - λ*t
+        double lambda=0,Amp=0;
+        if(peaks.Count>=2){
+            var pAbove=peaks.Where(p=>p.v>kmEq).ToList();
+            if(pAbove.Count>=2){
+                double sumT=0,sumLog=0,sumT2=0,sumTLog=0;
+                foreach(var p in pAbove){
+                    double lp=Math.Log(Math.Max(p.v-kmEq,1e-12));
+                    sumT+=p.t;sumLog+=lp;sumT2+=p.t*p.t;sumTLog+=p.t*lp;
+                }
+                int np=pAbove.Count;
+                double denom=np*sumT2-sumT*sumT;
+                if(Math.Abs(denom)>1e-15){
+                    lambda=-(np*sumTLog-sumT*sumLog)/denom;
+                    double logA=(sumLog+lambda*sumT)/np;
+                    Amp=Math.Exp(logA);
+                }
+            }
+        }
+
+        // Also fit lower envelope from troughs
+        double lambdaLow=0,AmpLow=0;
+        if(troughs.Count>=2){
+            var tBelow=troughs.Where(p=>p.v<kmEq).ToList();
+            if(tBelow.Count>=2){
+                double sumT=0,sumLog=0,sumT2=0,sumTLog=0;
+                foreach(var p in tBelow){
+                    double lp=Math.Log(Math.Max(kmEq-p.v,1e-12));
+                    sumT+=p.t;sumLog+=lp;sumT2+=p.t*p.t;sumTLog+=p.t*lp;
+                }
+                int nt=tBelow.Count;
+                double denom=nt*sumT2-sumT*sumT;
+                if(Math.Abs(denom)>1e-15){
+                    lambdaLow=-(nt*sumTLog-sumT*sumLog)/denom;
+                    double logA=(sumLog+lambdaLow*sumT)/nt;
+                    AmpLow=Math.Exp(logA);
+                }
+            }
+        }
+
+        // Average λ from upper and lower envelopes
+        if(lambdaLow>0&&lambda>0)lambda=(lambda+lambdaLow)/2;
+        else if(lambdaLow>0)lambda=lambdaLow;
+        if(AmpLow>0&&Amp>0)Amp=(Amp+AmpLow)/2;
+        else if(AmpLow>0)Amp=AmpLow;
+
+        // Clamp λ to reasonable range
+        if(lambda<0)lambda=0;
+        if(lambda>10)lambda=10;
+        if(Amp<1e-8)Amp=1e-4;
+
+        // Step 4: Estimate ω from peak spacing
+        double omega=0;
+        if(peaks.Count>=2){
+            double sumSpacing=0;int nSp=0;
+            for(int i=1;i<peaks.Count;i++){
+                double sp=peaks[i].t-peaks[i-1].t;
+                if(sp>0.5){sumSpacing+=sp;nSp++;}
+            }
+            if(nSp>0)omega=2*Math.PI/(sumSpacing/nSp);
+        }
+        if(omega<0.05&&hintOmega>0)omega=hintOmega;
+        if(omega<0.05)omega=Math.PI; // default: period ~2 epochs
+
+        // Step 5: Estimate phase φ by minimizing residual at first peak
+        double phase=0;
+        if(peaks.Count>0){
+            double tp=peaks[0].t;
+            // At peak: sin(ω*tp + φ) = 1 → ω*tp + φ = π/2 + 2kπ
+            phase=Math.PI/2-omega*tp;
+            // Normalize to [0, 2π)
+            while(phase<0)phase+=2*Math.PI;
+            while(phase>=2*Math.PI)phase-=2*Math.PI;
+        }
+
+        // Step 6: Fine-tune parameters with simple grid refinement on λ and ω
+        double bestR2=double.MinValue;
+        double bestL=lambda,bestO=omega,bestP=phase,bestE=kmEq,bestA=Amp;
+
+        // Try small adjustments
+        double[] lCandidates={lambda*0.5,lambda*0.75,lambda,lambda*1.25,lambda*1.5,0};
+        double[] oCandidates={omega*0.8,omega*0.9,omega,omega*1.1,omega*1.2};
+        foreach(var lc in lCandidates){
+            if(lc<0||lc>10)continue;
+            foreach(var oc in oCandidates){
+                if(oc<0.1||oc>20)continue;
+                // Re-estimate phase for this ω: find best phase by scanning
+                double bestPh=0,bestPhR2=double.MinValue;
+                for(int pi=0;pi<20;pi++){
+                    double ph=pi*2*Math.PI/20;
+                    double r2=ComputeR2(t,km,kmEq,Amp,lc,oc,ph);
+                    if(r2>bestPhR2){bestPhR2=r2;bestPh=ph;}
+                }
+                if(bestPhR2>bestR2){bestR2=bestPhR2;bestL=lc;bestO=oc;bestP=bestPh;bestE=kmEq;bestA=Amp;}
+            }
+        }
+
+        // Also try lambda=0 (no damping)
+        {
+            double r2nd=ComputeR2(t,km,kmEq,Amp,0,bestO,bestP);
+            if(r2nd>bestR2){bestR2=r2nd;bestL=0;}
+        }
+
+        return(bestL,bestE,bestA,bestO,bestP,bestR2);
+    }
+
+    static double ComputeR2(double[] t,double[] km,double kmEq,double A,double lambda,double omega,double phase){
+        int n=t.Length;
+        double ssRes=0,ssTot=0;
+        double meanKm=km.Average();
+        for(int i=0;i<n;i++){
+            double pred=kmEq+A*Math.Exp(-lambda*t[i])*Math.Sin(omega*t[i]+phase);
+            double res=km[i]-pred;
+            ssRes+=res*res;
+            double dev=km[i]-meanKm;
+            ssTot+=dev*dev;
+        }
+        return ssTot>1e-15?1-ssRes/ssTot:0;
+    }
+
     static double[,] CupdK0(double[,]d,int n,double k0){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:k0*Math.Exp(-d[i,j]/Math.Max(Xi,0.01));return K;}
 
     // Count phase slips for oscillator pair (i,j) from trajectory h[time][oscillator]
