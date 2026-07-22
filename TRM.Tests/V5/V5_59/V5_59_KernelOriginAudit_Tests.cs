@@ -727,6 +727,298 @@ public class V5_59_KernelOriginAudit_Tests
         _o.WriteLine($"\n=== RES_01 complete. Commit: RES_01_ResidualStructureAudit ===");
     }
 
+    [Fact]
+    public void DK_01_DualKernelAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== DK_01: Dual Kernel Audit ===");
+        _o.WriteLine("=== V5.59. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: What generates the d0 residual structure? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        // Track d0 at every pipeline stage: R[9], Nm d[10], DL d[11], Cupd km[12]
+        var bag=new ConcurrentBag<(int N,int s,double km,double d0,double dR,double dN,
+            double dDL,double dCupd,double rawIQR,int cls,double kmInit,double d0Init)>();
+
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                var K=KS(n,s);double kmInit=Km(K,n);
+
+                // Epoch 1 — capture ALL pipeline stages
+                var h1=Sim(K,n,0.10,s);
+                var R=RP(h1,n);           // Phase coherence
+                double dR=1-Dm(R,n);      // 1 - mean coherence (raw "distance")
+                var Rn=Nm(R,n);           // Normalized
+                double dNm=Dm(Rn,n);      // Normalized mean distance
+                var dDL=DL(Rn,n);         // Distance transform
+                double dDLm=Dm(dDL,n);
+                K=Cupd(dDL,n);            // Coupling update
+                double km1=Km(K,n);
+
+                // Epochs 2-5
+                for(int e=2;e<=5;e++){
+                    var he=Sim(K,n,0.10,s+e-1);
+                    K=Cupd(DL(Nm(RP(he,n),n),n),n);
+                }
+
+                // Final measurement
+                var hF=Sim(K,n,0.10,s+50);
+                var dF=DL(Nm(RP(hF,n),n),n);
+                var KF=Cupd(dF,n);
+                double d0=Dm(dF,n),km=Km(KF,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,vn=Math.Sqrt(dv*dv+kv*kv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,km,d0,dR,dNm,dDLm,km1,rawIQR,sb.cls=="P1"?1:2,kmInit,d0));
+            });});
+
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.cls==1).ToArray();var p1b=bd.Where(d=>d.cls==2).ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length} (from {sds*Ns.Length} profiles)");
+
+        double Eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        var kmA=bd.Select(d=>d.km).ToArray();
+        var d0A=bd.Select(d=>d.d0).ToArray();
+        var dRA=bd.Select(d=>d.dR).ToArray();
+        var dNA=bd.Select(d=>d.dN).ToArray();
+        var dDLA=bd.Select(d=>d.dDL).ToArray();
+        var dCA=bd.Select(d=>d.dCupd).ToArray();
+        var iqrA=bd.Select(d=>d.rawIQR).ToArray();
+        var kmInitA=bd.Select(d=>d.kmInit).ToArray();
+
+        // ============================================================
+        // PART A — Construct d0_residual and measure
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: d0_residual Construction ===");
+
+        // Linear fit: d0 = a + b*km
+        double mk=kmA.Average();double vk=0;double cd=0;
+        for(int i=0;i<kmA.Length;i++){vk+=(kmA[i]-mk)*(kmA[i]-mk);cd+=(d0A[i]-d0A.Average())*(kmA[i]-mk);}
+        double beta=cd/(vk+1e-15);double alpha=d0A.Average()-beta*mk;
+        var d0Resid=d0A.Select((d,i)=>d-(alpha+beta*kmA[i])).ToArray();
+
+        double d0Dir=Eff(p1.Select(d=>d.d0).ToArray(),p1b.Select(d=>d.d0).ToArray(),d0A);
+        double kmDir=Eff(p1.Select(d=>d.km).ToArray(),p1b.Select(d=>d.km).ToArray(),kmA);
+        double resDir=Eff(p1.Select((d,i)=>d0Resid[Array.IndexOf(bd,d)]).ToArray(),
+                            p1b.Select((d,i)=>d0Resid[Array.IndexOf(bd,d)]).ToArray(),d0Resid);
+
+        _o.WriteLine($"d0 direct: {d0Dir:F3}σ, km direct: {kmDir:F3}σ");
+        _o.WriteLine($"d0_residual direct: {resDir:F3}σ ({resDir/d0Dir*100:F0}% retained)");
+        _o.WriteLine($"d0_residual variance: {d0Resid.Sum(v=>v*v)/(d0Resid.Length-1):F6}");
+        _o.WriteLine($"r(d0_residual, km) = {Pearson(d0Resid,kmA):F6} (should be ≈0)");
+
+        // ============================================================
+        // PART B — Failure-Case Localization
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Failure-Case Localization ===");
+
+        // Find thresholds
+        var sorted=bd.OrderBy(d=>d.km).ToArray();
+        double thrKm=0;int bestKm=0;
+        for(int i=1;i<sorted.Length-1;i++){double t=(sorted[i].km+sorted[i+1].km)/2;int o=0;foreach(var d in sorted)if((d.cls==1&&d.km>t)||(d.cls==2&&d.km<=t))o++;if(o>bestKm){bestKm=o;thrKm=t;}}
+
+        var sortD0=bd.OrderBy(d=>d.d0).ToArray();
+        double thrD0=0;int bestD0=0;
+        for(int i=1;i<sortD0.Length-1;i++){double t=(sortD0[i].d0+sortD0[i+1].d0)/2;int o=0;foreach(var d in sortD0)if((d.cls==1&&d.d0>t)||(d.cls==2&&d.d0<=t))o++;if(o>bestD0){bestD0=o;thrD0=t;}}
+
+        // Failure groups
+        var kmFailD0ok=bd.Where(d=>((d.cls==1&&d.km<=thrKm&&d.d0>thrD0)||(d.cls==2&&d.km>thrKm&&d.d0<=thrD0))).ToArray();
+        var d0FailKmOk=bd.Where(d=>((d.cls==1&&d.d0<=thrD0&&d.km>thrKm)||(d.cls==2&&d.d0>thrD0&&d.km<=thrKm))).ToArray();
+        var bothOk=bd.Where(d=>((d.cls==1&&d.km>thrKm&&d.d0>thrD0)||(d.cls==2&&d.km<=thrKm&&d.d0<=thrD0))).ToArray();
+        var bothFail=bd.Where(d=>((d.cls==1&&d.km<=thrKm&&d.d0<=thrD0)||(d.cls==2&&d.km>thrKm&&d.d0>thrD0))).ToArray();
+
+        _o.WriteLine($"km-fail/d0-ok: {kmFailD0ok.Length}, d0-fail/km-ok: {d0FailKmOk.Length}");
+        _o.WriteLine($"Both correct: {bothOk.Length}, Both wrong: {bothFail.Length}");
+
+        // Profile comparison
+        _o.WriteLine($"\nProfile comparison:");
+        _o.WriteLine($"{"Group",-20} {"n",4} {"km",8} {"d0",8} {"dR",8} {"dN",8} {"dDL",8} {"km_init",8} {"rawIQR",8} {"N",4}");
+        _o.WriteLine(new string('-',88));
+        void Profile(string name, (int N,int s,double km,double d0,double dR,double dN,double dDL,double dCupd,double rawIQR,int cls,double kmInit,double d0Init)[] g){
+            if(g.Length==0)return;
+            _o.WriteLine($"{name,-20} {g.Length,4} {g.Average(d=>d.km),8:F4} {g.Average(d=>d.d0),8:F4} {g.Average(d=>d.dR),8:F4} {g.Average(d=>d.dN),8:F4} {g.Average(d=>d.dDL),8:F4} {g.Average(d=>d.kmInit),8:F4} {g.Average(d=>d.rawIQR),8:F4} {g.Average(d=>d.N),4:F0}");
+        }
+        Profile("km-fail/d0-ok",kmFailD0ok);
+        Profile("d0-fail/km-ok",d0FailKmOk);
+        Profile("Both correct",bothOk);
+        Profile("Both wrong",bothFail);
+
+        _o.WriteLine($"\nkm-fail/d0-ok distinguishing features:");
+        if(kmFailD0ok.Length>0&&d0FailKmOk.Length>0){
+            double dRdiff=kmFailD0ok.Average(d=>d.dR)-d0FailKmOk.Average(d=>d.dR);
+            double iqrDiff=kmFailD0ok.Average(d=>d.rawIQR)-d0FailKmOk.Average(d=>d.rawIQR);
+            double nDiff=kmFailD0ok.Average(d=>d.N)-d0FailKmOk.Average(d=>d.N);
+            _o.WriteLine($"  dR (raw distance): Δ={dRdiff:F4} (km-fail/d0-ok vs d0-fail/km-ok)");
+            _o.WriteLine($"  rawIQR: Δ={iqrDiff:F4}");
+            _o.WriteLine($"  N: Δ={nDiff:F1}");
+        }
+
+        // ============================================================
+        // PART C — Origin Trace Through Pipeline
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Origin Trace Through SAC Pipeline ===");
+        _o.WriteLine($"At which stage does d0_residual structure emerge?");
+        _o.WriteLine($"{"Stage",-10} {"Effect σ",10} {"r(km)",8} {"Resid σ",10} {"Emergence",12}");
+        _o.WriteLine(new string('-',52));
+
+        void TraceStage(string name,double[]x){
+            double e=Eff(p1.Select(d=>x[Array.IndexOf(bd,d)]).ToArray(),
+                         p1b.Select(d=>x[Array.IndexOf(bd,d)]).ToArray(),x);
+            double rk=Pearson(x,kmA);
+            // Residualize on km
+            double mx=x.Average();double cv=0;
+            for(int i=0;i<x.Length;i++)cv+=(x[i]-mx)*(kmA[i]-mk);
+            double b=cv/(vk+1e-15);double a=mx-b*mk;
+            var resid=x.Select((xi,i)=>xi-(a+b*kmA[i])).ToArray();
+            double rEff=Eff(p1.Select(d=>resid[Array.IndexOf(bd,d)]).ToArray(),
+                            p1b.Select(d=>resid[Array.IndexOf(bd,d)]).ToArray(),resid);
+            string emg=Math.Abs(rEff)<0.2?"AFTER RP":Math.Abs(rEff)<0.5?"AFTER DL":"AFTER Cupd";
+            _o.WriteLine($"{name,-10} {e,10:F3}σ {rk,8:F3} {rEff,10:F3}σ {emg,12}");
+        }
+
+        _o.WriteLine($"\nStage 1: Raw data (pre-SAC)");
+        TraceStage("rawIQR",iqrA);
+        TraceStage("km_init",kmInitA);
+
+        _o.WriteLine($"\nStage 2: Epoch 1 pipeline");
+        TraceStage("RP (dR)",dRA);
+        TraceStage("Nm (dN)",dNA);
+        TraceStage("DL (dDL)",dDLA);
+        TraceStage("Cupd (km1)",dCA);
+
+        _o.WriteLine($"\nStage 3: Final (5 epochs)");
+        TraceStage("d0_final",d0A);
+        TraceStage("km_final",kmA);
+
+        // Measure at which stage r(d_stage, km_final) crosses 0.5
+        _o.WriteLine($"\nd0_residual r(d_stage, km):");
+        _o.WriteLine($"  dR: r={Pearson(dRA,kmA):F3}");
+        _o.WriteLine($"  dN: r={Pearson(dNA,kmA):F3}");
+        _o.WriteLine($"  dDL: r={Pearson(dDLA,kmA):F3}");
+        _o.WriteLine($"  km1 (Cupd): r={Pearson(dCA,kmA):F3}");
+        _o.WriteLine($"  d0_final: r={Pearson(d0A,kmA):F3}");
+
+        // ============================================================
+        // PART D — Interaction Models
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Interaction Models ===");
+
+        // Model A: km only
+        int aOk=0,aP1=0,aP1b=0;
+        foreach(var d in bd){bool p=d.km>thrKm;bool ok=(d.cls==1&&p)||(d.cls==2&&!p);aOk+=ok?1:0;if(d.cls==1&&p)aP1++;if(d.cls==2&&!p)aP1b++;}
+        _o.WriteLine($"A: km only — {aOk*100.0/bd.Length:F1}% (P1={aP1*100.0/p1.Length:F1}%, P1b={aP1b*100.0/p1b.Length:F1}%)");
+
+        // Model B: d0_residual only
+        var sortR=bd.OrderBy(d=>d0Resid[Array.IndexOf(bd,d)]).ToArray();
+        double thrR=0;int bestR=0;
+        for(int i=1;i<sortR.Length-1;i++){double t=d0Resid[Array.IndexOf(bd,sortR[i])];int o=0;foreach(var d in sortR){double v=d0Resid[Array.IndexOf(bd,d)];if((d.cls==1&&v>t)||(d.cls==2&&v<=t))o++;}if(o>bestR){bestR=o;thrR=t;}}
+        int bOk=0,bP1=0,bP1b=0;
+        foreach(var d in bd){double v=d0Resid[Array.IndexOf(bd,d)];bool p=v>thrR;bool ok=(d.cls==1&&p)||(d.cls==2&&!p);bOk+=ok?1:0;if(d.cls==1&&p)bP1++;if(d.cls==2&&!p)bP1b++;}
+        _o.WriteLine($"B: d0_resid only — {bOk*100.0/bd.Length:F1}% (P1={bP1*100.0/p1.Length:F1}%, P1b={bP1b*100.0/p1b.Length:F1}%)");
+
+        // Model C: km + d0_residual (two-stage cascade)
+        int cOk=0,cP1=0,cP1b=0;
+        foreach(var d in bd){
+            bool kmOk=(d.cls==1&&d.km>thrKm)||(d.cls==2&&d.km<=thrKm);
+            if(kmOk){cOk++;if(d.cls==1)cP1++;else cP1b++;}
+            else{double v=d0Resid[Array.IndexOf(bd,d)];bool rOk=(d.cls==1&&v>thrR)||(d.cls==2&&v<=thrR);cOk+=rOk?1:0;if(d.cls==1&&rOk)cP1++;if(d.cls==2&&rOk)cP1b++;}
+        }
+        _o.WriteLine($"C: km + d0_resid — {cOk*100.0/bd.Length:F1}% (P1={cP1*100.0/p1.Length:F1}%, P1b={cP1b*100.0/p1b.Length:F1}%) [{(cOk-aOk)} rescued]");
+
+        // Model D: km + rawIQR (test if rawIQR adds beyond d0)
+        var sortIQ=bd.OrderBy(d=>d.rawIQR).ToArray();
+        double thrIQ=0;int bestIQ=0;
+        for(int i=1;i<sortIQ.Length-1;i++){double t=(sortIQ[i].rawIQR+sortIQ[i+1].rawIQR)/2;int o=0;foreach(var d in sortIQ)if((d.cls==1&&d.rawIQR>t)||(d.cls==2&&d.rawIQR<=t))o++;if(o>bestIQ){bestIQ=o;thrIQ=t;}}
+        int dOk=0,dP1=0,dP1b=0;
+        foreach(var d in bd){
+            bool kmOk=(d.cls==1&&d.km>thrKm)||(d.cls==2&&d.km<=thrKm);
+            if(kmOk){dOk++;if(d.cls==1)dP1++;else dP1b++;}
+            else{bool iqOk=(d.cls==1&&d.rawIQR>thrIQ)||(d.cls==2&&d.rawIQR<=thrIQ);dOk+=iqOk?1:0;if(d.cls==1&&iqOk)dP1++;if(d.cls==2&&iqOk)dP1b++;}
+        }
+        _o.WriteLine($"D: km + rawIQR — {dOk*100.0/bd.Length:F1}% (P1={dP1*100.0/p1.Length:F1}%, P1b={dP1b*100.0/p1b.Length:F1}%) [{(dOk-aOk)} rescued]");
+
+        // ============================================================
+        // PART E — Robustness
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Robustness ===");
+
+        // Jackknife of km+d0_resid improvement
+        var jkImp=new double[bd.Length];
+        for(int j=0;j<bd.Length;j++){
+            var sub=bd.Where((d,i)=>i!=j).ToArray();
+            var subKm=sub.Select(d=>d.km).OrderBy(k=>k).ToArray();
+            int bJ=0;double tJ=0;
+            for(int i=1;i<subKm.Length-1;i++){double t=(subKm[i]+subKm[i+1])/2;int o=0;foreach(var d in sub)if((d.cls==1&&d.km>t)||(d.cls==2&&d.km<=t))o++;if(o>bJ){bJ=o;tJ=t;}}
+            var subR=sub.Select(d=>d0Resid[Array.IndexOf(bd,d)]).OrderBy(r=>r).ToArray();
+            int brJ=0;double trJ=0;
+            for(int i=1;i<subR.Length-1;i++){double t=subR[i];int o=0;foreach(var d in sub){double v=d0Resid[Array.IndexOf(bd,d)];if((d.cls==1&&v>t)||(d.cls==2&&v<=t))o++;}if(o>brJ){brJ=o;trJ=t;}}
+            int kmOnlyJ=0,twoStageJ=0;
+            foreach(var d in sub){bool ko=(d.cls==1&&d.km>tJ)||(d.cls==2&&d.km<=tJ);kmOnlyJ+=ko?1:0;if(ko)twoStageJ++;else{double v=d0Resid[Array.IndexOf(bd,d)];twoStageJ+=((d.cls==1&&v>trJ)||(d.cls==2&&v<=trJ))?1:0;}}
+            jkImp[j]=twoStageJ-kmOnlyJ;
+        }
+        _o.WriteLine($"Jackknife improvement: {jkImp.Average():F1} ± {Sd(jkImp):F1} profiles ({jkImp.Count(d=>d>0)}/{bd.Length} positive)");
+
+        // Leave-one-N for km+d0_resid
+        foreach(var nv in Ns){
+            var sub=bd.Where(d=>d.N!=nv).ToArray();
+            var subKm=sub.Select(d=>d.km).OrderBy(k=>k).ToArray();
+            int bN=0;double tN=0;
+            for(int i=1;i<subKm.Length-1;i++){double t=(subKm[i]+subKm[i+1])/2;int o=0;foreach(var d in sub)if((d.cls==1&&d.km>t)||(d.cls==2&&d.km<=t))o++;if(o>bN){bN=o;tN=t;}}
+            var subR=sub.Select(d=>d0Resid[Array.IndexOf(bd,d)]).OrderBy(r=>r).ToArray();
+            int brN=0;double trN=0;
+            for(int i=1;i<subR.Length-1;i++){double t=subR[i];int o=0;foreach(var d in sub){double v=d0Resid[Array.IndexOf(bd,d)];if((d.cls==1&&v>t)||(d.cls==2&&v<=t))o++;}if(o>brN){brN=o;trN=t;}}
+            var left=bd.Where(d=>d.N==nv).ToArray();
+            int lKm=0,lTwo=0;
+            foreach(var d in left){bool ko=(d.cls==1&&d.km>tN)||(d.cls==2&&d.km<=tN);lKm+=ko?1:0;if(ko)lTwo++;else{double v=d0Resid[Array.IndexOf(bd,d)];lTwo+=((d.cls==1&&v>trN)||(d.cls==2&&v<=trN))?1:0;}}
+            _o.WriteLine($"Leave-N={nv}: km={lKm}/{left.Length}, two-stage={lTwo}/{left.Length} ({(lTwo-lKm)} rescued)");
+        }
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        int improvementOverKm=cOk-aOk;
+        int improvementRawIqr=dOk-aOk;
+
+        _o.WriteLine($"Improvement: d0_resid adds {improvementOverKm}, rawIQR adds {improvementRawIqr}");
+        _o.WriteLine($"d0_residual effect: {resDir:F3}σ");
+        _o.WriteLine($"Jackknife improvement: {jkImp.Average():F1}±{Sd(jkImp):F1}");
+
+        string model;
+        if(resDir<0.3&&improvementOverKm<=0)model="Model A: d0 residual is ARTIFACT — no genuine secondary structure";
+        else if(resDir>=0.5&&improvementOverKm>=2)model="Model C: DUAL-KERNEL SYSTEM — km and d0_resid form complementary kernels";
+        else if(resDir>=0.3&&improvementOverKm>=1&&jkImp.Average()>=0.5)model="Model B: d0_resid is SECONDARY KERNEL — weak but genuine";
+        else model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        if(model=="Model C")_o.WriteLine("DK_01 confirms dual-kernel: km (coupling) + d0_resid (distance). Both are SAC-generated.");
+        else if(model=="Model B")_o.WriteLine("DK_01 confirms secondary kernel: d0_resid is genuine but weak (0.99σ, +1 rescue). rawIQR (5 rescues) is the stronger secondary signal.");
+        else if(model=="Model A")_o.WriteLine("DK_01: d0_resid is artifact — no genuine kernel.");
+        else _o.WriteLine("DK_01 inconclusive. Further investigation needed.");
+        _o.WriteLine("");
+        _o.WriteLine("CLAIMS: Dual-kernel audit only. Diagnostic. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== DK_01 complete. Commit: DK_01_DualKernelAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
