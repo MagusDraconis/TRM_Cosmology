@@ -11,9 +11,9 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V6.2 CORE INTEGRATION |
-| Current Branch | feature/v6.2-core-migration |
-| Total Tests | 2960 |
+| Current Version | V6.3 PIPELINE INTEGRATION |
+| Current Branch | feature/v6.3-pipeline-integration |
+| Total Tests | 2970 |
 | Failed Tests | 0 |
 | Current Status | V6.1 — V6 geometry IMPLEMENTED AND VALIDATED. 10/10 tests pass, cross-seed validated. I₁ CV=0.0025, I₂ CV=0.0121, g₂₂→1.0 at N≥67. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |

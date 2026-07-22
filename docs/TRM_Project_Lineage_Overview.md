@@ -1518,9 +1518,9 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2960 tests, 0 failed. V6.2 CORE INTEGRATION.
-Current branch: `feature/v6.2-core-migration`.
-V6Geometry in TRM.Core/Geometry/V6/. 10/10 tests pass. V6: CORE INTEGRATED.
+**Current status:** 2970 tests, 0 failed. V6.3 PIPELINE INTEGRATION.
+Current branch: `feature/v6.3-pipeline-integration`.
+V6Pipeline: V6Trajectory with CSV/JSON export. 13/13 V6 tests pass. V6: PIPELINE INTEGRATED.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
