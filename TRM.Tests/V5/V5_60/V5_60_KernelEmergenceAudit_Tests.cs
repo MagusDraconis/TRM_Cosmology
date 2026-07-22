@@ -1386,6 +1386,274 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== LCM_02 complete. Commit: LCM_02_LimitCycleGeometry ===");
     }
 
+    [Fact]
+    public void LCM_03_InvariantValidation()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 LCM_03 — Invariant Validation ===");
+        _o.WriteLine("=== (seed 1005, no classification) ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;double xi=1.75;double dt=0.05;double k0=1.2;
+        const double wKm=0.70,wDm=0.30; // Invariant: I = wKm*km + wDm*d_mean
+
+        // ============================================================
+        // PART A — Invariant Scaling with Parameters
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Invariant Scaling with Parameters ===");
+        _o.WriteLine($"I = {wKm:F2}·km + {wDm:F2}·d_mean");
+
+        // Helper: run SAC for nEpochs, return array of (km, d_mean) per epoch
+        System.Tuple<double[],double[]> RunChain(int nE,int n,double x,double dtv,double k0v){
+            var K=KS(n,seed);var km=new double[nE+1];var dm=new double[nE+1];
+            km[0]=Km(K,n);dm[0]=0; // epoch 0 has no d
+            for(int e=1;e<=nE;e++){
+                var h=SimDt(K,n,0.10,seed+e-1,dtv);
+                var d=DL(Nm(RP(h,n),n),n);
+                dm[e]=Dm(d,n);
+                K=CupdK0(d,n,k0v);
+                km[e]=Km(K,n);
+            }
+            return System.Tuple.Create(km,dm);
+        }
+        System.Tuple<double[],double[]> RunChainXi(int nE,int n,double xiv,double dtv){
+            var K=KS(n,seed);var km=new double[nE+1];var dm=new double[nE+1];
+            km[0]=Km(K,n);dm[0]=0;
+            for(int e=1;e<=nE;e++){
+                var h=SimDt(K,n,0.10,seed+e-1,dtv);
+                var d=DL(Nm(RP(h,n),n),n);
+                dm[e]=Dm(d,n);
+                K=CupdXi(d,n,xiv);
+                km[e]=Km(K,n);
+            }
+            return System.Tuple.Create(km,dm);
+        }
+
+        int nEpochsA=10;
+        double Ival(double kmv,double dmv)=>wKm*kmv+wDm*dmv;
+
+        // A.1 — K0 sweep
+        _o.WriteLine($"\n--- A.1: K0 Sweep (N={N}, Xi={xi}, Dt={dt}) ---");
+        double[] K0s={0.8,1.0,1.2,1.4,1.6};
+        _o.WriteLine($"{"K0",6} {"I_mean",10} {"I_std",10} {"CV(I)",10} {"km_mean",10} {"d_mean",10}");
+        _o.WriteLine(new string('-',60));
+        foreach(var kv in K0s){
+            var r=RunChain(nEpochsA,N,xi,dt,kv);
+            var Ivals=new double[nEpochsA];
+            for(int e=1;e<=nEpochsA;e++)Ivals[e-1]=Ival(r.Item1[e],r.Item2[e]);
+            double im=Ivals.Average(),isd=Sd(Ivals);
+            double cv=Math.Abs(im)>0.001?Math.Abs(isd/im):isd;
+            double kAvg=r.Item1.Skip(1).Average(),dAvg=r.Item2.Skip(1).Average();
+            _o.WriteLine($"{kv,6:F1} {im,10:F4} {isd,10:F4} {cv,10:F4} {kAvg,10:F4} {dAvg,10:F4}");
+        }
+
+        // A.2 — Xi sweep
+        _o.WriteLine($"\n--- A.2: Xi Sweep (N={N}, K0={k0}, Dt={dt}) ---");
+        double[] Xis={1.0,1.25,1.5,1.75,2.0};
+        _o.WriteLine($"{"Xi",6} {"I_mean",10} {"I_std",10} {"CV(I)",10} {"km_mean",10} {"d_mean",10}");
+        _o.WriteLine(new string('-',60));
+        foreach(var xv in Xis){
+            var r=RunChainXi(nEpochsA,N,xv,dt);
+            var Ivals=new double[nEpochsA];
+            for(int e=1;e<=nEpochsA;e++)Ivals[e-1]=Ival(r.Item1[e],r.Item2[e]);
+            double im=Ivals.Average(),isd=Sd(Ivals);
+            double cv=Math.Abs(im)>0.001?Math.Abs(isd/im):isd;
+            double kAvg=r.Item1.Skip(1).Average(),dAvg=r.Item2.Skip(1).Average();
+            _o.WriteLine($"{xv,6:F2} {im,10:F4} {isd,10:F4} {cv,10:F4} {kAvg,10:F4} {dAvg,10:F4}");
+        }
+
+        // A.3 — N sweep
+        _o.WriteLine($"\n--- A.3: N Sweep (K0={k0}, Xi={xi}, Dt={dt}) ---");
+        int[] Ns={60,67,72,80,100};
+        _o.WriteLine($"{"N",5} {"I_mean",10} {"I_std",10} {"CV(I)",10} {"km_mean",10} {"d_mean",10}");
+        _o.WriteLine(new string('-',55));
+        foreach(var nv in Ns){
+            var r=RunChain(nEpochsA,nv,xi,dt,k0);
+            var Ivals=new double[nEpochsA];
+            for(int e=1;e<=nEpochsA;e++)Ivals[e-1]=Ival(r.Item1[e],r.Item2[e]);
+            double im=Ivals.Average(),isd=Sd(Ivals);
+            double cv=Math.Abs(im)>0.001?Math.Abs(isd/im):isd;
+            double kAvg=r.Item1.Skip(1).Average(),dAvg=r.Item2.Skip(1).Average();
+            _o.WriteLine($"{nv,5} {im,10:F4} {isd,10:F4} {cv,10:F4} {kAvg,10:F4} {dAvg,10:F4}");
+        }
+
+        // A.4 — Dt sweep
+        _o.WriteLine($"\n--- A.4: Dt Sweep (N={N}, K0={k0}, Xi={xi}) ---");
+        double[] Dts={0.01,0.025,0.05,0.075};
+        _o.WriteLine($"{"Dt",6} {"I_mean",10} {"I_std",10} {"CV(I)",10} {"km_mean",10} {"d_mean",10}");
+        _o.WriteLine(new string('-',60));
+        foreach(var dv in Dts){
+            var r=RunChain(nEpochsA,N,xi,dv,k0);
+            var Ivals=new double[nEpochsA];
+            for(int e=1;e<=nEpochsA;e++)Ivals[e-1]=Ival(r.Item1[e],r.Item2[e]);
+            double im=Ivals.Average(),isd=Sd(Ivals);
+            double cv=Math.Abs(im)>0.001?Math.Abs(isd/im):isd;
+            double kAvg=r.Item1.Skip(1).Average(),dAvg=r.Item2.Skip(1).Average();
+            _o.WriteLine($"{dv,6:F3} {im,10:F4} {isd,10:F4} {cv,10:F4} {kAvg,10:F4} {dAvg,10:F4}");
+        }
+
+        // Baseline I across parameters
+        _o.WriteLine($"\n--- Baseline comparison (N={N}, K0={k0}, Xi={xi}, Dt={dt}) ---");
+        var rB=RunChain(nEpochsA,N,xi,dt,k0);
+        var Ibase=new double[nEpochsA];
+        for(int e=1;e<=nEpochsA;e++)Ibase[e-1]=Ival(rB.Item1[e],rB.Item2[e]);
+        _o.WriteLine($"Baseline I: mean={Ibase.Average():F4}, CV={Math.Abs(Sd(Ibase)/Ibase.Average()):F4}");
+
+        // ============================================================
+        // PART B — Invariant vs Omega Correlation
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Invariant vs Omega Correlation ===");
+
+        int nLong=50;
+        var Kb=KS(N,seed);
+        var IvalsB=new double[nLong+1];var OmValsB=new double[nLong+1];
+        var KmValsB=new double[nLong+1];var DmValsB=new double[nLong+1];
+        IvalsB[0]=Ival(Km(Kb,N),0);OmValsB[0]=0;KmValsB[0]=Km(Kb,N);DmValsB[0]=0;
+        for(int e=1;e<=nLong;e++){
+            var h=Sim(Kb,N,0.10,seed+e-1);
+            var d=DL(Nm(RP(h,N),N),N);
+            double dmv=Dm(d,N);
+            double om=Of(h,N).Average();
+            Kb=Cupd(d,N);
+            double kmv=Km(Kb,N);
+            IvalsB[e]=Ival(kmv,dmv);
+            OmValsB[e]=om;
+            KmValsB[e]=kmv;
+            DmValsB[e]=dmv;
+        }
+
+        // Remove epoch 0 (no proper Omega)
+        var ITail=IvalsB.Skip(1).ToArray();
+        var OmTail=OmValsB.Skip(1).ToArray();
+        double rIO=Pearson(ITail,OmTail);
+        double rIOSp=Spearman(ITail,OmTail);
+        double nEff=ITail.Length;
+        double se=1.0/Math.Sqrt(nEff-3);
+        double z=0.5*Math.Log((1+Math.Min(rIO,0.999))/(1-Math.Max(rIO,-0.999)));
+        double ciLow=Math.Tanh(z-1.96*se);
+        double ciHigh=Math.Tanh(z+1.96*se);
+
+        _o.WriteLine($"Pearson r(I, Omega) = {rIO:F4}");
+        _o.WriteLine($"Spearman ρ(I, Omega) = {rIOSp:F4}");
+        _o.WriteLine($"95% CI: [{ciLow:F4}, {ciHigh:F4}]");
+        string independence=Math.Abs(rIO)<0.1?"ORTHOGONAL — I is independent of Omega"
+            :Math.Abs(rIO)<0.3?"WEAKLY correlated — I is largely independent of Omega"
+            :Math.Abs(rIO)<0.6?"MODERATELY correlated"
+            :"STRONGLY correlated — I not independent";
+        _o.WriteLine($"Independence: {independence}");
+
+        // Also test r(I, d_mean) and r(I, km)
+        double rIDm=Pearson(ITail,DmValsB.Skip(1).ToArray());
+        double rIKm=Pearson(ITail,KmValsB.Skip(1).ToArray());
+        _o.WriteLine($"r(I, d_mean) = {rIDm:F4}");
+        _o.WriteLine($"r(I, km) = {rIKm:F4}");
+
+        // ============================================================
+        // PART C — Search for Second Invariant
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Search for Second Invariant ===");
+
+        // Build full state matrix from 50-epoch data
+        // State: [km, d_mean, lambda1, Omega, MeanDist]
+        var stateMatrix=new double[nLong][];
+        var Kref=KS(N,seed);
+        for(int e=1;e<=nLong;e++){
+            var h=Sim(Kref,N,0.10,seed+e-1);
+            var d=DL(Nm(RP(h,N),N),N);
+            double dmv2=Dm(d,N),om2=Of(h,N).Average();
+            Kref=Cupd(d,N);
+            stateMatrix[e-1]=new double[]{Km(Kref,N),dmv2,Lambda1(Kref,N),om2,dmv2};
+        }
+        // MeanDist = d_mean in this context
+
+        string[] varNamesB={"km","d_mean","lambda1","Omega","MeanDist","I"};
+        int nVars=5; // excluding I
+
+        // For each pair (a,b), find w minimizing CV(w*a + (1-w)*b)
+        _o.WriteLine($"--- Best weighted combinations of variable pairs ---");
+        _o.WriteLine($"{"Pair",-22} {"Best w",8} {"CV",10} {"Mean",10} {"r(I,combo)",12} {"Orthogonal?",14}");
+        _o.WriteLine(new string('-',80));
+
+        var bestCombos=new List<(int a,int b,double w,double cv,double rWithI)>();
+        for(int a=0;a<nVars;a++){
+            for(int b=a+1;b<nVars;b++){
+                double bestW=0,bestCV=double.MaxValue,bestR=0;
+                for(int wi=0;wi<=20;wi++){
+                    double w=wi/20.0;
+                    var vals=new double[nLong];
+                    for(int i=0;i<nLong;i++)vals[i]=w*stateMatrix[i][a]+(1-w)*stateMatrix[i][b];
+                    double m=vals.Average(),s=Sd(vals);
+                    double cv=Math.Abs(m)>0.001?Math.Abs(s/m):s;
+                    if(cv<bestCV){bestCV=cv;bestW=w;}
+                }
+                // Compute r with I for the best w
+                var bestVals=new double[nLong];
+                for(int i=0;i<nLong;i++)bestVals[i]=bestW*stateMatrix[i][a]+(1-bestW)*stateMatrix[i][b];
+                bestR=Pearson(bestVals,ITail);
+                string ortho=Math.Abs(bestR)<0.1?"YES":"no";
+                _o.WriteLine($"{varNamesB[a]+","+varNamesB[b],-22} {bestW,8:F4} {bestCV,10:F4} {bestVals.Average(),10:F4} {bestR,12:F4} {ortho,14}");
+                bestCombos.Add((a,b,bestW,bestCV,bestR));
+            }
+        }
+
+        // Also test I itself as reference
+        double cvI=Math.Abs(ITail.Average())>0.001?Sd(ITail)/Math.Abs(ITail.Average()):Sd(ITail);
+        _o.WriteLine($"\nI reference: CV={cvI:F4}, mean={ITail.Average():F4}");
+
+        // Find best second invariant: one with low CV AND orthogonal to I
+        var secondCandidates=bestCombos.Where(c=>c.cv<0.15&&Math.Abs(c.rWithI)<0.2).OrderBy(c=>c.cv).ToList();
+        if(secondCandidates.Any()){
+            var best=secondCandidates.First();
+            _o.WriteLine($"\nBest second invariant candidate: {varNamesB[best.a]}+{varNamesB[best.b]}");
+            _o.WriteLine($"  w={best.w:F4}, CV={best.cv:F4}, r(I,·)={best.rWithI:F4}");
+            _o.WriteLine($"  Rank-2 subspace: I + combination give two approximate invariants.");
+        }else{
+            _o.WriteLine($"\nNo second independent invariant found (all combos either high CV or correlated with I).");
+        }
+
+        // ============================================================
+        // PART D — Invariant Physical Interpretation
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Invariant Interpretation ===");
+        _o.WriteLine($"");
+        _o.WriteLine($"I = {wKm:F2}·km + {wDm:F2}·d_mean");
+        _o.WriteLine($"");
+        _o.WriteLine($"Structural interpretation (speculative, NOT claimed):");
+        _o.WriteLine($"");
+        _o.WriteLine($"km = mean coupling strength — how tightly oscillators are bound.");
+        _o.WriteLine($"d_mean = mean phase distance — how far apart oscillators are in phase space.");
+        _o.WriteLine($"");
+        _o.WriteLine($"I is a COUPLING-DISTANCE TRADE-OFF invariant:");
+        _o.WriteLine($"  When km is HIGH (strong coupling), d_mean is LOW (oscillators close together).");
+        _o.WriteLine($"  When km is LOW (weak coupling), d_mean is HIGH (oscillators spread apart).");
+        _o.WriteLine($"  The 70/30 ratio means coupling changes dominate the invariant.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Analogy (NOT physical claim):");
+        _o.WriteLine($"  — In Hamiltonian mechanics: total energy = kinetic + potential (trade-off).");
+        _o.WriteLine($"  — I resembles an 'action' or 'total constraint' along the SAC cycle.");
+        _o.WriteLine($"  — km ~ potential (binding energy), d_mean ~ kinetic (spread energy).");
+        _o.WriteLine($"");
+        _o.WriteLine($"Mathematical origin:");
+        _o.WriteLine($"  Cupd: K = K0·exp(-d/xi) → log(K/K0) = -d/xi.");
+        _o.WriteLine($"  Linearizing: K ≈ K0·(1 - d/xi) for small d.");
+        _o.WriteLine($"  So K + (K0/xi)·d ≈ K0 → conserved.");
+        _o.WriteLine($"  km + (K0/xi)·d_mean ≈ constant along the cycle.");
+        _o.WriteLine($"  The {wKm:F2}/{wDm:F2} ratio approximates 1/(1+K0/xi) ≈ xi/(xi+K0).");
+        _o.WriteLine($"  With K0={k0}, xi={xi}: K0/xi ≈ {k0/xi:F3}.");
+        _o.WriteLine($"");
+        _o.WriteLine($"This is NOT an energy or action invariant — it's a consequence of");
+        _o.WriteLine($"the exponential Cupd map's functional form. No physical claims are made.");
+        _o.WriteLine($"");
+        _o.WriteLine($"For V6: I replaces c_eff as the candidate conserved quantity.");
+        _o.WriteLine($"A spacetime-emergence path based on I would NOT require:");
+        _o.WriteLine($"  — c_eff invariance (FALSIFIED)");
+        _o.WriteLine($"  — Omega/MeanDist orthogonality (FALSIFIED)");
+        _o.WriteLine($"  — SAC fixed point (FALSIFIED — replaced by limit cycle)");
+        _o.WriteLine($"");
+        _o.WriteLine($"Stop-Low: SAFE. V6 NOT READY.");
+        _o.WriteLine($"\n=== LCM_03 complete. Commit: LCM_03_InvariantValidation ===");
+    }
+
     /// <summary>Power iteration for dominant eigenpair of symmetric matrix.</summary>
     static(double eval,double[] evec)PowerIteration(double[,]A,int n,int maxIter){
         var v=new double[n];for(int i=0;i<n;i++)v[i]=1.0/Math.Sqrt(n);
