@@ -497,6 +497,137 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"=== EMG_02 complete. Commit: EMG_02_VarianceDecomposition ===");
     }
 
+    [Fact]
+    public void KEM_02_KernelEmergenceDepth()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 KEM_02 — Kernel Emergence Depth ===");
+        _o.WriteLine("=== Phase transition, phase-var, K0 sweep ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] sds={1001,1002,1003,1004,1005,1006,1007,1008,1009,1010};
+        var hiC=new ConcurrentDictionary<int,P3>();
+        P3 GetHi(int n){return hiC.GetOrAdd(n,k=>PCent(k,true));}
+
+        // ============================================================
+        // PART A — Emergence speed across N
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Emergence Speed Across N ===");
+        int[] Ns={60,65,67,70,72,75,80};
+        var aBag=new ConcurrentBag<(int N,int s,double km1,double km2,double km3,double km5,string cls)>();
+
+        Parallel.ForEach(Ns,n=>{var hi=GetHi(n);
+            Parallel.ForEach(sds,s=>{
+                if(!IsHi(n,s))return;
+                var K=KS(n,s);
+                var h1=Sim(K,n,0.10,s);K=Cupd(DL(Nm(RP(h1,n),n),n),n);double km1=Km(K,n);
+                var h2=Sim(K,n,0.10,s+1);K=Cupd(DL(Nm(RP(h2,n),n),n),n);double km2=Km(K,n);
+                var h3=Sim(K,n,0.10,s+3);K=Cupd(DL(Nm(RP(h3,n),n),n),n);double km3=Km(K,n);
+                for(int e=3;e<5;e++){var he=Sim(K,n,0.10,s+e);K=Cupd(DL(Nm(RP(he,n),n),n),n);}
+                var h5=Sim(K,n,0.10,s+10);double km5=Km(Cupd(DL(Nm(RP(h5,n),n),n),n),n);
+                var sb=new SBase{seed=s,d0=Dm(DL(Nm(RP(h5,n),n),n),n),km0=km5,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,vn=Math.Sqrt(dv*dv+kv*kv);
+                double pj=vn>0?((sb.d0-Lo(n).dm)*dv+(km5-Lo(n).km)*kv)/vn:0;
+                if(!(n==72?(sb.cls=="P1"||sb.cls=="P1b"?pj>PHV:false):(sb.cls=="P1"||sb.cls=="P1b"?pj>PHV:false)))return;
+                aBag.Add((n,s,km1,km2,km3,km5,sb.cls));
+            });});
+        var ad=aBag.ToArray();
+
+        _o.WriteLine($"{"N",5} {"Epoch",7} {"n",5} {"P1 km",8} {"P1b km",8} {"Sep",8} {"Eff(σ)",8}");
+        _o.WriteLine(new string('-',60));
+        foreach(var n in Ns){
+            var nd=ad.Where(d=>d.Item1==n).ToArray();if(nd.Length<4)continue;
+            var p1=nd.Where(d=>d.Item7=="P1").ToArray();var p1b=nd.Where(d=>d.Item7=="P1b").ToArray();
+            if(p1.Length<1||p1b.Length<1)continue;
+            foreach(var(ep,f)in new[]{(1,new Func<(int,int,double,double,double,double,string),double>(d=>d.Item3)),(2,d=>d.Item4),(3,d=>d.Item5),(5,d=>d.Item6)}){
+                double p1m=p1.Average(f),p1bm=p1b.Average(f),sep=Math.Abs(p1m-p1bm);
+                double allS=Sd(nd.Select(f).ToArray()),eff=allS>0.001?sep/allS:0;
+                _o.WriteLine($"{n,5} {ep,7} {nd.Length,5} {p1m,8:F4} {p1bm,8:F4} {sep,8:F5} {eff,8:F3}σ");
+            }
+        }
+
+        // ============================================================
+        // PART B — Phase-diff variance as signal source
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Phase-Diff Variance Signal ===");
+        int nP2=72;
+        var bBag=new ConcurrentBag<(int s,double rawIQR,double rawMean,double phaseVar,double km,string cls)>();
+        var hi72=GetHi(nP2);
+        Parallel.ForEach(sds,s=>{
+            if(!IsHi(nP2,s))return;
+            var rng=new Random(s);var w=new double[nP2];
+            for(int i=0;i<nP2;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+            double ri=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+            double rm=w.Average();
+            var K=KS(nP2,s);var h=Sim(K,nP2,0.10,s);
+            double totVar=0;int cnt=0;
+            for(int i=0;i<nP2;i++)for(int j=i+1;j<nP2;j++){
+                if(!(K[i,j]>0.001))continue;
+                double mean=0;for(int t=0;t<h.Length;t++)mean+=h[t][i]-h[t][j];mean/=h.Length;
+                double vr=0;for(int t=0;t<h.Length;t++){double d2=h[t][i]-h[t][j]-mean;vr+=d2*d2;}
+                totVar+=vr/h.Length;cnt++;
+            }
+            double pv=cnt>0?totVar/cnt:0;
+            for(int e=0;e<3;e++){var he=Sim(K,nP2,0.10,s+e);K=Cupd(DL(Nm(RP(he,nP2),nP2),nP2),nP2);}
+            var h3=Sim(K,nP2,0.10,s+3);var d3=DL(Nm(RP(h3,nP2),nP2),nP2);double kmv=Km(Cupd(d3,nP2),nP2);
+            double d0v=Dm(d3,nP2);
+            var sb=new SBase{seed=s,d0=d0v,km0=kmv,ks0=0,cls=""};sb=Classify(sb,hi72);
+            double dv3=hi72.dm-Lo(nP2).dm,kv3=hi72.km-Lo(nP2).km,vn3=Math.Sqrt(dv3*dv3+kv3*kv3);
+            double pj3=vn3>0?((d0v-Lo(nP2).dm)*dv3+(kmv-Lo(nP2).km)*kv3)/vn3:0;
+            if(!(sb.cls=="P1"||sb.cls=="P1b"?pj3>PHV:false))return;
+            bBag.Add((s,ri,rm,pv,kmv,sb.cls));
+        });
+        var bd2=bBag.ToArray();var bp1=bd2.Where(d=>d.Item6=="P1").ToArray();var bp1b=bd2.Where(d=>d.Item6=="P1b").ToArray();
+        _o.WriteLine($"N=72 retained: P1={bp1.Length}, P1b={bp1b.Length}");
+        if(bp1.Length<1||bp1b.Length<1){_o.WriteLine("Insufficient retained profiles for Part B.");}
+        else{
+
+        double CohensD(double[] a,double[] b){
+            double ma=a.Average(),mb=b.Average(),na=a.Length,nb=b.Length;
+            double va=a.Sum(v=>(v-ma)*(v-ma))/(na-1),vb=b.Sum(v=>(v-mb)*(v-mb))/(nb-1);
+            double sp=Math.Sqrt(((na-1)*va+(nb-1)*vb)/(na+nb-2));
+            return sp>0.001?Math.Abs(ma-mb)/sp:0;
+        }
+        _o.WriteLine($"{"Descriptor",-14} {"P1",8} {"P1b",8} {"Cohen d",8}");
+        _o.WriteLine(new string('-',40));
+        void D(string n,double[] a,double[] b){double cd=CohensD(a,b);_o.WriteLine($"{n,-14} {a.Average(),8:F4} {b.Average(),8:F4} {cd,8:F3}");}
+        D("rawIQR",bp1.Select(d=>d.Item2).ToArray(),bp1b.Select(d=>d.Item2).ToArray());
+        D("rawMean",bp1.Select(d=>d.Item3).ToArray(),bp1b.Select(d=>d.Item3).ToArray());
+        D("phaseVar",bp1.Select(d=>d.Item4).ToArray(),bp1b.Select(d=>d.Item4).ToArray());
+        D("km",bp1.Select(d=>d.Item5).ToArray(),bp1b.Select(d=>d.Item5).ToArray());
+        }
+
+        // ============================================================
+        // PART C — K0 sweep
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: K0 Parameter Sweep (seed 1005, N=72) ===");
+        double[] K0s={0.8,1.0,1.2,1.4,1.6};
+        int fixS=1005;
+        _o.WriteLine($"{"K0",6} {"km1",8} {"km3",8} {"km5",8} {"Δ(km)",8}");
+        _o.WriteLine(new string('-',40));
+        foreach(var k0 in K0s){
+            var K=KS(nP2,fixS);
+            // Use k0 parameter in Cupd
+            for(int e=0;e<5;e++){var he=Sim(K,nP2,0.10,fixS+e);var de=DL(Nm(RP(he,nP2),nP2),nP2);K=CupdK0(de,nP2,k0);}
+            var hOut=Sim(K,nP2,0.10,fixS+50);
+            double kmOut=Km(CupdK0(DL(Nm(RP(hOut,nP2),nP2),nP2),nP2,k0),nP2);
+
+            // Track epoch 1, 3, 5
+            var Kt=KS(nP2,fixS);
+            var h1t=Sim(Kt,nP2,0.10,fixS);double km1t=Km(CupdK0(DL(Nm(RP(h1t,nP2),nP2),nP2),nP2,k0),nP2);
+            for(int e=1;e<3;e++){var he=Sim(Kt,nP2,0.10,fixS+e);Kt=CupdK0(DL(Nm(RP(he,nP2),nP2),nP2),nP2,k0);}
+            double km3t=Km(Kt,nP2);
+            for(int e=3;e<5;e++){var he=Sim(Kt,nP2,0.10,fixS+e);Kt=CupdK0(DL(Nm(RP(he,nP2),nP2),nP2),nP2,k0);}
+            double km5t=Km(Kt,nP2);
+            _o.WriteLine($"{k0,6:F1} {km1t,8:F4} {km3t,8:F4} {km5t,8:F4} {km5t-km1t,8:F4}");
+        }
+
+        _o.WriteLine($"\nStop-Low: SAFE. V6 NOT READY.");
+        _o.WriteLine($"=== KEM_02 complete. Commit: KEM_02_KernelEmergenceDepth ===");
+    }
+
+    static double[,] CupdK0(double[,]d,int n,double k0){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:k0*Math.Exp(-d[i,j]/Math.Max(Xi,0.01));return K;}
+
     // Count phase slips for oscillator pair (i,j) from trajectory h[time][oscillator]
     static int CountSlips(double[][]h,int i,int j){
         int slips=0;double prevDelta=0;bool first=true;
