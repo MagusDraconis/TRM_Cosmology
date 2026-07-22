@@ -1,1 +1,28 @@
-{"releaseStatus":"V5.60 INITIALIZED","phase":"Kernel Emergence Audit","date":"2026-07-22","branch":"feature/v5.60-kernel-emergence-audit","base":"V5.59 COMPLETE","baseCommit":"5f51532","testSummary":{"total":2932,"passed":2932,"failed":0},"suites":[],"finalModel":null,"causalClosure":"BLOCKED","stopLowSafety":"SAFE","v6Status":"NOT READY","purpose":"How is km generated from random initial K via SAC dynamics?","frozenConstraints":{"M3++":"unchanged","StopLow":"c3OmgS > 0.1 continue, <= 0.1 stop","c3OmegaShiftThreshold":0.1}}
+{
+  "releaseStatus": "V5.60 INITIALIZED",
+  "phase": "Kernel Emergence Audit",
+  "date": "2026-07-22",
+  "branch": "feature/v5.60-kernel-emergence-audit",
+  "base": "V5.59 COMPLETE",
+  "baseCommit": "5f51532",
+  "testSummary": { "total": 2933, "passed": 2933, "failed": 0 },
+  "suites": [
+    {"name":"KEM_01","title":"Kernel Emergence Audit","commit":"6e3babc","status":"COMPLETE","claimCategory":"SUPPORTED"}
+  ],
+  "finalModel": "Model C — Amnesic emergence. Cupd erases random graph and creates new K from Sim→RP→DL phase coherence data.",
+  "baseForNextVersion": "V5.61",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "supportedClaims": [
+    "km emergence is amnesic (init→epoch1 r=0.000)",
+    "Epoch3 contributes 67% of total separation growth",
+    "km signal is created from phase synchronization, not graph topology",
+    "Cupd exponential transform gates km structure",
+    "Per-N effect stable (1.44-1.79σ)"
+  ],
+  "conditionalClaims": ["finite-N limits","pipeline dependence","diagnostic not causal"],
+  "hypotheses": ["Cupd(f(d)) may be a universal signal generator across regimes"],
+  "notClaimed": ["causal mechanism","deterministic rescue","physical interpretation","V6 readiness","modified M3++","modified Stop-Low"],
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "NOT READY"
+}
