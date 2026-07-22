@@ -2,9 +2,9 @@ using System.Collections.Concurrent;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace TRM.Tests.V6_1;
+namespace TRM.Tests.V6_0;
 
-[Trait("Category","V6_1"),Trait("Category","V6_1_Geometry"),Trait("Category","LongRunning")]
+[Trait("Category","V6_0"),Trait("Category","V6_0_Geometry"),Trait("Category","LongRunning")]
 public class V6_Geometry_Tests
 {
     private readonly ITestOutputHelper _o;

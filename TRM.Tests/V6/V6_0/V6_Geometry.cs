@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TRM.Tests.V6_1;
+namespace TRM.Tests.V6_0;
 
 /// <summary>
 /// V6 Geometry module — invariant-based geometry on the SAC limit cycle.
