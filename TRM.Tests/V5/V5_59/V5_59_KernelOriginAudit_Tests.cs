@@ -1019,6 +1019,248 @@ public class V5_59_KernelOriginAudit_Tests
         _o.WriteLine($"\n=== DK_01 complete. Commit: DK_01_DualKernelAudit ===");
     }
 
+    [Fact]
+    public void RSC_01_RescueCaseAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RSC_01: Rescue Case Audit ===");
+        _o.WriteLine("=== V5.59. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine("=== Question: Why does rawIQR rescue 5 km failures? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={70,72,75};int sds=200;
+        var bag=new ConcurrentBag<(int N,int s,double km,double d0,double dR,double dN,
+            double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)>();
+
+        var hi70=Hi(70);var hi72=Hi(72);var hi75=Hi(75);
+
+        Parallel.ForEach(Ns,n=>{var hi=n==70?hi70:n==72?hi72:hi75;
+            Parallel.For(0,sds,s=>{
+                if(!IsHi(n,s))return;
+                var rng=new Random(s);var w=new double[n];
+                for(int i=0;i<n;i++)w[i]=1.0+0.10*(rng.NextDouble()-0.5)*2.0;
+                double rawIQR=Q(w.OrderBy(v=>v).ToArray(),0.75)-Q(w.OrderBy(v=>v).ToArray(),0.25);
+
+                var K=KS(n,s);double kmInit=Km(K,n);
+
+                // Epoch 1 with pipeline trace
+                var h1=Sim(K,n,0.10,s);
+                var R=RP(h1,n);double dR=1-Dm(R,n);
+                var Rn=Nm(R,n);double dN=1-Dm(Rn,n);
+                var dDL=DL(Rn,n);double dDLm=Dm(dDL,n);
+                K=Cupd(dDL,n);double km1=Km(K,n);
+
+                for(int e=2;e<=5;e++){var he=Sim(K,n,0.10,s+e-1);K=Cupd(DL(Nm(RP(he,n),n),n),n);}
+
+                var hF=Sim(K,n,0.10,s+50);
+                var dF=DL(Nm(RP(hF,n),n),n);var KF=Cupd(dF,n);
+                double d0=Dm(dF,n),km=Km(KF,n);
+
+                var sb=new SBase{seed=s,d0=d0,km0=km,ks0=0,cls=""};sb=Classify(sb,hi);
+                double dv=hi.dm-Lo(n).dm,kv=hi.km-Lo(n).km,vn=Math.Sqrt(dv*dv+kv*kv);
+                double proj=vn>0?((d0-Lo(n).dm)*dv+(km-Lo(n).km)*kv)/vn:0;
+                double d2o=(d0-Lo(n).dm)*(d0-Lo(n).dm)+(km-Lo(n).km)*(km-Lo(n).km);
+                double orth=Math.Sqrt(Math.Max(0,d2o-proj*proj));
+                if(!(n==72?sb.cls=="P1"||sb.cls=="P1b"?proj>PHV&&orth>OTH:false:sb.cls=="P1"||sb.cls=="P1b"?proj>PHV:false))return;
+                bag.Add((n,s,km,d0,dR,dN,dDLm,km1,rawIQR,sb.cls=="P1"?1:2,kmInit,0));
+            });});
+
+        var bd=bag.ToArray();
+        var p1=bd.Where(d=>d.cls==1).ToArray();var p1b=bd.Where(d=>d.cls==2).ToArray();
+        _o.WriteLine($"Retained: P1={p1.Length}, P1b={p1b.Length} (from {sds*Ns.Length} probes)");
+
+        // Compute d0_residual for all profiles (same method as RES_01/DK_01)
+        var kmA=bd.Select(d=>d.km).ToArray();
+        var d0A=bd.Select(d=>d.d0).ToArray();
+        double mk=kmA.Average();double vk=0,cd=0;
+        for(int i=0;i<kmA.Length;i++){vk+=(kmA[i]-mk)*(kmA[i]-mk);cd+=(d0A[i]-d0A.Average())*(kmA[i]-mk);}
+        double beta=cd/(vk+1e-15);double alpha=d0A.Average()-beta*mk;
+        var d0Resid=d0A.Select((d,i)=>d-(alpha+beta*kmA[i])).ToArray();
+
+        // ============================================================
+        // PART A — Identify Rescue Cases
+        // ============================================================
+        _o.WriteLine($"\n=== PART A: Rescue Case Identification ===");
+
+        // Find optimal thresholds for km, rawIQR, d0_resid
+        double FindThresh(double[]x,double c1=1){
+            var srt=bd.OrderBy(d=>x[Array.IndexOf(bd,d)]).ToArray();
+            double bestT=0;int best=0;
+            for(int i=1;i<srt.Length-1;i++){
+                double t=x[Array.IndexOf(bd,srt[i])];int o=0;
+                foreach(var d in srt){double v=x[Array.IndexOf(bd,d)];if((d.cls==1&&v>t)||(d.cls==2&&v<=t))o++;}
+                if(o>best){best=o;bestT=t;}
+            }
+            return bestT;
+        }
+        var iqrA=bd.Select(d=>d.rawIQR).ToArray();
+        double thrKm=FindThresh(kmA);
+        double thrIqr=FindThresh(iqrA);
+        double thrRes=FindThresh(d0Resid);
+        double thrD0=FindThresh(d0A);
+
+        // Identify all rescue/normal groups
+        var kmFail=new List<(int N,int s,double km,double d0,double dR,double dN,double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)>();
+        var kmWin=new List<(int N,int s,double km,double d0,double dR,double dN,double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)>();
+        var iqrRescue=new List<(int N,int s,double km,double d0,double dR,double dN,double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)>();
+        var d0rescue=new List<(int N,int s,double km,double d0,double dR,double dN,double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)>();
+        var bothFail=new List<(int N,int s,double km,double d0,double dR,double dN,double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)>();
+
+        foreach(var d in bd){
+            bool kmOk=(d.cls==1&&d.km>thrKm)||(d.cls==2&&d.km<=thrKm);
+            bool iqOk=(d.cls==1&&d.rawIQR>thrIqr)||(d.cls==2&&d.rawIQR<=thrIqr);
+            double dres=d0Resid[Array.IndexOf(bd,d)];
+            bool drOk=(d.cls==1&&dres>thrRes)||(d.cls==2&&dres<=thrRes);
+
+            if(kmOk)kmWin.Add(d);
+            else{
+                kmFail.Add(d);
+                if(iqOk)iqrRescue.Add(d);
+                if(drOk)d0rescue.Add(d);
+                if(!iqOk&&!drOk)bothFail.Add(d);
+            }
+        }
+
+        _o.WriteLine($"km wins: {kmWin.Count}, km fails: {kmFail.Count}");
+        _o.WriteLine($"rawIQR rescues: {iqrRescue.Count}, d0_resid rescues: {d0rescue.Count}");
+        _o.WriteLine($"Both fail: {bothFail.Count}");
+
+        // ============================================================
+        // PART B — Profile Comparison
+        // ============================================================
+        _o.WriteLine($"\n=== PART B: Rescue-Case Profile Comparison ===");
+        _o.WriteLine($"{"Group",-18} {"n",4} {"km",8} {"d0",8} {"IQR",8} {"dR",8} {"dN",8} {"dDL",8} {"km_init",8} {"N",4}");
+        _o.WriteLine(new string('-',88));
+
+        double[] Stats((int N,int s,double km,double d0,double dR,double dN,double dDL,double km1,double rawIQR,int cls,double kmInit,double d0Resid)[] g){
+            if(g.Length==0)return new double[0];
+            _o.WriteLine($"{"",-18} {g.Length,4} {g.Average(d=>d.km),8:F4} {g.Average(d=>d.d0),8:F4} {g.Average(d=>d.rawIQR),8:F4} {g.Average(d=>d.dR),8:F4} {g.Average(d=>d.dN),8:F4} {g.Average(d=>d.dDL),8:F4} {g.Average(d=>d.kmInit),8:F4} {g.Average(d=>d.N),4:F0}");
+            return new[]{g.Average(d=>d.km),g.Average(d=>d.d0),g.Average(d=>d.rawIQR),g.Average(d=>d.dR),g.Average(d=>d.dN),g.Average(d=>d.dDL),g.Average(d=>d.kmInit),(double)g.Average(d=>d.N)};
+        }
+        _o.WriteLine($"{"",-18} {"n",4} {"km",8} {"d0",8} {"IQR",8} {"dR",8} {"dN",8} {"dDL",8} {"km_init",8} {"N",4}");
+        _o.WriteLine(new string('-',88));
+        var kw=Stats(kmWin.ToArray());
+        var kf=Stats(kmFail.ToArray());
+        var ir=Stats(iqrRescue.ToArray());
+        var dr=Stats(d0rescue.ToArray());
+        Stats(bothFail.ToArray());
+
+        // Effect sizes between groups
+        double EffG(double[]g1,double[]g2,double[]all){
+            double d=Math.Abs(g1.Average()-g2.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        if(kmFail.Count>0&&iqrRescue.Count>0){
+            _o.WriteLine($"\n--- rawIQR rescue vs unrescued km failures ---");
+            var unrescued=kmFail.Where(d=>!iqrRescue.Contains(d)).ToArray();
+            if(unrescued.Length>0){
+                _o.WriteLine($"rawIQR Δ: {iqrRescue.Average(d=>d.rawIQR)-unrescued.Average(d=>d.rawIQR):F4}");
+                _o.WriteLine($"dR Δ: {iqrRescue.Average(d=>d.dR)-unrescued.Average(d=>d.dR):F4}");
+                _o.WriteLine($"km Δ: {iqrRescue.Average(d=>d.km)-unrescued.Average(d=>d.km):F4}");
+                _o.WriteLine($"d0 Δ: {iqrRescue.Average(d=>d.d0)-unrescued.Average(d=>d.d0):F4}");
+            }
+        }
+
+        // ============================================================
+        // PART C — Clustering
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Cluster Analysis ===");
+
+        // Do the 5 rawIQR rescues form a distinct cluster in (km, d0) space?
+        _o.WriteLine($"Rescued profiles in (km, d0) space:");
+        _o.WriteLine($"{"Seed",5} {"N",3} {"cls",4} {"km",8} {"d0",8} {"rawIQR",8} {"dR",8} {"d0_resid",10}");
+        _o.WriteLine(new string('-',58));
+        foreach(var d in iqrRescue){
+            double dr2=d0Resid[Array.IndexOf(bd,d)];
+            _o.WriteLine($"{d.s,5} {d.N,3} {(d.cls==1?"P1":"P1b"),4} {d.km,8:F4} {d.d0,8:F4} {d.rawIQR,8:F4} {d.dR,8:F4} {dr2,10:F4}");
+        }
+
+        // Are they clustered by N?
+        var nDist=iqrRescue.GroupBy(d=>d.N).Select(g=>(n:g.Key,c:g.Count())).OrderBy(x=>x.n);
+        _o.WriteLine($"\nRescues by N: {string.Join(", ",nDist.Select(x=>$"N={x.n}:{x.c}"))}");
+
+        // Distance from km-win centroid
+        if(kmWin.Count>0){
+            double kwKm=kmWin.Average(d=>d.km),kwD0=kmWin.Average(d=>d.d0);
+            _o.WriteLine($"km-win centroid: km={kwKm:F4}, d0={kwD0:F4}");
+            foreach(var d in iqrRescue){
+                double dist=Math.Sqrt((d.km-kwKm)*(d.km-kwKm)+(d.d0-kwD0)*(d.d0-kwD0));
+                _o.WriteLine($"  Rescue seed={d.s} N={d.N}: distance from centroid = {dist:F4}");
+            }
+        }
+
+        // ============================================================
+        // PART D — Counterfactual
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Counterfactual — Remove Rescue Cases ===");
+
+        // Remove the 5 rawIQR rescue cases and recompute
+        var subBD=bd.Where(d=>!iqrRescue.Any(r=>r.s==d.s&&r.N==d.N)).ToArray();
+        var subKm=subBD.Select(d=>d.km).ToArray();
+        var subIqr=subBD.Select(d=>d.rawIQR).ToArray();
+        var subD0=subBD.Select(d=>d.d0).ToArray();
+        var subP1=subBD.Where(d=>d.cls==1).ToArray();
+        var subP1b=subBD.Where(d=>d.cls==2).ToArray();
+
+        double Eff(double[] pv,double[] pbv,double[] all){
+            double d=Math.Abs(pv.Average()-pbv.Average()),s=Sd(all);
+            return s>0.001?d/s:0;
+        }
+
+        // Recompute km accuracy
+        var sKm=subBD.OrderBy(d=>d.km).ToArray();
+        double subThrKm=0;int subBestKm=0;
+        for(int i=1;i<sKm.Length-1;i++){double t=(sKm[i].km+sKm[i+1].km)/2;int o=0;foreach(var d in sKm)if((d.cls==1&&d.km>t)||(d.cls==2&&d.km<=t))o++;if(o>subBestKm){subBestKm=o;subThrKm=t;}}
+        double kmAcc=subBestKm*100.0/subBD.Length;
+
+        // km + rawIQR two-stage
+        var sIqr=subBD.OrderBy(d=>d.rawIQR).ToArray();
+        double subThrIqr=0;int subBestIqr=0;
+        for(int i=1;i<sIqr.Length-1;i++){double t=(sIqr[i].rawIQR+sIqr[i+1].rawIQR)/2;int o=0;foreach(var d in sIqr)if((d.cls==1&&d.rawIQR>t)||(d.cls==2&&d.rawIQR<=t))o++;if(o>subBestIqr){subBestIqr=o;subThrIqr=t;}}
+        int kmIqAcc=0;
+        foreach(var d in subBD){bool ko=(d.cls==1&&d.km>subThrKm)||(d.cls==2&&d.km<=subThrKm);if(ko)kmIqAcc++;else{bool io=(d.cls==1&&d.rawIQR>subThrIqr)||(d.cls==2&&d.rawIQR<=subThrIqr);kmIqAcc+=io?1:0;}}
+        double kmIqPct=kmIqAcc*100.0/subBD.Length;
+
+        _o.WriteLine($"With {iqrRescue.Count} rescue cases removed ({subBD.Length} remaining):");
+        _o.WriteLine($"  km only: {kmAcc:F1}%");
+        _o.WriteLine($"  km + rawIQR: {kmIqPct:F1}% ({(kmIqAcc-subBestKm)} rescued)");
+        _o.WriteLine($"  rawIQR advantage: {(kmIqPct-kmAcc):F1}%");
+
+        string cfConclusion=(kmIqPct-kmAcc)<1?"rawIQR advantage DISAPPEARS — the 5 cases were the entire benefit":
+            (kmIqPct-kmAcc)<3?"rawIQR advantage PERSISTS but is reduced — residual genuine structure exists":
+            "rawIQR advantage is ROBUST — genuine secondary structure";
+        _o.WriteLine($"Counterfactual: {cfConclusion}");
+
+        // ============================================================
+        // PART E — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double avgIqrRescue=iqrRescue.Count>0?iqrRescue.Average(d=>d.rawIQR):0;
+        double avgIqrKmWin=kmWin.Count>0?kmWin.Average(d=>d.rawIQR):0;
+        double avgIqrKmFail=kmFail.Count>0?kmFail.Where(d=>!iqrRescue.Contains(d)).Average(d=>d.rawIQR):0;
+
+        _o.WriteLine($"rawIQR: rescues={avgIqrRescue:F4}, km-wins={avgIqrKmWin:F4}, unrescued-fails={avgIqrKmFail:F4}");
+        _o.WriteLine($"Counterfactual advantage: {(kmIqPct-kmAcc):F1}%");
+
+        string model;
+        if((kmIqPct-kmAcc)<1&&iqrRescue.Count<=2)model="Model C: SAMPLING ARTIFACT — rawIQR rescues are noise";
+        else if((kmIqPct-kmAcc)>=2)model="Model A: rawIQR carries GENUINE secondary structure";
+        else model="Model B: rawIQR identifies RARE km failure mode — genuine but narrow";
+
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        if(model=="Model A")_o.WriteLine("RSC_01: rawIQR is a genuine secondary classifier with broad applicability.");
+        else if(model=="Model B")_o.WriteLine("RSC_01: rawIQR catches a narrow km failure mode. 71% rescue rate on km failures, but only 7 km failures exist.");
+        else if(model=="Model C")_o.WriteLine("RSC_01: rawIQR advantage is a sampling artifact — counterfactual shows it evaporates.");
+        else _o.WriteLine("RSC_01: inconclusive.");
+        _o.WriteLine("");
+        _o.WriteLine("CLAIMS: Rescue case audit only. Diagnostic. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== RSC_01 complete. Commit: RSC_01_RescueCaseAudit ===");
+    }
+
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
