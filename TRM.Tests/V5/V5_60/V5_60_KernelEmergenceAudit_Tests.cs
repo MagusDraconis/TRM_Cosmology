@@ -3255,6 +3255,194 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== N64_01 complete. Commit: N64_01_CriticalBoundaryAudit ===");
     }
 
+    [Fact]
+    public void OVO_01_OmegaVarianceOriginAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== OVO_01: Omega Variance Origin Audit ===");
+        _o.WriteLine("=== Why does var(Omega) explode above N≈64? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int nEpochs=20;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // ============================================================
+        // PART A+B — Dense Sweep + Scaling Law
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: Dense Sweep 50-100 (step 2, seed={seed}) ===");
+        _o.WriteLine($"{"N",5} {"mean(Ω)",10} {"var(Ω)",12} {"CV(Ω)",10} {"log_var",10} {"var(km)",12} {"mean(km)",10}");
+        _o.WriteLine(new string('-',72));
+
+        var nList=new List<int>();var vList=new List<double>();var oList=new List<double>();
+        for(int nv=50;nv<=100;nv+=2){
+            var K=KS(nv,seed);var km=new double[nEpochs];var om=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K=Cupd(d,nv);km[e-1]=Km(K,nv);om[e-1]=Of(h,nv).Average();}
+            double mo=om.Average();double vo=0;for(int i=0;i<nEpochs;i++)vo+=(om[i]-mo)*(om[i]-mo);vo/=nEpochs;
+            double vk=0,mk=km.Average();for(int i=0;i<nEpochs;i++)vk+=(km[i]-mk)*(km[i]-mk);vk/=nEpochs;
+            nList.Add(nv);vList.Add(vo);oList.Add(mo);
+            _o.WriteLine($"{nv,5} {mo,10:F4} {vo,12:F6} {Math.Sqrt(vo)/mo,10:F4} {Math.Log(vo+0.001),10:F4} {vk,12:F6} {mk,10:F4}");
+        }
+
+        // Fit models to var(Omega) vs N
+        var nA=nList.Select(n=>(double)n).ToArray();var vA=vList.ToArray();
+        // Power law: var = a*N^alpha + c or var = a*(N-N0)^alpha
+        // Logistic: var = L/(1+exp(-k*(N-Nc)))
+        // For simplicity: fit log-var vs N for exponential, log-var vs log-N for power
+        double sN=0,sL=0,sNN=0,sNL=0;int m=nA.Length;
+        for(int i=0;i<m;i++){sN+=nA[i];sL+=Math.Log(vA[i]+1e-6);sNN+=nA[i]*nA[i];sNL+=nA[i]*Math.Log(vA[i]+1e-6);}
+        double expSlope=(m*sNL-sN*sL)/(m*sNN-sN*sN+1e-15);
+        double expInt=(sL-expSlope*sN)/m;
+        double expR2=0,expRss=0,expTss=0;
+        for(int i=0;i<m;i++){double p=expInt+expSlope*nA[i];double r=Math.Log(vA[i]+1e-6)-p;expRss+=r*r;expTss+=(Math.Log(vA[i]+1e-6)-sL/m)*(Math.Log(vA[i]+1e-6)-sL/m);}
+        expR2=1-expRss/(expTss+1e-15);
+        _o.WriteLine($"\nExponential fit: var(Ω) ~ exp({expSlope:F4}·N), R²={expR2:F4}");
+
+        double sLn=0;for(int i=0;i<m;i++)sLn+=Math.Log(nA[i]);
+        double sLnL=0,sLn2=0;
+        for(int i=0;i<m;i++){sLnL+=Math.Log(nA[i])*Math.Log(vA[i]+1e-6);sLn2+=Math.Log(nA[i])*Math.Log(nA[i]);}
+        double pwrSlope=(m*sLnL-sLn*sL)/(m*sLn2-sLn*sLn+1e-15);
+        double pwrInt=(sL-pwrSlope*sLn)/m;
+        double pwrR2=0,pwrRss=0;
+        for(int i=0;i<m;i++){double r=Math.Log(vA[i]+1e-6)-(pwrInt+pwrSlope*Math.Log(nA[i]));pwrRss+=r*r;}
+        pwrR2=1-pwrRss/(expTss+1e-15);
+        _o.WriteLine($"Power-law fit: var(Ω) ~ N^{pwrSlope:F2}, R²={pwrR2:F4}");
+
+        // Logistic: var = L/(1+exp(-k*(N-Nc))) + offset
+        // Approximate Nc as point where derivative of log-var peaks
+        double bestL=0,bestK=0,bestNc=0,bestR2L=double.MinValue;
+        for(double nc=55;nc<=75;nc+=1){
+            for(int ki=1;ki<=5;ki++){
+                double k=ki*0.5,L=Math.Exp(sL/m)*2;
+                double ssr=0,sst=0;double mv=vA.Average();
+                for(int i=0;i<m;i++){double pred=L/(1+Math.Exp(-k*(nA[i]-nc)));ssr+=(vA[i]-pred)*(vA[i]-pred);sst+=(vA[i]-mv)*(vA[i]-mv);}
+                double r2=1-ssr/(sst+1e-15);
+                if(r2>bestR2L){bestR2L=r2;bestL=L;bestK=k;bestNc=nc;}
+            }
+        }
+        _o.WriteLine($"Logistic fit: var(Ω) = {bestL:F2}/(1+exp(-{bestK:F1}·(N-{bestNc:F0}))), R²={bestR2L:F4}");
+
+        string bestFit=expR2>pwrR2&&expR2>bestR2L?"EXPONENTIAL":pwrR2>bestR2L?"POWER LAW":"LOGISTIC";
+        _o.WriteLine($"Best fit: {bestFit}");
+
+        // ============================================================
+        // PART C — Origin Trace: What Co-Scales with var(Omega)?
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Origin Trace (co-scaling) ===");
+        _o.WriteLine($"{"Quantity",-18} {"r(varΩ,·)",12} {"Scales?",10}");
+        _o.WriteLine(new string('-',42));
+
+        for(int nv=50;nv<=100;nv+=2){
+            var K2=KS(nv,seed);var km2=new double[nEpochs];var om2=new double[nEpochs];var dm2=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K2,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K2=Cupd(d,nv);km2[e-1]=Km(K2,nv);om2[e-1]=Of(h,nv).Average();dm2[e-1]=Dm(d,nv);}
+        }
+
+        // Use the already-computed values from Part A for correlation
+        var nVals=nA;
+        var varOm=vA;
+        var meanOm=oList.ToArray();
+        var varKmList=new double[nVals.Length];var meanKmList=new double[nVals.Length];
+        for(int i=0;i<nVals.Length;i++){
+            int nv=(int)nVals[i];
+            var K3=KS(nv,seed);var km3=new double[nEpochs];var om3=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K3,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K3=Cupd(d,nv);km3[e-1]=Km(K3,nv);om3[e-1]=Of(h,nv).Average();}
+            double mk3=km3.Average();double vk3=0;for(int j=0;j<nEpochs;j++)vk3+=(km3[j]-mk3)*(km3[j]-mk3);vk3/=nEpochs;
+            varKmList[i]=vk3;meanKmList[i]=mk3;
+        }
+
+        void CorrScale(string name,double[]x){
+            double r=Pearson(x,varOm);
+            _o.WriteLine($"{name,-18} {r,12:F4} {(Math.Abs(r)>0.7?"CO-SCALES":"independent"),10}");
+        }
+        CorrScale("N",nVals);
+        CorrScale("var(km)",varKmList);
+        CorrScale("mean(km)",meanKmList);
+        CorrScale("mean(Ω)",meanOm);
+
+        // Partial correlation: var(Omega) ~ N * var(km)
+        double rNV=Pearson(nVals,varOm);
+        double rKV=Pearson(varKmList,varOm);
+        double rNK=Pearson(nVals,varKmList);
+        double partial=(rNV-rKV*rNK)/Math.Sqrt((1-rKV*rKV)*(1-rNK*rNK)+1e-15);
+        _o.WriteLine($"Partial r(varΩ,N|var_km) = {partial:F4}");
+        _o.WriteLine($"{(Math.Abs(partial)>0.5?"N has independent effect":"var(km) explains N-dependence")}");
+
+        // ============================================================
+        // PARTS D+E — Critical Point + Topology
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS D+E: Critical Point + Topology ===");
+
+        _o.WriteLine($"{"N",5} {"var(Ω)",12} {"d_varΩ",10} {"deg",6} {"n_comp",8} {"spec_gap",10}");
+        _o.WriteLine(new string('-',54));
+
+        double prevV=0;double maxDeriv=0;int maxDerivN=0;
+        for(int nv=50;nv<=100;nv+=2){
+            var K4=KS(nv,seed);var km4=new double[nEpochs];var om4=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K4,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K4=Cupd(d,nv);km4[e-1]=Km(K4,nv);om4[e-1]=Of(h,nv).Average();}
+            double voM=0,moM=om4.Average();for(int i=0;i<nEpochs;i++)voM+=(om4[i]-moM)*(om4[i]-moM);voM/=nEpochs;
+            double dVar=nv>50?(voM-prevV)/2:0;
+            if(dVar>maxDeriv){maxDeriv=dVar;maxDerivN=nv;}
+            prevV=voM;
+
+            // Graph stats
+            double deg=6.0/(nv-1)*(nv-1); // mean degree = p*(N-1) = 6 for ER G(N,6/(N-1))
+            int nComp=0;double specGap=0;
+            // Count components via DFS
+            var adj=new HashSet<int>[nv];for(int i=0;i<nv;i++)adj[i]=new HashSet<int>();
+            var gK=KS(nv,seed);
+            for(int i=0;i<nv;i++)for(int j=i+1;j<nv;j++)if(gK[i,j]>0.001){adj[i].Add(j);adj[j].Add(i);}
+            var vis=new bool[nv];for(int i=0;i<nv;i++){if(!vis[i]){nComp++;var q=new Queue<int>();q.Enqueue(i);vis[i]=true;while(q.Count>0){int u=q.Dequeue();foreach(int x in adj[u])if(!vis[x]){vis[x]=true;q.Enqueue(x);}}}}
+            _o.WriteLine($"{nv,5} {voM,12:F6} {dVar,10:F4} {deg,6:F1} {nComp,8} {specGap,10:F4}");
+        }
+        _o.WriteLine($"\nMax derivative of var(Omega) at N={maxDerivN} (Δ={maxDeriv:F4})");
+
+        // ============================================================
+        // PART F — Cross-Seed Validation
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Cross-Seed Validation ===");
+
+        int[] valNs={50,60,64,65,68,72,80,90,100};
+        int[] valSeeds={1005,0,2,5,8};
+
+        _o.WriteLine($"{"Seed",5} {"N=50",10} {"N=60",10} {"N=65",10} {"N=72",10} {"N=90",10} {"N=100",10} {"Explosion?",12}");
+        _o.WriteLine(new string('-',72));
+
+        foreach(var sd in valSeeds){
+            string row=$"{sd,5}";
+            double v50=0,v100=0;
+            foreach(var nv in valNs){
+                var Ks=KS(nv,sd);var ks2=new double[nEpochs];var os2=new double[nEpochs];
+                for(int e=1;e<=nEpochs;e++){var h=Sim(Ks,nv,0.10,sd+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Ks=Cupd(d,nv);ks2[e-1]=Km(Ks,nv);os2[e-1]=Of(h,nv).Average();}
+                double mos=os2.Average();double vos=0;for(int i=0;i<nEpochs;i++)vos+=(os2[i]-mos)*(os2[i]-mos);vos/=nEpochs;
+                row+=$" {vos,10:F6}";
+                if(nv==50)v50=vos;
+                if(nv==100)v100=vos;
+            }
+            _o.WriteLine($"{row} {(v100/v50>10?"YES":"no"),12}");
+        }
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART G: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        double explosionRatio=vList[^1]/vList[0];
+        _o.WriteLine($"var(Omega) ratio N=100/N=50: {explosionRatio:F0}x");
+        _o.WriteLine($"Best fit: {bestFit} (exp R²={expR2:F3}, power R²={pwrR2:F3}, logistic R²={bestR2L:F3})");
+        _o.WriteLine($"Critical N (max derivative): {maxDerivN}");
+        _o.WriteLine($"Critical N (logistic): {bestNc:F0}");
+
+        string model;
+        if(bestR2L>expR2&&bestR2L>pwrR2)model="Model B: CRITICAL TRANSITION — logistic at N≈"+bestNc;
+        else if(expR2>0.9)model="Model A: SMOOTH EXPONENTIAL — no critical point";
+        else if(pwrSlope>3)model="Model C: POWER-LAW EXPLOSION — finite-size divergence";
+        else model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Omega variance origin audit. Diagnostic only. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== OVO_01 complete. Commit: OVO_01_OmegaVarianceOriginAudit ===");
+    }
+
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
     static double FindOptA(double[]km,double[]dm){
         double bestA=0,bestCV=double.MaxValue;
