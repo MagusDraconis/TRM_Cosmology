@@ -417,6 +417,86 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"=== EMG_01 Part A complete ===");
     }
 
+    [Fact]
+    public void EMG_02_VarianceDecomposition()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 EMG_02 — Variance Decomposition ===");
+        _o.WriteLine("=== Why is c_eff NOT invariant? ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={67,70,72,75,80};int[] sds={1001,1002,1003,1004,1005,1006,1007,1008,1009,1010};
+        var bag=new ConcurrentBag<(int N,int s,double omega,double md)>();
+        var hiC=new ConcurrentDictionary<int,P3>();
+        P3 GetHi(int n){return hiC.GetOrAdd(n,k=>PCent(k,true));}
+
+        Parallel.ForEach(Ns,n=>{
+            var hi=GetHi(n);
+            foreach(var s in sds){
+                var K=KS(n,s);
+                for(int e=0;e<5;e++){var h=Sim(K,n,0.10,s+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}
+                double omega=Of(Sim(K,n,0.10,s+5),n).Average();
+                var hFinal=Sim(K,n,0.10,s+50);
+                double md=Dm(DL(Nm(RP(hFinal,n),n),n),n);
+                bag.Add((n,s,omega,md));
+            }});
+        var bd=bag.ToArray();
+        var Om=bd.Select(d=>d.Item3).ToArray();var Md=bd.Select(d=>d.Item4).ToArray();
+        double grandO=Om.Average(),grandM=Md.Average();
+        _o.WriteLine($"Profiles: {bd.Length}");
+
+        // === PART A: Variance decomposition ===
+        _o.WriteLine($"\n=== PART A: Variance Decomposition ===");
+        _o.WriteLine($"{"Source",-18} {"Omega SS",12} {"Omega %",10} {"MD SS",12} {"MD %",10}");
+        _o.WriteLine(new string('-',65));
+        double sO_N=0,sO_S=0,sM_N=0,sM_S=0;
+        foreach(var n in Ns){var nd=bd.Where(d=>d.Item1==n).ToArray();double mn=nd.Average(d=>d.Item3);sO_N+=nd.Length*(mn-grandO)*(mn-grandO);}
+        foreach(var s in sds){var sd=bd.Where(d=>d.Item2==s).ToArray();double ms=sd.Average(d=>d.Item3);sO_S+=sd.Length*(ms-grandO)*(ms-grandO);}
+        foreach(var n in Ns){var nd=bd.Where(d=>d.Item1==n).ToArray();double mn=nd.Average(d=>d.Item4);sM_N+=nd.Length*(mn-grandM)*(mn-grandM);}
+        foreach(var s in sds){var sd=bd.Where(d=>d.Item2==s).ToArray();double ms=sd.Average(d=>d.Item4);sM_S+=sd.Length*(ms-grandM)*(ms-grandM);}
+        double sO_T=Om.Sum(v=>(v-grandO)*(v-grandO)),sM_T=Md.Sum(v=>(v-grandM)*(v-grandM));
+        _o.WriteLine($"{"Between-N",-18} {sO_N,12:F3} {sO_N/(sO_T+0.001)*100,10:F1}% {sM_N,12:F3} {sM_N/(sM_T+0.001)*100,10:F1}%");
+        _o.WriteLine($"{"Between-Seed",-18} {sO_S,12:F3} {sO_S/(sO_T+0.001)*100,10:F1}% {sM_S,12:F3} {sM_S/(sM_T+0.001)*100,10:F1}%");
+        _o.WriteLine($"{"Residual",-18} {sO_T-sO_N-sO_S,12:F3} {(sO_T-sO_N-sO_S)/(sO_T+0.001)*100,10:F1}% {sM_T-sM_N-sM_S,12:F3} {(sM_T-sM_N-sM_S)/(sM_T+0.001)*100,10:F1}%");
+        string oDom=sO_N>sO_S?"N-dominated":"Seed-dominated";
+        string mDom=sM_N>sM_S?"N-dominated":"Seed-dominated";
+        _o.WriteLine($"Omega: {oDom}. MeanDist: {mDom}.");
+
+        // === PART B: Candidate invariant combinations ===
+        _o.WriteLine($"\n=== PART B: Candidate Invariant Combinations ===");
+        _o.WriteLine($"{"Candidate",-16} {"CV(seed)",10} {"CV(N)",10}");
+        _o.WriteLine(new string('-',38));
+        double CVs(Func<(int,int,double,double),double> f){
+            double sum=0;int c=0;
+            foreach(var n in Ns){var v=bd.Where(d=>d.Item1==n).Select(f).ToArray();double m=v.Average();sum+=Sd(v)/(m+0.0001);c++;}return c>0?sum/c:0;}
+        double CVn(Func<(int,int,double,double),double> f){
+            double sum=0;int c=0;
+            foreach(var s in sds){var v=bd.Where(d=>d.Item2==s).Select(f).ToArray();double m=v.Average();sum+=Sd(v)/(m+0.0001);c++;}return c>0?sum/c:0;}
+        void Cand(string n,Func<(int,int,double,double),double> f){_o.WriteLine($"{n,-16} {CVs(f),10:F4} {CVn(f),10:F4}");}
+        Cand("Omega",d=>d.Item3);Cand("MeanDist",d=>d.Item4);
+        Cand("c_eff",d=>d.Item3*d.Item4);
+        Cand("O/MD",d=>d.Item3/(d.Item4+0.001));Cand("MD/O",d=>d.Item4/(d.Item3+0.001));
+        Cand("O²/MD",d=>d.Item3*d.Item3/(d.Item4+0.001));Cand("MD²/O",d=>d.Item4*d.Item4/(d.Item3+0.001));
+        Cand("sqrt(O*MD)",d=>Math.Sqrt(d.Item3*d.Item4));
+
+        // === PART C: Correlation structure ===
+        _o.WriteLine($"\n=== PART C: Correlation Structure ===");
+        _o.WriteLine($"{"N",5} {"Pearson",8} {"Spearman",9} {"p-value",8} {"Dependence",12}");
+        _o.WriteLine(new string('-',48));
+        foreach(var n in Ns){
+            var nd=bd.Where(d=>d.Item1==n).ToArray();var oo=nd.Select(d=>d.Item3).ToArray();var mm=nd.Select(d=>d.Item4).ToArray();
+            double r=Pearson(oo,mm),sp=Spearman(oo,mm);
+            double z=0.5*Math.Log((1+Math.Min(r,0.999))/(1-Math.Max(r,-0.999)))*Math.Sqrt(oo.Length-3);
+            double p=2*(1-NormCDF(Math.Abs(z)));
+            _o.WriteLine($"{n,5} {r,8:F3} {sp,9:F3} {p,8:F3} {(Math.Abs(r)<0.3?"orthogonal":Math.Abs(r)<0.6?"weak":"moderate"),12}");
+        }
+        _o.WriteLine($"\nOverall r={Pearson(Om,Md):F3}, Spearman={Spearman(Om,Md):F3}");
+        _o.WriteLine($"Omega and MeanDist: {(Math.Abs(Pearson(Om,Md))<0.3?"ORTHOGONAL":"CORRELATED")}.");
+
+        _o.WriteLine($"\nStop-Low: SAFE. V6 NOT READY.");
+        _o.WriteLine($"=== EMG_02 complete. Commit: EMG_02_VarianceDecomposition ===");
+    }
+
     // Count phase slips for oscillator pair (i,j) from trajectory h[time][oscillator]
     static int CountSlips(double[][]h,int i,int j){
         int slips=0;double prevDelta=0;bool first=true;
@@ -440,6 +520,8 @@ public class V5_60_KernelEmergenceAudit_Tests
     }
 
     static double Q(double[] s,double p)=>s[(int)(p*(s.Length-1))];
+    static int[] RankVals(double[] v){int n=v.Length;return Enumerable.Range(0,n).OrderBy(i=>v[i]).Select((idx,r)=>new{idx,r}).OrderBy(x=>x.idx).Select(x=>x.r).ToArray();}
+    static double Spearman(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);var rx=RankVals(x.Take(n).ToArray());var ry=RankVals(y.Take(n).ToArray());return Pearson(rx.Select(v=>(double)v).ToArray(),ry.Select(v=>(double)v).ToArray());}
     static double Sd(double[] s){double m=s.Average();return Math.Sqrt(s.Sum(v=>(v-m)*(v-m))/(s.Length-1));}
     static double Pearson(double[] x,double[] y){int n=Math.Min(x.Length,y.Length);double mx=x.Take(n).Average(),my=y.Take(n).Average();double sx=0,sy=0,sxy=0;for(int i=0;i<n;i++){double dx=x[i]-mx,dy=y[i]-my;sx+=dx*dx;sy+=dy*dy;sxy+=dx*dy;}return (sx>0.001&&sy>0.001)?sxy/Math.Sqrt(sx*sy):0;}
     static double[][]Sim(double[,]K,int n,double s,int seed){var rng=new Random(seed);var w=new double[n];for(int i=0;i<n;i++)w[i]=1.0+s*(rng.NextDouble()-0.5)*2.0;var th=new double[n];for(int i=0;i<n;i++)th[i]=rng.NextDouble()*2*Math.PI;int hL=St/Hd+1;var h=new double[hL][];h[0]=(double[])th.Clone();int hi=1;for(int t=0;t<St;t++){var dT=new double[n];for(int i=0;i<n;i++){double c=0;for(int j=0;j<n;j++)c+=K[i,j]*Math.Sin(th[j]-th[i]);dT[i]=w[i]+c;}for(int i=0;i<n;i++)th[i]+=Dt*dT[i];if((t+1)%Hd==0&&hi<hL)h[hi++]=(double[])th.Clone();}return h;}
