@@ -1408,6 +1408,24 @@ ordering through P1 composition.
 
 **Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
 
+### V6.1 — Documentation and Integration — IN PROGRESS
+
+**Status:** DOCUMENTATION AND INTEGRATION (2026-07-22).
+**Key deliverables:** User Guide, Theory Document, Integration Plan, API documentation,
+project status updates, status JSON.
+
+### V6.0 — Geometry Implementation — COMPLETE
+
+**Status:** COMPLETE (2026-07-22). 10 tests, all pass.
+**Branch:** feature/v6.0-geometry-implementation → feature/v6.1-documentation-integration.
+
+**Key deliverables:**
+- V6_Geometry.cs: invariant computation module (I₁, I₂, s, g₂₂)
+- 10 test cases: core geometry, cross-seed validation, thermodynamic limit
+- All tests pass, cross-seed validated (10 seeds)
+
+**V6 readiness:** IMPLEMENTED AND VALIDATED.
+
 ### V5.61 — Euclidean Limit Proof — INITIALIZED
 
 **Status:** INITIALIZED (2026-07-22). 1 suite: V5.61_g2_Dynamics.
@@ -1500,12 +1518,11 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2940 tests, 0 failed. V5.61 INITIALIZED — Euclidean limit discovered.
-Current branch: `feature/v5.61-euclidean-limit-proof`.
-Preferred model: M3++ with Stop-Low policy (c3OmgS > 0.1 continue, ≤ 0.1 stop).
-SAC dynamics: LIMIT CYCLE (period=2, λ=0.01, half-life=52-66 epochs).
-V6 geometry: ds² = g₂₂·dI₂² on (I₁, I₂) manifold. g₂₂ → 1.0 as N → ∞ (asymptotically flat).
-V6 readiness: THEORETICALLY FOUNDED (not yet implemented).
+**Current status:** 2960 tests, 0 failed. V6.1 DOCUMENTATION AND INTEGRATION.
+Current branch: `feature/v6.1-documentation-integration`.
+Preferred model: M3++ with Stop-Low (unchanged — V5 operational).
+V6 geometry: ds² = g₂₂·dI₂² → dI₂² at N≥67 (Euclidean).
+10/10 V6 tests pass. V6 readiness: IMPLEMENTED AND VALIDATED.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

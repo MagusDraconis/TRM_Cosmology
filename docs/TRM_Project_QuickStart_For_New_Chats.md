@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.61 INITIALIZED |
-| Current Branch | feature/v5.61-euclidean-limit-proof |
-| Total Tests | 2940 |
+| Current Version | V6.1 DOCUMENTATION AND INTEGRATION |
+| Current Branch | feature/v6.1-documentation-integration |
+| Total Tests | 2960 |
 | Failed Tests | 0 |
-| Current Status | V5.61 INITIALIZED — Euclidean limit discovered. I₁ (CV=0.0025), I₂ (CV=0.0121) cross-seed validated. g₂₂ → 1.0 at N≥90. V6: THEORETICALLY FOUNDED. |
+| Current Status | V6.1 — V6 geometry IMPLEMENTED AND VALIDATED. 10/10 tests pass, cross-seed validated. I₁ CV=0.0025, I₂ CV=0.0121, g₂₂→1.0 at N≥67. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -251,11 +251,19 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.61
+### Current Frontier — V6.1
 
-**Status:** V5.61 INITIALIZED — Euclidean limit numerically confirmed.
-**Branch:** `feature/v5.61-euclidean-limit-proof`
-**Tests:** 2940 passed, 0 failed
+**Status:** V6.1 DOCUMENTATION AND INTEGRATION.
+**Branch:** `feature/v6.1-documentation-integration`
+**Tests:** 2960 passed, 0 failed
+
+**V6 geometry:** IMPLEMENTED AND VALIDATED.
+- Module: V6_Geometry.cs (I₁, I₂, s, g₂₂ computation)
+- 10/10 tests pass, cross-seed validated (10 seeds)
+- I₁ CV=0.0025, I₂ CV=0.0121
+- g₂₂ → 1.0 at N≥67 (Euclidean metric)
+
+**Next:** V6.2 — code migration to TRM.Core and CI integration.
 
 **V5.61 story arc:**
 V5.60 discovered that SAC is a LIMIT CYCLE (period=2, half-life=52-66 epochs) with two
