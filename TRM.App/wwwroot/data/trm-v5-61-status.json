@@ -1,48 +1,33 @@
 {
-  "version": "5.61",
+  "releaseStatus": "V5.61 INITIALIZED",
+  "phase": "Euclidean Limit Proof",
   "date": "2026-07-22",
   "branch": "feature/v5.61-euclidean-limit-proof",
-  "testsPassed": 2940,
-  "testsFailed": 0,
+  "base": "V5.60 COMPLETE",
+  "testSummary": { "total": 2940, "passed": 2940, "failed": 0 },
   "suites": [
-    "KEM_01",
-    "KEM_02",
-    "KEM_03",
-    "KEM_04",
-    "KSP_01",
-    "EMG_01",
-    "EMG_02",
-    "LCM_01",
-    "LCM_02",
-    "LCM_03",
-    "LCM_04",
-    "V6_Proposal",
-    "V6_Validation",
-    "V5.61_g2"
+    {"name":"V5.61_g2","title":"g₂₂ Dynamics Investigation","commit":"a33126b","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V5_62","title":"Euclidean Limit Proof","commit":"916b219","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "keyFindings": [
-    "SAC is a LIMIT CYCLE (period 2, half-life 52-66 epochs)",
-    "c_eff FALSIFIED (not invariant, CV=0.80-1.08)",
-    "Omega and MeanDist are CORRELATED (r=0.81)",
-    "I₁ = 0.70·km + 0.30·d_mean (CV=0.0025, cross-seed validated)",
-    "I₂ = 0.9·km + 0.1·Omega (CV=0.0121, cross-seed validated)",
-    "g₂₂ → 1.0 at N→∞ (Euclidean metric, asymptotically flat)",
-    "V6 geometry: ds² = g₂₂·dI₂² → dI₂² at N→∞",
-    "Arc length s(t) is strictly monotonic (universal time coordinate)",
-    "Omega is NOT monotonic (cyclic driver, not time)",
-    "V6 readiness: THEORETICALLY FOUNDED"
+  "finalModel": "g₂₂ → 1.0 at N→∞. The V6 metric ds²=g₂₂·dI₂² becomes ds²=dI₂² in thermodynamic limit — asymptotically flat Euclidean. Convergence is faster than power-law (exponential/threshold at N≈65).",
+  "baseForNextVersion": "V6.0",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "supportedClaims": [
+    "g₂₂ → 1.0 as N → ∞ (Euclidean metric)",
+    "At N=90: g₂₂=1.01 (CV=0.017), at N=100: g₂₂=1.00 (CV=0.003)",
+    "N=72 has seed-driven g₂₂ anomaly (median=2.5, not 16.6)",
+    "Convergence is faster than power-law (exponential/threshold)",
+    "I₁ remains N-constant (range 0.799-0.812 across N)"
   ],
-  "falsifiedHypotheses": [
-    "c_eff is structurally invariant",
-    "Omega and MeanDist are orthogonal",
-    "SAC converges to a fixed point",
-    "Omega is a monotonic time coordinate"
+  "falsifiedClaims": [],
+  "conditionalClaims": ["finite-N limits","single-seed N-scaling","diagnostic not causal"],
+  "hypotheses": [
+    "g₂₂ → 1 follows from CLT: dI₁ ~ 1/√N",
+    "N≈65 is the threshold for Euclidean convergence",
+    "g₂₂ = 1 + a·N^{-α} with α determined by fluctuation scaling"
   ],
-  "v6Readiness": "THEORETICALLY FOUNDED",
-  "stopLowStatus": "SAFE (unchanged)",
-  "m3ppStatus": "UNCHANGED",
-  "nextVersion": {
-    "version": "5.62",
-    "task": "Analytical proof of g₂₂ → 1 as N → ∞"
-  }
+  "notClaimed": ["causal mechanism","physical interpretation","V6 readiness","modified M3++","modified Stop-Low"],
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "THEORETICALLY FOUNDED"
 }

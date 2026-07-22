@@ -1,18 +1,29 @@
 {
-  "version": "6.2",
+  "releaseStatus": "V6.2 CORE INTEGRATION",
+  "phase": "V6 Geometry Core Migration",
   "date": "2026-07-22",
   "branch": "feature/v6.2-core-migration",
-  "testsPassed": 2960,
-  "testsFailed": 0,
-  "v6Geometry": {
-    "location": "TRM.Core/Geometry/V6/V6Geometry.cs",
-    "namespace": "TRM.Core.Geometry.V6",
-    "status": "CORE INTEGRATED",
-    "testsPassed": 10,
-    "testsFailed": 0
-  },
-  "nextVersion": {
-    "version": "6.3",
-    "task": "V5-V6 pipeline connection"
-  }
+  "base": "V6.1 COMPLETE",
+  "testSummary": { "total": 2960, "passed": 2960, "failed": 0 },
+  "suites": [
+    {"name":"V6_Migration","title":"Core Migration to TRM.Core/Geometry/V6","commit":"0310f30","status":"COMPLETE","claimCategory":"INFRASTRUCTURE"}
+  ],
+  "finalModel": "V6Geometry integrated into TRM.Core/Geometry/V6/. All 10 V6 tests pass after migration. Zero breaking changes.",
+  "baseForNextVersion": "V6.3",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "supportedClaims": [
+    "V6Geometry successfully migrated to TRM.Core",
+    "All 10 V6 tests pass after migration",
+    "Backward compatible: no breaking changes"
+  ],
+  "falsifiedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "V6 geometry can now be used by all TRM.Core consumers",
+    "V6.3 will connect V5 pipeline to V6 geometry"
+  ],
+  "notClaimed": ["physical interpretation","V6 completeness","modified M3++","modified Stop-Low"],
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "CORE INTEGRATED"
 }

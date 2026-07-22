@@ -1,33 +1,42 @@
 {
-  "version": "6.1",
+  "releaseStatus": "V6.1 DOCUMENTATION AND INTEGRATION",
+  "phase": "V6 Geometry Documentation and Integration",
   "date": "2026-07-22",
   "branch": "feature/v6.1-documentation-integration",
-  "testsPassed": 2960,
-  "testsFailed": 0,
+  "base": "V6.0 COMPLETE",
+  "testSummary": { "total": 2960, "passed": 2960, "failed": 0 },
   "suites": [
-    "V6_01_InvariantI1",
-    "V6_02_InvariantI2",
-    "V6_03_ArcLengthMonotonic",
-    "V6_04_MetricEuclidean",
-    "V6_05_EllipticalGeometry",
-    "V6_10_CrossSeedInvariants",
-    "V6_11_CrossSeedMetric",
-    "V6_12_CrossSeedGeometry",
-    "V6_20_MetricScaling",
-    "V6_21_InvariantScaling"
+    {"name":"V6_01","title":"Invariant I1 Validation","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_02","title":"Invariant I2 Validation","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_03","title":"Arc Length Monotonicity","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_04","title":"Metric Euclidean Check","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_05","title":"Elliptical Geometry","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_10","title":"Cross-Seed Invariants","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_11","title":"Cross-Seed Metric","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_12","title":"Cross-Seed Geometry","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_20","title":"Metric Scaling with N","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_21","title":"Invariant Scaling with N","commit":"bdf7a1d","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "keyFindings": [
-    "SAC = LIMIT CYCLE (period 2, half-life 52-66 epochs)",
-    "I₁ = 0.70·km + 0.30·d_mean (CV=0.0025, universal)",
-    "I₂ = 0.90·km + 0.10·Omega (CV=0.0121, universal)",
-    "g₂₂ → 1.0 at N≥67 (Euclidean metric)",
-    "V6 geometry: ds² = dI₂² in thermodynamic limit",
+  "finalModel": "V6 geometry: ds2 = g22*dI22 -> dI22 at N>=67. I1=0.70*km+0.30*d_mean (CV=0.0025), I2=0.90*km+0.10*Omega (CV=0.0121). Cross-seed validated, thermodynamically flat.",
+  "baseForNextVersion": "V6.2",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "supportedClaims": [
+    "I1 is conserved (CV=0.0025 across seeds)",
+    "I2 is stable (CV=0.0121 across seeds)",
     "Arc length s(t) is strictly monotonic (10/10 seeds)",
+    "g22 tends to 1.0 at N>=67 (Euclidean metric)",
+    "Ellipse eccentricity 0.982 (consistent across seeds)",
     "All 10 V6_0 tests pass, cross-seed validated"
   ],
-  "v6Readiness": "IMPLEMENTED AND VALIDATED",
-  "nextVersion": {
-    "version": "6.2",
-    "task": "Code migration to TRM.Core and CI integration"
-  }
+  "falsifiedClaims": [],
+  "conditionalClaims": ["finite-N limits","seed 1005 for N-scaling","diagnostic not causal"],
+  "hypotheses": [
+    "V6 geometry may replace c_eff as the internal geometry foundation",
+    "The Euclidean limit may be provable analytically",
+    "I1 and I2 may generalize beyond the tested parameter range"
+  ],
+  "notClaimed": ["causal mechanism","physical interpretation","V6 completeness","modified M3++","modified Stop-Low","physical spacetime derivation"],
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "IMPLEMENTED AND VALIDATED"
 }

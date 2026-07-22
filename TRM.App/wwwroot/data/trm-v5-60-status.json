@@ -1,27 +1,64 @@
 {
-  "releaseStatus": "V5.60 INITIALIZED",
+  "releaseStatus": "V5.60 COMPLETE",
   "phase": "Kernel Emergence Audit",
   "date": "2026-07-22",
   "branch": "feature/v5.60-kernel-emergence-audit",
   "base": "V5.59 COMPLETE",
   "baseCommit": "5f51532",
-  "testSummary": { "total": 2933, "passed": 2933, "failed": 0 },
+  "testSummary": { "total": 2940, "passed": 2940, "failed": 0 },
   "suites": [
-    {"name":"KEM_01","title":"Kernel Emergence Audit","commit":"6e3babc","status":"COMPLETE","claimCategory":"SUPPORTED"}
+    {"name":"KEM_01","title":"Kernel Emergence Audit","commit":"6e3babc","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"KSP_01","title":"Kuramoto Slip-Phase Audit","commit":"LATEST","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"EMG_01","title":"Emergence Audit Part A — c_eff Invariance","commit":"LATEST","status":"COMPLETE","claimCategory":"FALSIFIED"},
+    {"name":"EMG_02","title":"Variance Decomposition — Omega/MeanDist Correlation","commit":"LATEST","status":"COMPLETE","claimCategory":"FALSIFIED"},
+    {"name":"KEM_02","title":"Kernel Emergence Depth","commit":"LATEST","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"KEM_03","title":"Parameter Sweep","commit":"LATEST","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"KEM_04","title":"Limit Cycle Characterization","commit":"51b52dc","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"LCM_01","title":"Limit Cycle Mechanism","commit":"f242560","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"LCM_02","title":"Limit Cycle Geometry","commit":"8665f4e","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"LCM_03","title":"Invariant Validation","commit":"0441c78","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"LCM_04","title":"Invariant Geometry","commit":"8b66539","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"V6_Proposal","title":"V6 Formulation Based on Invariants","commit":"c3e9d4b","status":"COMPLETE","claimCategory":"HYPOTHESIS"},
+    {"name":"V6_Validation","title":"Cross-Seed Validation","commit":"25853aa","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "finalModel": "Model C — Amnesic emergence. Cupd erases random graph and creates new K from Sim→RP→DL phase coherence data.",
+  "finalModel": "SAC is a LIMIT CYCLE (period=2, half-life=52-66). Two invariants: I₁=0.70·km+0.30·d_mean (CV=0.0025), I₂=0.9·km+0.1·Omega (CV=0.0121). V6 geometry on 2D manifold with metric ds²=g₂₂·dI₂².",
   "baseForNextVersion": "V5.61",
-  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "frozenConstraints": {
+    "M3++": "unchanged",
+    "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop",
+    "c3OmegaShiftThreshold": 0.1
+  },
   "supportedClaims": [
-    "km emergence is amnesic (init→epoch1 r=0.000)",
-    "Epoch3 contributes 67% of total separation growth",
-    "km signal is created from phase synchronization, not graph topology",
-    "Cupd exponential transform gates km structure",
-    "Per-N effect stable (1.44-1.79σ)"
+    "SAC is a LIMIT CYCLE (period=2, half-life=52-66)",
+    "km emerges through amnesic SAC feedback",
+    "Phase slips are zero at K=0.5 (fully locked)",
+    "Omega and MeanDist are CORRELATED (r=0.81)",
+    "I₁ = 0.70·km + 0.30·d_mean (CV=0.0025, cross-seed validated)",
+    "I₂ = 0.90·km + 0.10·Omega (CV=0.0121, cross-seed validated)",
+    "Arc length s(t) is strictly monotonic (universal time)",
+    "Period-2 is a stable two-cycle of G=DL∘Nm∘RP∘Sim∘Cupd"
   ],
-  "conditionalClaims": ["finite-N limits","pipeline dependence","diagnostic not causal"],
-  "hypotheses": ["Cupd(f(d)) may be a universal signal generator across regimes"],
-  "notClaimed": ["causal mechanism","deterministic rescue","physical interpretation","V6 readiness","modified M3++","modified Stop-Low"],
+  "falsifiedClaims": [
+    "c_eff is structurally invariant (CV=0.80-1.08)",
+    "Omega and MeanDist are orthogonal (r=0.81)",
+    "SAC converges to a fixed point (limit cycle instead)",
+    "Omega is a monotonic time coordinate (cyclic driver)"
+  ],
+  "conditionalClaims": ["finite-N limits","seed-limited (1005)","pipeline dependence","diagnostic not causal"],
+  "hypotheses": [
+    "The SAC limit cycle is a fundamental property of Kuramoto+exponential coupling",
+    "I₁ may replace c_eff as the V6 conserved quantity",
+    "The 2D invariant manifold may provide foundation for V6 geometry"
+  ],
+  "notClaimed": [
+    "causal mechanism",
+    "deterministic rescue",
+    "physical interpretation",
+    "V6 readiness",
+    "modified M3++",
+    "modified Stop-Low",
+    "physical length, c, GR, spacetime, or cosmology derivation"
+  ],
   "causalClosure": "BLOCKED",
   "stopLowSafety": "SAFE",
   "v6Status": "NOT READY"
