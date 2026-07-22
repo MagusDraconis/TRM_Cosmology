@@ -1,0 +1,27 @@
+{
+  "releaseStatus": "V6.4 APP INTEGRATION",
+  "phase": "V6 Geometry Blazor App Integration",
+  "date": "2026-07-22",
+  "branch": "feature/v6.4-app-integration",
+  "base": "V6.3 COMPLETE",
+  "testSummary": { "total": 2970, "passed": 2970, "failed": 0 },
+  "suites": [
+    {"name":"V6Page","title":"V6 Blazor Page (/v6)","commit":"LATEST","status":"COMPLETE","claimCategory":"INFRASTRUCTURE"},
+    {"name":"V6Service","title":"V6 Geometry Service","commit":"LATEST","status":"COMPLETE","claimCategory":"INFRASTRUCTURE"}
+  ],
+  "finalModel": "V6 geometry available via /v6 Blazor page. MudBlazor dashboards for I1, I2, g22, eccentricity, arc length.",
+  "baseForNextVersion": "V6.5",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "c3OmgS > 0.1 continue, <= 0.1 stop", "c3OmegaShiftThreshold": 0.1 },
+  "supportedClaims": [
+    "V6 geometry page renders at /v6",
+    "V6GeometryService computes V6 from SAC simulations",
+    "Summary cards display I1, I2, g22, epsilon, arc length",
+    "Validation badges show pass/fail status"
+  ],
+  "falsifiedClaims": [],
+  "hypotheses": ["V6 page will help researchers explore SAC geometry interactively"],
+  "notClaimed": ["physical interpretation","V6 completeness","modified M3++","modified Stop-Low"],
+  "causalClosure": "BLOCKED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "APP INTEGRATED"
+}

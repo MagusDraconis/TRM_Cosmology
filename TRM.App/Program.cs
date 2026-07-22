@@ -25,6 +25,9 @@ builder.Services.AddScoped<IWeakFieldService, WeakFieldService>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(sp.GetRequiredService<IConfiguration>()["BaseUrl"] ?? "https://localhost:5001/") });
 builder.Services.AddScoped<TrmStatusService>();
 
+// V6 geometry service
+builder.Services.AddScoped<V6GeometryService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

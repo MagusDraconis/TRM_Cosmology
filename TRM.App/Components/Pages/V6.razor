@@ -1,0 +1,133 @@
+@page "/v6"
+@using TRM.App.Services
+@using TRM.App.Models
+@inject V6GeometryService V6Service
+@rendermode InteractiveServer
+
+<PageTitle>V6 Geometry</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">V6 Geometry</MudText>
+<MudText Typo="Typo.body1" Class="mb-4">Invariant-based geometry of the SAC limit cycle. ds² = g₂₂·dI₂² → dI₂² at N≥67.</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (_trajectory is not null)
+{
+    var t = _trajectory;
+
+    <!-- Summary Cards -->
+    <MudGrid Class="mb-4">
+        <MudItem xs="6" sm="4" md="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true" Elevation="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">I₁ Mean</MudText>
+                <MudText Typo="Typo.h6">@t.I1Mean.ToString("F4")</MudText>
+                <MudChip T="string" Size="Size.Small" Color="@(t.IsI1Invariant ? Color.Success : Color.Error)">CV=@t.I1CV.ToString("F4")</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true" Elevation="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">I₂ Mean</MudText>
+                <MudText Typo="Typo.h6">@t.I2Mean.ToString("F4")</MudText>
+                <MudChip T="string" Size="Size.Small" Color="@(t.IsI2Invariant ? Color.Success : Color.Error)">CV=@t.I2CV.ToString("F4")</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true" Elevation="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">g₂₂ Median</MudText>
+                <MudText Typo="Typo.h6">@t.G22Median.ToString("F4")</MudText>
+                <MudChip T="string" Size="Size.Small" Color="@(t.IsMetricEuclidean ? Color.Success : Color.Warning)">@(t.IsMetricEuclidean ? "Euclidean" : "Non-Euclidean")</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true" Elevation="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Eccentricity</MudText>
+                <MudText Typo="Typo.h6">@t.Eccentricity.ToString("F4")</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info">ratio=@t.AxisRatio.ToString("F3")</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true" Elevation="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Arc Length</MudText>
+                <MudText Typo="Typo.h6">@t.TotalArcLength.ToString("F4")</MudText>
+                <MudChip T="string" Size="Size.Small" Color="@(t.IsArcMonotonic ? Color.Success : Color.Error)">@(t.IsArcMonotonic ? "Monotonic" : "Non-Monotonic")</MudChip>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="4" md="2">
+            <MudPaper Class="pa-3 text-center" Outlined="true" Elevation="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Epochs</MudText>
+                <MudText Typo="Typo.h6">@t.Epochs</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info">N=72, seed=@_seed</MudChip>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Validation Badges -->
+    <MudStack Row="true" Spacing="2" Class="mb-4">
+        <MudChip T="string" Size="Size.Small" Color="@(t.IsI1Invariant ? Color.Success : Color.Error)" Variant="Variant.Filled">
+            I₁ @(t.IsI1Invariant ? "✓" : "✗") CV=@t.I1CV.ToString("F4")
+        </MudChip>
+        <MudChip T="string" Size="Size.Small" Color="@(t.IsI2Invariant ? Color.Success : Color.Warning)" Variant="Variant.Filled">
+            I₂ @(t.IsI2Invariant ? "✓" : "?") CV=@t.I2CV.ToString("F4")
+        </MudChip>
+        <MudChip T="string" Size="Size.Small" Color="@(t.IsArcMonotonic ? Color.Success : Color.Error)" Variant="Variant.Filled">
+            Arc @(t.IsArcMonotonic ? "✓" : "✗")
+        </MudChip>
+        <MudChip T="string" Size="Size.Small" Color="@(t.IsMetricEuclidean ? Color.Success : Color.Warning)" Variant="Variant.Filled">
+            g₂₂ @(t.IsMetricEuclidean ? "✓" : "?")
+        </MudChip>
+    </MudStack>
+
+    <!-- Data Table -->
+    <MudText Typo="Typo.h6" Class="mt-4 mb-2">Epoch Data</MudText>
+    <MudTable Items="@_tableRows" Hover="true" Dense="true" Elevation="1" Outlined="true">
+        <HeaderContent>
+            <MudTh>Epoch</MudTh>
+            <MudTh>I₁</MudTh>
+            <MudTh>I₂</MudTh>
+            <MudTh>Arc Length</MudTh>
+            <MudTh>g₂₂</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Epoch</MudTd>
+            <MudTd>@context.I1.ToString("F4")</MudTd>
+            <MudTd>@context.I2.ToString("F4")</MudTd>
+            <MudTd>@context.Arc.ToString("F4")</MudTd>
+            <MudTd>@context.G22.ToString("F4")</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{5,10,20}" />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+    private bool _loading = true;
+    private V6TrajectoryModel? _trajectory;
+    private int _seed = 1005;
+    private List<RowData> _tableRows = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(() =>
+        {
+            _trajectory = V6Service.ComputeForSeed(_seed, 20);
+            _tableRows = Enumerable.Range(0, _trajectory.Epochs).Select(i => new RowData
+            {
+                Epoch = i,
+                I1 = _trajectory.I1[i],
+                I2 = _trajectory.I2[i],
+                Arc = _trajectory.ArcLength[i],
+                G22 = i > 0 && i - 1 < _trajectory.G22.Length ? _trajectory.G22[i - 1] : 1.0
+            }).ToList();
+        });
+        _loading = false;
+    }
+
+    private struct RowData
+    {
+        public int Epoch;
+        public double I1, I2, Arc, G22;
+    }
+}

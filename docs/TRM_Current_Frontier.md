@@ -3,8 +3,8 @@
 **Version:** 2.0
 **Date:** 2026-07-22
 
-**Current Version:** V6.3 PIPELINE INTEGRATION
-**Current Branch:** feature/v6.3-pipeline-integration
+**Current Version:** V6.4 APP INTEGRATION (Blazor)
+**Current Branch:** feature/v6.4-app-integration
 **Cumulative Tests:** 2970
 **Failed:** 0
 
