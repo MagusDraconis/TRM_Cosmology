@@ -11,8 +11,8 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V6.1 DOCUMENTATION AND INTEGRATION |
-| Current Branch | feature/v6.1-documentation-integration |
+| Current Version | V6.2 CORE INTEGRATION |
+| Current Branch | feature/v6.2-core-migration |
 | Total Tests | 2960 |
 | Failed Tests | 0 |
 | Current Status | V6.1 — V6 geometry IMPLEMENTED AND VALIDATED. 10/10 tests pass, cross-seed validated. I₁ CV=0.0025, I₂ CV=0.0121, g₂₂→1.0 at N≥67. |
