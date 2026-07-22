@@ -349,6 +349,74 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== KSP_01 complete. Commit: KSP_01_KuramotoSlipPhaseAudit ===");
     }
 
+    [Fact]
+    public void EMG_01_EmergenceAudit_PartA()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== TRM V5.60 EMG_01 — Emergence Audit ===");
+        _o.WriteLine("=== Part A: Structural Invariance of c_eff ===");
+        _o.WriteLine("=== V5.60. Frozen: M3++, Stop-Low, c3OmgS ===");
+        _o.WriteLine(new string('=',80));
+
+        int[] Ns={67,70,72,75,80};int[] sds={1001,1002,1003,1004,1005,1006,1007,1008,1009,1010};
+
+        var bag=new ConcurrentBag<(int N,int s,double omega,double meanDist,double cEff)>();
+        var hiC=new ConcurrentDictionary<int,P3>();
+        var loC=new ConcurrentDictionary<int,P3>();
+        P3 GetHi(int n){return hiC.GetOrAdd(n,k=>PCent(k,true));}
+        P3 GetLo(int n){return loC.GetOrAdd(n,k=>PCent(k,false));}
+
+        Parallel.ForEach(Ns,n=>{
+            var hi=GetHi(n);var lo=GetLo(n);
+            foreach(var s in sds){
+                var K=KS(n,s);
+                for(int e=0;e<5;e++){var h=Sim(K,n,0.10,s+e);var d=DL(Nm(RP(h,n),n),n);K=Cupd(d,n);}
+                double omega=Of(Sim(K,n,0.10,s+5),n).Average();
+                var hFinal=Sim(K,n,0.10,s+50);
+                var dFinal=DL(Nm(RP(hFinal,n),n),n);
+                double md=Dm(dFinal,n);
+                double cEff=omega*md;
+                bag.Add((n,s,omega,md,cEff));
+            }});
+        var bd=bag.ToArray();
+        _o.WriteLine($"Profiles: {bd.Length}");
+
+        // Cross-seed CV (for each N, std/mean across seeds, then average)
+        // Cross-N CV (for each seed, std/mean across N, then average)
+        _o.WriteLine($"\n{"Metric",-14} {"CV(seed)",10} {"CV(N)",10} {"Mean",10} {"Invariant?",12}");
+        _o.WriteLine(new string('-',60));
+
+        void Report(string name,Func<(int,int,double,double,double),double> f){
+            double grandMean=bd.Average(f);
+            // CV(seed): for each N, compute CV across seeds, average
+            double sumSeedCV=0;int seedCount=0;
+            foreach(var n in Ns){
+                var nd=bd.Where(d=>d.Item1==n).ToArray();if(nd.Length<2)continue;
+                var vals=nd.Select(f).ToArray();double m=vals.Average();
+                double s=Math.Sqrt(vals.Sum(v=>(v-m)*(v-m))/(vals.Length-1));
+                sumSeedCV+=s/(m+0.0001);seedCount++;
+            }
+            double cvSeed=seedCount>0?sumSeedCV/seedCount:0;
+            // CV(N): for each seed, compute CV across N, average
+            double sumNCV=0;int nCount=0;
+            foreach(var s in sds){
+                var sd=bd.Where(d=>d.Item2==s).ToArray();if(sd.Length<2)continue;
+                var vals=sd.Select(f).ToArray();double m=vals.Average();
+                double st=Math.Sqrt(vals.Sum(v=>(v-m)*(v-m))/(vals.Length-1));
+                sumNCV+=st/(m+0.0001);nCount++;
+            }
+            double cvN=nCount>0?sumNCV/nCount:0;
+            bool invariant=cvSeed<cvN*0.5&&cvSeed<0.05;
+            _o.WriteLine($"{name,-14} {cvSeed,10:F6} {cvN,10:F6} {grandMean,10:F6} {(invariant?"YES":"no"),12}");
+        }
+        Report("Omega",d=>d.Item3);
+        Report("MeanDist",d=>d.Item4);
+        Report("c_eff",d=>d.Item5);
+
+        _o.WriteLine($"\nStop-Low: SAFE. V6 NOT READY.");
+        _o.WriteLine($"=== EMG_01 Part A complete ===");
+    }
+
     // Count phase slips for oscillator pair (i,j) from trajectory h[time][oscillator]
     static int CountSlips(double[][]h,int i,int j){
         int slips=0;double prevDelta=0;bool first=true;
