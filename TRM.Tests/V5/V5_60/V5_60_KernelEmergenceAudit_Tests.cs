@@ -3443,6 +3443,176 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== OVO_01 complete. Commit: OVO_01_OmegaVarianceOriginAudit ===");
     }
 
+    [Fact]
+    public void OSC_01_OmegaScalingOriginAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== OSC_01: Omega Scaling Origin Audit ===");
+        _o.WriteLine("=== Why N^18.84? Analytical decomposition. ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int nEpochs=20;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // ============================================================
+        // PART A+B — Dense Sweep with Extended Variables
+        // ============================================================
+        _o.WriteLine($"\n=== PARTS A+B: Scaling Decomposition ===");
+        _o.WriteLine($"{"N",5} {"b*",8} {"1/(1-b)²",10} {"var(I2)",10} {"var(km)"+
+            "",12} {"var(Ω)",12} {"var_pred",12} {"err%",8}");
+        _o.WriteLine(new string('-',80));
+
+        var nAll=new List<int>();var bAll=new List<double>();
+        var vkAll=new List<double>();var voAll=new List<double>();var covAll=new List<double>();
+
+        for(int nv=50;nv<=100;nv+=2){
+            var K=KS(nv,seed);var km=new double[nEpochs];var om=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K=Cupd(d,nv);km[e-1]=Km(K,nv);om[e-1]=Of(h,nv).Average();}
+            double mo=om.Average(),mk=km.Average();
+            double vo=0,vk=0,cv2=0;
+            for(int i=0;i<nEpochs;i++){vo+=(om[i]-mo)*(om[i]-mo);vk+=(km[i]-mk)*(km[i]-mk);cv2+=(km[i]-mk)*(om[i]-mo);}
+            vo/=nEpochs;vk/=nEpochs;cv2/=nEpochs;
+
+            // Optimal b*
+            double bb=0,bc=double.MaxValue;
+            for(int bi=0;bi<=100;bi++){double b=bi/100.0;var v=new double[nEpochs];for(int i=0;i<nEpochs;i++)v[i]=b*km[i]+(1-b)*om[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bc){bc=cv;bb=b;}}
+
+            // var(I2) for the optimal b*
+            var i2v=new double[nEpochs];for(int i=0;i<nEpochs;i++)i2v[i]=bb*km[i]+(1-bb)*om[i];
+            double vi2=0,mi2=i2v.Average();for(int i=0;i<nEpochs;i++)vi2+=(i2v[i]-mi2)*(i2v[i]-mi2);vi2/=nEpochs;
+
+            // Predicted var(Omega) from decomposition:
+            // var(I2) = b²·var(km) + (1-b)²·var(Ω) + 2b(1-b)·cov
+            // var(Ω) = (var(I2) - b²·var(km) - 2b(1-b)·cov) / (1-b)²
+            double predVo=(vi2-bb*bb*vk-2*bb*(1-bb)*cv2)/((1-bb)*(1-bb)+1e-15);
+            double err=Math.Abs(predVo-vo)/Math.Max(vo,1e-10)*100;
+
+            nAll.Add(nv);bAll.Add(bb);vkAll.Add(vk);voAll.Add(vo);covAll.Add(cv2);
+
+            double amp=1.0/((1-bb)*(1-bb)+1e-10);
+            _o.WriteLine($"{nv,5} {bb,8:F3} {amp,10:F1} {vi2,10:F6} {vk,12:F6} {vo,12:F6} {predVo,12:F6} {err,8:F1}");
+        }
+
+        // ============================================================
+        // PART C — Causal Chain: Does var(km) drive var(Omega)?
+        // ============================================================
+        _o.WriteLine($"\n=== PART C: Causal Chain ===");
+
+        var nA=nAll.Select(n=>(double)n).ToArray();
+        var bA=bAll.ToArray();var vkA=vkAll.ToArray();var voA=voAll.ToArray();
+        var ampA=bAll.Select(b=>1.0/((1-b)*(1-b)+1e-10)).ToArray();
+
+        // Fit scaling exponents
+        double FitExp(double[]x,double[]y){
+            double sX=0,sY=0,sX2=0,sXY=0;int m=x.Length;
+            for(int i=0;i<m;i++){double lx=Math.Log(Math.Max(x[i],1e-10));double ly=Math.Log(Math.Max(y[i],1e-10));sX+=lx;sY+=ly;sX2+=lx*lx;sXY+=lx*ly;}
+            return (m*sXY-sX*sY)/(m*sX2-sX*sX+1e-15);
+        }
+
+        double expVo=FitExp(nA,voA);
+        double expVk=FitExp(nA,vkA);
+        double expAmp=FitExp(nA,ampA);
+        double expB=FitExp(nA,bAll.Select(b=>1-b).ToArray()); // exponent for (1-b)
+
+        _o.WriteLine($"Scaling exponents (var ~ N^alpha):");
+        _o.WriteLine($"  var(Omega): alpha = {expVo:F2}");
+        _o.WriteLine($"  var(km):    alpha = {expVk:F2}");
+        _o.WriteLine($"  1/(1-b)^2:  alpha = {expAmp:F2}");
+        _o.WriteLine($"  (1-b):      alpha = {expB:F2}");
+
+        // Decompose: var(Omega) ≈ var(I2)/[(1-b)²] - [b²/(1-b)²]·var(km) - [2b/(1-b)]·cov
+        // Since var(I2) is small (invariant), the dominant terms come from the AMPLIFICATION
+        _o.WriteLine($"");
+        _o.WriteLine($"Decomposition of N^18.84:");
+        _o.WriteLine($"  exp(varΩ) ≈ exp(1/(1-b)²) + exp(var(km))");
+        _o.WriteLine($"  {expVo:F2} ≈ {expAmp:F2} + {expVk:F2} = {expAmp+expVk:F2}");
+        _o.WriteLine($"  Residual: {expVo-(expAmp+expVk):F2}");
+        _o.WriteLine($"  {(Math.Abs(expVo-(expAmp+expVk))<2?"DECOMPOSITION EXPLAINED":"NOT fully explained")}");
+
+        // ============================================================
+        // PART D — Exponent Origin: Why does (1-b) scale?
+        // ============================================================
+        _o.WriteLine($"\n=== PART D: Exponent Origin ===");
+        _o.WriteLine($"Why does (1-b) shrink with N?");
+        _o.WriteLine($"  (1-b) ~ N^{expB:F2}");
+        _o.WriteLine($"");
+        _o.WriteLine($"At large N: b → 1, (1-b) → 0");
+        _o.WriteLine($"  b* = (var(Ω) - cov) / (var(km) + var(Ω) - 2·cov)");
+        _o.WriteLine($"  As var(Ω) >> var(km): b* → 1");
+        _o.WriteLine($"  Then (1-b) ≈ var(km)/var(Ω)");
+        _o.WriteLine($"");
+        _o.WriteLine($"The self-consistency condition:");
+        _o.WriteLine($"  var(Ω) ≈ var(I₂)/(1-b)²  [from var(I₂) formula, ignoring cov]");
+        _o.WriteLine($"  (1-b) ≈ var(km)/var(Ω)     [from b* expression at large N]");
+        _o.WriteLine($"  Substituting: var(Ω) ≈ var(I₂)·var(Ω)²/var(km)²");
+        _o.WriteLine($"  → var(Ω) ≈ var(km)² / var(I₂)");
+        _o.WriteLine($"");
+        _o.WriteLine($"Therefore: exp(varΩ) ≈ 2·exp(var_km) - exp(var_I₂)");
+        _o.WriteLine($"  With var(km) ~ N^{expVk:F2} and var(I₂) ≈ constant:");
+        _o.WriteLine($"  Predicted exp(varΩ) = 2 × {expVk:F2} = {2*expVk:F2}");
+        _o.WriteLine($"  Observed exp(varΩ) = {expVo:F2}");
+        _o.WriteLine($"  Match: {(Math.Abs(expVo-2*expVk)<3?"SELF-CONSISTENT":"NOT self-consistent")}");
+
+        // ============================================================
+        // PART E — Finite-Size Check
+        // ============================================================
+        _o.WriteLine($"\n=== PART E: Finite-Size Audit ===");
+        _o.WriteLine($"Checking for boundary/artifact effects:");
+
+        // Is the power-law robust to removing N=50-58 (low end)?
+        var midN=nA.Where(n=>n>=60).ToArray();
+        var midVo=nA.Select((n,i)=>voA[i]).Where((v,i)=>nA[i]>=60).ToArray();
+        double expMid=FitExp(midN,midVo);
+        _o.WriteLine($"  Exponent for N>=60: {expMid:F2} (vs full {expVo:F2})");
+
+        var highN=nA.Where(n=>n>=70).ToArray();
+        var highVo=nA.Select((n,i)=>voA[i]).Where((v,i)=>nA[i]>=70).ToArray();
+        double expHigh=FitExp(highN,highVo);
+        _o.WriteLine($"  Exponent for N>=70: {expHigh:F2} (vs full {expVo:F2})");
+
+        // Is var(I2) truly constant?
+        _o.WriteLine($"");
+        _o.WriteLine($"var(I2) across N (b* optimized at each N):");
+        // Show that var(I2) stays small
+        double vi2Mean=0;int vi2Count=0;
+        for(int nv=60;nv<=100;nv+=10){
+            if(nv==70||nv==90)continue; // keep sparse
+            var K2=KS(nv,seed);var km2=new double[nEpochs];var om2=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K2,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);K2=Cupd(d,nv);km2[e-1]=Km(K2,nv);om2[e-1]=Of(h,nv).Average();}
+            double bb2=0,bc2=double.MaxValue;
+            for(int bi=0;bi<=100;bi++){double b=bi/100.0;var v=new double[nEpochs];for(int i=0;i<nEpochs;i++)v[i]=b*km2[i]+(1-b)*om2[i];double cv=Sd(v)/(Math.Abs(v.Average())+0.001);if(cv<bc2){bc2=cv;bb2=b;}}
+            var i2e=new double[nEpochs];for(int i=0;i<nEpochs;i++)i2e[i]=bb2*km2[i]+(1-bb2)*om2[i];
+            double vi2e=0,mi2e=i2e.Average();for(int i=0;i<nEpochs;i++)vi2e+=(i2e[i]-mi2e)*(i2e[i]-mi2e);vi2e/=nEpochs;
+            _o.WriteLine($"  N={nv}: var(I2)={vi2e:F6}, b*={bb2:F3}");
+            vi2Mean+=vi2e;vi2Count++;
+        }
+        vi2Mean/=vi2Count;
+        _o.WriteLine($"  Mean var(I2) = {vi2Mean:F6}");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"\n=== PART F: Decision ===");
+        _o.WriteLine($"Stop-Low: SAFE. Causal closure: BLOCKED.");
+
+        bool decomposed=Math.Abs(expVo-(expAmp+expVk))<2;
+        bool selfConsistent=Math.Abs(expVo-2*expVk)<3;
+
+        string model;
+        if(selfConsistent&&decomposed)
+            model="Model A: Omega scaling DRIVEN BY km — var(km)²/var(I2) predicts var(Omega)";
+        else if(decomposed)
+            model="Model B: Amplification by (1-b)^-2 is dominant mechanism";
+        else
+            model="Model D: UNRESOLVED";
+
+        _o.WriteLine($"Self-consistent: {selfConsistent}, Decomposed: {decomposed}");
+        _o.WriteLine($"exp(varΩ)={expVo:F2} ≈ 2·exp(varKm)={2*expVk:F2} (predicted)");
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Scaling origin audit. Diagnostic. Not causal. V6 NOT READY.");
+        _o.WriteLine($"\n=== OSC_01 complete. Commit: OSC_01_OmegaScalingOriginAudit ===");
+    }
+
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
     static double FindOptA(double[]km,double[]dm){
         double bestA=0,bestCV=double.MaxValue;
