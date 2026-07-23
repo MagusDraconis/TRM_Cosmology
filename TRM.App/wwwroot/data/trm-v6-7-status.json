@@ -1,29 +1,34 @@
 {
   "releaseStatus": "V6.7 VARIANCE CANCELLATION FOUNDATIONS",
-  "phase": "Variance Cancellation as Mathematical Identity",
+  "phase": "VC as Causal-Geometric Root — Complete 5-Suite Closure",
   "date": "2026-07-23",
   "branch": "v6.7-variance-cancellation-foundations",
   "base": "V6.6 DSVC FOUNDATIONS COMPLETE",
-  "testSummary": { "total": 3020, "passed": 3020, "failed": 0 },
+  "testSummary": { "total": 3050, "passed": 3050, "failed": 0 },
   "suites": [
-    {"name":"VCF_01","title":"Variance Cancellation Foundations Audit","commit":"9c7047f","status":"COMPLETE","claimCategory":"SUPPORTED"}
+    {"name":"VCF_01","title":"Variance Cancellation Foundations Audit","commit":"9c7047f","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"EOA_01","title":"Emergent Ordering Audit","commit":"86ed734","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"OTA_01","title":"Ordering-Time Audit","commit":"f17f0b0","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"ECA_01","title":"Emergent Causality Audit","commit":"b56211a","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"CGA_02","title":"Causal Geometry Audit","commit":"ec5d61e","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "finalModel": "Variance cancellation IS the mathematical identity var(Z) = var_terms*(1-R). Entropy reduction, dimensional collapse, information efficiency, and SNR maximization are ALL EQUIVALENT — different views of the same identity. VC is not a mechanism or physical law — it's a property of structured covariance matrices (Cauchy-Schwarz).",
+  "finalModel": "Variance Cancellation is the mathematical identity var(Z)=var_terms*(1-R). VC -> Ordering O(t) -> Causal ordering -> Causal graph -> Geometry (g22). O(t) is a universal time-like coordinate satisfying causal set axioms. Causality and geometry are TWO BRANCHES of the same VC root. Complete hierarchy: VC -> {O(t)->causality->topology+metric, conservation, compression, function}.",
   "baseForNextVersion": "V6.8",
   "frozenConstraints": { "M3++": "unchanged", "StopLow": "frozen" },
   "supportedClaims": [
-    "Variance cancellation is a mathematical identity, not a mechanism",
+    "Variance cancellation is a mathematical identity: var(Z) = var_terms * (1-R)",
     "Entropy reduction, dim collapse, info efficiency are ALL equivalent to VC",
-    "var(Z) = var_terms * (1-R) is the single equation of the entire theory",
-    "High-VC systems achieve 1.6x more entropy reduction than low-VC",
-    "Organization is continuous — no threshold, proportional to R",
-    "The 'why' is Cauchy-Schwarz: anti-correlated pairs always have lower-variance combinations",
-    "DSVC/SAC self-organize to maximize this mathematical inevitability"
+    "VC defines an intrinsic arrow of ordering toward R=1",
+    "O(t) = 1 - var(Z_t)/var(Z_0) is a universal time-like coordinate",
+    "O(t) defines a causal ordering (transitive, anti-symmetric partial order)",
+    "Causality and geometry are two branches of the same VC root",
+    "O controls geometry: g22 = f(O), dim = g(O)",
+    "Causal set -> causal graph -> manifold topology + metric"
   ],
   "falsifiedClaims": [],
   "hypotheses": ["VC may be derivable as a maximum-entropy principle from first principles"],
   "notClaimed": ["physical spacetime","physical dimensions","cosmology","teleology"],
   "causalClosure": "MATHEMATICALLY CLOSED (identity, not causal)",
   "stopLowSafety": "SAFE",
-  "v6Status": "VARIANCE CANCELLATION IS A MATHEMATICAL IDENTITY"
+  "v6Status": "VC IS THE ROOT OF CAUSALITY AND GEOMETRY"
 }
