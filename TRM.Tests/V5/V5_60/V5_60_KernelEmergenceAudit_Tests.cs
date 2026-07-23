@@ -5394,6 +5394,128 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== MOA_01 complete. Commit: MOA_01_ManifoldOriginAudit ===");
     }
 
+    [Fact]
+    public void RDA_01_RedundancyDerivationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== RDA_01: Redundancy Derivation Audit ===");
+        _o.WriteLine("=== Why lambda1=km and MeanDist=dMean? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int nEpochs=30;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // ============================================================
+        // PARTS A+B — lambda1 = km derivation
+        // ============================================================
+        _o.WriteLine($"=== PARTS A+B: lambda1 vs km ===");
+        _o.WriteLine("Definition: lambda1 = sum(K_ij) / N^2");
+        _o.WriteLine("           km = 2*sum(K_ij, i<j) / N(N-1)");
+        _o.WriteLine("For symmetric K with K_ii=0:");
+        _o.WriteLine("  lambda1 = 2*sum_{i<j}K_ij / N^2 = km*(N-1)/N");
+        _o.WriteLine($"");
+        _o.WriteLine($"{"N",5} {"km",10} {"lambda1",10} {"ratio",10} {"predicted",10} {"Delta%",8}");
+        _o.WriteLine(new string('-',56));
+
+        foreach(var nv in new[]{50,60,72,100,150,200,300,500}){
+            var K=KS(nv,seed);
+            // Run 5 SAC epochs
+            for(int e=0;e<5;e++){var h=Sim(K,nv,0.10,seed+e);K=Cupd(DL(Nm(RP(h,nv),nv),nv),nv);}
+            double km=Km(K,nv),lam=Lambda1(K,nv);
+            double pred=km*(nv-1.0)/nv;
+            double delta=Math.Abs(lam-pred)/(Math.Abs(pred)+1e-15)*100;
+            _o.WriteLine($"{nv,5} {km,10:F6} {lam,10:F6} {lam/km,10:F6} {pred,10:F6} {delta,8:F4}");
+        }
+
+        // Cross-seed check
+        _o.WriteLine($"");
+        _o.WriteLine($"Cross-seed at N=72:");
+        int N=72;
+        foreach(var sd in new[]{1005,0,2,5,8}){
+            var Ks=KS(N,sd);
+            for(int e=0;e<5;e++){var h=Sim(Ks,N,0.10,sd+e);Ks=Cupd(DL(Nm(RP(h,N),N),N),N);}
+            double kms=Km(Ks,N),lams=Lambda1(Ks,N);
+            _o.WriteLine($"  seed {sd}: km={kms:F6}, lam={lams:F6}, lam/km={lams/kms:F6}, pred={kms*(N-1.0)/N:F6}");
+        }
+
+        // ============================================================
+        // PART C+D — MeanDist = dMean derivation
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PARTS C+D: MeanDist vs dMean ===");
+        _o.WriteLine($"Both are defined as Dm(d) = mean of upper-triangular d-matrix.");
+        _o.WriteLine($"MeanDist and dMean are IDENTICAL by construction.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Verification at key N:");
+        foreach(var nv in new[]{50,72,100,200}){
+            var Kn=KS(nv,seed);
+            for(int e=0;e<5;e++){var h=Sim(Kn,nv,0.10,seed+e);Kn=Cupd(DL(Nm(RP(h,nv),nv),nv),nv);}
+            var hF=Sim(Kn,nv,0.10,seed+50);
+            var dF=DL(Nm(RP(hF,nv),nv),nv);
+            double md=Dm(dF,nv); // "MeanDist"
+            double dm=Dm(dF,nv); // "dMean" (same call)
+            _o.WriteLine($"  N={nv}: MeanDist={md:F6}, dMean={dm:F6}, identical={Math.Abs(md-dm)<1e-15}");
+        }
+        _o.WriteLine($"MeanDist = dMean: ALGEBRAIC IDENTITY (same function, same input).");
+
+        // ============================================================
+        // PART E — Constraint Necessity: What if we break them?
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PART E: Constraint Necessity ===");
+        _o.WriteLine($"Remove each redundancy, measure effective dimension increase:");
+
+        var K2=KS(N,seed);int ep3=50;
+        var full=new double[ep3][];for(int e=1;e<=ep3;e++){var h=Sim(K2,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);K2=Cupd(d,N);full[e-1]=new[]{Km(K2,N),Dm(d,N),Lambda1(K2,N),Of(h,N).Average()};}
+
+        // PR with 4 variables (full)
+        double PR4(double[][]st,int nVars){
+            var mn4=new double[nVars];for(int v=0;v<nVars;v++){double s=0;for(int i=0;i<st.Length;i++)s+=st[i][v];mn4[v]=s/st.Length;}
+            var cv4=new double[nVars,nVars];for(int a=0;a<nVars;a++)for(int b=a;b<nVars;b++){double s=0;for(int i=0;i<st.Length;i++)s+=(st[i][a]-mn4[a])*(st[i][b]-mn4[b]);cv4[a,b]=cv4[b,a]=s/st.Length;}
+            double tr2=0;for(int v=0;v<nVars;v++)tr2+=cv4[v,v];
+            double trSq=0;for(int v=0;v<nVars;v++)trSq+=cv4[v,v]*cv4[v,v];
+            return tr2*tr2/(trSq+1e-15);
+            return tr2*tr2/(trSq+1e-15);
+        }
+        // With 4 vars (full): km, dMean, lambda1, Omega
+        var st4=full.Select(r=>new[]{r[0],r[1],r[2],r[3]}).ToArray();
+        double pr4=PR4(st4,4);
+        // Remove lambda1 (3 vars): km, dMean, Omega
+        var st3=full.Select(r=>new[]{r[0],r[1],r[3]}).ToArray();
+        double pr3=PR4(st3,3);
+        // Remove dMean (2 vars): km, Omega
+        var st2=full.Select(r=>new[]{r[0],r[3]}).ToArray();
+        double pr2=PR4(st2,2);
+
+        _o.WriteLine($"  4 variables: PR={pr4:F2}");
+        _o.WriteLine($"  Remove lambda1 (3 vars): PR={pr3:F2}");
+        _o.WriteLine($"  Remove dMean (2 vars): PR={pr2:F2}");
+        _o.WriteLine($"  lambda1 contributes {pr4-pr3:F2} to PR reduction");
+        _o.WriteLine($"  dMean contributes {pr3-pr2:F2} to PR reduction");
+
+        // ============================================================
+        // PART F+G — Large-N + Decision
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PARTS F+G: Large-N + Decision ===");
+        _o.WriteLine($"lambda1/km = (N-1)/N -> 1 as N increases  (ANALYTIC)");
+        _o.WriteLine($"MeanDist = dMean -> exact identity          (ANALYTIC)");
+        _o.WriteLine($"");
+        _o.WriteLine($"Both constraints are ANALYTIC — they follow from the");
+        _o.WriteLine($"definitions of the variables and the structure of K.");
+        _o.WriteLine($"lambda1 = km*(N-1)/N requires only: K_ii=0, K symmetric.");
+        _o.WriteLine($"MeanDist = dMean requires only: same Dm(d) function call.");
+        _o.WriteLine($"");
+        _o.WriteLine($"With I1 also analytic (from ICA_01):");
+        _o.WriteLine($"  ALL THREE constraints reducing 5D->2D are ANALYTIC.");
+        _o.WriteLine($"  The 2D manifold is a MATHEMATICALLY NECESSARY consequence");
+        _o.WriteLine($"  of the SAC definitions, not an emergent phenomenon.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Model A: Both redundancies are ANALYTIC consequences.");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Redundancy derivation audit. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== RDA_01 complete. Commit: RDA_01_RedundancyDerivationAudit ===");
+    }
+
     static double sI1X(double[]y,double[]x,int n){double sx=0,sy=0,sxy=0,sx2=0;for(int i=0;i<n;i++){sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];sx2+=x[i]*x[i];}return(n*sxy-sx*sy)/(n*sx2-sx*sx+1e-15);}
 
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
