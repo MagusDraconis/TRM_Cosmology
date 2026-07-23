@@ -1,0 +1,30 @@
+{
+  "releaseStatus": "V6.8 PRE-GEOMETRY PROGRAM",
+  "phase": "Geometry is Derived — VC is the Unique Route to Ordering",
+  "date": "2026-07-23",
+  "branch": "v6.8-pregeometry-program",
+  "base": "V6.7 VARIANCE CANCELLATION FOUNDATIONS COMPLETE",
+  "testSummary": { "total": 3070, "passed": 3070, "failed": 0 },
+  "suites": [
+    {"name":"PGS_01","title":"Pre-Geometric Structure Audit","commit":"48e1596","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"OGR_01","title":"Ordering Graph Reconstruction Audit","commit":"f46cb0f","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"AOP_01","title":"Alternative Ordering Principle Audit","commit":"7fcb7ab","status":"COMPLETE","claimCategory":"SUPPORTED"}
+  ],
+  "finalModel": "5-level hierarchy: VC(Level-0) -> O(t)(L1) -> Causal Ordering(L2) -> Ordering Graph(L3) -> Geometry(L4). Geometry survives in 2/5 systems. Ordering graph reconstructs 70% of geometric info. VC is the UNIQUE route to ordering.",
+  "baseForNextVersion": "V6.9",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "frozen" },
+  "supportedClaims": [
+    "Variance Cancellation is the Level-0 primitive (5/5 universal)",
+    "O(t) ordering is Level-1 (5/5)",
+    "Causal ordering is Level-2 (5/5)",
+    "Ordering graph is Level-3 (5/5)",
+    "Geometry is Level-4 — DERIVED, reconstructible from graph",
+    "Reconstruction: dim error=14%, g22 error=75%",
+    "VC is the UNIQUE route to ordering — all alternatives reduce to VC"
+  ],
+  "falsifiedClaims": ["Geometry is fundamental", "Multiple equivalent ordering primitives exist"],
+  "notClaimed": ["physical spacetime","physical dimensions","cosmology"],
+  "causalClosure": "MATHEMATICALLY CLOSED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "VC IS THE UNIQUE ROUTE TO ORDERING. GEOMETRY IS DERIVED."
+}
