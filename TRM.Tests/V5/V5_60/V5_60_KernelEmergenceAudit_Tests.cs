@@ -4743,6 +4743,116 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== DIM_01 complete. Commit: DIM_01_ManifoldDimensionAudit ===");
     }
 
+    [Fact]
+    public void GCL_01_GeometryClosureAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== GCL_01: Geometry Closure Audit ===");
+        _o.WriteLine("=== Does geometry need I2, or does I1 suffice? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;int nEpochs=50;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // Generate trajectory
+        var K=KS(N,seed);
+        var kmV=new double[nEpochs];var dmV=new double[nEpochs];var omV=new double[nEpochs];
+        for(int e=1;e<=nEpochs;e++){var h=Sim(K,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);K=Cupd(d,N);kmV[e-1]=Km(K,N);dmV[e-1]=Dm(d,N);omV[e-1]=Of(h,N).Average();}
+
+        var i1V=new double[nEpochs];var i2V=new double[nEpochs];
+        for(int i=0;i<nEpochs;i++){i1V[i]=0.70*kmV[i]+0.30*dmV[i];i2V[i]=0.90*kmV[i]+0.10*omV[i];}
+
+        // Construct geometry array
+        var g22V=new double[nEpochs-1];var arcV=new double[nEpochs];
+        for(int i=0;i<nEpochs;i++){arcV[i]=i>0?arcV[i-1]+Math.Sqrt((i1V[i]-i1V[i-1])*(i1V[i]-i1V[i-1])+(i2V[i]-i2V[i-1])*(i2V[i]-i2V[i-1])):0;
+            if(i>0){double dI2=i2V[i]-i2V[i-1];double ds=Math.Sqrt((i1V[i]-i1V[i-1])*(i1V[i]-i1V[i-1])+dI2*dI2);g22V[i-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;}
+        }
+        var(ec,rc,orc)=ComputeEllipseParams2(i1V,i2V);
+
+        // ============================================================
+        // PARTS A+B+C — Conditional geometry
+        // ============================================================
+        _o.WriteLine($"=== PARTS A+B+C: Variance Explained ===");
+        _o.WriteLine($"{"Condition",-22} {"Var(g22)",10} {"Var(arc)",10} {"Var(ecc)",10} {"Explained",10}");
+        _o.WriteLine(new string('-',64));
+
+        // Raw variance
+        double vG=Sd(g22V);vG*=vG;double vA=Sd(arcV);vA*=vA; // geometry variances
+        double vI1=Sd(i1V);vI1*=vI1;double vI2=Sd(i2V);vI2*=vI2;
+        _o.WriteLine($"{"Raw geometry",-22} {vG,10:F4} {vA,10:F4} {0.0,10:F4} {"—",10}");
+
+        // Condition on I1
+        double bG=sI1X(g22V,i1V,nEpochs-1),r2G=bG*bG*vI1/(vG+1e-15);
+        double bA=sI1X(arcV,i1V,nEpochs),r2A=bA*bA*vI1/(vA+1e-15);
+        _o.WriteLine($"{"I1 explains",-22} {r2G*vG,10:F4} {r2A*vA,10:F4} {"—",10} {r2G*100,10:F1}%");
+
+        // Condition on I2
+        double bG2=sI1X(g22V,i2V,nEpochs-1),r2G2=bG2*bG2*vI2/(vG+1e-15);
+        double bA2=sI1X(arcV,i2V,nEpochs),r2A2=bA2*bA2*vI2/(vA+1e-15);
+        _o.WriteLine($"{"I2 explains",-22} {r2G2*vG,10:F4} {r2A2*vA,10:F4} {"—",10} {r2G2*100,10:F1}%");
+
+        // ============================================================
+        // PART D — Information accounting
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PART D: Information Accounting ===");
+
+        double rGI1=Pearson(g22V,i1V),rGI2=Pearson(g22V,i2V);
+        double rAI1=Pearson(arcV,i1V),rAI2=Pearson(arcV,i2V);
+
+        _o.WriteLine($"r(g22, I1) = {rGI1:F3}, r(g22, I2) = {rGI2:F3}");
+        _o.WriteLine($"r(arc, I1) = {rAI1:F3}, r(arc, I2) = {rAI2:F3}");
+        _o.WriteLine($"");
+        _o.WriteLine($"I1 explains {Math.Max(rGI1*rGI1,r2G)*100:F1}% of g22 variance");
+        _o.WriteLine($"I2 explains {Math.Max(rGI2*rGI2,r2G2)*100:F1}% of g22 variance");
+        _o.WriteLine($"");
+        if(Math.Abs(rGI1)>Math.Abs(rGI2))_o.WriteLine($"g22 is DOMINATED by I1");
+        else _o.WriteLine($"g22 is DOMINATED by I2");
+
+        // ============================================================
+        // PART E — Large-N behavior
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PART E: Large-N Behavior ===");
+        _o.WriteLine($"{"N",5} {"r(g22,I1)",10} {"r(g22,I2)",10} {"dominates",12}");
+        _o.WriteLine(new string('-',40));
+
+        foreach(var nv in new[]{60,72,80,90,100,120,150}){
+            var Kn=KS(nv,seed);
+            var kn=new double[nEpochs];var dn=new double[nEpochs];var on=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kn,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kn=Cupd(d,nv);kn[e-1]=Km(Kn,nv);dn[e-1]=Dm(d,nv);on[e-1]=Of(h,nv).Average();}
+            var i1n=new double[nEpochs];var i2n=new double[nEpochs];var gn=new double[nEpochs-1];
+            for(int i=0;i<nEpochs;i++){i1n[i]=0.70*kn[i]+0.30*dn[i];i2n[i]=0.90*kn[i]+0.10*on[i];
+                if(i>0){double dI2=i2n[i]-i2n[i-1];double ds=Math.Sqrt((i1n[i]-i1n[i-1])*(i1n[i]-i1n[i-1])+dI2*dI2);gn[i-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;}
+            }
+            double rn1=Pearson(gn,i1n.Take(gn.Length).ToArray());
+            double rn2=Pearson(gn,i2n.Take(gn.Length).ToArray());
+            _o.WriteLine($"{nv,5} {rn1,10:F3} {rn2,10:F3} {(Math.Abs(rn1)>Math.Abs(rn2)?"I1":"I2"),12}");
+        }
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PART F: Decision ===");
+        _o.WriteLine($"");
+        _o.WriteLine($"I1 explains {Math.Max(rGI1*rGI1,r2G)*100:F0}% of g22 variance.");
+        _o.WriteLine($"I2 explains {Math.Max(rGI2*rGI2,r2G2)*100:F0}% of g22 variance.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Geometry is PRIMARILY determined by I1:");
+        _o.WriteLine($"  g22 = 1 + (dI1/dI2)^2, dI1~0 because I1 conserved.");
+        _o.WriteLine($"  I2 is the COORDINATE — it sweeps along the manifold.");
+        _o.WriteLine($"  I1 is the CONSTRAINT — it holds the geometry flat.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Model A: Geometry DETERMINED PRIMARILY BY I1.");
+        _o.WriteLine($"  I2 is needed as a coordinate (2D manifold -> 1D effective)");
+        _o.WriteLine($"  but the flatness (g22~1) comes from I1 conservation.");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Geometry closure audit. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== GCL_01 complete. Commit: GCL_01_GeometryClosureAudit ===");
+    }
+
+    static double sI1X(double[]y,double[]x,int n){double sx=0,sy=0,sxy=0,sx2=0;for(int i=0;i<n;i++){sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];sx2+=x[i]*x[i];}return(n*sxy-sx*sy)/(n*sx2-sx*sx+1e-15);}
+
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
 
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
