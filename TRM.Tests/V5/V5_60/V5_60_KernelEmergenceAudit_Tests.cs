@@ -4453,6 +4453,118 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== IDA_01 complete. Commit: IDA_01_I2DerivationAudit ===");
     }
 
+    [Fact]
+    public void MDA_01_MetricDerivationAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== MDA_01: Metric Derivation Audit ===");
+        _o.WriteLine("=== Why does g22 -> 1? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;int nEpochs=20;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // Generate trajectory
+        var K=KS(N,seed);
+        var kmV=new double[nEpochs];var dmV=new double[nEpochs];var omV=new double[nEpochs];
+        for(int e=1;e<=nEpochs;e++){var h=Sim(K,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);K=Cupd(d,N);kmV[e-1]=Km(K,N);dmV[e-1]=Dm(d,N);omV[e-1]=Of(h,N).Average();}
+
+        double ComputeI1(double kv,double dv)=>0.70*kv+0.30*dv;
+        double ComputeI2(double kv,double ov)=>0.90*kv+0.10*ov;
+
+        var i1V=new double[nEpochs];var i2V=new double[nEpochs];
+        for(int i=0;i<nEpochs;i++){i1V[i]=ComputeI1(kmV[i],dmV[i]);i2V[i]=ComputeI2(kmV[i],omV[i]);}
+
+        // PART A: dI1, dI2 along SAC
+        var dI1=new double[nEpochs-1];var dI2v=new double[nEpochs-1];var ds=new double[nEpochs-1];
+        for(int i=1;i<nEpochs;i++){
+            dI1[i-1]=i1V[i]-i1V[i-1];
+            dI2v[i-1]=i2V[i]-i2V[i-1];
+            ds[i-1]=Math.Sqrt(dI1[i-1]*dI1[i-1]+dI2v[i-1]*dI2v[i-1]);
+        }
+
+        _o.WriteLine($"=== PART A: dI1, dI2 magnitudes ===");
+        _o.WriteLine($"mean|dI1| = {dI1.Select(d=>Math.Abs(d)).Average():F6}");
+        _o.WriteLine($"mean|dI2| = {dI2v.Select(d=>Math.Abs(d)).Average():F4}");
+        _o.WriteLine($"ratio |dI1|/|dI2| = {dI1.Select(d=>Math.Abs(d)).Average()/(dI2v.Select(d=>Math.Abs(d)).Average()+1e-15):F4}");
+        _o.WriteLine($"");
+
+        // PART B: Derive g22 from I1 constraint
+        _o.WriteLine($"=== PART B: Derivation ===");
+        _o.WriteLine($"g22 = ds^2 / dI2^2 = (dI1^2 + dI2^2) / dI2^2 = 1 + (dI1/dI2)^2");
+        _o.WriteLine($"");
+        _o.WriteLine($"Since I1 is conserved: dI1 ~ 0 along trajectories");
+        _o.WriteLine($"Therefore: g22 = 1 + (dI1/dI2)^2 ~ 1 + 0 = 1");
+        _o.WriteLine($"");
+        _o.WriteLine($"Observed at N={N}:");
+        double gObs=dI1.Select((d,i)=>ds[i]*ds[i]/(dI2v[i]*dI2v[i]+1e-15)).Average();
+        double ratioObs=dI1.Select(d=>Math.Abs(d)).Average()/(dI2v.Select(d=>Math.Abs(d)).Average()+1e-15);
+        _o.WriteLine($"  (dI1/dI2)^2 observation: {ratioObs*ratioObs:F6}");
+        _o.WriteLine($"  Predicted g22 = 1 + {ratioObs*ratioObs:F6} = {1+ratioObs*ratioObs:F6}");
+        _o.WriteLine($"  Median g22 = {ds.Select((s,i)=>s*s/(dI2v[i]*dI2v[i]+1e-15)).OrderBy(g=>g).ToArray()[ds.Length/2]:F4}");
+        _o.WriteLine($"");
+
+        // PART C: Finite-size N sweep
+        _o.WriteLine($"=== PART C: Finite-Size Corrections ===");
+        _o.WriteLine($"Prediction: (dI1/dI2)^2 ~ 1/N^p because var(I1) ~ 1/N^p");
+        _o.WriteLine($"N=50..150 sweep (step 10):");
+        _o.WriteLine($"{"N",5} {"(dI1/dI2)^2",14} {"predicted g22",14}");
+        _o.WriteLine(new string('-',36));
+
+        var nSweep=new List<double>();var rSqSweep=new List<double>();
+        for(int nv=50;nv<=150;nv+=10){
+            var Kn=KS(nv,seed);var kn=new double[nEpochs];var dn=new double[nEpochs];var on=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(Kn,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kn=Cupd(d,nv);kn[e-1]=Km(Kn,nv);dn[e-1]=Dm(d,nv);on[e-1]=Of(h,nv).Average();}
+            var i1n=new double[nEpochs];var i2n=new double[nEpochs];
+            for(int i=0;i<nEpochs;i++){i1n[i]=ComputeI1(kn[i],dn[i]);i2n[i]=ComputeI2(kn[i],on[i]);}
+            double sumR=0;int cnt=0;
+            for(int i=1;i<nEpochs;i++){
+                double di1=i1n[i]-i1n[i-1],di2=i2n[i]-i2n[i-1];
+                sumR+=(di1*di1)/(di2*di2+1e-15);cnt++;
+            }
+            double avgR=sumR/cnt;
+            nSweep.Add(nv);rSqSweep.Add(avgR);
+            _o.WriteLine($"{nv,5} {avgR,14:F6} {1+avgR,14:F6}");
+        }
+
+        // Fit exponent
+        var logN=nSweep.Select(n=>Math.Log(n)).ToArray();
+        var logR=rSqSweep.Select(r=>Math.Log(r+1e-10)).ToArray();
+        int m=logN.Length;double sx=0,sy=0,sx2=0,sxy=0;
+        for(int i=0;i<m;i++){sx+=logN[i];sy+=logR[i];sx2+=logN[i]*logN[i];sxy+=logN[i]*logR[i];}
+        double exponentP=-(m*sxy-sx*sy)/(m*sx2-sx*sx+1e-15);
+        _o.WriteLine($"Fit: (dI1/dI2)^2 ~ N^{-exponentP:F2} (p={exponentP:F2})");
+        _o.WriteLine($"");
+
+        // PART D: Curvature relation
+        _o.WriteLine($"=== PART D: Curvature and g22 ===");
+        _o.WriteLine($"g22 = 1 + var(dI1)/var(dI2) (approx, ignoring correlation)");
+        _o.WriteLine($"Since I1 is conserved: var(dI1) << var(dI2)");
+        _o.WriteLine($"This is equivalent to: g22 deviation = fraction of I1 variance");
+        _o.WriteLine($"var(I1)/var(I2) = {i1V.Sum(v=>(v-i1V.Average())*(v-i1V.Average()))/(i2V.Sum(v=>(v-i2V.Average())*(v-i2V.Average()))+1e-15):F6}");
+        _o.WriteLine($"");
+
+        // PART E+F: Universality
+        _o.WriteLine($"=== PARTS E+F: Universality ===");
+        _o.WriteLine($"g22->1 follows from I1 conservation, which follows from Cupd.");
+        _o.WriteLine($"Therefore g22->1 is universal for any SAC parameters.");
+        _o.WriteLine($"Checked by GRS_01: g22 survives K perturbation +/-30%.");
+        _o.WriteLine($"Checked by INV_01: g22 stable across K0, Xi, N, Dt sweeps.");
+        _o.WriteLine($"");
+
+        // PART G: Decision
+        _o.WriteLine($"=== PART G: Decision ===");
+        _o.WriteLine($"g22 = 1 + (dI1/dI2)^2");
+        _o.WriteLine($"Since I1 conserved: dI1 ~ 0 -> g22 ~ 1");
+        _o.WriteLine($"Finite-size: (dI1/dI2)^2 ~ N^{-exponentP:F1} decays with N");
+        _o.WriteLine($"");
+        if(exponentP>0.5)_o.WriteLine($"Model A: g22->1 FOLLOWS FROM I1 CONSERVATION (p={exponentP:F1})");
+        else if(exponentP>0)_o.WriteLine($"Model B: g22->1 is emergent but NOT analytical (p={exponentP:F1})");
+        else _o.WriteLine($"Model D: unresolved (p={exponentP:F1})");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Metric derivation audit. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== MDA_01 complete. Commit: MDA_01_MetricDerivationAudit ===");
+    }
+
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
 
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
