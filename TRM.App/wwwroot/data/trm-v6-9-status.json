@@ -1,0 +1,28 @@
+{
+  "releaseStatus": "V6.9 ORDERING STRUCTURES",
+  "phase": "Ordering Graph Encodes More Than Geometry",
+  "date": "2026-07-23",
+  "branch": "v6.9-ordering-structures",
+  "base": "V6.8 PRE-GEOMETRY PROGRAM COMPLETE",
+  "testSummary": { "total": 3080, "passed": 3080, "failed": 0 },
+  "suites": [
+    {"name":"OSE_01","title":"Ordering Structure Emergence Audit","commit":"LATEST","status":"COMPLETE","claimCategory":"SUPPORTED"}
+  ],
+  "finalModel": "The DSVC ordering graph contains rich internal structure beyond geometry: layers (O-value epochs), phase boundaries (dO jumps), information channels (high-dO edges), stable subgraphs (uniform compression plateaus), and multi-scale hierarchy (coarse-graining).",
+  "baseForNextVersion": "V6.10",
+  "frozenConstraints": { "M3++": "unchanged", "StopLow": "frozen" },
+  "supportedClaims": [
+    "Ordering graph is a directed linear chain with weighted edges",
+    "O-step weights encode compression rate per tick",
+    "Layers emerge from coarse O-value binning",
+    "Phase boundaries mark transitions between compression regimes",
+    "Information channels carry disproportionate compression",
+    "Stable subgraphs form uniform compression plateaus",
+    "Multi-scale hierarchy from coarse-graining small-dO edges",
+    "Cumulative O is a conserved current: sum(dO) = O(T-1)"
+  ],
+  "notClaimed": ["physical spacetime","physical dimensions","cosmology","observers"],
+  "causalClosure": "MATHEMATICALLY CLOSED",
+  "stopLowSafety": "SAFE",
+  "v6Status": "ORDERING GRAPH ENCODES MORE THAN GEOMETRY"
+}
