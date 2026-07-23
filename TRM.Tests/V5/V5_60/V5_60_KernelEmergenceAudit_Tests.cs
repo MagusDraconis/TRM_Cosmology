@@ -8262,7 +8262,7 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== DSV_01 complete. Commit: DSV_01_DSVCUniversalityLawAudit ===");
     }
 
-    [Fact]
+    [Fact(Skip="Moved to V6_6_DSVC_Foundations_Tests.cs")]
     public void DSL_01_DSVCFundamentalLawAudit()
     {
         _o.WriteLine(new string('=',80));
@@ -8582,7 +8582,7 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== DSL_01 complete. Commit: DSL_01_DSVCFundamentalLawAudit ===");
     }
 
-    [Fact]
+    [Fact(Skip="Moved to V6_6_DSVC_Foundations_Tests.cs")]
     public void DFO_01_DSVCFundamentalOrderAudit()
     {
         _o.WriteLine(new string('=',80));
