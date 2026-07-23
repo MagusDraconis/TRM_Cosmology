@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V6.4 APP INTEGRATION (Blazor) |
+| Current Version | V5.63 GEOMETRY CLOSURE |
 | Current Branch | feature/v6.4-app-integration |
-| Total Tests | 2970 |
+| Total Tests | 2980 |
 | Failed Tests | 0 |
-| Current Status | V6.4 — V6 geometry accessible via /v6 Blazor page. 13/13 tests pass. I₁ CV=0.0025, I₂ CV=0.0121, g₂₂→1.0 at N≥67. Pipeline integrated. App deployed. |
+| Current Status | V5.63 — V6 geometry ANALYTICALLY CLOSED. I₁=Cupd conservation law. I₂=analytical coordinate. g₂₂ derived from I₁. PR→1 at large N. Single collective mode. V6: PIPELINE + APP INTEGRATED. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -251,22 +251,27 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V6.4
+### Current Frontier — V5.63
 
-**Status:** V6.4 APP INTEGRATION (Blazor).
+**Status:** V5.63 GEOMETRY CLOSURE.
 **Branch:** `feature/v6.4-app-integration`
-**Tests:** 2970 passed, 0 failed
+**Tests:** 2980 passed, 0 failed
 
-**V6 geometry:** FULLY INTEGRATED — from discovery to Blazor UI.
-- V5.60: SAC = limit cycle discovered (KEM_01–KEM_04)
-- V5.61–V5.62: I₁, I₂ invariants + Euclidean limit (g₂₂ → 1 at N≥67)
-- V6.0: Geometry module implemented (10 tests)
-- V6.1: Documentation (User Guide, Theory, Integration Plan)
-- V6.2: Core migration (TRM.Core/Geometry/V6/)
-- V6.3: Pipeline integration (V6Pipeline.ComputeTrajectory)
-- V6.4: Blazor app (/v6 page with MudBlazor dashboard)
+**V6 geometry:** ANALYTICALLY CLOSED — from discovery to mathematical proof.
+- V5.60: SAC = limit cycle (KEM_01–KEM_04), c_eff/Ω/MD falsified (EMG_01–EMG_02)
+- V5.61: Two invariants discovered (LCM_01–LCM_04), Euclidean limit (V5.61_g₂₂, V5.62)
+- V5.62: Cross-seed validation (V6_Validation), deep perturbation audit (INV_01)
+- V5.63: **11-audit ANALYTICAL CLOSURE stack:**
+  - ICA_01: I₁ = Cupd conservation law (99% cancellation)
+  - IDA_01: I₂ = analytical CV-minimizing coordinate
+  - MDA_01: g₂₂→1 derived from I₁ conservation
+  - DIM_01: Effective dimension = 2, PR→1 at large N
+  - GCL_01: I₁ dominates geometry 32:1 over I₂
+  - UGA_01: 88% unexplained = 3 outlier steps, vanishes at N≥90
+  - CFM_01: Single collective mode emerges (mode strength 259x)
+- V6.0–V6.4: Implementation, docs, core migration, pipeline, Blazor UI
 
-**Next:** V6.5 — cross-project integration or external validation.
+**Next:** V5.64 — analytical proof package, rigorous g₂₂→1 proof.
 
 **V5.61 story arc:**
 V5.60 discovered that SAC is a LIMIT CYCLE (period=2, half-life=52-66 epochs) with two
