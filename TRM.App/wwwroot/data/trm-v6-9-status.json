@@ -1,28 +1,32 @@
 {
   "releaseStatus": "V6.9 ORDERING STRUCTURES",
-  "phase": "Ordering Graph Encodes More Than Geometry",
+  "phase": "Ordering Graph Structure Emergence — Complete 4-Suite Closure",
   "date": "2026-07-23",
   "branch": "v6.9-ordering-structures",
   "base": "V6.8 PRE-GEOMETRY PROGRAM COMPLETE",
-  "testSummary": { "total": 3080, "passed": 3080, "failed": 0 },
+  "testSummary": { "total": 3100, "passed": 3100, "failed": 0 },
   "suites": [
-    {"name":"OSE_01","title":"Ordering Structure Emergence Audit","commit":"LATEST","status":"COMPLETE","claimCategory":"SUPPORTED"}
+    {"name":"OSE_01","title":"Ordering Structure Emergence Audit","commit":"d30a5f2","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"OID_01","title":"Ordering Information Dynamics Audit","commit":"ac700ee","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"OSG_01","title":"Ordering Step Generator Audit","commit":"d4bcfd8","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"CSP_01","title":"Complexity Structure Peak Audit","commit":"69198e5","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"SPO_01","title":"Structure Peak Origin Audit","commit":"889caaa","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "finalModel": "The DSVC ordering graph contains rich internal structure beyond geometry: layers (O-value epochs), phase boundaries (dO jumps), information channels (high-dO edges), stable subgraphs (uniform compression plateaus), and multi-scale hierarchy (coarse-graining).",
-  "baseForNextVersion": "V6.10",
+  "finalModel": "dO is the mediator between VC and all emergent structure. Non-uniform dO creates channels, hierarchy, geometry. Structure peaks at intermediate R (R~0.1) — guaranteed by Rolle's theorem. SAC at p=1.6 (R=0.999) is in the low-structure regime. Peak location is system-specific; peak existence is universal.",
+  "baseForNextVersion": "V7.0",
   "frozenConstraints": { "M3++": "unchanged", "StopLow": "frozen" },
   "supportedClaims": [
-    "Ordering graph is a directed linear chain with weighted edges",
-    "O-step weights encode compression rate per tick",
-    "Layers emerge from coarse O-value binning",
-    "Phase boundaries mark transitions between compression regimes",
-    "Information channels carry disproportionate compression",
-    "Stable subgraphs form uniform compression plateaus",
-    "Multi-scale hierarchy from coarse-graining small-dO edges",
-    "Cumulative O is a conserved current: sum(dO) = O(T-1)"
+    "Ordering graph encodes more than geometry (layers, boundaries, channels, hierarchy)",
+    "Information channels = high-dO edges (2.7x more efficient)",
+    "Non-uniform dO creates ALL structure beyond pure ordering",
+    "dO is the mediator: VC -> Delta_R -> dO distribution -> all structure",
+    "Structure peaks at intermediate R (R~0.11), NOT at R=1",
+    "Peak existence guaranteed by Rolle's theorem (var(dO)=0 at both ends)",
+    "Peak location derived from R(cs) functional form",
+    "SAC p=1.6 (R=0.999) is past the complexity peak"
   ],
-  "notClaimed": ["physical spacetime","physical dimensions","cosmology","observers"],
+  "notClaimed": ["physical spacetime","physical dimensions","cosmology"],
   "causalClosure": "MATHEMATICALLY CLOSED",
   "stopLowSafety": "SAFE",
-  "v6Status": "ORDERING GRAPH ENCODES MORE THAN GEOMETRY"
+  "v6Status": "STRUCTURE PEAKS AT INTERMEDIATE R. dO IS THE MEDIATOR."
 }
