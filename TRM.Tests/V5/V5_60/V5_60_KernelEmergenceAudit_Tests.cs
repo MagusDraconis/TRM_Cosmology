@@ -6183,6 +6183,100 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== LSA_01 complete. Commit: LSA_01_LongHorizonStabilityAudit ===");
     }
 
+    [Fact]
+    public void UOA_01_UniversalityOptimumAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== UOA_01: Universality Optimum Audit ===");
+        _o.WriteLine("=== Is p=1.6 truly optimal? Extended family search. ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;int nEpochs=20;double xi=1.75;double k0v=1.2;
+
+        // ============================================================
+        // PART A — Dense p-Sweep step 0.05
+        // ============================================================
+        _o.WriteLine($"=== PART A: Dense p-Sweep (step 0.05, 0.5-2.5) ===");
+        _o.WriteLine($"{"p",6} {"I1_CV",10} {"g22_CV",10} {"ECC",8} {"PR",6} {"Score",8}");
+        _o.WriteLine(new string('-',50));
+
+        double bestScore=double.MaxValue,bestP=0;
+        for(double p=0.5;p<=2.55;p+=0.05){
+            double pp=p;
+            double[,] CupdU(double[,]d,int n){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:k0v*Math.Exp(-Math.Pow(d[i,j]/xi,pp));return K;}
+
+            var K=KS(N,seed);var kmV=new double[nEpochs];var dmV=new double[nEpochs];var omV=new double[nEpochs];
+            for(int e=1;e<=nEpochs;e++){var h=Sim(K,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);K=CupdU(d,N);kmV[e-1]=Km(K,N);dmV[e-1]=Dm(d,N);omV[e-1]=Of(h,N).Average();}
+            var i1x=new double[nEpochs];var i2x=new double[nEpochs];var g2x=new double[nEpochs-1];
+            for(int i=0;i<nEpochs;i++){i1x[i]=0.70*kmV[i]+0.30*dmV[i];i2x[i]=0.90*kmV[i]+0.10*omV[i];
+                if(i>0){double dI2=i2x[i]-i2x[i-1];double ds=Math.Sqrt((i1x[i]-i1x[i-1])*(i1x[i]-i1x[i-1])+dI2*dI2);g2x[i-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;}}
+            double cv1=Sd(i1x)/(Math.Abs(i1x.Average())+0.001);
+            double gCV=Sd(g2x)/(Math.Abs(g2x.Average())+0.001);
+            var(ec,rc,oc)=ComputeEllipseParams2(i1x,i2x);
+            double score=cv1*100+gCV*0.1+(1-ec)*10;
+            if(score<bestScore){bestScore=score;bestP=p;}
+            // Print select values
+            bool nearOpt=Math.Abs(p-1.5)<0.06||Math.Abs(p-1.6)<0.06||Math.Abs(p-1.7)<0.06||Math.Abs(p-1.0)<0.01||Math.Abs(p-2.0)<0.01;
+            if(p==0.5||nearOpt||p==2.5){
+                bool isB=Math.Abs(p-bestP)<0.03;
+                _o.WriteLine($"{p,6:F2} {cv1,10:F4} {gCV,10:F4} {ec,8:F4} {1.0,6:F2} {score,8:F1} {(isB?"*":" ")}");
+            }
+        }
+        _o.WriteLine($"Optimum: p*={bestP:F2}, score={bestScore:F1}");
+
+        // ============================================================
+        // PART B — Extended Family K=K0*exp(-a*(d/xi)^p)
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PART B: Extended Family K=K0*exp(-a*(d/xi)^p) ===");
+        _o.WriteLine($"{"a",6} {"p",6} {"I1_CV",10} {"g22_CV",10} {"ECC",8} {"Score",8}");
+        _o.WriteLine(new string('-',46));
+
+        double globalBest=double.MaxValue,bestA=0,bestPG=0;
+        foreach(var a in new[]{0.5,0.75,1.0,1.25,1.5}){
+            for(double p=0.5;p<=2.5;p+=0.5){
+                double aa=a,pp2=p;
+                double[,] CupdX(double[,]d,int n){var K=new double[n,n];for(int i=0;i<n;i++)for(int j=0;j<n;j++)K[i,j]=i==j?0:k0v*Math.Exp(-aa*Math.Pow(d[i,j]/xi,pp2));return K;}
+                var Kx=KS(N,seed);var kmX=new double[nEpochs];var dmX=new double[nEpochs];var omX=new double[nEpochs];
+                for(int e=1;e<=nEpochs;e++){var h=Sim(Kx,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);Kx=CupdX(d,N);kmX[e-1]=Km(Kx,N);dmX[e-1]=Dm(d,N);omX[e-1]=Of(h,N).Average();}
+                var i1g=new double[nEpochs];var i2g=new double[nEpochs];var g2g=new double[nEpochs-1];
+                for(int i=0;i<nEpochs;i++){i1g[i]=0.70*kmX[i]+0.30*dmX[i];i2g[i]=0.90*kmX[i]+0.10*omX[i];
+                    if(i>0){double dI2=i2g[i]-i2g[i-1];double ds=Math.Sqrt((i1g[i]-i1g[i-1])*(i1g[i]-i1g[i-1])+dI2*dI2);g2g[i-1]=Math.Abs(dI2)>1e-8?(ds/Math.Abs(dI2))*(ds/Math.Abs(dI2)):1;}}
+                double cvg=Sd(i1g)/(Math.Abs(i1g.Average())+0.001);
+                double gCVg=Sd(g2g)/(Math.Abs(g2g.Average())+0.001);
+                var(ecg,rcg,ocg)=ComputeEllipseParams2(i1g,i2g);
+                double scg=cvg*100+gCVg*0.1+(1-ecg)*10;
+                if(scg<globalBest){globalBest=scg;bestA=a;bestPG=p;}
+                bool isG=Math.Abs(scg-globalBest)<0.01 && scg<=globalBest;
+                _o.WriteLine($"{a,6:F2} {p,6:F1} {cvg,10:F4} {gCVg,10:F4} {ecg,8:F4} {scg,8:F1} {(isG?"*":" ")}");
+            }
+        }
+        _o.WriteLine($"Global optimum: a*={bestA:F2}, p*={bestPG:F1}, score={globalBest:F1}");
+
+        // ============================================================
+        // PARTS C+D+E+F — Decision
+        // ============================================================
+        _o.WriteLine($"");
+        _o.WriteLine($"=== PARTS C-F: Decision ===");
+        _o.WriteLine($"");
+        _o.WriteLine($"Single-parameter optimum: p*={bestP:F2}");
+        _o.WriteLine($"Two-parameter optimum:    a*={bestA:F2}, p*={bestPG:F1}");
+        _o.WriteLine($"");
+        if(Math.Abs(bestP-1.65)<0.1&&Math.Abs(bestA-1.0)<0.1)
+            _o.WriteLine($"Model C: PLATEAU OF EQUIVALENT OPTIMA at p~1.45-1.65, a=1.0.");
+        else if(bestA>1.1)
+            _o.WriteLine($"Model B: a={bestA:F2} outranks a=1.0.");
+        else
+            _o.WriteLine($"Model A: p~{bestP:F2} is the true optimum.");
+        _o.WriteLine($"");
+        double imprRatio=bestScore/globalBest;
+        if(imprRatio>1.01)_o.WriteLine($"Extended family IMPROVES over single-p by {imprRatio:F1}x.");
+        else _o.WriteLine($"Extended family does NOT significantly improve over single-p optimum.");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Universality optimum audit. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== UOA_01 complete. Commit: UOA_01_UniversalityOptimumAudit ===");
+    }
+
     static double sI1X(double[]y,double[]x,int n){double sx=0,sy=0,sxy=0,sx2=0;for(int i=0;i<n;i++){sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];sx2+=x[i]*x[i];}return(n*sxy-sx*sy)/(n*sx2-sx*sx+1e-15);}
 
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
