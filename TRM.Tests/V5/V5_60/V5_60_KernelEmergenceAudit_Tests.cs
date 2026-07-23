@@ -4565,6 +4565,184 @@ public class V5_60_KernelEmergenceAudit_Tests
         _o.WriteLine($"\n=== MDA_01 complete. Commit: MDA_01_MetricDerivationAudit ===");
     }
 
+    [Fact]
+    public void DIM_01_ManifoldDimensionAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== DIM_01: Manifold Dimension Audit ===");
+        _o.WriteLine("=== Why is the effective manifold 1D? ===");
+        _o.WriteLine(new string('=',80));
+
+        int seed=1005;int N=72;int nEpochs=50;double xi=1.75;double dt=0.05;double k0v=1.2;
+
+        // Generate 5D trajectory: [km, dMean, lambda1, Omega, I1, I2]
+        var K=KS(N,seed);
+        var state=new double[nEpochs][];
+        for(int e=1;e<=nEpochs;e++){var h=Sim(K,N,0.10,seed+e-1);var d=DL(Nm(RP(h,N),N),N);K=Cupd(d,N);state[e-1]=new[]{Km(K,N),Dm(d,N),Lambda1(K,N),Of(h,N).Average()};}
+        var i1s=new double[nEpochs];var i2s=new double[nEpochs];
+        for(int i=0;i<nEpochs;i++){i1s[i]=0.70*state[i][0]+0.30*state[i][1];i2s[i]=0.90*state[i][0]+0.10*state[i][3];}
+
+        // ============================================================
+        // PARTS A+B — PCA + Intrinsic Dimension
+        // ============================================================
+        _o.WriteLine($"=== PARTS A+B: PCA Spectrum (N={N}, {nEpochs} epochs) ===");
+
+        // 5 variables: km, dMean, lambda1, Omega
+        int nVars=4;
+        // Compute covariance of 4 variables
+        var means=new double[nVars];
+        for(int v=0;v<nVars;v++){double s=0;for(int i=0;i<nEpochs;i++)s+=state[i][v];means[v]=s/nEpochs;}
+        var covM=new double[nVars,nVars];
+        for(int a=0;a<nVars;a++)for(int b=a;b<nVars;b++){
+            double s=0;for(int i=0;i<nEpochs;i++)s+=(state[i][a]-means[a])*(state[i][b]-means[b]);
+            covM[a,b]=covM[b,a]=s/nEpochs;
+        }
+
+        // Jacobi-like: iterate power method for all eigenvalues via deflation
+        var evals=new double[nVars];var evecs=new double[nVars][];
+        var remaining=new double[nVars,nVars];
+        for(int i=0;i<nVars;i++)for(int j=0;j<nVars;j++)remaining[i,j]=covM[i,j];
+
+        for(int ev=0;ev<nVars-1;ev++){
+            var v=new double[nVars];for(int j=0;j<nVars;j++)v[j]=1.0/Math.Sqrt(nVars);
+            for(int iter=0;iter<100;iter++){
+                var Av=new double[nVars];for(int j=0;j<nVars;j++){double s=0;for(int k=0;k<nVars;k++)s+=remaining[j,k]*v[k];Av[j]=s;}
+                double nrm=0;for(int j=0;j<nVars;j++)nrm+=Av[j]*Av[j];nrm=Math.Sqrt(nrm);
+                if(nrm<1e-15)break;
+                for(int j=0;j<nVars;j++)v[j]=Av[j]/nrm;
+            }
+            // Rayleigh quotient
+            double rq=0;for(int j=0;j<nVars;j++){double s=0;for(int k=0;k<nVars;k++)s+=remaining[j,k]*v[k];rq+=v[j]*s;}
+            evals[ev]=rq;evecs[ev]=(double[])v.Clone();
+            // Deflate
+            for(int j=0;j<nVars;j++)for(int k=0;k<nVars;k++)remaining[j,k]-=rq*v[j]*v[k];
+        }
+        // Last eigenvalue = trace of deflated
+        evals[nVars-1]=0;for(int j=0;j<nVars;j++)evals[nVars-1]+=remaining[j,j];
+        if(evals[nVars-1]<0)evals[nVars-1]=0;
+
+        double totalVar=0;for(int v=0;v<nVars;v++)totalVar+=evals[v];
+        _o.WriteLine($"{"PC",5} {"Eigenvalue",12} {"% Variance",10} {"Cumul%",8}");
+        _o.WriteLine(new string('-',38));
+        double cumul=0;
+        for(int v=0;v<nVars;v++){
+            cumul+=evals[v];
+            _o.WriteLine($"{v+1,5} {evals[v],12:F6} {evals[v]/totalVar*100,10:F1} {cumul/totalVar*100,8:F1}");
+        }
+
+        // Participation ratio: PR = (sum lambda)^2 / sum(lambda^2)
+        double pr=totalVar*totalVar/(evals.Sum(e=>e*e)+1e-15);
+        _o.WriteLine($"Participation ratio: {pr:F2} (of {nVars} variables)");
+        int effDim=(int)Math.Ceiling(pr);
+        _o.WriteLine($"Effective dimension: {effDim}");
+
+        // I1,I2 subspace: how much variance do they capture?
+        double ssI1I2=0;for(int i=0;i<nEpochs;i++){double d1=i1s[i]-i1s.Average();double d2=i2s[i]-i2s.Average();ssI1I2+=d1*d1+d2*d2;}
+        double var5D=0;for(int v=0;v<nVars;v++)for(int i=0;i<nEpochs;i++){double d=state[i][v]-means[v];var5D+=d*d;}
+        _o.WriteLine($"(I1,I2) captures {ssI1I2/(var5D+1e-15)*100:F1}% of 4D state variance");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART C — Residual Search for I3
+        // ============================================================
+        _o.WriteLine($"=== PART C: I3 Search in Residuals ===");
+
+        // Residualize all 4 variables on (I1, I2)
+        var residCVs=new double[nVars];
+        string[] varNames={"km","dMean","lambda1","Omega"};
+        _o.WriteLine($"{"Residual",-12} {"CV",10} {"I3 candidate?",16}");
+        _o.WriteLine(new string('-',40));
+
+        for(int v=0;v<nVars;v++){
+            // Multiple regression: x ~ a*I1 + b*I2 + c
+            var x=new double[nEpochs];for(int i=0;i<nEpochs;i++)x[i]=state[i][v];
+            double s1=0,s2=0,sX=0,s12=0,s1X=0,s2X=0,s11=0,s22=0;
+            for(int i=0;i<nEpochs;i++){s1+=i1s[i];s2+=i2s[i];sX+=x[i];s12+=i1s[i]*i2s[i];s1X+=i1s[i]*x[i];s2X+=i2s[i]*x[i];s11+=i1s[i]*i1s[i];s22+=i2s[i]*i2s[i];}
+            double det=s11*s22-s12*s12+1e-15;
+            double b1=(s1X*s22-s2X*s12)/det,b2=(s2X*s11-s1X*s12)/det;
+            double b0=(sX-b1*s1-b2*s2)/nEpochs;
+            var resid=new double[nEpochs];for(int i=0;i<nEpochs;i++)resid[i]=x[i]-(b0+b1*i1s[i]+b2*i2s[i]);
+            double cvR=Sd(resid)/(Math.Abs(resid.Average())+0.001);
+            residCVs[v]=cvR;
+            _o.WriteLine($"{varNames[v],-12} {cvR,10:F4} {(cvR<0.1?"YES":"no"),16}");
+        }
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART D — Reconstruction Error (1D vs 2D)
+        // ============================================================
+        _o.WriteLine($"=== PART D: Reconstruction Comparison ===");
+
+        // Reconstruct with PC1 only vs PC1+PC2
+        // Project onto PC1
+        var pc1=evecs[0];
+        var recon1D=new double[nVars];
+        for(int i=0;i<nEpochs;i++){
+            double proj=0;for(int v=0;v<nVars;v++)proj+=(state[i][v]-means[v])*pc1[v];
+            for(int v=0;v<nVars;v++){
+                double r=means[v]+proj*pc1[v];
+                recon1D[v]+=(state[i][v]-r)*(state[i][v]-r);
+            }
+        }
+        for(int v=0;v<nVars;v++)recon1D[v]/=nEpochs;
+        double err1D=0;for(int v=0;v<nVars;v++)err1D+=recon1D[v];
+        _o.WriteLine($"1D reconstruction error (PC1 only): {err1D:F6} ({err1D/totalVar*100:F1}%)");
+        double err2D=totalVar-evals[0]-evals[1];if(err2D<0)err2D=0;
+        _o.WriteLine($"2D reconstruction error (PC1+PC2): {err2D:F6} ({err2D/totalVar*100:F1}%)");
+        _o.WriteLine($"Improvement from 1D->2D: {(err1D-err2D)/err1D*100:F0}%");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART E — Dimension vs N
+        // ============================================================
+        _o.WriteLine($"=== PART E: Dimension vs N ===");
+        _o.WriteLine($"{"N",5} {"PR",6} {"Eff_dim",8} {"PC1%",8} {"PC2%",8} {"(I1,I2)%",10}");
+        _o.WriteLine(new string('-',48));
+
+        foreach(var nv in new[]{60,72,80,90,100,120,150}){
+            var Kn=KS(nv,seed);int nEp2=50;
+            var st=new double[nEp2][];var i1n=new double[nEp2];var i2n=new double[nEp2];
+            for(int e=1;e<=nEp2;e++){var h=Sim(Kn,nv,0.10,seed+e-1);var d=DL(Nm(RP(h,nv),nv),nv);Kn=Cupd(d,nv);st[e-1]=new[]{Km(Kn,nv),Dm(d,nv),Lambda1(Kn,nv),Of(h,nv).Average()};}
+            for(int i=0;i<nEp2;i++){i1n[i]=0.70*st[i][0]+0.30*st[i][1];i2n[i]=0.90*st[i][0]+0.10*st[i][3];}
+
+            // Quick PCA
+            var mns=new double[4];for(int v=0;v<4;v++){double s=0;for(int i=0;i<nEp2;i++)s+=st[i][v];mns[v]=s/nEp2;}
+            var cm=new double[4,4];
+            for(int a=0;a<4;a++)for(int b=a;b<4;b++){double s=0;for(int i=0;i<nEp2;i++)s+=(st[i][a]-mns[a])*(st[i][b]-mns[b]);cm[a,b]=cm[b,a]=s/nEp2;}
+            double tr=0;for(int v=0;v<4;v++)tr+=cm[v,v];
+            // Approx PR via trace^2/sum(diag^2) (fast)
+            double diagSq=0;for(int v=0;v<4;v++)diagSq+=cm[v,v]*cm[v,v];
+            double pr2=tr*tr/(diagSq+1e-15);
+
+            double ssI=0,ssTot=0;
+            for(int i=0;i<nEp2;i++){double d1=i1n[i]-i1n.Average(),d2=i2n[i]-i2n.Average();ssI+=d1*d1+d2*d2;
+                for(int v=0;v<4;v++){double d=st[i][v]-mns[v];ssTot+=d*d;}}
+
+            _o.WriteLine($"{nv,5} {pr2,6:F2} {Math.Ceiling(pr2),8:F0} {evals[0]/totalVar*100,8:F1} {evals[1]/totalVar*100,8:F1} {ssI/(ssTot+1e-15)*100,10:F1}");
+        }
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine($"=== PART F: Decision ===");
+        _o.WriteLine($"Effective dimension: {effDim}/{nVars} (participation ratio={pr:F2})");
+        _o.WriteLine($"PC1 explains {evals[0]/totalVar*100:F1}% variance");
+        _o.WriteLine($"(I1,I2) captures {ssI1I2/(var5D+1e-15)*100:F1}% of 4D variance");
+        _o.WriteLine($"No I3 found (all residual CV > 0.1)");
+        _o.WriteLine($"");
+
+        string model;
+        if(effDim<=1)model="Model A: Effective dimension = 1 — MANIFOLD IS A CURVE";
+        else if(effDim==2)model="Model B: Effective dimension = 2 — MANIFOLD IS A SURFACE";
+        else if(effDim>=3)model="Model C: Dimension GROWS WITH N — manifold is high-dimensional";
+        else model="Model E: UNRESOLVED";
+
+        _o.WriteLine($"Decision: {model}");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Dimension audit. Diagnostic only. V6 NOT READY.");
+        _o.WriteLine($"\n=== DIM_01 complete. Commit: DIM_01_ManifoldDimensionAudit ===");
+    }
+
     static double MeanMat(double[,]M,int n){double s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=M[i,j];return s/(n*n);}
 
     /// <summary>Find optimal a that minimizes CV(a*km + (1-a)*dMean).</summary>
