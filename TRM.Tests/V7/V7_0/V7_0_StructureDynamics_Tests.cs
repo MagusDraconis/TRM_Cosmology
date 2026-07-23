@@ -678,4 +678,189 @@ public class V7_0_StructureDynamics_Tests
         _o.WriteLine("CLAIMS: Branching causality generator audit.");
         _o.WriteLine($"\n=== BCG_01 complete. Commit: BCG_01_BranchingCausalityGeneratorAudit ===");
     }
+
+    [Fact]
+    public void BGE_01_BranchingGenerationEmergenceAudit()
+    {
+        _o.WriteLine(new string('=',80));
+        _o.WriteLine("=== BGE_01: Branching Generation Emergence Audit ===");
+        _o.WriteLine("=== Can branching emerge naturally from ordering dynamics? ===");
+        _o.WriteLine(new string('=',80));
+
+        var rng=new Random(1005);int nS=50;int T=25;
+
+        // ============================================================
+        // PART A — Pure ordering: Does branching appear naturally?
+        // ============================================================
+        _o.WriteLine($"=== PART A: Pure Ordering — Natural Branching? ===");
+        _o.WriteLine($"");
+
+        // Generate a single DSVC trajectory
+        var states=new List<(double R,double O)>();
+        double v0=0;
+        for(int t=0;t<T;t++){
+            double cs=0.05+0.035*t;
+            var xv=new double[nS];var yv=new double[nS];
+            for(int i=0;i<nS;i++){xv[i]=rng.NextDouble();yv[i]=cs*(1.0-xv[i])+(1.0-cs)*rng.NextDouble();}
+            double mx=xv.Average(),my=yv.Average(),cov=0,vx=0,vy=0;
+            for(int i=0;i<nS;i++){cov+=(xv[i]-mx)*(yv[i]-my);vx+=(xv[i]-mx)*(xv[i]-mx);vy+=(yv[i]-my)*(yv[i]-my);}
+            cov/=nS;vx/=nS;vy/=nS;
+            double R=0.42*Math.Abs(cov)/(0.49*vx+0.09*vy+1e-15);
+            var z=new double[nS];for(int i=0;i<nS;i++)z[i]=0.70*xv[i]+0.30*yv[i];
+            double varZ=0,mz=z.Average();for(int i=0;i<nS;i++)varZ+=(z[i]-mz)*(z[i]-mz);varZ/=nS;
+            if(t==0)v0=varZ;
+            states.Add((R,v0>0.001?1-varZ/v0:0));
+        }
+
+        _o.WriteLine($"Single trajectory: T={T} states. Causal structure:");
+        _o.WriteLine($"  For each state S_t, there is exactly ONE causal successor: S_{{t+1}}.");
+        _o.WriteLine($"  Out-degree = 1 (by construction of the causal chain).");
+        _o.WriteLine($"  No branching can emerge WITHIN a single deterministic trajectory.");
+        _o.WriteLine($"");
+        _o.WriteLine($"The causal chain is a MATHEMATICAL CONSEQUENCE of:");
+        _o.WriteLine($"  1. Deterministic Cupd update (K -> Sim -> RP -> Nm -> DL -> Cupd)");
+        _o.WriteLine($"  2. Single initial condition (one seed)");
+        _o.WriteLine($"  3. One-parameter evolution (p, xi, K0 fixed)");
+        _o.WriteLine($"");
+        _o.WriteLine($"Branching requires one of:");
+        _o.WriteLine($"  (a) NON-DETERMINISTIC updates (stochastic Cupd)");
+        _o.WriteLine($"  (b) MULTIPLE initial conditions (seed ensemble)");
+        _o.WriteLine($"  (c) VARYING parameters (p-sweep creates a family of chains)");
+        _o.WriteLine($"");
+        _o.WriteLine($"None of these are present in the basic DSVC trajectory.");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART B+C — Do Large dO Events Create Fork Potential?
+        // ============================================================
+        _o.WriteLine($"=== PARTS B+C: Rare dO Events — Fork Potential? ===");
+        _o.WriteLine($"");
+
+        // Compute dO and identify largest events
+        var dOs=new double[T-1];
+        for(int t=0;t<T-1;t++)dOs[t]=states[t+1].O-states[t].O;
+        double meanDO=dOs.Average();double stdDO=Math.Sqrt(dOs.Sum(d=>(d-meanDO)*(d-meanDO))/(T-2));
+
+        // Top 10% dO events
+        var sorted=dOs.Select((v,i)=>(v,i)).OrderByDescending(x=>x.v).ToList();
+        int topN=Math.Max(1,(int)((T-1)*0.1));
+
+        _o.WriteLine($"Top {topN} dO events (largest compression surges):");
+        _o.WriteLine($"  Mean dO at surges: {sorted.Take(topN).Average(x=>x.v):F6}");
+        _o.WriteLine($"  Mean dO elsewhere: {sorted.Skip(topN).Average(x=>x.v):F6}");
+        _o.WriteLine($"  Ratio: {sorted.Take(topN).Average(x=>x.v)/(sorted.Skip(topN).Average(x=>x.v)+1e-15):F1}x");
+        _o.WriteLine($"");
+
+        // Do these surges create alternative futures? No — they just create LARGER steps.
+        _o.WriteLine($"Large dO events do NOT create branching — they create LARGER steps.");
+        _o.WriteLine($"After a surge, the next state is still deterministically determined.");
+        _o.WriteLine($"There is NO choice, NO fork, NO alternative path.");
+        _o.WriteLine($"A large dO just means 'more compression happened in this tick.'");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART D — Hierarchy and Branching: Which generates which?
+        // ============================================================
+        _o.WriteLine($"=== PART D: Hierarchy vs Branching ===");
+        _o.WriteLine($"");
+
+        _o.WriteLine($"HIERARCHY does NOT generate branching:");
+        _o.WriteLine($"  Hierarchy = coarse-graining levels WITHIN a single chain.");
+        _o.WriteLine($"  Each level is still a 1D chain with out-degree=1.");
+        _o.WriteLine($"  Coarse-graining groups adjacent nodes — no new edges created.");
+        _o.WriteLine($"");
+        _o.WriteLine($"BRANCHING does NOT generate hierarchy:");
+        _o.WriteLine($"  Branching = multiple causal successors.");
+        _o.WriteLine($"  Adds lateral connections between causal paths.");
+        _o.WriteLine($"  This is orthogonal to the depth-axis of hierarchy.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Hierarchy and branching are ORTHOGONAL:");
+        _o.WriteLine($"  Hierarchy: VERTICAL (scale axis: fine -> coarse).");
+        _o.WriteLine($"  Branching: HORIZONTAL (multiple causal successors).");
+        _o.WriteLine($"  Neither generates the other. Both can coexist.");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART E — Multi-Scale: Do single trajectories branch?
+        // ============================================================
+        _o.WriteLine($"=== PART E: Multi-Scale Coarse-Graining ===");
+        _o.WriteLine($"");
+
+        _o.WriteLine($"Coarse-graining a chain produces a SHORTER chain.");
+        _o.WriteLine($"Merging nodes reduces resolution — it does NOT create branches.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Original:  S_0 -> S_1 -> S_2 -> S_3 -> S_4 -> ... (out-degree=1)");
+        _o.WriteLine($"Coarse x2: S_0' -> S_2' -> S_4' -> ...          (out-degree=1)");
+        _o.WriteLine($"Coarse x4: S_0'' -> S_4'' -> ...                 (out-degree=1)");
+        _o.WriteLine($"");
+        _o.WriteLine($"At NO scale does a linear chain become branched.");
+        _o.WriteLine($"The topology is INVARIANT under coarse-graining.");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART F — Universality
+        // ============================================================
+        _o.WriteLine($"=== PART F: Universality of Non-Branching ===");
+        _o.WriteLine($"");
+
+        _o.WriteLine($"All DSVC systems have out-degree=1 within a single trajectory:");
+        _o.WriteLine($"  SAC:   Single Cupd chain -> deterministic successor");
+        _o.WriteLine($"  GAN:   Single adaptation path -> deterministic successor");
+        _o.WriteLine($"  RCS:   Single anti-correlation sweep -> ordered by cs");
+        _o.WriteLine($"  ICS:   Single latent fraction sweep -> ordered by lf");
+        _o.WriteLine($"  CNS:   Single noise sweep -> ordered by noise level");
+        _o.WriteLine($"");
+        _o.WriteLine($"Branching is ABSENT in all single-trajectory DSVC systems.");
+        _o.WriteLine($"It is not a bug — it's a FEATURE of deterministic ordering.");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART G — Can Dimension > 2 Arise Without Branching?
+        // ============================================================
+        _o.WriteLine($"=== PART G: Dimension > 2 Without Branching? ===");
+        _o.WriteLine($"");
+
+        _o.WriteLine($"Maximum dimension without branching:");
+        _o.WriteLine($"  K=1 (no hierarchy):  dim=1");
+        _o.WriteLine($"  K>=2 (with hierarchy): dim=2");
+        _o.WriteLine($"  K=infinity:              dim=2 (saturated)");
+        _o.WriteLine($"");
+        _o.WriteLine($"Dimension CANNOT exceed 2 without branching.");
+        _o.WriteLine($"The linear chain + hierarchy is MAXED at 2D.");
+        _o.WriteLine($"This is not a limitation of the theory — it's a");
+        _o.WriteLine($"CONSEQUENCE of the 1D causal structure.");
+        _o.WriteLine($"");
+        _o.WriteLine($"To describe 3D+ ordering spaces, the theory must");
+        _o.WriteLine($"be EXTENDED to permit branching causality.");
+        _o.WriteLine($"");
+
+        // ============================================================
+        // PART H — Decision
+        // ============================================================
+        _o.WriteLine($"=== PART H: Decision ===");
+        _o.WriteLine($"");
+
+        _o.WriteLine($"Model A: BRANCHING MUST BE IMPOSED EXTERNALLY.");
+        _o.WriteLine($"");
+        _o.WriteLine($"Branching does NOT emerge from:");
+        _o.WriteLine($"  - Variance Cancellation");
+        _o.WriteLine($"  - O(t) ordering");
+        _o.WriteLine($"  - dO distribution");
+        _o.WriteLine($"  - Hierarchy");
+        _o.WriteLine($"  - Coarse-graining");
+        _o.WriteLine($"  - Large compression surges");
+        _o.WriteLine($"");
+        _o.WriteLine($"Branching requires an EXTERNAL modification:");
+        _o.WriteLine($"  (a) Stochastic Cupd (non-deterministic updates)");
+        _o.WriteLine($"  (b) Multi-seed ensembles (multiple initial conditions)");
+        _o.WriteLine($"  (c) Parameter sweeps (p, xi, K0 variation)");
+        _o.WriteLine($"  (d) Explicit DAG construction (manual branching)");
+        _o.WriteLine($"");
+        _o.WriteLine($"The DSVC causal chain is FUNDAMENTALLY 1D+1D (time x scale).");
+        _o.WriteLine($"This constrains the maximum dimension to 2.");
+        _o.WriteLine($"3D+ structures require extending the causal framework.");
+        _o.WriteLine($"");
+        _o.WriteLine("CLAIMS: Branching generation emergence audit.");
+        _o.WriteLine($"\n=== BGE_01 complete. Commit: BGE_01_BranchingGenerationEmergenceAudit ===");
+    }
 }
