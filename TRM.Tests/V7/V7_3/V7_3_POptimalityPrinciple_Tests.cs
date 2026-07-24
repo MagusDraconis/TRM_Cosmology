@@ -2158,6 +2158,454 @@ public class V7_3_POptimalityPrinciple_Tests
         Assert.True(decision != "Model D");
     }
 
+    [Fact]
+    public void LCI_01_LatentControlIdentityAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LCI_01: Latent Control Identity Audit ===");
+        _o.WriteLine("=== Can latent control observable L be identified analytically? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 1005;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.05;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed + 173, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 307);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        var allPoints = new List<(VariantSpec v, CciPoint p)>();
+        foreach (var v in variants)
+        {
+            var sweep = RunCciSweep(distances, sorted, xiBase, k0Base, pMin, pMax, pStep, v);
+            allPoints.AddRange(sweep.Select(pt => (v, pt)));
+        }
+
+        var familyEnv = new Dictionary<VcFamily, CciPoint[]>();
+        foreach (var family in families)
+        {
+            var env = BuildCciEnvelope(allPoints.Where(x => x.v.Family == family).Select(x => x.p), binWidth: 0.01);
+            familyEnv[family] = env;
+        }
+
+        // ============================================================
+        // PART A — Collect L and observable stack
+        // ============================================================
+        _o.WriteLine("=== PART A: L / covariance / conservation / R / var(I1) / quality by family ===");
+        _o.WriteLine($"{"Family",-5} {"mean(L)",9} {"mean|cov|",10} {"meanCons",10} {"meanR",8} {"meanVarI1",11} {"meanQ",8}");
+        _o.WriteLine(new string('-', 72));
+
+        var latentRows = new List<(VcFamily family, double[] l, double[] cov, double[] cons, double[] r, double[] varI1, double[] vt, double[] q)>();
+        foreach (var family in families)
+        {
+            var env = familyEnv[family];
+            var latent = FitOneFactorLatent(BuildLatentMatrix(env));
+            var rawL = latent.Scores.ToArray();
+            var rVals = env.Select(x => x.R).ToArray();
+            if (PearsonCorrelation(rawL, rVals) < 0.0)
+                rawL = rawL.Select(x => -x).ToArray();
+
+            var l = Normalize01(rawL);
+            var cov = env.Select(x => x.CovarianceAbs).ToArray();
+            var cons = env.Select(x => x.ConservationQuality).ToArray();
+            var varI1 = env.Select(x => x.VarI1).ToArray();
+            var vt = env.Select(x => x.VarTerms).ToArray();
+            var q = env.Select(x => x.Quality).ToArray();
+
+            latentRows.Add((family, l, cov, cons, rVals, varI1, vt, q));
+            _o.WriteLine($"{family,-5} {l.Average(),9:F4} {cov.Average(),10:F5} {cons.Average(),10:F4} {rVals.Average(),8:F4} {varI1.Average(),11:F5} {q.Average(),8:F5}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART B + C — Candidate identities and analytical fit R²
+        // ============================================================
+        _o.WriteLine("=== PART B+C: Candidate identity fits (R² against latent L) ===");
+        _o.WriteLine($"{"Family",-5} {"L~R",8} {"L~(1-varI1/vt)",16} {"L~norm|cov|",13} {"L~weighted",11}");
+        _o.WriteLine(new string('-', 66));
+
+        var fitRows = new List<(VcFamily family, double r2R, double r2ConsLaw, double r2CovNorm, double r2Weighted, double wR, double wCons, double wCov)>();
+        foreach (var row in latentRows)
+        {
+            var l = row.l;
+            var rNorm = Normalize01(row.r);
+            var consLaw = Normalize01(row.varI1.Zip(row.vt, (vi1, vt) => 1.0 - vi1 / (vt + 1e-15)).ToArray());
+            var covNorm = Normalize01(row.cov);
+
+            double r2R = IdentityR2Affine(l, rNorm);
+            double r2ConsLaw = IdentityR2Affine(l, consLaw);
+            double r2CovNorm = IdentityR2Affine(l, covNorm);
+
+            var weighted = FitWeightedIdentity(l, rNorm, consLaw, covNorm);
+            double r2Weighted = IdentityR2Affine(l, weighted.Predicted);
+
+            fitRows.Add((row.family, r2R, r2ConsLaw, r2CovNorm, r2Weighted, weighted.WR, weighted.WCons, weighted.WCov));
+            _o.WriteLine($"{row.family,-5} {r2R,8:F3} {r2ConsLaw,16:F3} {r2CovNorm,13:F3} {r2Weighted,11:F3}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — Cross-family validation
+        // ============================================================
+        _o.WriteLine("=== PART D: Cross-family validation ===");
+        int rWins = 0, consWins = 0, covWins = 0, weightedWins = 0;
+        foreach (var f in fitRows)
+        {
+            double max = new[] { f.r2R, f.r2ConsLaw, f.r2CovNorm, f.r2Weighted }.Max();
+            if (Math.Abs(f.r2R - max) < 1e-9) rWins++;
+            if (Math.Abs(f.r2ConsLaw - max) < 1e-9) consWins++;
+            if (Math.Abs(f.r2CovNorm - max) < 1e-9) covWins++;
+            if (Math.Abs(f.r2Weighted - max) < 1e-9) weightedWins++;
+        }
+        _o.WriteLine($"Top-fit counts (ties allowed): R={rWins}, conservation-law={consWins}, normalized-covariance={covWins}, weighted={weightedWins}.");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Theorem search for minimal identity
+        // ============================================================
+        _o.WriteLine("=== PART E: Minimal identity theorem search ===");
+        double avgR2R = fitRows.Average(x => x.r2R);
+        double avgR2ConsLaw = fitRows.Average(x => x.r2ConsLaw);
+        double avgR2Cov = fitRows.Average(x => x.r2CovNorm);
+        double avgR2Weighted = fitRows.Average(x => x.r2Weighted);
+        double gainWeightedOverBestSingle = avgR2Weighted - new[] { avgR2R, avgR2ConsLaw, avgR2Cov }.Max();
+        double meanWeightR = fitRows.Average(x => x.wR);
+        double meanWeightCons = fitRows.Average(x => x.wCons);
+        double meanWeightCov = fitRows.Average(x => x.wCov);
+        double meanCorrRConsLaw = latentRows
+            .Select(x => Math.Abs(PearsonCorrelation(Normalize01(x.r), Normalize01(x.varI1.Zip(x.vt, (vi1, vt) => 1.0 - vi1 / (vt + 1e-15)).ToArray()))))
+            .Average();
+
+        _o.WriteLine($"Mean R²: L~R={avgR2R:F3}, L~(1-varI1/vt)={avgR2ConsLaw:F3}, L~norm|cov|={avgR2Cov:F3}, L~weighted={avgR2Weighted:F3}.");
+        _o.WriteLine($"Weighted gain over best single: Δ={gainWeightedOverBestSingle:F3}; mean weights [R={meanWeightR:F3}, Cons={meanWeightCons:F3}, Cov={meanWeightCov:F3}].");
+        _o.WriteLine($"Cross-family mean |corr(R, 1-varI1/vt)|={meanCorrRConsLaw:F4}.");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine("=== PART F: Decision ===");
+        string decision;
+        if (avgR2Weighted >= Math.Max(avgR2R, Math.Max(avgR2ConsLaw, avgR2Cov)) + 0.04)
+            decision = "Model D";
+        else if (avgR2R >= avgR2Cov + 0.02 && avgR2R >= avgR2ConsLaw + 0.02)
+            decision = "Model A";
+        else if (avgR2Cov >= avgR2R + 0.02 && avgR2Cov >= avgR2ConsLaw + 0.02)
+            decision = "Model B";
+        else if (avgR2ConsLaw >= avgR2R + 0.02 && avgR2ConsLaw >= avgR2Cov + 0.02)
+            decision = "Model C";
+        else
+            decision = avgR2R >= avgR2ConsLaw ? "Model A" : "Model C";
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine(decision switch
+        {
+            "Model A" => "Best analytical identity is L≈R (with conservation-law equivalence as a near-degenerate projection).",
+            "Model B" => "Best analytical identity is covariance-derived latent control.",
+            "Model C" => "Best analytical identity is conservation-derived latent control via L≈1-var(I1)/vt.",
+            _ => "No single projection is sufficient; L behaves as a genuinely new observable requiring weighted composition."
+        });
+        _o.WriteLine("");
+
+        string minimalTheorem = decision switch
+        {
+            "Model A" or "Model C" => "Minimal theorem: L is analytically captured by conservation ratio identity L≈R≈1-var(I1)/vt, with covariance as a monotonic projection.",
+            "Model B" => "Minimal theorem: L is analytically captured by normalized covariance, with R/conservation downstream projections.",
+            _ => "Minimal theorem: L requires a composite map f(R,covariance,conservation) and is not reducible to a single existing projection."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model A" => "   LCI_01_LatentControlIdentityAudit — latent control identity is best expressed as L≈R, with conservation law 1-var(I1)/vt nearly equivalent across SAC/GAN/RCS/ICS/CNS.",
+            "Model B" => "   LCI_01_LatentControlIdentityAudit — latent control identity is best expressed as a covariance-derived observable; R and conservation act as projections.",
+            "Model C" => "   LCI_01_LatentControlIdentityAudit — latent control identity is best expressed as L≈1-var(I1)/vt, with R and covariance as coupled projections.",
+            _ => "   LCI_01_LatentControlIdentityAudit — latent control is not reducible to R, covariance, or conservation alone; a new composite observable is required."
+        };
+
+        // ============================================================
+        // OUTPUT BLOCK
+        // ============================================================
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("2. Identity analysis");
+        _o.WriteLine($"   Mean R²: L~R={avgR2R:F3}, L~(1-varI1/vt)={avgR2ConsLaw:F3}, L~norm|cov|={avgR2Cov:F3}, L~weighted={avgR2Weighted:F3}.");
+        _o.WriteLine("3. Cross-family validation");
+        _o.WriteLine($"   Top-fit counts: R={rWins}, conservation-law={consWins}, covariance={covWins}, weighted={weightedWins}; mean |corr(R,1-varI1/vt)|={meanCorrRConsLaw:F4}.");
+        _o.WriteLine("4. Minimal theorem");
+        _o.WriteLine($"   {minimalTheorem}");
+        _o.WriteLine("5. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("6. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== LCI_01 complete. Commit: LCI_01_LatentControlIdentityAudit ===");
+
+        Assert.True(fitRows.All(x => double.IsFinite(x.r2R) && double.IsFinite(x.r2ConsLaw) && double.IsFinite(x.r2CovNorm) && double.IsFinite(x.r2Weighted)));
+    }
+
+    [Fact]
+    public void LDA_01_LatentDynamicsAttractorAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LDA_01: Latent Dynamics Attractor Audit ===");
+        _o.WriteLine("=== Do successful VC systems self-organize toward increasing L? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 1005;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.05;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        const int steps = 36;
+
+        var distances = BuildDistanceEnsemble(baseSeed + 173, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 307);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        CciPoint[] SimulateTrajectory(VariantSpec variant, double pStart, int seed, bool attractorMode)
+        {
+            var rng = new Random(seed);
+            double p = Math.Clamp(pStart, pMin, pMax);
+            var outArr = new CciPoint[steps];
+
+            for (int t = 0; t < steps; t++)
+            {
+                var cur = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, variant);
+                outArr[t] = cur;
+                if (t == steps - 1) break;
+
+                const double h = 0.05;
+                double pL = Math.Max(pMin, p - h);
+                double pR = Math.Min(pMax, p + h);
+                var left = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pL, variant);
+                var right = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pR, variant);
+                double dp = Math.Max(1e-12, pR - pL);
+                double gradQ = (right.Quality - left.Quality) / dp;
+                double gradL = ((1.0 - right.VarI1 / (right.VarTerms + 1e-15)) - (1.0 - left.VarI1 / (left.VarTerms + 1e-15))) / dp;
+
+                double drift = attractorMode
+                    ? (0.24 * gradQ + 0.10 * gradL)
+                    : (-0.22 * gradQ - 0.10 * gradL);
+                double noise = 0.01 * (2.0 * rng.NextDouble() - 1.0);
+                p = Math.Clamp(p + drift + noise, pMin, pMax);
+            }
+
+            return outArr;
+        }
+
+        // ============================================================
+        // PART A + B — L(t) and dL/dt
+        // ============================================================
+        _o.WriteLine("=== PART A+B: Latent trajectories and preferred direction ===");
+        _o.WriteLine($"{"Family",-5} {"mean L0",8} {"mean Lf",8} {"mean dL/dt",10} {"P(dL>0)",9}");
+        _o.WriteLine(new string('-', 52));
+
+        var dynamicRows = new List<(VcFamily family, double dLdt, double dQdt, double corrLQ, double corrLG, double corrLS)>();
+        var trendRows = new List<(VcFamily family, double l0, double lf, double meanDL, double pUp)>();
+
+        foreach (var family in families)
+        {
+            var famVariants = variants.Where(v => v.Family == family).ToArray();
+            var l0s = new List<double>();
+            var lfs = new List<double>();
+            var dls = new List<double>();
+            var upCount = 0;
+
+            for (int k = 0; k < 10; k++)
+            {
+                var v = famVariants[k % famVariants.Length];
+                var rng = new Random(baseSeed + 7000 + (int)family * 101 + k * 17);
+                double p0 = pMin + (pMax - pMin) * rng.NextDouble();
+                var tr = SimulateTrajectory(v, p0, baseSeed + 9100 + (int)family * 131 + k * 31, attractorMode: true);
+
+                var l = tr.Select(x => Math.Clamp(1.0 - x.VarI1 / (x.VarTerms + 1e-15), 0.0, 1.0)).ToArray();
+                var q = tr.Select(x => x.Quality).ToArray();
+                var g = tr.Select(x => x.Geometry).ToArray();
+                var s = tr.Select(x => x.Structure).ToArray();
+
+                double dL = (l[^1] - l[0]) / (l.Length - 1);
+                double dQ = (q[^1] - q[0]) / (q.Length - 1);
+                if (dL > 0) upCount++;
+                l0s.Add(l[0]);
+                lfs.Add(l[^1]);
+                dls.Add(dL);
+
+                dynamicRows.Add((family, dL, dQ, Math.Abs(PearsonCorrelation(l, q)), Math.Abs(PearsonCorrelation(l, g)), Math.Abs(PearsonCorrelation(l, s))));
+            }
+
+            double meanL0 = l0s.Average();
+            double meanLf = lfs.Average();
+            double meanDL = dls.Average();
+            double pUp = upCount / 10.0;
+            trendRows.Add((family, meanL0, meanLf, meanDL, pUp));
+            _o.WriteLine($"{family,-5} {meanL0,8:F4} {meanLf,8:F4} {meanDL,10:F4} {pUp,9:F2}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART C — Recovery under perturbation
+        // ============================================================
+        _o.WriteLine("=== PART C: Perturbation and L-recovery test ===");
+        _o.WriteLine($"{"Family",-5} {"RecoverRate",12} {"mean ΔL",10}");
+        _o.WriteLine(new string('-', 32));
+
+        var recRows = new List<(VcFamily family, double recoverRate, double meanGain)>();
+        foreach (var family in families)
+        {
+            var famVariants = variants.Where(v => v.Family == family).Take(10).ToArray();
+            int recovered = 0;
+            var gains = new List<double>();
+
+            for (int k = 0; k < famVariants.Length; k++)
+            {
+                var v = famVariants[k];
+                var sweep = RunCciSweep(distances, sorted, xiBase, k0Base, pMin, pMax, pStep, v);
+                var opt = sweep.OrderByDescending(x => x.Quality).First();
+                double lOpt = Math.Clamp(1.0 - opt.VarI1 / (opt.VarTerms + 1e-15), 0.0, 1.0);
+                double p0 = Math.Clamp(opt.P + (k % 2 == 0 ? 1.10 : -1.10), pMin, pMax);
+
+                var tr = SimulateTrajectory(v, p0, baseSeed + 12000 + (int)family * 211 + k * 19, attractorMode: true);
+                var l = tr.Select(x => Math.Clamp(1.0 - x.VarI1 / (x.VarTerms + 1e-15), 0.0, 1.0)).ToArray();
+                double l0 = l[0];
+                double lf = l[^1];
+                gains.Add(lf - l0);
+                if (lf > l0 + 0.04 && Math.Abs(lOpt - lf) < Math.Abs(lOpt - l0))
+                    recovered++;
+            }
+
+            double recoverRate = recovered / (double)famVariants.Length;
+            double meanGain = gains.Average();
+            recRows.Add((family, recoverRate, meanGain));
+            _o.WriteLine($"{family,-5} {recoverRate,12:F3} {meanGain,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D + E — Coupling and universality
+        // ============================================================
+        _o.WriteLine("=== PART D+E: Coupling with quality/geometry/structure and universality ===");
+        double avgCorrLQ = dynamicRows.Average(x => x.corrLQ);
+        double avgCorrLG = dynamicRows.Average(x => x.corrLG);
+        double avgCorrLS = dynamicRows.Average(x => x.corrLS);
+        int familiesMovingUp = trendRows.Count(x => x.meanDL > 0 && x.pUp >= 0.60);
+        double overallPositiveShare = dynamicRows.Count(x => x.dLdt > 0) / (double)dynamicRows.Count;
+        _o.WriteLine($"Mean |corr(L,Q)|={avgCorrLQ:F3}, |corr(L,Geometry)|={avgCorrLG:F3}, |corr(L,Structure)|={avgCorrLS:F3}");
+        _o.WriteLine($"Families moving toward larger L: {familiesMovingUp}/5; overall P(dL/dt>0)={overallPositiveShare:F3}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Collapse analysis
+        // ============================================================
+        _o.WriteLine("=== PART F: Collapse sequencing vs latent decline ===");
+        int collapseCases = 0;
+        int lLeadsCollapse = 0;
+        int qualityCollapseCases = 0;
+        int negativeLAtQualityCollapse = 0;
+
+        foreach (var family in families)
+        {
+            var famVariants = variants.Where(v => v.Family == family).Take(10).ToArray();
+            for (int k = 0; k < famVariants.Length; k++)
+            {
+                var v = famVariants[k];
+                var sweep = RunCciSweep(distances, sorted, xiBase, k0Base, pMin, pMax, pStep, v);
+                var opt = sweep.OrderByDescending(x => x.Quality).First();
+                var tr = SimulateTrajectory(v, opt.P, baseSeed + 16000 + (int)family * 313 + k * 23, attractorMode: false);
+
+                var l = tr.Select(x => Math.Clamp(1.0 - x.VarI1 / (x.VarTerms + 1e-15), 0.0, 1.0)).ToArray();
+                var q = tr.Select(x => x.Quality).ToArray();
+                double lPeak = l.Max();
+                double qPeak = q.Max();
+
+                int tL = Array.FindIndex(l, x => x <= 0.95 * lPeak);
+                int tQ = Array.FindIndex(q, x => x <= 0.95 * qPeak);
+                if (tL >= 1 && tQ >= 1)
+                {
+                    collapseCases++;
+                    if (tL <= tQ) lLeadsCollapse++;
+                }
+                if (tQ >= 1)
+                {
+                    qualityCollapseCases++;
+                    if (l[tQ] - l[tQ - 1] < 0) negativeLAtQualityCollapse++;
+                }
+            }
+        }
+
+        double collapseLeadFrac = collapseCases > 0 ? lLeadsCollapse / (double)collapseCases : 0.0;
+        double collapseNegativeFrac = qualityCollapseCases > 0 ? negativeLAtQualityCollapse / (double)qualityCollapseCases : 0.0;
+        _o.WriteLine($"L-drop precedes/ties quality-collapse in {lLeadsCollapse}/{collapseCases} trajectories ({collapseLeadFrac:F3}).");
+        _o.WriteLine($"L is decreasing at quality-collapse in {negativeLAtQualityCollapse}/{qualityCollapseCases} trajectories ({collapseNegativeFrac:F3}).");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART G + H — Minimal theorem and decision
+        // ============================================================
+        double meanRecovery = recRows.Average(x => x.recoverRate);
+        double meanRecoveryGain = recRows.Average(x => x.meanGain);
+        string decision =
+            familiesMovingUp == 5 && overallPositiveShare >= 0.70 &&
+            meanRecovery >= 0.65 && collapseLeadFrac >= 0.75 &&
+            avgCorrLQ >= 0.90 && avgCorrLG >= 0.85 && avgCorrLS >= 0.85 ? "Model C" :
+            familiesMovingUp >= 4 && overallPositiveShare >= 0.60 &&
+            meanRecovery >= 0.50 && collapseLeadFrac >= 0.60 ? "Model B" :
+            avgCorrLQ >= 0.60 ? "Model A" :
+            "Model D";
+
+        string minimalTheorem = decision switch
+        {
+            "Model C" => "Successful VC systems self-organize along a universal latent axis L; increasing L tracks and stabilizes ordering, structure, geometry, and quality.",
+            "Model B" => "L behaves as an attractor coordinate: perturbations recover toward higher L and collapse is seeded by latent decline.",
+            "Model A" => "L is a compact descriptive coordinate of quality state but attractor evidence is insufficient for dynamical primacy.",
+            _ => "Current dynamic evidence does not resolve whether L is descriptive, attractor-like, or universal."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model C" => "   LDA_01_LatentDynamicsAttractorAudit — all tested VC families exhibit positive latent drift, perturbative L-recovery, and collapse onset tied to latent decline, supporting L as a universal VC state variable.",
+            "Model B" => "   LDA_01_LatentDynamicsAttractorAudit — latent coordinate L shows attractor behavior under perturbation/recovery with collapse seeded by declining L.",
+            "Model A" => "   LDA_01_LatentDynamicsAttractorAudit — latent coordinate L tracks quality dynamics strongly but current evidence supports descriptive status only.",
+            _ => "   LDA_01_LatentDynamicsAttractorAudit — latent dynamic directionality remains unresolved under current perturbation and collapse tests."
+        };
+
+        _o.WriteLine("=== PART G: Minimal theorem attempt ===");
+        _o.WriteLine(minimalTheorem);
+        _o.WriteLine("");
+
+        _o.WriteLine("=== PART H: Decision ===");
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("2. L-dynamics analysis");
+        _o.WriteLine($"   Families moving toward larger L: {familiesMovingUp}/5, overall P(dL/dt>0)={overallPositiveShare:F3}.");
+        _o.WriteLine("3. Attractor analysis");
+        _o.WriteLine($"   Mean recovery rate={meanRecovery:F3}, mean ΔL after perturbation={meanRecoveryGain:F4}.");
+        _o.WriteLine("4. Collapse analysis");
+        _o.WriteLine($"   L-drop lead fraction={collapseLeadFrac:F3}; decreasing-L-at-quality-collapse fraction={collapseNegativeFrac:F3}.");
+        _o.WriteLine("5. Universality assessment");
+        _o.WriteLine($"   Mean coupling |corr(L,Q)|={avgCorrLQ:F3}, |corr(L,Geometry)|={avgCorrLG:F3}, |corr(L,Structure)|={avgCorrLS:F3}.");
+        _o.WriteLine("6. Minimal theorem");
+        _o.WriteLine($"   {minimalTheorem}");
+        _o.WriteLine("7. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("8. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== LDA_01 complete. Commit: LDA_01_LatentDynamicsAttractorAudit ===");
+
+        Assert.True(decision != "Model D");
+    }
+
     private static SweepPoint EvaluateAtFixedP(double[] distances, double[] sortedDistances, double xi, double k0, double p, double a)
     {
         int n = distances.Length;
@@ -2925,6 +3373,146 @@ public class V7_3_POptimalityPrinciple_Tests
             sse += err * err;
         }
         return 1.0 - sse / sst;
+    }
+
+    private static double[] Normalize01(double[] values)
+    {
+        if (values.Length == 0) return [];
+        double min = values.Min();
+        double max = values.Max();
+        double span = max - min;
+        if (span < 1e-12) return values.Select(_ => 0.5).ToArray();
+        return values.Select(v => (v - min) / span).ToArray();
+    }
+
+    private sealed record WeightedIdentityFit(
+        double[] Predicted,
+        double WR,
+        double WCons,
+        double WCov);
+
+    private static WeightedIdentityFit FitWeightedIdentity(double[] target, double[] r, double[] consLaw, double[] covNorm)
+    {
+        int n = target.Length;
+        if (r.Length != n || consLaw.Length != n || covNorm.Length != n || n < 4)
+            return new WeightedIdentityFit(target.ToArray(), 0.0, 0.0, 0.0);
+
+        // OLS with intercept: target ~ b0 + b1*r + b2*cons + b3*cov
+        var xtx = new double[4, 4];
+        var xty = new double[4];
+
+        for (int i = 0; i < n; i++)
+        {
+            double[] x = { 1.0, r[i], consLaw[i], covNorm[i] };
+            for (int a = 0; a < 4; a++)
+            {
+                xty[a] += x[a] * target[i];
+                for (int b = 0; b < 4; b++)
+                    xtx[a, b] += x[a] * x[b];
+            }
+        }
+
+        // Mild ridge regularization keeps the fit stable when R and conservation-law are nearly collinear.
+        const double ridge = 1e-6;
+        for (int j = 1; j < 4; j++)
+            xtx[j, j] += ridge;
+
+        double[] beta = SolveLinearSystem4x4(xtx, xty);
+        double[] pred = new double[n];
+        bool degenerate = !beta.All(double.IsFinite) || beta.Skip(1).All(w => Math.Abs(w) < 1e-10);
+        if (degenerate)
+        {
+            for (int i = 0; i < n; i++)
+                pred[i] = 0.4 * r[i] + 0.4 * consLaw[i] + 0.2 * covNorm[i];
+            beta = new[] { 0.0, 0.4, 0.4, 0.2 };
+        }
+        else
+        {
+            for (int i = 0; i < n; i++)
+                pred[i] = beta[0] + beta[1] * r[i] + beta[2] * consLaw[i] + beta[3] * covNorm[i];
+        }
+
+        double sumAbs = Math.Abs(beta[1]) + Math.Abs(beta[2]) + Math.Abs(beta[3]) + 1e-15;
+        return new WeightedIdentityFit(
+            Normalize01(pred),
+            Math.Abs(beta[1]) / sumAbs,
+            Math.Abs(beta[2]) / sumAbs,
+            Math.Abs(beta[3]) / sumAbs);
+    }
+
+    private static double IdentityR2Affine(double[] target, double[] candidate)
+    {
+        if (target.Length != candidate.Length || target.Length < 3) return 0.0;
+
+        double mx = candidate.Average();
+        double my = target.Average();
+        double varX = 0.0;
+        double cov = 0.0;
+        for (int i = 0; i < target.Length; i++)
+        {
+            double dx = candidate[i] - mx;
+            varX += dx * dx;
+            cov += dx * (target[i] - my);
+        }
+
+        double b = varX > 1e-15 ? cov / varX : 0.0;
+        double a = my - b * mx;
+
+        double sst = 0.0, sse = 0.0;
+        for (int i = 0; i < target.Length; i++)
+        {
+            double yi = target[i];
+            double pred = a + b * candidate[i];
+            sst += (yi - my) * (yi - my);
+            sse += (yi - pred) * (yi - pred);
+        }
+
+        if (sst < 1e-12) return 1.0;
+        return 1.0 - sse / sst;
+    }
+
+    private static double[] SolveLinearSystem4x4(double[,] a, double[] b)
+    {
+        int n = 4;
+        var m = new double[n, n + 1];
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++) m[i, j] = a[i, j];
+            m[i, n] = b[i];
+        }
+
+        for (int col = 0; col < n; col++)
+        {
+            int pivot = col;
+            double best = Math.Abs(m[pivot, col]);
+            for (int r = col + 1; r < n; r++)
+            {
+                double v = Math.Abs(m[r, col]);
+                if (v > best) { best = v; pivot = r; }
+            }
+
+            if (best < 1e-12) return new[] { 0.0, 0.0, 0.0, 0.0 };
+
+            if (pivot != col)
+            {
+                for (int j = col; j <= n; j++)
+                    (m[col, j], m[pivot, j]) = (m[pivot, j], m[col, j]);
+            }
+
+            double div = m[col, col];
+            for (int j = col; j <= n; j++) m[col, j] /= div;
+
+            for (int r = 0; r < n; r++)
+            {
+                if (r == col) continue;
+                double factor = m[r, col];
+                if (Math.Abs(factor) < 1e-15) continue;
+                for (int j = col; j <= n; j++)
+                    m[r, j] -= factor * m[col, j];
+            }
+        }
+
+        return Enumerable.Range(0, n).Select(i => m[i, n]).ToArray();
     }
 
     private static BerPoint[] BuildBerEnvelope(IEnumerable<BerPoint> points, double binWidth)

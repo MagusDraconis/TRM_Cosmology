@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V7.4 LATENT CONTROL |
-| Current Branch | v7.4-latent-control |
-| Total Tests | 587 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Current Version | V7.4 LATENT DYNAMICS |
+| Current Branch | v7.4-latent-dynamics |
+| Total Tests | 588 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — Latent control observable audit complete. LCO_01 reconstructs a dominant latent cancellation axis \(L\) across families and supports latent-control unification (Model C). |
+| Current Status | V7.4 — LCI_01 and LDA_01 complete. \(L\approx R\approx 1-var(I1)/vt\) is analytically supported, while latent dynamics currently support a descriptive control role (LDA decision: Model A). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -254,10 +254,10 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V7.4 LATENT CONTROL
+### Current Frontier — V7.4 LATENT DYNAMICS
 
-**Status:** V7.4 — latent control observable audit complete.
-**Branch:** `v7.4-latent-control`
+**Status:** V7.4 — latent control identity and latent dynamics attractor audit complete.
+**Branch:** `v7.4-latent-dynamics`
 
 **Completed audits:**
 - **SAP_01** (Structure Attractor Principle): 20 random VC systems. p now causally enters dynamics via cs^p. 14 GAUSSIAN, 1 CHANNELED, 5 MIXED. Structure = f(p). No attractor — direct mapping.
@@ -276,10 +276,12 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 - **CQU_01** (Covariance-Quality Universality): normalized quality(covariance) collapses across SAC/GAN/RCS/ICS/CNS (mean std≈0.072). Predictive comparison gives mean R²: covariance 0.957, conservation 0.981, balance 0.966, covariance+balance 0.982; covariance retains ≈97.4% of cov+balance information. Decision: **Model C**.
 - **UCO_01** (Unified Control Observable): covariance vs conservation redundancy analysis gives mean \(|corr|\approx0.964\), mean NMI≈0.736, and PCA PC1 explained variance mean≈0.992 (min≈0.989). Combined cov+cons prediction adds negligible information over best single predictor. Decision: **Model C**.
 - **LCO_01** (Latent Control Observable): multivariate latent reconstruction over \(|cov|\), conservation, \(R\), ordering, structure, geometry yields a dominant latent axis \(L\) (PC1 explained mean≈0.959, min≈0.948). \(L\) predicts covariance/conservation/quality stack strongly and aligns with cancellation coordinate \(R\) (\(|corr(L,R)|\approx0.996\)). Decision: **Model C**.
+- **LCI_01** (Latent Control Identity): analytical candidate fits show \(L\) is best captured by the conservation ratio identity \(L\approx1-var(I1)/vt\), with \(L\approx R\) as an equivalent projection and covariance as monotonic projection. Decision: **Model C**.
+- **LDA_01** (Latent Dynamics Attractor): dynamic trajectories show strong \(L\)-quality coupling and collapse onset tied to decreasing \(L\), but perturbative recovery is insufficiently strong for a robust attractor claim (mean recovery rate≈0.320). Decision: **Model A**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
-**Next:** stress-test LCO_01 under expanded low-B coverage and stronger family perturbations to map where latent-control universality fails.
+**Next:** strengthen attractor-evidence tests for L (recovery protocols, control laws, and perturbation geometry) to determine whether latent dynamics upgrade from descriptive (Model A) to attractor-level (Model B/C).
 
 ---
 

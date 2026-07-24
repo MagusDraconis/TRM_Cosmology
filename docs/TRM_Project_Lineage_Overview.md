@@ -3,9 +3,9 @@
 **Version:** 2.5
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 587 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
-**Branch:** v7.4-latent-control
-**Current Frontier:** V7.4 LATENT CONTROL (LCO_01 complete; built on V7.3 closure stack)
+**Tests:** 588 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Branch:** v7.4-latent-dynamics
+**Current Frontier:** V7.4 LATENT DYNAMICS (LCO_01, LCI_01, LDA_01 complete; built on V7.3 closure stack)
 
 ---
 
@@ -1302,11 +1302,11 @@ covariance carrying nearly all predictive quality information across families.
 **Decision:** **Model C** — a unified latent control observable exists; covariance
 and conservation are dual observables of the same cancellation-control mechanism.
 
-### V7.4 — Latent Control Observable
+### V7.4 — Latent Control and Dynamics
 
-**Branch:** `v7.4-latent-control`  
-**Goal:** identify the explicit latent control quantity generating covariance,
-conservation, and quality stack behavior.
+**Branch:** `v7.4-latent-control` → `v7.4-latent-dynamics`  
+**Goal:** identify the explicit latent control quantity and determine whether VC dynamics
+converge along that latent coordinate.
 
 #### LCO_01 — Latent Control Observable Audit (complete)
 
@@ -1323,6 +1323,34 @@ conservation, and quality stack behavior.
 
 **Decision:** **Model C** — latent control observable exists; covariance and
 conservation are dual projections of one cancellation-control mechanism.
+
+#### LCI_01 — Latent Control Identity Audit (complete)
+
+- Candidate identity fits for latent \(L\) across SAC/GAN/RCS/ICS/CNS:
+  - \(R^2(L\sim R)\approx 0.992\)
+  - \(R^2(L\sim 1-var(I1)/vt)\approx 0.992\)
+  - \(R^2(L\sim normalized\ |cov|)\approx 0.934\)
+- Conservation-ratio and \(R\) projections are effectively degenerate:
+  \(|corr(R,\ 1-var(I1)/vt)|\approx1.000\).
+
+**Decision:** **Model C** — latent identity is analytically captured by
+\(L\approx R\approx 1-var(I1)/vt\), with covariance as a monotonic projection.
+
+#### LDA_01 — Latent Dynamics Attractor Audit (complete)
+
+- Dynamic trajectories across families:
+  - mean \(|corr(L,Q)|\approx0.967\), \(|corr(L,Geometry)|\approx0.979\),
+    \(|corr(L,Structure)|\approx0.907\)
+  - positive latent drift in all families (5/5), overall \(P(dL/dt>0)\approx0.800\)
+- Collapse sequencing:
+  - \(L\)-drop precedes/ties quality collapse in 21/21 tested collapse trajectories.
+  - \(L\) is decreasing at quality-collapse in 21/21 trajectories.
+- Perturbation recovery:
+  - mean recovery rate toward higher-\(L\) neighborhood ≈ 0.320 (insufficient for
+    robust attractor claim under current protocol).
+
+**Decision:** **Model A** — \(L\) is strongly descriptive of VC dynamic state under
+current tests; attractor-level universality remains open.
 
 ---
 
@@ -1849,8 +1877,8 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT CONTROL. LCO_01 complete on top of closed V7.3 stack, 0 failed.
-Current branch: `v7.4-latent-control`.
+**Current status:** V7.4 LATENT DYNAMICS. LCO_01 + LCI_01 + LDA_01 complete on top of closed V7.3 stack, 0 failed.
+Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
 - Balance principle transfers across SAC/GAN/RCS/ICS/CNS (BSP_01).
@@ -1863,7 +1891,9 @@ Key findings (V7.3 → V7.4):
 - Quality collapses onto a shared covariance curve with covariance-dominant information content (CQU_01).
 - Covariance and conservation collapse into a single latent control axis (UCO_01).
 - Latent cancellation coordinate \(L\) is reconstructible and aligns with \(R\) across families (LCO_01).
-Decision model (latest latent-control state): **Model C** for a latent control observable; invariant universality remains unresolved.
+- Latent identity is analytically captured by \(L\approx R\approx1-var(I1)/vt\) (LCI_01).
+- Latent dynamic coupling is strong, but current attractor evidence remains descriptive rather than universal-attractor level (LDA_01, Model A).
+Decision model (latest latent-dynamics state): **Model A** (descriptive latent state variable under current recovery protocol); attractor universality remains unresolved.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -1873,6 +1903,6 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-24. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V7.3. It is intended for onboarding
+TRM/TQM project from Clockwork Cosmology V1 through V7.4. It is intended for onboarding
 new researchers, reviewers, Copilot sessions, and LLM chats. Maintain strict claim
 discipline when referencing any finding described herein.*
