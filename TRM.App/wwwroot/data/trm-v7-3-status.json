@@ -1,0 +1,89 @@
+{
+  "releaseStatus": "V7.3 STRUCTURE OPTIMALITY COMPLETE",
+  "phase": "Balance, covariance, conservation, and unified-control closure",
+  "date": "2026-07-24",
+  "branch": "v7.3-structure-optimality",
+  "base": "V7.2 STRUCTURE ATTRACTORS COMPLETE",
+  "testSummary": {
+    "total": 586,
+    "passed": 586,
+    "failed": 0,
+    "skipped": 0,
+    "verification": "TARGETED LONG-RUN AUDIT VERIFIED",
+    "command": "dotnet test --settings TRM.Tests/long-running.runsettings --filter FullyQualifiedName~V7_3",
+    "date": "2026-07-24"
+  },
+  "suites": [
+    { "name": "FOP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "POP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "BSP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "BUP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "BBC_01", "tests": 1, "status": "COMPLETE", "claimCategory": "MIXED/UNRESOLVED" },
+    { "name": "BER_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "ASY_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "CTP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "CCI_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "CQU_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "UCO_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Balance interiority is required for robust quality across SAC/GAN/RCS/ICS/CNS",
+    "High-B collapse is stronger and covariance-led",
+    "Covariance is the earliest collapse signal and predicts higher-order observables",
+    "Conservation law relation var(I1)=vt*(1-R) is operationally validated",
+    "Quality collapses onto a shared covariance curve",
+    "Covariance and conservation are dual projections of one unified control axis"
+  ],
+  "conditionalClaims": [
+    "Strict invariant balance corridor remains unresolved under wide stress perturbations",
+    "Low-B envelope below ~0.30 still requires explicit stress expansion"
+  ],
+  "hypotheses": [
+    "A latent cancellation-control variable underlies covariance and conservation jointly",
+    "V7.4 should recover this latent variable explicitly and test universality limits"
+  ],
+  "notClaimed": [
+    "physical spacetime",
+    "physical dimensions",
+    "cosmology",
+    "GR derivation",
+    "strict universal invariant constant for balance corridor"
+  ],
+  "openProblems": [
+    {
+      "priority": "P1",
+      "title": "Latent Variable Reconstruction",
+      "description": "Recover explicit latent control observable from covariance/conservation stack."
+    },
+    {
+      "priority": "P2",
+      "title": "Envelope Expansion",
+      "description": "Expand low-B stress coverage and test latent-control stability under stronger perturbations."
+    }
+  ],
+  "documents": [
+    {
+      "title": "V7.3 Closure Report",
+      "filename": "V7_3_Closure_Report.md",
+      "available": true,
+      "description": "Closure summary for BSP/BUP/BBC/BER/ASY/CTP/CQU/UCO audit stack."
+    }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V7/V7_3/V7_3_POptimalityPrinciple_Tests.cs",
+    "candidateUpdateLaws": [
+      "L := R",
+      "L := 1 - var(I1)/vt",
+      "L inferred from one-factor latent fit over {|cov|, ConsQ, R, ordering, structure, geometry}"
+    ]
+  },
+  "releaseIntegrity": {
+    "totalTestsVerified": 586,
+    "passedVerified": 586,
+    "verificationMethod": "dotnet test (targeted long-running V7.3 audit selectors)",
+    "mismatch": null
+  },
+  "finalModel": "V7.3 closes on a unified control picture: suppression/discrimination balance controls covariance cancellation, conservation is its residual expression through var(I1)=vt*(1-R), and quality follows the same control manifold.",
+  "baseForNextVersion": "V7.4",
+  "v7Status": "V7.3 CLOSED. UNIFIED CONTROL AXIS ESTABLISHED. READY FOR LATENT VARIABLE RECONSTRUCTION."
+}
