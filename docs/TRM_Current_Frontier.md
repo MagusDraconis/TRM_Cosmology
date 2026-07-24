@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 2.5
+**Version:** 3.0
 **Date:** 2026-07-24
 
-**Current Version:** V7.4 LATENT DYNAMICS
-**Current Branch:** v7.4-latent-dynamics
-**Cumulative Tests:** 2981
+**Current Version:** V7.8 ENTROPY ATTRACTORS
+**Current Branch:** v7.8-entropy-attractors
+**Cumulative Tests:** 2990
 **Failed:** 0
 
 ---
@@ -22,28 +22,16 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V7.4 LATENT DYNAMICS. Covariance is the strongest latent driver and is substantially
-balance-determined: S,D balance explains ~84.4% of covariance variance (CBD_01, Model B).
-Residual (~15.6%) is partially explained by p (r=0.551) and hierarchy depth (r=0.491),
-with combined augmented model reaching R²=0.941 (CBR_01, Model B). p's residual predictivity
-is 96.7% shape-mediated: p→K(d) shape→covariance (PRI_01, Model C). Shape metrics are
-near-orthogonal independent controls (KSI_01, Model D). slopeAtHalf is the universal
-dominant shape driver across all families (KDI_01, Model B) and its dominance is
-analytically derived from the K(d) midpoint gradient (SHD_01, Model B). slopeAtHalf is
-dominant (64% of explainable variance) but incomplete — covariance is fundamentally
-a slope-driven phenomenon with residual structure (SCS_01, Model B). Discrimination
-is the dominant complement: it adds ΔR²=0.676 beyond slope and dominates covariance
-residuals (r=0.847), combining additively rather than synergistically (DCR_01, Model B).
-Discrimination and slope are two complementary, substantially orthogonal (r²=5.1%)
-kernel control channels: D serves as coupling fidelity (R²=0.809), S as coupling
-intensity (ΔR²=0.019). Both needed in all 5 families; Model C (DSD_01). Discrimination is the primary
-kernel quantity: D-R²=0.805 vs S-R²=0.100 (8.1:1 dominance ratio). D predicts
-covariance even with S fixed (partial r=0.924). S provides modulation (ΔR²=0.040
-via D×S interaction). Cross-family primacy consistent. DPF_01, Model B. The near-far K contrast
-drives covariance almost perfectly: r(near-far, cov)=0.999, R²=0.998.
-Discrimination is the normalized form D=(K_near-K_far)/K_near. Covariance IS
-fundamentally state separability. DGD_01, Model B.
-2990 tests, 0 failed.
+V7.8 ENTROPY ATTRACTORS. The full V7.4→V7.8 chain is complete:
+Covariance IS state separability (NFS_01, R²=0.998) → Multiple covariance modes
+exist but collapse to one dominant latent axis (MCM_01→MCL_01) → Diversity weakens
+collapse (LDB_01→DOP_01) → Mode resonance governs axis selection (MRA_01, 6 peaks)
+→ Mode occupation conserved L1+L2+L3≈1 (MCE_01) → Entropy H = −Σp_i log p_i tracks
+dimension (MEO_01→MEG_01) → Dim = exp(H) universal law (GDM_01) → Canonical
+occupation states (1,0,0)/(½,½,0)/(⅓,⅓,⅓) are entropy attractors minimizing
+mode-transfer pressure (ETA_01). Entropy and attractors are dual descriptions:
+attractors define geometric basins; entropy is the continuous analytic measure (EAP_01).
+~615 tests, 0 failed.
 
 ---
 
@@ -200,25 +188,11 @@ deterministic threshold rescue.
 
 ---
 
-## Current Research Question (V7.4 → V7.5)
+## Current Research Question (V7.8 → V7.9)
 
-**V7.4 FULL 16-AUDIT STACK COMPLETE — Covariance chain complete: balance → residual → shape → derivation → sufficiency → completion → duality → primacy → geometry driver.**
+**V7.8 ENTROPY ATTRACTORS.** The full V7.4→V7.8 chain is complete: Covariance IS state separability (NFS_01, R²=0.998) → Mode resonance governs axis selection (MRA_01) → Occupation conserved L1+L2+L3≈1 (MCE_01) → Dim=exp(H) universal (GDM_01) → Canonical states (1,0,0)/(½,½,0)/(⅓,⅓,⅓) are entropy attractors minimizing transfer pressure (ETA_01). Entropy and attractors are dual descriptions (EAP_01).
 
-Chain: S,D balance → covariance (~84%, CBD_01) → p residual (CBR_01) → p→shape
-mediation 96.7% (PRI_01) → shape metrics independent (KSI_01) → slopeAtHalf dominates
-(KDI_01) → slope analytically derived as K(d) midpoint gradient (SHD_01) → covariance
-sufficiency audit: slope dominant but incomplete, Model B (SCS_01) →
-discrimination identified as dominant complement, additive, Model B (DCR_01) →
-D and S confirmed as two complementary orthogonal control channels, Model C (DSD_01) →
-discrimination is the primary kernel quantity (8.1:1 dominance), S provides modulation,
-Model B (DPF_01).
-
-**V7.5 proposed: Analytical closure — derive S and D from slopeAtHalf.**
-
-Remaining open questions:
-- Can S and D be derived analytically from slopeAtHalf and other shape metrics?
-- Can the full chain p→ξ,K₀→slope→S,D→cov be derived in closed form?
-- Does this enable analytical prediction of covariance from p alone?
+**V7.9 proposed:** Attractor basin geometry, multi-family attractor landscape, and dimension prediction from kernel parameters.
 
 ---
 

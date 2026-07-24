@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 3.0
+**Version:** 4.0
 **Date:** 2026-07-24
-**Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 600 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
-**Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (full 16-audit stack complete: LCO_01 through DGD_01; built on V7.3 closure stack)
+**Scope:** Clockwork Cosmology V1 through V7.8
+**Tests:** ~615 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Branch:** v7.8-entropy-attractors
+**Current Frontier:** V7.8 ENTROPY ATTRACTORS (V7.4→V7.8 complete: covariance chain through entropy attractors)
 
 ---
 
@@ -2237,7 +2237,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. Full 16-audit stack (LCO_01 → DGD_01) complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.8 ENTROPY ATTRACTORS. Full V7.4→V7.8 chain complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -2264,8 +2264,11 @@ Key findings (V7.3 → V7.4):
 - Discrimination completion: discrimination is dominant complement to slope (ΔR²=0.676, r(res,D)=0.847); additive not synergistic (1.7%). Discrimination is primary covariance information carrier (solo R²=0.774 > slope 0.113). DCR_01, Model B.
 - Discrimination-slope duality: D and S are two complementary orthogonal (r²=5.1%) kernel control channels. D=fidelity (86% unique), S=intensity (2% unique). Both needed in all 5 families. DSD_01, Model C.
 - Discrimination primacy: D is the primary kernel quantity (R²(D)=0.805 vs S=0.100, 8.1:1 dominance). S provides modulation of D→cov. DPF_01, Model B.
-- Discrimination geometry driver: Near-far K contrast drives covariance almost perfectly (r=0.999, R²=0.998). Raw K_near−K_far IS the covariance signal. D is the normalized form. Fixing near-far eliminates slope's effect. DGD_01, Model B.
-Decision model (latest latent-dynamics state): **Model B** for D as geometry driver, **Model B** for D primacy, **Model C** for D-S dual-channel control, **Model B** for slopeAtHalf direct control, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
+- Entropy-attractor primacy: Attractors and entropy are dual descriptions; basins structure, entropy measures. EAP_01.
+Decision model (latest V7.8 state): **Model B/C** for entropy-attractor duality, **Model C** for Dim=exp(H), **Model B/C** for canonical attractors.
+
+**V7.4 → V7.8 Full Chain:**
+K(d) → Near-Far Separability (R²=0.998) → Covariance ≈ 0.379·(K_near−K_far) → Mode competition at multiple scales → Resonance peaks govern mode transfer → L1+L2+L3≈1 (conservation) → H=−Σp_i log p_i (entropy) → Dim=exp(H) (universal) → Canonical attractors (1,0,0)/(½,½,0)/(⅓,⅓,⅓)
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

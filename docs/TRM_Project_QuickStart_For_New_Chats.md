@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V7.4 LATENT DYNAMICS |
-| Current Branch | v7.4-latent-dynamics |
-| Total Tests | 595 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Current Version | V7.8 ENTROPY ATTRACTORS |
+| Current Branch | v7.8-entropy-attractors |
+| Total Tests | ~615 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — 16-audit stack complete. Near-far K contrast drives covariance almost perfectly (R²=0.998). Discrimination = normalized state separability D=(K_near-K_far)/K_near. Covariance IS state separability. |
+| Current Status | V7.8 ENTROPY ATTRACTORS. Full V7.4→V7.8 chain: Covariance=separability → Mode resonance → Conservation → Dim=exp(H) → Canonical attractors. Entropy and attractors are dual descriptions of occupation geometry. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
