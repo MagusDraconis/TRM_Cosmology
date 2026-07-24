@@ -30,7 +30,8 @@ Primitive P (Accessibility Potential, irreducible, universal)
   → Directed Drift
   → Temporal Ordering
   → Emergent Time (local rates)
-  → Emergent Geometry (PEG_01) ← CURRENT FRONTIER
+  → Emergent Geometry (PEG_01)
+  → Metric Length (PML_01) ← CURRENT FRONTIER
   → Attractor Occupation
   → Entropy H = −Σp_i log p_i
   → Dimension D = exp(H)
@@ -44,6 +45,12 @@ distance geometry — regions with similar progress rates are effectively
 nearby; regions with divergent rates are effectively distant. A primitive
 metric structure emerges from the accessibility landscape without assuming
 space, length, or geometry.
+
+PML_01 establishes: the emergent geometry supports consistent metric length.
+Metric axioms (positivity, symmetry, identity) are satisfied. Triangle inequality
+holds across family triples. Metric distance predicts transfer difficulty and
+attractor accessibility. Length is a measurable consequence of accessibility
+geometry — no rulers, coordinates, or physical space assumed.
 
 ---
 
