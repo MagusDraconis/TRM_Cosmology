@@ -3,9 +3,9 @@
 **Version:** 3.0
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 599 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Tests:** 600 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
 **Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (full 15-audit stack complete: LCO_01 through DPF_01; built on V7.3 closure stack)
+**Current Frontier:** V7.4 LATENT DYNAMICS (full 16-audit stack complete: LCO_01 through DGD_01; built on V7.3 closure stack)
 
 ---
 
@@ -1676,6 +1676,44 @@ underlying covariance formation. N=4000, 5 families.
 
 ---
 
+#### DGD_01 — Discrimination Geometry Driver Audit (complete)
+
+7-part audit determining the mathematical reason discrimination controls covariance.
+N=4000, 5 families.
+
+- **Part A — Descriptive:** r(D,cov)=0.862, r(D,L)=0.867, r(D,qual)=0.987.
+  CNS shows strongest D-covariance link (r=0.922); ICS weakest (r=0.771).
+
+- **Part B — Near/Far decomposition:** NEAR-FAR R²=0.998. This is essentially
+  a perfect linear relationship with covariance. Mid-far R²=0.742, near-mid
+  R²=0.543. The total near-to-far K contrast is the dominant geometry channel.
+
+- **Part C — Counterfactuals:** When slope is fixed, d(cov)/d(D) is stable
+  (0.294→0.402 across bins). When near-far separation is fixed, slope's
+  effect nearly vanishes (r ≈ -0.04 to 0.06). This confirms near-far as the
+  primary driver and slope as a secondary modulator.
+
+- **Part D — Analytical derivation:** D = (K_near−K_far)/K_near. K_far drives
+  D (r=−0.707) more than K_near (r=0.187). D ≈ 1−exp(−[(q75/ξ)^p−(q25/ξ)^p])
+  for stretched-exponential K(d). The normalization by K_near makes D a
+  dimensionless, interpretable metric.
+
+- **Part E — Cross-family:** Near-far is the #1 driver in all 5 families
+  (r=0.996−1.000). No exceptions.
+
+- **Part F — Minimal theorem:** Covariance in a stretched-exponential coupling
+  lattice IS state separability. The raw K_near−K_far contrast captures
+  R²=0.998 of covariance variance. D normalizes this contrast by K_near,
+  making it a measurement of the fractional K-separation between near and
+  far distance regimes.
+
+- **Part G — Decision:** **Model B** — Discrimination directly drives covariance
+  as the normalized near-far K contrast. The geometric relationship is
+  near-perfect: covariance is fundamentally state separability, and
+  discrimination is its dimensionless measure.
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -2199,7 +2237,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. Full 15-audit stack (LCO_01 → DPF_01) complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.4 LATENT DYNAMICS. Full 16-audit stack (LCO_01 → DGD_01) complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -2225,8 +2263,9 @@ Key findings (V7.3 → V7.4):
 - Slope-covariance sufficiency: 7-part audit; slope dominant (64% of explainable variance) but incomplete; residuals structured (discrimination r=0.879). Covariance is fundamentally slope-driven (SCS_01, Model B).
 - Discrimination completion: discrimination is dominant complement to slope (ΔR²=0.676, r(res,D)=0.847); additive not synergistic (1.7%). Discrimination is primary covariance information carrier (solo R²=0.774 > slope 0.113). DCR_01, Model B.
 - Discrimination-slope duality: D and S are two complementary orthogonal (r²=5.1%) kernel control channels. D=fidelity (86% unique), S=intensity (2% unique). Both needed in all 5 families. DSD_01, Model C.
-- Discrimination primacy: D is the primary kernel quantity (R²=0.805 vs S=0.100, 8.1:1). Partial r(D,cov|S)=0.924. S modulates D→cov (ΔR²=0.040). DPF_01, Model B.
-Decision model (latest latent-dynamics state): **Model B** for D primacy, **Model C** for D-S dual-channel control, **Model B** for slopeAtHalf direct control, **Model B** for covariance sufficiency, **Model B** for discrimination completion, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
+- Discrimination primacy: D is the primary kernel quantity (R²(D)=0.805 vs S=0.100, 8.1:1 dominance). S provides modulation of D→cov. DPF_01, Model B.
+- Discrimination geometry driver: Near-far K contrast drives covariance almost perfectly (r=0.999, R²=0.998). Raw K_near−K_far IS the covariance signal. D is the normalized form. Fixing near-far eliminates slope's effect. DGD_01, Model B.
+Decision model (latest latent-dynamics state): **Model B** for D as geometry driver, **Model B** for D primacy, **Model C** for D-S dual-channel control, **Model B** for slopeAtHalf direct control, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

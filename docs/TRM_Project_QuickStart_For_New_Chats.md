@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V7.4 LATENT DYNAMICS |
 | Current Branch | v7.4-latent-dynamics |
-| Total Tests | 594 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Total Tests | 595 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — 15-audit stack: CBD_01 → DPF_01. Discrimination is the primary kernel quantity (R²=0.805, 8.1:1 dominance). S provides modulation (ΔR²=0.040). Model B. |
+| Current Status | V7.4 — 16-audit stack complete. Near-far K contrast drives covariance almost perfectly (R²=0.998). Discrimination = normalized state separability D=(K_near-K_far)/K_near. Covariance IS state separability. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -111,7 +111,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
 | **V7.2** | **Structure Attractors & p-Distribution** | **SAP_01, PDP_01, NLA_01, REV_01. Structure = f(p) validated. Bug-fixed RNG (per-p seeding, cs^p causal). 15 spurious CHANNELED removed (19→4). Phase diagram: Gaussian 57%, CHANNELED 5%. Model B — conclusions hold with corrections.** |
 | **V7.3** | **Structure Optimality / Unified Control Observable** | **FOP_01 + POP_01 + BSP_01 + BUP_01 + BBC_01 + BER_01 + ASY_01 + CTP_01 + CCI_01 + CQU_01 + UCO_01 complete. Covariance and conservation were closed as dual projections of one control axis (UCO_01, Model C).** |
-| **V7.4** | **Latent Dynamics & Covariance Balance** | **15-audit stack. D is primary kernel quantity (8.1:1 dominance); S modulates. Model B.** |
+| **V7.4** | **Latent Dynamics & Covariance Balance** | **16-audit stack complete. Near-far K contrast drives covariance (R²=0.998). Covariance IS state separability.** |
 
 **Cumulative total: 2985 tests, 0 failed as of 2026-07-24.**
 
@@ -288,7 +288,8 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 - **SCS_01** (Slope-Covariance Sufficiency Audit): Determines whether covariance is fundamentally slope-driven. slopeAtHalf dominates (unique ΔR²=0.122, 64% of explainable variance) but is incomplete — other shape metrics add ΔR²=0.075, residuals retain structure (R²=0.902 with discrimination r=0.879). Cross-family: RCS/ICS strongest slope influence. First-order analytical approximation: r=0.34. Decision: **Model B**.
 - **DCR_01** (Discrimination Completion Residual Audit): Investigates why discrimination completes covariance after slope removal. Discrimination dominates residuals (r=0.847) and adds ΔR²=0.676 beyond slope. Slope+disc R²=0.790; adding suppression reaches R²=0.890. Interaction is additive (1.7% synergy), not synergistic. Discrimination is the primary covariance information carrier. Decision: **Model B**.
 - **DSD_01** (Discrimination-Slope Duality Audit): D and S are substantially orthogonal (r²=5.1%, independent=94.9%). Information partition: unique D ΔR²=0.715 (86%), unique S ΔR²=0.019 (2%). Both needed in all 5 families. Decision: **Model C**.
-- **DPF_01** (Discrimination Primacy Audit): Is D the primary kernel quantity? D dominates: R²(D)=0.805 vs R²(S)=0.100 (8.1:1). Partial r(D,cov|S)=0.924. D exhausts 54% of variance alone. S modulates D→cov (ΔR²=0.040 via D×S). Cross-family: RCS/ICS weakest primacy (4:1), GAN/CNS strongest (16:1). Decision: **Model B**.
+- **DPF_01** (Discrimination Primacy Audit): D dominates (R²=0.805 vs S=0.100, 8.1:1). Partial r(D,cov|S)=0.924. S modulates D→cov (ΔR²=0.040 via D×S). Decision: **Model B**.
+- **DGD_01** (Discrimination Geometry Driver Audit): Near-far K contrast drives covariance almost perfectly: r=0.999, R²=0.998. The raw K_near−K_far difference IS the covariance signal. D=(K_near-K_far)/K_near is the normalized form. Mid-far (r=0.861) and near-mid (r=0.737) contribute less. Fixing near-far eliminates slope's effect. Decision: **Model B**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
