@@ -1,0 +1,7 @@
+{
+  "version": "V7.7",
+  "branch": "v7.7-mode-entropy",
+  "status": "closed",
+  "total_audits": 5,
+  "key_result": "Dim = exp(H) is universal; canonical attractor states govern mode occupation."
+}
