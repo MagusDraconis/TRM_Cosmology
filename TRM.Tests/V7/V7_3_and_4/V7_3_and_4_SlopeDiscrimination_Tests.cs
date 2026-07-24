@@ -4512,4 +4512,334 @@ public class V7_3_and_4_SlopeDiscrimination_Tests
         }
     }
 
+    [Fact]
+    public void LDB_01_LatentDiversityBreakingAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LDB_01: Latent Diversity Breaking Audit ===");
+        _o.WriteLine("=== Can sufficient kernel diversity produce multiple stable latent axes? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 2933;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[]
+        {
+            ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6),
+            ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9),
+        };
+        int nContrasts = contrastDefs.Length;
+
+        // ============================================================
+        // Build diversity ladder
+        // ============================================================
+        var rng = new Random(baseSeed + 1031);
+
+        // Level 0: Standard
+        var lv0 = BuildAsymmetryVariants(baseSeed + 555);
+
+        // Level 1: Parameter-diverse (one family, wide parameter range)
+        var lv1 = new List<VariantSpec>();
+        for (int i = 0; i < 25; i++)
+            lv1.Add(new VariantSpec($"SAC_D1_{i}", VcFamily.SAC,
+                0.20 + rng.NextDouble() * 3.0, 1.0,
+                0.10 + rng.NextDouble() * 4.0, 0.0, 0.0));
+
+        // Level 2: Family-diverse (all families, standard-ish params)
+        var lv2 = new List<VariantSpec>();
+        foreach (var fam in families)
+            for (int i = 0; i < 8; i++)
+                lv2.Add(new VariantSpec($"{fam}_D2_{i}", fam,
+                    0.60 + rng.NextDouble() * 1.2, 1.0,
+                    0.60 + rng.NextDouble() * 1.5,
+                    fam switch { VcFamily.GAN => 0.85 + rng.NextDouble() * 0.12, VcFamily.CNS => 0.85 + rng.NextDouble() * 0.12, _ => 0.0 },
+                    fam switch { VcFamily.GAN => 0.05 + rng.NextDouble() * 0.10, VcFamily.CNS => 0.05 + rng.NextDouble() * 0.10, _ => 0.0 }));
+
+        // Level 3: Super-diverse (wide everything, all families)
+        var lv3 = new List<VariantSpec>();
+        foreach (var fam in families)
+            for (int i = 0; i < 12; i++)
+                lv3.Add(new VariantSpec($"{fam}_D3_{i}", fam,
+                    0.08 + rng.NextDouble() * 4.0, 0.50 + rng.NextDouble(),
+                    0.05 + rng.NextDouble() * 5.0,
+                    fam switch { VcFamily.GAN => rng.NextDouble() * 0.95, VcFamily.CNS => rng.NextDouble() * 0.95, VcFamily.ICS => rng.NextDouble() * 0.60, _ => 0.0 },
+                    fam switch { VcFamily.GAN => rng.NextDouble() * 0.25, VcFamily.CNS => rng.NextDouble() * 0.25, _ => 0.0 }));
+
+        // Level 4: Maximally diverse (extreme + mixed types)
+        var lv4 = new List<VariantSpec>();
+        foreach (var fam in families)
+            for (int i = 0; i < 16; i++)
+            {
+                double xiS = 0.03 + rng.NextDouble() * 5.0;
+                double k0S = 0.30 + rng.NextDouble() * 1.5;
+                double alpha = 0.02 + rng.NextDouble() * 6.0;
+                double beta = fam switch { VcFamily.GAN => rng.NextDouble(), VcFamily.CNS => rng.NextDouble(), VcFamily.ICS => rng.NextDouble() * 0.70, _ => 0.0 };
+                double gamma = fam switch { VcFamily.GAN => rng.NextDouble() * 0.30, VcFamily.CNS => rng.NextDouble() * 0.30, _ => 0.0 };
+                lv4.Add(new VariantSpec($"{fam}_D4_{i}", fam, xiS, k0S, alpha, beta, gamma));
+            }
+
+        var levels = new[] { ("L0 Standard", lv0), ("L1 Param-diverse", lv1), ("L2 Family-diverse", lv2),
+                              ("L3 Super-diverse", lv3), ("L4 Max-diverse", lv4) };
+
+        int pStepIdx = 0;
+        double[] pSteps = { 0.15, 0.25, 0.20, 0.25, 0.30 }; // coarser for higher diversity to control runtime
+
+        // ============================================================
+        // PART A-D: Diversity ladder analysis
+        // ============================================================
+        _o.WriteLine("=== PARTS A-D: Diversity ladder ===");
+        _o.WriteLine($"{"Level",-20} {"N pts",7} {"rank",5} {"PC1%",7} {"PC2%",7} {"PC3%",7} {"L1 R²(L)",9} {"L2 ΔR²",8} {"L3 ΔR²",8} {"CI",6}");
+        _o.WriteLine(new string('-', 88));
+
+        var results = new List<(string name, int n, int rank, double pc1, double pc2, double pc3,
+            double r2L1, double dL2, double dL3, double ci)>();
+
+        foreach (var (levelName, variants) in levels)
+        {
+            double pStep = pSteps[pStepIdx]; pStepIdx++;
+            int nP = (int)Math.Round((3.5 - 0.1) / pStep) + 1;
+
+            var allContrasts = new List<double[]>();
+            var allL = new List<double>();
+
+            foreach (var v in variants)
+            {
+                for (int ip = 0; ip < nP; ip++)
+                {
+                    double p = 0.1 + ip * pStep;
+                    if (p > 3.51) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    int n = distances.Length;
+                    double[] kArr = new double[n];
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    for (int i = 0; i < n; i++)
+                    {
+                        double x = distances[i] / (xi + 1e-15);
+                        kArr[i] = v.Family switch
+                        {
+                            VcFamily.SAC => k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)),
+                            VcFamily.GAN => k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)) * (v.Beta + v.Gamma * Math.Cos(1.15 * x)),
+                            VcFamily.RCS => k0 / (1.0 + v.Alpha * Math.Pow(x, p)),
+                            VcFamily.ICS => k0 * Math.Exp(-Math.Pow(x, v.Alpha * p + v.Beta)),
+                            VcFamily.CNS => (k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)) * (v.Beta - v.Gamma * Math.Exp(-1.6 * x))) + 0.03 * k0,
+                            _ => k0 * Math.Exp(-Math.Pow(x, p))
+                        };
+                        kArr[i] = Math.Clamp(kArr[i], 0.0, k0);
+                    }
+
+                    var kDec = new double[nDeciles + 1];
+                    var cnt = new int[nDeciles + 1];
+                    for (int i = 0; i < n; i++)
+                    {
+                        int dec = 1;
+                        while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++;
+                        kDec[dec] += kArr[i]; cnt[dec]++;
+                    }
+                    for (int d = 1; d <= nDeciles; d++) kDec[d] /= Math.Max(cnt[d], 1);
+
+                    var contrasts = new double[nContrasts];
+                    for (int c = 0; c < nContrasts; c++) contrasts[c] = kDec[contrastDefs[c].i] - kDec[contrastDefs[c].j];
+                    double L = Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0);
+                    allContrasts.Add(contrasts);
+                    allL.Add(L);
+                }
+            }
+
+            int N = allL.Count;
+            double[] LArr = allL.ToArray();
+
+            // PCA
+            var X = new double[N][];
+            for (int i = 0; i < N; i++) { X[i] = (double[])allContrasts[i].Clone(); }
+            double[] cMean = new double[nContrasts], cStd = new double[nContrasts];
+            for (int c = 0; c < nContrasts; c++)
+            {
+                cMean[c] = Enumerable.Range(0, N).Average(i => X[i][c]);
+                double v = Enumerable.Range(0, N).Select(i => (X[i][c] - cMean[c]) * (X[i][c] - cMean[c])).Average();
+                cStd[c] = Math.Sqrt(v) + 1e-12;
+                for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - cMean[c]) / cStd[c];
+            }
+
+            var corrMat = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++)
+                for (int b = 0; b < nContrasts; b++)
+                    corrMat[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allContrasts[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allContrasts[i][b]).ToArray());
+
+            var (eigen, eigenVecs) = JacobiEigenLocal(corrMat, nContrasts);
+            // Sort eigenvalues descending and permute eigenvectors
+            var permE = Enumerable.Range(0, nContrasts).OrderByDescending(i => eigen[i]).ToArray();
+            double[] sortedE = permE.Select(i => eigen[i]).ToArray();
+            double totalE = sortedE.Sum();
+            int rank = sortedE.Count(e => e > 0.01);
+
+            var latentAxes = new double[Math.Min(4, rank)][];
+            for (int k = 0; k < latentAxes.Length; k++)
+            {
+                latentAxes[k] = new double[N];
+                int evRow = permE[k];
+                for (int i = 0; i < N; i++)
+                {
+                    double s = 0;
+                    for (int c = 0; c < nContrasts; c++) s += X[i][c] * eigenVecs[evRow, c];
+                    latentAxes[k][i] = s;
+                }
+            }
+
+            double r2L1 = R2SinglePredictor(LArr, latentAxes[0]);
+            double r2L2 = latentAxes.Length >= 2 ? FitModelR2(LArr, new[] { latentAxes[0], latentAxes[1] }) : r2L1;
+            double r2L3 = latentAxes.Length >= 3 ? FitModelR2(LArr, new[] { latentAxes[0], latentAxes[1], latentAxes[2] }) : r2L2;
+            double r2All = FitModelR2(LArr, latentAxes);
+
+            double dL2 = r2L2 - r2L1;
+            double dL3 = r2L3 - r2L2;
+            double ci = r2L1 / Math.Max(r2All, 1e-12);
+
+            _o.WriteLine($"{levelName,-20} {N,7} {rank,5} {sortedE[0] / totalE * 100,6:F1}% {sortedE[1] / totalE * 100,6:F1}% {(rank >= 3 ? sortedE[2] / totalE * 100 : 0),6:F1}% {r2L1,9:F4} {dL2,8:F4} {dL3,8:F4} {ci,6:F3}");
+
+            results.Add((levelName, N, rank, sortedE[0] / totalE * 100, sortedE[1] / totalE * 100,
+                rank >= 3 ? sortedE[2] / totalE * 100 : 0, r2L1, dL2, dL3, ci));
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — CI trend
+        // ============================================================
+        _o.WriteLine("=== PART D: Collapse Index trend ===");
+        _o.WriteLine("CI = L1/(L1+L2+L3+...),  1.0 = full collapse,  1/N = balanced");
+
+        var ciValues = results.Select(r => r.ci).ToArray();
+        double balancedTarget = 1.0 / Math.Max(results.Average(r => r.rank), 2.0);
+        _o.WriteLine($"Balanced target (1/rank_avg): {balancedTarget:F3}");
+        _o.WriteLine($"CI trajectory: {string.Join(" → ", ciValues.Select(c => $"{c:F3}"))}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Dimension implications
+        // ============================================================
+        _o.WriteLine("=== PART E: Dimension implications ===");
+
+        _o.WriteLine($"{"Level",-20} {"eff rank",10} {"eff dim (L)",14}");
+        _o.WriteLine(new string('-', 46));
+        foreach (var (name, n, rank, pc1, pc2, pc3, r2L1, dL2, dL3, ci) in results)
+        {
+            int effLdim = 1;
+            if (dL2 > 0.03) effLdim = 2;
+            if (dL3 > 0.03) effLdim = 3;
+            _o.WriteLine($"{name,-20} {rank,10} {effLdim,14}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        _o.WriteLine("=== PART F: Decision ===");
+
+        double ciStart = ciValues[0];
+        double ciEnd = ciValues[^1];
+        bool ciDecreases = ciEnd < ciStart * 0.85;
+        bool ciApproachesBalanced = ciEnd < balancedTarget * 1.5;
+        bool collapseSurvives = ciEnd > 0.40;
+        bool multiAxisStable = ciEnd < 0.35;
+
+        string decision;
+        if (ciApproachesBalanced && multiAxisStable)
+            decision = "Model C";
+        else if (ciDecreases && !collapseSurvives)
+            decision = "Model B";
+        else if (collapseSurvives)
+            decision = "Model A";
+        else
+            decision = "Model D";
+
+        string characterization = decision switch
+        {
+            "Model C" => $"Sufficient kernel diversity produces multiple stable latent axes. CI drops from {ciStart:F3} (L0) to {ciEnd:F3} (L4), approaching the balanced target of {balancedTarget:F3}. Extreme parameter diversity breaks the monotonic K(d) alignment that forces latent collapse. With maximal diversity, L prediction distributes across multiple independent latent dimensions.",
+            "Model B" => $"Collapse weakens substantially with diversity (CI: {ciStart:F3} → {ciEnd:F3}) but does not fully break. Higher axes gain predictive power but L1 retains >40% share. The monotonic K(d) constraint is weakened but not eliminated by parameter diversity alone.",
+            "Model A" => $"Latent collapse survives diversity scaling. CI stays at {ciEnd:F3} even at maximal diversity. The monotonic K(d) form is a structural constraint that parameter variation alone cannot break — genuine multi-axis latent structure may require fundamentally different kernel families.",
+            _ => "The diversity-breaking threshold remains unresolved."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model C" => $"LDB_01_LatentDiversityBreakingAudit — sufficient diversity creates multiple stable latent axes. CI: {ciStart:F3}→{ciEnd:F3} (target={balancedTarget:F3}). Max-diverse kernels achieve near-balanced latent space.",
+            "Model B" => $"LDB_01_LatentDiversityBreakingAudit — collapse weakens (CI: {ciStart:F3}→{ciEnd:F3}) but survives. Diversity reduces L1 dominance but doesn't fully break the monotonic alignment.",
+            "Model A" => $"LDB_01_LatentDiversityBreakingAudit — collapse persists across diversity ladder (CI: {ciStart:F3}→{ciEnd:F3}). Structural K(d) constraint dominates.",
+            _ => "LDB_01_LatentDiversityBreakingAudit — diversity-breaking threshold unresolved."
+        };
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"  - CI decreases: {ciDecreases} ({ciStart:F3} → {ciEnd:F3})");
+        _o.WriteLine($"  - CI approaches balanced: {ciApproachesBalanced} (end={ciEnd:F3}, target={balancedTarget:F3})");
+        _o.WriteLine($"  - Collapse survives: {collapseSurvives}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // OUTPUT BLOCK
+        // ============================================================
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}: {characterization}");
+        _o.WriteLine("2. Collapse-index analysis");
+        _o.WriteLine($"   CI trajectory: {string.Join(" → ", ciValues.Select(c => $"{c:F3}"))}");
+        _o.WriteLine($"   Balanced target: {balancedTarget:F3}");
+        _o.WriteLine("3. Diversity scaling");
+        foreach (var (name, n, rank, pc1, pc2, pc3, r2L1, dL2, dL3, ci) in results)
+            _o.WriteLine($"   {name}: {n} pts, rank={rank}, CI={ci:F3}, PC2={pc2:F0}%");
+        _o.WriteLine("4. Dimension implications");
+        _o.WriteLine($"   {(ciEnd < 0.50 ? "Max diversity approaches multi-axis latent structure" : "Latent space remains approximately 1D")}");
+        _o.WriteLine("5. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("6. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== LDB_01 complete. Commit: LDB_01_LatentDiversityBreakingAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+        Assert.True(ciValues.All(double.IsFinite));
+
+        static (double[] eigenvalues, double[,] eigenvectors) JacobiEigenLocal(double[,] a, int n)
+        {
+            var v = new double[n, n]; var d = new double[n];
+            for (int i = 0; i < n; i++) { v[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0;
+                for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++) sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++)
+                    for (int j = i + 1; j < n; j++)
+                    {
+                        double g = 100.0 * Math.Abs(a[i, j]);
+                        if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j])) a[i, j] = 0.0;
+                        else if (Math.Abs(a[i, j]) > thresh)
+                        {
+                            double h = d[j] - d[i], t;
+                            if (Math.Abs(h) + g == Math.Abs(h)) t = a[i, j] / h;
+                            else { double theta = 0.5 * h / a[i, j]; t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta)); if (theta < 0) t = -t; }
+                            double c = 1.0 / Math.Sqrt(1.0 + t * t), s = t * c, tau = s / (1.0 + c);
+                            h = t * a[i, j]; z[i] -= h; z[j] += h; d[i] -= h; d[j] += h; a[i, j] = 0.0;
+                            for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                            for (int k = 0; k < n; k++) { g = v[k, i]; h = v[k, j]; v[k, i] = g - s * (h + g * tau); v[k, j] = h + s * (g - h * tau); }
+                        }
+                    }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, v);
+        }
+    }
+
 }
