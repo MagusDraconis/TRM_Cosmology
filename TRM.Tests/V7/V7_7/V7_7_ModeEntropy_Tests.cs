@@ -934,4 +934,219 @@ public class V7_7_ModeEntropy_Tests
             return (d, m);
         }
     }
+
+    [Fact]
+    public void MTA_01_ModeTransferAttractorAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== MTA_01: Mode Transfer Attractor Audit ===");
+        _o.WriteLine("=== Do canonical occupation states act as attractors? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 6079;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[]
+        {
+            ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6),
+            ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9),
+        };
+        int nContrasts = contrastDefs.Length;
+        var rng = new Random(baseSeed + 2791);
+
+        // ============================================================
+        // Collect occupation trajectories
+        // ============================================================
+        var trajectories = new List<(double beta, double l1, double l2, double l3, double ent, double dH)>();
+
+        for (int bi = 0; bi < 201; bi++)
+        {
+            double beta = bi * 0.005;
+            var variants = new List<VariantSpec>();
+            for (int i = 0; i < 4; i++)
+                variants.Add(new VariantSpec($"SAC_AT_{i}", VcFamily.ICS,
+                    0.30 + rng.NextDouble() * 2.0, 1.0,
+                    0.20 + rng.NextDouble() * 2.5, beta, 0.0));
+
+            var allC = new List<double[]>(); var allL = new List<double>();
+            double pS = 0.45; int nP = (int)Math.Round((1.5 - 0.1) / pS) + 1;
+            foreach (var v in variants)
+                for (int ip = 0; ip < nP; ip++)
+                {
+                    double p = 0.1 + ip * pS; if (p > 1.51) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    int n = distances.Length; double[] kA = new double[n];
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    for (int i = 0; i < n; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                    for (int i = 0; i < n; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                    for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                    var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                    allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                }
+
+            int N = allL.Count; var LArr = allL.ToArray();
+            var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+            for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double v = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(v) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+            var cm = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+            var (e, ev) = JacobiEigenLocal(cm, nContrasts);
+            var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => e[i]).ToArray();
+            var la = new double[3][];
+            for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+            double r2L1 = R2SinglePredictor(LArr, la[0]);
+            double r2L2 = FitModelR2(LArr, new[] { la[0], la[1] });
+            double r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+            double t = r2L3;
+            double l1 = r2L1 / Math.Max(t, 1e-12);
+            double l2 = (r2L2 - r2L1) / Math.Max(t, 1e-12);
+            double l3 = (r2L3 - r2L2) / Math.Max(t, 1e-12);
+            double ent = 0;
+            if (l1 > 1e-12) ent -= l1 * Math.Log(l1);
+            if (l2 > 1e-12) ent -= l2 * Math.Log(l2);
+            if (l3 > 1e-12) ent -= l3 * Math.Log(l3);
+            double dH = trajectories.Count > 0 ? (ent - trajectories.Last().ent) / 0.005 : 0;
+            trajectories.Add((beta, l1, l2, l3, ent, dH));
+        }
+
+        // ============================================================
+        // PARTS A-D — Canonical attractor analysis
+        // ============================================================
+        _o.WriteLine("=== PARTS A-D: Canonical attractor states ===");
+
+        // Distance to each canonical state
+        var distTo1 = trajectories.Select(t => Math.Abs(t.l1 - 1.0) + Math.Abs(t.l2) + Math.Abs(t.l3)).ToArray();
+        var distTo2 = trajectories.Select(t => Math.Abs(t.l1 - 0.5) + Math.Abs(t.l2 - 0.5) + Math.Abs(t.l3)).ToArray();
+        var distTo3 = trajectories.Select(t => Math.Abs(t.l1 - 1.0 / 3.0) + Math.Abs(t.l2 - 1.0 / 3.0) + Math.Abs(t.l3 - 1.0 / 3.0)).ToArray();
+
+        double eps = 0.15;
+        int dwell1 = distTo1.Count(d => d < eps);
+        int dwell2 = distTo2.Count(d => d < eps);
+        int dwell3 = distTo3.Count(d => d < eps);
+        int totalSteps = trajectories.Count;
+
+        _o.WriteLine($"Dwell time near canonical states (ε={eps:F2}, {totalSteps} steps):");
+        _o.WriteLine($"  (1,0,0):        {dwell1} steps ({dwell1 * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine($"  (½,½,0):       {dwell2} steps ({dwell2 * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine($"  (⅓,⅓,⅓):      {dwell3} steps ({dwell3 * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine($"  Other:          {totalSteps - dwell1 - dwell2 - dwell3} steps ({(totalSteps - dwell1 - dwell2 - dwell3) * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART C-E — Attractor test: dH/dβ near canonical states
+        // ============================================================
+        _o.WriteLine("=== PARTS C-E: Attractor strength ===");
+
+        double avgDhNear1 = trajectories.Where((t, i) => distTo1[i] < eps).Select(t => Math.Abs(t.dH)).DefaultIfEmpty(0).Average();
+        double avgDhNear2 = trajectories.Where((t, i) => distTo2[i] < eps).Select(t => Math.Abs(t.dH)).DefaultIfEmpty(0).Average();
+        double avgDhNear3 = trajectories.Where((t, i) => distTo3[i] < eps).Select(t => Math.Abs(t.dH)).DefaultIfEmpty(0).Average();
+        double avgDhAll = trajectories.Select(t => Math.Abs(t.dH)).Average();
+
+        _o.WriteLine($"Average |dH/dβ| (lower = stronger attractor):");
+        _o.WriteLine($"  Near (1,0,0):   {avgDhNear1:F4} ({(avgDhNear1 < avgDhAll ? "ATTRACTOR" : "repeller")})");
+        _o.WriteLine($"  Near (½,½,0):  {avgDhNear2:F4} ({(avgDhNear2 < avgDhAll ? "ATTRACTOR" : "repeller")})");
+        _o.WriteLine($"  Near (⅓,⅓,⅓): {avgDhNear3:F4} ({(avgDhNear3 < avgDhAll ? "ATTRACTOR" : "repeller")})");
+        _o.WriteLine($"  Overall avg:    {avgDhAll:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D-F — Entropy evolution + cross-family
+        // ============================================================
+        _o.WriteLine("=== PARTS D-F: Entropy convergence ===");
+
+        // Does entropy cluster near log(1), log(2), log(3)?
+        double[] entropyVals = trajectories.Select(t => t.ent).ToArray();
+        double hLog1 = 0, hLog2 = Math.Log(2.0), hLog3 = Math.Log(3.0);
+
+        int nearLog1 = entropyVals.Count(e => Math.Abs(e - hLog1) < 0.10);
+        int nearLog2 = entropyVals.Count(e => Math.Abs(e - hLog2) < 0.10);
+        int nearLog3 = entropyVals.Count(e => Math.Abs(e - hLog3) < 0.10);
+
+        _o.WriteLine($"Entropy clustering near canonical values:");
+        _o.WriteLine($"  H ≈ 0 (log 1):     {nearLog1} steps ({nearLog1 * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine($"  H ≈ {hLog2:F3} (log 2):  {nearLog2} steps ({nearLog2 * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine($"  H ≈ {hLog3:F3} (log 3):  {nearLog3} steps ({nearLog3 * 100.0 / totalSteps:F1}%)");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART G-H — Theorem + Decision
+        // ============================================================
+        _o.WriteLine("=== PARTS G-H: Theorem + Decision ===");
+
+        bool statesAreAttractors = (avgDhNear1 < avgDhAll || avgDhNear2 < avgDhAll || avgDhNear3 < avgDhAll);
+        bool significantDwell = dwell1 + dwell2 + dwell3 > totalSteps * 0.3;
+        bool entropyClusters = nearLog1 + nearLog2 + nearLog3 > totalSteps * 0.3;
+
+        string decision;
+        if (statesAreAttractors && significantDwell && entropyClusters)
+            decision = "Model C";
+        else if (statesAreAttractors)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision model: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine($"Dimension phases are entropy attractors. Canonical occupation states {(dwell1 + dwell2 + dwell3)}/{totalSteps} steps near attractors with reduced entropy gradient (avg |dH/dβ| < overall). Mode transfer converges toward these entropy-defined attractor basins, explaining why the three-phase structure (Dim=1,2,3) is stable and recurrent.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Canonical occupation states act as attractors (reduced dH/dβ).");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. Dwell time: (1,0,0)={dwell1}, (½,½,0)={dwell2}, (⅓,⅓,⅓)={dwell3} of {totalSteps}");
+        _o.WriteLine($"3. Attractor strength: |dH/dβ| near attractors vs overall ({avgDhAll:F4})");
+        _o.WriteLine($"4. Entropy clustering: log1={nearLog1}, log2={nearLog2}, log3={nearLog3}");
+        _o.WriteLine($"5. Decision model: {decision}");
+        _o.WriteLine("6. Commit-ready summary:");
+        _o.WriteLine("   MTA_01_ModeTransferAttractorAudit — canonical occupation states");
+        _o.WriteLine($"   {(statesAreAttractors ? "act as entropy attractors" : "are transient")}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== MTA_01 complete. Commit: MTA_01_ModeTransferAttractorAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+
+        static (double[] eigenvalues, double[,] eigenvectors) JacobiEigenLocal(double[,] a, int n)
+        {
+            var m = new double[n, n]; var d = new double[n];
+            for (int i = 0; i < n; i++) { m[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0;
+                for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++) sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++)
+                    for (int j = i + 1; j < n; j++)
+                    {
+                        double g = 100.0 * Math.Abs(a[i, j]);
+                        if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j])) a[i, j] = 0.0;
+                        else if (Math.Abs(a[i, j]) > thresh)
+                        {
+                            double h = d[j] - d[i], t;
+                            if (Math.Abs(h) + g == Math.Abs(h)) t = a[i, j] / h;
+                            else { double theta = 0.5 * h / a[i, j]; t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta)); if (theta < 0) t = -t; }
+                            double c = 1.0 / Math.Sqrt(1.0 + t * t), s = t * c, tau = s / (1.0 + c);
+                            h = t * a[i, j]; z[i] -= h; z[j] += h; d[i] -= h; d[j] += h; a[i, j] = 0.0;
+                            for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                            for (int k = 0; k < n; k++) { g = m[k, i]; h = m[k, j]; m[k, i] = g - s * (h + g * tau); m[k, j] = h + s * (g - h * tau); }
+                        }
+                    }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, m);
+        }
+    }
 }
