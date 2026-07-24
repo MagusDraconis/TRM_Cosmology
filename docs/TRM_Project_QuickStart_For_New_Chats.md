@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V7.8 ENTROPY ATTRACTORS |
-| Current Branch | v7.8-entropy-attractors |
-| Total Tests | ~615 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Current Version | V8.0 FOUNDATIONAL GEOMETRY |
+| Current Branch | v8.0-foundational-geometry |
+| Total Tests | ~620 (Fact/Theory methods); ~3100+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.8 ENTROPY ATTRACTORS. Full V7.4→V7.8 chain: Covariance=separability → Mode resonance → Conservation → Dim=exp(H) → Canonical attractors. Entropy and attractors are dual descriptions of occupation geometry. |
+| Current Status | V8.0 FOUNDATIONAL GEOMETRY. Full V7.4→V7.9 chain: Covariance=separability → Mode resonance → Conservation → Dim=exp(H) → Attractors → Transfer-pressure field. V8.0 targets the deepest geometric principles. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
