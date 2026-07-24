@@ -31,7 +31,10 @@ near-orthogonal independent controls (KSI_01, Model D). slopeAtHalf is the unive
 dominant shape driver across all families (KDI_01, Model B) and its dominance is
 analytically derived from the K(d) midpoint gradient (SHD_01, Model B). slopeAtHalf is
 dominant (64% of explainable variance) but incomplete — covariance is fundamentally
-a slope-driven phenomenon with residual structure (SCS_01, Model B). 2986 tests, 0 failed.
+a slope-driven phenomenon with residual structure (SCS_01, Model B). Discrimination
+is the dominant complement: it adds ΔR²=0.676 beyond slope and dominates covariance
+residuals (r=0.847), combining additively rather than synergistically (DCR_01, Model B).
+2987 tests, 0 failed.
 
 ---
 
@@ -176,6 +179,7 @@ deterministic threshold rescue.
 | V7.4 KDI_01 | **COMPLETE** — slopeAtHalf is universal top driver (SHAP=0.106, #1 in 5/5 families). 3-metric subset reaches 99% of full R². Decision: Model B. |
 | V7.4 SHD_01 | **COMPLETE** — slopeAtHalf analytically derived: -(K₀·p/(2ξ))·(ln 2)^((p-1)/p). Direct control verified (avg partial r=0.721). Decision: Model B. |
 | V7.4 SCS_01 | **COMPLETE** — Slope-Covariance Sufficiency Audit. slopeAtHalf is dominant (64% of explainable variance, unique ΔR²=0.122) but incomplete — other shapes add ΔR²=0.075, residuals retain structure. Decision: Model B. |
+| V7.4 DCR_01 | **COMPLETE** — Discrimination Completion Residual Audit. Discrimination is the dominant complement: ΔR²=0.676 beyond slope, r(cov_res,D)=0.847. Slope+disc reaches R²=0.790. Adding suppression reaches R²=0.890. Interaction is additive (1.7% synergy). Decision: Model B. |
 | **V6.3** | **COMPLETE** — Pipeline integration. V6Pipeline.ComputeTrajectory(), CSV/JSON export. 13/13 V6 tests pass. |
 | **V6.2** | **COMPLETE** — Core migration. TRM.Core/Geometry/V6/V6Geometry.cs. 10/10 tests pass after migration. |
 | **V6.1** | **COMPLETE** — Documentation. User Guide, Theory, Integration Plan. XML docs on V6Geometry. |
@@ -186,12 +190,14 @@ deterministic threshold rescue.
 
 ## Current Research Question (V7.4 → V7.5)
 
-**V7.4 FULL 12-AUDIT STACK COMPLETE — Covariance chain closed: balance → residual → shape → derivation → sufficiency audit.**
+**V7.4 FULL 13-AUDIT STACK COMPLETE — Covariance chain: balance → residual → shape → derivation → sufficiency → completion audit.**
 
 Chain: S,D balance → covariance (~84%, CBD_01) → p residual (CBR_01) → p→shape
 mediation 96.7% (PRI_01) → shape metrics independent (KSI_01) → slopeAtHalf dominates
 (KDI_01) → slope analytically derived as K(d) midpoint gradient (SHD_01) → covariance
-sufficiency audit confirms slope is dominant but incomplete, Model B (SCS_01).
+sufficiency audit confirms slope is dominant but incomplete, Model B (SCS_01) →
+discrimination identified as dominant complement (ΔR²=0.676, r=0.847), additive not
+synergistic, Model B (DCR_01).
 
 **V7.5 proposed: Analytical closure — derive S and D from slopeAtHalf.**
 

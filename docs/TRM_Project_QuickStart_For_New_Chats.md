@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V7.4 LATENT DYNAMICS |
 | Current Branch | v7.4-latent-dynamics |
-| Total Tests | 591 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Total Tests | 592 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — CBD_01 through SCS_01 complete. Covariance balance-determined. p shape-mediated. slopeAtHalf analytically derived as midpoint gradient (Model B). SCS_01: covariance is fundamentally slope-driven, slope dominant (64%) but incomplete (Model B). |
+| Current Status | V7.4 — CBD_01 through DCR_01 complete. Covariance balance-determined. p shape-mediated. slopeAtHalf analytically derived. SCS_01: covariance slope-driven but incomplete. DCR_01: discrimination is dominant complement (ΔR²=0.676, r=0.847), additive not synergistic. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -111,7 +111,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
 | **V7.2** | **Structure Attractors & p-Distribution** | **SAP_01, PDP_01, NLA_01, REV_01. Structure = f(p) validated. Bug-fixed RNG (per-p seeding, cs^p causal). 15 spurious CHANNELED removed (19→4). Phase diagram: Gaussian 57%, CHANNELED 5%. Model B — conclusions hold with corrections.** |
 | **V7.3** | **Structure Optimality / Unified Control Observable** | **FOP_01 + POP_01 + BSP_01 + BUP_01 + BBC_01 + BER_01 + ASY_01 + CTP_01 + CCI_01 + CQU_01 + UCO_01 complete. Covariance and conservation were closed as dual projections of one control axis (UCO_01, Model C).** |
-| **V7.4** | **Latent Dynamics & Covariance Balance** | **CBD_01 + CBR_01 + PRI_01 + KSI_01 + KDI_01 + SHD_01 + SCS_01 complete. Covariance chain: S,D→cov (~84%), p→shape→cov, slopeAtHalf analytically derived, slope sufficiency confirmed dominant but incomplete.** |
+| **V7.4** | **Latent Dynamics & Covariance Balance** | **CBD_01 + CBR_01 + PRI_01 + KSI_01 + KDI_01 + SHD_01 + SCS_01 + DCR_01 complete. Covariance chain: S,D→cov, p→shape→cov, slope analytically derived, covariance slope-driven but discrimination-dominant complement.** |
 
 **Cumulative total: 2985 tests, 0 failed as of 2026-07-24.**
 
@@ -286,6 +286,7 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 - **KDI_01** (Kernel Driver Importance): slopeAtHalf is universal #1 driver (SHAP=0.106, solo R²=0.096, top in 5/5 families). 3-metric subset (slope+cw+curv) reaches 99% of full R². Decision: **Model B**.
 - **SHD_01** (Slope Half Dominance): slopeAtHalf analytically derived as -(K₀·p/(2ξ))·(ln 2)^((p-1)/p) — the midpoint gradient of K(d). Direct control verified (avg partial r=0.721 across HD bins). 0% numerical error in derivation. Decision: **Model B**.
 - **SCS_01** (Slope-Covariance Sufficiency Audit): Determines whether covariance is fundamentally slope-driven. slopeAtHalf dominates (unique ΔR²=0.122, 64% of explainable variance) but is incomplete — other shape metrics add ΔR²=0.075, residuals retain structure (R²=0.902 with discrimination r=0.879). Cross-family: RCS/ICS strongest slope influence. First-order analytical approximation: r=0.34. Decision: **Model B**.
+- **DCR_01** (Discrimination Completion Residual Audit): Investigates why discrimination completes covariance after slope removal. Discrimination dominates residuals (r=0.847) and adds ΔR²=0.676 beyond slope. Slope+disc R²=0.790; adding suppression reaches R²=0.890. Interaction is additive (1.7% synergy), not synergistic. Discrimination is the primary covariance information carrier. Decision: **Model B**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 

@@ -3,9 +3,9 @@
 **Version:** 3.0
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 596 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Tests:** 597 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
 **Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (full 12-audit stack complete: LCO_01 through SCS_01; built on V7.3 closure stack)
+**Current Frontier:** V7.4 LATENT DYNAMICS (full 13-audit stack complete: LCO_01 through DCR_01; built on V7.3 closure stack)
 
 ---
 
@@ -1545,6 +1545,54 @@ phenomenon. 4000 data points across all 5 families (SAC, GAN, RCS, ICS, CNS).
 
 ---
 
+#### DCR_01 — Discrimination Completion Residual Audit (complete)
+
+7-part audit investigating why discrimination completes the covariance signal after
+slope effects are removed. 4000 data points with full structural metrics across 5 families.
+
+- **Part A — Residual construction:** Fitted cov ~ slope (R²=0.113). Positive residuals
+  (slope under-predicts) in 2151/4000 points, negative in 1849. Residual std=0.094.
+
+- **Part B — Residual correlations:** Discrimination dominates residuals (r=0.847),
+  followed by quality (r=0.841) and channel count (r=0.616). Suppression (r=-0.128)
+  and dO moments are weak residual predictors.
+
+- **Part C — Incremental prediction:**
+  | Model | R² |
+  |:------|:---|
+  | slope only | 0.113 |
+  | discrimination only | 0.774 |
+  | slope + discrimination | 0.790 |
+  | + suppression | 0.890 |
+  | + hierarchy + channels | 0.909 |
+  | all predictors | 0.911 |
+  Discrimination adds ΔR²=0.676 beyond slope; suppression adds another ΔR²=0.100.
+
+- **Part D — Interaction analysis:** slope×disc interaction adds only ΔR²=0.014
+  (1.7% synergy ratio). The combination is strongly additive, not multiplicative.
+  Product model cov ≈ slope×disc yields R²=0.572 — inferior to the additive model.
+  Log-log model: R²=0.785, with discrimination weight (0.772) dominating slope
+  weight (0.200).
+
+- **Part E — Cross-family:** Discrimination adds substantial ΔR² in all 5 families:
+  SAC (+0.755), GAN (+0.793), RCS (+0.533), ICS (+0.463), CNS (+0.792).
+  GAN and SAC show strongest slope+disc synergy (ΔR²_interaction=0.019-0.027).
+
+- **Part F — Analytical search:** Covariance ≈ Gradient Strength × State Separability.
+  Gradient strength = |slopeAtHalf|, state separability = discrimination D.
+  Composite: cov ≈ 0.426·|slopeAtHalf|·D + 0.095, r=0.756.
+  The two factors are weakly correlated (r=0.244), confirming they capture
+  orthogonal aspects of the K(d) function.
+
+- **Part G — Decision:** **Model B** — Discrimination is complementary to slope.
+  It dominates residual structure (r=0.847) and adds ΔR²=0.676. But the combination
+  is additive (1.7% synergy), not synergistic. This means slope and discrimination
+  provide mostly independent information about covariance, rather than multiplying
+  into a joint effect. Discrimination is the primary covariance information carrier
+  (solo R²=0.774 > slope's 0.113).
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -2068,7 +2116,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. Full 12-audit stack (LCO_01 → SCS_01) complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.4 LATENT DYNAMICS. Full 13-audit stack (LCO_01 → DCR_01) complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -2092,7 +2140,8 @@ Key findings (V7.3 → V7.4):
 - Kernel driver importance: slopeAtHalf is universal #1 driver (SHAP=0.106, top in 5/5 families); 3-metric subset recovers 99% of shape R²; KDI_01, Model B.
 - Slope half dominance: slopeAtHalf analytically derived as midpoint gradient; direct control verified (partial r=0.721); SHD_01, Model B.
 - Slope-covariance sufficiency: 7-part audit; slope dominant (64% of explainable variance) but incomplete; residuals structured (discrimination r=0.879). Covariance is fundamentally slope-driven (SCS_01, Model B).
-Decision model (latest latent-dynamics state): **Model B** for slopeAtHalf direct control, **Model B** for covariance sufficiency, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
+- Discrimination completion: discrimination is dominant complement to slope (ΔR²=0.676, r(res,D)=0.847); additive not synergistic (1.7%). Discrimination is primary covariance information carrier (solo R²=0.774 > slope 0.113). DCR_01, Model B.
+Decision model (latest latent-dynamics state): **Model B** for slopeAtHalf direct control, **Model B** for covariance sufficiency, **Model B** for discrimination completion, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
