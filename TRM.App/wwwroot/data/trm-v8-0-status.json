@@ -1,7 +1,8 @@
 {
   "version": "V8.0",
   "branch": "v8.0-foundational-geometry",
-  "status": "active",
-  "total_audits": 0,
-  "key_result": "Targeting foundational geometric principles underlying the V7.4→V7.9 chain."
+  "status": "closed",
+  "next_branch": "v8.1-primitive-origin",
+  "total_audits": 3,
+  "key_result": "Primitive P identified; entire V7.4→V8.0 chain reduces to single kernel quantity."
 }
