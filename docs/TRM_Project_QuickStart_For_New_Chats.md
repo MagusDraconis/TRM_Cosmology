@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V7.4 LATENT DYNAMICS |
 | Current Branch | v7.4-latent-dynamics |
-| Total Tests | 589 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Total Tests | 590 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — LCI_01, LDA_01, and LCD_01 complete. \(L\approx R\approx 1-var(I1)/vt\) is analytically supported, and current driver ranking identifies covariance as the leading upstream controller (LCD decision: Model A). |
+| Current Status | V7.4 — LCI_01, LDA_01, LCD_01, and CBD_01 complete. Covariance is the strongest latent driver and is now strongly balance-determined (CBD decision: Model B). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -279,10 +279,11 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 - **LCI_01** (Latent Control Identity): analytical candidate fits show \(L\) is best captured by the conservation ratio identity \(L\approx1-var(I1)/vt\), with \(L\approx R\) as an equivalent projection and covariance as monotonic projection. Decision: **Model C**.
 - **LDA_01** (Latent Dynamics Attractor): dynamic trajectories show strong \(L\)-quality coupling and collapse onset tied to decreasing \(L\), but perturbative recovery is insufficiently strong for a robust attractor claim (mean recovery rate≈0.320). Decision: **Model A**.
 - **LCD_01** (Latent Control Driver): lead-lag, predictive, and perturbation-based Driver Scores rank covariance as the strongest upstream controller of \(L\) across families (wins: covariance 3/5, balance 2/5, p 0/5; global top=Covariance). Decision: **Model A**.
+- **CBD_01** (Covariance Balance Derivation): balance-only models explain most covariance variance across families (mean SD-model \(R^2\approx0.844\); strong in 5/5 families), supporting covariance as strongly determined by suppression-discrimination balance. Decision: **Model B**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
-**Next:** test whether covariance itself is downstream of a deeper conserved or geometric driver, and whether strengthened intervention protocols can elevate latent dynamics beyond descriptive status.
+**Next:** resolve whether covariance-balance determination can be upgraded from strong empirical control (Model B) to analytical closure (Model C), while re-testing latent dynamics with improved recovery protocols.
 
 ---
 

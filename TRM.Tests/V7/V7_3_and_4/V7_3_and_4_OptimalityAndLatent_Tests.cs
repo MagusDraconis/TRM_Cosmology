@@ -2958,6 +2958,224 @@ public class V7_3_and_4_OptimalityAndLatent_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void CBD_01_CovarianceBalanceDerivationAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CBD_01: Covariance Balance Derivation Audit ===");
+        _o.WriteLine("=== Is covariance a consequence of suppression-discrimination balance? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 1005;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.10;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed + 173, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 307);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        var samples = new List<(VcFamily family, double p, double s, double d, double cov, double l)>();
+        foreach (var v in variants)
+        {
+            int nP = (int)Math.Round((pMax - pMin) / pStep) + 1;
+            for (int i = 0; i < nP; i++)
+            {
+                double p = pMin + i * pStep;
+                var bsp = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                double l = Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0);
+                samples.Add((v.Family, p, bsp.Suppression, bsp.Discrimination, cci.CovarianceAbs, l));
+            }
+        }
+
+        static double Std(double[] x)
+        {
+            if (x.Length < 2) return 0.0;
+            double m = x.Average();
+            return Math.Sqrt(x.Select(v => (v - m) * (v - m)).Average());
+        }
+
+        (double r2, double[] pred) FitSdModel(double[] y, double[] s, double[] d)
+        {
+            int n = y.Length;
+            var sd = s.Zip(d, (sv, dv) => sv * dv).ToArray();
+
+            var xtx = new double[4, 4];
+            var xty = new double[4];
+            for (int i = 0; i < n; i++)
+            {
+                double[] x = { 1.0, s[i], d[i], sd[i] };
+                for (int a = 0; a < 4; a++)
+                {
+                    xty[a] += x[a] * y[i];
+                    for (int b = 0; b < 4; b++) xtx[a, b] += x[a] * x[b];
+                }
+            }
+
+            const double ridge = 1e-6;
+            for (int j = 1; j < 4; j++) xtx[j, j] += ridge;
+            var beta = SolveLinearSystem4x4(xtx, xty);
+            if (!beta.All(double.IsFinite)) beta = new[] { y.Average(), 0.0, 0.0, 0.0 };
+
+            var pred = new double[n];
+            for (int i = 0; i < n; i++)
+                pred[i] = beta[0] + beta[1] * s[i] + beta[2] * d[i] + beta[3] * sd[i];
+
+            double my = y.Average();
+            double sst = y.Select(v => (v - my) * (v - my)).Sum();
+            double sse = y.Zip(pred, (a, b) => (a - b) * (a - b)).Sum();
+            double r2 = sst < 1e-12 ? 1.0 : 1.0 - sse / sst;
+            return (r2, pred);
+        }
+
+        // ============================================================
+        // PART A — Observable collection
+        // ============================================================
+        _o.WriteLine("=== PART A: S, D, covariance, L by family ===");
+        _o.WriteLine($"{"Family",-5} {"mean S",8} {"mean D",8} {"mean|cov|",10} {"mean L",8} {"std L",8}");
+        _o.WriteLine(new string('-', 56));
+
+        foreach (var family in families)
+        {
+            var rows = samples.Where(x => x.family == family).ToArray();
+            var lVals = rows.Select(x => x.l).ToArray();
+            _o.WriteLine($"{family,-5} {rows.Average(x => x.s),8:F4} {rows.Average(x => x.d),8:F4} {rows.Average(x => x.cov),10:F5} {lVals.Average(),8:F4} {Std(lVals),8:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART B — Candidate balance models
+        // ============================================================
+        _o.WriteLine("=== PART B: Candidate fits cov=f(S,D) (R²) ===");
+        _o.WriteLine($"{"Family",-5} {"S*D",8} {"S/D",8} {"D/S",8} {"S(1-D)",10} {"D(1-S)",10} {"SD-model",10}");
+        _o.WriteLine(new string('-', 70));
+
+        var fitRows = new List<(VcFamily family, double r2Sd, double r2SdivD, double r2DdivS, double r2S1d, double r2D1s, double r2SdModel, double r2LfromSd)>();
+        foreach (var family in families)
+        {
+            var rows = samples.Where(x => x.family == family).ToArray();
+            double[] s = rows.Select(x => x.s).ToArray();
+            double[] d = rows.Select(x => x.d).ToArray();
+            double[] cov = rows.Select(x => x.cov).ToArray();
+            double[] l = rows.Select(x => x.l).ToArray();
+
+            double[] q = s.Zip(d, (sv, dv) => sv * dv).ToArray();
+            double[] sDivD = s.Zip(d, (sv, dv) => sv / (dv + 1e-12)).ToArray();
+            double[] dDivS = d.Zip(s, (dv, sv) => dv / (sv + 1e-12)).ToArray();
+            double[] s1d = s.Zip(d, (sv, dv) => sv * (1.0 - dv)).ToArray();
+            double[] d1s = d.Zip(s, (dv, sv) => dv * (1.0 - sv)).ToArray();
+
+            double r2Sd = IdentityR2Affine(cov, q);
+            double r2SdivD = IdentityR2Affine(cov, sDivD);
+            double r2DdivS = IdentityR2Affine(cov, dDivS);
+            double r2S1d = IdentityR2Affine(cov, s1d);
+            double r2D1s = IdentityR2Affine(cov, d1s);
+
+            var (r2SdModel, predCov) = FitSdModel(cov, s, d);
+            var (r2LfromSd, _) = FitSdModel(l, s, d);
+
+            fitRows.Add((family, r2Sd, r2SdivD, r2DdivS, r2S1d, r2D1s, r2SdModel, r2LfromSd));
+            _o.WriteLine($"{family,-5} {r2Sd,8:F3} {r2SdivD,8:F3} {r2DdivS,8:F3} {r2S1d,10:F3} {r2D1s,10:F3} {r2SdModel,10:F3}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART C — Information accounting
+        // ============================================================
+        _o.WriteLine("=== PART C: Information accounting ===");
+        double meanR2Sd = fitRows.Average(x => x.r2Sd);
+        double meanR2SdivD = fitRows.Average(x => x.r2SdivD);
+        double meanR2DdivS = fitRows.Average(x => x.r2DdivS);
+        double meanR2S1d = fitRows.Average(x => x.r2S1d);
+        double meanR2D1s = fitRows.Average(x => x.r2D1s);
+        double meanR2SdModel = fitRows.Average(x => x.r2SdModel);
+        double meanR2LfromSd = fitRows.Average(x => x.r2LfromSd);
+        double meanBestSingle = new[] { meanR2Sd, meanR2SdivD, meanR2DdivS, meanR2S1d, meanR2D1s }.Max();
+        double gainSdModel = meanR2SdModel - meanBestSingle;
+
+        _o.WriteLine($"Mean single-model R²: S*D={meanR2Sd:F3}, S/D={meanR2SdivD:F3}, D/S={meanR2DdivS:F3}, S(1-D)={meanR2S1d:F3}, D(1-S)={meanR2D1s:F3}");
+        _o.WriteLine($"Mean SD-model R²(cov|S,D,S*D)={meanR2SdModel:F3}; gain over best single={gainSdModel:F3}");
+        _o.WriteLine($"Mean SD-model R²(L|S,D,S*D)={meanR2LfromSd:F3}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — Cross-family validation
+        // ============================================================
+        _o.WriteLine("=== PART D: Cross-family validation ===");
+        int famStrong = fitRows.Count(x => x.r2SdModel >= 0.75);
+        int famVeryStrong = fitRows.Count(x => x.r2SdModel >= 0.90);
+        _o.WriteLine($"Families with strong SD explanatory power (R²>=0.75): {famStrong}/5");
+        _o.WriteLine($"Families with very-strong SD explanatory power (R²>=0.90): {famVeryStrong}/5");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Analytical search
+        // ============================================================
+        _o.WriteLine("=== PART E: Analytical derivation search ===");
+        _o.WriteLine("From var(I1)=vt*(1-R) and R=0.42*|cov|/vt:");
+        _o.WriteLine("  |cov| = (vt/0.42) * R = (vt - var(I1))/0.42");
+        _o.WriteLine("If R (or equivalently L≈R≈1-var(I1)/vt) is determined by S,D balance, then covariance follows from balance via vt scaling.");
+        _o.WriteLine($"Empirical support: mean R²(L|S,D,S*D)={meanR2LfromSd:F3}, mean R²(cov|S,D,S*D)={meanR2SdModel:F3}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F + G — Minimal theorem and decision
+        // ============================================================
+        string decision =
+            meanR2SdModel >= 0.90 && meanR2LfromSd >= 0.90 ? "Model C" :
+            meanR2SdModel >= 0.70 && famStrong >= 4 ? "Model B" :
+            meanR2SdModel < 0.55 ? "Model A" :
+            "Model D";
+
+        string minimalTheorem = decision switch
+        {
+            "Model C" => "Covariance is analytically derivable from suppression-discrimination balance through latent-conservation identity: balance→R(≈L), then |cov|=(vt/0.42)R.",
+            "Model B" => "Covariance is strongly determined by balance: S and D explain most covariance variance, with latent/conservation identity providing the consistency bridge.",
+            "Model A" => "Covariance retains substantial independence from balance under current model class and cannot be treated as balance-determined.",
+            _ => "Current evidence is mixed; balance contribution is present but insufficient for a resolved derivation claim."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model C" => "   CBD_01_CovarianceBalanceDerivationAudit — covariance is analytically recoverable from suppression-discrimination balance via latent-conservation identity and vt scaling.",
+            "Model B" => "   CBD_01_CovarianceBalanceDerivationAudit — covariance is strongly balance-determined across SAC/GAN/RCS/ICS/CNS, with high variance explanation from S and D alone.",
+            "Model A" => "   CBD_01_CovarianceBalanceDerivationAudit — covariance behaves as partially independent from suppression-discrimination balance under current balance model family.",
+            _ => "   CBD_01_CovarianceBalanceDerivationAudit — covariance-balance derivation remains unresolved under current analytical and cross-family constraints."
+        };
+
+        _o.WriteLine("=== PART F: Minimal theorem attempt ===");
+        _o.WriteLine(minimalTheorem);
+        _o.WriteLine("");
+
+        _o.WriteLine("=== PART G: Decision ===");
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("2. Covariance derivation analysis");
+        _o.WriteLine($"   Best single balance model mean R²={meanBestSingle:F3}; SD composite mean R²={meanR2SdModel:F3}.");
+        _o.WriteLine("3. Information accounting");
+        _o.WriteLine($"   Explained covariance variance by S,D alone: {meanR2SdModel:P1} (mean across families).");
+        _o.WriteLine("4. Cross-family validation");
+        _o.WriteLine($"   Strong-family count={famStrong}/5; very-strong-family count={famVeryStrong}/5.");
+        _o.WriteLine("5. Minimal theorem");
+        _o.WriteLine($"   {minimalTheorem}");
+        _o.WriteLine("6. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("7. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== CBD_01 complete. Commit: CBD_01_CovarianceBalanceDerivationAudit ===");
+
+        Assert.True(fitRows.All(x => double.IsFinite(x.r2SdModel) && double.IsFinite(x.r2LfromSd)));
+    }
+
     private static SweepPoint EvaluateAtFixedP(double[] distances, double[] sortedDistances, double xi, double k0, double p, double a)
     {
         int n = distances.Length;
