@@ -11,6 +11,12 @@
 - **Performance optimization:** When writing or modifying tests that contain many independent loop iterations (e.g., seed sweeps, parameter scans, variant comparisons), use `Parallel.For`, `Parallel.ForEach`, or `Parallel.Invoke` to distribute work across CPU cores. Collect results in thread-safe collections (`ConcurrentDictionary`, `ConcurrentBag`), then output sequentially after parallel work completes. This is especially important for tests tagged `LongRunning`.
 - TRM.Tests is intentionally used as a fast calculation/audit harness rather than a classic unit-test suite; many green assertions (including `Assert.True(true)`) are intentional and not meant as strict behavioral verification.
 
+## Shared Code Organization
+- **Always prefer shared helper classes over inline helpers in test files.** When writing new tests or adding utility methods (records, enums, static helpers, evaluation functions, sweep runners, statistical methods), place them in the appropriate shared helper class rather than defining them directly in the test file.
+- For V7 tests, use `V7_TestHelpers.cs` (static class `V7TestHelpers` in namespace `TRM.Tests.V7_3_and_4`) via `using static TRM.Tests.V7_3_and_4.V7TestHelpers;`.
+- When a helper is only used by a single test, it may be defined as a local static function within that test method. If it is used by two or more tests, move it to the shared helper class.
+- Keep test files focused on test logic only. Split large test files (>2000 lines) into separate test classes organized by topic for parallel execution and maintainability.
+
 ## Documentation Maintenance
 
 The following documentation files must be kept up to date at all times:
