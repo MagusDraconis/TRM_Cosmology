@@ -73,7 +73,7 @@
     }
   ],
   "roadmap": {
-    "recommendedTestFile": "TRM.Tests/V7/V7_3/V7_3_POptimalityPrinciple_Tests.cs",
+    "recommendedTestFile": "TRM.Tests/V7/V7_3_and_4/V7_3_and_4_OptimalityAndLatent_Tests.cs",
     "candidateUpdateLaws": [
       "L := R",
       "L := 1 - var(I1)/vt",

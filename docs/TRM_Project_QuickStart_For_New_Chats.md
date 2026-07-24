@@ -13,9 +13,9 @@
 |:-----|:------|
 | Current Version | V7.4 LATENT DYNAMICS |
 | Current Branch | v7.4-latent-dynamics |
-| Total Tests | 588 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Total Tests | 589 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — LCI_01 and LDA_01 complete. \(L\approx R\approx 1-var(I1)/vt\) is analytically supported, while latent dynamics currently support a descriptive control role (LDA decision: Model A). |
+| Current Status | V7.4 — LCI_01, LDA_01, and LCD_01 complete. \(L\approx R\approx 1-var(I1)/vt\) is analytically supported, and current driver ranking identifies covariance as the leading upstream controller (LCD decision: Model A). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -278,10 +278,11 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 - **LCO_01** (Latent Control Observable): multivariate latent reconstruction over \(|cov|\), conservation, \(R\), ordering, structure, geometry yields a dominant latent axis \(L\) (PC1 explained mean≈0.959, min≈0.948). \(L\) predicts covariance/conservation/quality stack strongly and aligns with cancellation coordinate \(R\) (\(|corr(L,R)|\approx0.996\)). Decision: **Model C**.
 - **LCI_01** (Latent Control Identity): analytical candidate fits show \(L\) is best captured by the conservation ratio identity \(L\approx1-var(I1)/vt\), with \(L\approx R\) as an equivalent projection and covariance as monotonic projection. Decision: **Model C**.
 - **LDA_01** (Latent Dynamics Attractor): dynamic trajectories show strong \(L\)-quality coupling and collapse onset tied to decreasing \(L\), but perturbative recovery is insufficiently strong for a robust attractor claim (mean recovery rate≈0.320). Decision: **Model A**.
+- **LCD_01** (Latent Control Driver): lead-lag, predictive, and perturbation-based Driver Scores rank covariance as the strongest upstream controller of \(L\) across families (wins: covariance 3/5, balance 2/5, p 0/5; global top=Covariance). Decision: **Model A**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
-**Next:** strengthen attractor-evidence tests for L (recovery protocols, control laws, and perturbation geometry) to determine whether latent dynamics upgrade from descriptive (Model A) to attractor-level (Model B/C).
+**Next:** test whether covariance itself is downstream of a deeper conserved or geometric driver, and whether strengthened intervention protocols can elevate latent dynamics beyond descriptive status.
 
 ---
 

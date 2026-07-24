@@ -3,9 +3,9 @@
 **Version:** 2.5
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 588 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Tests:** 589 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
 **Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (LCO_01, LCI_01, LDA_01 complete; built on V7.3 closure stack)
+**Current Frontier:** V7.4 LATENT DYNAMICS (LCO_01, LCI_01, LDA_01, LCD_01 complete; built on V7.3 closure stack)
 
 ---
 
@@ -1352,6 +1352,21 @@ conservation are dual projections of one cancellation-control mechanism.
 **Decision:** **Model A** — \(L\) is strongly descriptive of VC dynamic state under
 current tests; attractor-level universality remains open.
 
+#### LCD_01 — Latent Control Driver Audit (complete)
+
+- Tracked \(L\), covariance, suppression, discrimination, \(p\), and \(dO\) moments
+  along family trajectories.
+- Lead-lag + predictive + perturbation Driver Score ranking:
+  - covariance wins in 3/5 families
+  - balance wins in 2/5 families
+  - \(p\) wins in 0/5 families
+  - global mean Driver Scores: cov≈0.718, balance≈0.703, p≈0.543.
+- Perturbation and temporal-precedence evidence jointly support covariance as the
+  most consistent upstream controller under the tested protocol.
+
+**Decision:** **Model A** — covariance drives \(L\) most consistently in current
+cross-family dynamic audits.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1877,7 +1892,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. LCO_01 + LCI_01 + LDA_01 complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.4 LATENT DYNAMICS. LCO_01 + LCI_01 + LDA_01 + LCD_01 complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -1893,7 +1908,8 @@ Key findings (V7.3 → V7.4):
 - Latent cancellation coordinate \(L\) is reconstructible and aligns with \(R\) across families (LCO_01).
 - Latent identity is analytically captured by \(L\approx R\approx1-var(I1)/vt\) (LCI_01).
 - Latent dynamic coupling is strong, but current attractor evidence remains descriptive rather than universal-attractor level (LDA_01, Model A).
-Decision model (latest latent-dynamics state): **Model A** (descriptive latent state variable under current recovery protocol); attractor universality remains unresolved.
+- Driver audit identifies covariance as the strongest tested upstream controller of latent state motion (LCD_01, Model A).
+Decision model (latest latent-dynamics state): **Model A** (covariance-driven descriptive latent state under current intervention protocol); deeper upstream control remains open.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

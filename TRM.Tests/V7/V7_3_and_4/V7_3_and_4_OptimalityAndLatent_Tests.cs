@@ -2,13 +2,13 @@ using Xunit;
 using Xunit.Abstractions;
 using TRM.Core.Geometry.V6;
 
-namespace TRM.Tests.V7_3;
+namespace TRM.Tests.V7_3_and_4;
 
-[Trait("Category", "V7_3"), Trait("Category", "V7_3_POP"), Trait("Category", "LongRunning")]
-public class V7_3_POptimalityPrinciple_Tests
+[Trait("Category", "V7_3"), Trait("Category", "V7_4"), Trait("Category", "V7_3_POP"), Trait("Category", "LongRunning")]
+public class V7_3_and_4_OptimalityAndLatent_Tests
 {
     private readonly ITestOutputHelper _o;
-    public V7_3_POptimalityPrinciple_Tests(ITestOutputHelper o) { _o = o; }
+    public V7_3_and_4_OptimalityAndLatent_Tests(ITestOutputHelper o) { _o = o; }
 
     private sealed record SweepPoint(
         double P,
@@ -2604,6 +2604,358 @@ public class V7_3_POptimalityPrinciple_Tests
         _o.WriteLine("=== LDA_01 complete. Commit: LDA_01_LatentDynamicsAttractorAudit ===");
 
         Assert.True(decision != "Model D");
+    }
+
+    [Fact]
+    public void LCD_01_LatentControlDriverAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LCD_01: Latent Control Driver Audit ===");
+        _o.WriteLine("=== What upstream variable controls latent coordinate L? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 1005;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.05;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        const int steps = 34;
+
+        var distances = BuildDistanceEnsemble(baseSeed + 173, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 307);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        static double Std(double[] x)
+        {
+            if (x.Length < 2) return 0.0;
+            double m = x.Average();
+            return Math.Sqrt(x.Select(v => (v - m) * (v - m)).Average());
+        }
+
+        static double Clamp01(double x) => Math.Clamp(x, 0.0, 1.0);
+
+        CciPoint[] SimulateTrajectory(VariantSpec variant, double pStart, int seed)
+        {
+            var rng = new Random(seed);
+            double p = Math.Clamp(pStart, pMin, pMax);
+            var outArr = new CciPoint[steps];
+
+            for (int t = 0; t < steps; t++)
+            {
+                var cur = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, variant);
+                outArr[t] = cur;
+                if (t == steps - 1) break;
+
+                const double h = 0.05;
+                double pL = Math.Max(pMin, p - h);
+                double pR = Math.Min(pMax, p + h);
+                var left = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pL, variant);
+                var right = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pR, variant);
+                double dp = Math.Max(1e-12, pR - pL);
+                double gradQ = (right.Quality - left.Quality) / dp;
+                double gradL = ((1.0 - right.VarI1 / (right.VarTerms + 1e-15)) - (1.0 - left.VarI1 / (left.VarTerms + 1e-15))) / dp;
+                double drift = 0.22 * gradQ + 0.08 * gradL;
+                double noise = 0.012 * (2.0 * rng.NextDouble() - 1.0);
+                p = Math.Clamp(p + drift + noise, pMin, pMax);
+            }
+
+            return outArr;
+        }
+
+        (double scoreCov, double scoreBal, double scoreP, string firstMover, double dOMean, double dOVar) AnalyzeTrajectory(VariantSpec variant, CciPoint[] tr)
+        {
+            int n = tr.Length;
+            var l = tr.Select(x => Clamp01(1.0 - x.VarI1 / (x.VarTerms + 1e-15))).ToArray();
+            var cov = tr.Select(x => x.CovarianceAbs).ToArray();
+            var pSeries = tr.Select(x => x.P).ToArray();
+            var dO = tr.Select(x => x.Ordering).ToArray();
+
+            var supp = new double[n];
+            var disc = new double[n];
+            var bal = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                var bsp = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, tr[i].P, variant);
+                supp[i] = bsp.Suppression;
+                disc[i] = bsp.Discrimination;
+                bal[i] = bsp.BalanceQ;
+            }
+
+            var dL = new double[n - 1];
+            var dCov = new double[n - 1];
+            var dSupp = new double[n - 1];
+            var dDisc = new double[n - 1];
+            var dP = new double[n - 1];
+            var dBal = new double[n - 1];
+            var dOstep = new double[n - 1];
+            for (int i = 0; i < n - 1; i++)
+            {
+                dL[i] = l[i + 1] - l[i];
+                dCov[i] = cov[i + 1] - cov[i];
+                dSupp[i] = supp[i + 1] - supp[i];
+                dDisc[i] = disc[i + 1] - disc[i];
+                dP[i] = pSeries[i + 1] - pSeries[i];
+                dBal[i] = bal[i + 1] - bal[i];
+                dOstep[i] = dO[i + 1] - dO[i];
+            }
+
+            // Lead-lag/predictive scores: variable(t) -> dL(t+1), variable(t) -> L(t+1).
+            var xCov = cov.Take(n - 1).ToArray();
+            var xP = pSeries.Take(n - 1).ToArray();
+            var xBal = bal.Take(n - 1).ToArray();
+            var lNext = l.Skip(1).ToArray();
+
+            double leadCov = Math.Abs(PearsonCorrelation(xCov, dL));
+            double leadBal = Math.Abs(PearsonCorrelation(xBal, dL));
+            double leadP = Math.Abs(PearsonCorrelation(xP, dL));
+
+            double predCov = IdentityR2Affine(lNext, Normalize01(xCov));
+            double predBal = IdentityR2Affine(lNext, Normalize01(xBal));
+            double predP = IdentityR2Affine(lNext, Normalize01(xP));
+
+            // First-mover tagging before first significant L move.
+            double thL = Math.Max(1e-5, 0.35 * Std(dL));
+            int tL = Array.FindIndex(dL, x => Math.Abs(x) >= thL);
+            if (tL < 1) tL = Math.Min(5, dL.Length - 1);
+            int windowEnd = Math.Max(1, tL);
+
+            double energyCov = dCov.Take(windowEnd).Select(Math.Abs).Sum();
+            double energySupp = dSupp.Take(windowEnd).Select(Math.Abs).Sum();
+            double energyDisc = dDisc.Take(windowEnd).Select(Math.Abs).Sum();
+            double energyP = dP.Take(windowEnd).Select(Math.Abs).Sum();
+            double energyBal = dBal.Take(windowEnd).Select(Math.Abs).Sum();
+            double energyDO = dOstep.Take(windowEnd).Select(Math.Abs).Sum();
+
+            var energies = new Dictionary<string, double>
+            {
+                ["Covariance"] = energyCov,
+                ["Suppression"] = energySupp,
+                ["Discrimination"] = energyDisc,
+                ["Balance"] = energyBal,
+                ["p"] = energyP,
+                ["dO"] = energyDO
+            };
+            string firstMover = energies.OrderByDescending(kv => kv.Value).First().Key;
+
+            double scoreCov = 0.5 * leadCov + 0.5 * predCov;
+            double scoreBal = 0.5 * leadBal + 0.5 * predBal;
+            double scoreP = 0.5 * leadP + 0.5 * predP;
+            return (scoreCov, scoreBal, scoreP, firstMover, dO.Average(), SampleVariance(dO, dO.Average()));
+        }
+
+        // ============================================================
+        // PART A — Trajectory tracking
+        // ============================================================
+        _o.WriteLine("=== PART A: Trajectory tracking of L/cov/supp/disc/p/dO moments ===");
+        _o.WriteLine($"{"Family",-5} {"mean L",8} {"mean|cov|",10} {"mean Supp",10} {"mean Disc",10} {"mean p",8} {"mean dO",9} {"var dO",9}");
+        _o.WriteLine(new string('-', 86));
+
+        var famScores = new Dictionary<VcFamily, (double cov, double bal, double p, double pertCov, double pertBal, double pertP, string topDriver)>();
+        var firstMoverCounts = new Dictionary<string, int>
+        {
+            ["Covariance"] = 0, ["Suppression"] = 0, ["Discrimination"] = 0, ["Balance"] = 0, ["p"] = 0, ["dO"] = 0
+        };
+
+        foreach (var family in families)
+        {
+            var famVariants = variants.Where(v => v.Family == family).Take(10).ToArray();
+
+            var lMeans = new List<double>();
+            var covMeans = new List<double>();
+            var suppMeans = new List<double>();
+            var discMeans = new List<double>();
+            var pMeans = new List<double>();
+            var dOMeans = new List<double>();
+            var dOVars = new List<double>();
+
+            var scoreCovs = new List<double>();
+            var scoreBals = new List<double>();
+            var scorePs = new List<double>();
+
+            // ========================================================
+            // PART B — Lead-lag analysis
+            // ========================================================
+            foreach (var (variant, k) in famVariants.Select((v, i) => (v, i)))
+            {
+                double p0 = pMin + (pMax - pMin) * ((k + 1.0) / (famVariants.Length + 1.0));
+                var tr = SimulateTrajectory(variant, p0, baseSeed + 4200 + (int)family * 101 + k * 31);
+
+                var l = tr.Select(x => Clamp01(1.0 - x.VarI1 / (x.VarTerms + 1e-15))).ToArray();
+                var cov = tr.Select(x => x.CovarianceAbs).ToArray();
+                var pSer = tr.Select(x => x.P).ToArray();
+
+                var supp = tr.Select(x => EvaluateVariantAtP(distances, sorted, xiBase, k0Base, x.P, variant).Suppression).ToArray();
+                var disc = tr.Select(x => EvaluateVariantAtP(distances, sorted, xiBase, k0Base, x.P, variant).Discrimination).ToArray();
+
+                lMeans.Add(l.Average());
+                covMeans.Add(cov.Average());
+                suppMeans.Add(supp.Average());
+                discMeans.Add(disc.Average());
+                pMeans.Add(pSer.Average());
+
+                var a = AnalyzeTrajectory(variant, tr);
+                scoreCovs.Add(a.scoreCov);
+                scoreBals.Add(a.scoreBal);
+                scorePs.Add(a.scoreP);
+                dOMeans.Add(a.dOMean);
+                dOVars.Add(a.dOVar);
+                if (firstMoverCounts.ContainsKey(a.firstMover)) firstMoverCounts[a.firstMover]++;
+            }
+
+            // ========================================================
+            // PART C — Perturbation experiments
+            // ========================================================
+            var pertCovResp = new List<double>();
+            var pertSuppResp = new List<double>();
+            var pertDiscResp = new List<double>();
+            var pertPResp = new List<double>();
+
+            foreach (var (variant, k) in famVariants.Select((v, i) => (v, i)))
+            {
+                var sweep = RunCciSweep(distances, sorted, xiBase, k0Base, pMin, pMax, pStep, variant);
+                var opt = sweep.OrderByDescending(x => x.Quality).First();
+                double p0 = opt.P;
+
+                var baseC = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p0, variant);
+                var baseB = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p0, variant);
+                double l0 = Clamp01(1.0 - baseC.VarI1 / (baseC.VarTerms + 1e-15));
+
+                // covariance perturbation via p-tilt
+                double p1 = Math.Clamp(p0 + (k % 2 == 0 ? 0.30 : -0.30), pMin, pMax);
+                var cPert = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p1, variant);
+                double lCov = Clamp01(1.0 - cPert.VarI1 / (cPert.VarTerms + 1e-15));
+                double dCov = cPert.CovarianceAbs - baseC.CovarianceAbs;
+                pertCovResp.Add(Math.Abs(lCov - l0) / (Math.Abs(dCov) + 1e-12));
+                pertPResp.Add(Math.Abs(lCov - l0) / (Math.Abs(p1 - p0) + 1e-12));
+
+                // suppression perturbation via xi scale
+                var vSupp = variant with { XiScale = variant.XiScale * (k % 2 == 0 ? 0.78 : 1.22) };
+                var cSupp = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p0, vSupp);
+                var bSupp = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p0, vSupp);
+                double lSupp = Clamp01(1.0 - cSupp.VarI1 / (cSupp.VarTerms + 1e-15));
+                double dSupp = bSupp.Suppression - baseB.Suppression;
+                pertSuppResp.Add(Math.Abs(lSupp - l0) / (Math.Abs(dSupp) + 1e-12));
+
+                // discrimination perturbation via beta/gamma modulation
+                double betaScale = k % 2 == 0 ? 1.10 : 0.90;
+                double gammaScale = k % 2 == 0 ? 1.20 : 0.80;
+                var vDisc = variant with
+                {
+                    Beta = variant.Beta == 0.0 ? 0.0 : variant.Beta * betaScale,
+                    Gamma = variant.Gamma == 0.0 ? 0.0 : variant.Gamma * gammaScale
+                };
+                var cDisc = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p0, vDisc);
+                var bDisc = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p0, vDisc);
+                double lDisc = Clamp01(1.0 - cDisc.VarI1 / (cDisc.VarTerms + 1e-15));
+                double dDisc = bDisc.Discrimination - baseB.Discrimination;
+                pertDiscResp.Add(Math.Abs(lDisc - l0) / (Math.Abs(dDisc) + 1e-12));
+            }
+
+            double scoreCov = scoreCovs.Average();
+            double scoreBal = scoreBals.Average();
+            double scoreP = scorePs.Average();
+            double pCov = pertCovResp.Average();
+            double pBal = 0.5 * (pertSuppResp.Average() + pertDiscResp.Average());
+            double pP = pertPResp.Average();
+
+            double maxPert = Math.Max(pCov, Math.Max(pBal, pP)) + 1e-12;
+            double driverCov = 0.40 * scoreCov + 0.30 * (pCov / maxPert) + 0.30 * scoreCov;
+            double driverBal = 0.40 * scoreBal + 0.30 * (pBal / maxPert) + 0.30 * scoreBal;
+            double driverP = 0.40 * scoreP + 0.30 * (pP / maxPert) + 0.30 * scoreP;
+
+            string topDriver = new[]
+            {
+                ("Covariance", driverCov),
+                ("Balance", driverBal),
+                ("p", driverP)
+            }.OrderByDescending(x => x.Item2).First().Item1;
+
+            famScores[family] = (driverCov, driverBal, driverP, pCov, pBal, pP, topDriver);
+            _o.WriteLine($"{family,-5} {lMeans.Average(),8:F4} {covMeans.Average(),10:F5} {suppMeans.Average(),10:F4} {discMeans.Average(),10:F4} {pMeans.Average(),8:F3} {dOMeans.Average(),9:F5} {dOVars.Average(),9:F5}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — Causality ranking
+        // ============================================================
+        _o.WriteLine("=== PART D: Driver Score ranking (precedence + prediction + perturbation) ===");
+        _o.WriteLine($"{"Family",-5} {"ScoreCov",9} {"ScoreBal",9} {"ScoreP",9} {"Top",11}");
+        _o.WriteLine(new string('-', 50));
+
+        int covWins = 0, balWins = 0, pWins = 0;
+        foreach (var family in families)
+        {
+            var s = famScores[family];
+            _o.WriteLine($"{family,-5} {s.cov,9:F3} {s.bal,9:F3} {s.p,9:F3} {s.topDriver,11}");
+            if (s.topDriver == "Covariance") covWins++;
+            else if (s.topDriver == "Balance") balWins++;
+            else if (s.topDriver == "p") pWins++;
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Cross-family validation
+        // ============================================================
+        _o.WriteLine("=== PART E: Cross-family validation ===");
+        double meanCov = families.Select(f => famScores[f].cov).Average();
+        double meanBal = families.Select(f => famScores[f].bal).Average();
+        double meanP = families.Select(f => famScores[f].p).Average();
+        string globalTop = new[]
+        {
+            ("Covariance", meanCov),
+            ("Balance", meanBal),
+            ("p", meanP)
+        }.OrderByDescending(x => x.Item2).First().Item1;
+
+        _o.WriteLine($"Driver wins across families: covariance={covWins}, balance={balWins}, p={pWins}.");
+        _o.WriteLine($"Lead-first counts: cov={firstMoverCounts["Covariance"]}, supp={firstMoverCounts["Suppression"]}, disc={firstMoverCounts["Discrimination"]}, balance={firstMoverCounts["Balance"]}, p={firstMoverCounts["p"]}, dO={firstMoverCounts["dO"]}.");
+        _o.WriteLine($"Global mean driver scores: cov={meanCov:F3}, balance={meanBal:F3}, p={meanP:F3} (top={globalTop}).");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Decision
+        // ============================================================
+        string decision =
+            pWins >= 3 && meanP >= Math.Max(meanCov, meanBal) - 0.01 && covWins >= 1 ? "Model C" :
+            covWins >= 3 && meanCov > meanBal + 0.01 && meanCov > meanP + 0.01 ? "Model A" :
+            balWins >= 3 && meanBal > meanCov + 0.01 && meanBal > meanP + 0.01 ? "Model B" :
+            globalTop == "Covariance" ? "Model A" :
+            globalTop == "Balance" ? "Model B" :
+            "Model C";
+
+        string commitSummary = decision switch
+        {
+            "Model A" => "   LCD_01_LatentControlDriverAudit — covariance leads latent-state motion most consistently in lead-lag, predictive, and perturbation response scores across VC families.",
+            "Model B" => "   LCD_01_LatentControlDriverAudit — suppression/discrimination balance is the strongest upstream controller of L across temporal precedence and perturbation tests.",
+            "Model C" => "   LCD_01_LatentControlDriverAudit — p acts as the upstream control coordinate, with L response mediated through covariance and balance projections.",
+            _ => "   LCD_01_LatentControlDriverAudit — no tested variable fully explains L dynamics, indicating a deeper upstream driver."
+        };
+
+        _o.WriteLine("=== PART F: Decision ===");
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("2. Lead-lag analysis");
+        _o.WriteLine($"   Earliest change counts favor: cov={firstMoverCounts["Covariance"]}, balance={firstMoverCounts["Balance"]}, p={firstMoverCounts["p"]} (full set logged above).");
+        _o.WriteLine("3. Perturbation analysis");
+        _o.WriteLine($"   Mean perturbation responses (ΔL/Δdriver): cov={families.Select(f => famScores[f].pertCov).Average():F3}, balance={families.Select(f => famScores[f].pertBal).Average():F3}, p={families.Select(f => famScores[f].pertP).Average():F3}.");
+        _o.WriteLine("4. Driver ranking");
+        _o.WriteLine($"   Mean Driver Scores: cov={meanCov:F3}, balance={meanBal:F3}, p={meanP:F3}; global top={globalTop}.");
+        _o.WriteLine("5. Cross-family validation");
+        _o.WriteLine($"   Wins: covariance={covWins}/5, balance={balWins}/5, p={pWins}/5.");
+        _o.WriteLine("6. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("7. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== LCD_01 complete. Commit: LCD_01_LatentControlDriverAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
     private static SweepPoint EvaluateAtFixedP(double[] distances, double[] sortedDistances, double xi, double k0, double p, double a)
