@@ -1,0 +1,8 @@
+{
+  "version": "V7.6",
+  "branch": "v7.6-mode-resonance",
+  "status": "closed",
+  "next_branch": "v7.7-mode-entropy",
+  "total_audits": 5,
+  "key_result": "Mode occupation conserved (L1+L2+L3≈1); entropy tracks/generates effective dimension."
+}
