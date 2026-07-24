@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V7.2 STRUCTURE ATTRACTORS |
-| Current Branch | v7.2-structure-attractors |
-| Total Tests | 576 (Fact/Theory methods); ~3000+ (including suite runs) |
+| Current Version | V7.4 LATENT CONTROL |
+| Current Branch | v7.4-latent-control |
+| Total Tests | 587 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.2 — Structure Attractor Principle audited (SAP_01, PDP_01, NLA_01). REV_01 revalidation: bug-fixed RNG and causal p-dynamics. Structure = f(p) validated. Phase diagram: Gaussian dominates, CHANNELED sparse (4/77), no DEEP HIERARCHY under linear sweep. Nonlinear coupling (cs^p) now causal. |
+| Current Status | V7.4 — Latent control observable audit complete. LCO_01 reconstructs a dominant latent cancellation axis \(L\) across families and supports latent-control unification (Model C). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -110,6 +110,8 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.52 | Raw-Frequency Ensemble Sampling Origin | COMPLETE — SAC creates K1>K3>K2 ordering. |
 | V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
 | **V7.2** | **Structure Attractors & p-Distribution** | **SAP_01, PDP_01, NLA_01, REV_01. Structure = f(p) validated. Bug-fixed RNG (per-p seeding, cs^p causal). 15 spurious CHANNELED removed (19→4). Phase diagram: Gaussian 57%, CHANNELED 5%. Model B — conclusions hold with corrections.** |
+| **V7.3** | **Structure Optimality / Unified Control Observable** | **FOP_01 + POP_01 + BSP_01 + BUP_01 + BBC_01 + BER_01 + ASY_01 + CTP_01 + CCI_01 + CQU_01 + UCO_01 complete. Covariance and conservation were closed as dual projections of one control axis (UCO_01, Model C).** |
+| **V7.4** | **Latent Control Observable** | **LCO_01 complete. Latent reconstruction (PCA/factor-style one-factor fit) identifies a shared cancellation axis \(L\) with high family consistency (PC1 explained mean≈0.959, min≈0.948, mean \|corr(L,R)\|≈0.996). Decision: Model C (latent control observable exists).** |
 
 **Cumulative total: 2940 tests, 0 failed as of 2026-07-22.**
 
@@ -252,20 +254,32 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V7.2 STRUCTURE ATTRACTORS
+### Current Frontier — V7.4 LATENT CONTROL
 
-**Status:** V7.2 — Structure Attractor Principle under audit.
-**Branch:** `v7.2-structure-attractors`
+**Status:** V7.4 — latent control observable audit complete.
+**Branch:** `v7.4-latent-control`
 
 **Completed audits:**
 - **SAP_01** (Structure Attractor Principle): 20 random VC systems. p now causally enters dynamics via cs^p. 14 GAUSSIAN, 1 CHANNELED, 5 MIXED. Structure = f(p). No attractor — direct mapping.
 - **PDP_01** (p-Distribution Principle): 77-point p-sweep (0.2–4.0). Per-p independent RNG seeding. Phase diagram: GAUSSIAN 44 pts (57%), CHANNELED 4 pts (5%), MIXED 29 pts (38%). No FLAT, no DEEP HIERARCHY. Linear sweep → Gaussian-dominant dO.
 - **NLA_01** (Nonlinearity Landscape): 5 sweep functions compared. dO ~ dR/dcs × dcs/dt. Deep structure requires BOTH optimal p AND nonlinear sweep.
 - **REV_01** (SAP/PDP Revalidation): Bug fixes validated. Old PDP_01 overcounted CHANNELED by 375% (19→4) due to shared RNG drift. SAP_01 p-label was non-causal; now causal. All claims survive with corrections (Model B).
+- **FOP_01** (Functional Optimality Paradox): resolved DSVC-|R| vs Cupd-R distinction; preserved V6 optimum band p≈1.45–1.65 for real Cupd geometry.
+- **POP_01** (p-Optimality Principle): dense sweep p=0.1..4.0 plus analytical closure. Cupd-R maximum at p≈1.60, suppression/discrimination stationarity near p≈1.40, closure estimate p≈1.50. Universality check across stretched-exponential family keeps p* in the same band. Decision: **Model B**.
+- **BSP_01** (Balance Suppression Principle): generic metrics S, D across SAC/GAN/RCS/ICS/CNS with Q=S·D. Quality peaks near Q maxima in 4/5 systems; balance stationarity d(log S)/dp = -d(log D)/dp aligns with Q maxima in 5/5. Decision: **Model B**.
+- **BUP_01** (Balance Universality Principle): normalized balance coordinate B=S/(S+D). Quality peaks concentrate near B*≈0.413 (sd≈0.013), with balance-stationarity alignment in 4/5 systems. Extremes collapse asymmetrically (strongest in high-B/S>>D regime). Decision: **Model B**.
+- **BBC_01** (Balance Corridor Audit): 60-variant stress set across all five families. B* center persists (mean≈0.416) but spread widens (std≈0.056) and corridor coverage drops to 61.7%; high-B failure remains severe. Decision: **Model D** (universality unresolved under wide perturbation).
+- **BER_01** (Balance Extremes Rejection): systems constructed across reachable B span show distinct low/high collapse channels. High-B failures dominate in 5/5 families; low/high first-failure modes differ in 5/5. Decision: **Model B**.
+- **ASY_01** (Balance Asymmetry): B-sweep stress analysis confirms strong high-B dominance (mean low-B degradation 3.6% vs high-B 91.6%). High-side first collapse is covariance in 5/5 families, with mean destruction ratio \(D\text{-decay}_{highB}/S\text{-decay}_{lowB}\approx1.57\). Decision: **Model C**.
+- **CTP_01** (Covariance Tipping Point): covariance-first high-B collapse confirmed in 5/5 families; quality collapse follows covariance in 5/5. Early-warning 5% drop indicator selects covariance as earliest signal in 5/5. Normalized quality(covariance) manifold shows cross-family collapse (mean std≈0.089). Decision: **Model C**.
+- **CCI_01** (Covariance-Conservation Identity): analytic relation \(var(I1)=vt*(1-R)\) is validated operationally; \(R\) and conservation quality align almost perfectly (mean corr=1.000, RMSE≈0), but high-B collapse timing is covariance-first in 5/5 families (\(\Delta B_{cov}<\Delta B_{cons}\)). Decision: **Model A**.
+- **CQU_01** (Covariance-Quality Universality): normalized quality(covariance) collapses across SAC/GAN/RCS/ICS/CNS (mean std≈0.072). Predictive comparison gives mean R²: covariance 0.957, conservation 0.981, balance 0.966, covariance+balance 0.982; covariance retains ≈97.4% of cov+balance information. Decision: **Model C**.
+- **UCO_01** (Unified Control Observable): covariance vs conservation redundancy analysis gives mean \(|corr|\approx0.964\), mean NMI≈0.736, and PCA PC1 explained variance mean≈0.992 (min≈0.989). Combined cov+cons prediction adds negligible information over best single predictor. Decision: **Model C**.
+- **LCO_01** (Latent Control Observable): multivariate latent reconstruction over \(|cov|\), conservation, \(R\), ordering, structure, geometry yields a dominant latent axis \(L\) (PC1 explained mean≈0.959, min≈0.948). \(L\) predicts covariance/conservation/quality stack strongly and aligns with cancellation coordinate \(R\) (\(|corr(L,R)|\approx0.996\)). Decision: **Model C**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
-**Next:** SBA_01 SymmetryBreakingAudit complete. Awaiting next V7.2 sub-audit.
+**Next:** stress-test LCO_01 under expanded low-B coverage and stronger family perturbations to map where latent-control universality fails.
 
 ---
 

@@ -2,10 +2,10 @@
 
 **Version:** 2.5
 **Date:** 2026-07-24
-**Scope:** Clockwork Cosmology V1 through V7.2
-**Tests:** 576 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
-**Branch:** v7.2-structure-attractors
-**Current Frontier:** V7.2 STRUCTURE ATTRACTORS (SAP_01, PDP_01, NLA_01, REV_01 complete)
+**Scope:** Clockwork Cosmology V1 through V7.4
+**Tests:** 587 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Branch:** v7.4-latent-control
+**Current Frontier:** V7.4 LATENT CONTROL (LCO_01 complete; built on V7.3 closure stack)
 
 ---
 
@@ -1129,6 +1129,201 @@ Gaussian-dominant dO for almost all p.
 **V7.2 cumulative status:** 5 tests (SAP_01, PDP_01, NLA_01, REV_01 via re-run, SBA_01),
 0 failed.
 
+### V7.3 — Structure Optimality / p-Optimality Principle
+
+**Branch:** `v7.3-structure-optimality`
+
+**Goal:** explain why the stable functional optimum appears near p≈1.5.
+
+#### FOP_01 — Functional Optimality Paradox (complete)
+
+- Established that DSVC \|R\| and real Cupd R are different objects.
+- Preserved the V6 functional optimum band p≈1.45–1.65.
+- Framed p≈1.5 as a balance optimum, not a contradiction.
+
+#### POP_01 — p-Optimality Principle Audit (complete)
+
+- Dense sweep: p=0.1..4.0 across Cupd R, covariance magnitude, distance discrimination,
+  geometry quality, and functionality.
+- Extrema map: Cupd R peaks first at p≈1.60.
+- Analytical closure:
+  - Kernel: K = K0·exp(-(d/xi)^p)
+  - Balance proxy: A(p)=p·K0·⟨d⟩^(p−1)/xi^p
+  - Cupd ratio model: R(p)=0.42·A/(0.49·A²+0.09)
+  - Closure estimate: p≈1.50.
+- Minimal theorem (numerical stationarity):
+  - S(p)=1−⟨K⟩ (distance suppression), D(p)=distance discrimination
+  - Q(p)=S(p)·D(p) with stationarity condition d log S/dp = −d log D/dp.
+  - Balance point near p≈1.4–1.6.
+- Universality check:
+  - Stretched-exponential family K=exp(-a(d/xi)^p), a∈[0.7,1.3]
+  - p* remains in the same near-1.5 band.
+
+**Decision:** **Model B** — p≈1.5 emerges from covariance-balance dynamics
+(distance suppression vs distance discrimination), not as an empirical artifact.
+
+#### BSP_01 — Balance Suppression Principle Audit (complete)
+
+- Cross-system audit across **SAC, GAN, RCS, ICS, CNS**.
+- Defined generic metrics:
+  - Suppression: \(S = 1-\langle K\rangle\)
+  - Discrimination: \(D\) (state-separation with retention factor)
+  - Balance objective: \(Q=S\cdot D\)
+- Results:
+  - System quality peaks near \(Q\)-max in **4/5** systems.
+  - Stationarity condition \(d(\log S)/dp=-d(\log D)/dp\) aligns with \(Q\)-max in **5/5**.
+  - Suppression-only and discrimination-only extremes both underperform.
+
+**Decision:** **Model B** — suppression/discrimination balance generalizes beyond Cupd
+and behaves as a VC universality principle.
+
+#### BUP_01 — Balance Universality Principle Audit (complete)
+
+- Introduced normalized balance coordinate:
+  - \(B = S / (S + D)\)
+- Cross-family results (SAC, GAN, RCS, ICS, CNS):
+  - Quality-optimal balance coordinate concentrates at \(B^*\approx 0.413\) with low spread (sd≈0.013).
+  - Balance-stationarity condition aligns with quality optimum in 4/5 systems.
+  - Both extremes underperform, with strongest collapse for high-B (suppression-dominant) states.
+
+**Decision:** **Model B** — VC systems are balance-seeking in a shared interior
+balance corridor; no stronger mathematical-necessity claim yet.
+
+#### BBC_01 — Balance Corridor Audit (complete)
+
+- Expanded stress envelope to 60 variants across SAC/GAN/RCS/ICS/CNS with wide
+  \(\xi\), \(K_0\), and family-shape perturbations.
+- Balance coordinate at quality optimum:
+  - mean(B*) ≈ 0.4156
+  - std(B*) ≈ 0.0563
+  - 95% CI(mean) ≈ [0.4013, 0.4298]
+  - range ≈ [0.3242, 0.5238]
+- Corridor coverage around \(0.41\pm0.06\): 61.7% (37/60).
+- Tail degradation persists, strongest for high-B/suppression-dominant regimes.
+
+**Decision:** **Model D** — strict universal corridor/invariant claim is unresolved
+under large parameter variation.
+
+#### BER_01 — Balance Extremes Rejection Audit (complete)
+
+- Examined failure topology when moving away from interior balance toward low-B and high-B tails.
+- Across SAC/GAN/RCS/ICS/CNS:
+  - High-B tail collapse dominates (5/5 families).
+  - Low/high first-failure modes are complementary (5/5 families), indicating
+    different instability channels by side.
+  - Mean tail failure severity is strongly asymmetric (high-B >> low-B).
+- Reachable stress envelope in this run covered B≈[0.30, 0.92].
+
+**Decision:** **Model B** — high-B failures dominate, supporting rejection of
+suppression-dominant extremes and reinforcing interior-balance operation.
+
+#### ASY_01 — Balance Asymmetry Audit (complete)
+
+- Audited origin of asymmetric failure under balance extremes using B-sweep stress envelope.
+- Cross-family results (SAC/GAN/RCS/ICS/CNS):
+  - Mean low-B degradation ≈ 3.6%; mean high-B degradation ≈ 91.6%.
+  - High-B dominance observed in 5/5 families.
+  - First high-side collapse mode is covariance in 5/5 families.
+  - Analytical decay ratio \(D\text{-decay}_{highB} / S\text{-decay}_{lowB}\) averages ≈ 1.57.
+- Reachable stress envelope in this run covered B≈[0.30, 0.93].
+
+**Decision:** **Model C** — asymmetry emerges from covariance structure:
+suppression-dominant branch destroys discrimination through covariance collapse
+faster than the opposite branch destroys suppression.
+
+#### CTP_01 — Covariance Tipping Point Audit (complete)
+
+- Audited whether covariance is the primary control variable behind balance collapse.
+- Cross-family results (SAC/GAN/RCS/ICS/CNS):
+  - Covariance fails first on the high-B branch in 5/5 families.
+  - Quality collapse follows covariance collapse in 5/5 families.
+  - Early-warning indicator (\(\Delta B\) at 5% drop) selects covariance as earliest
+    signal in 5/5 families.
+  - Covariance-only predictability is strong for higher-level quantities
+    (mean R²: ordering≈0.956, structure≈0.886, geometry≈0.986, quality≈0.920).
+  - Normalized cross-family quality(covariance) manifold has mean std≈0.089.
+
+**Decision:** **Model C** — covariance and balance operate as equivalent control
+descriptions in the tested V7.3 stress envelope.
+
+#### CCI_01 — Covariance-Conservation Identity Audit (complete)
+
+- Audited whether covariance is fundamental or an alternate expression of conservation.
+- Cross-family results (SAC/GAN/RCS/ICS/CNS):
+  - Conservation law relation is explicit and operational:
+    \[
+    var(I1)=0.49\,var(km)+0.09\,var(d)+0.42\,cov = vt(1-R)
+    \]
+  - Correlation structure:
+    - mean corr(|cov|, var(I1)) ≈ -0.966
+    - mean corr(R, conservation quality) ≈ 1.000
+    - mean RMSE(R−ConsQ) ≈ 0
+  - Collapse sequencing on high-B side:
+    - covariance collapse precedes conservation collapse in 5/5 families.
+  - Normalized quality(covariance) manifold remains cross-family coherent
+    (mean std≈0.072).
+
+**Decision:** **Model A** — covariance drives conservation collapse timing, while
+remaining analytically bound to conservation through the same cancellation identity.
+
+#### CQU_01 — Covariance-Quality Universality Audit (complete)
+
+- Audited whether quality is fundamentally governed by covariance across VC families.
+- Cross-family results (SAC/GAN/RCS/ICS/CNS):
+  - Normalized quality(covariance) collapse is strong (mean cross-family std≈0.072).
+  - Predictive comparison (mean R²):
+    - covariance only ≈ 0.957
+    - conservation only ≈ 0.981
+    - balance only ≈ 0.966
+    - covariance+balance ≈ 0.982
+  - Covariance retains ≈97.4% of cov+balance predictive information.
+  - Incremental gain from adding balance to covariance is small (mean ΔR²≈0.025).
+
+**Decision:** **Model C** — quality behaves as a covariance phenomenon, with
+covariance carrying nearly all predictive quality information across families.
+
+#### UCO_01 — Unified Control Observable Audit (complete)
+
+- Audited whether covariance and conservation are distinct controls or dual
+  projections of one latent mechanism.
+- Cross-family results (SAC/GAN/RCS/ICS/CNS):
+  - High redundancy between covariance and conservation:
+    - mean |corr(cov, cons)| ≈ 0.964
+    - mean NMI ≈ 0.736
+  - Latent-variable analysis:
+    - PC1 explained variance mean ≈ 0.992
+    - minimum PC1 explained variance ≈ 0.989
+  - Predictive coupling:
+    - mean R²(cov) ≈ 0.957
+    - mean R²(cons) ≈ 0.981
+    - mean R²(cov+cons) ≈ 0.974
+    - gain over best single predictor ≈ -0.008 (negligible / redundant)
+
+**Decision:** **Model C** — a unified latent control observable exists; covariance
+and conservation are dual observables of the same cancellation-control mechanism.
+
+### V7.4 — Latent Control Observable
+
+**Branch:** `v7.4-latent-control`  
+**Goal:** identify the explicit latent control quantity generating covariance,
+conservation, and quality stack behavior.
+
+#### LCO_01 — Latent Control Observable Audit (complete)
+
+- Reconstructed latent variable \(L\) from multivariate stack:
+  \(|cov|,\ ConsQ,\ R,\ ordering,\ structure,\ geometry\).
+- Cross-family latent reconstruction (SAC/GAN/RCS/ICS/CNS):
+  - PC1 explained variance mean ≈ 0.959, minimum ≈ 0.948.
+  - mean \(|corr(L,R)|\) ≈ 0.996.
+  - \(L\)-based prediction is strong for covariance/conservation/quality and
+    comparable to best single projections.
+- Analytical reduction:
+  - \(var(I1)=vt(1-R)\), \(R=0.42|cov|/vt\)
+  - latent cancellation coordinate identified as \(L\sim R\sim 1-var(I1)/vt\).
+
+**Decision:** **Model C** — latent control observable exists; covariance and
+conservation are dual projections of one cancellation-control mechanism.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1654,12 +1849,21 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.2 STRUCTURE ATTRACTORS. 5 V7.2 audits complete (SAP_01, PDP_01, NLA_01, REV_01, SBA_01), 0 failed.
-Current branch: `v7.2-structure-attractors`.
-Key finding (V7.2): Structure = f(p) — a direct mapping, not a dynamical attractor.
-p now causally enters dynamics via cs^p. Per-p independent RNG seeding.
-Phase diagram: Gaussian 57%, CHANNELED 5%, MIXED 38%. No DEEP HIERARCHY under linear sweep.
-REV_01: 15 spurious CHANNELED removed by bug fixes. All claims survive (Model B).
+**Current status:** V7.4 LATENT CONTROL. LCO_01 complete on top of closed V7.3 stack, 0 failed.
+Current branch: `v7.4-latent-control`.
+Key findings (V7.3 → V7.4):
+- p≈1.5 is a covariance-balance optimum (POP_01).
+- Balance principle transfers across SAC/GAN/RCS/ICS/CNS (BSP_01).
+- Balance coordinate corridor \(B^*\approx 0.41\) is cross-family stable (BUP_01).
+- Under wide perturbations, corridor spread broadens substantially (BBC_01).
+- Extremes rejection is asymmetric: high-B collapse dominates across families (BER_01).
+- Asymmetry origin localizes to covariance-led high-B collapse (ASY_01).
+- Covariance is the universal tipping variable and earliest collapse signal (CTP_01).
+- Covariance and conservation obey the same identity, with covariance leading collapse timing (CCI_01).
+- Quality collapses onto a shared covariance curve with covariance-dominant information content (CQU_01).
+- Covariance and conservation collapse into a single latent control axis (UCO_01).
+- Latent cancellation coordinate \(L\) is reconstructible and aligns with \(R\) across families (LCO_01).
+Decision model (latest latent-control state): **Model C** for a latent control observable; invariant universality remains unresolved.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -1669,6 +1873,6 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-24. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V7.2. It is intended for onboarding
+TRM/TQM project from Clockwork Cosmology V1 through V7.3. It is intended for onboarding
 new researchers, reviewers, Copilot sessions, and LLM chats. Maintain strict claim
 discipline when referencing any finding described herein.*
