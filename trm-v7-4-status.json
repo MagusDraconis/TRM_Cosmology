@@ -1,0 +1,37 @@
+{
+  "version": "V7.4",
+  "branch": "v7.4-latent-dynamics",
+  "closure_date": "2026-07-24",
+  "status": "closed",
+  "next_branch": "v7.5-mode-dynamics",
+  "total_audits": 18,
+  "test_count": 600,
+  "failed": 0,
+  "key_result": "Covariance IS state separability; cov ≈ 0.379·(K_near−K_far), R²=0.998.",
+  "audits": [
+    { "id": "LDA_01", "focus": "Latent dynamics attractor", "decision": "Model A" },
+    { "id": "LCD_01", "focus": "Latent control driver", "decision": "Model A" },
+    { "id": "CBD_01", "focus": "Covariance balance derivation", "decision": "Model B" },
+    { "id": "CBR_01", "focus": "Covariance balance residual", "decision": "Model B" },
+    { "id": "PRI_01", "focus": "p-Residual information", "decision": "Model C" },
+    { "id": "KSI_01", "focus": "Kernel shape identity", "decision": "Model D" },
+    { "id": "KDI_01", "focus": "Kernel driver importance", "decision": "Model B" },
+    { "id": "SHD_01", "focus": "Slope half dominance", "decision": "Model B" },
+    { "id": "SCS_01", "focus": "Slope-covariance sufficiency", "decision": "Model B" },
+    { "id": "DCR_01", "focus": "Discrimination completion", "decision": "Model B" },
+    { "id": "DPF_01", "focus": "Discrimination primacy", "decision": "Model B" },
+    { "id": "DGD_01", "focus": "Discrimination geometry driver", "decision": "Model B" },
+    { "id": "NFS_01", "focus": "Near-far separability", "decision": "Model C" },
+    { "id": "MCM_01", "focus": "Multi-covariance mode", "decision": "Model B" },
+    { "id": "MCA_01", "focus": "Multi-covariance axis", "decision": "Model B" },
+    { "id": "MCL_01", "focus": "Multi-latent collapse", "decision": "Model A" },
+    { "id": "LDB_01", "focus": "Latent diversity breaking", "decision": "Model A" },
+    { "id": "DOP_01", "focus": "Diversity optimality principle", "decision": "Model B" }
+  ],
+  "open_questions": [
+    "Mode selection: Why do some covariance modes survive while others collapse?",
+    "Mode dynamics: Is there a competitive process selecting latent axes?",
+    "Resonance windows: Do CI sweet spots correspond to resonance regions?",
+    "xD emergence: Can multi-mode covariance generate genuine dimensionality?"
+  ]
+}
