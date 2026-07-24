@@ -1,0 +1,40 @@
+{
+  "closure": "V7.3_CLOSED",
+  "closureCommit": "V7_3_CLOSURE_LatentControlEstablished",
+  "date": "2026-07-24",
+  "branch": "v7.3-structure-optimality",
+  "transitionBranch": "v7.4-latent-dynamics",
+  "auditHistory": [
+    "POP_01",
+    "BSP_01",
+    "BUP_01",
+    "BBC_01",
+    "BER_01",
+    "ASY_01",
+    "CTP_01",
+    "CQU_01",
+    "UCO_01",
+    "LCO_01",
+    "LCI_01"
+  ],
+  "keyEquations": [
+    "K = K0 * exp(-(d/xi)^p)",
+    "R = 0.42*|cov|/(0.49*var(km) + 0.09*var(d))",
+    "var(I1) = 0.49*var(km) + 0.09*var(d) + 0.42*cov = vt*(1-R)",
+    "B = S/(S + D)",
+    "Q = S*D",
+    "L ≈ R ≈ 1 - var(I1)/vt"
+  ],
+  "finalHierarchy": [
+    "Balance (suppression vs discrimination) controls covariance cancellation.",
+    "Covariance is the earliest collapse and quality-tipping signal.",
+    "Conservation is the residual-form projection of the same cancellation law.",
+    "Ordering/structure/geometry/quality follow the same control manifold.",
+    "Latent L is the compact identity-level control observable."
+  ],
+  "openQuestions": [
+    "Do VC systems dynamically converge toward larger L (attractor behavior)?",
+    "Is L a universal state variable of VC dynamics across SAC/GAN/RCS/ICS/CNS?",
+    "Does collapse always begin with decreasing L?"
+  ]
+}

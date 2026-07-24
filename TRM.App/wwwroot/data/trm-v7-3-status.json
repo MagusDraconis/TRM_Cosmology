@@ -1,12 +1,12 @@
 {
   "releaseStatus": "V7.3 STRUCTURE OPTIMALITY COMPLETE",
-  "phase": "Balance, covariance, conservation, and unified-control closure",
+  "phase": "Balance, covariance, conservation, and latent-control establishment",
   "date": "2026-07-24",
   "branch": "v7.3-structure-optimality",
   "base": "V7.2 STRUCTURE ATTRACTORS COMPLETE",
   "testSummary": {
-    "total": 586,
-    "passed": 586,
+    "total": 587,
+    "passed": 587,
     "failed": 0,
     "skipped": 0,
     "verification": "TARGETED LONG-RUN AUDIT VERIFIED",
@@ -24,7 +24,9 @@
     { "name": "CTP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
     { "name": "CCI_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
     { "name": "CQU_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
-    { "name": "UCO_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" }
+    { "name": "UCO_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "LCO_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "LCI_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Balance interiority is required for robust quality across SAC/GAN/RCS/ICS/CNS",
@@ -32,7 +34,8 @@
     "Covariance is the earliest collapse signal and predicts higher-order observables",
     "Conservation law relation var(I1)=vt*(1-R) is operationally validated",
     "Quality collapses onto a shared covariance curve",
-    "Covariance and conservation are dual projections of one unified control axis"
+    "Covariance and conservation are dual projections of one unified control axis",
+    "Latent cancellation coordinate L is reconstructible and analytically identified as L≈R≈1-var(I1)/vt"
   ],
   "conditionalClaims": [
     "Strict invariant balance corridor remains unresolved under wide stress perturbations",
@@ -66,7 +69,7 @@
       "title": "V7.3 Closure Report",
       "filename": "V7_3_Closure_Report.md",
       "available": true,
-      "description": "Closure summary for BSP/BUP/BBC/BER/ASY/CTP/CQU/UCO audit stack."
+      "description": "Closure summary for POP/BSP/BUP/BBC/BER/ASY/CTP/CQU/UCO/LCO/LCI audit stack."
     }
   ],
   "roadmap": {
@@ -78,12 +81,12 @@
     ]
   },
   "releaseIntegrity": {
-    "totalTestsVerified": 586,
-    "passedVerified": 586,
+    "totalTestsVerified": 587,
+    "passedVerified": 587,
     "verificationMethod": "dotnet test (targeted long-running V7.3 audit selectors)",
     "mismatch": null
   },
-  "finalModel": "V7.3 closes on a unified control picture: suppression/discrimination balance controls covariance cancellation, conservation is its residual expression through var(I1)=vt*(1-R), and quality follows the same control manifold.",
+  "finalModel": "V7.3 closure with latent-control establishment: suppression/discrimination balance controls covariance cancellation, conservation is its residual expression through var(I1)=vt*(1-R), and latent coordinate L≈R≈1-var(I1)/vt unifies covariance, conservation, and quality behavior.",
   "baseForNextVersion": "V7.4",
-  "v7Status": "V7.3 CLOSED. UNIFIED CONTROL AXIS ESTABLISHED. READY FOR LATENT VARIABLE RECONSTRUCTION."
+  "v7Status": "V7.3 CLOSED. LATENT CONTROL ESTABLISHED. READY FOR LATENT DYNAMICS ATTRACTOR AUDIT."
 }
