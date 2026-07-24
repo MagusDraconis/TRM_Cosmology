@@ -41,8 +41,9 @@ public class V7_2_StructureAttractors_Tests
             var dOs=new List<double>();double v0=0;double prevO=0;
             for(int t=0;t<T;t++){
                 double cs=0.02+0.04*t;
+                double csP=Math.Pow(Math.Clamp(cs,0.0,0.98),p);
                 var xv=new double[nS];var yv=new double[nS];
-                for(int i=0;i<nS;i++){xv[i]=rng.NextDouble();yv[i]=cs*(1.0-xv[i])+(1.0-cs)*rng.NextDouble();}
+                for(int i=0;i<nS;i++){xv[i]=rng.NextDouble();yv[i]=csP*(1.0-xv[i])+(1.0-csP)*rng.NextDouble();}
                 double mx=xv.Average(),my=yv.Average(),cov=0,vx=0,vy=0;
                 for(int i=0;i<nS;i++){cov+=(xv[i]-mx)*(yv[i]-my);vx+=(xv[i]-mx)*(xv[i]-mx);vy+=(yv[i]-my)*(yv[i]-my);}
                 cov/=nS;vx/=nS;vy/=nS;
@@ -195,7 +196,7 @@ public class V7_2_StructureAttractors_Tests
         _o.WriteLine("=== How does p generate dO distribution shape? ===");
         _o.WriteLine(new string('=',80));
 
-        var rng=new Random(1005);int nS=50;int T=25;
+        const int baseSeed=1005;int nS=50;int T=25;
 
         // ============================================================
         // PARTS A+B — Dense p-Sweep, Measure dO Moments
@@ -208,12 +209,15 @@ public class V7_2_StructureAttractors_Tests
 
         var phaseData=new List<(double p,double varDO,double skew,double kurt,int depth,int channels,int sClass)>();
 
-        for(double p=0.2;p<=4.01;p+=0.05){
+        for(int pIdx=0;pIdx<=76;pIdx++){
+            double p=0.2+0.05*pIdx;
+            var rng=new Random(baseSeed+pIdx*7919);
             var dOs=new List<double>();double v0=0;double prevO=0;
             for(int t=0;t<T;t++){
                 double cs=0.02+0.04*t;
+                double csP=Math.Pow(Math.Clamp(cs,0.0,0.98),p);
                 var xv=new double[nS];var yv=new double[nS];
-                for(int i=0;i<nS;i++){xv[i]=rng.NextDouble();yv[i]=cs*(1.0-xv[i])+(1.0-cs)*rng.NextDouble();}
+                for(int i=0;i<nS;i++){xv[i]=rng.NextDouble();yv[i]=csP*(1.0-xv[i])+(1.0-csP)*rng.NextDouble();}
                 double mx=xv.Average(),my=yv.Average(),cov=0,vx=0,vy=0;
                 for(int i=0;i<nS;i++){cov+=(xv[i]-mx)*(yv[i]-my);vx+=(xv[i]-mx)*(xv[i]-mx);vy+=(yv[i]-my)*(yv[i]-my);}
                 cov/=nS;vx/=nS;vy/=nS;

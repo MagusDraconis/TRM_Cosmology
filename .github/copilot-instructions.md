@@ -6,8 +6,10 @@
 - Blazor.Extensions.Canvas is approved as an optional free component for custom visualizations if needed.
 
 ## Testing Guidelines
-- For xUnit in this project, long calculation tests should be skipped by default and only run in an explicit long-running test mode.
+- For xUnit in this project, long-running tests must be excluded from default test runs and executed only when explicitly required, as individual long-running tests may take minutes to up to one hour.
+- Long calculation tests should be skipped by default and only run in an explicit long-running test mode.
 - **Performance optimization:** When writing or modifying tests that contain many independent loop iterations (e.g., seed sweeps, parameter scans, variant comparisons), use `Parallel.For`, `Parallel.ForEach`, or `Parallel.Invoke` to distribute work across CPU cores. Collect results in thread-safe collections (`ConcurrentDictionary`, `ConcurrentBag`), then output sequentially after parallel work completes. This is especially important for tests tagged `LongRunning`.
+- TRM.Tests is intentionally used as a fast calculation/audit harness rather than a classic unit-test suite; many green assertions (including `Assert.True(true)`) are intentional and not meant as strict behavioral verification.
 
 ## Documentation Maintenance
 
