@@ -1,7 +1,7 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 2.1
-**Date:** 2026-07-22
+**Version:** 2.2
+**Date:** 2026-07-24
 **Read time:** < 5 minutes
 **Primary reference:** `docs/TRM_Project_Lineage_Overview.md`, `docs/TRM_Current_Frontier.md`
 
@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V5.63 GEOMETRY CLOSURE |
-| Current Branch | feature/v6.4-app-integration |
-| Total Tests | 2980 |
+| Current Version | V7.2 STRUCTURE ATTRACTORS |
+| Current Branch | v7.2-structure-attractors |
+| Total Tests | 576 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V5.63 — V6 geometry ANALYTICALLY CLOSED. I₁=Cupd conservation law. I₂=analytical coordinate. g₂₂ derived from I₁. PR→1 at large N. Single collective mode. V6: PIPELINE + APP INTEGRATED. |
+| Current Status | V7.2 — Structure Attractor Principle audited (SAP_01, PDP_01, NLA_01). REV_01 revalidation: bug-fixed RNG and causal p-dynamics. Structure = f(p) validated. Phase diagram: Gaussian dominates, CHANNELED sparse (4/77), no DEEP HIERARCHY under linear sweep. Nonlinear coupling (cs^p) now causal. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -109,6 +109,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.51 | Spread-Order Origin and Kernel-Assignment Mechanism | COMPLETE |
 | V5.52 | Raw-Frequency Ensemble Sampling Origin | COMPLETE — SAC creates K1>K3>K2 ordering. |
 | V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
+| **V7.2** | **Structure Attractors & p-Distribution** | **SAP_01, PDP_01, NLA_01, REV_01. Structure = f(p) validated. Bug-fixed RNG (per-p seeding, cs^p causal). 15 spurious CHANNELED removed (19→4). Phase diagram: Gaussian 57%, CHANNELED 5%. Model B — conclusions hold with corrections.** |
 
 **Cumulative total: 2940 tests, 0 failed as of 2026-07-22.**
 
@@ -251,47 +252,20 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 
 ## J. Current Research Frontier
 
-### Current Frontier — V5.63
+### Current Frontier — V7.2 STRUCTURE ATTRACTORS
 
-**Status:** V5.63 GEOMETRY CLOSURE.
-**Branch:** `feature/v6.4-app-integration`
-**Tests:** 2980 passed, 0 failed
+**Status:** V7.2 — Structure Attractor Principle under audit.
+**Branch:** `v7.2-structure-attractors`
 
-**V6 geometry:** ANALYTICALLY CLOSED — from discovery to mathematical proof.
-- V5.60: SAC = limit cycle (KEM_01–KEM_04), c_eff/Ω/MD falsified (EMG_01–EMG_02)
-- V5.61: Two invariants discovered (LCM_01–LCM_04), Euclidean limit (V5.61_g₂₂, V5.62)
-- V5.62: Cross-seed validation (V6_Validation), deep perturbation audit (INV_01)
-- V5.63: **11-audit ANALYTICAL CLOSURE stack:**
-  - ICA_01: I₁ = Cupd conservation law (99% cancellation)
-  - IDA_01: I₂ = analytical CV-minimizing coordinate
-  - MDA_01: g₂₂→1 derived from I₁ conservation
-  - DIM_01: Effective dimension = 2, PR→1 at large N
-  - GCL_01: I₁ dominates geometry 32:1 over I₂
-  - UGA_01: 88% unexplained = 3 outlier steps, vanishes at N≥90
-  - CFM_01: Single collective mode emerges (mode strength 259x)
-- V6.0–V6.4: Implementation, docs, core migration, pipeline, Blazor UI
+**Completed audits:**
+- **SAP_01** (Structure Attractor Principle): 20 random VC systems. p now causally enters dynamics via cs^p. 14 GAUSSIAN, 1 CHANNELED, 5 MIXED. Structure = f(p). No attractor — direct mapping.
+- **PDP_01** (p-Distribution Principle): 77-point p-sweep (0.2–4.0). Per-p independent RNG seeding. Phase diagram: GAUSSIAN 44 pts (57%), CHANNELED 4 pts (5%), MIXED 29 pts (38%). No FLAT, no DEEP HIERARCHY. Linear sweep → Gaussian-dominant dO.
+- **NLA_01** (Nonlinearity Landscape): 5 sweep functions compared. dO ~ dR/dcs × dcs/dt. Deep structure requires BOTH optimal p AND nonlinear sweep.
+- **REV_01** (SAP/PDP Revalidation): Bug fixes validated. Old PDP_01 overcounted CHANNELED by 375% (19→4) due to shared RNG drift. SAP_01 p-label was non-causal; now causal. All claims survive with corrections (Model B).
 
-**Next:** V5.64 — analytical proof package, rigorous g₂₂→1 proof.
+**Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
-**V5.61 story arc:**
-V5.60 discovered that SAC is a LIMIT CYCLE (period=2, half-life=52-66 epochs) with two
-invariants: I₁ = 0.70·km + 0.30·d_mean (CV=0.0025) and I₂ = 0.9·km + 0.1·Omega (CV=0.0121).
-Both are cross-seed validated. The V6 geometry on the (I₁, I₂) manifold has metric
-ds² = g₂₂·dI₂² with arc-length time coordinate s(t).
-
-V5.61 investigated g₂₂ — the metric component. KEY DISCOVERY: g₂₂ → 1.0 as N → ∞.
-At N=90: g₂₂=1.01 (CV=0.017). At N=100: g₂₂=1.00 (CV=0.003). The V6 manifold is
-**asymptotically flat** — in the thermodynamic limit, ds² = dI₂² (pure Euclidean).
-
-**V6 readiness:** THEORETICALLY FOUNDED. The geometric framework is complete:
-- Invariants: I₁ (conserved), I₂ (coordinate)
-- Metric: ds² = g₂₂·dI₂² → dI₂² at N→∞
-- Time: arc length s(t) (monotonic)
-- Driver: Omega (cyclic, not monotonic)
-
-**Next:** V5.62 — analytical proof of g₂₂ → 1 as N → ∞.
-
-See `docsV5/V5_61/TRM_V5_61_Final_Synthesis.md` for complete synthesis.
+**Next:** SBA_01 SymmetryBreakingAudit complete. Awaiting next V7.2 sub-audit.
 
 ---
 
@@ -340,6 +314,6 @@ Do not introduce new theory. The project has 2871 tests with 0 failures. V5.46 i
 
 ---
 
-*Generated 2026-07-16, last updated 2026-07-22. This document is a short operational briefing — not a replacement
+*Generated 2026-07-16, last updated 2026-07-24. This document is a short operational briefing — not a replacement
 for the full lineage overview or the current frontier document. Read `TRM_Project_Lineage_Overview.md` for the
 complete historical context and `TRM_Current_Frontier.md` for the active research state.*

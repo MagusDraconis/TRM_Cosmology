@@ -1,25 +1,32 @@
 {
-  "releaseStatus": "V7.2 PROCESS DIVERSITY",
-  "phase": "One Master Function — Parameterized by p",
-  "date": "2026-07-23",
-  "branch": "v7.2-process-diversity",
+  "releaseStatus": "V7.2 STRUCTURE ATTRACTORS",
+  "phase": "Structure = f(p) — p-Distribution and Nonlinearity Landscape Audits",
+  "date": "2026-07-24",
+  "branch": "v7.2-structure-attractors",
   "base": "V7.1 BRANCHING EMERGENCE COMPLETE",
-  "testSummary": { "total": 3210, "passed": 3210, "failed": 0 },
+  "testSummary": { "total": 3420, "passed": 3420, "failed": 0 },
   "suites": [
-    {"name":"SBA_01","title":"Symmetry Breaking Audit","commit":"LATEST","status":"COMPLETE","claimCategory":"SUPPORTED"}
+    {"name":"SAP_01","title":"Structure Attractor Principle Audit","commit":"bc8f00b","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"PDP_01","title":"p-Distribution Principle Audit","commit":"c4d435e","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"NLA_01","title":"Nonlinearity Landscape Audit","commit":"45a0cd3","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"REV_01","title":"SAP/PDP Revalidation","commit":"e5b4e62","status":"COMPLETE","claimCategory":"SUPPORTED"},
+    {"name":"SBA_01","title":"Symmetry Breaking Audit","commit":"26ac342","status":"COMPLETE","claimCategory":"SUPPORTED"}
   ],
-  "finalModel": "All geometry-producing VC families are instances of the master form K=K0*exp(-a*(d/xi)^p). Exponential=p=1, Gaussian=p=2, optimal=p=1.5-1.6. Rational family is NOT in this class and fails geometry. VC diversity = different p-values. Terminal: p IS the diversity generator.",
+  "finalModel": "Structure = f(p) — a direct mapping, not a dynamical attractor. p now causally enters dynamics via csP = cs^p. Per-p independent RNG seeding. Phase diagram: GAUSSIAN 57%, CHANNELED 5%, MIXED 38%. dO ~ dR/dcs * dcs/dt. Deep structure requires BOTH optimal p AND nonlinear sweep. REV_01: Bug-fixed RNG (shared stream -> per-p independent seeds). 15 spurious CHANNELED removed (19->4). All claims survive (Model B).",
   "baseForNextVersion": "V7.3",
   "supportedClaims": [
-    "All geometry-producing VC families share master form K=K0*exp(-a*(d/xi)^p)",
-    "6 shared invariants across all (a,p): distance suppression, negative cov, R, I1, 2D manifold, g22->1",
-    "Polynomial approximates stretched-exp at large p",
-    "Rational fails geometry (decays too slowly) — confirms master form",
-    "VC diversity = different p-values (same function, different parameter)",
-    "Terminal hierarchy: f(x)=exp(-a*x^p) -> p-diversity -> D -> DIM -> Structure -> Geometry"
+    "Structure = f(p) — structure classes are a direct mapping from p through dO distribution moments",
+    "Phase diagram: GAUSSIAN 44/77 (57%), CHANNELED 4/77 (5%), MIXED 29/77 (38%)",
+    "No DEEP HIERARCHY under linear cs(t) sweep (kurtosis < 10 for all p)",
+    "p now causally enters Y-generation via csP = cs^p, clamped to [0, 0.98]",
+    "Per-p independent RNG seeding eliminates cross-p contamination (baseSeed + pIdx * 7919)",
+    "dO ~ dR/dcs * dcs/dt — product of coupling curvature and sweep rate",
+    "Deep structure requires BOTH optimal p AND nonlinear sweep (SAC Cupd provides naturally)",
+    "REV_01: Old PDP_01 overcounted CHANNELED by 375% (19->4) — was RNG drift, not p-sensitivity",
+    "Structures are NOT attractors — no preferred structure. R is an attractor; structure is a response function."
   ],
-  "notClaimed": ["physical spacetime","physical dimensions","cosmology"],
+  "notClaimed": ["physical spacetime","physical dimensions","cosmology","structure attractor existence","DEEP HIERARCHY emergence under linear sweep"],
   "causalClosure": "MATHEMATICALLY CLOSED",
   "stopLowSafety": "SAFE",
-  "v7Status": "ONE MASTER FUNCTION. p IS THE DIVERSITY."
+  "v7Status": "STRUCTURE = f(p). p IS CAUSAL. NO ATTRACTOR — DIRECT MAPPING."
 }

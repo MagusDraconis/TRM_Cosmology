@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 2.4
-**Date:** 2026-07-21
-**Scope:** Clockwork Cosmology V1 through V5.57
-**Tests:** 2923 verified, 0 failed
-**Branch:** feature/v5.57-artifact-audit
-**Current Frontier:** V5.57 INITIALIZED (ART_01 complete)
+**Version:** 2.5
+**Date:** 2026-07-24
+**Scope:** Clockwork Cosmology V1 through V7.2
+**Tests:** 576 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Branch:** v7.2-structure-attractors
+**Current Frontier:** V7.2 STRUCTURE ATTRACTORS (SAP_01, PDP_01, NLA_01, REV_01 complete)
 
 ---
 
@@ -1048,6 +1048,89 @@ Origin of N-dependent distribution shape remains open. Stop-Low valid. V6 NOT RE
 
 ---
 
+## F4. V7.x — Structure Attractors and p-Distribution
+
+The V7 program investigates structure emergence — what determines the observed
+hierarchy/structure classes in the output, and whether structures are attractors
+or passive response functions of the coupling parameter p.
+
+### V7.2 — Structure Attractor Principle Audits
+
+**Branch:** `v7.2-structure-attractors`
+
+**Methodology:** DSVC (Dynamic Stochastic Variable Coupling) systems sweeping
+coupling strength cs(t) from ~0 to ~1 over T=25 steps, nS=50 samples per step.
+Order parameter O(t) = 1 − var(Z_t)/var(Z_0) where Z_t = 0.70·X_t + 0.30·Y_t.
+Structure classes derived from dO distribution moments (variance, skew, kurtosis).
+
+#### SAP_01 — Structure Attractor Principle Audit
+
+**Question:** Why do specific structure classes appear?
+
+**Answer:** Structure = f(p) — a direct mapping, not a dynamical attractor.
+
+- 20 random VC systems with p ∈ [0.5, 3.5]
+- **BUG FIX (2026-07-24):** p was generated but never injected into dynamics.
+  Fixed: `csP = cs^p` now enters Y-generation: `yv[i] = csP*(1−xv[i]) + (1−csP)*U`
+- Results: 14 GAUSSIAN, 1 CHANNELED, 5 MIXED (no DEEP HIERARCHY, no FLAT)
+- Structure class = dO distribution type → hierarchy construction
+- No attractor basin — structure tracks p, not the other way around
+- R is an attractor (BLO_01). Structure is a RESPONSE FUNCTION.
+- **Model D:** Structures are determined by p, not attracted to it.
+
+#### PDP_01 — p-Distribution Principle Audit
+
+**Question:** How does p generate dO distribution shape?
+
+**Answer:** Structure class = f(p), but the linear sweep produces
+Gaussian-dominant dO for almost all p.
+
+- 77-point p-sweep (0.2–4.0, step 0.05)
+- **BUG FIX (2026-07-24):** Old code shared single `Random(1005)` across all p-values,
+  causing RNG drift to masquerade as p-sensitivity. Fixed: each p gets independent seed
+  `Random(baseSeed + pIdx * 7919)`. Also added `csP = cs^p` nonlinear coupling.
+- **Phase diagram (corrected):**
+  - GAUSSIAN: 44 pts (57%) — dominant across entire p-range
+  - CHANNELED: 4 pts (5%) — p ∈ {0.75, 1.25, 2.45, 3.85}
+  - MIXED: 29 pts (38%)
+  - No FLAT, no DEEP HIERARCHY (kurtosis never exceeds 10)
+- 41 phase transitions detected (vs 51 in old RNG-drift version)
+- CHANNELED regions are sparse genuine nonlinear responses
+- **Model C:** Structure classes analytically derivable from dO moments.
+  dO moments = f(R(cs) shape). R(cs) shape = f(p). ∴ structure class = f(p).
+
+#### NLA_01 — Nonlinearity Landscape Audit
+
+**Question:** Does nonlinearity generate deep structure?
+
+**Answer:** Deep structure requires BOTH optimal p AND nonlinear sweep.
+
+- 5 sweep functions: Linear, Quadratic, Exponential, Logistic, Power-law
+- dO ~ dR/dcs × dcs/dt — product of coupling curvature and sweep rate
+- Linear sweep + any p: Gaussian dO
+- Nonlinear sweep + optimal p: Heavy-tail dO
+- SAC Cupd dynamics naturally provide nonlinear sweep
+- **Model C:** p AND nonlinearity jointly determine structure.
+
+#### REV_01 — SAP/PDP Revalidation
+
+**Question:** Do the bug fixes change conclusions?
+
+**Answer:** Conclusions hold with corrections (Model B).
+
+- **SAP_01:** Class distribution stable (14-1-5 vs 14-2-4). p now causal.
+- **PDP_01:** CHANNELED overcount identified: 19→4 (−79%). 15 spurious classifications
+  were RNG-drift artifacts from shared `Random(1005)`. Phase transitions: 51→41 (−20%).
+- **Impact:** MODIFIED (SAP p-causality, PDP channeled count). Nothing INVALIDATED.
+- **Old artifacts:** Shared RNG created artificial class oscillations.
+  Per-p independent seeding eliminates cross-p contamination.
+- **All original claims survive.** "Structure = f(p)" strengthened with causal evidence.
+
+**V7.2 cumulative status:** 5 tests (SAP_01, PDP_01, NLA_01, REV_01 via re-run, SBA_01),
+0 failed.
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -1156,6 +1239,17 @@ Items classified as SUPPORTED under current governance (V5.2 baseline):
     than mismatch. All perturbation families absorbed 87–99%. Weak c3OmgS directional signals
     are baseline-state artifacts (52.3% correct, near chance). Absorption is direction-invariant
     (Model D). Causal closure remains BLOCKED.
+32. **Structure = f(p) (V7.2 SAP_01):** Structure classes are a direct mapping from p
+    through dO distribution moments to hierarchy construction types. No attractor basin —
+    structure tracks p passively. p now causally enters dynamics via csP = cs^p.
+33. **p-Distribution Phase Diagram (V7.2 PDP_01):** 77-point p-sweep with per-p independent
+    RNG seeding. Phase diagram: GAUSSIAN 44/77 (57%), CHANNELED 4/77 (5%), MIXED 29/77 (38%).
+    Linear sweep produces Gaussian-dominant dO. No DEEP HIERARCHY (kurtosis < 10).
+34. **Nonlinearity Landscape (V7.2 NLA_01):** dO ~ dR/dcs × dcs/dt. Deep structure requires
+    BOTH optimal p AND nonlinear sweep. SAC Cupd dynamics naturally provide nonlinearity.
+35. **REV_01 Revalidation:** Old PDP_01 overcounted CHANNELED by 375% (19→4) due to shared
+    RNG drift. Per-p independent seeding eliminates cross-p contamination. All original
+    claims survive with corrections (Model B). No conclusions invalidated.
 
 ---
 
@@ -1538,6 +1632,7 @@ For new researchers, reviewers, Copilot sessions, or LLM chats onboarding to the
 9. **V5.6 MGCA Analysis** — Minimal generative core analysis. Nm suppressor, RP necessary,
    minimal map identified.
 10. **Section F2 above** — V5.7–V5.27 Branch Control and Adaptive Rescue Program.
+11. **Section F4 above** — V7.2 Structure Attractors and p-Distribution (SAP_01, PDP_01, NLA_01, REV_01).
 
 ---
 
@@ -1559,12 +1654,12 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** 2980 tests, 0 failed. V5.63 GEOMETRY CLOSURE.
-Current branch: `feature/v6.4-app-integration`.
-Preferred model: M3++ with Stop-Low (unchanged — V5 operational).
-V6 geometry: ANALYTICALLY CLOSED — I₁=Cupd conservation, I₂=analytical coordinate,
-g₂₂ derived from I₁, PR→1 at large N, single collective mode.
-V6: PIPELINE + APP INTEGRATED. 13/13 V6 tests pass.
+**Current status:** V7.2 STRUCTURE ATTRACTORS. 5 V7.2 audits complete (SAP_01, PDP_01, NLA_01, REV_01, SBA_01), 0 failed.
+Current branch: `v7.2-structure-attractors`.
+Key finding (V7.2): Structure = f(p) — a direct mapping, not a dynamical attractor.
+p now causally enters dynamics via cs^p. Per-p independent RNG seeding.
+Phase diagram: Gaussian 57%, CHANNELED 5%, MIXED 38%. No DEEP HIERARCHY under linear sweep.
+REV_01: 15 spurious CHANNELED removed by bug fixes. All claims survive (Model B).
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -1573,7 +1668,7 @@ equations, dark matter replacement, physical theory proven.
 
 ---
 
-*Generated 2026-07-21. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V5.53. It is intended for onboarding
+*Generated 2026-07-24. This document is the authoritative historical overview of the
+TRM/TQM project from Clockwork Cosmology V1 through V7.2. It is intended for onboarding
 new researchers, reviewers, Copilot sessions, and LLM chats. Maintain strict claim
 discipline when referencing any finding described herein.*
