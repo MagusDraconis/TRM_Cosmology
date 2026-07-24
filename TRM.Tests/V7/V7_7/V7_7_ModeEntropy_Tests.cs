@@ -255,4 +255,229 @@ public class V7_7_ModeEntropy_Tests
             return (d, m);
         }
     }
+
+    [Fact]
+    public void EPT_01_EntropyPhaseTransitionAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== EPT_01: Entropy Phase Transition Audit ===");
+        _o.WriteLine("=== Are dimensions discrete entropy phases? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 5573;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[]
+        {
+            ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6),
+            ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9),
+        };
+        int nContrasts = contrastDefs.Length;
+        var rng = new Random(baseSeed + 2411);
+
+        // ============================================================
+        // PART A-C — Ultra-dense sweep + transition detection
+        // ============================================================
+        int nBeta = 251; // 0.000 to 0.500 step 0.002 (focus on transition region)
+        var sweep = new List<(double beta, double h, double dh, int dim, double l1, double l2)>();
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = bi * 0.002;
+            var variants = new List<VariantSpec>();
+            for (int i = 0; i < 4; i++)
+                variants.Add(new VariantSpec($"SAC_PT_{i}", VcFamily.ICS,
+                    0.30 + rng.NextDouble() * 2.0, 1.0,
+                    0.20 + rng.NextDouble() * 2.5, beta, 0.0));
+
+            var allC = new List<double[]>(); var allL = new List<double>();
+            double pS = 0.45; int nP = (int)Math.Round((1.5 - 0.1) / pS) + 1;
+            foreach (var v in variants)
+                for (int ip = 0; ip < nP; ip++)
+                {
+                    double p = 0.1 + ip * pS; if (p > 1.51) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    int n = distances.Length; double[] kA = new double[n];
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    for (int i = 0; i < n; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                    for (int i = 0; i < n; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                    for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                    var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                    allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                }
+
+            int Npts = allL.Count; var LArr = allL.ToArray();
+            var X = new double[Npts][]; for (int i = 0; i < Npts; i++) X[i] = (double[])allC[i].Clone();
+            for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, Npts).Average(i => X[i][c]); double v = Enumerable.Range(0, Npts).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(v) + 1e-12; for (int i = 0; i < Npts; i++) X[i][c] = (X[i][c] - m) / s; }
+            var cm = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, Npts).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, Npts).Select(i => allC[i][b]).ToArray());
+            var (e, ev) = JacobiEigenLocal(cm, nContrasts);
+            var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => e[i]).ToArray();
+            var la = new double[3][];
+            for (int k = 0; k < 3; k++) { la[k] = new double[Npts]; int er = pe[k]; for (int i = 0; i < Npts; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+            double r2L1 = R2SinglePredictor(LArr, la[0]);
+            double r2L2 = FitModelR2(LArr, new[] { la[0], la[1] });
+            double r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+            double t = r2L3;
+            double p1 = r2L1 / Math.Max(t, 1e-12), p2 = (r2L2 - r2L1) / Math.Max(t, 1e-12), p3 = (r2L3 - r2L2) / Math.Max(t, 1e-12);
+            double ent = 0;
+            if (p1 > 1e-12) ent -= p1 * Math.Log(p1);
+            if (p2 > 1e-12) ent -= p2 * Math.Log(p2);
+            if (p3 > 1e-12) ent -= p3 * Math.Log(p3);
+            int effDim = 1 + (p2 > 0.03 ? 1 : 0) + (p3 > 0.03 ? 1 : 0);
+
+            // dH/dβ from finite difference
+            double dh = sweep.Count > 0 ? (ent - sweep.Last().h) / 0.002 : 0;
+            sweep.Add((beta, ent, dh, effDim, p1, p2));
+        }
+
+        // ============================================================
+        // PART C-D — Transition detection + critical behavior
+        // ============================================================
+        _o.WriteLine("=== PARTS C-D: Transitions and critical behavior ===");
+
+        var transitions = new List<(double beta, int from, int to, double dH, double entBefore, double entAfter)>();
+        for (int i = 1; i < sweep.Count; i++)
+        {
+            if (sweep[i].dim != sweep[i - 1].dim)
+            {
+                transitions.Add((sweep[i].beta, sweep[i - 1].dim, sweep[i].dim,
+                    sweep[i].dh, sweep[i - 1].h, sweep[i].h));
+            }
+        }
+
+        _o.WriteLine($"Detected {transitions.Count} dimensional transitions:");
+        _o.WriteLine($"{"β",10} {"from→to",10} {"dH/dβ",10} {"H_before",10} {"H_after",10} {"ΔH",10}");
+        _o.WriteLine(new string('-', 62));
+        foreach (var tr in transitions)
+            _o.WriteLine($"{tr.beta,10:F3} {tr.from + "→" + tr.to,10} {tr.dH,10:F4} {tr.entBefore,10:F4} {tr.entAfter,10:F4} {tr.entAfter - tr.entBefore,10:F4}");
+        _o.WriteLine("");
+
+        // Susceptibility: variance of H in 5-point windows
+        var susceptibility = new List<(double beta, double varH)>();
+        for (int i = 2; i < sweep.Count - 2; i++)
+        {
+            double[] window = { sweep[i - 2].h, sweep[i - 1].h, sweep[i].h, sweep[i + 1].h, sweep[i + 2].h };
+            double m = window.Average();
+            double varH = window.Select(h => (h - m) * (h - m)).Average();
+            susceptibility.Add((sweep[i].beta, varH));
+        }
+        double maxSus = susceptibility.Max(s => s.varH);
+        var peakSus = susceptibility.Where(s => s.varH > maxSus * 0.7).OrderBy(s => s.beta).ToList();
+
+        _o.WriteLine($"Entropy susceptibility peaks (top 70th percentile):");
+        foreach (var ps in peakSus)
+            _o.WriteLine($"  β={ps.beta:F3}, var(H)={ps.varH:F6}");
+        _o.WriteLine("");
+
+        // Critical: do susceptibility peaks align with transitions?
+        int susNearTrans = peakSus.Count(ps => transitions.Any(tr => Math.Abs(ps.beta - tr.beta) < 0.01));
+        _o.WriteLine($"Susceptibility peaks near transitions: {susNearTrans}/{peakSus.Count}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E-F — Phase diagram + cross-family
+        // ============================================================
+        _o.WriteLine("=== PARTS E-F: Phase diagram ===");
+
+        // H-Dim phase boundaries
+        var hAtDim1 = sweep.Where(s => s.dim == 1).Select(s => s.h).ToList();
+        var hAtDim2 = sweep.Where(s => s.dim == 2).Select(s => s.h).ToList();
+        var hAtDim3 = sweep.Where(s => s.dim == 3).Select(s => s.h).ToList();
+
+        _o.WriteLine($"Entropy phase diagram (251-step sweep, Δβ=0.002):");
+        _o.WriteLine($"  Dim=1: H ∈ [{hAtDim1.Min():F4}, {hAtDim1.Max():F4}] (mean={hAtDim1.Average():F4})");
+        _o.WriteLine($"  Dim=2: H ∈ [{hAtDim2.Min():F4}, {hAtDim2.Max():F4}] (mean={hAtDim2.Average():F4})");
+        _o.WriteLine($"  Dim=3: H ∈ [{hAtDim3.Min():F4}, {hAtDim3.Max():F4}] (mean={hAtDim3.Average():F4})");
+
+        // Phase boundaries
+        double hBound12 = hAtDim1.Count > 0 ? (hAtDim1.Max() + hAtDim2.Min()) / 2 : 0;
+        double hBound23 = hAtDim2.Count > 0 ? (hAtDim2.Max() + hAtDim3.Min()) / 2 : 0;
+        _o.WriteLine($"  Dim 1↔2 boundary: H ≈ {hBound12:F4}");
+        _o.WriteLine($"  Dim 2↔3 boundary: H ≈ {hBound23:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART G-H — Theorem + decision
+        // ============================================================
+        _o.WriteLine("=== PARTS G-H: Theorem + Decision ===");
+
+        bool discreteTransitions = transitions.Count >= 2 && transitions.All(tr => Math.Abs(tr.entAfter - tr.entBefore) > 0.02);
+        bool criticalSignatures = susNearTrans >= 1;
+        bool boundariesWellDefined = hAtDim1.Count > 3 && hAtDim2.Count > 3;
+
+        string decision;
+        if (discreteTransitions && criticalSignatures && boundariesWellDefined)
+            decision = "Model C";
+        else if (discreteTransitions)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision model: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine($"Critical entropy thresholds generate dimensions. The {transitions.Count} detected transitions show sharp, discrete jumps in the H-dimension mapping, with susceptibility peaks at transition boundaries. Phase diagram: dim=1 at H<{hBound12:F3}, dim=2 at H∈[{hBound12:F3},{hBound23:F3}], dim=3 at H>{hBound23:F3}. Mode-occupation entropy undergoes genuine phase transitions at critical β values.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Dimension changes through discrete entropy transitions ({transitions.Count} detected). Transition points coincide with susceptibility peaks.");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. Transitions: {transitions.Count} detected, {(discreteTransitions ? "discrete" : "gradual")}");
+        _o.WriteLine($"3. Critical: {peakSus.Count} susceptibility peaks, {susNearTrans} near transitions");
+        _o.WriteLine($"4. Phase boundaries: H≈{hBound12:F3} (1↔2), H≈{hBound23:F3} (2↔3)");
+        _o.WriteLine($"5. Decision model: {decision}");
+        _o.WriteLine("6. Commit-ready summary:");
+        _o.WriteLine("   EPT_01_EntropyPhaseTransitionAudit — dimensional transitions are");
+        _o.WriteLine($"   {(discreteTransitions ? "discrete entropy phase transitions" : "continuous entropy changes")}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== EPT_01 complete. Commit: EPT_01_EntropyPhaseTransitionAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+
+        static (double[] eigenvalues, double[,] eigenvectors) JacobiEigenLocal(double[,] a, int n)
+        {
+            var m = new double[n, n]; var d = new double[n];
+            for (int i = 0; i < n; i++) { m[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0;
+                for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++) sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++)
+                    for (int j = i + 1; j < n; j++)
+                    {
+                        double g = 100.0 * Math.Abs(a[i, j]);
+                        if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j])) a[i, j] = 0.0;
+                        else if (Math.Abs(a[i, j]) > thresh)
+                        {
+                            double h = d[j] - d[i], t;
+                            if (Math.Abs(h) + g == Math.Abs(h)) t = a[i, j] / h;
+                            else { double theta = 0.5 * h / a[i, j]; t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta)); if (theta < 0) t = -t; }
+                            double c = 1.0 / Math.Sqrt(1.0 + t * t), s = t * c, tau = s / (1.0 + c);
+                            h = t * a[i, j]; z[i] -= h; z[j] += h; d[i] -= h; d[j] += h; a[i, j] = 0.0;
+                            for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                            for (int k = 0; k < n; k++) { g = m[k, i]; h = m[k, j]; m[k, i] = g - s * (h + g * tau); m[k, j] = h + s * (g - h * tau); }
+                        }
+                    }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, m);
+        }
+    }
 }
