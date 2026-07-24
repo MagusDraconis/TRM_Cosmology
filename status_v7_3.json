@@ -1,0 +1,39 @@
+{
+  "version": "V7.3",
+  "status": "closed",
+  "timestamp": "2026-07-24",
+  "current_branch": "v7.3-structure-optimality",
+  "branch_history": [
+    "v7.2-structure-attractors",
+    "v7.3-structure-optimality"
+  ],
+  "audit_history": [
+    { "id": "BSP_01", "title": "Balance Suppression Principle", "decision": "Model B" },
+    { "id": "BUP_01", "title": "Balance Universality Principle", "decision": "Model B" },
+    { "id": "BBC_01", "title": "Balance Corridor", "decision": "Model D" },
+    { "id": "BER_01", "title": "Balance Extremes Rejection", "decision": "Model B" },
+    { "id": "ASY_01", "title": "Balance Asymmetry", "decision": "Model C" },
+    { "id": "CTP_01", "title": "Covariance Tipping Point", "decision": "Model C" },
+    { "id": "CQU_01", "title": "Covariance-Quality Universality", "decision": "Model C" },
+    { "id": "UCO_01", "title": "Unified Control Observable", "decision": "Model C" }
+  ],
+  "key_equations": {
+    "kernel": "K = K0 * exp(-(d/xi)^p)",
+    "balance_ratio": "R = 0.42*|cov|/(0.49*var(km) + 0.09*var(d))",
+    "invariant_variance_identity": "var(I1) = 0.49*var(km) + 0.09*var(d) + 0.42*cov = vt*(1-R)",
+    "balance_coordinate": "B = S/(S + D)",
+    "balance_objective": "Q = S*D"
+  },
+  "final_hierarchy": [
+    "Distance suppression/discrimination balance",
+    "Covariance cancellation control",
+    "Conservation residual control (var(I1))",
+    "Ordering + structure + geometry support",
+    "System quality"
+  ],
+  "open_questions": [
+    "What is the explicit latent control observable underlying covariance and conservation?",
+    "Does latent-control universality persist under broader low-B and high-perturbation envelopes?",
+    "What is the cleanest symbolic reduction from cancellation identities to a single latent coordinate?"
+  ]
+}
