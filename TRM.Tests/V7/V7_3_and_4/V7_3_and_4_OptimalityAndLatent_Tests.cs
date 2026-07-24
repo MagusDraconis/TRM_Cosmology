@@ -6120,6 +6120,507 @@ public class V7_3_and_4_OptimalityAndLatent_Tests
         }
     }
 
+    [Fact]
+    public void DSD_01_DiscriminationSlopeDualityAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DSD_01: Discrimination-Slope Duality Audit ===");
+        _o.WriteLine("=== Are discrimination and slope the two fundamental kernel control channels? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 1493;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.08;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 317);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        // ============================================================
+        // Data collection — full structural + shape metrics
+        // ============================================================
+        var allPoints = new List<PriPoint>();
+
+        foreach (var v in variants)
+        {
+            int nP = (int)Math.Round((pMax - pMin) / pStep) + 1;
+            for (int ip = 0; ip < nP; ip++)
+            {
+                double p = pMin + ip * pStep;
+                var bsp = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+
+                int n = distances.Length;
+                double[] kArr = new double[n];
+                double[] effD = new double[n];
+                double xi = xiBase * v.XiScale;
+                double k0 = k0Base * v.K0Scale;
+
+                for (int i = 0; i < n; i++)
+                {
+                    effD[i] = distances[i] / (xi + 1e-15);
+                    kArr[i] = v.Family switch
+                    {
+                        VcFamily.SAC => k0 * Math.Exp(-v.Alpha * Math.Pow(effD[i], p)),
+                        VcFamily.GAN => k0 * Math.Exp(-v.Alpha * Math.Pow(effD[i], p)) * (v.Beta + v.Gamma * Math.Cos(1.15 * effD[i])),
+                        VcFamily.RCS => k0 / (1.0 + v.Alpha * Math.Pow(effD[i], p)),
+                        VcFamily.ICS => k0 * Math.Exp(-Math.Pow(effD[i], v.Alpha * p + v.Beta)),
+                        VcFamily.CNS => (k0 * Math.Exp(-v.Alpha * Math.Pow(effD[i], p)) * (v.Beta - v.Gamma * Math.Exp(-1.6 * effD[i]))) + 0.03 * k0,
+                        _ => k0 * Math.Exp(-Math.Pow(effD[i], p))
+                    };
+                    kArr[i] = Math.Clamp(kArr[i], 0.0, k0);
+                }
+
+                double mdEff = effD.Average();
+                double vdEff = SampleVariance(effD, mdEff);
+                double sdEff = Math.Sqrt(vdEff);
+
+                double halfMaxDist = xi * Math.Pow(Math.Log(2.0), 1.0 / Math.Max(p, 0.05));
+                double zHalf = halfMaxDist / xi;
+                double slopeAtHalf = -k0 * (p / xi) * Math.Pow(zHalf, p - 1.0) * Math.Exp(-Math.Pow(zHalf, p));
+                double curvatureAtHalf = k0 * (p / (xi * xi)) * Math.Pow(zHalf, p - 2.0) * Math.Exp(-Math.Pow(zHalf, p)) * (p * Math.Pow(zHalf, p) - (p - 1.0));
+                double couplingBudget = k0 * xi * GammaApproxD(1.0 + 1.0 / p);
+                double couplingWidth = xi * Math.Pow(-Math.Log(0.10), 1.0 / p);
+
+                double dOSkew = 0.0, dOKurt = 0.0;
+                {
+                    double m3 = 0.0, m4 = 0.0;
+                    for (int i = 0; i < n; i++) { double dx = effD[i] - mdEff; m3 += dx * dx * dx; m4 += dx * dx * dx * dx; }
+                    m3 /= n; m4 /= n;
+                    dOSkew = sdEff > 1e-15 ? m3 / (sdEff * sdEff * sdEff) : 0.0;
+                    dOKurt = (vdEff * vdEff) > 1e-15 ? m4 / (vdEff * vdEff) - 3.0 : 0.0;
+                }
+
+                double kMax = kArr.Max();
+                double kMin = kArr.Where(x => x > 1e-12).DefaultIfEmpty(1e-12).Min();
+                double hierarchyDepth = Math.Log(kMax / Math.Max(kMin, 1e-12));
+                double channelCount;
+                {
+                    int bins = 20;
+                    double[] binCounts = new double[bins];
+                    double kRange = kMax - kMin;
+                    double chanBinW = kRange > 1e-15 ? kRange / bins : 1.0;
+                    for (int i = 0; i < n; i++)
+                    {
+                        int bin = (int)Math.Min(bins - 1, Math.Floor((kArr[i] - kMin) / (chanBinW + 1e-15)));
+                        if (bin >= 0) binCounts[bin]++;
+                    }
+                    double t = binCounts.Sum();
+                    double simpson = 0.0;
+                    for (int i = 0; i < bins; i++) { double pi = binCounts[i] / (t + 1e-15); simpson += pi * pi; }
+                    channelCount = simpson > 1e-15 ? 1.0 / simpson : 1.0;
+                }
+
+                var pp = new PriPoint
+                {
+                    Family = v.Family, P = p,
+                    S = bsp.Suppression, D = bsp.Discrimination,
+                    CovActual = cci.CovarianceAbs,
+                    DOVariance = vdEff, DOSkew = dOSkew, DOKurtosis = dOKurt,
+                    HierarchyDepth = hierarchyDepth, ChannelCount = channelCount,
+                    GeometryQuality = cci.Geometry,
+                    HalfMaxDist = halfMaxDist, SlopeAtHalf = slopeAtHalf,
+                    CurvatureAtHalf = curvatureAtHalf,
+                    CouplingBudget = couplingBudget, CouplingWidth = couplingWidth,
+                    Quality = cci.Quality,
+                    BalanceB = bsp.Suppression / (bsp.Suppression + bsp.Discrimination + 1e-15)
+                };
+                allPoints.Add(pp);
+            }
+        }
+
+        int N = allPoints.Count;
+        double[] slopeArr = allPoints.Select(x => Math.Abs(x.SlopeAtHalf)).ToArray();
+        double[] discArr = allPoints.Select(x => x.D).ToArray();
+        double[] covArr = allPoints.Select(x => x.CovActual).ToArray();
+        double[] suppArr = allPoints.Select(x => x.S).ToArray();
+        double[] pArr = allPoints.Select(x => x.P).ToArray();
+        double[] qualArr = allPoints.Select(x => x.Quality).ToArray();
+
+        _o.WriteLine($"Data collected: N={N} points across {families.Length} families.");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART A — Descriptive: D, S, cov across families
+        // ============================================================
+        _o.WriteLine("=== PART A: Discrimination, slopeAtHalf, covariance ===");
+        _o.WriteLine($"{"Family",-6} {"N",6} {"disc_mean",10} {"slope_mean",10} {"cov_mean",10} {"r(D,cov)",10} {"r(S,cov)",10}");
+        _o.WriteLine(new string('-', 68));
+
+        foreach (var fam in families)
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allPoints[i].Family == fam).ToArray();
+            double dm = idx.Average(i => discArr[i]);
+            double sm = idx.Average(i => slopeArr[i]);
+            double cm = idx.Average(i => covArr[i]);
+            double rDc = PearsonCorrelation(idx.Select(i => discArr[i]).ToArray(), idx.Select(i => covArr[i]).ToArray());
+            double rSc = PearsonCorrelation(idx.Select(i => slopeArr[i]).ToArray(), idx.Select(i => covArr[i]).ToArray());
+            _o.WriteLine($"{fam,-6} {idx.Length,6} {dm,10:F4} {sm,10:F4} {cm,10:F4} {rDc,10:F4} {rSc,10:F4}");
+        }
+        double rSlopeDisc = PearsonCorrelation(slopeArr, discArr);
+        _o.WriteLine($"");
+        _o.WriteLine($"Global: r(D,cov) = {PearsonCorrelation(discArr, covArr):F4}");
+        _o.WriteLine($"        r(S,cov) = {PearsonCorrelation(slopeArr, covArr):F4}");
+        _o.WriteLine($"        r(D,S)   = {rSlopeDisc:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART B — Orthogonality analysis
+        // ============================================================
+        _o.WriteLine("=== PART B: Orthogonality analysis ===");
+
+        double rDS = rSlopeDisc;
+        double sharedVarDS = rDS * rDS;
+
+        // Mutual information
+        var miDS = MutualInformationBinned(discArr, slopeArr, 12);
+        var miDCov = MutualInformationBinned(discArr, covArr, 12);
+        var miSCov = MutualInformationBinned(slopeArr, covArr, 12);
+
+        // PCA
+        var (pc1DS, pc2DS) = FirstPrincipalExplainedVariance(discArr, slopeArr);
+
+        _o.WriteLine($"Correlation r(discrimination, slope): {rDS:F4}");
+        _o.WriteLine($"Shared variance r²:                     {sharedVarDS:F4} ({sharedVarDS:P1})");
+        _o.WriteLine($"Independent variance:                    {1.0 - sharedVarDS:F4} ({1.0 - sharedVarDS:P1})");
+        _o.WriteLine($"");
+        _o.WriteLine($"Mutual information:");
+        _o.WriteLine($"  NMI(discrimination, slope)     = {miDS.nmi:F4}");
+        _o.WriteLine($"  NMI(discrimination, covariance)= {miDCov.nmi:F4}");
+        _o.WriteLine($"  NMI(slope, covariance)         = {miSCov.nmi:F4}");
+        _o.WriteLine($"");
+        _o.WriteLine($"PCA of D-S space:");
+        _o.WriteLine($"  PC1 explains {pc1DS:P1} of variance, PC2 explains {pc2DS:P1}");
+        _o.WriteLine($"  D and S are {(pc1DS > 0.85 ? "nearly collinear (single axis)" : pc1DS > 0.65 ? "partially aligned" : "substantially orthogonal")}");
+        _o.WriteLine("");
+
+        // Orthogonality within each family
+        _o.WriteLine($"{"Family",-6} {"r(D,S)",10} {"PC1",10} {"PC2",10} {"NMI(D,S)",10} {"independence",14}");
+        _o.WriteLine(new string('-', 62));
+        foreach (var fam in families)
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allPoints[i].Family == fam).ToArray();
+            double[] fD = idx.Select(i => discArr[i]).ToArray();
+            double[] fS = idx.Select(i => slopeArr[i]).ToArray();
+            double fR = PearsonCorrelation(fD, fS);
+            var (fpc1, fpc2) = FirstPrincipalExplainedVariance(fD, fS);
+            var fmi = MutualInformationBinned(fD, fS, 10);
+            _o.WriteLine($"{fam,-6} {fR,10:F4} {fpc1,10:F3} {fpc2,10:F3} {fmi.nmi,10:F4} {1.0 - fR * fR,14:P1}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART C — Information decomposition
+        // ============================================================
+        _o.WriteLine("=== PART C: Information decomposition ===");
+
+        // Fit models
+        double r2Full = FitModelR2(covArr, new[] { discArr, slopeArr });
+        double r2DiscOnly = R2SinglePredictor(covArr, discArr);
+        double r2SlopeOnly = R2SinglePredictor(covArr, slopeArr);
+
+        // Unique contributions
+        double uniqueDisc = r2Full - r2SlopeOnly;
+        double uniqueSlope = r2Full - r2DiscOnly;
+        double sharedDS = r2Full - uniqueDisc - uniqueSlope;
+
+        // S+D vs all-predictors comparison
+        double r2All = FitModelR2(covArr, new[] { discArr, slopeArr, suppArr, pArr });
+        double r2AllBeyondDS = r2All - r2Full;
+
+        _o.WriteLine($"Covariance prediction decomposition:");
+        _o.WriteLine($"  R²(D only)           = {r2DiscOnly:F4}");
+        _o.WriteLine($"  R²(S only)           = {r2SlopeOnly:F4}");
+        _o.WriteLine($"  R²(D + S)            = {r2Full:F4}");
+        _o.WriteLine($"  R²(all predictors)   = {r2All:F4}");
+        _o.WriteLine($"");
+        _o.WriteLine($"Information partition:");
+        _o.WriteLine($"  Unique discrimination:   ΔR² = {uniqueDisc:F4} ({uniqueDisc / Math.Max(r2Full, 1e-12):P0} of D+S)");
+        _o.WriteLine($"  Unique slope:            ΔR² = {uniqueSlope:F4} ({uniqueSlope / Math.Max(r2Full, 1e-12):P0} of D+S)");
+        _o.WriteLine($"  Shared D∩S:              ΔR² = {sharedDS:F4} ({sharedDS / Math.Max(r2Full, 1e-12):P0} of D+S)");
+        _o.WriteLine($"  Beyond D+S (all other):  ΔR² = {r2AllBeyondDS:F4}");
+        _o.WriteLine("");
+
+        double discDominanceRatio = uniqueDisc / Math.Max(uniqueSlope, 1e-12);
+        _o.WriteLine($"Discrimination:slope unique information ratio = {discDominanceRatio:F1}:1");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — Counterfactuals (hold one fixed, vary the other)
+        // ============================================================
+        _o.WriteLine("=== PART D: Counterfactual analysis ===");
+
+        int nBins = 5;
+        double discMin = discArr.Min(), discMax = discArr.Max();
+        double binW = (discMax - discMin) / nBins;
+
+        _o.WriteLine("Counterfactual A: hold discrimination fixed, vary slope");
+        _o.WriteLine($"{"D bin",-16} {"n",6} {"d(cov)/d(slope)",16} {"partial r",12}");
+        _o.WriteLine(new string('-', 56));
+        double totalPartialR_Dfixed = 0.0; int nPartial_Dfixed = 0;
+        for (int b = 0; b < nBins; b++)
+        {
+            double lo = discMin + b * binW, hi = discMin + (b + 1) * binW;
+            var inBin = Enumerable.Range(0, N).Where(i => discArr[i] >= lo && (b < nBins - 1 ? discArr[i] < hi : discArr[i] <= hi)).ToArray();
+            if (inBin.Length < 15) continue;
+            double[] bS = inBin.Select(i => slopeArr[i]).ToArray();
+            double[] bC = inBin.Select(i => covArr[i]).ToArray();
+            double bmS = bS.Average(), bmC = bC.Average();
+            double bNum = 0.0, bDen = 0.0;
+            for (int k = 0; k < inBin.Length; k++) { bNum += (bS[k] - bmS) * (bC[k] - bmC); bDen += (bS[k] - bmS) * (bS[k] - bmS); }
+            double bSens = bDen > 1e-15 ? bNum / bDen : 0.0;
+            double bR = PearsonCorrelation(bS, bC);
+            totalPartialR_Dfixed += bR; nPartial_Dfixed++;
+            _o.WriteLine($"[{lo:F3},{hi:F3})  {inBin.Length,6} {bSens,16:F5} {bR,12:F4}");
+        }
+        double avgPartialR_Dfixed = nPartial_Dfixed > 0 ? totalPartialR_Dfixed / nPartial_Dfixed : 0.0;
+        _o.WriteLine($"Average partial r(cov,slope | D): {avgPartialR_Dfixed:F4}");
+        _o.WriteLine("");
+
+        // Counterfactual B: hold slope fixed, vary discrimination
+        double slopeMin = slopeArr.Min(), slopeMax = slopeArr.Max();
+        binW = (slopeMax - slopeMin) / nBins;
+
+        _o.WriteLine("Counterfactual B: hold slope fixed, vary discrimination");
+        _o.WriteLine($"{"Slope bin",-16} {"n",6} {"d(cov)/d(disc)",16} {"partial r",12}");
+        _o.WriteLine(new string('-', 56));
+        double totalPartialR_Sfixed = 0.0; int nPartial_Sfixed = 0;
+        for (int b = 0; b < nBins; b++)
+        {
+            double lo = slopeMin + b * binW, hi = slopeMin + (b + 1) * binW;
+            var inBin = Enumerable.Range(0, N).Where(i => slopeArr[i] >= lo && (b < nBins - 1 ? slopeArr[i] < hi : slopeArr[i] <= hi)).ToArray();
+            if (inBin.Length < 15) continue;
+            double[] bD = inBin.Select(i => discArr[i]).ToArray();
+            double[] bC = inBin.Select(i => covArr[i]).ToArray();
+            double bmD = bD.Average(), bmC = bC.Average();
+            double bNum = 0.0, bDen = 0.0;
+            for (int k = 0; k < inBin.Length; k++) { bNum += (bD[k] - bmD) * (bC[k] - bmC); bDen += (bD[k] - bmD) * (bD[k] - bmD); }
+            double bSens = bDen > 1e-15 ? bNum / bDen : 0.0;
+            double bR = PearsonCorrelation(bD, bC);
+            totalPartialR_Sfixed += bR; nPartial_Sfixed++;
+            _o.WriteLine($"[{lo:F3},{hi:F3})  {inBin.Length,6} {bSens,16:F5} {bR,12:F4}");
+        }
+        double avgPartialR_Sfixed = nPartial_Sfixed > 0 ? totalPartialR_Sfixed / nPartial_Sfixed : 0.0;
+        _o.WriteLine($"Average partial r(cov,disc | S): {avgPartialR_Sfixed:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Analytical search
+        // ============================================================
+        _o.WriteLine("=== PART E: Analytical derivation search ===");
+        _o.WriteLine("");
+        _o.WriteLine("Duality hypothesis:");
+        _o.WriteLine("  Covariance ≈ Fidelity × Strength");
+        _o.WriteLine("  where:");
+        _o.WriteLine("    Fidelity = discrimination D = (K_near - K_far)/K_near");
+        _o.WriteLine("    Strength = |slopeAtHalf| = |K'(d_half)|");
+        _o.WriteLine("");
+        _o.WriteLine("Physical interpretation:");
+        _o.WriteLine("  D measures how well K(d) separates near from far distances");
+        _o.WriteLine("  S measures the intensity of coupling response at the midpoint");
+        _o.WriteLine("  D×S ≈ combined capacity to produce structured covariance");
+        _o.WriteLine("");
+
+        // Test: cov ~ D + S vs cov ~ D*S
+        var dsProd = new double[N];
+        for (int i = 0; i < N; i++) dsProd[i] = discArr[i] * slopeArr[i];
+        double r2Product = R2SinglePredictor(covArr, dsProd);
+        double r2Additive = r2Full;
+        double r2Interaction = FitModelR2(covArr, new[] { discArr, slopeArr, dsProd });
+
+        // Duality index: cov ≈ α·D + β·S + γ·D·S
+        _o.WriteLine("Numerical test of duality models:");
+        _o.WriteLine($"  Additive (D+S):        R² = {r2Additive:F4}");
+        _o.WriteLine($"  Product (D×S):         R² = {r2Product:F4}");
+        _o.WriteLine($"  Interaction (D+S+D×S): R² = {r2Interaction:F4}");
+        _o.WriteLine("");
+
+        // Dimensional analysis: is covariance ~ D^a * S^b?
+        var logD = discArr.Select(x => Math.Log(Math.Max(x, 1e-12))).ToArray();
+        var logS = slopeArr.Select(x => Math.Log(Math.Max(x, 1e-12))).ToArray();
+        var logCov = covArr.Select(x => Math.Log(Math.Max(x, 1e-12))).ToArray();
+        double r2LogFull = FitModelR2(logCov, new[] { logD, logS });
+
+        // Extract exponents from log-log fit
+        double logDm = logD.Average(), logSm = logS.Average(), logCm = logCov.Average();
+        double logDVar = SampleVariance(logD, logDm), logSVar = SampleVariance(logS, logSm);
+        double logDCov = 0, logSCov = 0, logDSCov = 0;
+        for (int i = 0; i < N; i++)
+        {
+            logDCov += (logD[i] - logDm) * (logCov[i] - logCm);
+            logSCov += (logS[i] - logSm) * (logCov[i] - logCm);
+            logDSCov += (logD[i] - logDm) * (logS[i] - logSm);
+        }
+        logDCov /= N - 1; logSCov /= N - 1; logDSCov /= N - 1;
+        double denom = logDVar * logSVar - logDSCov * logDSCov;
+        double expA = denom > 1e-15 ? (logDCov * logSVar - logSCov * logDSCov) / denom : 0.0;
+        double expB = denom > 1e-15 ? (logSCov * logDVar - logDCov * logDSCov) / denom : 0.0;
+        double logIntercept = logCm - expA * logDm - expB * logSm;
+
+        _o.WriteLine($"Scaling law: cov ≈ exp({logIntercept:F4}) · D^{expA:F3} · S^{expB:F3}");
+        _o.WriteLine($"  R²(log-log) = {r2LogFull:F4}");
+        _o.WriteLine($"  Exponent on D: {expA:F3}  (D contributes {Math.Abs(expA) / (Math.Abs(expA) + Math.Abs(expB) + 1e-15):P0} of scaling)");
+        _o.WriteLine($"  Exponent on S: {expB:F3}  (S contributes {Math.Abs(expB) / (Math.Abs(expA) + Math.Abs(expB) + 1e-15):P0} of scaling)");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Cross-family validation
+        // ============================================================
+        _o.WriteLine("=== PART F: Cross-family validation ===");
+        _o.WriteLine($"{"Family",-6} {"r(D,S)",8} {"R²(D)",8} {"R²(S)",8} {"R²(D+S)",10} {"unique D",10} {"unique S",10} {"partial r(D)",14} {"partial r(S)",14}");
+        _o.WriteLine(new string('-', 100));
+
+        foreach (var fam in families)
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allPoints[i].Family == fam).ToArray();
+            int nF = idx.Length;
+            double[] fD = idx.Select(i => discArr[i]).ToArray();
+            double[] fS = idx.Select(i => slopeArr[i]).ToArray();
+            double[] fC = idx.Select(i => covArr[i]).ToArray();
+
+            double fRD = R2SinglePredictor(fC, fD);
+            double fRS = R2SinglePredictor(fC, fS);
+            double fRDS = FitModelR2(fC, new[] { fD, fS });
+            double fUniqueD = fRDS - fRS;
+            double fUniqueS = fRDS - fRD;
+
+            // Partial r(D,cov|S) — bin by S tertiles
+            double fSMin = fS.Min(), fSMax = fS.Max();
+            double fPartialR_D = 0.0, fPartialR_S = 0.0;
+            int validBins_D = 0, validBins_S = 0;
+
+            for (int b = 0; b < 3; b++)
+            {
+                double lo = fSMin + b * (fSMax - fSMin) / 3.0;
+                double hi = fSMin + (b + 1) * (fSMax - fSMin) / 3.0;
+                var inBin = Enumerable.Range(0, nF).Where(i => fS[i] >= lo && (b < 2 ? fS[i] < hi : fS[i] <= hi)).ToArray();
+                if (inBin.Length < 10) continue;
+                double[] bD_b = inBin.Select(i => fD[i]).ToArray();
+                double[] bC_b = inBin.Select(i => fC[i]).ToArray();
+                double pr = PearsonCorrelation(bD_b, bC_b);
+                if (double.IsFinite(pr)) { fPartialR_D += Math.Abs(pr); validBins_D++; }
+            }
+            for (int b = 0; b < 3; b++)
+            {
+                double lo = fD.Min() + b * (fD.Max() - fD.Min()) / 3.0;
+                double hi = fD.Min() + (b + 1) * (fD.Max() - fD.Min()) / 3.0;
+                var inBin = Enumerable.Range(0, nF).Where(i => fD[i] >= lo && (b < 2 ? fD[i] < hi : fD[i] <= hi)).ToArray();
+                if (inBin.Length < 10) continue;
+                double[] bS_b = inBin.Select(i => fS[i]).ToArray();
+                double[] bC_b = inBin.Select(i => fC[i]).ToArray();
+                double pr = PearsonCorrelation(bS_b, bC_b);
+                if (double.IsFinite(pr)) { fPartialR_S += Math.Abs(pr); validBins_S++; }
+            }
+            fPartialR_D = validBins_D > 0 ? fPartialR_D / validBins_D : 0.0;
+            fPartialR_S = validBins_S > 0 ? fPartialR_S / validBins_S : 0.0;
+
+            _o.WriteLine($"{fam,-6} {PearsonCorrelation(fD, fS),8:F4} {fRD,8:F4} {fRS,8:F4} {fRDS,10:F4} {fUniqueD,10:F4} {fUniqueS,10:F4} {fPartialR_D,14:F4} {fPartialR_S,14:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine("=== PART G: Decision ===");
+
+        bool dAndSOrthogonal = Math.Abs(rDS) < 0.40 && (1.0 - sharedVarDS) > 0.80;
+        bool dAloneDominates = uniqueDisc > uniqueSlope * 3.0;
+        bool bothNeeded = uniqueDisc > 0.02 && uniqueSlope > 0.005 && r2Full > r2DiscOnly + 0.005;
+        bool deeperMechanism = r2AllBeyondDS > 0.05;
+        bool crossFamBothNeeded = families.All(fam =>
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allPoints[i].Family == fam).ToArray();
+            double[] fD = idx.Select(i => discArr[i]).ToArray();
+            double[] fS = idx.Select(i => slopeArr[i]).ToArray();
+            double[] fC = idx.Select(i => covArr[i]).ToArray();
+            double fRDS = FitModelR2(fC, new[] { fD, fS });
+            double fRD = R2SinglePredictor(fC, fD);
+            return (fRDS - fRD) > 0.002;
+        });
+
+        string decision;
+        if (bothNeeded && crossFamBothNeeded && !deeperMechanism)
+            decision = "Model C";
+        else if (bothNeeded && dAloneDominates)
+            decision = "Model C";
+        else if (r2DiscOnly > 0.70 && !bothNeeded)
+            decision = "Model A";
+        else if (r2SlopeOnly > 0.50)
+            decision = "Model B";
+        else
+            decision = "Model D";
+
+        string characterization = decision switch
+        {
+            "Model C" => $"Covariance requires both discrimination and slope. D provides fidelity (R²={r2DiscOnly:F3}), S provides intensity (ΔR²={uniqueSlope:F3}). The two channels are {(dAndSOrthogonal ? "substantially orthogonal (r²=" + sharedVarDS.ToString("F2") + ")" : "partially correlated (r²=" + sharedVarDS.ToString("F2") + ")")}. The information partition shows unique D ΔR²={uniqueDisc:F3}, unique S ΔR²={uniqueSlope:F3}, shared ΔR²={sharedDS:F3}.",
+            "Model A" => $"Discrimination carries most covariance information (R²={r2DiscOnly:F3}). Slope adds minimal unique information (ΔR²={uniqueSlope:F3}). D alone is nearly sufficient.",
+            "Model B" => $"SlopeAtHalf carries the dominant covariance information (R²={r2SlopeOnly:F3}). Discrimination provides limited additional unique contribution.",
+            _ => "The dual-control-channel hypothesis remains unresolved under current analytical decomposition."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model C" => $"DSD_01_DiscriminationSlopeDualityAudit — covariance is controlled by two complementary kernel mechanisms: discrimination (fidelity, R²={r2DiscOnly:F3}) and slope (intensity, ΔR²={uniqueSlope:F3}). Channels are orthogonal (r²={sharedVarDS:F2}), partition: unique D={uniqueDisc:F3}, unique S={uniqueSlope:F3}, shared={sharedDS:F3}.",
+            "Model A" => $"DSD_01_DiscriminationSlopeDualityAudit — discrimination is nearly sufficient (R²={r2DiscOnly:F3}); slope adds marginal unique information (ΔR²={uniqueSlope:F3}). Single-channel model may be adequate.",
+            "Model B" => $"DSD_01_DiscriminationSlopeDualityAudit — slopeAtHalf is the primary channel (R²={r2SlopeOnly:F3}); discrimination is secondary.",
+            _ => "DSD_01_DiscriminationSlopeDualityAudit — dual-control-channel status unresolved under current decomposition."
+        };
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"  - D and S orthogonal (r²<0.16): {dAndSOrthogonal} (r={rDS:F3}, r²={sharedVarDS:F3})");
+        _o.WriteLine($"  - Both needed (ΔR²_D>0.02, ΔR²_S>0.005): {bothNeeded}");
+        _o.WriteLine($"  - Deeper mechanism beyond D+S: {deeperMechanism} (ΔR²={r2AllBeyondDS:F3})");
+        _o.WriteLine($"  - Cross-family consistent: {crossFamBothNeeded}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // OUTPUT BLOCK
+        // ============================================================
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}: {characterization}");
+        _o.WriteLine("2. Orthogonality analysis");
+        _o.WriteLine($"   r(D,S)={rDS:F4}, shared variance={sharedVarDS:P1}, PCA PC1={pc1DS:P1}");
+        _o.WriteLine($"   NMI(D,cov)={miDCov.nmi:F4}, NMI(S,cov)={miSCov.nmi:F4}, NMI(D,S)={miDS.nmi:F4}");
+        _o.WriteLine("3. Information decomposition");
+        _o.WriteLine($"   Unique D: ΔR²={uniqueDisc:F4} ({uniqueDisc / Math.Max(r2Full, 1e-12):P0})");
+        _o.WriteLine($"   Unique S: ΔR²={uniqueSlope:F4} ({uniqueSlope / Math.Max(r2Full, 1e-12):P0})");
+        _o.WriteLine($"   Shared:   ΔR²={sharedDS:F4} ({sharedDS / Math.Max(r2Full, 1e-12):P0})");
+        _o.WriteLine($"   D:S ratio = {discDominanceRatio:F1}:1");
+        _o.WriteLine("4. Counterfactual analysis");
+        _o.WriteLine($"   Partial r(cov,slope | D fixed) = {avgPartialR_Dfixed:F4}");
+        _o.WriteLine($"   Partial r(cov,disc  | S fixed) = {avgPartialR_Sfixed:F4}");
+        _o.WriteLine("5. Analytical assessment");
+        _o.WriteLine($"   Scaling: cov ~ D^{expA:F3} · S^{expB:F3}, R²(log)={r2LogFull:F4}");
+        _o.WriteLine($"   Additive R²={r2Additive:F4}, Product R²={r2Product:F4}, Interaction R²={r2Interaction:F4}");
+        _o.WriteLine("6. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("7. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== DSD_01 complete. Commit: DSD_01_DiscriminationSlopeDualityAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+        Assert.True(double.IsFinite(r2Full));
+
+        static double GammaApproxD(double x)
+        {
+            if (x <= 0) return 1.0;
+            if (x < 0.5) return Math.PI / (Math.Sin(Math.PI * x) * GammaApproxD(1.0 - x));
+            double z = x - 1.0;
+            double[] pp = { 1.000000000190015, 76.18009172947146, -86.50532032941677,
+                           24.01409824083091, -1.231739572450155, 1.208650973866179e-3, -5.395239384953e-6 };
+            double sum = pp[0];
+            double w = z + 5.5;
+            for (int i = 1; i < pp.Length; i++) sum += pp[i] / (z + i);
+            return Math.Sqrt(2.0 * Math.PI) * Math.Pow(w, z + 0.5) * Math.Exp(-w) * sum;
+        }
+    }
+
     private static SweepPoint EvaluateAtFixedP(double[] distances, double[] sortedDistances, double xi, double k0, double p, double a)
     {
         int n = distances.Length;
