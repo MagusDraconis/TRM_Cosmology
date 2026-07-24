@@ -3096,4 +3096,528 @@ public class V7_3_and_4_SlopeDiscrimination_Tests
         }
     }
 
+    [Fact]
+    public void MCM_01_MultiCovarianceModeAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== MCM_01: Multi-Covariance Mode Audit ===");
+        _o.WriteLine("=== Can one VC kernel produce multiple independent covariance modes? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 2357;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.10;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 733);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        // Decile boundaries for multi-scale K profiling
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++)
+            decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        _o.WriteLine($"Decile boundaries: {string.Join(", ", decileBounds.Select(b => $"{b:F2}"))}");
+        _o.WriteLine("");
+
+        // Define separation contrasts at multiple scales
+        var contrastDefs = new (string name, int i, int j)[]
+        {
+            ("K1-K3 (near)", 1, 3),
+            ("K1-K5 (near-mid)", 1, 5),
+            ("K1-K7 (near-far)", 1, 7),
+            ("K1-K10 (extreme)", 1, 10),
+            ("K3-K7 (mid)", 3, 7),
+            ("K5-K9 (mid-far)", 5, 9),
+            ("K3-K10", 3, 10),
+            ("K2-K8 (wide)", 2, 8),
+            ("K4-K6 (narrow)", 4, 6),
+        };
+
+        // ============================================================
+        // Data collection — K means per decile, all contrasts per point
+        // ============================================================
+        int nContrasts = contrastDefs.Length;
+        var contrastNames = contrastDefs.Select(c => c.name).ToArray();
+
+        var allKDeciles = new List<double[]>();
+        var allContrasts = new List<double[]>();
+        var allCov = new List<double>();
+        var allFam = new List<VcFamily>();
+        var allP = new List<double>();
+        var allD = new List<double>();
+        var allSlope = new List<double>();
+
+        foreach (var v in variants)
+        {
+            int nP = (int)Math.Round((pMax - pMin) / pStep) + 1;
+            for (int ip = 0; ip < nP; ip++)
+            {
+                double p = pMin + ip * pStep;
+                var bsp = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+
+                int n = distances.Length;
+                double[] kArr = new double[n];
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                for (int i = 0; i < n; i++)
+                {
+                    double x = distances[i] / (xi + 1e-15);
+                    kArr[i] = v.Family switch
+                    {
+                        VcFamily.SAC => k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)),
+                        VcFamily.GAN => k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)) * (v.Beta + v.Gamma * Math.Cos(1.15 * x)),
+                        VcFamily.RCS => k0 / (1.0 + v.Alpha * Math.Pow(x, p)),
+                        VcFamily.ICS => k0 * Math.Exp(-Math.Pow(x, v.Alpha * p + v.Beta)),
+                        VcFamily.CNS => (k0 * Math.Exp(-v.Alpha * Math.Pow(x, p)) * (v.Beta - v.Gamma * Math.Exp(-1.6 * x))) + 0.03 * k0,
+                        _ => k0 * Math.Exp(-Math.Pow(x, p))
+                    };
+                    kArr[i] = Math.Clamp(kArr[i], 0.0, k0);
+                }
+
+                // K means per decile (1-indexed: decile 1 = lowest distances, decile 10 = highest)
+                var kDecileMeans = new double[nDeciles + 1]; // index 0 unused
+                var decileCounts = new int[nDeciles + 1];
+                for (int i = 0; i < n; i++)
+                {
+                    int dec = 1;
+                    while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++;
+                    kDecileMeans[dec] += kArr[i];
+                    decileCounts[dec]++;
+                }
+                for (int d = 1; d <= nDeciles; d++)
+                    kDecileMeans[d] /= Math.Max(decileCounts[d], 1);
+
+                // Compute all contrasts
+                var contrasts = new double[nContrasts];
+                for (int c = 0; c < nContrasts; c++)
+                {
+                    var def = contrastDefs[c];
+                    contrasts[c] = kDecileMeans[def.i] - kDecileMeans[def.j];
+                }
+
+                double halfMaxDist = xi * Math.Pow(Math.Log(2.0), 1.0 / Math.Max(p, 0.05));
+                double zHalf = halfMaxDist / xi;
+                double slopeAtHalf = Math.Abs(k0 * (p / xi) * Math.Pow(zHalf, p - 1.0) * Math.Exp(-Math.Pow(zHalf, p)));
+
+                allKDeciles.Add(kDecileMeans);
+                allContrasts.Add(contrasts);
+                allCov.Add(cci.CovarianceAbs);
+                allFam.Add(v.Family);
+                allP.Add(p);
+                allD.Add(bsp.Discrimination);
+                allSlope.Add(slopeAtHalf);
+            }
+        }
+
+        int N = allCov.Count;
+        double[] covArr = allCov.ToArray();
+
+        _o.WriteLine($"Data collected: N={N} points, {nDeciles} deciles, {nContrasts} contrasts");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART A — Multi-scale near-far separability
+        // ============================================================
+        _o.WriteLine("=== PART A: Multi-scale separability ===");
+
+        // Correlation of each contrast with covariance
+        _o.WriteLine($"{"Contrast",-22} {"r(cov)",10} {"R²(cov)",10} {"mean",10} {"std",10}");
+        _o.WriteLine(new string('-', 64));
+
+        var contrastCorrs = new (string name, double r, double r2, double mean, double std)[nContrasts];
+        for (int c = 0; c < nContrasts; c++)
+        {
+            double[] cVals = Enumerable.Range(0, N).Select(i => allContrasts[i][c]).ToArray();
+            double r = PearsonCorrelation(cVals, covArr);
+            double r2 = R2SinglePredictor(covArr, cVals);
+            double m = cVals.Average();
+            double s = Math.Sqrt(SampleVariance(cVals, m));
+            contrastCorrs[c] = (contrastNames[c], r, r2, m, s);
+            _o.WriteLine($"{contrastNames[c],-22} {r,10:F4} {r2,10:F4} {m,10:F4} {s,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // Which is the strongest?
+        var best = contrastCorrs.OrderByDescending(x => Math.Abs(x.r)).First();
+        _o.WriteLine($"Strongest single contrast: {best.name} (r={best.r:F4}, R²={best.r2:F4})");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART B — Multiple covariance modes
+        // ============================================================
+        _o.WriteLine("=== PART B: Covariance mode matrix ===");
+
+        // Build the nContrasts × nContrasts correlation matrix
+        var corrMatrix = new double[nContrasts, nContrasts];
+        for (int a = 0; a < nContrasts; a++)
+        {
+            double[] av = Enumerable.Range(0, N).Select(i => allContrasts[i][a]).ToArray();
+            for (int b = 0; b < nContrasts; b++)
+            {
+                double[] bv = Enumerable.Range(0, N).Select(i => allContrasts[i][b]).ToArray();
+                corrMatrix[a, b] = PearsonCorrelation(av, bv);
+            }
+        }
+
+        // Print correlation matrix (compact)
+        _o.WriteLine($"Contrast inter-correlation matrix:");
+        var headerLine = $"{"",-22}";
+        for (int c = 0; c < nContrasts; c++) headerLine += $"{contrastNames[c].Substring(0, Math.Min(6, contrastNames[c].Length)),7}";
+        _o.WriteLine(headerLine);
+        for (int a = 0; a < nContrasts; a++)
+        {
+            var row = $"{contrastNames[a],-22}";
+            for (int b = 0; b < nContrasts; b++)
+                row += $"{corrMatrix[a, b],7:F3}";
+            _o.WriteLine(row);
+        }
+        _o.WriteLine("");
+
+        // Average off-diagonal correlation
+        double sumOffDiag = 0; int nOffDiag = 0;
+        for (int a = 0; a < nContrasts; a++)
+            for (int b = a + 1; b < nContrasts; b++)
+            { sumOffDiag += Math.Abs(corrMatrix[a, b]); nOffDiag++; }
+        double avgOffDiag = nOffDiag > 0 ? sumOffDiag / nOffDiag : 0;
+        _o.WriteLine($"Average |off-diagonal| correlation: {avgOffDiag:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART C — rank(COV) via eigenvalue analysis
+        // ============================================================
+        _o.WriteLine("=== PART C: Effective rank of contrast covariance ===");
+
+        // Eigen decomposition of the correlation matrix
+        var (eigenvalues, _) = JacobiEigenLocal(corrMatrix, nContrasts);
+        Array.Sort(eigenvalues);
+        Array.Reverse(eigenvalues);
+
+        double totalEigen = eigenvalues.Sum();
+        _o.WriteLine($"{"Component",-12} {"Eigenvalue",12} {"% variance",12} {"Cumulative",12}");
+        _o.WriteLine(new string('-', 50));
+        double cumSum = 0; int effectiveRank = 0;
+        for (int i = 0; i < nContrasts; i++)
+        {
+            cumSum += eigenvalues[i];
+            double pct = eigenvalues[i] / totalEigen * 100;
+            _o.WriteLine($"PC{i + 1,-11} {eigenvalues[i],12:F4} {pct,11:F1}% {cumSum / totalEigen * 100,11:F1}%");
+            if (eigenvalues[i] > 0.01) effectiveRank++;
+        }
+        _o.WriteLine("");
+        _o.WriteLine($"Effective rank (λ > 0.01): {effectiveRank}");
+        _o.WriteLine($"Condition number (λ1/λ_last): {eigenvalues[0] / Math.Max(eigenvalues[nContrasts - 1], 1e-12):F1}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — Latent axes from contrast PCA
+        // ============================================================
+        _o.WriteLine("=== PART D: Latent axis reconstruction ===");
+
+        // Project all data onto top PCs, get latent scores
+        // Build contrast matrix N×M, center and scale
+        var X = new double[N][];
+        for (int i = 0; i < N; i++) X[i] = (double[])allContrasts[i].Clone();
+
+        // Center columns
+        double[] colMean = new double[nContrasts];
+        double[] colStd = new double[nContrasts];
+        for (int c = 0; c < nContrasts; c++)
+        {
+            colMean[c] = Enumerable.Range(0, N).Average(i => X[i][c]);
+            double v = Enumerable.Range(0, N).Select(i => (X[i][c] - colMean[c]) * (X[i][c] - colMean[c])).Average();
+            colStd[c] = Math.Sqrt(v) + 1e-12;
+            for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - colMean[c]) / colStd[c];
+        }
+
+        // Build corr matrix and power-iterate for top eigenvectors
+        // We already have corrMatrix (centered+scaled corr = original corr)
+        var pcLoadings = new double[3][]; // top 3 PCs
+        for (int pc = 0; pc < 3; pc++)
+        {
+            var v = Enumerable.Repeat(1.0 / Math.Sqrt(nContrasts), nContrasts).ToArray();
+            for (int it = 0; it < 60; it++)
+            {
+                var next = new double[nContrasts];
+                for (int a = 0; a < nContrasts; a++)
+                    for (int b = 0; b < nContrasts; b++)
+                        next[a] += corrMatrix[a, b] * v[b];
+                // Deflation: orthogonalize against previous PCs
+                if (pc > 0)
+                {
+                    for (int p = 0; p < pc; p++)
+                    {
+                        double dot = 0;
+                        for (int a = 0; a < nContrasts; a++) dot += next[a] * pcLoadings[p][a];
+                        for (int a = 0; a < nContrasts; a++) next[a] -= dot * pcLoadings[p][a];
+                    }
+                }
+                double norm = Math.Sqrt(next.Sum(x => x * x)) + 1e-15;
+                for (int a = 0; a < nContrasts; a++) v[a] = next[a] / norm;
+            }
+            pcLoadings[pc] = v;
+        }
+
+        // Compute latent scores L_k = X · v_k
+        var latentScores = new double[3][];
+        for (int pc = 0; pc < 3; pc++)
+        {
+            latentScores[pc] = new double[N];
+            for (int i = 0; i < N; i++)
+            {
+                double s = 0;
+                for (int c = 0; c < nContrasts; c++) s += X[i][c] * pcLoadings[pc][c];
+                latentScores[pc][i] = s;
+            }
+        }
+
+        // Show top loadings
+        _o.WriteLine("Top 3 PC loadings:");
+        for (int pc = 0; pc < 3; pc++)
+        {
+            var topLoads = Enumerable.Range(0, nContrasts)
+                .Select(c => (name: contrastNames[c], load: pcLoadings[pc][c]))
+                .OrderByDescending(x => Math.Abs(x.load)).Take(3);
+            _o.WriteLine($"  PC{pc + 1} ({eigenvalues[pc] / totalEigen * 100:F0}%): {string.Join(", ", topLoads.Select(tl => $"{tl.name}={tl.load:F3}"))}");
+        }
+        _o.WriteLine("");
+
+        // Correlation of latent axes with covariance
+        _o.WriteLine($"Latent axes vs covariance:");
+        for (int pc = 0; pc < Math.Min(3, effectiveRank); pc++)
+        {
+            double r = PearsonCorrelation(latentScores[pc], covArr);
+            double r2 = R2SinglePredictor(covArr, latentScores[pc]);
+            _o.WriteLine($"  PC{pc + 1}: r(cov)={r:F4}, R²={r2:F4}");
+        }
+        _o.WriteLine("");
+
+        // All latent axes together vs covariance
+        var latentAxesForR2 = new List<double[]>();
+        for (int pc = 0; pc < Math.Min(3, effectiveRank); pc++)
+            latentAxesForR2.Add(latentScores[pc]);
+        double r2AllLatent = latentAxesForR2.Count > 0
+            ? FitModelR2(covArr, latentAxesForR2.ToArray())
+            : 0.0;
+        _o.WriteLine($"R²(cov | all latent axes) = {r2AllLatent:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Dimension analysis
+        // ============================================================
+        _o.WriteLine("=== PART E: Dimension implications ===");
+
+        _o.WriteLine($"Effective rank of multi-scale contrast matrix: {effectiveRank}");
+        _o.WriteLine($"");
+        if (effectiveRank == 1)
+        {
+            _o.WriteLine("All contrasts collapse onto a SINGLE axis.");
+            _o.WriteLine("One kernel → one separability mode → one covariance axis.");
+            _o.WriteLine("Implication: xD structure requires multiple kernels or");
+            _o.WriteLine("  additional mechanisms beyond near-far separation.");
+        }
+        else
+        {
+            _o.WriteLine($"Contrasts span {effectiveRank} effective dimensions.");
+            _o.WriteLine($"One kernel → {effectiveRank} separability modes →");
+            _o.WriteLine($"  up to {effectiveRank} independent covariance axes.");
+            _o.WriteLine($"Implication: xD structure can emerge from a single kernel");
+            _o.WriteLine($"  via multi-scale separability modes.");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Cross-family validation
+        // ============================================================
+        _o.WriteLine("=== PART F: Cross-family validation ===");
+
+        _o.WriteLine($"{"Family",-6} {"eff. rank",10} {"PC1%",8} {"PC2%",8} {"avg |off-diag|",15} {"top contrast",18}");
+        _o.WriteLine(new string('-', 73));
+
+        foreach (var fam in families)
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allFam[i] == fam).ToArray();
+            int nF = idx.Length;
+            if (nF < 20) continue;
+
+            // Build contrast correlation matrix for this family
+            var fCorrMatrix = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++)
+            {
+                double[] av = idx.Select(i => allContrasts[i][a]).ToArray();
+                for (int b = 0; b < nContrasts; b++)
+                {
+                    double[] bv = idx.Select(i => allContrasts[i][b]).ToArray();
+                    fCorrMatrix[a, b] = PearsonCorrelation(av, bv);
+                }
+            }
+
+            var (fEigen, _) = JacobiEigenLocal(fCorrMatrix, nContrasts);
+            Array.Sort(fEigen); Array.Reverse(fEigen);
+            double fTotal = fEigen.Sum();
+            int fEffRank = fEigen.Count(e => e > 0.01);
+
+            double fSumOff = 0; int fN = 0;
+            for (int a = 0; a < nContrasts; a++)
+                for (int b = a + 1; b < nContrasts; b++)
+                { fSumOff += Math.Abs(fCorrMatrix[a, b]); fN++; }
+            double fAvgOff = fN > 0 ? fSumOff / fN : 0;
+
+            // Best contrast for this family
+            var fBest = Enumerable.Range(0, nContrasts)
+                .Select(c => (name: contrastNames[c], r: PearsonCorrelation(idx.Select(i => allContrasts[i][c]).ToArray(), idx.Select(i => covArr[i]).ToArray())))
+                .OrderByDescending(x => Math.Abs(x.r)).First();
+
+            _o.WriteLine($"{fam,-6} {fEffRank,10} {fEigen[0] / fTotal * 100,7:F1}% {fEigen[1] / fTotal * 100,7:F1}% {fAvgOff,15:F4} {fBest.name,18}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine("=== PART G: Decision ===");
+
+        bool singleMode = effectiveRank == 1;
+        bool multiMode = effectiveRank >= 2;
+        bool crossFamSingle = families.All(fam =>
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allFam[i] == fam).ToArray();
+            var fCM = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++)
+                for (int b = 0; b < nContrasts; b++)
+                    fCM[a, b] = PearsonCorrelation(idx.Select(i => allContrasts[i][a]).ToArray(), idx.Select(i => allContrasts[i][b]).ToArray());
+            var (fe, _) = JacobiEigenLocal(fCM, nContrasts);
+            Array.Sort(fe); Array.Reverse(fe);
+            return fe.Count(e => e > 0.01) == 1;
+        });
+        bool nearPerfectCollapse = eigenvalues[0] / totalEigen > 0.95;
+
+        string decision;
+        if (singleMode && nearPerfectCollapse && crossFamSingle)
+            decision = "Model A";
+        else if (multiMode)
+            decision = "Model B";
+        else if (nearPerfectCollapse)
+            decision = "Model A";
+        else
+            decision = "Model D";
+
+        string characterization = decision switch
+        {
+            "Model A" => $"One kernel → one covariance mode. Multi-scale contrasts collapse onto a single axis (PC1={eigenvalues[0] / totalEigen * 100:F0}%, effective rank={effectiveRank}). The near-far separation is not scale-specific — it's a universal property of the K(d) monotonic decay. xD structure cannot emerge from a single kernel's separability modes alone.",
+            "Model B" => $"One kernel → {effectiveRank} covariance modes. The contrast matrix shows {effectiveRank} effective dimensions, indicating that different distance scales produce partially independent covariance signals. This could serve as a mechanism for xD emergence.",
+            _ => "Multi-scale mode structure remains unresolved under current analysis."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model A" => $"MCM_01_MultiCovarianceModeAudit — one kernel → one covariance mode. All contrasts collapse to a single axis (PC1={eigenvalues[0] / totalEigen * 100:F0}%, rank={effectiveRank}, avg |off-diag|={avgOffDiag:F3}). xD requires multiple kernels or additional mechanisms.",
+            "Model B" => $"MCM_01_MultiCovarianceModeAudit — one kernel → {effectiveRank} modes. Effective rank={effectiveRank}, PC1={eigenvalues[0] / totalEigen * 100:F0}%. Multi-scale separability could generate xD.",
+            _ => "MCM_01_MultiCovarianceModeAudit — multi-mode status unresolved."
+        };
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"  - Single mode: {singleMode} (eff. rank={effectiveRank})");
+        _o.WriteLine($"  - Near-perfect collapse: {nearPerfectCollapse} (PC1={eigenvalues[0] / totalEigen * 100:F0}%)");
+        _o.WriteLine($"  - Cross-family single-mode: {crossFamSingle}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // OUTPUT BLOCK
+        // ============================================================
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}: {characterization}");
+        _o.WriteLine("2. Covariance-mode analysis");
+        _o.WriteLine($"   {nContrasts} contrasts defined, effective rank = {effectiveRank}");
+        _o.WriteLine($"   PC1 = {eigenvalues[0] / totalEigen * 100:F1}%, PC2 = {eigenvalues[1] / totalEigen * 100:F1}%");
+        _o.WriteLine($"   Best contrast: {best.name} (R²={best.r2:F4})");
+        _o.WriteLine("3. Latent-axis analysis");
+        for (int pc = 0; pc < Math.Min(3, effectiveRank); pc++)
+            _o.WriteLine($"   PC{pc + 1} explains {eigenvalues[pc] / totalEigen * 100:F0}%, r(cov)={PearsonCorrelation(latentScores[pc], covArr):F4}");
+        _o.WriteLine($"   All latent axes: R²(cov) = {r2AllLatent:F4}");
+        _o.WriteLine("4. Dimension implications");
+        _o.WriteLine($"   Effective dim = {effectiveRank}. " + (effectiveRank == 1 ? "Single kernel cannot generate xD alone." : $"Single kernel can generate up to {effectiveRank} covariance dimensions."));
+        _o.WriteLine("5. Cross-family validation");
+        foreach (var fam in families)
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allFam[i] == fam).ToArray();
+            var fCM = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++)
+                for (int b = 0; b < nContrasts; b++)
+                    fCM[a, b] = PearsonCorrelation(idx.Select(i => allContrasts[i][a]).ToArray(), idx.Select(i => allContrasts[i][b]).ToArray());
+            var (fe, _) = JacobiEigenLocal(fCM, nContrasts);
+            Array.Sort(fe); Array.Reverse(fe);
+            _o.WriteLine($"     {fam}: rank={fe.Count(e => e > 0.01)}, PC1={fe[0] / fe.Sum() * 100:F1}%");
+        }
+        _o.WriteLine("6. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("7. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== MCM_01 complete. Commit: MCM_01_MultiCovarianceModeAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+        Assert.True(effectiveRank >= 1);
+
+        static (double[] eigenvalues, double[,] eigenvectors) JacobiEigenLocal(double[,] a, int n)
+        {
+            var v = new double[n, n];
+            var d = new double[n];
+            for (int i = 0; i < n; i++) { v[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0;
+                for (int i = 0; i < n - 1; i++)
+                    for (int j = i + 1; j < n; j++)
+                        sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++)
+                {
+                    for (int j = i + 1; j < n; j++)
+                    {
+                        double g = 100.0 * Math.Abs(a[i, j]);
+                        if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j]))
+                            a[i, j] = 0.0;
+                        else if (Math.Abs(a[i, j]) > thresh)
+                        {
+                            double h = d[j] - d[i];
+                            double t;
+                            if (Math.Abs(h) + g == Math.Abs(h))
+                                t = a[i, j] / h;
+                            else
+                            {
+                                double theta = 0.5 * h / a[i, j];
+                                t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta));
+                                if (theta < 0) t = -t;
+                            }
+                            double c = 1.0 / Math.Sqrt(1.0 + t * t);
+                            double s = t * c;
+                            double tau = s / (1.0 + c);
+                            h = t * a[i, j];
+                            z[i] -= h; z[j] += h;
+                            d[i] -= h; d[j] += h;
+                            a[i, j] = 0.0;
+                            for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                            for (int k = 0; k < n; k++) { g = v[k, i]; h = v[k, j]; v[k, i] = g - s * (h + g * tau); v[k, j] = h + s * (g - h * tau); }
+                        }
+                    }
+                }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, v);
+        }
+    }
+
 }
