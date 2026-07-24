@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 2.5
+**Version:** 3.0
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 590 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Tests:** 595 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
 **Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (LCO_01, LCI_01, LDA_01, LCD_01, CBD_01 complete; built on V7.3 closure stack)
+**Current Frontier:** V7.4 LATENT DYNAMICS (full 11-audit stack complete: LCO_01 through SHD_01; built on V7.3 closure stack)
 
 ---
 
@@ -1383,6 +1383,121 @@ cross-family dynamic audits.
 **Decision:** **Model B** — covariance is strongly determined by suppression-
 discrimination balance across tested VC families.
 
+#### CBR_01 — Covariance Balance Residual Audit (complete)
+
+- Residual covariance beyond S,D balance computed: \(cov_{res}=cov_{actual}-cov_{pred}\).
+  Base SD-model \(R^2\approx0.838\) (~84% explained); residual \(\sigma\approx0.038\).
+- Residual candidate correlations (across all families):
+  - p: \(r=0.551\) (strongest single predictor)
+  - hierarchy depth: \(r=0.491\)
+  - channel count: \(r=-0.350\)
+  - dO variance: \(r=0.336\)
+  - dO skew/kurtosis: negligible
+- Information accounting:
+  - p alone explains 30.4% of residual variance
+  - hierarchy depth explains 24.1%
+  - combined augmented model \(R^2=0.941\) (+10.3% gain over base S,D)
+  - structural-dynamics composite explains 28.7% of residual
+- Cross-family validation:
+  - All 5 families show significant gain (SAC +11.1%, GAN +10.4%, RCS +11.5%, ICS +15.4%, CNS +7.1%)
+  - RCS shows strongest p-cov_res correlation (r=0.765)
+- Residual decomposition:
+  - Balance contribution: \(\Delta R^2=0.061\) (modest)
+  - Structural contribution: \(R^2=0.287\) (substantial)
+
+**Decision:** **Model B** — residual covariance is partially explained by p,
+suggesting p encodes information beyond pure S,D projections. Combined model
+reaches 94.1% explanation of total covariance variance.
+
+#### PRI_01 — p-Residual Information Audit (complete)
+
+- Conditional tests: after controlling for S,D base model, each candidate's unique
+  contribution to residual covariance was measured.
+- Information decomposition (variance partitioning):
+  - Full model R² = 0.941 (S,D + p + hierarchy + channel + dO_var + geoQ)
+  - S,D unique: 1.3%, p unique: 0.4%, struct unique: 0.6%, geoQ unique: 1.9%
+  - Unexplained: 5.9%
+- Key finding: p's information is largely shared with S,D (small unique on total cov),
+  but p explains 38.9% of cov_res (covariance residual after S,D removal).
+- Shape mediation (central result):
+  - Shape metrics (half-max distance, slope, curvature, coupling budget, width) 
+    explain 55.0% of cov_res over S,D base
+  - After controlling for shape, p's unique ΔR² drops from 0.389 to 0.013
+  - **Shape mediation ratio: 96.7%** — shape metrics almost fully mediate p's 
+    relationship with cov_res
+  - Cross-family mean mediation: 92.8% (5/5 families strong; range 85%--99%)
+- Theorem: p → K(d) shape → covariance. p governs hierarchy formation through
+  coupling function shape: the half-max distance, slope, curvature, and total
+  coupling budget are all p-determined and jointly capture p's covariance signal.
+
+**Decision:** **Model C** — p governs hierarchy formation through coupling function
+shape. p's covariance predictivity is near-perfectly mediated by K(d) shape metrics
+(96.7% mediation, cross-family 92.8%). This closes the p→shape→covariance chain.
+
+#### KSI_01 — Kernel Shape Identity Audit (complete)
+
+- 5 K(d) shape metrics analyzed: halfMaxDist, slopeAtHalf, curvAtHalf, couplingWidth,
+  couplingBudget.
+- Correlation structure:
+  - couplingWidth ↔ couplingBudget: r = 0.996 (highly redundant)
+  - All other pairwise correlations: |r| < 0.36 (near-orthogonal)
+  - All PCA eigenvalues ≈ 1.0 (20% each) after standardization — effectively
+    a scaled identity matrix
+- Predictive comparison:
+  - Best single shape predictor of covariance: slopeAtHalf (R² = 0.096)
+  - All 5 shape metrics combined: R² = 0.185
+  - PC1 (latent): R² = 0.101 (efficiency vs all-5 = 54.5%)
+  - p alone: R² = 0.285 (still the best single predictor)
+  - p + PC1: R² = 0.323
+- Cross-family: All families show flat eigenvalue spectra (~20% each).
+  Mean PC1 efficiency: 21.2%.
+
+**Decision:** **Model D** — kernel shape metrics retain independent control
+channels. No single latent shape variable dominates. The shape metrics collectively
+mediate p's covariance signal (PRI_01) but do so as multiple independent dimensions
+rather than projections of one latent coordinate.
+
+#### KDI_01 — Kernel Driver Importance Audit (complete)
+
+- Feature importance across 4 methods (solo R², permutation, leave-one-out, SHAP-style):
+  - **slopeAtHalf**: SHAP = 0.106 (57% share), solo R² = 0.096, #1 in all 5 families
+  - couplingWidth: SHAP = 0.033, solo R² = 0.057
+  - couplingBudget: SHAP = 0.024, solo R² = 0.055 (redundant with couplingWidth)
+  - curvAtHalf: SHAP = 0.021, solo R² = 0.024
+  - halfMaxDist: SHAP = 0.003, solo R² = 0.000 (negligible)
+- Cross-family consistency: **slopeAtHalf is #1 in 5/5 families** (SAC, GAN, RCS, ICS, CNS).
+  RCS shows strongest importance (permut ΔR² = 0.211).
+- Interaction analysis: mean pairwise synergy = -0.002 (near-additive).
+  slopeAtHalf+curvAtHalf shows modest synergy (+0.029).
+- Minimal subset: 3 metrics (slopeAtHalf, couplingWidth, curvAtHalf) recover 99.0% of
+  full 5-metric R². slopeAtHalf alone captures 51.8%.
+- couplingWidth/couplingBudget redundancy confirmed: adding couplingBudget after
+  couplingWidth adds only 0.001 R²; their interaction is strongly negative (-0.052).
+
+**Decision:** **Model B** — a few-metric shape basis exists. slopeAtHalf is the
+universal dominant shape driver. A compact 3-metric subset (slope, width, curvature)
+captures 99% of all-shape covariance information.
+
+#### SHD_01 — Slope Half Dominance Audit (complete)
+
+- Analytical derivation from K(d) = K₀·exp(-(d/ξ)^p):
+  `slopeAtHalf = -(K₀·p/(2ξ))·(ln 2)^((p-1)/p)` — verified to 0.0% mean relative error.
+- This is the midpoint gradient of the coupling function, directly measuring k-d
+  coupling strength.
+- Sensitivity: d(cov)/d(slope) = 0.113 (linear). Strongest at low slopes (0.804 in
+  lowest bin, declining to near-zero at high slopes where covariance saturates).
+- Counterfactuals: holding halfMaxDist fixed, partial r(slope,cov) = 0.721 (direct
+  control confirmed). Holding couplingWidth fixed, correlation disappears — slope's
+  effect is mediated through halfMaxDist.
+- Geometric interpretation: r(slope,suppression) = 0.525, r(slope,discrimination) = 0.182.
+  Slope adds R² = 0.083 beyond S,D (partially independent channel).
+- Cross-family: sensitivity positive and stable (0.064 – 0.162). RCS and ICS show
+  strongest slope-covariance coupling.
+
+**Decision:** **Model B** — slopeAtHalf directly controls covariance as the midpoint
+gradient of K(d). The analytical formula is exact for SAC and provides the mathematical
+explanation for slopeAtHalf's universal dominance.
+
 ---
 
 ## G. Corrected Stability Picture
@@ -1908,7 +2023,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. LCO_01 + LCI_01 + LDA_01 + LCD_01 + CBD_01 complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.4 LATENT DYNAMICS. Full 11-audit stack (LCO_01 → SHD_01) complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -1926,7 +2041,12 @@ Key findings (V7.3 → V7.4):
 - Latent dynamic coupling is strong, but current attractor evidence remains descriptive rather than universal-attractor level (LDA_01, Model A).
 - Driver audit identifies covariance as the strongest tested upstream controller of latent state motion (LCD_01, Model A).
 - Covariance-balance audit shows covariance is strongly balance-determined (\(R^2\approx0.844\) from S,D-only composite model; CBD_01, Model B).
-Decision model (latest latent-dynamics state): **Model B** for covariance-balance determination with **Model A** retained for latent attractor status under current recovery protocol.
+- Covariance-balance residual audit shows residual (~16%) is partially explained by p (\(r=0.551\), \(R^2=0.304\)); combined model reaches \(R^2=0.941\); CBR_01, Model B.
+- p-Residual information audit: p's residual predictivity is 96.7% shape-mediated through K(d) coupling function metrics; p→shape→covariance chain established; PRI_01, Model C.
+- Kernel shape identity: 5 K(d) shape metrics are near-orthogonal independent controls; couplingWidth/budget redundant (r=0.996); no single latent shape variable exists; KSI_01, Model D.
+- Kernel driver importance: slopeAtHalf is universal #1 driver (SHAP=0.106, top in 5/5 families); 3-metric subset recovers 99% of shape R²; KDI_01, Model B.
+- Slope half dominance: slopeAtHalf analytically derived as midpoint gradient; direct control verified (partial r=0.721); SHD_01, Model B.
+Decision model (latest latent-dynamics state): **Model B** for slopeAtHalf direct control, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

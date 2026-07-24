@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 2.0
-**Date:** 2026-07-22
+**Version:** 2.5
+**Date:** 2026-07-24
 
-**Current Version:** V5.63 GEOMETRY CLOSURE
-**Current Branch:** feature/v6.4-app-integration
-**Cumulative Tests:** 2980
+**Current Version:** V7.4 LATENT DYNAMICS
+**Current Branch:** v7.4-latent-dynamics
+**Cumulative Tests:** 2981
 **Failed:** 0
 
 ---
@@ -22,13 +22,14 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V5.63 GEOMETRY CLOSURE. V6 geometry is now ANALYTICALLY CLOSED:
-I₁ = Cupd linearization conservation law (99% variance cancellation, CV=0.017),
-I₂ = analytical CV-minimizing coordinate (b* = f(var(km), var(Ω), cov)),
-g₂₂→1 analytically from I₁ conservation (dI₁≈0 → (dI₁/dI₂)²→0),
-Effective manifold dimension = 2 (PR→1 at large N),
-Single collective mode emerges (mode strength 48x→259x, N=50→300).
-2980 tests, 0 failed. V5 M3++/Stop-Low unchanged. V6: PIPELINE + APP INTEGRATED.
+V7.4 LATENT DYNAMICS. Covariance is the strongest latent driver and is substantially
+balance-determined: S,D balance explains ~84.4% of covariance variance (CBD_01, Model B).
+Residual (~15.6%) is partially explained by p (r=0.551) and hierarchy depth (r=0.491),
+with combined augmented model reaching R²=0.941 (CBR_01, Model B). p's residual predictivity
+is 96.7% shape-mediated: p→K(d) shape→covariance (PRI_01, Model C). Shape metrics are
+near-orthogonal independent controls (KSI_01, Model D). slopeAtHalf is the universal
+dominant shape driver across all families (KDI_01, Model B) and its dominance is
+analytically derived from the K(d) midpoint gradient (SHD_01, Model B). 2985 tests, 0 failed.
 
 ---
 
@@ -166,6 +167,12 @@ deterministic threshold rescue.
 | **V5.62** | **COMPLETE** — Deep stack (INV through GRS). I₁/I₂ survive all perturbations. Geometry robust. Three-layer protection discovered. |
 | **V5.61** | **COMPLETE** — Deep stack (OVO through EXO). Omega variance power-law (N^10.89). km variance non-monotonic (peaks at N~118). No simple exponent. |
 | **V6.4** | **COMPLETE** — Blazor app integration. /v6 page with MudBlazor dashboard. V6GeometryService. NavMenu updated. |
+| V7.4 CBD_01 | **COMPLETE** — S,D balance explains ~84.4% of covariance variance. Covariance is balance-determined (Model B). |
+| V7.4 CBR_01 | **COMPLETE** — Residual covariance (~16%) partially explained by p (r=0.55) and hierarchy depth. Combined R²=0.941. Model B. |
+| V7.4 PRI_01 | **COMPLETE** — p's residual predictivity is 96.7% shape-mediated. p→K(d) shape→covariance. Decision: Model C. |
+| V7.4 KSI_01 | **COMPLETE** — Shape metrics are near-orthogonal (all PCA eigenvalues ~20%). No single latent shape variable. couplingWidth/budget redundant (r=0.996). Decision: Model D. |
+| V7.4 KDI_01 | **COMPLETE** — slopeAtHalf is universal top driver (SHAP=0.106, #1 in 5/5 families). 3-metric subset reaches 99% of full R². Decision: Model B. |
+| V7.4 SHD_01 | **COMPLETE** — slopeAtHalf analytically derived: -(K₀·p/(2ξ))·(ln 2)^((p-1)/p). Direct control verified (avg partial r=0.721). Decision: Model B. |
 | **V6.3** | **COMPLETE** — Pipeline integration. V6Pipeline.ComputeTrajectory(), CSV/JSON export. 13/13 V6 tests pass. |
 | **V6.2** | **COMPLETE** — Core migration. TRM.Core/Geometry/V6/V6Geometry.cs. 10/10 tests pass after migration. |
 | **V6.1** | **COMPLETE** — Documentation. User Guide, Theory, Integration Plan. XML docs on V6Geometry. |
@@ -174,23 +181,20 @@ deterministic threshold rescue.
 
 ---
 
-## Current Research Question (V5.63 → V5.64)
+## Current Research Question (V7.4 → V7.5)
 
-**V5.63 COMPLETE — V6 geometry is analytically CLOSED.**
+**V7.4 FULL 11-AUDIT STACK COMPLETE — Covariance chain closed: balance → residual → shape → derivation.**
 
-**V5.64 proposed: V6.5 — analytical proof package.**
+Chain: S,D balance → covariance (~84%, CBD_01) → p residual (CBR_01) → p→shape
+mediation 96.7% (PRI_01) → shape metrics independent (KSI_01) → slopeAtHalf dominates
+(KDI_01) → slope analytically derived as K(d) midpoint gradient (SHD_01).
 
-The V6 geometry is now fully understood analytically:
-- I₁ = Cupd conservation law (ICA_01: 99% variance cancellation)
-- I₂ = CV-minimizing coordinate (IDA_01: b* formula)
-- g₂₂ = 1 + (dI₁/dI₂)² → 1 (MDA_01: from I₁ conservation)
-- dim = 2 → 1 at large N (DIM_01: PR→1)
-- geometry closure at N≥90 (GCL_01, UGA_01)
-- single collective mode emerges (CFM_01: mode strength 259x at N=300)
+**V7.5 proposed: Analytical closure — derive S and D from slopeAtHalf.**
 
-Remaining frontier: Package these analytical results into a coherent mathematical
-framework. Prove g₂₂→1 rigorously from the SAC equations. Characterize the
-collective mode analytically from the Kuramoto equations.
+Remaining open questions:
+- Can S and D be derived analytically from slopeAtHalf and other shape metrics?
+- Can the full chain p→ξ,K₀→slope→S,D→cov be derived in closed form?
+- Does this enable analytical prediction of covariance from p alone?
 
 ---
 

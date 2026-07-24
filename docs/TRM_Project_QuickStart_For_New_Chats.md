@@ -1,6 +1,6 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 2.2
+**Version:** 2.7
 **Date:** 2026-07-24
 **Read time:** < 5 minutes
 **Primary reference:** `docs/TRM_Project_Lineage_Overview.md`, `docs/TRM_Current_Frontier.md`
@@ -15,7 +15,7 @@
 | Current Branch | v7.4-latent-dynamics |
 | Total Tests | 590 (Fact/Theory methods); ~3000+ (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V7.4 — LCI_01, LDA_01, LCD_01, and CBD_01 complete. Covariance is the strongest latent driver and is now strongly balance-determined (CBD decision: Model B). |
+| Current Status | V7.4 — CBD_01 through SHD_01 complete. Covariance balance-determined. p shape-mediated. slopeAtHalf analytically derived as midpoint gradient (Model B). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
@@ -111,9 +111,9 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V5.53 | SelectAndClassify Predicate Origin | COMPLETE — rawIQR dominant discriminator (~10×). rawMean complementary stabilizer. Model B+. |
 | **V7.2** | **Structure Attractors & p-Distribution** | **SAP_01, PDP_01, NLA_01, REV_01. Structure = f(p) validated. Bug-fixed RNG (per-p seeding, cs^p causal). 15 spurious CHANNELED removed (19→4). Phase diagram: Gaussian 57%, CHANNELED 5%. Model B — conclusions hold with corrections.** |
 | **V7.3** | **Structure Optimality / Unified Control Observable** | **FOP_01 + POP_01 + BSP_01 + BUP_01 + BBC_01 + BER_01 + ASY_01 + CTP_01 + CCI_01 + CQU_01 + UCO_01 complete. Covariance and conservation were closed as dual projections of one control axis (UCO_01, Model C).** |
-| **V7.4** | **Latent Control Observable** | **LCO_01 complete. Latent reconstruction (PCA/factor-style one-factor fit) identifies a shared cancellation axis \(L\) with high family consistency (PC1 explained mean≈0.959, min≈0.948, mean \|corr(L,R)\|≈0.996). Decision: Model C (latent control observable exists).** |
+| **V7.4** | **Latent Dynamics & Covariance Balance** | **CBD_01 + CBR_01 + PRI_01 + KSI_01 + KDI_01 + SHD_01 complete. Covariance chain: S,D→cov (~84%), p→shape→cov, slopeAtHalf analytically derived.** |
 
-**Cumulative total: 2940 tests, 0 failed as of 2026-07-22.**
+**Cumulative total: 2985 tests, 0 failed as of 2026-07-24.**
 
 ---
 
@@ -280,10 +280,15 @@ is Lorentz-like, not physical spacetime. TRM is a constrained effective theory.
 - **LDA_01** (Latent Dynamics Attractor): dynamic trajectories show strong \(L\)-quality coupling and collapse onset tied to decreasing \(L\), but perturbative recovery is insufficiently strong for a robust attractor claim (mean recovery rate≈0.320). Decision: **Model A**.
 - **LCD_01** (Latent Control Driver): lead-lag, predictive, and perturbation-based Driver Scores rank covariance as the strongest upstream controller of \(L\) across families (wins: covariance 3/5, balance 2/5, p 0/5; global top=Covariance). Decision: **Model A**.
 - **CBD_01** (Covariance Balance Derivation): balance-only models explain most covariance variance across families (mean SD-model \(R^2\approx0.844\); strong in 5/5 families), supporting covariance as strongly determined by suppression-discrimination balance. Decision: **Model B**.
+- **CBR_01** (Covariance Balance Residual): residual covariance beyond S,D balance (~16% of variance) is partially explained by p (r=0.551, R²=0.304) and hierarchy depth (r=0.491, R²=0.241). Combined augmented model reaches R²=0.941 (+10.3%). Residual is substantial across all 5 families (gain 7.1%--15.4%). Decision: **Model B** (residual from p).
+- **PRI_01** (p-Residual Information): p's residual predictivity is 96.7% shape-mediated through coupling function metrics. Cross-family mean mediation: 92.8% (5/5 strong). p→K(d) shape→covariance. Decision: **Model C**.
+- **KSI_01** (Kernel Shape Identity): 5 shape metrics near-orthogonal. couplingWidth/budget redundant (r=0.996). No single latent shape variable. Decision: **Model D**.
+- **KDI_01** (Kernel Driver Importance): slopeAtHalf is universal #1 driver (SHAP=0.106, solo R²=0.096, top in 5/5 families). 3-metric subset (slope+cw+curv) reaches 99% of full R². Decision: **Model B**.
+- **SHD_01** (Slope Half Dominance): slopeAtHalf analytically derived as -(K₀·p/(2ξ))·(ln 2)^((p-1)/p) — the midpoint gradient of K(d). Direct control verified (avg partial r=0.721 across HD bins). 0% numerical error in derivation. Decision: **Model B**.
 
 **Key mechanism:** Coupling enters as `csP = cs^p` (nonlinear). Each p-value receives independent deterministic RNG stream `Random(baseSeed + pIdx * 7919)`.
 
-**Next:** resolve whether covariance-balance determination can be upgraded from strong empirical control (Model B) to analytical closure (Model C), while re-testing latent dynamics with improved recovery protocols.
+**Next:** with slopeAtHalf derived analytically and its direct control verified, pursue the full analytical closure: derive S and D from slopeAtHalf, and close the p→ξ→K₀→slope→cov chain analytically.
 
 ---
 
