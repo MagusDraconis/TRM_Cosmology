@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V8.0 FOUNDATIONAL GEOMETRY |
-| Current Branch | v8.0-foundational-geometry |
-| Total Tests | ~620 (Fact/Theory methods); ~3100+ (including suite runs) |
+| Current Version | V8.2 PRIMITIVE MEANING |
+| Current Branch | v8.2-primitive-meaning |
+| Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.0 FOUNDATIONAL GEOMETRY. Full V7.4→V7.9 chain: Covariance=separability → Mode resonance → Conservation → Dim=exp(H) → Attractors → Transfer-pressure field. V8.0 targets the deepest geometric principles. |
+| Current Status | V8.2 PRIMITIVE MEANING. Full chain: P(Accessibility)→Gradient→Transfer Pressure→Drift→Temporal Ordering→Emergent Time→Local Rates→Emergent Geometry(PEG_01). Dimension emerges from transfer-field geometry. P is irreducible & universal. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

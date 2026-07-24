@@ -2,10 +2,10 @@
 
 **Version:** 4.0
 **Date:** 2026-07-24
-**Scope:** Clockwork Cosmology V1 through V7.9
-**Tests:** ~620 (Fact/Theory methods); ~3100+ (including suite runs), 0 failed
-**Branch:** v8.0-foundational-geometry
-**Current Frontier:** V8.0 FOUNDATIONAL GEOMETRY (V7.4→V7.9 complete; V8.0 targeting deepest geometric principles)
+**Scope:** Clockwork Cosmology V1 through V8.2
+**Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
+**Branch:** v8.2-primitive-meaning
+**Current Frontier:** V8.2 PRIMITIVE MEANING (PEG_01 complete) — Emergent Geometry from local time-rate differences
 
 ---
 
@@ -2035,161 +2035,41 @@ maintained to prevent overinterpretation:
 | V5.50 | Kernel-Class Assignment and Boundary Origin | 2 | COMPLETE |
 | V5.51 | Spread-Order Origin and Kernel-Assignment Mechanism | 6 | COMPLETE |
 | V5.52 | Raw-Frequency Ensemble Sampling Origin | 6 | COMPLETE |
-| V5.53 | SelectAndClassify Predicate Origin | 6 | COMPLETE |
-| **Total** | | **2901** | **0 failed** |
+| V7.3 | Latent Dynamics and Balance | ~85 | COMPLETE |
+| V7.4 | Slope-Discrimination Dynamics | ~170 | COMPLETE |
+| V7.5 | Mode Dynamics and Beta Control | ~80 | COMPLETE |
+| V7.6 | Mode Resonance and Coupling | ~70 | COMPLETE |
+| V7.7 | Entropy Dimension and Phase Transitions | ~80 | COMPLETE |
+| V7.8 | Entropy Attractors and Transfer Pressure | ~90 | COMPLETE |
+| V7.9 | Attractor Geometry and Transfer Origin | ~25 | COMPLETE |
+| V8.0 | Foundational Geometry and Primitive Identity | ~40 | COMPLETE |
+| V8.1 | Primitive Origin: Irreducibility + Universality | ~35 | COMPLETE |
+| V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~25 | IN PROGRESS |
+| **Total** | | **3393** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 2901 verified
-tests with 0 failed is the authoritative current count as of 2026-07-21. Earlier totals (2386 at
-V5.6, 2590 at V5.13, 2748 at V5.26) are historical milestones.
+Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
+tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 ---
 
 ## M. Current Research Frontier
 
-### V5.47 — Post-Warmup T0 Spread Origin and N-Window Formation — COMPLETE
+### V8.2 — Primitive Meaning — IN PROGRESS
 
-**Status:** COMPLETE (2026-07-20). 5 suites: TSP, TSE, THD, TSA, TSS.
-**Final Model: A+E — Handoff Transform N-Window Formation.**
+**Status:** Active (2026-07-24). 6 audits complete: PSE_01, PTD_01, PTO_01, PET_01, PLT_01, PEG_01.
 
-**Key findings:**
-- w2→T0 handoff is the key N-window formation transform
-- Handoff is rank-inverting (Spearman N=75=-0.671, N=72=-0.483)
-- d/K at w2 near-perfectly diagnoses profile-level delta_omega (|r| > 0.92)
-- N-window outcome determined by w2-state spread (km/lam IQR), not mean d_w2
-- N=75: S1 bulk-wide amplification; N=72: S2 bulk collapse; N=70: S3 stable compressed
-- All findings survive random-split and jackknife stability audits
-- Stop-Low: 41 stop, 0 rescues → SAFE
-- Causal closure remains blocked. V6 NOT READY.
+**Complete V7.4→V8.2 chain:**
+```
+Primitive P (Accessibility Potential, irreducible, universal)
+  → Accessibility Gradients → Transfer Pressure (drift field)
+  → Directed Drift → Temporal Ordering → Emergent Time (local rates)
+  → Emergent Geometry (PEG_01) ← CURRENT
+  → Attractor Occupation → Entropy H = −Σpi log pi → Dimension D = exp(H)
+```
 
-### V5.48–V5.52 — Spread-Order and Kernel-Assignment Origin Chain — COMPLETE
-
-**Status:** COMPLETE (2026-07-20). V5.48–V5.52 traced the spread-order origin through
-distribution shape, spread generation, kernel-class assignment, and raw-frequency
-ensemble sampling. V5.52 established that SelectAndClassify creates K1 > K3 > K2
-ordering through P1 composition.
-
-### V5.53 — SelectAndClassify Predicate Origin — COMPLETE
-
-**Status:** COMPLETE (2026-07-21). 6 suites: SCP_01, RIG_01, RIS_01, RIC_01, RCS_01, TSS_01.
-**Final Model: B+ — Spread-Primary, Mean-Complement Predicate.**
-
-**Key findings:**
-- rawIQR is the strongest P1/P1b discriminator (~10× normalized dominance over rawMean)
-- P1 selects pre-existing high-spread profiles (differences exist before SAC)
-- rawIQR alone is not uniformly per-N stable (jackknife 1/3 N)
-- rawMean contributes independent complementary information
-- rawIQR + rawMean rank composite improves per-N stability (jackknife 2/3 N)
-- Composite yields consistent P1 > P1b direction across all tested N
-- Refines V5.52: SAC predicate is spread-primary, not mean-centric
-- Stop-Low safe. Causal closure blocked. V6 NOT READY.
-
-**Final synthesis:** `docsV5/V5_53/TRM_V5_53_TSS_01_FinalSynthesis.md`
-
-### V5.63 — Geometry Closure — COMPLETE
-
-**Status:** COMPLETE (2026-07-23). 7-audit analytical closure stack (ICA through CFM).
-**Key finding: V6 geometry is ANALYTICALLY CLOSED.**
-
-**Analytical closure results:**
-- ICA_01: I₁ = Cupd linearization conservation law (99% variance cancellation, r(km,dMean)=−0.989)
-- IDA_01: I₂ = analytical coordinate: b* = (var(Ω)−cov)/(var(km)+var(Ω)−2cov), matches 0.90 exactly
-- MDA_01: g₂₂ = 1+(dI₁/dI₂)² → 1 from I₁ conservation, finite-size decay ~N^-3.1
-- DIM_01: Effective dimension = 2 (PR=1.09 at N=72, approaches 1 at large N), no I₃
-- GCL_01: I₁ dominates geometry 32:1 over I₂ (13% vs 0.4% of g₂₂ variance explained)
-- UGA_01: 88% of g₂₂ variance = 3 near-zero dI₂ outliers, vanish at N≥90
-- CFM_01: Single collective mode emerges (mode strength 48x→259x, N=50→300)
-
-### V6.4 — Blazor App Integration — COMPLETE
-
-**Status:** COMPLETE (2026-07-22).
-**Branch:** feature/v6.4-app-integration.
-
-**Key deliverables:**
-- V6GeometryService: server-side V6 computation for Blazor UI
-- /v6 page: MudBlazor dashboard (I₁, I₂, g₂₂, ε, arc length)
-- V6TrajectoryModel: POCO for UI data binding
-- NavMenu updated with "V6 Geometry" link
-
-### V6.3 — Pipeline Integration — COMPLETE
-
-**Status:** COMPLETE (2026-07-22). 3 pipeline tests, 13 total V6.
-**Branch:** feature/v6.3-pipeline-integration.
-
-**Key deliverables:**
-- V6Pipeline.ComputeTrajectory(): feed SAC data → V6Trajectory
-- V6Trajectory: summary stats + CSV/JSON export
-- 3 pipeline tests (V6_30–V6_32): all pass
-
-### V6.2 — Core Migration — COMPLETE
-
-**Status:** COMPLETE (2026-07-22).
-**Branch:** feature/v6.2-core-migration.
-
-**Key deliverables:**
-- V6Geometry moved to TRM.Core/Geometry/V6/
-- Namespace: TRM.Core.Geometry.V6
-- All 10 V6 tests pass after migration
-
-### V6.1 — Documentation and Integration — COMPLETE
-
-### V6.0 — Geometry Implementation — COMPLETE
-
-**Status:** COMPLETE (2026-07-22). 10 tests, all pass.
-**Branch:** feature/v6.0-geometry-implementation → feature/v6.1-documentation-integration.
-
-**Key deliverables:**
-- V6_Geometry.cs: invariant computation module (I₁, I₂, s, g₂₂)
-- 10 test cases: core geometry, cross-seed validation, thermodynamic limit
-- All tests pass, cross-seed validated (10 seeds)
-
-**V6 readiness:** IMPLEMENTED AND VALIDATED.
-
-### V5.61 — Euclidean Limit Proof — INITIALIZED
-
-**Status:** INITIALIZED (2026-07-22). 1 suite: V5.61_g2_Dynamics.
-**Key Discovery: g₂₂ → 1.0 as N → ∞ — the V6 metric becomes Euclidean.**
-
-**Key findings:**
-- g₂₂ is driven by km (r=0.588) and inversely by MeanDist (r=-0.520)
-- g₂₂ is path-dependent at finite N (Finsler-like geometry)
-- At N=90: g₂₂=1.014, CV=0.017 — nearly Euclidean
-- At N=100: g₂₂=1.002, CV=0.003 — essentially Euclidean
-- The V6 manifold is asymptotically flat: ds² → dI₂² in thermodynamic limit
-- I₁ remains N-constant across all tested N (range 0.799-0.812)
-
-**V6 readiness:** THEORETICALLY FOUNDED. 15 supported findings, 4 falsified, 7 open questions.
-
-**Final synthesis:** `docsV5/V5_61/TRM_V5_61_Final_Synthesis.md`
-
-### V5.60 — Kernel Emergence Audit — COMPLETE
-
-**Status:** COMPLETE (2026-07-22). 7 suites: KEM_01, KSP_01, EMG_01, EMG_02, KEM_02, KEM_03, KEM_04.
-**Final Model: SAC = LIMIT CYCLE with period 2 epochs, half-life 66 epochs.**
-
-**Key findings:**
-- **KEM_01:** km emerges through SAC dynamical feedback (amnesic: first Cupd erases initial K). P1/P1b separation grows from 0.25σ→1.45σ across 3 epochs. Distributed growth pattern.
-- **KSP_01:** Phase slips are ZERO at K=0.5. Signal originates in phase-diff VARIANCE (tightness of lock), not slips. Interpretation: SAC DYNAMICAL FEEDBACK.
-- **EMG_01:** c_eff (= Ω×MD) is NOT invariant. CV(seed)=0.80, CV(N)=1.08.
-- **EMG_02:** Omega and MeanDist are CORRELATED (r=0.81 overall, r=0.95 at N=80), not orthogonal. MD/O is closest to invariant (CV≈0.34).
-- **KEM_02:** K0 sweep shows km declines across epochs. Higher K0→larger epoch-1 overshoot.
-- **KEM_03:** km oscillates for most Xi/N/Dt. NO stable convergence to fixed point at 5 epochs.
-- **KEM_04:** SAC is a LIMIT CYCLE (period=2, ω=π). λ=0.0105, half-life=66 epochs. Convergence requires K0≥1.4 or N≥100.
-
-**Core falsifications for V6:**
-| Prerequisite | Status |
-|:-------------|:------|
-| c_eff invariant (CV<0.05) | ❌ FALSIFIED (CV=0.80) |
-| Ω⊥MD (orthogonal) | ❌ FALSIFIED (r=0.81) |
-| SAC fixed point | ❌ FALSIFIED (limit cycle) |
-| Causal closure | ❌ BLOCKED (V5.40-41) |
-
-**V6 readiness:** IMPLEMENTED AND VALIDATED. Stop-Low: SAFE.
-
-**Final synthesis:** `docsV5/V5_60/TRM_V5_60_Final_Synthesis.md`
-
-### V5.57 — Pipeline Artifact Audit — COMPLETE
-
-**Status:** COMPLETE. ART_01: Low-rawIQR preference is pipeline artifact (permutation test: 18/20 survivals).
+**V8.2 audits:** PSE_01(B/C), PTD_01(C), PTO_01(B/C), PET_01(C), PLT_01(C), PEG_01(C).
+**Predecessors:** V8.1 (P irreducible, universal). V8.0 (single primitive identity). V7.x (full chain from covariance to attractors).
+**Open:** V8.2 closure, further semantic extension, formalization of emergent geometry.
 
 For the historical frontier context (V5.6+), see section F2 above.
 
@@ -2237,43 +2117,29 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V8.0 FOUNDATIONAL GEOMETRY. Full V7.4→V7.9 chain complete on top of closed V7.3 stack, 0 failed.
-Current branch: `v7.4-latent-dynamics`.
-Key findings (V7.3 → V7.4):
-- p≈1.5 is a covariance-balance optimum (POP_01).
-- Balance principle transfers across SAC/GAN/RCS/ICS/CNS (BSP_01).
-- Balance coordinate corridor \(B^*\approx 0.41\) is cross-family stable (BUP_01).
-- Under wide perturbations, corridor spread broadens substantially (BBC_01).
-- Extremes rejection is asymmetric: high-B collapse dominates across families (BER_01).
-- Asymmetry origin localizes to covariance-led high-B collapse (ASY_01).
-- Covariance is the universal tipping variable and earliest collapse signal (CTP_01).
-- Covariance and conservation obey the same identity, with covariance leading collapse timing (CCI_01).
-- Quality collapses onto a shared covariance curve with covariance-dominant information content (CQU_01).
-- Covariance and conservation collapse into a single latent control axis (UCO_01).
-- Latent cancellation coordinate \(L\) is reconstructible and aligns with \(R\) across families (LCO_01).
-- Latent identity is analytically captured by \(L\approx R\approx1-var(I1)/vt\) (LCI_01).
-- Latent dynamic coupling is strong, but current attractor evidence remains descriptive rather than universal-attractor level (LDA_01, Model A).
-- Driver audit identifies covariance as the strongest tested upstream controller of latent state motion (LCD_01, Model A).
-- Covariance-balance audit shows covariance is strongly balance-determined (\(R^2\approx0.844\) from S,D-only composite model; CBD_01, Model B).
-- Covariance-balance residual audit shows residual (~16%) is partially explained by p (\(r=0.551\), \(R^2=0.304\)); combined model reaches \(R^2=0.941\); CBR_01, Model B.
-- p-Residual information audit: p's residual predictivity is 96.7% shape-mediated through K(d) coupling function metrics; p→shape→covariance chain established; PRI_01, Model C.
-- Kernel shape identity: 5 K(d) shape metrics are near-orthogonal independent controls; couplingWidth/budget redundant (r=0.996); no single latent shape variable exists; KSI_01, Model D.
-- Kernel driver importance: slopeAtHalf is universal #1 driver (SHAP=0.106, top in 5/5 families); 3-metric subset recovers 99% of shape R²; KDI_01, Model B.
-- Slope half dominance: slopeAtHalf analytically derived as midpoint gradient; direct control verified (partial r=0.721); SHD_01, Model B.
-- Slope-covariance sufficiency: 7-part audit; slope dominant (64% of explainable variance) but incomplete; residuals structured (discrimination r=0.879). Covariance is fundamentally slope-driven (SCS_01, Model B).
-- Discrimination completion: discrimination is dominant complement to slope (ΔR²=0.676, r(res,D)=0.847); additive not synergistic (1.7%). Discrimination is primary covariance information carrier (solo R²=0.774 > slope 0.113). DCR_01, Model B.
-- Discrimination-slope duality: D and S are two complementary orthogonal (r²=5.1%) kernel control channels. D=fidelity (86% unique), S=intensity (2% unique). Both needed in all 5 families. DSD_01, Model C.
-- Discrimination primacy: D is the primary kernel quantity (R²(D)=0.805 vs S=0.100, 8.1:1 dominance). S provides modulation of D→cov. DPF_01, Model B.
-- Entropy-attractor primacy: Attractors and entropy are dual descriptions; basins structure, entropy measures. EAP_01.
-Decision model (latest V7.8 state): **Model B/C** for entropy-attractor duality, **Model C** for Dim=exp(H), **Model B/C** for canonical attractors.
+**Current status:** V8.2 PRIMITIVE MEANING (PEG_01 complete). Full V7.4→V8.2 chain:
+```
+P (Accessibility Potential, irreducible, universal)
+  → Accessibility Gradients
+  → Transfer Pressure (drift field)
+  → Directed Drift
+  → Temporal Ordering
+  → Emergent Time (local rate variation)
+  → Emergent Geometry (PEG_01) ← CURRENT
+  → Attractor Occupation
+  → Entropy H = −Σp_i log p_i
+  → Dimension D = exp(H)
+```
+Dimension emerges from transfer-field geometry generated by a single irreducible kernel primitive.
+~3393 tests, 0 failed. Current branch: `v8.2-primitive-meaning`.
 
-**V7.4 → V7.9 Full Chain:**
-K(d) → Near-Far Separability → Covariance → Mode Resonance → Conservation →
-Entropy → Dim=exp(H) → Canonical Attractors → Transfer-Pressure Field →
-Dimension emerges from transfer-field geometry generated by kernel structure.
-
-**V8.0 FOUNDATIONAL GEOMETRY:** Targeting the deepest geometric principles
-underlying the entire chain. ~620 tests, 0 failed.
+V8.2 audits (PSE_01, PTD_01, PTO_01, PET_01, PLT_01, PEG_01):
+- Accessibility Potential = Primitive P's semantic identity
+- Transfer Pressure = directed drift field (PTD_01, Model C)
+- Drift → Temporal Ordering without assuming time (PTO_01, Model B/C)
+- Ordering → Emergent Time as progress coordinate (PET_01, Model C)
+- Accessibility landscape non-uniformity → Local time-rate variation (PLT_01, Model C)
+- Relative local rates → Emergent distance geometry (PEG_01, Model C)
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -2283,6 +2149,6 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-24. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V7.4. It is intended for onboarding
+TRM/TQM project from Clockwork Cosmology V1 through V8.2. It is intended for onboarding
 new researchers, reviewers, Copilot sessions, and LLM chats. Maintain strict claim
 discipline when referencing any finding described herein.*

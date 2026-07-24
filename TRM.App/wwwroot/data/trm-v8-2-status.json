@@ -2,6 +2,19 @@
   "version": "V8.2",
   "branch": "v8.2-primitive-meaning",
   "status": "active",
-  "total_audits": 0,
-  "key_result": "Investigating the physical meaning of Primitive P."
+  "total_audits": 6,
+  "audits_completed": ["PSE_01", "PTD_01", "PTO_01", "PET_01", "PLT_01", "PEG_01"],
+  "key_result": "Primitive P = Accessibility Potential. Full semantic chain: Accessibility → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry.",
+  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Attractor Occupation → Entropy → Dimension",
+  "models": {
+    "PSE_01": "B/C",
+    "PTD_01": "C",
+    "PTO_01": "B/C",
+    "PET_01": "C",
+    "PLT_01": "C",
+    "PEG_01": "C"
+  },
+  "test_count": "~3393",
+  "failed": 0,
+  "last_updated": "2026-07-24"
 }
