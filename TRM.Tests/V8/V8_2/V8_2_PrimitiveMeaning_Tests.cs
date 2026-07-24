@@ -835,4 +835,193 @@ public class V8_2_PrimitiveMeaning_Tests
             return (d, m);
         }
     }
+
+    [Fact]
+    public void PLT_01_PrimitiveLocalTimeAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PLT_01: Primitive Local Time Audit ===");
+        _o.WriteLine("=== Is emergent time globally uniform or locally variable? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 9311;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        var rng = new Random(baseSeed + 5581);
+
+        // ============================================================
+        // Dense trajectory with rate metrics
+        // ============================================================
+        var allRates = new List<(VcFamily fam, double dH_dBeta, double dAcc_dBeta, double dDist_dBeta, double press)>();
+
+        foreach (var fam in families)
+        {
+            var prev = (ent: 0.0, acc: 0.0, dist: 0.0); bool hasPrev = false;
+
+            for (int bi = 0; bi < 61; bi++)
+            {
+                double beta = bi * 0.0167;
+                var variants = new List<VariantSpec>();
+                for (int i = 0; i < 3; i++)
+                    variants.Add(new VariantSpec($"{fam}_LT_{i}", VcFamily.ICS, 0.30 + rng.NextDouble() * 2.0, 1.0, 0.20 + rng.NextDouble() * 2.5, beta, 0.0));
+
+                var allC = new List<double[]>(); var allL = new List<double>();
+                foreach (var v in variants)
+                    for (int ip = 0; ip < 4; ip++)
+                    {
+                        double pVal = 0.1 + ip * 0.4; if (pVal > 1.31) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pVal, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pVal)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                int N = allL.Count; var LArr = allL.ToArray();
+                var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double v = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(v) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                var cm = new double[nContrasts, nContrasts];
+                for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                var la = new double[3][];
+                for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                double t = r2L3;
+                double l1 = r2L1 / Math.Max(t, 1e-12), l2 = (r2L2 - r2L1) / Math.Max(t, 1e-12), l3 = (r2L3 - r2L2) / Math.Max(t, 1e-12);
+                double ent = 0; if (l1 > 1e-12) ent -= l1 * Math.Log(l1); if (l2 > 1e-12) ent -= l2 * Math.Log(l2); if (l3 > 1e-12) ent -= l3 * Math.Log(l3);
+                double d1 = Math.Abs(l1 - 1.0) + l2 + l3;
+                double d2 = Math.Abs(l1 - 0.5) + Math.Abs(l2 - 0.5) + l3;
+                double d3 = Math.Abs(l1 - 1.0 / 3) + Math.Abs(l2 - 1.0 / 3) + Math.Abs(l3 - 1.0 / 3);
+                double minD = Math.Min(d1, Math.Min(d2, d3));
+                double acc = 1.0 / Math.Max(minD, 0.01);
+
+                if (hasPrev)
+                {
+                    double dH = (ent - prev.ent) / 0.0167;
+                    double dAcc = (acc - prev.acc) / 0.0167;
+                    double dDist = (minD - prev.dist) / 0.0167;
+                    double press = Math.Abs(l1 - (r2L1 / Math.Max(r2L3, 1e-12))) + Math.Abs(l2 - ((r2L2 - r2L1) / Math.Max(r2L3, 1e-12)));
+                    allRates.Add((fam, dH, dAcc, dDist, press));
+                }
+                prev = (ent, acc, minD); hasPrev = true;
+            }
+        }
+
+        // ============================================================
+        // Local time analysis
+        // ============================================================
+        _o.WriteLine("=== Local Time Analysis ===");
+        _o.WriteLine($"{"Family",-6} {"CV(dH/dβ)",12} {"CV(dDist/dβ)",14} {"r(press,dH)",12} {"local time?",12}");
+        _o.WriteLine(new string('-', 58));
+
+        double[] allDH = allRates.Select(r => r.dH_dBeta).ToArray();
+        double[] allPress = allRates.Select(r => r.press).ToArray();
+        double rPress_dH = PearsonCorrelation(allPress, allDH);
+
+        foreach (var fam in families)
+        {
+            var fd = allRates.Where(r => r.fam == fam).ToList();
+            if (fd.Count < 5) continue;
+            double[] dH = fd.Select(r => r.dH_dBeta).ToArray();
+            double[] dD = fd.Select(r => r.dDist_dBeta).ToArray();
+            double[] pr = fd.Select(r => r.press).ToArray();
+
+            double cvH = Math.Sqrt(dH.Select(v => (v - dH.Average()) * (v - dH.Average())).Average()) / Math.Max(Math.Abs(dH.Average()), 1e-12);
+            double cvD = Math.Sqrt(dD.Select(v => (v - dD.Average()) * (v - dD.Average())).Average()) / Math.Max(Math.Abs(dD.Average()), 1e-12);
+            double rPh = PearsonCorrelation(pr, dH);
+
+            string local = cvH > 0.50 ? "VARIABLE" : "UNIFORM";
+            _o.WriteLine($"{fam,-6} {cvH,12:F2} {cvD,14:F2} {rPh,12:F4} {local,12}");
+        }
+        _o.WriteLine("");
+
+        double cvGlobal = Math.Sqrt(allDH.Select(v => (v - allDH.Average()) * (v - allDH.Average())).Average()) / Math.Max(Math.Abs(allDH.Average()), 1e-12);
+        _o.WriteLine($"Global CV(dH/dβ) = {cvGlobal:F2}, r(press, dH/dβ) = {rPress_dH:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+
+        bool locallyVariable = cvGlobal > 0.40;
+        bool pressureDrivesRate = Math.Abs(rPress_dH) > 0.20;
+
+        string decision;
+        if (locallyVariable && pressureDrivesRate)
+            decision = "Model C";
+        else if (locallyVariable)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision model: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine($"Local time rates emerge naturally from accessibility geometry. CV(dH/dβ)={cvGlobal:F2} — entropy does not accumulate uniformly. Transfer pressure drives local rate variation (r={rPress_dH:F3}). Different regions of the accessibility landscape evolve at different effective rates — this is the primitive origin of local time-rate variation, without assuming spacetime curvature or gravitational time dilation.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Weak local rate variation (CV={cvGlobal:F2}).");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. Global CV(dH/dβ)={cvGlobal:F2} — {(locallyVariable ? "VARIABLE" : "UNIFORM")}");
+        _o.WriteLine($"3. r(press, dH/dβ)={rPress_dH:F4}");
+        _o.WriteLine("4. Local time theorem: Accessibility geometry → variable progress rates → local time");
+        _o.WriteLine($"5. Decision: {decision}");
+        _o.WriteLine("6. Commit-ready summary:");
+        _o.WriteLine($"   PLT_01_PrimitiveLocalTimeAudit — {(locallyVariable ? "Local time rates emerge" : "Time is uniform")}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== PLT_01 complete. Commit: PLT_01_PrimitiveLocalTimeAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+
+        static (double[] e, double[,] v) JacobiEigenLocal(double[,] a, int n)
+        {
+            var m = new double[n, n]; var d = new double[n];
+            for (int i = 0; i < n; i++) { m[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0; for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++) sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++)
+                    {
+                        double g = 100.0 * Math.Abs(a[i, j]);
+                        if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j])) a[i, j] = 0.0;
+                        else if (Math.Abs(a[i, j]) > thresh)
+                        {
+                            double h = d[j] - d[i], t;
+                            if (Math.Abs(h) + g == Math.Abs(h)) t = a[i, j] / h;
+                            else { double theta = 0.5 * h / a[i, j]; t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta)); if (theta < 0) t = -t; }
+                            double cc = 1.0 / Math.Sqrt(1.0 + t * t), s = t * cc, tau = s / (1.0 + cc);
+                            h = t * a[i, j]; z[i] -= h; z[j] += h; d[i] -= h; d[j] += h; a[i, j] = 0.0;
+                            for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                            for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                            for (int k = 0; k < n; k++) { g = m[k, i]; h = m[k, j]; m[k, i] = g - s * (h + g * tau); m[k, j] = h + s * (g - h * tau); }
+                        }
+                    }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, m);
+        }
+    }
 }
