@@ -36,8 +36,11 @@ is the dominant complement: it adds ΔR²=0.676 beyond slope and dominates covar
 residuals (r=0.847), combining additively rather than synergistically (DCR_01, Model B).
 Discrimination and slope are two complementary, substantially orthogonal (r²=5.1%)
 kernel control channels: D serves as coupling fidelity (R²=0.809), S as coupling
-intensity (ΔR²=0.019). Both needed in all 5 families; Model C (DSD_01).
-2988 tests, 0 failed.
+intensity (ΔR²=0.019). Both needed in all 5 families; Model C (DSD_01). Discrimination is the primary
+kernel quantity: D-R²=0.805 vs S-R²=0.100 (8.1:1 dominance ratio). D predicts
+covariance even with S fixed (partial r=0.924). S provides modulation (ΔR²=0.040
+via D×S interaction). Cross-family primacy consistent. DPF_01, Model B.
+2989 tests, 0 failed.
 
 ---
 
@@ -184,6 +187,7 @@ deterministic threshold rescue.
 | V7.4 SCS_01 | **COMPLETE** — Slope-Covariance Sufficiency Audit. slopeAtHalf is dominant (64% of explainable variance, unique ΔR²=0.122) but incomplete — other shapes add ΔR²=0.075, residuals retain structure. Decision: Model B. |
 | V7.4 DCR_01 | **COMPLETE** — Discrimination Completion Residual Audit. Discrimination is the dominant complement: ΔR²=0.676 beyond slope, r(cov_res,D)=0.847. Slope+disc reaches R²=0.790. Adding suppression reaches R²=0.890. Interaction is additive (1.7% synergy). Decision: Model B. |
 | V7.4 DSD_01 | **COMPLETE** — Discrimination-Slope Duality Audit. D and S are substantially orthogonal (r²=5.1%, independent=94.9%). Unique D ΔR²=0.715 (86%), unique S ΔR²=0.019 (2%), shared ΔR²=0.094 (11%). Both needed, cross-family consistent. Deeper mechanism exists (ΔR²=0.087 beyond D+S). Decision: Model C. |
+| V7.4 DPF_01 | **COMPLETE** — Discrimination Primacy Audit. D dominates direct prediction (R²=0.805 vs S=0.100, 8.1:1). Partial r(D,cov|S)=0.924. D exhausts 54% of variance alone. S modulates D→cov (ΔR²=0.040 via D×S). Cross-family: RCS/ICS weakest D-primacy (4:1), GAN/CNS strongest (16:1). Decision: Model B. |
 | **V6.3** | **COMPLETE** — Pipeline integration. V6Pipeline.ComputeTrajectory(), CSV/JSON export. 13/13 V6 tests pass. |
 | **V6.2** | **COMPLETE** — Core migration. TRM.Core/Geometry/V6/V6Geometry.cs. 10/10 tests pass after migration. |
 | **V6.1** | **COMPLETE** — Documentation. User Guide, Theory, Integration Plan. XML docs on V6Geometry. |
@@ -194,15 +198,16 @@ deterministic threshold rescue.
 
 ## Current Research Question (V7.4 → V7.5)
 
-**V7.4 FULL 14-AUDIT STACK COMPLETE — Covariance chain: balance → residual → shape → derivation → sufficiency → completion → duality audit.**
+**V7.4 FULL 15-AUDIT STACK COMPLETE — Covariance chain: balance → residual → shape → derivation → sufficiency → completion → duality → primacy audit.**
 
 Chain: S,D balance → covariance (~84%, CBD_01) → p residual (CBR_01) → p→shape
 mediation 96.7% (PRI_01) → shape metrics independent (KSI_01) → slopeAtHalf dominates
 (KDI_01) → slope analytically derived as K(d) midpoint gradient (SHD_01) → covariance
-sufficiency audit confirms slope is dominant but incomplete, Model B (SCS_01) →
-discrimination identified as dominant complement (ΔR²=0.676, r=0.847), additive not
-synergistic, Model B (DCR_01) → D and S confirmed as two complementary orthogonal
-control channels: fidelity (D, 86%) and intensity (S, 2%), Model C (DSD_01).
+sufficiency audit: slope dominant but incomplete, Model B (SCS_01) →
+discrimination identified as dominant complement, additive, Model B (DCR_01) →
+D and S confirmed as two complementary orthogonal control channels, Model C (DSD_01) →
+discrimination is the primary kernel quantity (8.1:1 dominance), S provides modulation,
+Model B (DPF_01).
 
 **V7.5 proposed: Analytical closure — derive S and D from slopeAtHalf.**
 

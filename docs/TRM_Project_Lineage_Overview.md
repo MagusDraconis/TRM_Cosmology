@@ -3,9 +3,9 @@
 **Version:** 3.0
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 598 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Tests:** 599 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
 **Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (full 14-audit stack complete: LCO_01 through DSD_01; built on V7.3 closure stack)
+**Current Frontier:** V7.4 LATENT DYNAMICS (full 15-audit stack complete: LCO_01 through DPF_01; built on V7.3 closure stack)
 
 ---
 
@@ -1639,6 +1639,43 @@ complementary kernel control channels for covariance. N=4000, 5 families.
 
 ---
 
+#### DPF_01 — Discrimination Primacy Audit (complete)
+
+7-part audit determining whether discrimination is the fundamental kernel quantity
+underlying covariance formation. N=4000, 5 families.
+
+- **Part A — Descriptive:** r(D,cov)=0.897, r(S,cov)=0.316, r(D,S)=0.193.
+  D-covariance correlation is 2.8× stronger than S-covariance across all families.
+
+- **Part B — Causal hierarchy:** D dominates: R²(D)=0.805 vs R²(S)=0.100
+  (dominance ratio 8.1:1). Partial r(D,cov|S)=0.924 — D predicts covariance
+  even with slope statistically controlled. Partial r(S,cov|D)=0.317 — slope
+  retains some unique effect. D+suppression R²=0.837 vs S+suppression R²=0.117.
+
+- **Part C — Conditional prediction:** d(cov)/d(D) ranges from 0.269 (low S)
+  to 0.347 (high S) — 1.29× modulation. d(cov)/d(S) ranges from 0.046 (low D)
+  to 0.382 (high D) — 8.4× amplification, but the base effect is small.
+
+- **Part D — Residual analysis:** After removing D: 46% of variance remains
+  unexplained (residual still structured: r(res,p)=0.599, r(res,supp)=-0.392).
+  After removing S: only 10% remains unexplained, and the residual is dominated
+  by D (r=0.881) — confirming D is the primary carrier.
+
+- **Part E — Cross-family:** D primacy consistent in all 5 families:
+  SAC 8.7:1, GAN 16.1:1, RCS 4.1:1, ICS 4.0:1, CNS 16.1:1.
+  RCS/ICS show weakest D primacy (steeper slope coupling).
+
+- **Part F — Analytical search:** Modulation model cov ~ D + D×S yields
+  R²=0.845 (gain ΔR²=0.040 over D alone). D is the primary channel;
+  S modulates the D→cov sensitivity by ~29% across its range.
+
+- **Part G — Decision:** **Model B** — Discrimination is the dominant kernel
+  quantity. It carries 8.1× more predictive power than slope, predicts
+  covariance even with slope fixed (r=0.924), and exhausts 54% of variance alone.
+  Slope provides secondary modulation of the D→cov mapping (ΔR²=0.040).
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -2162,7 +2199,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. Full 14-audit stack (LCO_01 → DSD_01) complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.4 LATENT DYNAMICS. Full 15-audit stack (LCO_01 → DPF_01) complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -2187,8 +2224,9 @@ Key findings (V7.3 → V7.4):
 - Slope half dominance: slopeAtHalf analytically derived as midpoint gradient; direct control verified (partial r=0.721); SHD_01, Model B.
 - Slope-covariance sufficiency: 7-part audit; slope dominant (64% of explainable variance) but incomplete; residuals structured (discrimination r=0.879). Covariance is fundamentally slope-driven (SCS_01, Model B).
 - Discrimination completion: discrimination is dominant complement to slope (ΔR²=0.676, r(res,D)=0.847); additive not synergistic (1.7%). Discrimination is primary covariance information carrier (solo R²=0.774 > slope 0.113). DCR_01, Model B.
-- Discrimination-slope duality: D and S are two complementary orthogonal (r²=5.1%) kernel control channels. D=fidelity (86% unique), S=intensity (2% unique). Both needed in all 5 families. Deeper mechanism exists (ΔR²=0.087 beyond D+S). DSD_01, Model C.
-Decision model (latest latent-dynamics state): **Model C** for D-S dual-channel control, **Model B** for slopeAtHalf direct control, **Model B** for covariance sufficiency, **Model B** for discrimination completion, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
+- Discrimination-slope duality: D and S are two complementary orthogonal (r²=5.1%) kernel control channels. D=fidelity (86% unique), S=intensity (2% unique). Both needed in all 5 families. DSD_01, Model C.
+- Discrimination primacy: D is the primary kernel quantity (R²=0.805 vs S=0.100, 8.1:1). Partial r(D,cov|S)=0.924. S modulates D→cov (ΔR²=0.040). DPF_01, Model B.
+Decision model (latest latent-dynamics state): **Model B** for D primacy, **Model C** for D-S dual-channel control, **Model B** for slopeAtHalf direct control, **Model B** for covariance sufficiency, **Model B** for discrimination completion, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
