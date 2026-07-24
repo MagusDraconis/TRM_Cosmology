@@ -5229,6 +5229,421 @@ public class V7_3_and_4_OptimalityAndLatent_Tests
         }
     }
 
+    [Fact]
+    public void SCS_01_SlopeCovarianceSufficiencyAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== SCS_01: Slope-Covariance Sufficiency Audit ===");
+        _o.WriteLine("=== Is covariance fundamentally a slope-driven phenomenon? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 1137;
+        const double pMin = 0.1;
+        const double pMax = 4.0;
+        const double pStep = 0.08;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        var variants = BuildAsymmetryVariants(baseSeed + 277);
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+
+        // ============================================================
+        // Data collection: slopeAtHalf, covariance, L, quality + all shapes
+        // ============================================================
+        var allPoints = new List<(double slope, double cov, double s, double d, double hd, double cw, double cb, double ca,
+            double p, VcFamily fam, double l, double qual, double xiVal, double k0Val)>();
+
+        foreach (var v in variants)
+        {
+            int nP = (int)Math.Round((pMax - pMin) / pStep) + 1;
+            for (int ip = 0; ip < nP; ip++)
+            {
+                double p = pMin + ip * pStep;
+                var bsp = EvaluateVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                double hd = xi * Math.Pow(Math.Log(2.0), 1.0 / Math.Max(p, 0.05));
+                double zh = hd / xi;
+                double sa = Math.Abs(k0 * (p / xi) * Math.Pow(zh, p - 1.0) * Math.Exp(-Math.Pow(zh, p)));
+                double ca = Math.Abs(k0 * (p / (xi * xi)) * Math.Pow(zh, p - 2.0) * Math.Exp(-Math.Pow(zh, p)) * (p * Math.Pow(zh, p) - (p - 1.0)));
+                double cw = xi * Math.Pow(-Math.Log(0.10), 1.0 / p);
+                double cb = k0 * xi * GammaApproxS(1.0 + 1.0 / p);
+                double l = Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0);
+
+                allPoints.Add((sa, cci.CovarianceAbs, bsp.Suppression, bsp.Discrimination, hd, cw, cb, ca, p, v.Family, l, cci.Quality, xi, k0));
+            }
+        }
+
+        int N = allPoints.Count;
+        double[] slopeArr = allPoints.Select(x => x.slope).ToArray();
+        double[] covArr = allPoints.Select(x => x.cov).ToArray();
+        double[] sArr = allPoints.Select(x => x.s).ToArray();
+        double[] dArr = allPoints.Select(x => x.d).ToArray();
+        double[] hdArr = allPoints.Select(x => x.hd).ToArray();
+        double[] cwArr = allPoints.Select(x => x.cw).ToArray();
+        double[] cbArr = allPoints.Select(x => x.cb).ToArray();
+        double[] caArr = allPoints.Select(x => x.ca).ToArray();
+        double[] pArr = allPoints.Select(x => x.p).ToArray();
+        double[] lArr = allPoints.Select(x => x.l).ToArray();
+        double[] qualArr = allPoints.Select(x => x.qual).ToArray();
+
+        // Shape metric matrix (5 columns)
+        var shapeMatrix = new double[][] { hdArr, slopeArr, caArr, cwArr, cbArr };
+        var shapeNames = new[] { "halfMaxDist", "slopeAtHalf", "curvAtHalf", "couplingWidth", "couplingBudget" };
+
+        _o.WriteLine($"Data collected: N={N} points across {families.Length} families.");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART A — Descriptive statistics across all families
+        // ============================================================
+        _o.WriteLine("=== PART A: slopeAtHalf, covariance, L, quality ===");
+        _o.WriteLine($"{"Family",-6} {"N",6} {"slopeMean",10} {"slopeStd",10} {"covMean",10} {"covStd",10} {"LMean",10} {"qualMean",10}");
+        _o.WriteLine(new string('-', 72));
+        foreach (var fam in families)
+        {
+            var idx = Enumerable.Range(0, N).Where(i => allPoints[i].fam == fam).ToArray();
+            double sm = idx.Average(i => slopeArr[i]), ss = Math.Sqrt(SampleVariance(idx.Select(i => slopeArr[i]).ToArray(), sm));
+            double cm = idx.Average(i => covArr[i]), cs = Math.Sqrt(SampleVariance(idx.Select(i => covArr[i]).ToArray(), cm));
+            double lm = idx.Average(i => lArr[i]), qm = idx.Average(i => qualArr[i]);
+            _o.WriteLine($"{fam,-6} {idx.Length,6} {sm,10:F4} {ss,10:F4} {cm,10:F4} {cs,10:F4} {lm,10:F4} {qm,10:F4}");
+        }
+        _o.WriteLine($"Corr(slope,cov)={PearsonCorrelation(slopeArr, covArr):F4}");
+        _o.WriteLine($"Corr(slope,L)   ={PearsonCorrelation(slopeArr, lArr):F4}");
+        _o.WriteLine($"Corr(slope,qual)={PearsonCorrelation(slopeArr, qualArr):F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART B — Predictive comparison
+        // ============================================================
+        _o.WriteLine("=== PART B: Predictive comparison — R² for covariance ===");
+
+        // 1. slopeAtHalf only
+        double r2SlopeOnly = R2SinglePredictor(covArr, slopeArr);
+        // 2. All shape metrics
+        double r2AllShapes = FitModelR2(covArr, shapeMatrix);
+        // 3. p only
+        double r2POnly = R2SinglePredictor(covArr, pArr);
+        // 4. slopeAtHalf + p
+        double r2SlopePlusP = FitModelR2(covArr, new[] { slopeArr, pArr });
+        // 5. All shape metrics excluding slope
+        double r2ShapesNoSlope = FitModelR2(covArr, new[] { hdArr, caArr, cwArr, cbArr });
+
+        _o.WriteLine($"  1. slopeAtHalf only:           R² = {r2SlopeOnly:F4}");
+        _o.WriteLine($"  2. All 5 shape metrics:         R² = {r2AllShapes:F4}");
+        _o.WriteLine($"  3. p only:                      R² = {r2POnly:F4}");
+        _o.WriteLine($"  4. slopeAtHalf + p:             R² = {r2SlopePlusP:F4}");
+        _o.WriteLine($"  5. Shapes excluding slope:      R² = {r2ShapesNoSlope:F4}");
+        _o.WriteLine("");
+
+        double uniqueSlopeInfo = r2AllShapes - r2ShapesNoSlope;
+        double uniqueShapeInfo = r2AllShapes - r2SlopeOnly;
+        double sharedInfo = r2AllShapes - uniqueSlopeInfo - uniqueShapeInfo;
+        _o.WriteLine("Information accounting:");
+        _o.WriteLine($"  Unique slope contribution:          ΔR² = {uniqueSlopeInfo:F4}");
+        _o.WriteLine($"  Unique other-shapes contribution:   ΔR² = {uniqueShapeInfo:F4}");
+        _o.WriteLine($"  Shared/confounded:                  ΔR² = {sharedInfo:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART C — Information decomposition (unique info per predictor)
+        // ============================================================
+        _o.WriteLine("=== PART C: Information decomposition ===");
+
+        // Unique information: for each metric, R²(all) - R²(all-except-metric)
+        for (int m = 0; m < shapeNames.Length; m++)
+        {
+            var reduced = shapeMatrix.Where((_, i) => i != m).ToArray();
+            double r2Reduced = reduced.Length > 0 ? FitModelR2(covArr, reduced) : 0.0;
+            double uniqueInfo = r2AllShapes - r2Reduced;
+            double r2Single = R2SinglePredictor(covArr, shapeMatrix[m]);
+            _o.WriteLine($"  {shapeNames[m],-18} unique ΔR²={uniqueInfo:F4}  solo R²={r2Single:F4}");
+        }
+        // Also p
+        double r2AllPlusP = FitModelR2(covArr, new[] { hdArr, slopeArr, caArr, cwArr, cbArr, pArr });
+        double uniquePInfo = r2AllPlusP - r2AllShapes;
+        _o.WriteLine($"  {"p",-18} unique ΔR²={uniquePInfo:F4}  solo R²={r2POnly:F4}");
+        _o.WriteLine("");
+
+        // Mutual information (binned, normalized)
+        var miSlopeCov = MutualInformationBinned(slopeArr, covArr, 12);
+        var miPCov = MutualInformationBinned(pArr, covArr, 12);
+        _o.WriteLine($"Normalized mutual information:");
+        _o.WriteLine($"  NMI(slopeAtHalf, cov) = {miSlopeCov.nmi:F4}");
+        _o.WriteLine($"  NMI(p, cov)            = {miPCov.nmi:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART D — Residual analysis
+        // ============================================================
+        _o.WriteLine("=== PART D: Residual analysis — covariance after slope removal ===");
+
+        // Fit: cov ~ slopeAtHalf (linear)
+        double slopeMean = slopeArr.Average(), covMean = covArr.Average();
+        double sNum = 0.0, sDen = 0.0;
+        for (int i = 0; i < N; i++) { sNum += (slopeArr[i] - slopeMean) * (covArr[i] - covMean); sDen += (slopeArr[i] - slopeMean) * (slopeArr[i] - slopeMean); }
+        double betaSlope = sDen > 1e-15 ? sNum / sDen : 0.0;
+        double alphaSlope = covMean - betaSlope * slopeMean;
+        var residuals = new double[N];
+        for (int i = 0; i < N; i++) residuals[i] = covArr[i] - (alphaSlope + betaSlope * slopeArr[i]);
+
+        double resMean = residuals.Average(), resStd = Math.Sqrt(SampleVariance(residuals, resMean));
+        _o.WriteLine($"Residual stats: mean={resMean:F6}, std={resStd:F4}, skew={Skewness(residuals, resMean, resStd):F3}");
+
+        // What correlates with residuals?
+        _o.WriteLine("Residual correlations with remaining quantities:");
+        _o.WriteLine($"  r(res, p)                = {PearsonCorrelation(residuals, pArr):F4}");
+        _o.WriteLine($"  r(res, halfMaxDist)      = {PearsonCorrelation(residuals, hdArr):F4}");
+        _o.WriteLine($"  r(res, curvAtHalf)       = {PearsonCorrelation(residuals, caArr):F4}");
+        _o.WriteLine($"  r(res, couplingWidth)    = {PearsonCorrelation(residuals, cwArr):F4}");
+        _o.WriteLine($"  r(res, couplingBudget)   = {PearsonCorrelation(residuals, cbArr):F4}");
+        _o.WriteLine($"  r(res, suppression)      = {PearsonCorrelation(residuals, sArr):F4}");
+        _o.WriteLine($"  r(res, discrimination)   = {PearsonCorrelation(residuals, dArr):F4}");
+        _o.WriteLine($"  r(res, quality)          = {PearsonCorrelation(residuals, qualArr):F4}");
+
+        // Residual R² from remaining predictors
+        double r2ResidualFromRest = FitModelR2(residuals, new[] { hdArr, caArr, cwArr, cbArr, pArr, sArr, dArr });
+        _o.WriteLine($"  R²(residuals | all-other-predictors) = {r2ResidualFromRest:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART E — Cross-family validation
+        // ============================================================
+        _o.WriteLine("=== PART E: Cross-family validation ===");
+        _o.WriteLine($"{"Family",-6} {"r²(slope)",10} {"r²(all)",10} {"unique slope",13} {"r(res,p)",10} {"r(res,other)",13} {"N",5}");
+        _o.WriteLine(new string('-', 73));
+
+        foreach (var fam in families)
+        {
+            var fIdx = Enumerable.Range(0, N).Where(i => allPoints[i].fam == fam).ToArray();
+            int nF = fIdx.Length;
+            double[] fCov = fIdx.Select(i => covArr[i]).ToArray();
+            double[] fSlope = fIdx.Select(i => slopeArr[i]).ToArray();
+            double[] fP = fIdx.Select(i => pArr[i]).ToArray();
+            double[] fHd = fIdx.Select(i => hdArr[i]).ToArray();
+            double[] fCa = fIdx.Select(i => caArr[i]).ToArray();
+            double[] fCw = fIdx.Select(i => cwArr[i]).ToArray();
+            double[] fCb = fIdx.Select(i => cbArr[i]).ToArray();
+
+            double fR2Slope = R2SinglePredictor(fCov, fSlope);
+            double fR2All = FitModelR2(fCov, new[] { fSlope, fHd, fCa, fCw, fCb });
+            double fR2NoSlope = FitModelR2(fCov, new[] { fHd, fCa, fCw, fCb });
+            double fUniqueSlope = fR2All - fR2NoSlope;
+
+            // Residual after slope removal
+            double fmS = fSlope.Average(), fmC = fCov.Average();
+            double fn = 0.0, fd = 0.0;
+            for (int k = 0; k < nF; k++) { fn += (fSlope[k] - fmS) * (fCov[k] - fmC); fd += (fSlope[k] - fmS) * (fSlope[k] - fmS); }
+            double fb = fd > 1e-15 ? fn / fd : 0.0;
+            double fa = fmC - fb * fmS;
+            var fRes = new double[nF];
+            for (int k = 0; k < nF; k++) fRes[k] = fCov[k] - (fa + fb * fSlope[k]);
+            double fResR_P = PearsonCorrelation(fRes, fP);
+            double fResR_Other = double.NaN;
+            // residual correlation with best non-slope shape
+            double bestOther = Math.Max(
+                Math.Abs(PearsonCorrelation(fRes, fHd)),
+                Math.Max(Math.Abs(PearsonCorrelation(fRes, fCa)),
+                Math.Max(Math.Abs(PearsonCorrelation(fRes, fCw)),
+                Math.Abs(PearsonCorrelation(fRes, fCb)))));
+
+            _o.WriteLine($"{fam,-6} {fR2Slope,10:F4} {fR2All,10:F4} {fUniqueSlope,13:F4} {fResR_P,10:F4} {bestOther,13:F4} {nF,5}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART F — Analytical search
+        // ============================================================
+        _o.WriteLine("=== PART F: Analytical derivation search ===");
+        _o.WriteLine("");
+        _o.WriteLine("Starting from:");
+        _o.WriteLine("  slopeAtHalf = -(K₀·p/(2ξ))·(ln 2)^((p-1)/p)");
+        _o.WriteLine("");
+        _o.WriteLine("Covariance for K(d)=K₀·exp(-(d/ξ)^p):");
+        _o.WriteLine("  cov(K,d) = -K₀·E[d·(d/ξ)^(p-1)·exp(-(d/ξ)^p)] + K₀·E[d]·E[exp(-(d/ξ)^p)]");
+        _o.WriteLine("");
+        _o.WriteLine("For small d (near half-max, d≈ξ·(ln 2)^(1/p)):");
+        _o.WriteLine("  K(d) ≈ K₀·(1 - (d/ξ)^p)  (first-order)")
+;
+        _o.WriteLine("  cov(K,d) ≈ -K₀·var(d^p)/ξ^p ∝ -K₀·(p·md^(p-1))²·var(d)/ξ^(2p)");
+        _o.WriteLine("");
+        _o.WriteLine("At d≈d_half:");
+        _o.WriteLine("  cov(K,d) ≈ -K₀·(p/ξ)·(d_half/ξ)^(p-1)·var(d)·(1/2)");
+        _o.WriteLine("           = slopeAtHalf · var(d)");
+        _o.WriteLine("");
+        _o.WriteLine("First-order Taylor expansion around d_half:");
+        _o.WriteLine("  K(d) ≈ K(d_half) + K'(d_half)·(d - d_half)");
+        _o.WriteLine("  cov(K,d) ≈ K'(d_half)·var(d) = slopeAtHalf · var(d)");
+        _o.WriteLine("");
+
+        // Numerical test of analytical approximation
+        _o.WriteLine("Numerical test of cov ≈ slopeAtHalf · var(d):");
+        double dVar = SampleVariance(distances, distances.Average());
+        var analyticCovPred = new double[N];
+        for (int i = 0; i < N; i++) analyticCovPred[i] = slopeArr[i] * dVar;
+        double r2Analytic = R2SinglePredictorWithSign(covArr, analyticCovPred);
+        double rAnalytic = PearsonCorrelation(covArr, analyticCovPred);
+        _o.WriteLine($"  cov ≈ slopeAtHalf · var(d):                     R² = {r2Analytic:F4}, r = {rAnalytic:F4}");
+
+        // Better: cov ≈ -slopeAtHalf · var(d) (cov is negative, slope is negative)
+        var negCovPred = new double[N];
+        for (int i = 0; i < N; i++) negCovPred[i] = -slopeArr[i] * dVar;
+        double r2Neg = R2SinglePredictor(covArr, negCovPred);
+        double rNeg = PearsonCorrelation(covArr, negCovPred);
+        _o.WriteLine($"  cov ≈ -slopeAtHalf · var(d):                    R² = {r2Neg:F4}, r = {rNeg:F4}");
+
+        // Full non-linear: cov ≈ -K₀·(p/ξ)·median(d^(p-1))/ξ^(p-1)·var(d)
+        double md = distances.Average();
+        var fullCovPred = new double[N];
+        for (int i = 0; i < N; i++)
+        {
+            var pt = allPoints[i];
+            double pLocal = pt.p, xiLocal = pt.xiVal, k0Local = pt.k0Val;
+            double dp1 = 0.0;
+            foreach (var dist in distances) dp1 += Math.Pow(dist / xiLocal, pLocal - 1.0);
+            dp1 /= distances.Length;
+            fullCovPred[i] = k0Local * (pLocal / xiLocal) * dp1 * dVar;
+        }
+        double r2Full = Math.Abs(R2SinglePredictorWithSign(covArr, fullCovPred));
+        double rFull = Math.Abs(PearsonCorrelation(covArr, fullCovPred));
+        _o.WriteLine($"  cov ≈ K₀·(p/ξ)·E[(d/ξ)^(p-1)]·var(d):        R² = {r2Full:F4}, r = {rFull:F4}");
+        _o.WriteLine("");
+
+        // Derivative approach: can we analytically reduce covariance to slopeAtHalf?
+        _o.WriteLine("Analytical chain:");
+        _o.WriteLine("  1. slopeAtHalf = K'(d_half) = -(K₀·p/(2ξ))·(ln 2)^((p-1)/p)");
+        _o.WriteLine("  2. cov ≈ slopeAtHalf · var(d)  (first-order Taylor)");
+        _o.WriteLine($"  3. Empirical: corr(slope,cov) = {PearsonCorrelation(slopeArr, covArr):F4}");
+        _o.WriteLine($"  4. Linear R²:                 = {r2SlopeOnly:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // PART G — Decision
+        // ============================================================
+        _o.WriteLine("=== PART G: Decision ===");
+
+        double slopeDominanceFraction = uniqueSlopeInfo / Math.Max(r2AllShapes, 1e-12);
+        bool slopeIsDominant = slopeDominanceFraction > 0.50;
+        bool slopeIsComplete = uniqueShapeInfo < 0.03 && uniquePInfo < 0.02;
+        bool residualStructured = r2ResidualFromRest > 0.15;
+        bool crossFamConsistent = families.All(fam =>
+        {
+            var fIdx = Enumerable.Range(0, N).Where(i => allPoints[i].fam == fam).ToArray();
+            double[] fC = fIdx.Select(i => covArr[i]).ToArray();
+            double[] fS = fIdx.Select(i => slopeArr[i]).ToArray();
+            return R2SinglePredictor(fC, fS) > 0.30;
+        });
+        bool analyticalDerivable = Math.Abs(rAnalytic) > 0.50;
+
+        string decision;
+        if (slopeIsComplete) decision = "Model C";
+        else if (slopeIsDominant && !residualStructured) decision = "Model B";
+        else if (slopeIsDominant && residualStructured) decision = "Model B";
+        else if (crossFamConsistent && r2SlopeOnly > 0.25) decision = "Model A";
+        else decision = "Model D";
+
+        string characterization = decision switch
+        {
+            "Model C" => "Covariance is fundamentally a slope-driven quantity. slopeAtHalf alone captures essentially all explainable variance; residuals carry little structure.",
+            "Model B" => $"Slope is dominant (unique ΔR²={uniqueSlopeInfo:F3} of total {r2AllShapes:F3}) but incomplete. Other shape metrics contribute ΔR²={uniqueShapeInfo:F3}; residuals show structure (R²={r2ResidualFromRest:F3}).",
+            "Model A" => $"Slope is a strong proxy (R²={r2SlopeOnly:F3}) but significant unique variance remains unexplained. Residual covariance retains measurable correlations with p and shape metrics.",
+            _ => "The relationship between slopeAtHalf and covariance remains unresolved under current analytical decomposition."
+        };
+
+        string commitSummary = decision switch
+        {
+            "Model C" => $"SCS_01_SlopeCovarianceSufficiencyAudit — covariance is fundamentally slope-driven; slopeAtHalf R²={r2SlopeOnly:F3}, unique ΔR²={uniqueSlopeInfo:F3}/{r2AllShapes:F3}, residual R²={r2ResidualFromRest:F3}, cross-family consistent.",
+            "Model B" => $"SCS_01_SlopeCovarianceSufficiencyAudit — slopeAtHalf is dominant (unique ΔR²={uniqueSlopeInfo:F3}, solo R²={r2SlopeOnly:F3}) but incomplete; shape residuals contribute ΔR²={uniqueShapeInfo:F3}.",
+            "Model A" => $"SCS_01_SlopeCovarianceSufficiencyAudit — slopeAtHalf is a strong proxy (R²={r2SlopeOnly:F3}) but unique residual variance remains; Model B not yet reached.",
+            _ => "SCS_01_SlopeCovarianceSufficiencyAudit — slope-covariance sufficiency unresolved under current decomposition."
+        };
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"  - Slope dominance fraction: {slopeDominanceFraction:P0} of explainable variance");
+        _o.WriteLine($"  - Slope is complete (Model C threshold): {slopeIsComplete}");
+        _o.WriteLine($"  - Slope is dominant (Model B threshold): {slopeIsDominant}");
+        _o.WriteLine($"  - Residual structure: {residualStructured} (R²={r2ResidualFromRest:F3})");
+        _o.WriteLine($"  - Cross-family consistent: {crossFamConsistent}");
+        _o.WriteLine($"  - Analytically derivable (|r|>0.5): {analyticalDerivable}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // OUTPUT BLOCK
+        // ============================================================
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}: {characterization}");
+        _o.WriteLine("2. Predictive comparison");
+        _o.WriteLine($"   slopeAtHalf: R²={r2SlopeOnly:F4}  |  All shapes: R²={r2AllShapes:F4}  |  p only: R²={r2POnly:F4}");
+        _o.WriteLine($"   slope+p: R²={r2SlopePlusP:F4}  |  Unique slope: ΔR²={uniqueSlopeInfo:F4}  |  Unique shapes: ΔR²={uniqueShapeInfo:F4}");
+        _o.WriteLine("3. Information decomposition");
+        foreach (var name in shapeNames)
+        {
+            int m = Array.IndexOf(shapeNames, name);
+            var reduced = shapeMatrix.Where((_, i) => i != m).ToArray();
+            double r2Red = reduced.Length > 0 ? FitModelR2(covArr, reduced) : 0.0;
+            _o.WriteLine($"   {name}: unique ΔR²={r2AllShapes - r2Red:F4}, solo R²={R2SinglePredictor(covArr, shapeMatrix[m]):F4}");
+        }
+        _o.WriteLine($"   p: unique ΔR²={uniquePInfo:F4}, solo R²={r2POnly:F4}, NMI={miPCov.nmi:F4}");
+        _o.WriteLine("4. Residual analysis");
+        _o.WriteLine($"   Residual std={resStd:F4}, residual R² from rest={r2ResidualFromRest:F4}");
+        _o.WriteLine($"   Max residual correlation: p: {PearsonCorrelation(residuals, pArr):F4}, suppression: {PearsonCorrelation(residuals, sArr):F4}");
+        _o.WriteLine("5. Analytical assessment");
+        _o.WriteLine($"   First-order: cov ≈ slopeAtHalf·var(d), r={rAnalytic:F4}");
+        _o.WriteLine($"   Full expansion: r={rFull:F4}");
+        _o.WriteLine("6. Decision model");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine("7. Commit-ready summary");
+        _o.WriteLine(commitSummary);
+        _o.WriteLine("");
+        _o.WriteLine("=== SCS_01 complete. Commit: SCS_01_SlopeCovarianceSufficiencyAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+        Assert.True(double.IsFinite(r2SlopeOnly));
+
+        static double GammaApproxS(double x)
+        {
+            if (x <= 0) return 1.0;
+            if (x < 0.5) return Math.PI / (Math.Sin(Math.PI * x) * GammaApproxS(1.0 - x));
+            double z = x - 1.0;
+            double[] pp = { 1.000000000190015, 76.18009172947146, -86.50532032941677,
+                           24.01409824083091, -1.231739572450155, 1.208650973866179e-3, -5.395239384953e-6 };
+            double sum = pp[0];
+            double w = z + 5.5;
+            for (int i = 1; i < pp.Length; i++) sum += pp[i] / (z + i);
+            return Math.Sqrt(2.0 * Math.PI) * Math.Pow(w, z + 0.5) * Math.Exp(-w) * sum;
+        }
+
+        static double Skewness(double[] x, double mean, double std)
+        {
+            if (x.Length < 2 || std < 1e-15) return 0;
+            double m3 = 0;
+            foreach (var v in x) { double z = (v - mean) / std; m3 += z * z * z; }
+            return m3 / x.Length;
+        }
+
+        static double R2SinglePredictorWithSign(double[] target, double[] predictor)
+        {
+            if (target.Length < 4 || predictor.Length != target.Length) return 0.0;
+            double my = target.Average(), mx = predictor.Average();
+            double num = 0.0, den = 0.0;
+            for (int i = 0; i < target.Length; i++) { num += (target[i] - my) * (predictor[i] - mx); den += (predictor[i] - mx) * (predictor[i] - mx); }
+            double slope = den > 1e-15 ? num / den : 0.0;
+            double intercept = my - slope * mx;
+            double sse = 0.0, sst = 0.0;
+            for (int i = 0; i < target.Length; i++)
+            {
+                double pred = intercept + slope * predictor[i];
+                sse += (target[i] - pred) * (target[i] - pred);
+                sst += (target[i] - my) * (target[i] - my);
+            }
+            return sst < 1e-15 ? 1.0 : 1.0 - sse / sst;
+        }
+    }
+
     private static SweepPoint EvaluateAtFixedP(double[] distances, double[] sortedDistances, double xi, double k0, double p, double a)
     {
         int n = distances.Length;

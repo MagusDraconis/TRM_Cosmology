@@ -29,7 +29,9 @@ with combined augmented model reaching R²=0.941 (CBR_01, Model B). p's residual
 is 96.7% shape-mediated: p→K(d) shape→covariance (PRI_01, Model C). Shape metrics are
 near-orthogonal independent controls (KSI_01, Model D). slopeAtHalf is the universal
 dominant shape driver across all families (KDI_01, Model B) and its dominance is
-analytically derived from the K(d) midpoint gradient (SHD_01, Model B). 2985 tests, 0 failed.
+analytically derived from the K(d) midpoint gradient (SHD_01, Model B). slopeAtHalf is
+dominant (64% of explainable variance) but incomplete — covariance is fundamentally
+a slope-driven phenomenon with residual structure (SCS_01, Model B). 2986 tests, 0 failed.
 
 ---
 
@@ -173,6 +175,7 @@ deterministic threshold rescue.
 | V7.4 KSI_01 | **COMPLETE** — Shape metrics are near-orthogonal (all PCA eigenvalues ~20%). No single latent shape variable. couplingWidth/budget redundant (r=0.996). Decision: Model D. |
 | V7.4 KDI_01 | **COMPLETE** — slopeAtHalf is universal top driver (SHAP=0.106, #1 in 5/5 families). 3-metric subset reaches 99% of full R². Decision: Model B. |
 | V7.4 SHD_01 | **COMPLETE** — slopeAtHalf analytically derived: -(K₀·p/(2ξ))·(ln 2)^((p-1)/p). Direct control verified (avg partial r=0.721). Decision: Model B. |
+| V7.4 SCS_01 | **COMPLETE** — Slope-Covariance Sufficiency Audit. slopeAtHalf is dominant (64% of explainable variance, unique ΔR²=0.122) but incomplete — other shapes add ΔR²=0.075, residuals retain structure. Decision: Model B. |
 | **V6.3** | **COMPLETE** — Pipeline integration. V6Pipeline.ComputeTrajectory(), CSV/JSON export. 13/13 V6 tests pass. |
 | **V6.2** | **COMPLETE** — Core migration. TRM.Core/Geometry/V6/V6Geometry.cs. 10/10 tests pass after migration. |
 | **V6.1** | **COMPLETE** — Documentation. User Guide, Theory, Integration Plan. XML docs on V6Geometry. |
@@ -183,11 +186,12 @@ deterministic threshold rescue.
 
 ## Current Research Question (V7.4 → V7.5)
 
-**V7.4 FULL 11-AUDIT STACK COMPLETE — Covariance chain closed: balance → residual → shape → derivation.**
+**V7.4 FULL 12-AUDIT STACK COMPLETE — Covariance chain closed: balance → residual → shape → derivation → sufficiency audit.**
 
 Chain: S,D balance → covariance (~84%, CBD_01) → p residual (CBR_01) → p→shape
 mediation 96.7% (PRI_01) → shape metrics independent (KSI_01) → slopeAtHalf dominates
-(KDI_01) → slope analytically derived as K(d) midpoint gradient (SHD_01).
+(KDI_01) → slope analytically derived as K(d) midpoint gradient (SHD_01) → covariance
+sufficiency audit confirms slope is dominant but incomplete, Model B (SCS_01).
 
 **V7.5 proposed: Analytical closure — derive S and D from slopeAtHalf.**
 

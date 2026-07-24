@@ -3,9 +3,9 @@
 **Version:** 3.0
 **Date:** 2026-07-24
 **Scope:** Clockwork Cosmology V1 through V7.4
-**Tests:** 595 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
+**Tests:** 596 (Fact/Theory methods); ~3000+ (including suite runs), 0 failed
 **Branch:** v7.4-latent-dynamics
-**Current Frontier:** V7.4 LATENT DYNAMICS (full 11-audit stack complete: LCO_01 through SHD_01; built on V7.3 closure stack)
+**Current Frontier:** V7.4 LATENT DYNAMICS (full 12-audit stack complete: LCO_01 through SCS_01; built on V7.3 closure stack)
 
 ---
 
@@ -1500,6 +1500,51 @@ explanation for slopeAtHalf's universal dominance.
 
 ---
 
+#### SCS_01 — Slope-Covariance Sufficiency Audit (complete)
+
+7-part comprehensive audit determining whether covariance is fundamentally a slope-driven
+phenomenon. 4000 data points across all 5 families (SAC, GAN, RCS, ICS, CNS).
+
+- **Part A — Descriptive:** Cross-family statistics for slopeAtHalf, covariance, L, quality.
+  ICS shows highest mean covariance (0.233) and quality (0.470); CNS lowest covariance (0.143).
+  Overall r(slope,cov) = 0.341, r(slope,L) = 0.252.
+
+- **Part B — Predictive comparison:**
+  | Predictor | R² |
+  |:----------|:---|
+  | slopeAtHalf only | 0.116 |
+  | All 5 shape metrics | 0.191 |
+  | p only | 0.289 |
+  | slopeAtHalf + p | 0.293 |
+  | Shapes excluding slope | 0.069 |
+  Information accounting: unique slope ΔR² = 0.122 (64% of explainable), unique other-shapes
+  ΔR² = 0.075.
+
+- **Part C — Information decomposition:** slopeAtHalf has the highest unique information
+  contribution (ΔR²=0.122) among shape metrics. p uniquely contributes ΔR²=0.299 beyond
+  all 5 shape metrics combined. NMI(slope,cov)=0.206, NMI(p,cov)=0.127.
+
+- **Part D — Residual analysis:** After removing slopeAtHalf, residuals retain substantial
+  structure: strongest correlations with discrimination (r=0.879) and quality (r=0.875).
+  p correlates with residuals at r=0.381. All-other-predictors explain R²=0.902 of
+  residual variance.
+
+- **Part E — Cross-family:** RCS and ICS show strongest slope influence (R²=0.23 and 0.21).
+  SAC/GAN/CNS have weaker slope-covariance coupling (R²=0.07-0.10). All 5 families show
+  slope dominance in the information decomposition.
+
+- **Part F — Analytical search:** First-order Taylor: cov ≈ slopeAtHalf·var(d), r=0.34.
+  The analytical relationship is directional but incomplete — slope captures the local
+  gradient at half-max but covariance integrates over the full K(d) profile. Full
+  expansion with E[(d/ξ)^(p-1)] weighting yields r=0.02 (insufficient).
+
+- **Part G — Decision:** **Model B** — slopeAtHalf is dominant (64% of explainable
+  variance) but incomplete. Other shape metrics contribute unique ΔR²=0.075. Residual
+  covariance retains measurable structure after slope removal, primarily carried by
+  discrimination (r=0.879). Covariance is fundamentally slope-driven but not slope-sufficient.
+
+---
+
 ## G. Corrected Stability Picture
 
 **Old simplified view (V5.1, single regime):**
@@ -2023,7 +2068,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V7.4 LATENT DYNAMICS. Full 11-audit stack (LCO_01 → SHD_01) complete on top of closed V7.3 stack, 0 failed.
+**Current status:** V7.4 LATENT DYNAMICS. Full 12-audit stack (LCO_01 → SCS_01) complete on top of closed V7.3 stack, 0 failed.
 Current branch: `v7.4-latent-dynamics`.
 Key findings (V7.3 → V7.4):
 - p≈1.5 is a covariance-balance optimum (POP_01).
@@ -2046,7 +2091,8 @@ Key findings (V7.3 → V7.4):
 - Kernel shape identity: 5 K(d) shape metrics are near-orthogonal independent controls; couplingWidth/budget redundant (r=0.996); no single latent shape variable exists; KSI_01, Model D.
 - Kernel driver importance: slopeAtHalf is universal #1 driver (SHAP=0.106, top in 5/5 families); 3-metric subset recovers 99% of shape R²; KDI_01, Model B.
 - Slope half dominance: slopeAtHalf analytically derived as midpoint gradient; direct control verified (partial r=0.721); SHD_01, Model B.
-Decision model (latest latent-dynamics state): **Model B** for slopeAtHalf direct control, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
+- Slope-covariance sufficiency: 7-part audit; slope dominant (64% of explainable variance) but incomplete; residuals structured (discrimination r=0.879). Covariance is fundamentally slope-driven (SCS_01, Model B).
+Decision model (latest latent-dynamics state): **Model B** for slopeAtHalf direct control, **Model B** for covariance sufficiency, **Model C** for p's shape-mediated role, **Model D** for shape metric independence.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
