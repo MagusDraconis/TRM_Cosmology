@@ -1276,6 +1276,134 @@ public class V8_3_InvariantOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void POA_01_PrimitiveOscillationAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== POA_01: Primitive Oscillation Audit ===");
+        _o.WriteLine("=== Is oscillation more fundamental than λ-space? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 21937;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 21;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var data = new List<(VcFamily fam, double lam1, double couplingDiff, double acc, double ent)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_OA", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    var rawKD = new double[nDeciles]; var rawCt = new int[nDeciles];
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) { kD[d] /= Math.Max(ct[d], 1); rawKD[d - 1] += kD[d]; rawCt[d - 1]++; }
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    for (int d = 0; d < nDeciles; d++) rawKD[d] /= Math.Max(rawCt[d], 1);
+                    double kMean = rawKD.Average() + 1e-12;
+                    double couplingDiff = Math.Sqrt(rawKD.Average(k => (k - kMean) * (k - kMean))) / kMean;
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var sEE = ee.OrderByDescending(e => e).ToArray();
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+                    double d1a = Math.Abs(o1 - 1.0) + o2 + o3;
+                    double d2a = Math.Abs(o1 - 0.5) + Math.Abs(o2 - 0.5) + o3;
+                    double d3a = Math.Abs(o1 - 1.0 / 3) + Math.Abs(o2 - 1.0 / 3) + Math.Abs(o3 - 1.0 / 3);
+                    double acc = 1.0 / Math.Max(Math.Min(d1a, Math.Min(d2a, d3a)), 0.01);
+                    data.Add((fam, sEE[0], couplingDiff, acc, ent));
+                }
+            }
+        }
+
+        var L1 = data.Select(d => d.lam1).ToArray();
+        var CD = data.Select(d => d.couplingDiff).ToArray();
+        var AC = data.Select(d => d.acc).ToArray();
+        var EN = data.Select(d => d.ent).ToArray();
+
+        _o.WriteLine("=== Oscillation ↔ λ-Space ===");
+        _o.WriteLine($"N = {data.Count}");
+
+        double rcL = PearsonCorrelation(CD, L1);
+        double rcA = PearsonCorrelation(CD, AC);
+        double r2_cL = R2SinglePredictor(L1, CD);
+        double r2_Lc = R2SinglePredictor(CD, L1);
+        double r2_cAcc = R2SinglePredictor(AC, CD);
+
+        _o.WriteLine($"r(coupling_diff, λ1)  = {rcL:F4}  R²(cpl→λ1)={r2_cL:F4}");
+        _o.WriteLine($"r(coupling_diff, acc)  = {rcA:F4}  R²(cpl→acc)={r2_cAcc:F4}");
+        _o.WriteLine($"R²(λ1 → coupling_diff) = {r2_Lc:F4}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Per-Family ===");
+        foreach (var fam in families)
+        {
+            var fd = data.Where(d => d.fam == fam).ToArray();
+            double r1 = PearsonCorrelation(fd.Select(d => d.couplingDiff).ToArray(), fd.Select(d => d.lam1).ToArray());
+            double r2 = PearsonCorrelation(fd.Select(d => d.couplingDiff).ToArray(), fd.Select(d => d.acc).ToArray());
+            _o.WriteLine($"{fam,-6}: r(cpl,λ1)={r1:+0.0000;-0.0000}  r(cpl,acc)={r2:+0.0000;-0.0000}");
+        }
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        bool oscPrimitive = r2_cL > 0.5 && r2_Lc < 0.3;
+        bool dual = r2_cL > 0.3 && r2_Lc > 0.3;
+        string decision;
+        if (oscPrimitive) decision = "Model C";
+        else if (dual) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}  R²(cpl→λ1)={r2_cL:F4}  R²(λ1→cpl)={r2_Lc:F4}");
+
+        if (decision == "Model C") _o.WriteLine("Oscillation is more primitive. Coupling differentiation generates λ1.");
+        else if (decision == "Model B") _o.WriteLine("Oscillation and λ-space are dual — neither more primitive.");
+        else _o.WriteLine("λ-space is more fundamental than coupling differentiation.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== POA_01 complete. Commit: POA_01_PrimitiveOscillationAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double[,] CovMatrix(double[][] X, int nF, int N)
     {
         var cm = new double[nF, nF];
