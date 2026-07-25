@@ -3,8 +3,12 @@
   "branch": "v8.4-resonance-origin",
   "status": "active",
   "total_audits": 1,
+  "audits_completed": ["ROA_01"],
   "key_result": "Resonance concentration identical across families (Δ=0). Does not explain time-rate emergence (ROA_01,D).",
+  "models": {
+    "ROA_01": "D"
+  },
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["ROA_01"],"models": {"ROA_01": "D"},
+  "last_updated": "2026-07-25"
 }
