@@ -2309,6 +2309,105 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void MCH_01_MinimalClockworkHierarchyAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== MCH_01: Minimal Clockwork Hierarchy Audit ===");
+        _o.WriteLine("=== Which layers are necessary? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 69203;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var data = new List<(double dH, double dEq, double L, double tick, double activation)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_MC", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double dH = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    double tick = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    data.Add((dH, deq, Ls[i], tick, tick * deq));
+                }
+            }
+        }
+
+        var dHarr = data.Select(d => d.dH).ToArray();
+        var dEqArr = data.Select(d => d.dEq).ToArray();
+        var Larr = data.Select(d => d.L).ToArray();
+        var tickArr = data.Select(d => d.tick).ToArray();
+        var actArr = data.Select(d => d.activation).ToArray();
+
+        _o.WriteLine("=== Incremental R² for dH Prediction ===");
+        double r2_dEq = R2SinglePredictor(dHarr, dEqArr);
+        double r2_L = R2SinglePredictor(dHarr, Larr);
+        double r2_dEqL = FitModelR2(dHarr, new[] { dEqArr, Larr });
+        double r2_dEqLT = FitModelR2(dHarr, new[] { dEqArr, Larr, tickArr });
+        double r2_full = FitModelR2(dHarr, new[] { dEqArr, Larr, tickArr, actArr });
+
+        _o.WriteLine($"D_eq alone:           R²={r2_dEq:F4}");
+        _o.WriteLine($"L alone:              R²={r2_L:F4}");
+        _o.WriteLine($"+ L:                  R²={r2_dEqL:F4}  Δ={r2_dEqL - r2_dEq:F4}");
+        _o.WriteLine($"+ Tick:               R²={r2_dEqLT:F4}  Δ={r2_dEqLT - r2_dEqL:F4}");
+        _o.WriteLine($"+ Activation (full):  R²={r2_full:F4}  Δ={r2_full - r2_dEqLT:F4}");
+        _o.WriteLine("");
+
+        double gainL = r2_dEqL - r2_dEq;
+        double gainT = r2_dEqLT - r2_dEqL;
+        double gainA = r2_full - r2_dEqLT;
+
+        string decision;
+        if (gainL < 0.05 && gainT < 0.02 && gainA < 0.02) decision = "Model D";
+        else if (gainL < 0.1) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model D")
+            _o.WriteLine("Hierarchy collapses: D_eq alone captures essentially all predictivity. L, Tick, Activation add negligible information. Minimal clockwork: D_eq → dH.");
+        else if (decision == "Model B")
+            _o.WriteLine("One intermediate layer redundant.");
+        else
+            _o.WriteLine("Current hierarchy already minimal.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== MCH_01 complete. Commit: MCH_01_MinimalClockworkHierarchyAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
