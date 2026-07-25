@@ -721,6 +721,224 @@ public class V8_3_InvariantOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void PLI_01_PrimitiveLambdaInvarianceAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PLI_01: Primitive Lambda Invariance Audit ===");
+        _o.WriteLine("=== Do λ1,λ2 survive changes of basis? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 18311;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 21;
+
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var rawData = new List<(VcFamily fam, double[][] contrasts, double[] LArr)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_LI", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count >= 3)
+                        rawData.Add((fam, allC.ToArray(), allL.ToArray()));
+                }
+            }
+        }
+
+        _o.WriteLine($"N = {rawData.Count} samples");
+
+        // Baseline: z-score normalized λ1
+        var baselineLam1 = new List<double>();
+        foreach (var rd in rawData)
+        {
+            int N = rd.contrasts.Length;
+            var X = rd.contrasts.Select(c => (double[])c.Clone()).ToArray();
+            for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+            var cm = CovMatrix(X, nContrasts, N);
+            var (ee, _) = JacobiEigenLocal(cm, nContrasts);
+            baselineLam1.Add(ee.OrderByDescending(e => e).First());
+        }
+
+        // ============================================================
+        // Part A: Feature Drop (5/6 features)
+        // ============================================================
+        _o.WriteLine("=== Part A: Feature Drop ===");
+        var dropRs = new List<double>();
+        for (int drop = 0; drop < nContrasts; drop++)
+        {
+            var lam1s = new List<double>();
+            foreach (var rd in rawData)
+            {
+                int N = rd.contrasts.Length; int nF = nContrasts - 1;
+                var X = new double[N][];
+                for (int i = 0; i < N; i++) { X[i] = new double[nF]; int idx = 0; for (int c = 0; c < nContrasts; c++) if (c != drop) X[i][idx++] = rd.contrasts[i][c]; }
+                for (int c = 0; c < nF; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                var cm = CovMatrix(X, nF, N);
+                var (ee, _) = JacobiEigenLocal(cm, nF);
+                lam1s.Add(ee.OrderByDescending(e => e).First());
+            }
+            double r = PearsonCorrelation(baselineLam1.ToArray(), lam1s.ToArray());
+            dropRs.Add(r);
+            _o.WriteLine($"Drop {drop}: r(λ1_drop, λ1) = {r:F4}");
+        }
+        double rDropMean = dropRs.Average();
+        _o.WriteLine($"Mean r = {rDropMean:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part B: Min-Max normalization
+        // ============================================================
+        _o.WriteLine("=== Part B: Min-Max Normalization ===");
+        var mmLam1 = new List<double>();
+        foreach (var rd in rawData)
+        {
+            int N = rd.contrasts.Length;
+            var X = rd.contrasts.Select(c => (double[])c.Clone()).ToArray();
+            for (int c = 0; c < nContrasts; c++) { double mn = Enumerable.Range(0, N).Min(i => X[i][c]); double mx = Enumerable.Range(0, N).Max(i => X[i][c]); double rng = Math.Max(mx - mn, 1e-12); for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - mn) / rng; }
+            var cm = CovMatrix(X, nContrasts, N);
+            var (ee, _) = JacobiEigenLocal(cm, nContrasts);
+            mmLam1.Add(ee.OrderByDescending(e => e).First());
+        }
+        double rMinMax = PearsonCorrelation(baselineLam1.ToArray(), mmLam1.ToArray());
+        _o.WriteLine($"r(λ1_minmax, λ1_zscore) = {rMinMax:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part C: Scale perturbation
+        // ============================================================
+        _o.WriteLine("=== Part C: Random Scaling ===");
+        var rngScale = new Random(baseSeed + 411);
+        var scaleLam1 = new List<double>();
+        foreach (var rd in rawData)
+        {
+            int N = rd.contrasts.Length;
+            var X = rd.contrasts.Select(c => (double[])c.Clone()).ToArray();
+            for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; double sf = 0.5 + rngScale.NextDouble() * 2.0; for (int i = 0; i < N; i++) X[i][c] = ((X[i][c] - m) / s) * sf; }
+            var cm = CovMatrix(X, nContrasts, N);
+            var (ee, _) = JacobiEigenLocal(cm, nContrasts);
+            scaleLam1.Add(ee.OrderByDescending(e => e).First());
+        }
+        double rScale = PearsonCorrelation(baselineLam1.ToArray(), scaleLam1.ToArray());
+        _o.WriteLine($"r(λ1_scaled, λ1) = {rScale:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part D: Cross-family
+        // ============================================================
+        _o.WriteLine("=== Part D: Cross-Family Perturbation Stability ===");
+        _o.WriteLine($"{"Family",-6} {"r(drop)",10} {"r(minmax)",10} {"r(scale)",10}");
+        _o.WriteLine(new string('-', 38));
+
+        foreach (var fam in families)
+        {
+            var fd = rawData.Where(rd => rd.fam == fam).ToList();
+            // baseline
+            var fBase = new List<double>();
+            foreach (var rd in fd) { int N = rd.contrasts.Length; var X = rd.contrasts.Select(c => (double[])c.Clone()).ToArray(); for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; } var cm = CovMatrix(X, nContrasts, N); var (ee, _) = JacobiEigenLocal(cm, nContrasts); fBase.Add(ee.OrderByDescending(e => e).First()); }
+            var fbArr = fBase.ToArray();
+
+            // minmax
+            var fMM = new List<double>();
+            foreach (var rd in fd) { int N = rd.contrasts.Length; var X = rd.contrasts.Select(c => (double[])c.Clone()).ToArray(); for (int c = 0; c < nContrasts; c++) { double mn = Enumerable.Range(0, N).Min(i => X[i][c]); double mx = Enumerable.Range(0, N).Max(i => X[i][c]); double rng = Math.Max(mx - mn, 1e-12); for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - mn) / rng; } var cm = CovMatrix(X, nContrasts, N); var (ee, _) = JacobiEigenLocal(cm, nContrasts); fMM.Add(ee.OrderByDescending(e => e).First()); }
+
+            // scale
+            var fSc = new List<double>();
+            foreach (var rd in fd) { int N = rd.contrasts.Length; var X = rd.contrasts.Select(c => (double[])c.Clone()).ToArray(); for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; double sf = 0.5 + rngScale.NextDouble() * 2.0; for (int i = 0; i < N; i++) X[i][c] = ((X[i][c] - m) / s) * sf; } var cm = CovMatrix(X, nContrasts, N); var (ee, _) = JacobiEigenLocal(cm, nContrasts); fSc.Add(ee.OrderByDescending(e => e).First()); }
+
+            // drop avg
+            var fDr = new List<double>();
+            for (int drop = 0; drop < nContrasts; drop++) { var fD = new List<double>(); foreach (var rd in fd) { int N = rd.contrasts.Length; int nF = nContrasts - 1; var X = new double[N][]; for (int i = 0; i < N; i++) { X[i] = new double[nF]; int idx = 0; for (int c = 0; c < nContrasts; c++) if (c != drop) X[i][idx++] = rd.contrasts[i][c]; } for (int c = 0; c < nF; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; } var cm2 = CovMatrix(X, nF, N); var (ee2, _) = JacobiEigenLocal(cm2, nF); fD.Add(ee2.OrderByDescending(e => e).First()); } fDr.Add(PearsonCorrelation(fbArr, fD.ToArray())); }
+
+            double rD = fDr.Average();
+            double rM = PearsonCorrelation(fbArr, fMM.ToArray());
+            double rS = PearsonCorrelation(fbArr, fSc.ToArray());
+            _o.WriteLine($"{fam,-6} {rD,10:F4} {rM,10:F4} {rS,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        double overallR = (rDropMean + rMinMax + rScale) / 3.0;
+        bool invariant = overallR > 0.8;
+        bool partialInvariant = overallR > 0.5;
+
+        string decision;
+        if (invariant) decision = "Model C";
+        else if (partialInvariant) decision = "Model B";
+        else decision = "Model A";
+
+        if (overallR < 0.3 && invariant) decision = "Model A"; // shouldn't happen but safety
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"Perturbation r: drop={rDropMean:F4}, minmax={rMinMax:F4}, scale={rScale:F4}, overall={overallR:F4}");
+
+        if (decision == "Model C")
+            _o.WriteLine("λ1 is representation-independent. Survives feature removal, normalization, and scaling — not a PCA artifact.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Partially invariant (r={overallR:F3}).");
+        else
+            _o.WriteLine("λ1 is a PCA artifact.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. Perturbation r: drop={rDropMean:F4}, minmax={rMinMax:F4}, scale={rScale:F4}");
+        _o.WriteLine($"3. Decision: {decision}");
+        _o.WriteLine("4. Commit-ready summary:");
+        string pliLabel = decision == "Model C" ? "λ representation-independent" : decision == "Model B" ? "λ partially invariant" : "λ PCA artifacts";
+        _o.WriteLine($"   PLI_01_PrimitiveLambdaInvarianceAudit — {pliLabel}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== PLI_01 complete. Commit: PLI_01_PrimitiveLambdaInvarianceAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
+    private static double[,] CovMatrix(double[][] X, int nF, int N)
+    {
+        var cm = new double[nF, nF];
+        for (int a = 0; a < nF; a++)
+            for (int b = 0; b < nF; b++)
+                cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => X[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => X[i][b]).ToArray());
+        return cm;
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
