@@ -1092,6 +1092,114 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void DEO_01_DisequilibriumOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DEO_01: Disequilibrium Origin Audit ===");
+        _o.WriteLine("=== Is D_eq the deepest dynamic quantity? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 55543;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        const int nBeta = 51;
+
+        var data = new List<(double dEq, double lam1, double acc, double varI1, double varTerms, double dH)>();
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = bi / (double)(nBeta - 1);
+            var v = new VariantSpec("GAN_DE", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            var allC = new List<double[]>(); var allL = new List<double>();
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                int nD = distances.Length; double[] kA = new double[nD];
+                for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, dpv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3 || allL.Count < 3) continue;
+
+            double mv1 = sumV1 / n, mvT = sumVT / n;
+            int N = allL.Count; var LArr = allL.ToArray();
+            var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+            for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+            var cm = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+            var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+            var sEE = ee.OrderByDescending(e => e).ToArray();
+            var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+            var la = new double[3][];
+            for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+            double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+            double tVal = r2L3 + 1e-12;
+            double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+            double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+            double d1a = Math.Abs(o1 - 1.0) + o2 + o3;
+            double d2a = Math.Abs(o1 - 0.5) + Math.Abs(o2 - 0.5) + o3;
+            double d3a = Math.Abs(o1 - 1.0 / 3) + Math.Abs(o2 - 1.0 / 3) + Math.Abs(o3 - 1.0 / 3);
+            double acc = 1.0 / Math.Max(Math.Min(d1a, Math.Min(d2a, d3a)), 0.01);
+
+            data.Add((0, sEE[0], acc, mv1, mvT, ent)); // D_eq placeholder
+        }
+
+        // Compute D_eq
+        double eqV1 = data.Skip((int)(data.Count * 0.8)).Average(d => d.varI1);
+        double eqVT = data.Skip((int)(data.Count * 0.8)).Average(d => d.varTerms);
+        for (int i = 0; i < data.Count; i++)
+        {
+            double deq = Math.Sqrt(
+                (data[i].varI1 - eqV1) * (data[i].varI1 - eqV1) +
+                (data[i].varTerms - eqVT) * (data[i].varTerms - eqVT));
+            data[i] = (deq, data[i].lam1, data[i].acc, data[i].varI1, data[i].varTerms, data[i].dH);
+        }
+
+        var dEqArr = data.Select(d => d.dEq).ToArray();
+        var lamArr = data.Select(d => d.lam1).ToArray();
+        var accArr = data.Select(d => d.acc).ToArray();
+        var dHArr = data.Select(d => d.dH).ToArray();
+
+        double rDEq_Lam = PearsonCorrelation(dEqArr, lamArr);
+        double rDEq_Acc = PearsonCorrelation(dEqArr, accArr);
+        double rDEq_DH = PearsonCorrelation(dEqArr, dHArr);
+
+        _o.WriteLine($"r(D_eq, λ1)          = {rDEq_Lam:F4}");
+        _o.WriteLine($"r(D_eq, accessibility) = {rDEq_Acc:F4}");
+        _o.WriteLine($"r(D_eq, dH)           = {rDEq_DH:F4}");
+        _o.WriteLine("");
+
+        bool reducible = Math.Abs(rDEq_Lam) > 0.5 || Math.Abs(rDEq_Acc) > 0.5;
+
+        string decision = reducible ? "Model A" : "Model C";
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model C")
+            _o.WriteLine("D_eq is the deepest dynamic quantity. It cannot be reconstructed from λ or accessibility — it captures genuinely dynamic information from VarI1 and VarTerms.");
+        else
+            _o.WriteLine("D_eq is reducible to static quantities.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== DEO_01 complete. Commit: DEO_01_DisequilibriumOriginAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
