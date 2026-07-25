@@ -1,10 +1,10 @@
 # TRM Current Frontier
 
-**Version:** 4.3
+**Version:** 4.4
 **Date:** 2026-07-25
 
-**Current Version:** V10.0 PHYSICS VALIDATION (CLOSED — 5 audits)
-**Current Branch:** v10.0-clockwork-physics-validation
+**Current Version:** V10.1 CLOCKWORK REGIME PHYSICS
+**Current Branch:** v10.1-clockwork-regime-physics
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
@@ -12,10 +12,9 @@
 
 ## One-Sentence Current State
 
-V10.0 PHYSICS VALIDATION — CLOSED. 5 audits. Physical analogy
-established. Two regimes: GAN/CNS (dissipative) and ICS (resonant).
-ICS is genuinely distinct, not a rescaling. No universal dimensionless
-invariant found. Clockwork physics is regime-dependent.
+V10.1 CLOCKWORK REGIME PHYSICS. Open question: do the two clockwork
+regimes (GAN/CNS dissipative, ICS resonant) map to distinct physical
+systems with testable predictions?
 **Cumulative Tests:** ~3393
 **Failed:** 0
 

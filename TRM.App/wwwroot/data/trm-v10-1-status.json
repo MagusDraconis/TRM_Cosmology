@@ -1,0 +1,10 @@
+{
+  "version": "V10.1",
+  "branch": "v10.1-clockwork-regime-physics",
+  "status": "active",
+  "total_audits": 0,
+  "key_result": "Regime-specific physics: exploring the two clockwork regimes (GAN/CNS dissipative, ICS resonant) as distinct physical systems.",
+  "test_count": "~3393",
+  "failed": 0,
+  "last_updated": "2026-07-25"
+}
