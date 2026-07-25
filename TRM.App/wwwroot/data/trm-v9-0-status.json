@@ -6,5 +6,7 @@
   "key_result": "ON families uniquely support emergent physics. OFF families have geometry but frozen observables (CPF_01,C).",
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["CPF_01"],"models": {"CPF_01": "C"},
+  "last_updated": "2026-07-25",
+  "audits_completed": ["CPF_01"],
+  "models": {"CPF_01": "C"}
 }
