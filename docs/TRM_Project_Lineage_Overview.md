@@ -2,10 +2,10 @@
 
 **Version:** 4.0
 **Date:** 2026-07-25
-**Scope:** Clockwork Cosmology V1 through V9.0
-**Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
-**Branch:** v8.4-resonance-origin
-**Current Frontier:** V8.4 RESONANCE ORIGIN (CLOSED) → V9.0 CLOCKWORK PHYSICS
+**Scope:** Clockwork Cosmology V1 through V9.1
+**Tests:** ~3393, 0 failed
+**Branch:** v9.0-clockwork-physics
+**Current Frontier:** V9.0/V9.1 CLOCKWORK PHYSICS (CLOSED) — 20 audits
 
 ---
 
@@ -2047,7 +2047,7 @@ maintained to prevent overinterpretation:
 | V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~35 | COMPLETE |
 | V8.3 | Invariant Origin: λ primitive + invariant | 9 | COMPLETE |
 | V8.4 | Resonance Origin: Clockwork emergence | 12 | COMPLETE |
-| V9.0 | Clockwork Physics | 0 | INITIALIZED |
+| V9.0/V9.1 | Clockwork Physics: L observable, prediction resolved | 20 | COMPLETE |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
@@ -2073,9 +2073,9 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 **Status:** CLOSED (2026-07-25). 12 audits. Time emergence irreducible family property. Closure report: `docsV8/V8_4_Closure_Report.md`.
 
-### V9.0 — Clockwork Physics — INITIALIZED
+### V9.0/V9.1 — Clockwork Physics — COMPLETE
 
-**Status:** Active (2026-07-25). 0 audits. Synthesizing V7.4→V8.4 into emergent physical structure.
+**Status:** CLOSED (2026-07-25). 20 audits. L=1-VarI1/VarTerms primary observable (CV=0.15). 6/6 V1 concepts recovered. Prediction gap resolved. Closure report: `docsV9/V9_0_Closure_Report.md`.
 
 **Key chain:** Speed from mutual compensation → Chain closed → λ1,λ2 primitive → λ1 representation-independent.
 

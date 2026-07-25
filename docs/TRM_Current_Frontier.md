@@ -1,12 +1,23 @@
 # TRM Current Frontier
 
-**Version:** 3.4
+**Version:** 4.0
 **Date:** 2026-07-25
 
-**Current Version:** V8.4 RESONANCE ORIGIN (CLOSED) → V9.0 CLOCKWORK PHYSICS
-**Current Branch:** v8.4-resonance-origin (pending v9.0)
+**Current Version:** V9.0/V9.1 CLOCKWORK PHYSICS (CLOSED — 20 audits)
+**Current Branch:** v9.0-clockwork-physics
 **Cumulative Tests:** ~3393
 **Failed:** 0
+
+---
+
+## One-Sentence Current State
+
+V9.0/V9.1 CLOCKWORK PHYSICS — CLOSED. 20 audits. Full hierarchy:
+Family axiom → static λ-space + dynamic VarI1/VarTerms → D_eq →
+Activation → dH (time flow). Primary observable: L = 1-VarI1/VarTerms
+(CV=0.15). 6/6 V1 concepts recovered. State space >80% complete.
+Prediction gap resolved via L observable instead of unstable ratios.
+See `docsV9/V9_0_Closure_Report.md`.
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
@@ -24,15 +35,9 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V8.4 RESONANCE ORIGIN — CLOSED. 12 audits. Time emergence traced to
-irreducible family-dependent CCI evaluation. L = a + bβ with b=0
-(frozen: SAC/RCS) or b≈0.43 (live: GAN/ICS/CNS). Family type is
-the irreducible differentiator (VRD_01). All structural quantities
-are static; only VarI1/VarTerms respond to β. See `docsV8/V8_4_Closure_Report.md`.
-
-V9.0 CLOCKWORK PHYSICS. Synthesizing the V7.4→V8.4 chain into emergent
-physical structure: λ-primitive → static geometry → linear clock
-operator → entropy flow → time → length → speed.
+V9.0/V9.1 CLOCKWORK PHYSICS — CLOSED. 20 audits. Primary observable:
+L = 1-VarI1/VarTerms (CV=0.15). All 6 V1 concepts recovered.
+State space sufficient. Prediction gap resolved. See `docsV9/V9_0_Closure_Report.md`.
 
 ---
 

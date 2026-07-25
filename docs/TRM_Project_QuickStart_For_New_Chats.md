@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V8.4 RESONANCE ORIGIN (CLOSED) → V9.0 CLOCKWORK PHYSICS |
-| Current Branch | v8.4-resonance-origin |
+| Current Version | V9.0/V9.1 CLOCKWORK PHYSICS |
+| Current Branch | v9.0-clockwork-physics |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.4 closed: 12 audits, family type irreducible. V9.0: clockwork physics synthesis. |
+| Current Status | 20 audits. L primary observable (CV=0.15). 6/6 V1 recovered. Closed. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
