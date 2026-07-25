@@ -2,11 +2,11 @@
   "version": "V8.4",
   "branch": "v8.4-resonance-origin",
   "status": "active",
-  "total_audits": 11,
-  "audits_completed": ["ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01"],
+  "total_audits": 12,
+  "audits_completed": ["ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01","VRD_01"],
   "key_result": "Resonance concentration identical across families (Δ=0). SAC/RCS frozen (|dE/dβ|=0), GAN/ICS/CNS live. Dynamics determine time emergence (DAO_01,C) (ROA_01,D).",
   "models": {
-    "ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01": "D"
+    "ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01","VRD_01": "D"
   },
   "test_count": "~3393",
   "failed": 0,
