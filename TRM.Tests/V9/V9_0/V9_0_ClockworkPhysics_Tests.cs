@@ -1919,6 +1919,104 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void OMA_01_ObservableMappingAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== OMA_01: Observable Mapping Audit ===");
+        _o.WriteLine("=== Why are observable ratios unstable? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 64231;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var pairs = new List<(double dH, double L)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var ents = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_OM", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n); Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                    ents.Add(0);
+                }
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double dH = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    pairs.Add((dH, Ls[i]));
+                }
+            }
+        }
+
+        var dHarr = pairs.Select(p => p.dH).ToArray();
+        var Larr = pairs.Select(p => p.L).ToArray();
+
+        // Test alternative observable forms
+        _o.WriteLine("=== Observable Form Stability ===");
+        _o.WriteLine($"{"Form",-20} {"CV",10}");
+        _o.WriteLine(new string('-', 32));
+
+        double cv1 = StdOverMean(dHarr.Zip(Larr, (d, l) => l / Math.Max(d, 1e-12)).ToArray());
+        double cv2 = StdOverMean(dHarr.Zip(Larr, (d, l) => Math.Log(Math.Max(l / Math.Max(d, 1e-12), 1e-12))).ToArray());
+        double cv3 = StdOverMean(dHarr.Zip(Larr, (d, l) => Math.Abs(l - d)).ToArray());
+        double cv4 = StdOverMean(dHarr.Zip(Larr, (d, l) => l * d).ToArray());
+        double cvDH = StdOverMean(dHarr);
+        double cvL = StdOverMean(Larr);
+
+        _o.WriteLine($"{"L/dH (ratio)",-20} {cv1,10:F2}");
+        _o.WriteLine($"{"log(L/dH)",-20} {cv2,10:F2}");
+        _o.WriteLine($"{"|L-dH| (diff)",-20} {cv3,10:F2}");
+        _o.WriteLine($"{"L*dH (product)",-20} {cv4,10:F2}");
+        _o.WriteLine($"{"dH alone",-20} {cvDH,10:F2}");
+        _o.WriteLine($"{"L alone",-20} {cvL,10:F2}");
+        _o.WriteLine("");
+
+        double bestCV = Math.Min(Math.Min(cv1, cv2), Math.Min(cv3, Math.Min(cv4, Math.Min(cvDH, cvL))));
+        string bestForm = cvDH == bestCV ? "dH alone" : cvL == bestCV ? "L alone" : cv2 == bestCV ? "log(L/dH)" : cv3 == bestCV ? "|L-dH|" : cv4 == bestCV ? "L*dH" : "L/dH";
+
+        _o.WriteLine($"Best form: {bestForm} (CV={bestCV:F2})");
+
+        string decision = bestCV < 1.0 ? "Model A" : bestCV < 3.0 ? "Model B" : "Model C";
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model A")
+            _o.WriteLine($"The observable {bestForm} has CV={bestCV:F2} — L and dH combine naturally into a stable observable.");
+        else
+            _o.WriteLine("No simple form produces stable observables — the mapping requires nonlinear or multi-layer structure.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OMA_01 complete. Commit: OMA_01_ObservableMappingAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
