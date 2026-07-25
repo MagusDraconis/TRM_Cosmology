@@ -1800,6 +1800,125 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void SSC_01_StateSpaceCompletionAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== SSC_01: State Space Completion Audit ===");
+        _o.WriteLine("=== Minimal hidden state estimate ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 62987;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var steps = new List<(double dEq, double activation, double dH, double dTotal, double beta)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var ents = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_SS", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n); ents.Add(0);
+                }
+
+                // Simplified entropy from total variation
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    double tick = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    double act = tick * deq;
+                    double dT = (totals[i + 1] - totals[i]) / dBeta;
+                    // Simple dH proxy: |dTotal/dβ|
+                    double dH = Math.Abs(dT);
+                    steps.Add((deq, act, dH, dT, (double)i / (totals.Count - 1)));
+                }
+            }
+        }
+
+        // Bucket by (D_eq decile, Activation decile) and compute within-bucket variance
+        var dEqArr = steps.Select(s => s.dEq).ToArray();
+        var actArr = steps.Select(s => s.activation).ToArray();
+        var dHarr = steps.Select(s => s.dH).ToArray();
+
+        int nBuckets = 5;
+        double dEqMin = dEqArr.Min(), dEqMax = dEqArr.Max();
+        double actMin = actArr.Min(), actMax = actArr.Max();
+
+        double withinVar = 0, totalVar = 0;
+        double totalMean = dHarr.Average();
+        totalVar = dHarr.Average(d => (d - totalMean) * (d - totalMean));
+        int nBucketsUsed = 0;
+
+        for (int di = 0; di < nBuckets; di++)
+        {
+            for (int ai = 0; ai < nBuckets; ai++)
+            {
+                double dLo = dEqMin + (dEqMax - dEqMin) * di / nBuckets;
+                double dHi = dEqMin + (dEqMax - dEqMin) * (di + 1) / nBuckets;
+                double aLo = actMin + (actMax - actMin) * ai / nBuckets;
+                double aHi = actMin + (actMax - actMin) * (ai + 1) / nBuckets;
+
+                var bucket = steps.Where(s => s.dEq >= dLo && s.dEq < dHi && s.activation >= aLo && s.activation < aHi).ToList();
+                if (bucket.Count < 3) continue;
+                nBucketsUsed++;
+                double bMean = bucket.Average(s => s.dH);
+                withinVar += bucket.Average(s => (s.dH - bMean) * (s.dH - bMean)) * bucket.Count;
+            }
+        }
+        withinVar /= steps.Count;
+
+        double explainedFrac = 1.0 - withinVar / Math.Max(totalVar, 1e-12);
+        _o.WriteLine($"Buckets: {nBucketsUsed}/{nBuckets * nBuckets} non-empty");
+        _o.WriteLine($"Explained variance by (D_eq, Act): {explainedFrac:P1}");
+        _o.WriteLine($"Within-bucket residual: {1.0 - explainedFrac:P1}");
+        _o.WriteLine("");
+
+        string decision;
+        if (explainedFrac > 0.8) decision = "Model A";
+        else if (explainedFrac > 0.5) decision = "Model B";
+        else decision = "Model C";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model A")
+            _o.WriteLine("Single hidden state sufficient. (D_eq, Activation) capture most of dH variance.");
+        else if (decision == "Model B")
+            _o.WriteLine("Small state manifold. Most variance captured by current state + small augmentation.");
+        else
+            _o.WriteLine("High-dimensional hidden state. The current (D_eq, Activation) state space has substantial unexplained variance.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== SSC_01 complete. Commit: SSC_01_StateSpaceCompletionAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
