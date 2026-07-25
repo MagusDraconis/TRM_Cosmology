@@ -3,8 +3,8 @@
 **Version:** 5.0
 **Date:** 2026-07-25
 
-**Current Version:** V13.0 TIME GRADIENT RECONSTRUCTION
-**Current Branch:** v13.0-time-gradient-reconstruction
+**Current Version:** V13.1 EFFECTIVE TIME DYNAMICS
+**Current Branch:** v13.1-effective-time-dynamics
 **Cumulative Tests:** ~3442
 **Failed:** 0
 
@@ -161,5 +161,5 @@ V = |1+m|           |dV1/dθ|
 
 ---
 
-*Generated 2026-07-25. V12.2 CLOSED — 10 audits. ~3442 tests, 0 failed.
-Next: V13.0 Time Gradient Reconstruction.*
+*Generated 2026-07-25. V12.2 CLOSED — 10 audits. V13.0 CLOSED — 2 audits (TGR_01, TGP_01).
+~3442 tests, 0 failed. Next: V13.1 Effective Time Dynamics.*

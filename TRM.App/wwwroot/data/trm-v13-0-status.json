@@ -1,0 +1,14 @@
+{
+  "version": "V13.0",
+  "branch": "v13.0-time-gradient-reconstruction",
+  "status": "closed",
+  "total_audits": 2,
+  "key_result": "V1 time-gradient dynamics reconstructed from V12.2. Tick acts as effective local clock rate. d(Tick)/dα < 0 universally. Feedback sign = damping coefficient on Tick gradient landscape.",
+  "test_count": "~3442",
+  "failed": 0,
+  "last_updated": "2026-07-25",
+  "audits_completed": ["TGR_01","TGP_01"],
+  "v1_reconstruction": "V1 'local clock rate' = Tick, 'time gradient' = d(Tick)/dm, 'fall to slower time' = drift toward m=-1",
+  "gradient_landscape": "d(Tick)/dα < 0 for all 5 families. Universal downhill toward slower time.",
+  "oscillator_analogy": "Negative feedback (ICS) = damped → Tick minimum. Positive feedback (GAN/CNS) = anti-damped → runs away."
+}
