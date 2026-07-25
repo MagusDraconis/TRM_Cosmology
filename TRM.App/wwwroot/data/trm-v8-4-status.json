@@ -1,0 +1,10 @@
+{
+  "version": "V8.4",
+  "branch": "v8.4-resonance-origin",
+  "status": "active",
+  "total_audits": 0,
+  "key_result": "Investigating whether resonance structure explains family-dependent time-rate emergence.",
+  "test_count": "~3393",
+  "failed": 0,
+  "last_updated": "2026-07-25"
+}

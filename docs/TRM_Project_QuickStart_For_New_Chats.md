@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V8.3 INVARIANT ORIGIN |
+| Current Version | V8.3 INVARIANT ORIGIN (CLOSED) → V8.4 RESONANCE ORIGIN |
 | Current Branch | v8.3-invariant-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.3 INVARIANT ORIGIN. 5 audits: PIO_01(B), PRC_01(C), PEO_01(A), PLI_01(C), LTR_01(A). λ1→time-rate is family-dependent: SAC/RCS R²=1.0, others≈0. |
+| Current Status | V8.3 closed: 9 audits, λ1,λ2 primitive+invariant. V8.4: resonance origin of family-dependent time emergence. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

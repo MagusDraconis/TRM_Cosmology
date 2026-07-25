@@ -1,17 +1,21 @@
 {
   "version": "V8.3",
   "branch": "v8.3-invariant-origin",
-  "status": "active",
+  "status": "complete",
   "total_audits": 9,
-  "audits_completed": ["PIO_01", "PRC_01", "PEO_01", "PLI_01", "LTR_01","KSD_01","POA_01","PST_01","TTA_01"],
-  "key_result": "Speed from compensation (B). Chain closed (C). λ primitive (A)+invariant (C). λ1→time-rate family-dependent: SAC/RCS R²=1.0, others≈0 (A).",
-  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Mutual Compensation (PIO_01) → Reconstruction Closure (PRC_01) → Eigenvalue Primitive (PEO_01) → Lambda Invariance (PLI_01) → Lambda-Time Family-Dependent (LTR_01)",
+  "audits_completed": ["PIO_01", "PRC_01", "PEO_01", "PLI_01", "LTR_01", "KSD_01", "POA_01", "PST_01", "TTA_01"],
+  "key_result": "λ1,λ2 primitive (PEO_01,A) and invariant (PLI_01,C). Chain closed (PRC_01,C). Speed from compensation (PIO_01,B). Oscillation-λ dual (POA_01,B). Time-rate emergence fundamentally family-dependent.",
+  "full_chain": "λ1,λ2 → Accessibility → Transfer Pressure → Drift → Ordering → Time → Local Rates → Geometry → Length → Speed",
   "models": {
     "PIO_01": "B",
     "PRC_01": "C",
     "PEO_01": "A",
     "PLI_01": "C",
-    "LTR_01","KSD_01","POA_01","PST_01","TTA_01": "A"
+    "LTR_01": "A",
+    "KSD_01": "D",
+    "POA_01": "B",
+    "PST_01": "A",
+    "TTA_01": "A"
   },
   "test_count": "~3393",
   "failed": 0,

@@ -5,7 +5,7 @@
 **Scope:** Clockwork Cosmology V1 through V8.3
 **Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
 **Branch:** v8.3-invariant-origin
-**Current Frontier:** V8.3 INVARIANT ORIGIN (LTR_01 complete) — λ1→time-rate family-dependent
+**Current Frontier:** V8.3 INVARIANT ORIGIN (CLOSED) — 9 audits, λ1,λ2 primitive
 
 ---
 
@@ -2045,7 +2045,8 @@ maintained to prevent overinterpretation:
 | V8.0 | Foundational Geometry and Primitive Identity | ~40 | COMPLETE |
 | V8.1 | Primitive Origin: Irreducibility + Universality | ~35 | COMPLETE |
 | V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~35 | COMPLETE |
-| V8.3 | Invariant Origin: λ primitive, λ1→time family-dep | 5 | IN PROGRESS |
+| V8.3 | Invariant Origin: λ primitive + invariant | 9 | COMPLETE |
+| V8.4 | Resonance Origin | 0 | INITIALIZED |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
@@ -2063,9 +2064,13 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 **Closure report:** `docsV8/V8_2_Closure_Report.md`
 
-### V8.3 — Invariant Origin — IN PROGRESS
+### V8.3 — Invariant Origin — COMPLETE
 
-**Status:** Active (2026-07-25). 5 audits: PIO_01(B), PRC_01(C), PEO_01(A), PLI_01(C), LTR_01(A). λ1→time-rate family-dependent.
+**Status:** CLOSED (2026-07-25). 9 audits. λ1,λ2 primitive+invariant. Time emergence family-dependent. Closure report: `docsV8/V8_3_Closure_Report.md`.
+
+### V8.4 — Resonance Origin — INITIALIZED
+
+**Status:** Active (2026-07-25). 0 audits. Open: does resonance structure explain family-dependent time-rate emergence?
 
 **Key chain:** Speed from mutual compensation → Chain closed → λ1,λ2 primitive → λ1 representation-independent.
 
@@ -2132,7 +2137,7 @@ analysis, minimal generative core).
 **Key finding (V5.2):** Seed stability and regime stability are **distinct**.
 **Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
 
-**Current status:** V8.3 INVARIANT ORIGIN. V8.2 closed with 10 audits establishing Speed as the primary geometric invariant. V8.3 investigates WHY speed is invariant. Current branch: `v8.3-invariant-origin`.
+**Current status:** V8.3 CLOSED — λ1,λ2 primitive + invariant. V8.4 INITIALIZED — Resonance Origin. Current branch: `v8.3-invariant-origin`.
 
 **V8.2 predecessor chain:** P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Attractors → Entropy → Dimension. See `docsV8/V8_2_Closure_Report.md`.
 

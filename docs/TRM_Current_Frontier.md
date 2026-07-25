@@ -1,9 +1,9 @@
 # TRM Current Frontier
 
-**Version:** 3.2
+**Version:** 3.3
 **Date:** 2026-07-25
 
-**Current Version:** V8.3 INVARIANT ORIGIN
+**Current Version:** V8.3 INVARIANT ORIGIN (CLOSED)
 **Current Branch:** v8.3-invariant-origin
 **Cumulative Tests:** ~3393
 **Failed:** 0
@@ -22,33 +22,13 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V8.3 INVARIANT ORIGIN. V8.2 established Speed as the primary geometric
-invariant — more stable than Time or Length, surviving all stress tests,
-with Length adjusting to preserve the characteristic speed ratio.
+V8.3 INVARIANT ORIGIN — CLOSED. 9 audits. λ1,λ2 are deepest primitives:
+irreducible (PEO_01), invariant (PLI_01). Time-rate emergence is
+family-dependent — not reducible to single mechanisms. Chain closed
+(PRC_01). Oscillation-λ dual (POA_01). See `docsV8/V8_3_Closure_Report.md`.
 
-PIO_01 complete: Speed invariance emerges from symmetric mutual
-compensation. r(dH_t→dL_t+1) ≈ r(dL_t→dH_t+1) ≈ 0.35 — neither Time
-nor Length dominates the causal direction. Accessibility does NOT
-directly predict Speed (r≈0). Speed is the balanced outcome of two
-co-evolving components.
-
-PRC_01 complete: The chain is internally closed. Accessibility can be
-perfectly reconstructed from derived quantities (Time, Length, Speed).
-This reflects the shared algebraic origin — all quantities derive from
-the same PCA eigenvalues — creating a mathematically consistent closed
-structure.
-
-PEO_01 complete: λ1,λ2 are PRIMITIVE. acc←λ R²=1.0000 — eigenvalues
-perfectly predict accessibility. λ←occ R²≈0, λ←acc R²≈0 — eigenvalues
-cannot be reconstructed from any derived quantity. λ1 CV=0.001 vs
-entropy CV=2.81 — eigenvalues are ~2000× more stable, and stable from
-the earliest β. The entire V7.4→V8.3 chain bottoms out at the PCA
-eigenvalues.
-
-PLI_01 complete: λ1 is representation-independent. Survives feature
-removal (r=0.82), normalization changes (r=1.00), and arbitrary scaling
-(r=1.00) — overall perturbation r=0.94. λ1 is not a PCA artifact; it is
-a genuine structural invariant of the accessibility landscape.
+V8.4 RESONANCE ORIGIN. Open question: does resonance structure explain
+the family-dependent time-rate emergence that V8.3 could not resolve?
 
 ---
 
