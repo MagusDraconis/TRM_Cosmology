@@ -15,7 +15,7 @@
 | Current Branch | v8.2-primitive-meaning |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.2 PRIMITIVE MEANING. Full chain: P(Accessibility)→Gradient→Transfer Pressure→Drift→Temporal Ordering→Emergent Time→Local Rates→Emergent Geometry→Metric Length→Speed(PSC_01). Dimension emerges from transfer-field geometry. P is irreducible & universal. |
+| Current Status | V8.2 PRIMITIVE MEANING. Full chain: P(Accessibility)→Gradient→Transfer Pressure→Drift→Temporal Ordering→Emergent Time→Local Rates→Emergent Geometry→Metric Length→Speed→Time-Length Geometry(TLG_01). Dimension emerges from transfer-field geometry. P is irreducible & universal. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

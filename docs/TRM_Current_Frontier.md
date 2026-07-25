@@ -32,7 +32,8 @@ Primitive P (Accessibility Potential, irreducible, universal)
   → Emergent Time (local rates)
   → Emergent Geometry (PEG_01)
   → Metric Length (PML_01)
-  → Emergent Speed (PSC_01) ← CURRENT FRONTIER
+  → Emergent Speed (PSC_01)
+  → Time-Length Geometry (TLG_01) ← CURRENT FRONTIER
   → Attractor Occupation
   → Entropy H = −Σp_i log p_i
   → Dimension D = exp(H)
@@ -59,6 +60,14 @@ characteristic propagation-speed constraint. Speed = ΔLength/ΔTime along
 finite), exhibits diminishing returns with transfer pressure, and serves as
 the natural conversion factor between emergent length and emergent time —
 without assuming physical c, relativity, or spacetime.
+
+TLG_01 establishes: Time and Length are dual projections of the same
+accessibility geometry. Changes in local time rate systematically predict
+changes in metric length. A joint metric ds² = (ΔT/σ_T)² + (ΔL/σ_L)²
+captures unified geometry. Speed is more stable than either component alone —
+Length and Time co-vary in a way that preserves the characteristic
+conversion factor. Without assuming spacetime, relativity, or length
+contraction.
 
 ---
 
