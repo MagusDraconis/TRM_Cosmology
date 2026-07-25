@@ -5,7 +5,7 @@
 **Scope:** Clockwork Cosmology V1 through V8.3
 **Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
 **Branch:** v8.3-invariant-origin
-**Current Frontier:** V8.3 INVARIANT ORIGIN (PRC_01 complete) — Reconstruction closure achieved
+**Current Frontier:** V8.3 INVARIANT ORIGIN (PEO_01 complete) — λ1,λ2 primitive
 
 ---
 
@@ -2045,7 +2045,7 @@ maintained to prevent overinterpretation:
 | V8.0 | Foundational Geometry and Primitive Identity | ~40 | COMPLETE |
 | V8.1 | Primitive Origin: Irreducibility + Universality | ~35 | COMPLETE |
 | V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~35 | COMPLETE |
-| V8.3 | Invariant Origin: Why is speed invariant? | 2 | IN PROGRESS |
+| V8.3 | Invariant Origin: λ primitive | 3 | IN PROGRESS |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
@@ -2065,11 +2065,13 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 ### V8.3 — Invariant Origin — IN PROGRESS
 
-**Status:** Active (2026-07-25). 2 audits complete: PIO_01, PRC_01.
+**Status:** Active (2026-07-25). 3 audits complete: PIO_01, PRC_01, PEO_01.
 
-**PIO_01:** Speed invariance from symmetric mutual compensation (Model B). r(dH_t→dL_t+1) ≈ r(dL_t→dH_t+1) ≈ 0.35 — neither dominates. Accessibility does NOT predict Speed.
+**PIO_01 (B):** Speed invariance from symmetric mutual compensation. r(dH→dL) ≈ r(dL→dH) ≈ 0.35.
 
-**PRC_01:** Chain internally closed (Model C). Accessibility is perfectly reconstructible from derived quantities (Time, Length, Speed). R²=1.0000 across all 5 families.
+**PRC_01 (C):** Chain internally closed. Accessibility reconstructible from derived quantities (R²=1.0000).
+
+**PEO_01 (A):** λ1,λ2 are PRIMITIVE. acc←λ R²=1.0000, λ←occ R²≈0, λ←acc R²≈0. λ1 CV=0.001 vs entropy CV=2.81 (~2000× more stable). The entire V7.4→V8.3 chain bottoms out at PCA eigenvalues.
 
 **Open:** Further invariant origin exploration.
 

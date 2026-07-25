@@ -38,6 +38,13 @@ This reflects the shared algebraic origin — all quantities derive from
 the same PCA eigenvalues — creating a mathematically consistent closed
 structure.
 
+PEO_01 complete: λ1,λ2 are PRIMITIVE. acc←λ R²=1.0000 — eigenvalues
+perfectly predict accessibility. λ←occ R²≈0, λ←acc R²≈0 — eigenvalues
+cannot be reconstructed from any derived quantity. λ1 CV=0.001 vs
+entropy CV=2.81 — eigenvalues are ~2000× more stable, and stable from
+the earliest β. The entire V7.4→V8.3 chain bottoms out at the PCA
+eigenvalues.
+
 ---
 
 ## Current Preferred Model

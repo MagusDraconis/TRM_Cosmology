@@ -15,7 +15,7 @@
 | Current Branch | v8.3-invariant-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.3 INVARIANT ORIGIN. V8.2 closed. PIO_01: Speed from mutual compensation (Model B). PRC_01: Chain internally closed — Accessibility reconstructible (Model C). |
+| Current Status | V8.3 INVARIANT ORIGIN. V8.2 closed. PIO_01: Speed from compensation (B). PRC_01: Chain closed (C). PEO_01: λ1,λ2 primitive — generate everything (A). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
