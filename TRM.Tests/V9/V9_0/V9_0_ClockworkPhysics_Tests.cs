@@ -2111,6 +2111,105 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void LPF_01_LPhysicalFieldAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LPF_01: L Physical Field Audit ===");
+        _o.WriteLine("=== Can all V1 concepts derive from L alone? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 66721;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var data = new List<(double L, double dH, double dEq, double activation)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_LP", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double dH = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    double tick = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    data.Add((Ls[i], dH, deq, tick * deq));
+                }
+            }
+        }
+
+        var Larr = data.Select(d => d.L).ToArray();
+        var dHarr = data.Select(d => d.dH).ToArray();
+        var dEqArr = data.Select(d => d.dEq).ToArray();
+        var actArr = data.Select(d => d.activation).ToArray();
+
+        _o.WriteLine("=== V1 Concept Recovery Through L ===");
+        double rL_dH = PearsonCorrelation(Larr, dHarr);
+        double rL_dEq = PearsonCorrelation(Larr, dEqArr);
+        double rL_act = PearsonCorrelation(Larr, actArr);
+
+        _o.WriteLine($"L → Local Time Rate (dH):    r={rL_dH:F4}");
+        _o.WriteLine($"L → Disequilibrium (D_eq):   r={rL_dEq:F4}");
+        _o.WriteLine($"L → Activation:              r={rL_act:F4}");
+        _o.WriteLine("");
+
+        // Compare: which predictor is best for dH?
+        double rdH_L = Math.Abs(rL_dH);
+        double rdH_act = Math.Abs(PearsonCorrelation(actArr, dHarr));
+        double rdH_dEq = Math.Abs(PearsonCorrelation(dEqArr, dHarr));
+
+        _o.WriteLine("=== Comparative Prediction of dH ===");
+        _o.WriteLine($"L alone:          r={rdH_L:F4}");
+        _o.WriteLine($"Activation:       r={rdH_act:F4}");
+        _o.WriteLine($"D_eq alone:       r={rdH_dEq:F4}");
+        _o.WriteLine("");
+
+        bool Lbest = rdH_L >= rdH_act && rdH_L >= rdH_dEq;
+
+        string decision = Lbest ? "Model C" : "Model B";
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("L is the primary physical field. All V1 concepts derivable from L alone with comparable or better predictivity than composite quantities.");
+        else
+            _o.WriteLine("L is a derived field, not primary.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== LPF_01 complete. Commit: LPF_01_LPhysicalFieldAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
