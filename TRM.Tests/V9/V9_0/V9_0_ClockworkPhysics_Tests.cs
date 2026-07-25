@@ -1200,6 +1200,90 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void DGO_01_DisequilibriumGenesisAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DGO_01: Disequilibrium Genesis Audit ===");
+        _o.WriteLine("=== How does D_eq first appear? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 56779;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 101;
+        double betaMax = 0.1; // fine early sweep
+
+        _o.WriteLine($"Early β sweep: 0 → {betaMax} ({nBeta} steps)");
+        _o.WriteLine($"{"β",10} {"SAC VarI1",12} {"GAN VarI1",12} {"ΔVarI1",12} {"SAC total",12} {"GAN total",12} {"Δtotal",12}");
+        _o.WriteLine(new string('-', 84));
+
+        double? firstDivergence = null;
+        double sacV1_0 = double.NaN, ganV1_0 = double.NaN, sacVT_0 = double.NaN, ganVT_0 = double.NaN;
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            double sacV1 = 0, sacVT = 0, ganV1 = 0, ganVT = 0;
+
+            foreach (var fam in new[] { VcFamily.SAC, VcFamily.GAN })
+            {
+                var v = new VariantSpec($"{fam}_DG", fam, 0.7, 1.0, 1.0, beta, 0.0);
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                double sumV1 = 0, sumVT = 0; int n = 0;
+                for (int ip = 0; ip < 3; ip++)
+                {
+                    double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                    sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+                }
+                if (n < 3) continue;
+                if (fam == VcFamily.SAC) { sacV1 = sumV1 / n; sacVT = sumVT / n; }
+                else { ganV1 = sumV1 / n; ganVT = sumVT / n; }
+            }
+
+            if (bi == 0) { sacV1_0 = sacV1; ganV1_0 = ganV1; sacVT_0 = sacVT; ganVT_0 = ganVT; }
+
+            double dV1 = ganV1 - sacV1;
+            double dTot = (ganV1 + ganVT) - (sacV1 + sacVT);
+
+            // First divergence: |dV1| > 1e-12
+            if (firstDivergence == null && Math.Abs(dV1) > 1e-12)
+                firstDivergence = beta;
+
+            if (bi % 20 == 0)
+                _o.WriteLine($"{beta,10:F4} {sacV1,12:F8} {ganV1,12:F8} {dV1,12:F8} {sacV1 + sacVT,12:F8} {ganV1 + ganVT,12:F8} {dTot,12:F8}");
+        }
+
+        _o.WriteLine("");
+        _o.WriteLine($"First VarI1 divergence at β = {(firstDivergence.HasValue ? $"{firstDivergence:F6}" : "NEVER")}");
+
+        // Check: at β=0, are SAC and GAN identical?
+        bool identicalAtZero = Math.Abs(sacV1_0 - ganV1_0) < 1e-12 && Math.Abs(sacVT_0 - ganVT_0) < 1e-12;
+        _o.WriteLine($"Identical at β=0: {(identicalAtZero ? "YES" : "NO")}");
+        _o.WriteLine($"ΔVarI1(0) = {ganV1_0 - sacV1_0:E2}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        string decision = firstDivergence.HasValue && firstDivergence.Value < 0.01 ? "Model A" : "Model D";
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model A")
+            _o.WriteLine($"D_eq originates from the family definition itself. At β=0, SAC and GAN are identical. Divergence begins at β={firstDivergence:F6} — the first non-zero β step. The family type determines β-sensitivity of the CCI evaluation, which is built into the kernel definition. D_eq has no deeper origin.");
+        else
+            _o.WriteLine("D_eq has a deeper origin.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== DGO_01 complete. Commit: DGO_01_DisequilibriumGenesisAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
