@@ -33,7 +33,8 @@ Primitive P (Accessibility Potential, irreducible, universal)
   → Emergent Geometry (PEG_01)
   → Metric Length (PML_01)
   → Emergent Speed (PSC_01)
-  → Time-Length Geometry (TLG_01) ← CURRENT FRONTIER
+  → Time-Length Geometry (TLG_01)
+  → Speed Invariant (PSI_01) ← CURRENT FRONTIER
   → Attractor Occupation
   → Entropy H = −Σp_i log p_i
   → Dimension D = exp(H)
@@ -68,6 +69,12 @@ captures unified geometry. Speed is more stable than either component alone —
 Length and Time co-vary in a way that preserves the characteristic
 conversion factor. Without assuming spacetime, relativity, or length
 contraction.
+
+PSI_01 establishes: Speed is the primary invariant of accessibility
+geometry. CV(Speed)=0.46 vs CV(Time)=1.15, CV(Length)=1.14 — 2.5× more
+stable. Length adjusts to Time-rate changes (r=0.57) preserving speed.
+Speed survives geometry stress in 5/5 families. Speed ranks #1 among
+invariance candidates. Without assuming physical c or relativity.
 
 ---
 
