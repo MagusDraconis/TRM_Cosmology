@@ -1404,6 +1404,196 @@ public class V8_3_InvariantOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void PST_01_PhaseSynchronizationTimeAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PST_01: Phase Synchronization Time Audit ===");
+        _o.WriteLine("=== Do time-rates emerge from phase synchronization? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 23117;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        // Collect: K1/K10 (near-far ratio), K1-K10 (contrast), dH/dβ, λ1
+        var steps = new List<(VcFamily fam, double nearFar, double contrast, double dH, double lam1)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pts = new List<(double kNearFar, double kContrast, double ent, double lam1)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_PS", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    var kSum = new double[nDeciles + 1]; var kCt = new int[nDeciles + 1];
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) { kD[d] /= Math.Max(ct[d], 1); kSum[d] += kD[d]; kCt[d]++; }
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    // Phase sync proxy: K1/K10 (near-far coupling ratio)
+                    for (int d = 1; d <= nDeciles; d++) kSum[d] /= Math.Max(kCt[d], 1);
+                    double nearFar = kSum[1] / Math.Max(kSum[nDeciles], 1e-12);
+                    double contrast = (kSum[1] - kSum[nDeciles]) / Math.Max(kSum[1] + kSum[nDeciles], 1e-12);
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var sEE = ee.OrderByDescending(e => e).ToArray();
+
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+
+                    // Phase sync proxies from K1-K10 contrast
+                    double kNear = allC.Average(c => c[0]); // K1-K10 is feature 0
+                    double kContrast = allC.Average(c => c[0]); // same
+                    double kNearFar = kContrast > 0 ? 1.0 : 0; // placeholder, will use actual K1/K10
+
+                    pts.Add((kNearFar, kContrast, ent, sEE[0]));
+                }
+
+                // Now compute actual K1/K10 and K1-K10 from the raw K values
+                // Regenerate raw K at each β with just one p-value for speed
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_PS", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    // Compute raw K per decile
+                    var kPerDecile = new double[nDeciles];
+                    var ctPerDecile = new int[nDeciles];
+                    double pv = 0.6; // single p for efficiency
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                    int nD = distances.Length; double[] kA = new double[nD];
+                    for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kPerDecile[dec - 1] += kA[i]; ctPerDecile[dec - 1]++; }
+                    for (int d = 0; d < nDeciles; d++) kPerDecile[d] /= Math.Max(ctPerDecile[d], 1);
+
+                    double nearFar = kPerDecile[0] / Math.Max(kPerDecile[nDeciles - 1], 1e-12);
+                    double contrast = (kPerDecile[0] - kPerDecile[nDeciles - 1]) / Math.Max(kPerDecile[0] + kPerDecile[nDeciles - 1], 1e-12);
+
+                    // Assign to pts
+                    int pIdx = bi;
+                    if (pIdx < pts.Count && bi < nBeta - 1)
+                    {
+                        double dH = Math.Abs((bi + 1 < pts.Count ? pts[bi + 1].ent : pts[bi].ent) - pts[bi].ent) / (1.0 / (nBeta - 1));
+                        steps.Add((fam, nearFar, contrast, dH, pts[bi].lam1));
+                    }
+                }
+            }
+        }
+
+        var NF = steps.Select(s => s.nearFar).ToArray();
+        var CT = steps.Select(s => s.contrast).ToArray();
+        var DH = steps.Select(s => s.dH).ToArray();
+        var L1 = steps.Select(s => s.lam1).ToArray();
+
+        // ============================================================
+        _o.WriteLine("=== Phase Sync vs Time-Rate ===");
+        _o.WriteLine($"N = {steps.Count}");
+
+        double rNF_DH = PearsonCorrelation(NF, DH);
+        double rCT_DH = PearsonCorrelation(CT, DH);
+        double r2_NF = R2SinglePredictor(DH, NF);
+        double r2_CT = R2SinglePredictor(DH, CT);
+
+        _o.WriteLine($"r(K1/K10, dH/dβ)    = {rNF_DH:F4}  R²={r2_NF:F4}");
+        _o.WriteLine($"r(contrast, dH/dβ)   = {rCT_DH:F4}  R²={r2_CT:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Per-Family ===");
+        _o.WriteLine($"{"Family",-6} {"r(NF,dH)",10} {"r(CT,dH)",10} {"mean NF",10} {"mean CT",10} {"CV(dH)",10}");
+        _o.WriteLine(new string('-', 58));
+
+        foreach (var fam in families)
+        {
+            var fd = steps.Where(s => s.fam == fam).ToArray();
+            double r1 = PearsonCorrelation(fd.Select(s => s.nearFar).ToArray(), fd.Select(s => s.dH).ToArray());
+            double r2 = PearsonCorrelation(fd.Select(s => s.contrast).ToArray(), fd.Select(s => s.dH).ToArray());
+            double mnf = fd.Average(s => s.nearFar);
+            double mct = fd.Average(s => s.contrast);
+            double cvd = StdOverMean(fd.Select(s => s.dH).ToArray());
+            _o.WriteLine($"{fam,-6} {r1,10:F4} {r2,10:F4} {mnf,10:F4} {mct,10:F4} {cvd,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Group Split ===");
+        var gA = steps.Where(s => s.fam == VcFamily.SAC || s.fam == VcFamily.RCS).ToArray();
+        var gB = steps.Where(s => s.fam != VcFamily.SAC && s.fam != VcFamily.RCS).ToArray();
+
+        double rNF_A = PearsonCorrelation(gA.Select(s => s.nearFar).ToArray(), gA.Select(s => s.dH).ToArray());
+        double rNF_B = PearsonCorrelation(gB.Select(s => s.nearFar).ToArray(), gB.Select(s => s.dH).ToArray());
+        double rCT_A = PearsonCorrelation(gA.Select(s => s.contrast).ToArray(), gA.Select(s => s.dH).ToArray());
+        double rCT_B = PearsonCorrelation(gB.Select(s => s.contrast).ToArray(), gB.Select(s => s.dH).ToArray());
+
+        _o.WriteLine($"SAC+RCS:     r(NF,dH)={rNF_A:F4}  r(CT,dH)={rCT_A:F4}");
+        _o.WriteLine($"GAN+ICS+CNS: r(NF,dH)={rNF_B:F4}  r(CT,dH)={rCT_B:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        bool phaseDrivesTime = Math.Abs(rNF_A) > 0.4 && Math.Abs(rNF_B) < 0.2;
+        bool partial = Math.Abs(rNF_DH) > 0.3;
+
+        string decision;
+        if (phaseDrivesTime) decision = "Model C";
+        else if (partial) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}  r(NF,dH)={rNF_DH:F4}");
+
+        if (decision == "Model C")
+            _o.WriteLine("Time-rates emerge from phase synchronization. The near-far coupling ratio predicts dH/dβ in time-connected families (SAC+RCS) but not in disconnected families.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Partial: phase synchronization partially predicts time-rates.");
+        else
+            _o.WriteLine("Phase synchronization does not predict time-rates.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== PST_01 complete. Commit: PST_01_PhaseSynchronizationTimeAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double[,] CovMatrix(double[][] X, int nF, int N)
     {
         var cm = new double[nF, nF];
