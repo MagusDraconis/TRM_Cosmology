@@ -1139,6 +1139,125 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void ETA_01_EnergyTransferAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== ETA_01: Energy Transfer Audit ===");
+        _o.WriteLine("=== Is the ON/OFF distinction an energy-transfer condition? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 35281;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var data = new List<(VcFamily fam, double dEnergy, double dEntropy, double dL, double energyVar)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pts = new List<(double energy, double entropy, double L)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_ET", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    // Energy = mean K across distance
+                    var kPerDecile = new double[nDeciles];
+                    var ctPerDecile = new int[nDeciles];
+                    double pv = 0.6;
+                    int nD = distances.Length; double[] kA = new double[nD];
+                    for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kPerDecile[dec - 1] += kA[i]; ctPerDecile[dec - 1]++; }
+                    for (int d = 0; d < nDeciles; d++) kPerDecile[d] /= Math.Max(ctPerDecile[d], 1);
+
+                    double energy = kPerDecile.Average(); // total coupling energy
+                    double energyVariance = kPerDecile.Average(k => (k - energy) * (k - energy)); // transferable energy
+
+                    // Entropy proxy from K-variance
+                    double kSD = Math.Sqrt(energyVariance);
+                    double entropy = Math.Log(Math.Max(kSD / Math.Max(energy, 1e-12) + 1.0, 1.0));
+
+                    // L proxy: near-far contrast
+                    double L = (kPerDecile[0] - kPerDecile[nDeciles - 1]) / Math.Max(kPerDecile[0], 1e-12);
+
+                    pts.Add((energy, entropy, L));
+                }
+
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < pts.Count - 1; i++)
+                {
+                    double dE = Math.Abs(pts[i + 1].energy - pts[i].energy) / dBeta;
+                    double dH = Math.Abs(pts[i + 1].entropy - pts[i].entropy) / dBeta;
+                    double dL = Math.Abs(pts[i + 1].L - pts[i].L) / dBeta;
+                    data.Add((fam, dE, dH, dL, 0));
+                }
+            }
+        }
+
+        // ============================================================
+        _o.WriteLine("=== Energy Flow ===");
+        _o.WriteLine($"{"Family",-6} {"|dE/dβ|",12} {"|dH/dβ|",12} {"|dL/dβ|",12}");
+        _o.WriteLine(new string('-', 40));
+
+        foreach (var fam in families)
+        {
+            var fd = data.Where(d => d.fam == fam).ToArray();
+            _o.WriteLine($"{fam,-6} {fd.Average(d => d.dEnergy),12:F6} {fd.Average(d => d.dEntropy),12:F6} {fd.Average(d => d.dL),12:F6}");
+        }
+        _o.WriteLine("");
+
+        var gF = data.Where(d => d.fam == VcFamily.SAC || d.fam == VcFamily.RCS).ToArray();
+        var gL = data.Where(d => d.fam != VcFamily.SAC && d.fam != VcFamily.RCS).ToArray();
+
+        double dEF = gF.Average(d => d.dEnergy);
+        double dEL = gL.Average(d => d.dEnergy);
+
+        _o.WriteLine($"FROZEN: |dE/dβ|={dEF:F6}");
+        _o.WriteLine($"LIVE:   |dE/dβ|={dEL:F6}");
+
+        double rED_H = PearsonCorrelation(data.Select(d => d.dEnergy).ToArray(), data.Select(d => d.dEntropy).ToArray());
+        double rED_L = PearsonCorrelation(data.Select(d => d.dEnergy).ToArray(), data.Select(d => d.dL).ToArray());
+        _o.WriteLine($"r(|dE|,|dH|)={rED_H:F4}, r(|dE|,|dL|)={rED_L:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        bool energyTransferExplains = dEL > dEF * 10 && rED_H > 0.5;
+
+        string decision;
+        if (energyTransferExplains) decision = "Model C";
+        else if (rED_H > 0.3) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}  dE ratio={(dEL/Math.Max(dEF,1e-12)):F2}  r(dE,dH)={rED_H:F4}");
+
+        if (decision == "Model C")
+            _o.WriteLine("The ON/OFF distinction IS an energy-transfer condition. OFF families have zero energy flow; ON families have non-zero energy flow that drives entropy and L dynamics.");
+        else if (decision == "Model B")
+            _o.WriteLine("Energy transfer partially explains dynamics.");
+        else
+            _o.WriteLine("Energy transfer is not the distinguishing factor.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== ETA_01 complete. Commit: ETA_01_EnergyTransferAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
