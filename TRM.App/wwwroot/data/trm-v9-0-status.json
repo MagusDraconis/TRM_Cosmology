@@ -2,10 +2,10 @@
   "version": "V9.1",
   "branch": "v9.0-clockwork-physics",
   "status": "active",
-  "total_audits": 20,
-  "audits_completed": ["CPF_01","CGA_01","VBT_01","BAO_01","BOC_02","WPO_01","BDC_01","TDO_01","TED_01","CTA_01","CAI_01","DEO_01","DGO_01","VRC_01","PPA_01","CMP_01","MSO_01","SSC_01","OMA_01","LOC_01"],
+  "total_audits": 21,
+  "audits_completed": ["CPF_01","CGA_01","VBT_01","BAO_01","BOC_02","WPO_01","BDC_01","TDO_01","TED_01","CTA_01","CAI_01","DEO_01","DGO_01","VRC_01","PPA_01","CMP_01","MSO_01","SSC_01","OMA_01","LOC_01","LPF_01"],
   "key_result": "L = 1-VarI1/VarTerms is the primary clockwork observable (CV=0.15). State space sufficient (>80% variance). Prediction gap resolved via direct L observable instead of unstable ratios.",
-  "models": {"CPF_01":"C","CGA_01":"D","VBT_01":"C","BAO_01":"A","BOC_02":"A","WPO_01":"B","BDC_01":"C","TDO_01":"B","TED_01":"B","CTA_01":"C","CAI_01":"D","DEO_01":"C","DGO_01":"A","VRC_01":"C","PPA_01":"A","CMP_01":"D","MSO_01":"D","SSC_01":"A","OMA_01":"A","LOC_01":"C"},
+  "models": {"CPF_01":"C","CGA_01":"D","VBT_01":"C","BAO_01":"A","BOC_02":"A","WPO_01":"B","BDC_01":"C","TDO_01":"B","TED_01":"B","CTA_01":"C","CAI_01":"D","DEO_01":"C","DGO_01":"A","VRC_01":"C","PPA_01":"A","CMP_01":"D","MSO_01":"D","SSC_01":"A","OMA_01":"A","LOC_01","LPF_01":"C"},
   "test_count": "~3393",
   "failed": 0,
   "last_updated": "2026-07-25"
