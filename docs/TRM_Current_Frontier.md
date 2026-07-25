@@ -3,8 +3,8 @@
 **Version:** 4.5
 **Date:** 2026-07-25
 
-**Current Version:** V10.1 REGIME PHYSICS (CLOSED) → V11.0 FAMILY AXIOM PHYSICS
-**Current Branch:** v10.1-clockwork-regime-physics
+**Current Version:** V11.0 FAMILY AXIOM PHYSICS
+**Current Branch:** v11.0-family-axiom-physics
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
