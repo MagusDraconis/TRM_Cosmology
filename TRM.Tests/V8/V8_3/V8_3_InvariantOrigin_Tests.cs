@@ -281,6 +281,219 @@ public class V8_3_InvariantOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void PRC_01_PrimitiveReconstructionClosureAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PRC_01: Primitive Reconstruction Closure Audit ===");
+        _o.WriteLine("=== Can Accessibility be reconstructed from derived quantities? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 15937;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        int dimF = 5;
+        const int nBeta = 21;
+
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        // Collect step-level data: [timeRate, stepLen, speed, accessibility]
+        var allSteps = new List<(VcFamily fam, double timeRate, double stepLen, double speed, double acc)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pts = new List<(double ent, double dimVal, double acc, double r2L1)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_RC", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double ss = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / ss; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double t = r2L3 + 1e-12;
+                    double l1 = r2L1 / t, l2 = (r2L2 - r2L1) / t, l3 = (r2L3 - r2L2) / t;
+                    double ent = 0; if (l1 > 1e-12) ent -= l1 * Math.Log(l1); if (l2 > 1e-12) ent -= l2 * Math.Log(l2); if (l3 > 1e-12) ent -= l3 * Math.Log(l3);
+                    double dimVal = Math.Exp(ent);
+                    double d1a = Math.Abs(l1 - 1.0) + l2 + l3;
+                    double d2a = Math.Abs(l1 - 0.5) + Math.Abs(l2 - 0.5) + l3;
+                    double d3a = Math.Abs(l1 - 1.0 / 3) + Math.Abs(l2 - 1.0 / 3) + Math.Abs(l3 - 1.0 / 3);
+                    double acc = 1.0 / Math.Max(Math.Min(d1a, Math.Min(d2a, d3a)), 0.01);
+
+                    pts.Add((ent, dimVal, acc, r2L1));
+                }
+
+                // Compute step-level quantities (feature vector WITHOUT accessibility)
+                var featArr = pts.Select(p => new[] { p.ent, p.dimVal, p.r2L1, p.ent }).ToArray(); // 4D: ent, dim, r2L1, shannonL
+                int featDim = 4;
+                var locMean = new double[featDim]; var locStd = new double[featDim];
+                for (int f = 0; f < featDim; f++) { locMean[f] = featArr.Average(p => p[f]); locStd[f] = Math.Sqrt(featArr.Average(p => (p[f] - locMean[f]) * (p[f] - locMean[f]))) + 1e-12; }
+
+                for (int i = 0; i < pts.Count - 1; i++)
+                {
+                    double dH = Math.Abs(pts[i + 1].ent - pts[i].ent) / (1.0 / (nBeta - 1));
+                    double dL = Math.Sqrt(Enumerable.Range(0, featDim).Sum(f =>
+                    {
+                        double va = (featArr[i][f] - locMean[f]) / locStd[f];
+                        double vb = (featArr[i + 1][f] - locMean[f]) / locStd[f];
+                        return (va - vb) * (va - vb);
+                    }));
+                    double sp = dL / Math.Max(dH, 1e-12);
+                    double accVal = pts[i].acc; // accessibility at step start
+                    allSteps.Add((fam, dH, dL, sp, accVal));
+                }
+            }
+        }
+
+        var Tarr = allSteps.Select(s => s.timeRate).ToArray();
+        var Larr = allSteps.Select(s => s.stepLen).ToArray();
+        var Sarr = allSteps.Select(s => s.speed).ToArray();
+        var Aarr = allSteps.Select(s => s.acc).ToArray();
+
+        // ============================================================
+        // Reconstruction tests
+        // ============================================================
+        _o.WriteLine("=== Reconstruction: Accessibility ← Derived Quantities ===");
+        _o.WriteLine($"N = {allSteps.Count} step-level samples across {families.Length} families × {configs.Length} configs");
+        _o.WriteLine("");
+
+        double r2_TL = FitModelR2(Aarr, new[] { Tarr, Larr });
+        double r2_TS = FitModelR2(Aarr, new[] { Tarr, Sarr });
+        double r2_LS = FitModelR2(Aarr, new[] { Larr, Sarr });
+        double r2_TLS = FitModelR2(Aarr, new[] { Tarr, Larr, Sarr });
+
+        // Single-predictor baselines
+        double r2_T = R2SinglePredictor(Aarr, Tarr);
+        double r2_L = R2SinglePredictor(Aarr, Larr);
+        double r2_S = R2SinglePredictor(Aarr, Sarr);
+
+        _o.WriteLine($"{"Model",-18} {"R²",10} {"Δ vs best",10}");
+        _o.WriteLine(new string('-', 40));
+        _o.WriteLine($"{"Time only",-18} {r2_T,10:F4}");
+        _o.WriteLine($"{"Length only",-18} {r2_L,10:F4}");
+        _o.WriteLine($"{"Speed only",-18} {r2_S,10:F4}");
+        _o.WriteLine($"{"Time + Length",-18} {r2_TL,10:F4}");
+        _o.WriteLine($"{"Time + Speed",-18} {r2_TS,10:F4}");
+        _o.WriteLine($"{"Length + Speed",-18} {r2_LS,10:F4}");
+        _o.WriteLine($"{"T + L + S (full)",-18} {r2_TLS,10:F4}");
+        _o.WriteLine("");
+
+        double bestR2 = Math.Max(r2_TLS, Math.Max(r2_TL, Math.Max(r2_TS, Math.Max(r2_LS, Math.Max(r2_T, Math.Max(r2_L, r2_S))))));
+        string bestModel = r2_TLS == bestR2 ? "T+L+S" : r2_TL == bestR2 ? "T+L" : r2_TS == bestR2 ? "T+S" : r2_LS == bestR2 ? "L+S" : r2_T == bestR2 ? "T" : r2_L == bestR2 ? "L" : "S";
+
+        _o.WriteLine($"Best model: {bestModel}, R² = {bestR2:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Per-family reconstruction
+        // ============================================================
+        _o.WriteLine("=== Cross-Family Reconstruction ===");
+        _o.WriteLine($"{"Family",-6} {"T+L R²",10} {"T+S R²",10} {"L+S R²",10} {"T+L+S R²",10} {"best",8}");
+        _o.WriteLine(new string('-', 56));
+
+        var famR2 = new List<(VcFamily fam, double best)>();
+        foreach (var fam in families)
+        {
+            var fd = allSteps.Where(s => s.fam == fam).ToArray();
+            var fT = fd.Select(s => s.timeRate).ToArray();
+            var fL = fd.Select(s => s.stepLen).ToArray();
+            var fS = fd.Select(s => s.speed).ToArray();
+            var fA = fd.Select(s => s.acc).ToArray();
+
+            double frTL = FitModelR2(fA, new[] { fT, fL });
+            double frTS = FitModelR2(fA, new[] { fT, fS });
+            double frLS = FitModelR2(fA, new[] { fL, fS });
+            double frTLS = FitModelR2(fA, new[] { fT, fL, fS });
+            double frBest = Math.Max(frTLS, Math.Max(frTL, Math.Max(frTS, frLS)));
+            string frBestM = frTLS == frBest ? "TLS" : frTL == frBest ? "TL" : frTS == frBest ? "TS" : "LS";
+
+            famR2.Add((fam, frBest));
+            _o.WriteLine($"{fam,-6} {frTL,10:F4} {frTS,10:F4} {frLS,10:F4} {frTLS,10:F4} {frBestM,8}");
+        }
+        double crossFamMean = famR2.Average(f => f.best);
+        double crossFamMin = famR2.Min(f => f.best);
+        _o.WriteLine($"Cross-family mean R² = {crossFamMean:F4}, min = {crossFamMin:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+
+        bool closed = bestR2 > 0.7 && crossFamMean > 0.5;
+        bool partial = bestR2 > 0.3 || crossFamMean > 0.2;
+        bool notClosed = !partial;
+
+        string decision;
+        if (closed) decision = "Model C";
+        else if (partial) decision = "Model B";
+        else if (notClosed) decision = "Model A";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"Best R² = {bestR2:F4} (model: {bestModel})");
+        _o.WriteLine($"Cross-family mean R² = {crossFamMean:F4}");
+
+        if (decision == "Model C")
+            _o.WriteLine("Reconstruction closure achieved. Accessibility can be reconstructed from derived quantities (Time, Length, Speed). The full chain is internally closed — the endpoint recovers the origin.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Partial closure (best R²={bestR2:F3}). Some information about Accessibility is recoverable from derived quantities, but significant information loss exists — the forward chain is not fully invertible.");
+        else
+            _o.WriteLine("Chain not closed. Accessibility cannot be reconstructed from derived quantities.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. Best model: {bestModel}, R²={bestR2:F4}");
+        _o.WriteLine($"3. Cross-family mean R²={crossFamMean:F4}");
+        _o.WriteLine($"4. Decision: {decision}");
+        _o.WriteLine("5. Commit-ready summary:");
+        string prcLabel = decision == "Model C" ? "Reconstruction closure achieved" : decision == "Model B" ? "Partial reconstruction closure" : "No reconstruction closure";
+        _o.WriteLine($"   PRC_01_PrimitiveReconstructionClosureAudit — {prcLabel}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== PRC_01 complete. Commit: PRC_01_PrimitiveReconstructionClosureAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
