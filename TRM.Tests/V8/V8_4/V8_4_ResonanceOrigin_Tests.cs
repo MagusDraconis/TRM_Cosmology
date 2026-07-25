@@ -1023,6 +1023,122 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void FCA_01_FamilyCouplingAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== FCA_01: Family Coupling Audit ===");
+        _o.WriteLine("=== What property of F creates dynamic vs frozen L? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 34061;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+
+        // Collect per-step: dL/dβ, L, d²L/dβ² (curvature)
+        var stepData = new List<(VcFamily fam, double dL, double L, double curv)>();
+
+        foreach (var fam in families)
+        {
+            var pts = new List<double>(); // L values
+
+            for (int bi = 0; bi < nBeta; bi++)
+            {
+                double beta = bi / (double)(nBeta - 1);
+                var v = new VariantSpec($"{fam}_FC", fam, 0.7, 1.0, 1.0, beta, 0.0);
+                var allC = new List<double[]>(); var allL = new List<double>();
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                for (int ip = 0; ip < 3; ip++)
+                {
+                    double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                    int nD = distances.Length; double[] kA = new double[nD];
+                    for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, dpv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                    for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                    for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                    var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                    allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                }
+
+                if (allL.Count < 3) continue;
+                pts.Add(allL.Average());
+            }
+
+            double dBeta = 1.0 / (nBeta - 1);
+            for (int i = 1; i < pts.Count - 1; i++)
+            {
+                double dL = (pts[i + 1] - pts[i - 1]) / (2.0 * dBeta);
+                double curv = (pts[i + 1] - 2 * pts[i] + pts[i - 1]) / (dBeta * dBeta);
+                stepData.Add((fam, dL, pts[i], curv));
+            }
+        }
+
+        // ============================================================
+        _o.WriteLine("=== dL/dβ Analysis ===");
+        _o.WriteLine($"{"Family",-6} {"mean L",10} {"CV(L)",10} {"mean |dL|",10} {"CV(dL)",10} {"CV(curv)",10}");
+        _o.WriteLine(new string('-', 58));
+
+        foreach (var fam in families)
+        {
+            var fd = stepData.Where(s => s.fam == fam).ToArray();
+            double mL = fd.Average(s => s.L);
+            double cvL = StdOverMean(fd.Select(s => s.L).ToArray());
+            double mDL = fd.Average(s => Math.Abs(s.dL));
+            double cvDL = StdOverMean(fd.Select(s => Math.Abs(s.dL)).ToArray());
+            double cvC = StdOverMean(fd.Select(s => Math.Abs(s.curv)).ToArray());
+            _o.WriteLine($"{fam,-6} {mL,10:F4} {cvL,10:F4} {mDL,10:F6} {cvDL,10:F4} {cvC,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Group ===");
+        var gF = stepData.Where(s => s.fam == VcFamily.SAC || s.fam == VcFamily.RCS).ToArray();
+        var gL = stepData.Where(s => s.fam != VcFamily.SAC && s.fam != VcFamily.RCS).ToArray();
+
+        double cvL_F = StdOverMean(gF.Select(s => s.L).ToArray());
+        double cvL_L = StdOverMean(gL.Select(s => s.L).ToArray());
+        double cvDL_F = StdOverMean(gF.Select(s => Math.Abs(s.dL)).ToArray());
+        double cvDL_L = StdOverMean(gL.Select(s => Math.Abs(s.dL)).ToArray());
+
+        _o.WriteLine($"FROZEN: CV(L)={cvL_F:F4}, CV(|dL|)={cvDL_F:F4}");
+        _o.WriteLine($"LIVE:   CV(L)={cvL_L:F4}, CV(|dL|)={cvDL_L:F4}");
+
+        // Is dL constant or variable in live families?
+        bool liveHasConstantDL = cvDL_L < 0.3;
+        bool liveHasVariableDL = cvDL_L > 0.5;
+        _o.WriteLine($"Live |dL/dβ| is: {(liveHasConstantDL ? "CONSTANT (linear)" : liveHasVariableDL ? "VARIABLE (nonlinear)" : "MIXED")}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        string decision;
+        if (liveHasConstantDL) decision = "Model A";
+        else if (liveHasVariableDL) decision = "Model B";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model A") _o.WriteLine("Live families have CONSTANT dL/dβ — the operator is linear but active.");
+        else if (decision == "Model B") _o.WriteLine("Live families have VARIABLE dL/dβ — feedback or nonlinearity drives dynamics.");
+        else _o.WriteLine("Hybrid/mixed mechanism.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== FCA_01 complete. Commit: FCA_01_FamilyCouplingAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
