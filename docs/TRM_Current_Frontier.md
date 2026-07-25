@@ -32,8 +32,11 @@ nor Length dominates the causal direction. Accessibility does NOT
 directly predict Speed (r≈0). Speed is the balanced outcome of two
 co-evolving components.
 
-Open question: Is the compensation exact enough to be a
-conservation-like relation?
+PRC_01 complete: The chain is internally closed. Accessibility can be
+perfectly reconstructed from derived quantities (Time, Length, Speed).
+This reflects the shared algebraic origin — all quantities derive from
+the same PCA eigenvalues — creating a mathematically consistent closed
+structure.
 
 ---
 
