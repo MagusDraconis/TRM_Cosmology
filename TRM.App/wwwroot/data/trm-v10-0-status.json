@@ -2,7 +2,7 @@
   "version": "V10.0",
   "branch": "v10.0-clockwork-physics-validation",
   "status": "active",
-  "total_audits": 1,
+  "total_audits": 2,
   "key_result": "6/6 clockwork quantities map to physical concepts. Strong physical analogy (Model B). Ready for quantitative prediction testing.",
   "test_count": "~3393",
   "failed": 0,
