@@ -2,9 +2,9 @@
   "version": "V9.0",
   "branch": "v9.0-clockwork-physics",
   "status": "active",
-  "total_audits": 0,
-  "key_result": "Clockwork Physics: synthesizing the V7.4→V8.4 chain into emergent physical structure.",
+  "total_audits": 1,
+  "key_result": "ON families uniquely support emergent physics. OFF families have geometry but frozen observables (CPF_01,C).",
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25"
+  "last_updated": "2026-07-25","audits_completed": ["CPF_01"],"models": {"CPF_01": "C"},
 }
