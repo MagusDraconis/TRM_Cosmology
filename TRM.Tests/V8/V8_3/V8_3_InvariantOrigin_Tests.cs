@@ -494,6 +494,233 @@ public class V8_3_InvariantOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void PEO_01_PrimitiveEigenvalueOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PEO_01: Primitive Eigenvalue Origin Audit ===");
+        _o.WriteLine("=== Are λ1,λ2,λ3 fundamental or derived? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 17107;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var eigenData = new List<(VcFamily fam, double lam1, double lam2, double lam3,
+            double l1, double l2, double l3, double acc, double ent, double beta)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_EO", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double ss = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / ss; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var sortedEE = ee.OrderByDescending(e => e).ToArray();
+
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double occ1 = r2L1 / tVal, occ2 = (r2L2 - r2L1) / tVal, occ3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (occ1 > 1e-12) ent -= occ1 * Math.Log(occ1); if (occ2 > 1e-12) ent -= occ2 * Math.Log(occ2); if (occ3 > 1e-12) ent -= occ3 * Math.Log(occ3);
+                    double d1a = Math.Abs(occ1 - 1.0) + occ2 + occ3;
+                    double d2a = Math.Abs(occ1 - 0.5) + Math.Abs(occ2 - 0.5) + occ3;
+                    double d3a = Math.Abs(occ1 - 1.0 / 3) + Math.Abs(occ2 - 1.0 / 3) + Math.Abs(occ3 - 1.0 / 3);
+                    double acv = 1.0 / Math.Max(Math.Min(d1a, Math.Min(d2a, d3a)), 0.01);
+
+                    eigenData.Add((fam, sortedEE[0], sortedEE[1], sortedEE[2], occ1, occ2, occ3, acv, ent, beta));
+                }
+            }
+        }
+
+        var Lam1 = eigenData.Select(d => d.lam1).ToArray();
+        var Lam2 = eigenData.Select(d => d.lam2).ToArray();
+        var Lam3 = eigenData.Select(d => d.lam3).ToArray();
+        var Occ1 = eigenData.Select(d => d.l1).ToArray();
+        var Occ2 = eigenData.Select(d => d.l2).ToArray();
+        var Occ3 = eigenData.Select(d => d.l3).ToArray();
+        var Acv = eigenData.Select(d => d.acc).ToArray();
+        var Ent = eigenData.Select(d => d.ent).ToArray();
+
+        // ============================================================
+        // Part A: Directional causality
+        // ============================================================
+        _o.WriteLine("=== Part A: Directional Causality ===");
+        _o.WriteLine($"N = {eigenData.Count} samples");
+
+        double r2_accFromL = FitModelR2(Acv, new[] { Lam1, Lam2, Lam3 });
+        double r2_L1fromAcc = R2SinglePredictor(Lam1, Acv);
+        double r2_L2fromAcc = R2SinglePredictor(Lam2, Acv);
+        double r2_L3fromAcc = R2SinglePredictor(Lam3, Acv);
+
+        _o.WriteLine($"Accessibility ← λ1+λ2+λ3: R² = {r2_accFromL:F4}");
+        _o.WriteLine($"λ1 ← Accessibility:        R² = {r2_L1fromAcc:F4}");
+        _o.WriteLine($"λ2 ← Accessibility:        R² = {r2_L2fromAcc:F4}");
+        _o.WriteLine($"λ3 ← Accessibility:        R² = {r2_L3fromAcc:F4}");
+        _o.WriteLine("");
+
+        string direction;
+        if (r2_accFromL > 0.7 && Math.Max(r2_L1fromAcc, Math.Max(r2_L2fromAcc, r2_L3fromAcc)) < 0.3)
+            direction = "λ → Accessibility (eigenvalues primary)";
+        else if (Math.Max(r2_L1fromAcc, Math.Max(r2_L2fromAcc, r2_L3fromAcc)) > 0.5 && r2_accFromL < 0.3)
+            direction = "Accessibility → λ (accessibility primary)";
+        else if (r2_accFromL > 0.5 && Math.Max(r2_L1fromAcc, Math.Max(r2_L2fromAcc, r2_L3fromAcc)) > 0.5)
+            direction = "Bidirectional (shared origin)";
+        else
+            direction = "Weak coupling";
+        _o.WriteLine($"Direction: {direction}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part B: λ ← Occupation pattern
+        // ============================================================
+        _o.WriteLine("=== Part B: λ ← Attractor Occupation ===");
+        double r2_L1fromOcc = FitModelR2(Lam1, new[] { Occ1, Occ2, Occ3 });
+        double r2_L2fromOcc = FitModelR2(Lam2, new[] { Occ1, Occ2, Occ3 });
+        double r2_L3fromOcc = FitModelR2(Lam3, new[] { Occ1, Occ2, Occ3 });
+        _o.WriteLine($"λ1 ← occupation: R² = {r2_L1fromOcc:F4}");
+        _o.WriteLine($"λ2 ← occupation: R² = {r2_L2fromOcc:F4}");
+        _o.WriteLine($"λ3 ← occupation: R² = {r2_L3fromOcc:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part C: Reconstruction without λ
+        // ============================================================
+        _o.WriteLine("=== Part C: Reconstruction Without λ ===");
+        double r2_entFromOcc = FitModelR2(Ent, new[] { Occ1, Occ2, Occ3 });
+        double r2_accFromOcc = FitModelR2(Acv, new[] { Occ1, Occ2, Occ3 });
+        _o.WriteLine($"Entropy ← occupation (no λ):    R² = {r2_entFromOcc:F4}");
+        _o.WriteLine($"Accessibility ← occupation:     R² = {r2_accFromOcc:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part D: Early vs Late stability
+        // ============================================================
+        _o.WriteLine("=== Part D: Early vs Late Stability ===");
+        var early = eigenData.Where(d => d.beta < 0.33).ToArray();
+        var late = eigenData.Where(d => d.beta > 0.66).ToArray();
+
+        double cvL1_E = StdOverMean(early.Select(d => d.lam1).ToArray());
+        double cvL1_L = StdOverMean(late.Select(d => d.lam1).ToArray());
+        double cvEnt_E = StdOverMean(early.Select(d => d.ent).ToArray());
+        double cvEnt_L = StdOverMean(late.Select(d => d.ent).ToArray());
+
+        _o.WriteLine($"λ1:      CV(early)={cvL1_E:F4}, CV(late)={cvL1_L:F4}");
+        _o.WriteLine($"Entropy: CV(early)={cvEnt_E:F4}, CV(late)={cvEnt_L:F4}");
+
+        string stabilizesFirst;
+        if (cvL1_E < cvEnt_E && cvL1_L < cvEnt_L) stabilizesFirst = "λ1";
+        else if (cvEnt_E < cvL1_E && cvEnt_L < cvL1_L) stabilizesFirst = "Entropy";
+        else stabilizesFirst = "both/neither";
+        _o.WriteLine($"More stable: {stabilizesFirst}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part E: Cross-family
+        // ============================================================
+        _o.WriteLine("=== Part E: Cross-Family λ Origin ===");
+        _o.WriteLine($"{"Family",-6} {"acc←λ R²",10} {"λ←occ R²",10} {"λ1←acc R²",10}");
+        _o.WriteLine(new string('-', 38));
+        foreach (var fam in families)
+        {
+            var fd = eigenData.Where(d => d.fam == fam).ToArray();
+            var fL1 = fd.Select(d => d.lam1).ToArray(); var fL2 = fd.Select(d => d.lam2).ToArray(); var fL3 = fd.Select(d => d.lam3).ToArray();
+            var fO1 = fd.Select(d => d.l1).ToArray(); var fO2 = fd.Select(d => d.l2).ToArray(); var fO3 = fd.Select(d => d.l3).ToArray();
+            var fAc = fd.Select(d => d.acc).ToArray();
+
+            double frAL = FitModelR2(fAc, new[] { fL1, fL2, fL3 });
+            double frLO = FitModelR2(fL1, new[] { fO1, fO2, fO3 });
+            double frLA = R2SinglePredictor(fL1, fAc);
+
+            _o.WriteLine($"{fam,-6} {frAL,10:F4} {frLO,10:F4} {frLA,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+
+        bool lambdaPrimitive = r2_accFromL > 0.7 && r2_L1fromOcc < 0.3 && r2_L1fromAcc < 0.3;
+        bool lambdaFromOccupation = r2_L1fromOcc > 0.5;
+        bool lambdaFromAccessibility = r2_L1fromAcc > 0.5 && r2_accFromL < 0.3;
+
+        string decision;
+        if (lambdaPrimitive) decision = "Model A";
+        else if (lambdaFromOccupation) decision = "Model B";
+        else if (lambdaFromAccessibility) decision = "Model C";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"acc←λ R²={r2_accFromL:F4}, λ←occ R²={r2_L1fromOcc:F4}, λ←acc R²={r2_L1fromAcc:F4}");
+        _o.WriteLine($"Direction: {direction}");
+
+        if (decision == "Model A")
+            _o.WriteLine("λ1,λ2,λ3 are primitive — generating accessibility, occupation, and entropy.");
+        else if (decision == "Model B")
+            _o.WriteLine("λ values emerge from attractor occupation patterns.");
+        else if (decision == "Model C")
+            _o.WriteLine("λ values emerge from accessibility geometry.");
+        else
+            _o.WriteLine("Unresolved eigenvalue origin.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. Direction: {direction}");
+        _o.WriteLine($"3. acc←λ R²={r2_accFromL:F4}, λ←occ R²={r2_L1fromOcc:F4}, λ←acc R²={r2_L1fromAcc:F4}");
+        _o.WriteLine($"4. Early stability: {stabilizesFirst}");
+        _o.WriteLine($"5. Decision: {decision}");
+        _o.WriteLine("6. Commit-ready summary:");
+        string peoLabel = decision == "Model A" ? "λ primitive" : decision == "Model B" ? "λ from occupation" : decision == "Model C" ? "λ from accessibility" : "λ unresolved";
+        _o.WriteLine($"   PEO_01_PrimitiveEigenvalueOriginAudit — {peoLabel}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== PEO_01 complete. Commit: PEO_01_PrimitiveEigenvalueOriginAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
