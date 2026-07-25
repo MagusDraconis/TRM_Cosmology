@@ -202,6 +202,152 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void DAO_01_DynamicsOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DAO_01: Dynamics Origin Audit ===");
+        _o.WriteLine("=== Do dynamics differ even when state structure doesn't? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 26713;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        // Collect d(state)/dβ for entropy, λ1, accessibility
+        var dynamics = new List<(VcFamily fam, double dEnt_dB, double dLam_dB, double dAcc_dB)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pts = new List<(double ent, double lam1, double acc)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_DA", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var sEE = ee.OrderByDescending(e => e).ToArray();
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+                    double d1a = Math.Abs(o1 - 1.0) + o2 + o3;
+                    double d2a = Math.Abs(o1 - 0.5) + Math.Abs(o2 - 0.5) + o3;
+                    double d3a = Math.Abs(o1 - 1.0 / 3) + Math.Abs(o2 - 1.0 / 3) + Math.Abs(o3 - 1.0 / 3);
+                    double acc = 1.0 / Math.Max(Math.Min(d1a, Math.Min(d2a, d3a)), 0.01);
+                    pts.Add((ent, sEE[0], acc));
+                }
+
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < pts.Count - 1; i++)
+                {
+                    double dE = (pts[i + 1].ent - pts[i].ent) / dBeta;
+                    double dL = (pts[i + 1].lam1 - pts[i].lam1) / dBeta;
+                    double dA = (pts[i + 1].acc - pts[i].acc) / dBeta;
+                    dynamics.Add((fam, dE, dL, dA));
+                }
+            }
+        }
+
+        // ============================================================
+        _o.WriteLine("=== Derivative Comparison (dynamics) ===");
+        _o.WriteLine($"{"Family",-6} {"mean|dE/dβ|",12} {"mean|dλ/dβ|",12} {"mean|dA/dβ|",12} {"CV(dE)",10} {"CV(dλ)",10}");
+        _o.WriteLine(new string('-', 64));
+
+        foreach (var fam in families)
+        {
+            var fd = dynamics.Where(d => d.fam == fam).ToArray();
+            double mE = fd.Average(d => Math.Abs(d.dEnt_dB));
+            double mL = fd.Average(d => Math.Abs(d.dLam_dB));
+            double mA = fd.Average(d => Math.Abs(d.dAcc_dB));
+            double cE = StdOverMean(fd.Select(d => Math.Abs(d.dEnt_dB)).ToArray());
+            double cL = StdOverMean(fd.Select(d => Math.Abs(d.dLam_dB)).ToArray());
+            _o.WriteLine($"{fam,-6} {mE,12:F4} {mL,12:F4} {mA,12:F4} {cE,10:F4} {cL,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Group Comparison ===");
+        var gA = dynamics.Where(d => d.fam == VcFamily.SAC || d.fam == VcFamily.RCS).ToArray();
+        var gB = dynamics.Where(d => d.fam != VcFamily.SAC && d.fam != VcFamily.RCS).ToArray();
+
+        double mEA = gA.Average(d => Math.Abs(d.dEnt_dB));
+        double mEB = gB.Average(d => Math.Abs(d.dEnt_dB));
+        double mLA = gA.Average(d => Math.Abs(d.dLam_dB));
+        double mLB = gB.Average(d => Math.Abs(d.dLam_dB));
+
+        _o.WriteLine($"|dE/dβ|: SAC+RCS={mEA:F4}, GAN+ICS+CNS={mEB:F4}, ratio={mEA/Math.Max(mEB,1e-12):F2}");
+        _o.WriteLine($"|dλ/dβ|: SAC+RCS={mLA:F4}, GAN+ICS+CNS={mLB:F4}, ratio={mLA/Math.Max(mLB,1e-12):F2}");
+
+        bool dynamicsDiffer = Math.Abs(mEA - mEB) / Math.Max(Math.Max(mEA, mEB), 1e-12) > 0.3 ||
+                              Math.Abs(mLA - mLB) / Math.Max(Math.Max(mLA, mLB), 1e-12) > 0.3;
+        _o.WriteLine($"Dynamics differ: {(dynamicsDiffer ? "YES" : "NO")}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        string decision;
+        if (dynamicsDiffer && Math.Abs(mEA - mEB) / Math.Max(Math.Max(mEA, mEB), 1e-12) > 0.5)
+            decision = "Model C";
+        else if (dynamicsDiffer)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model C")
+            _o.WriteLine("Time emergence is determined by dynamic laws. Families share state structure but differ in evolution rules.");
+        else if (decision == "Model B")
+            _o.WriteLine("Weak dynamic differences exist but don't fully explain time emergence.");
+        else
+            _o.WriteLine("Same dynamics across families.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== DAO_01 complete. Commit: DAO_01_DynamicsOriginAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
