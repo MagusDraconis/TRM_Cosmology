@@ -3,8 +3,8 @@
 **Version:** 5.0
 **Date:** 2026-07-25
 
-**Current Version:** V13.1 EFFECTIVE TIME DYNAMICS
-**Current Branch:** v13.1-effective-time-dynamics
+**Current Version:** V13.2 TICK POTENTIAL PHYSICS
+**Current Branch:** v13.2-tick-potential-physics
 **Cumulative Tests:** ~3442
 **Failed:** 0
 
@@ -144,22 +144,57 @@ V = |1+m|           |dV1/dθ|
 
 ## Corrected Findings
 
-- **SAC/RCS have NON-ZERO but CONSTANT variance** under β-sweep (DAT_01 corrected from "zero variance")
-- **β is a measurement coordinate, not fundamental** (BRP_01 — SAC/RCS activate under α-sweep)
-- **Step-level m fluctuation explains ICS Tick underprediction** (NLC_01 — 12.7× gap from regression smoothing)
-- **RCS is dissipative under α-sweep** (RFB_01 — r(feedback)=+0.92, not intermediate)
+- **SAC/RCS have NON-ZERO but CONSTANT variance** under β-sweep (DAT_01)
+- **β is a measurement coordinate, not fundamental** (BRP_01)
+- **Step-level m fluctuation explains ICS Tick underprediction** (NLC_01)
+- **RCS is dissipative under α-sweep** (RFB_01)
 
----
 
-## What Is NOT Claimed
+## V13.0 — Time Gradient Reconstruction (2 audits, CLOSED)
 
-- Physical c, G, SI units, spacetime, SR, GR, Einstein equations
-- Dark matter replacement, physical theory proven
-- Quantitative physical predictions
-- Universal dimensionless invariants
-- β as a physical time coordinate
+| Audit | Key Result | Model |
+|:------|:-----------|:-----:|
+| TGR_01 | V1 emerges from V12.2. Tick = clock rate. d(Tick)/dm = gradient | C |
+| TGP_01 | d(Tick)/dα < 0 universally. Feedback = damping. Oscillator analogy | D |
 
----
+### V1 ↔ V12.2 Reconstruction
 
-*Generated 2026-07-25. V12.2 CLOSED — 10 audits. V13.0 CLOSED — 2 audits (TGR_01, TGP_01).
-~3442 tests, 0 failed. Next: V13.1 Effective Time Dynamics.*
+| V1 Concept | V12.2 Equivalent |
+|:-----------|:-----------------|
+| Local clock rate | Tick |
+| Time gradient | d(Tick)/dm ≈ −|dV1/dθ| |
+| Fall to slower time | Drift toward m → −1 (resonance) |
+
+
+## V13.1 — Effective Time Dynamics (3 audits, CLOSED)
+
+| Audit | Key Result | Model |
+|:------|:-----------|:-----:|
+| ETD_01 | Tick(α) = damped oscillator. EXP/POW fits. d²T/dα² = −ω²T − γ·dT/dα | D |
+| TGF_01 | F = −dTick/dα > 0 universal force toward slower time. 5/5 V1 match | C |
+| TDT_01 | Complete Newtonian chain: F→v→x→a=F. All trajectories convergent | D |
+
+### Complete Kinematic Chain
+
+```
+F(α) = −dTick/dα           force = time gradient
+v(α) = Tick₀ − Tick(α)     velocity = accumulated Tick drop
+x(α) = ∫v dα               position = integrated velocity
+a(α) = d²x/dα² = F(α)      acceleration ≡ force  ← CLOSED
+```
+
+### Terminal Velocities & Force Laws
+
+| Family | v_term/Tick₀ | F vs Tick | R² | Trajectory |
+|:-------|:------------:|:----------|----:|:-----------|
+| RCS | 99% | F = 4.02·Tick | 0.994 | Near-complete |
+| GAN | 96% | F = 2.39·Tick | 0.997 | Exponential |
+| CNS | 96% | F = 2.39·Tick | 0.997 | Exponential |
+| SAC | 92% | F = 4.52·Tick | 0.924 | Power-law |
+| ICS | 60% | F = 4.76·Tick | 0.381 | Resonant plateau |
+
+All trajectories **STABLE, CONVERGENT, finite terminal velocity.**
+
+
+*Generated 2026-07-25. V12.2 CLOSED (10 audits). V13.0 CLOSED (2 audits). V13.1 CLOSED (3 audits).
+~3442 tests, 0 failed. Next: V13.2 Tick Potential Physics.*

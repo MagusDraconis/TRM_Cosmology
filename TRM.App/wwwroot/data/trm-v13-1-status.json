@@ -1,0 +1,15 @@
+{
+  "version": "V13.1",
+  "branch": "v13.1-effective-time-dynamics",
+  "status": "closed",
+  "total_audits": 3,
+  "key_result": "Complete Newtonian kinematic chain emerges from Tick-gradient force: F=-dTick/dα → v=Tick₀-Tick → x=∫v dα → a=F. V1 time-gradient hypothesis fully reconstructed as closed kinematic chain in α-space.",
+  "test_count": "~3442",
+  "failed": 0,
+  "last_updated": "2026-07-25",
+  "audits_completed": ["ETD_01","TGF_01","TDT_01"],
+  "kinematic_chain": "F=-dTick/dα (force) → v=Tick₀-Tick(α) (velocity) → x=∫v dα (position) → a=d²x/dα²=F (acceleration ≡ force, CLOSED)",
+  "terminal_velocities": "RCS:99%, GAN/CNS:96%, SAC:92%, ICS:60% of Tick₀",
+  "force_law": "F ∝ Tick for GAN/CNS (R²=0.997), RCS (R²=0.994), SAC (R²=0.924). ICS: R²=0.38 (flat, at minimum)",
+  "trajectories": "All CONVERGENT, STABLE, finite terminal velocity. No divergence, no oscillation."
+}

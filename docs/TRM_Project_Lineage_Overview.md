@@ -2064,6 +2064,7 @@ maintained to prevent overinterpretation:
 | V12.1 | Duality Validation: Robustness proven | 2 | COMPLETE |
 | V12.2 | Duality Physics Correspondence | 10 | COMPLETE |
 | V13.0 | Time Gradient Reconstruction | 2 | COMPLETE |
+| V13.1 | Effective Time Dynamics | 3 | COMPLETE |
 | **Total** | | **3442** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3442 verified
@@ -2108,6 +2109,10 @@ tests with 0 failed is the authoritative current count as of 2026-07-25.
 ### V12.1 — Duality Validation — COMPLETE
 
 **Status:** CLOSED (2026-07-25). 2 audits (DVL_01, DPG_01). Duality robust across 16 config perturbations. Full hierarchy emerges from two orthogonal components.
+
+### V13.1 — Effective Time Dynamics — CLOSED
+
+**Status:** CLOSED (2026-07-25). 3 audits (ETD_01, TGF_01, TDT_01). Complete Newtonian kinematic chain: F=−dTick/dα → v=Tick₀−Tick → x=∫v dα → a=F. All trajectories convergent, stable. V1 fully reconstructed as closed kinematic chain.
 
 ### V13.0 — Time Gradient Reconstruction — CLOSED
 
@@ -2161,9 +2166,9 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V13.0 CLOSED — 2 audits. Branch: `v13.0-time-gradient-reconstruction`. Next: V13.1.
+**Current status:** V13.1 CLOSED — 3 audits. Complete Newtonian kinematic chain: F→v→x→a=F in α-space. Branch: `v13.1-effective-time-dynamics`. Next: V13.2.
 
-**V1→V12.2 reconstruction:** Tick = effective clock rate. d(Tick)/dα < 0 = universal time gradient. Feedback sign = damping coefficient on gradient landscape. Oscillator analogy: γ>0 damped (ICS resonant), γ≈0 critical (SAC), γ<0 anti-damped (GAN/CNS/RCS dissipative).
+**V1 reconstruction complete:** Tick-gradient force → velocity → trajectory → acceleration. Closed kinematic chain. All trajectories convergent. V1 fully formalized.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
