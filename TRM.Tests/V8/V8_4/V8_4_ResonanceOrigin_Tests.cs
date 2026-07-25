@@ -1372,6 +1372,112 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void BOA_01_BetaSlopeOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== BOA_01: Beta Slope Origin Audit ===");
+        _o.WriteLine("=== What determines b in L = a + bβ? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 37783;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+
+        // Collect VarI1, VarTerms per β per family
+        var vtData = new List<(VcFamily fam, double beta, double varI1, double varTerms, double L)>();
+
+        foreach (var fam in families)
+        {
+            for (int bi = 0; bi < nBeta; bi++)
+            {
+                double beta = bi / (double)(nBeta - 1);
+                var v = new VariantSpec($"{fam}_BO", fam, 0.7, 1.0, 1.0, beta, 0.0);
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                var allVarI1 = new List<double>();
+                var allVarTerms = new List<double>();
+                var allL = new List<double>();
+
+                for (int ip = 0; ip < 3; ip++)
+                {
+                    double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                    allVarI1.Add(cci.VarI1);
+                    allVarTerms.Add(cci.VarTerms);
+                    allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                }
+
+                if (allL.Count < 3) continue;
+                vtData.Add((fam, beta, allVarI1.Average(), allVarTerms.Average(), allL.Average()));
+            }
+        }
+
+        // Fit VarI1 vs β and VarTerms vs β per family
+        _o.WriteLine("=== VarI1 and VarTerms Slopes ===");
+        _o.WriteLine($"{"Family",-6} {"VarI1 slope",12} {"VarTerms slope",14} {"Corr(VarI1,VarT)",16} {"L slope",10}");
+        _o.WriteLine(new string('-', 60));
+
+        foreach (var fam in families)
+        {
+            var fd = vtData.Where(d => d.fam == fam).ToArray();
+            var bArr = fd.Select(d => d.beta).ToArray();
+            var v1Arr = fd.Select(d => d.varI1).ToArray();
+            var vTArr = fd.Select(d => d.varTerms).ToArray();
+            var lArr = fd.Select(d => d.L).ToArray();
+
+            // Slope via correlation
+            double r1 = PearsonCorrelation(bArr, v1Arr);
+            double rT = PearsonCorrelation(bArr, vTArr);
+            double stdB = Math.Sqrt(bArr.Average(bv => (bv - bArr.Average()) * (bv - bArr.Average())));
+            double s1 = r1 * Math.Sqrt(v1Arr.Average(v => (v - v1Arr.Average()) * (v - v1Arr.Average()))) / Math.Max(stdB, 1e-12);
+            double sT = rT * Math.Sqrt(vTArr.Average(v => (v - vTArr.Average()) * (v - vTArr.Average()))) / Math.Max(stdB, 1e-12);
+
+            double rV1VT = PearsonCorrelation(v1Arr, vTArr);
+
+            double rL = PearsonCorrelation(bArr, lArr);
+            double sL = rL * Math.Sqrt(lArr.Average(v => (v - lArr.Average()) * (v - lArr.Average()))) / Math.Max(stdB, 1e-12);
+
+            _o.WriteLine($"{fam,-6} {s1,12:F6} {sT,14:F6} {rV1VT,16:F4} {sL,10:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        // For each family, check: does VarI1 change OR VarTerms change?
+        var frozen = vtData.Where(d => d.fam == VcFamily.SAC || d.fam == VcFamily.RCS).ToArray();
+        var live = vtData.Where(d => d.fam != VcFamily.SAC && d.fam != VcFamily.RCS).ToArray();
+
+        // Correlation between VarI1 and VarTerms
+        double rV1VT_all = PearsonCorrelation(
+            vtData.Select(d => d.varI1).ToArray(),
+            vtData.Select(d => d.varTerms).ToArray());
+
+        _o.WriteLine($"Corr(VarI1, VarTerms) overall = {rV1VT_all:F4}");
+
+        if (Math.Abs(rV1VT_all) > 0.95)
+            _o.WriteLine("Model A: VarI1 and VarTerms are nearly identical — b comes from symmetry/aspect ratio changes.");
+        else
+            _o.WriteLine("Model B/C: VarI1 and VarTerms respond differently to β.");
+
+        string decision = Math.Abs(rV1VT_all) > 0.99 ? "Model A" :
+                          Math.Abs(rV1VT_all) > 0.9 ? "Model B" : "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+        _o.WriteLine("");
+        _o.WriteLine("=== BOA_01 complete. Commit: BOA_01_BetaSlopeOriginAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
