@@ -89,4 +89,113 @@ public class V10_0_PhysicsValidation_Tests
         _o.WriteLine("=== CPV_00 complete. Commit: CPV_00_ClockworkPhysicsValidationFramework ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void CDN_01_ClockworkDimensionlessNumberAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CDN_01: Clockwork Dimensionless Number Audit ===");
+        _o.WriteLine("=== Do universal invariants exist? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 74173;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var data = new List<(VcFamily fam, double X, double tick, double dH, double L)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_DN", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double tick = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    double dH = tick;
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    double k = 0.08;
+                    double X = deq - k * Ls[i];
+                    data.Add((fam, X, tick, dH, Ls[i]));
+                }
+            }
+        }
+
+        // Candidate invariants
+        var candidates = new (string name, Func<(double X, double tick, double dH, double L), double> f)[]
+        {
+            ("Tick/X", d => d.tick / Math.Max(Math.Abs(d.X), 1e-12)),
+            ("X/L", d => d.X / Math.Max(d.L, 1e-12)),
+            ("dH/Tick", d => d.dH / Math.Max(d.tick, 1e-12)),
+            ("dH/X", d => d.dH / Math.Max(Math.Abs(d.X), 1e-12)),
+            ("(X*Tick)/dH", d => (d.X * d.tick) / Math.Max(d.dH, 1e-12)),
+            ("X/Tick", d => d.X / Math.Max(d.tick, 1e-12)),
+        };
+
+        var tuples = data.Select(d => (d.X, d.tick, d.dH, d.L)).ToArray();
+
+        _o.WriteLine("=== Invariant Candidates (CV ranked) ===");
+        _o.WriteLine($"{"Candidate",-16} {"Mean",12} {"CV(all)",10} {"CV(GAN)",10} {"CV(ICS)",10} {"CV(CNS)",10}");
+        _o.WriteLine(new string('-', 70));
+
+        foreach (var c in candidates.OrderBy(c => StdOverMean(tuples.Select(c.f).ToArray())))
+        {
+            var vals = tuples.Select(c.f).ToArray();
+            var gVals = data.Where(d => d.fam == VcFamily.GAN).Select(d => c.f((d.X, d.tick, d.dH, d.L))).ToArray();
+            var iVals = data.Where(d => d.fam == VcFamily.ICS).Select(d => c.f((d.X, d.tick, d.dH, d.L))).ToArray();
+            var cVals = data.Where(d => d.fam == VcFamily.CNS).Select(d => c.f((d.X, d.tick, d.dH, d.L))).ToArray();
+            _o.WriteLine($"{c.name,-16} {vals.Average(),12:F4} {StdOverMean(vals),10:F4} {StdOverMean(gVals),10:F4} {StdOverMean(iVals),10:F4} {StdOverMean(cVals),10:F4}");
+        }
+        _o.WriteLine("");
+
+        double bestCV = StdOverMean(tuples.Select(candidates.OrderBy(c => StdOverMean(tuples.Select(c.f).ToArray())).First().f).ToArray());
+
+        string decision = bestCV < 0.5 ? "Model C" : bestCV < 1.0 ? "Model B" : "Model A";
+        _o.WriteLine($"Decision: {decision} (best CV={bestCV:F4})");
+
+        if (decision == "Model C")
+            _o.WriteLine("Universal Clockwork Invariant exists with CV<0.50.");
+        else if (decision == "Model B")
+            _o.WriteLine("Family-specific invariants exist but no universal invariant.");
+        else
+            _o.WriteLine("No stable invariant numbers found.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== CDN_01 complete. Commit: CDN_01_ClockworkDimensionlessNumberAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
+    private static double StdOverMean(double[] x)
+    {
+        double m = x.Average() + 1e-12;
+        return Math.Sqrt(x.Average(v => (v - m) * (v - m))) / m;
+    }
 }
