@@ -1817,8 +1817,6 @@ public class V9_0_ClockworkPhysics_Tests
         var decileBounds = new double[nDeciles + 1];
         for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
 
-        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
-        int nContrasts = 6;
         var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
         var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
         const int nBeta = 31;
@@ -1936,8 +1934,6 @@ public class V9_0_ClockworkPhysics_Tests
         var decileBounds = new double[nDeciles + 1];
         for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
 
-        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
-        int nContrasts = 6;
         var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
         var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
         const int nBeta = 31;
@@ -2034,8 +2030,6 @@ public class V9_0_ClockworkPhysics_Tests
         var decileBounds = new double[nDeciles + 1];
         for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
 
-        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
-        int nContrasts = 6;
         var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
         var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
         const int nBeta = 21;
@@ -2128,8 +2122,6 @@ public class V9_0_ClockworkPhysics_Tests
         var decileBounds = new double[nDeciles + 1];
         for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
 
-        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
-        int nContrasts = 6;
         var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
         var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
         const int nBeta = 31;
