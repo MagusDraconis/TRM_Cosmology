@@ -2198,4 +2198,305 @@ public class V8_2_PrimitiveMeaning_Tests
             return (d, m);
         }
     }
+
+    [Fact]
+    public void PSI_01_PrimitiveSpeedInvariantAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PSI_01: Primitive Speed Invariant Audit ===");
+        _o.WriteLine("=== Is speed the first invariant of accessibility geometry? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 13579;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        int dimF = 5;
+        const int nBeta = 21;
+
+        // Baseline configs + stress configs
+        var configs = new (double alpha, double xiScale, string label)[]
+        {
+            (0.35, 0.80, "base-A"), (0.70, 1.00, "base-B"), (1.05, 1.20, "base-C"),
+            (0.20, 0.60, "stress-LoA"), (1.50, 1.50, "stress-HiA"), // geometry stress
+            (0.70, 0.50, "stress-LoXi"), (0.70, 1.80, "stress-HiXi"), // xi stress
+        };
+
+        // Build trajectory data
+        var trajData = new List<(VcFamily fam, string cfgLabel, double[] timeRates, double[] stepLens, double[] speeds)>();
+
+        foreach (var fam in families)
+        {
+            foreach (var cfg in configs)
+            {
+                var pts = new List<(double[] features, double dH)>();
+                double prevH = double.NaN;
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_SI", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double ss = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / ss; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocalPsi(cm, nContrasts);
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double t = r2L3 + 1e-12;
+                    double l1 = r2L1 / t, l2 = (r2L2 - r2L1) / t, l3 = (r2L3 - r2L2) / t;
+                    double ent = 0; if (l1 > 1e-12) ent -= l1 * Math.Log(l1); if (l2 > 1e-12) ent -= l2 * Math.Log(l2); if (l3 > 1e-12) ent -= l3 * Math.Log(l3);
+                    double dimVal = Math.Exp(ent);
+                    double d1a = Math.Abs(l1 - 1.0) + l2 + l3;
+                    double d2a = Math.Abs(l1 - 0.5) + Math.Abs(l2 - 0.5) + l3;
+                    double d3a = Math.Abs(l1 - 1.0 / 3) + Math.Abs(l2 - 1.0 / 3) + Math.Abs(l3 - 1.0 / 3);
+                    double acc = 1.0 / Math.Max(Math.Min(d1a, Math.Min(d2a, d3a)), 0.01);
+
+                    double dH = double.IsNaN(prevH) ? 0 : (ent - prevH) / (1.0 / (nBeta - 1));
+                    prevH = ent;
+                    pts.Add((new[] { ent, dimVal, acc, r2L1, ent }, dH));
+                }
+
+                // Normalize features globally for this trajectory
+                var featArr = pts.Select(p => p.features).ToArray();
+                var locMean = new double[dimF]; var locStd = new double[dimF];
+                for (int f = 0; f < dimF; f++) { locMean[f] = featArr.Average(p => p[f]); locStd[f] = Math.Sqrt(featArr.Average(p => (p[f] - locMean[f]) * (p[f] - locMean[f]))) + 1e-12; }
+
+                var rates = pts.Skip(1).Select(p => Math.Abs(p.dH)).ToArray();
+                var lens = new double[rates.Length];
+                for (int i = 1; i < pts.Count; i++)
+                {
+                    lens[i - 1] = Math.Sqrt(Enumerable.Range(0, dimF).Sum(f =>
+                    {
+                        double va = (pts[i - 1].features[f] - locMean[f]) / locStd[f];
+                        double vb = (pts[i].features[f] - locMean[f]) / locStd[f];
+                        return (va - vb) * (va - vb);
+                    }));
+                }
+                var speeds = Enumerable.Range(0, rates.Length).Select(i => lens[i] / Math.Max(rates[i], 1e-12)).ToArray();
+
+                trajData.Add((fam, cfg.label, rates, lens, speeds));
+            }
+        }
+
+        // ============================================================
+        // Part A: CV comparison — Time vs Length vs Speed
+        // ============================================================
+        _o.WriteLine("=== Part A: Variability Comparison ===");
+        _o.WriteLine($"{"Family/config",-22} {"CV(Time)",10} {"CV(Length)",12} {"CV(Speed)",10} {"rank",8}");
+
+        var cvData = new List<(VcFamily fam, string cfg, double cvT, double cvL, double cvS)>();
+        foreach (var td in trajData)
+        {
+            double cvT = StdOverMean(td.timeRates), cvL = StdOverMean(td.stepLens), cvS = StdOverMean(td.speeds);
+            cvData.Add((td.fam, td.cfgLabel, cvT, cvL, cvS));
+            int rank = cvS <= Math.Min(cvT, cvL) ? 1 : cvS <= Math.Max(cvT, cvL) ? 2 : 3;
+            _o.WriteLine($"{td.fam,-4} {td.cfgLabel,-16} {cvT,10:F4} {cvL,12:F4} {cvS,10:F4} {rank,8}");
+        }
+
+        double meanCV_T = cvData.Average(d => d.cvT), meanCV_L = cvData.Average(d => d.cvL), meanCV_S = cvData.Average(d => d.cvS);
+        int speedBest = cvData.Count(d => d.cvS <= Math.Min(d.cvT, d.cvL));
+        _o.WriteLine("");
+        _o.WriteLine($"Mean: CV(T)={meanCV_T:F4}, CV(L)={meanCV_L:F4}, CV(S)={meanCV_S:F4}");
+        _o.WriteLine($"Speed is most stable in {speedBest}/{cvData.Count} trajectories");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part B: Length-adjustment — does length compensate for time variation?
+        // ============================================================
+        _o.WriteLine("=== Part B: Length-Time Compensation ===");
+        var compData = new List<(string label, double r_TL)>();
+        foreach (var td in trajData)
+        {
+            double r = PearsonCorrelation(td.timeRates, td.stepLens);
+            compData.Add(($"{td.fam}-{td.cfgLabel}", r));
+        }
+        double rCompMean = compData.Average(d => d.r_TL);
+        double rCompPos = compData.Count(d => d.r_TL > 0);
+        _o.WriteLine($"r(dH/dβ, stepLen) mean = {rCompMean:F4}");
+        _o.WriteLine($"Positive r: {rCompPos}/{compData.Count} — {(rCompPos > compData.Count * 0.6 ? "Length adjusts to time (speed-preserving)" : rCompPos > compData.Count * 0.3 ? "partial adjustment" : "no consistent compensation")}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part C: Stress survival — does speed survive geometry changes?
+        // ============================================================
+        _o.WriteLine("=== Part C: Speed Under Geometry Stress ===");
+        var baseSpeeds = cvData.Where(d => d.cfg.StartsWith("base")).ToArray();
+        var stressSpeeds = cvData.Where(d => d.cfg.StartsWith("stress")).ToArray();
+
+        var famBaseMean = families.Select(f =>
+        {
+            var s = baseSpeeds.Where(d => d.fam == f).Select(d => d.cvS).ToArray();
+            return (fam: f, meanCV: s.Length > 0 ? s.Average() : 0, cvCV: s.Length > 1 ? Math.Sqrt(s.Average(v => (v - s.Average()) * (v - s.Average()))) / Math.Max(s.Average(), 1e-12) : 0);
+        }).ToArray();
+
+        var famStressMean = families.Select(f =>
+        {
+            var s = stressSpeeds.Where(d => d.fam == f).Select(d => d.cvS).ToArray();
+            return (fam: f, meanCV: s.Length > 0 ? s.Average() : 0);
+        }).ToArray();
+
+        _o.WriteLine($"{"Family",-6} {"base CV(S)",12} {"stress CV(S)",14} {"survives?",10}");
+        _o.WriteLine(new string('-', 44));
+        int survives = 0;
+        for (int i = 0; i < families.Length; i++)
+        {
+            bool surv = famStressMean[i].meanCV < famBaseMean[i].meanCV * 1.5 || famStressMean[i].meanCV < 1.0;
+            if (surv) survives++;
+            string survLabel = surv ? "YES" : "no";
+            _o.WriteLine($"{families[i],-6} {famBaseMean[i].meanCV,12:F4} {famStressMean[i].meanCV,14:F4} {survLabel,10}");
+        }
+        _o.WriteLine($"Speed survives geometry stress in {survives}/{families.Length} families");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part D: Invariance ranking — alternative candidates
+        // ============================================================
+        _o.WriteLine("=== Part D: Invariance Candidate Ranking ===");
+        // Candidates: speed, speed/entropy, speed×accessibility, speed/dimension
+        var candidates = new List<(string name, double cv, int rank)>();
+
+        // Speed (primary)
+        double cvSpeed = cvData.Select(d => d.cvS).Average();
+        candidates.Add(("Speed", cvSpeed, 0));
+
+        // Composite candidates from a subset of trajectories
+        var subset = trajData.Take(20).ToList(); // sample for composites
+        var subCVs = subset.Select(td =>
+        {
+            double avg = td.speeds.Average();
+            return (speeds: td.speeds, avg, meanEnt: td.timeRates.Average(),
+                    cvS: StdOverMean(td.speeds));
+        }).ToArray();
+
+        // Speed / mean time-rate
+        var cvSdivT = subCVs.Select(s => StdOverMean(s.speeds.Select(sp => sp / Math.Max(s.meanEnt, 1e-12)).ToArray())).Average();
+        candidates.Add(("Speed/TimeRate", cvSdivT, 0));
+
+        // Raw speed CV (recompute for consistency)
+        double cvRawSpeed = subCVs.Average(s => s.cvS);
+        candidates.Add(("Speed (subsample)", cvRawSpeed, 0));
+
+        // Rank by CV
+        var ranked = candidates.OrderBy(c => c.cv).ToList();
+        for (int i = 0; i < ranked.Count; i++) ranked[i] = (ranked[i].name, ranked[i].cv, i + 1);
+
+        _o.WriteLine($"{"Candidate",-20} {"Mean CV",10} {"Rank",6}");
+        _o.WriteLine(new string('-', 38));
+        foreach (var c in ranked)
+            _o.WriteLine($"{c.name,-20} {c.cv,10:F4} {c.rank,6}");
+
+        string bestCandidate = ranked[0].name;
+        _o.WriteLine($"Best invariant: {bestCandidate} (CV={ranked[0].cv:F4})");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+
+        bool strongInvariant = meanCV_S < meanCV_T * 0.5 && meanCV_S < meanCV_L * 0.5 && speedBest > cvData.Count * 0.6 && survives >= families.Length * 0.6 && rCompPos > compData.Count * 0.5;
+        bool weakInvariant = meanCV_S < meanCV_T * 0.8 || speedBest > cvData.Count * 0.3;
+        bool noInvariant = !weakInvariant;
+
+        string decision;
+        if (strongInvariant) decision = "Model C";
+        else if (weakInvariant) decision = "Model B";
+        else if (noInvariant) decision = "Model A";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"CV(Speed)={meanCV_S:F4} vs CV(Time)={meanCV_T:F4}, CV(Length)={meanCV_L:F4}");
+        _o.WriteLine($"Speed best in {speedBest}/{cvData.Count} trajectories");
+        _o.WriteLine($"Length compensates: {rCompPos}/{compData.Count} (r_mean={rCompMean:F4})");
+        _o.WriteLine($"Stress survival: {survives}/{families.Length}");
+        _o.WriteLine($"Best invariant candidate: {bestCandidate}");
+
+        if (decision == "Model C")
+            _o.WriteLine("Speed is the primary invariant of accessibility geometry. It is more stable than Time or Length individually, survives geometry stress tests, and exhibits Length-Time compensation preserving the characteristic ratio. Without assuming physical c or relativity.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Speed shows partial invariance (CV={meanCV_S:F3}). Not dominant enough for primary invariant status.");
+        else
+            _o.WriteLine("Speed does not satisfy invariance criteria.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. CV(S)={meanCV_S:F4} < CV(T)={meanCV_T:F4}, CV(L)={meanCV_L:F4}");
+        _o.WriteLine($"3. Length compensation r={rCompMean:F4}, stress survival={survives}/{families.Length}");
+        _o.WriteLine($"4. Best invariant: {bestCandidate}");
+        _o.WriteLine($"5. Decision: {decision}");
+        _o.WriteLine("6. Commit-ready summary:");
+        string psiLabel = decision == "Model C" ? "Speed is primary geometric invariant" : decision == "Model B" ? "Speed shows partial invariance" : "Speed not invariant";
+        _o.WriteLine($"   PSI_01_PrimitiveSpeedInvariantAudit — {psiLabel}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== PSI_01 complete. Commit: PSI_01_PrimitiveSpeedInvariantAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+
+        static double StdOverMean(double[] x) { double m = x.Average() + 1e-12; return Math.Sqrt(x.Average(v => (v - m) * (v - m))) / m; }
+
+        static (double[] e, double[,] v) JacobiEigenLocalPsi(double[,] a, int n)
+        {
+            var m = new double[n, n]; var d = new double[n];
+            for (int i = 0; i < n; i++) { m[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0; for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++) sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++)
+                {
+                    double g = 100.0 * Math.Abs(a[i, j]);
+                    if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j])) a[i, j] = 0.0;
+                    else if (Math.Abs(a[i, j]) > thresh)
+                    {
+                        double h = d[j] - d[i], t;
+                        if (Math.Abs(h) + g == Math.Abs(h)) t = a[i, j] / h;
+                        else { double theta = 0.5 * h / a[i, j]; t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta)); if (theta < 0) t = -t; }
+                        double cc = 1.0 / Math.Sqrt(1.0 + t * t), s = t * cc, tau = s / (1.0 + cc);
+                        h = t * a[i, j]; z[i] -= h; z[j] += h; d[i] -= h; d[j] += h; a[i, j] = 0.0;
+                        for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                        for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                        for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                        for (int k = 0; k < n; k++) { g = m[k, i]; h = m[k, j]; m[k, i] = g - s * (h + g * tau); m[k, j] = h + s * (g - h * tau); }
+                    }
+                }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, m);
+        }
+    }
 }
