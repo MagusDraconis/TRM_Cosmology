@@ -1,10 +1,11 @@
 {
   "version": "V10.0",
   "branch": "v10.0-clockwork-physics-validation",
-  "status": "active",
+  "status": "complete",
   "total_audits": 5,
-  "key_result": "6/6 clockwork quantities map to physical concepts. Strong physical analogy (Model B). Ready for quantitative prediction testing.",
+  "audits_completed": ["CPV_00","CDN_01","CMC_01","MCA_01","CRA_01"],
+  "key_result": "Physical analogy established. Two regimes: GAN/CNS (dissipative) and ICS (resonant). No universal invariant. Clockwork physics is regime-dependent.",
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["CPV_00"],
+  "last_updated": "2026-07-25"
 }
