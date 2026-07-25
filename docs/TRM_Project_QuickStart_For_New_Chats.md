@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V8.2 PRIMITIVE MEANING |
-| Current Branch | v8.2-primitive-meaning |
+| Current Version | V8.3 INVARIANT ORIGIN |
+| Current Branch | v8.3-invariant-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.2 PRIMITIVE MEANING. Full chain: P(Accessibility)→Gradient→Transfer Pressure→Drift→Temporal Ordering→Emergent Time→Local Rates→Emergent Geometry→Metric Length→Speed→Time-Length Geometry→Speed Invariant(PSI_01). Dimension emerges from transfer-field geometry. P is irreducible & universal. |
+| Current Status | V8.3 INVARIANT ORIGIN. V8.2 closed: Speed is primary geometric invariant. V8.3 asks WHY speed is invariant. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

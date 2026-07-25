@@ -1,10 +1,10 @@
 # TRM Current Frontier
 
-**Version:** 3.1
+**Version:** 3.2
 **Date:** 2026-07-25
 
-**Current Version:** V8.2 PRIMITIVE MEANING (CLOSED — 10 audits)
-**Current Branch:** v8.2-primitive-meaning
+**Current Version:** V8.3 INVARIANT ORIGIN
+**Current Branch:** v8.3-invariant-origin
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
@@ -22,36 +22,25 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V8.2 PRIMITIVE MEANING — CLOSED. 10 audits establish that Time, Length,
-Geometry, and Speed all emerge from Accessibility Potential without
-physical assumptions:
+V8.3 INVARIANT ORIGIN. V8.2 established Speed as the primary geometric
+invariant — more stable than Time or Length, surviving all stress tests,
+with Length adjusting to preserve the characteristic speed ratio.
 
+Open question: **Why is speed invariant?**
+
+V8.3 investigates the origin of this invariance.
+
+Full predecessor chain:
 ```
-Primitive P (Accessibility Potential, irreducible, universal)
-  → Accessibility Gradients
-  → Transfer Pressure (drift field)
-  → Directed Drift
-  → Temporal Ordering
-  → Emergent Time (local rates)
-  → Emergent Geometry (metric separation)
-  → Metric Length (all axioms satisfied)
-  → Emergent Speed (bounded, universal)
-  → Time-Length Geometry (dual projections)
-  → Speed Invariant (2.5× more stable than components)
-  → Attractor Occupation
-  → Entropy H = −Σp_i log p_i
-  → Dimension D = exp(H)
+P (Accessibility Potential, irreducible, universal)
+  → Accessibility Gradients → Transfer Pressure → Directed Drift
+  → Temporal Ordering → Emergent Time → Local Rates
+  → Emergent Geometry → Metric Length → Emergent Speed
+  → Time-Length Geometry → Speed Invariant ← V8.2 closure
+  → ??? ← V8.3: WHY is speed invariant?
 ```
 
-Key closure: Speed emerges as the primary geometric invariant —
-more stable than Time or Length individually, surviving all
-geometry stress tests, with Length adjusting to preserve the
-characteristic speed ratio. No physical c, relativity, spacetime,
-clocks, or rulers assumed.
-
-~3393 tests, 0 failed.
-
-See `docsV8/V8_2_Closure_Report.md` for full audit details.
+See `docsV8/V8_2_Closure_Report.md` for full V8.2 audit details.
 
 ---
 
