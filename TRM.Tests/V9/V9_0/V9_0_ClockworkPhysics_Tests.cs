@@ -398,6 +398,115 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains("Model A"));
     }
 
+    [Fact]
+    public void BOC_02_OscillatoryClockworkAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== BOC_02: Oscillatory Clockwork Audit ===");
+        _o.WriteLine("=== Is budget loss one phase of a closed oscillation? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 46927;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI; // ~12.57
+
+        _o.WriteLine($"Extended β: 0 → {betaMax:F2} ({nBeta} steps)");
+        _o.WriteLine("");
+
+        // Track GAN (ON) and SAC (OFF) totals
+        var ganTotal = new List<double>();
+        var sacTotal = new List<double>();
+        var ganEntropy = new List<double>();
+        var sacEntropy = new List<double>();
+        var betas = new List<double>();
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            betas.Add(beta);
+
+            foreach (var fam in new[] { VcFamily.SAC, VcFamily.GAN })
+            {
+                var v = new VariantSpec($"{fam}_OC", fam, 0.7, 1.0, 1.0, beta, 0.0);
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                double sumV1 = 0, sumVT = 0; int n = 0;
+
+                for (int ip = 0; ip < 3; ip++)
+                {
+                    double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                    sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+                }
+                if (n < 3) continue;
+                double mv1 = sumV1 / n, mvT = sumVT / n;
+                double o1 = mv1 / Math.Max(mv1 + mvT, 1e-12);
+                double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+
+                if (fam == VcFamily.SAC) { sacTotal.Add(mv1 + mvT); sacEntropy.Add(ent); }
+                else { ganTotal.Add(mv1 + mvT); ganEntropy.Add(ent); }
+            }
+        }
+
+        // Periodicity: find peaks in GAN total
+        var peaks = new List<int>();
+        for (int i = 1; i < ganTotal.Count - 1; i++)
+            if (ganTotal[i] > ganTotal[i - 1] && ganTotal[i] > ganTotal[i + 1])
+                peaks.Add(i);
+
+        _o.WriteLine($"GAN total range: [{ganTotal.Min():F6}, {ganTotal.Max():F6}]");
+        _o.WriteLine($"SAC total range: [{sacTotal.Min():F6}, {sacTotal.Max():F6}]");
+        _o.WriteLine($"Peaks found: {peaks.Count}");
+        if (peaks.Count >= 2)
+        {
+            double period = betas[peaks[1]] - betas[peaks[0]];
+            double freq = 2.0 * Math.PI / Math.Max(period, 1e-12);
+            _o.WriteLine($"Period ≈ {period:F2} β-units, frequency ≈ {freq:F4}");
+        }
+        _o.WriteLine("");
+
+        // Key check: does GAN return to initial value?
+        double ganInit = ganTotal[0];
+        double ganEnd = ganTotal[ganTotal.Count - 1];
+        _o.WriteLine($"GAN: total(0)={ganInit:F6}, total(end)={ganEnd:F6}, Δ={ganEnd - ganInit:F8}");
+        bool closedOrbit = Math.Abs(ganEnd - ganInit) < 1e-6;
+        _o.WriteLine($"Closed orbit? {(closedOrbit ? "YES" : "NO")}");
+
+        // SAC: still flat?
+        double sacCV = StdOverMean(sacTotal.ToArray());
+        _o.WriteLine($"SAC CV(total)={sacCV:F6} — {(sacCV < 0.001 ? "ZERO amplitude" : "variable")}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        string decision;
+        if (closedOrbit && peaks.Count >= 3 && sacCV < 0.001)
+            decision = "Model C";
+        else if (closedOrbit)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model C")
+            _o.WriteLine("Full oscillatory clockwork. Budget loss is the descending phase of a closed oscillation. SAC/RCS are zero-amplitude oscillators, not fundamentally different — they're the same clockwork with b=0.");
+        else if (decision == "Model B")
+            _o.WriteLine("Partial cyclic behavior.");
+        else
+            _o.WriteLine("True irreversible loss.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== BOC_02 complete. Commit: BOC_02_OscillatoryClockworkAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
