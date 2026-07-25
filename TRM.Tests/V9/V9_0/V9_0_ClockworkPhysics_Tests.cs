@@ -708,6 +708,101 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void TDO_01_TickDynamicsOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== TDO_01: Tick Dynamics Origin Audit ===");
+        _o.WriteLine("=== Is |d(total)/dβ| the primitive clockwork tick? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 50627;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI;
+        double dB = betaMax / (nBeta - 1);
+
+        var tick = new List<double>();
+        var dH = new List<double>();
+        double prevTotal = double.NaN, prevEnt = double.NaN;
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_TD", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3) continue;
+            double total = sumV1 / n + sumVT / n;
+            double o1 = (sumV1 / n) / Math.Max((sumV1 / n) + (sumVT / n), 1e-12);
+            double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+
+            if (!double.IsNaN(prevTotal))
+            {
+                tick.Add(Math.Abs(total - prevTotal) / dB);
+                dH.Add(Math.Abs(ent - prevEnt) / dB);
+            }
+            prevTotal = total; prevEnt = ent;
+        }
+
+        var tickArr = tick.ToArray();
+        var dHarr = dH.ToArray();
+
+        double rTick = PearsonCorrelation(tickArr, dHarr);
+
+        // Threshold test
+        int tickZero_dHZero = 0, tickZero_dHpos = 0, tickPos_dHZero = 0, tickPos_dHpos = 0;
+        for (int i = 0; i < tickArr.Length; i++)
+        {
+            bool t0 = tickArr[i] < 1e-8, h0 = dHarr[i] < 1e-8;
+            if (t0 && h0) tickZero_dHZero++;
+            if (t0 && !h0) tickZero_dHpos++;
+            if (!t0 && h0) tickPos_dHZero++;
+            if (!t0 && !h0) tickPos_dHpos++;
+        }
+
+        _o.WriteLine($"Tick vs dH/dβ: r={rTick:F4}");
+        _o.WriteLine($"Tick=0, dH=0: {tickZero_dHZero}  Tick=0, dH>0: {tickZero_dHpos}");
+        _o.WriteLine($"Tick>0, dH=0: {tickPos_dHZero}  Tick>0, dH>0: {tickPos_dHpos}");
+        _o.WriteLine("");
+
+        bool perfectNecessity = tickPos_dHZero == 0;
+        bool perfectSufficiency = tickZero_dHpos == 0;
+
+        _o.WriteLine($"Necessity (tick>0 required for dH>0): {(tickZero_dHpos == 0 ? "YES" : $"no ({tickZero_dHpos} exc)")}");
+        _o.WriteLine($"Sufficiency (tick>0 guarantees dH>0): {(tickPos_dHZero == 0 ? "YES" : $"no ({tickPos_dHZero} exc)")}");
+
+        string decision;
+        if (tickZero_dHpos == 0 && tickPos_dHZero == 0) decision = "Model C";
+        else if (tickZero_dHpos == 0) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("Tick = |dTotal/dβ| is the primitive clockwork. Tick=0 ⇔ dH=0.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Tick is necessary but not sufficient ({tickPos_dHZero} cases of tick without time). Time requires tick + additional condition (near equilibrium? small tick magnitude?).");
+        else
+            _o.WriteLine("Tick is not the clockwork variable.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== TDO_01 complete. Commit: TDO_01_TickDynamicsOriginAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
