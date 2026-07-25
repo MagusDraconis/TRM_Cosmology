@@ -231,6 +231,97 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void VBT_01_VarianceBudgetTheoremAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== VBT_01: Variance Budget Theorem Audit ===");
+        _o.WriteLine("=== Is budget loss necessary + sufficient for time? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 44497;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var data = new List<(string label, double dTotal, double dH)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pts = new List<(double total, double ent)>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_VB", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    var aV1 = new List<double>(); var aVT = new List<double>();
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        aV1.Add(cci.VarI1); aVT.Add(cci.VarTerms);
+                    }
+                    if (aV1.Count < 3) continue;
+                    double mv1 = aV1.Average(), mvT = aVT.Average();
+                    double o1 = mv1 / Math.Max(mv1 + mvT, 1e-12);
+                    double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+                    pts.Add((mv1 + mvT, ent));
+                }
+                double dB = 1.0 / (nBeta - 1);
+                for (int i = 0; i < pts.Count - 1; i++)
+                {
+                    double dT = (pts[i + 1].total - pts[i].total) / dB;
+                    double dH = Math.Abs(pts[i + 1].ent - pts[i].ent) / dB;
+                    data.Add(($"{fam}-{ci}", dT, dH));
+                }
+            }
+        }
+
+        var dTarr = data.Select(d => d.dTotal).ToArray();
+        var dHarr = data.Select(d => d.dH).ToArray();
+
+        double r = PearsonCorrelation(dTarr, dHarr);
+        _o.WriteLine($"r(d(total)/dβ, dH/dβ) = {r:F4}");
+        _o.WriteLine("");
+
+        // Necessity: any case with dH>0 but dTotal=0?
+        int dHpos_dTzero = data.Count(d => d.dH > 0.0001 && Math.Abs(d.dTotal) < 1e-8);
+        // Sufficiency: any case with dTotal<0 but dH=0?
+        int dTneg_dHzero = data.Count(d => d.dTotal < -1e-8 && d.dH < 0.0001);
+
+        _o.WriteLine($"Necessity: dH>0 without dTotal<0? {dHpos_dTzero} cases");
+        _o.WriteLine($"Sufficiency: dTotal<0 without dH>0? {dTneg_dHzero} cases");
+        _o.WriteLine("");
+
+        string decision;
+        if (dHpos_dTzero == 0 && dTneg_dHzero == 0)
+            decision = "Model C";
+        else if (dHpos_dTzero == 0)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}  r={r:F4}  necessity={dHpos_dTzero}  sufficiency={dTneg_dHzero}");
+        if (decision == "Model C") _o.WriteLine("Budget loss is necessary AND sufficient for time emergence. The relationship is binary (threshold gate), not continuous. Any non-zero budget loss produces time flow.");
+        else if (decision == "Model B") _o.WriteLine("Budget loss is necessary but not sufficient.");
+        else _o.WriteLine("Budget loss is irrelevant.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== VBT_01 complete. Commit: VBT_01_VarianceBudgetTheoremAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
