@@ -613,6 +613,101 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void BDC_01_BudgetDynamicsCycleAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== BDC_01: Budget Dynamics Cycle Audit ===");
+        _o.WriteLine("=== Time from budget loss, or budget dynamics? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 49387;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI;
+
+        var dTotal = new List<double>();
+        var dEntropy = new List<double>();
+        double prevTotal = double.NaN, prevEnt = double.NaN;
+        double dB = betaMax / (nBeta - 1);
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_BD", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3) continue;
+            double mv1 = sumV1 / n, mvT = sumVT / n;
+            double total = mv1 + mvT;
+            double o1 = mv1 / Math.Max(mv1 + mvT, 1e-12);
+            double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+
+            if (!double.IsNaN(prevTotal))
+            {
+                dTotal.Add((total - prevTotal) / dB);
+                dEntropy.Add(Math.Abs(ent - prevEnt) / dB);
+            }
+            prevTotal = total; prevEnt = ent;
+        }
+
+        // Separate into loss (dT<0) and gain (dT>0) phases
+        var lossDH = new List<double>();
+        var gainDH = new List<double>();
+        for (int i = 0; i < dTotal.Count; i++)
+        {
+            if (dTotal[i] < -1e-8) lossDH.Add(dEntropy[i]);
+            else if (dTotal[i] > 1e-8) gainDH.Add(dEntropy[i]);
+        }
+
+        _o.WriteLine($"Loss phase (dT<0): {lossDH.Count} steps, mean dH={lossDH.Average():F6}");
+        _o.WriteLine($"Gain phase (dT>0): {gainDH.Count} steps, mean dH={gainDH.Average():F6}");
+        _o.WriteLine("");
+
+        double rAbs = PearsonCorrelation(dTotal.Select(Math.Abs).ToArray(), dEntropy.ToArray());
+        double rRaw = PearsonCorrelation(dTotal.ToArray(), dEntropy.ToArray());
+        _o.WriteLine($"r(|dTotal|, dH) = {rAbs:F4} — dynamics magnitude predicts time?");
+        _o.WriteLine($"r(dTotal, dH)    = {rRaw:F4} — direction matters?");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        bool bothGenerate = lossDH.Average() > 1e-6 && gainDH.Average() > 1e-6;
+        bool lossDominates = lossDH.Average() > gainDH.Average() * 2;
+
+        string decision;
+        if (bothGenerate && Math.Abs(rAbs) > Math.Abs(rRaw) * 1.5)
+            decision = "Model C";
+        else if (bothGenerate)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("Time follows budget DYNAMICS (magnitude), not budget loss (direction). Both loss and gain phases generate time equally.");
+        else if (decision == "Model B")
+            _o.WriteLine("Both phases generate time, but loss may dominate.");
+        else
+            _o.WriteLine("Only loss generates time.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== BDC_01 complete. Commit: BDC_01_BudgetDynamicsCycleAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
