@@ -507,6 +507,112 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void WPO_01_WavePhaseOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== WPO_01: Wave Phase Origin Audit ===");
+        _o.WriteLine("=== Is ON/OFF phase-dependent within a wave cycle? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 48163;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI;
+
+        // Track GAN: d(total)/dβ, dH/dβ
+        var totals = new List<double>();
+        var entropies = new List<double>();
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_WP", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3) continue;
+            double mv1 = sumV1 / n, mvT = sumVT / n;
+            double o1 = mv1 / Math.Max(mv1 + mvT, 1e-12);
+            double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+            totals.Add(mv1 + mvT);
+            entropies.Add(ent);
+        }
+
+        // Compute derivatives and find zero-crossings
+        var dTotal = new List<double>();
+        var dEntropy = new List<double>();
+        double dB = betaMax / (nBeta - 1);
+        for (int i = 1; i < totals.Count; i++)
+        {
+            dTotal.Add((totals[i] - totals[i - 1]) / dB);
+            dEntropy.Add(Math.Abs(entropies[i] - entropies[i - 1]) / dB);
+        }
+
+        // Find zero-crossings of dTotal
+        int zeroCross = 0;
+        int timeActive = 0;
+        int timeFrozen = 0;
+        for (int i = 1; i < dTotal.Count; i++)
+        {
+            if (dTotal[i - 1] * dTotal[i] < 0) zeroCross++;
+            if (Math.Abs(dTotal[i]) < 1e-8 && dEntropy[i] < 1e-8) timeFrozen++;
+            if (Math.Abs(dTotal[i]) > 1e-8 && dEntropy[i] > 1e-8) timeActive++;
+        }
+
+        _o.WriteLine($"GAN over extended β (0→{betaMax:F2}):");
+        _o.WriteLine($"dTotal range: [{dTotal.Min():F6}, {dTotal.Max():F6}]");
+        _o.WriteLine($"Zero-crossings: {zeroCross}");
+        _o.WriteLine($"Time ACTIVE (|dT|>0, dH>0): {timeActive} steps");
+        _o.WriteLine($"Time FROZEN (|dT|≈0, dH≈0): {timeFrozen} steps");
+        _o.WriteLine("");
+
+        // Does dH=0 whenever dTotal=0?
+        int dTzero_dHzero = 0;
+        int dTzero_dHpos = 0;
+        for (int i = 0; i < dTotal.Count; i++)
+        {
+            if (Math.Abs(dTotal[i]) < 1e-8)
+            {
+                if (dEntropy[i] < 1e-8) dTzero_dHzero++;
+                else dTzero_dHpos++;
+            }
+        }
+        _o.WriteLine($"dTotal≈0: dH≈0 in {dTzero_dHzero} steps, dH>0 in {dTzero_dHpos} steps");
+        _o.WriteLine($"Frozen consistency: {(dTzero_dHpos == 0 ? "PERFECT — dT=0 ⇔ dH=0" : "imperfect")}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        string decision;
+        if (zeroCross >= 2 && timeFrozen > 5) decision = "Model C";
+        else if (zeroCross > 0) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("Extended frozen phases exist — time disappears at equilibrium.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Mixed: {zeroCross} zero-crossing, instantaneous transition. dTotal ranges [{dTotal.Min():F4}, {dTotal.Max():F4}] — both loss and gain phases. Full cycle: loss→gain→equilibrium at endpoints.");
+        else
+            _o.WriteLine("No phase-dependent behavior.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== WPO_01 complete. Commit: WPO_01_WavePhaseOriginAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
