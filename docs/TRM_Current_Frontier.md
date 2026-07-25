@@ -1,20 +1,18 @@
 # TRM Current Frontier
 
-**Version:** 4.4
+**Version:** 4.5
 **Date:** 2026-07-25
 
-**Current Version:** V10.1 CLOCKWORK REGIME PHYSICS
+**Current Version:** V10.1 REGIME PHYSICS (CLOSED) → V11.0 FAMILY AXIOM PHYSICS
 **Current Branch:** v10.1-clockwork-regime-physics
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
 ---
 
-## One-Sentence Current State
-
-V10.1 CLOCKWORK REGIME PHYSICS. Open question: do the two clockwork
-regimes (GAN/CNS dissipative, ICS resonant) map to distinct physical
-systems with testable predictions?
+V10.1 REGIME PHYSICS — CLOSED. 5 audits. Two irreducible regimes:
+Dissipative (GAN/CNS) and Resonant (ICS). VarI1-VarTerms coupling
+is family-axiom invariant. Next: V11.0 — Family Axiom Physics.
 **Cumulative Tests:** ~3393
 **Failed:** 0
 

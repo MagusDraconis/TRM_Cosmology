@@ -1,10 +1,11 @@
 {
   "version": "V10.1",
   "branch": "v10.1-clockwork-regime-physics",
-  "status": "active",
+  "status": "complete",
   "total_audits": 5,
-  "key_result": "Two distinct physical regimes: Dissipative (GAN/CNS) and Resonant (ICS). (CRP_01,C)",
+  "audits_completed": ["CRP_01","CRI_01","CQL_01","RSO_01","VCS_01"],
+  "key_result": "Two regimes (Dissipative GAN/CNS, Resonant ICS) are irreducible family-axiom properties. VarI1-VarTerms coupling is invariant to α,ξ. Regime duality is built into kernel definition.",
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["CRP_01","CRI_01","CQL_01","RSO_01","VCS_01"]
+  "last_updated": "2026-07-25"
 }
