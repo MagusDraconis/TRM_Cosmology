@@ -348,6 +348,124 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void DFG_01_DynamicsFlowGeneratorAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DFG_01: Dynamics Flow Generator Audit ===");
+        _o.WriteLine("=== What generates entropy flow when λ is static? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 27931;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var flowData = new List<(VcFamily fam, double dOcc_dB, double dEnt_dB, double dL_dB)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pts = new List<(double occ1, double ent, double Lmean)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_FG", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+                    pts.Add((o1, ent, LArr.Average()));
+                }
+
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < pts.Count - 1; i++)
+                {
+                    double dO = Math.Abs(pts[i + 1].occ1 - pts[i].occ1) / dBeta;
+                    double dE = Math.Abs(pts[i + 1].ent - pts[i].ent) / dBeta;
+                    double dL = Math.Abs(pts[i + 1].Lmean - pts[i].Lmean) / dBeta;
+                    flowData.Add((fam, dO, dE, dL));
+                }
+            }
+        }
+
+        _o.WriteLine("=== Flow Generator ===");
+        _o.WriteLine($"{"Family",-6} {"|d(occ)/dβ|",12} {"|d(ent)/dβ|",12} {"|d(L)/dβ|",12}");
+        _o.WriteLine(new string('-', 44));
+
+        foreach (var fam in families)
+        {
+            var fd = flowData.Where(d => d.fam == fam).ToArray();
+            _o.WriteLine($"{fam,-6} {fd.Average(d => d.dOcc_dB),12:F6} {fd.Average(d => d.dEnt_dB),12:F6} {fd.Average(d => d.dL_dB),12:F6}");
+        }
+        _o.WriteLine("");
+
+        var gF = flowData.Where(d => d.fam == VcFamily.SAC || d.fam == VcFamily.RCS).ToArray();
+        var gL = flowData.Where(d => d.fam != VcFamily.SAC && d.fam != VcFamily.RCS).ToArray();
+
+        double mOF = gF.Average(d => d.dOcc_dB), mEF = gF.Average(d => d.dEnt_dB), mLF = gF.Average(d => d.dL_dB);
+        double mOL = gL.Average(d => d.dOcc_dB), mEL = gL.Average(d => d.dEnt_dB), mLL = gL.Average(d => d.dL_dB);
+
+        _o.WriteLine("=== Group ===");
+        _o.WriteLine($"FROZEN: |dOcc|={mOF:F6}, |dEnt|={mEF:F6}, |dL|={mLF:F6}");
+        _o.WriteLine($"LIVE:   |dOcc|={mOL:F6}, |dEnt|={mEL:F6}, |dL|={mLL:F6}");
+        _o.WriteLine("");
+
+        string decision;
+        if (mOL > mOF * 10 && mEL > mEF * 10 && mLF < 1e-9) decision = "Model B";
+        else if (mLL > mLF * 10) decision = "Model C";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model B") _o.WriteLine("Occupation dynamics generate entropy flow.");
+        else if (decision == "Model C") _o.WriteLine("Covariance signal changes drive entropy flow.");
+        else _o.WriteLine("Multiple/hybrid mechanism.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== DFG_01 complete. Commit: DFG_01_DynamicsFlowGeneratorAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
