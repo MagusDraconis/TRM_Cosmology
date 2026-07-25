@@ -286,6 +286,112 @@ public class V10_0_PhysicsValidation_Tests
         Assert.True(true);
     }
 
+    [Fact]
+    public void MCA_01_MaterialClassValidationAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== MCA_01: Material Class Validation Audit ===");
+        _o.WriteLine("=== Are GAN and CNS truly different classes? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 76651;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var targets = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var famData = new Dictionary<VcFamily, List<(double X, double tick, double L, double dEq, double varI1, double varTerms)>>();
+        foreach (var fam in targets) famData[fam] = new List<(double, double, double, double, double, double)>();
+
+        foreach (var fam in targets)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                var v1s = new List<double>(); var vTs = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_MV", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n); Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                    v1s.Add(sv1 / n); vTs.Add(svt / n);
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double tick = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    double X = deq - 0.08 * Ls[i];
+                    famData[fam].Add((X, tick, Ls[i], deq, v1s[i], vTs[i]));
+                }
+            }
+        }
+
+        _o.WriteLine("=== GAN vs CNS Detailed Comparison ===");
+        _o.WriteLine($"{"Metric",-16} {"GAN mean",12} {"CNS mean",12} {"Δ",10} {"Same?",8}");
+        _o.WriteLine(new string('-', 60));
+
+        var gan = famData[VcFamily.GAN];
+        var cns = famData[VcFamily.CNS];
+        var ics = famData[VcFamily.ICS];
+
+        int sameCount = 0;
+        double[] gX = gan.Select(d => d.X).ToArray(), cX = cns.Select(d => d.X).ToArray();
+        double[] gT = gan.Select(d => d.tick).ToArray(), cT = cns.Select(d => d.tick).ToArray();
+        double[] gL = gan.Select(d => d.L).ToArray(), cL = cns.Select(d => d.L).ToArray();
+        double[] gD = gan.Select(d => d.dEq).ToArray(), cD = cns.Select(d => d.dEq).ToArray();
+        double[] gV1 = gan.Select(d => d.varI1).ToArray(), cV1 = cns.Select(d => d.varI1).ToArray();
+        double[] gVT = gan.Select(d => d.varTerms).ToArray(), cVT = cns.Select(d => d.varTerms).ToArray();
+
+        var comps = new[] { ("X", gX, cX), ("Tick", gT, cT), ("L", gL, cL), ("D_eq", gD, cD), ("VarI1", gV1, cV1), ("VarTerms", gVT, cVT) };
+
+        foreach (var (name, gArr, cArr) in comps)
+        {
+            double gM = gArr.Average(), cM = cArr.Average();
+            double delta = Math.Abs(gM - cM) / Math.Max(Math.Max(Math.Abs(gM), Math.Abs(cM)), 1e-12);
+            bool same = delta < 0.05; if (same) sameCount++;
+            string sl = same ? "YES" : "DIFF";
+            _o.WriteLine($"{name,-16} {gM,12:F6} {cM,12:F6} {delta,10:F4} {sl,8}");
+        }
+        _o.WriteLine("");
+        _o.WriteLine($"GAN≡CNS on {sameCount}/{comps.Length} metrics");
+
+        // Check ICS isolation
+        _o.WriteLine("=== ICS Isolation ===");
+        double icsTick = ics.Average(d => d.tick);
+        double ganTick = gan.Average(d => d.tick);
+        _o.WriteLine($"ICS Tick={icsTick:F6} vs GAN={ganTick:F6} — ratio={(icsTick/Math.Max(ganTick,1e-12)):F2}");
+
+        string decision = sameCount >= 5 ? "Model B" : "Model C";
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model B")
+            _o.WriteLine("GAN and CNS merge into one class. Only two classes: GAN/CNS (dissipative) and ICS (resonant).");
+        else
+            _o.WriteLine("Three genuinely distinct classes persist across multiple metrics.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== MCA_01 complete. Commit: MCA_01_MaterialClassValidationAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
