@@ -2066,6 +2066,7 @@ maintained to prevent overinterpretation:
 | V13.0 | Time Gradient Reconstruction | 2 | COMPLETE |
 | V13.1 | Effective Time Dynamics | 3 | COMPLETE |
 | V13.2 | Tick Potential Physics | 1 | COMPLETE |
+| V13.3 | Clockwork Gravity Correspondence | 3 | COMPLETE |
 | **Total** | | **3442** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3442 verified
@@ -2110,6 +2111,10 @@ tests with 0 failed is the authoritative current count as of 2026-07-25.
 ### V12.1 — Duality Validation — COMPLETE
 
 **Status:** CLOSED (2026-07-25). 2 audits (DVL_01, DPG_01). Duality robust across 16 config perturbations. Full hierarchy emerges from two orthogonal components.
+
+### V13.3 — Clockwork Gravity Correspondence — CLOSED
+
+**Status:** CLOSED (2026-07-25). 3 audits (CGC_01, CGP_01, GGA_01). V1 formally recovered as Newtonian limit. 11/11 concepts mapped (Model D). 7/13 gravity analogues emerge (Model C). Gradient-geometry equivalence proved: R=0 in 1D (Model D).
 
 ### V13.2 — Tick Potential Physics — CLOSED
 
@@ -2171,9 +2176,9 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V13.2 CLOSED — 1 audit. U=Tick=potential, F=-dU/dα exact. Complete Newtonian analogy closed. Branch: `v13.2-tick-potential-physics`. Next: V13.3.
+**Current status:** V13.3 CLOSED — 3 audits. V1 formally recovered. Gradient-geometry equivalence proved (R=0 in 1D). Branch: `v13.3-clockwork-gravity-correspondence`. Next: V13.4.
 
-**Full V13 chain:** V13.0 (V1 reconstruction) → V13.1 (Newtonian chain) → V13.2 (potential physics). Tick IS the potential from which force, acceleration, velocity, and trajectory emerge.
+**V13 complete chain:** V13.0 (V1 reconstruction) → V13.1 (Newtonian chain) → V13.2 (potential physics) → V13.3 (gravity correspondence). The 2019 Clockwork Cosmology hypothesis is formally recovered as the Newtonian limit of Tick physics.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
