@@ -1,10 +1,12 @@
 # TRM Current Frontier
 
-**Version:** 3.3
+**Version:** 3.4
 **Date:** 2026-07-25
 
-**Current Version:** V8.3 INVARIANT ORIGIN (CLOSED)
-**Current Branch:** v8.3-invariant-origin
+**Current Version:** V8.4 RESONANCE ORIGIN (CLOSED) → V9.0 CLOCKWORK PHYSICS
+**Current Branch:** v8.4-resonance-origin (pending v9.0)
+**Cumulative Tests:** ~3393
+**Failed:** 0
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
@@ -22,13 +24,15 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V8.3 INVARIANT ORIGIN — CLOSED. 9 audits. λ1,λ2 are deepest primitives:
-irreducible (PEO_01), invariant (PLI_01). Time-rate emergence is
-family-dependent — not reducible to single mechanisms. Chain closed
-(PRC_01). Oscillation-λ dual (POA_01). See `docsV8/V8_3_Closure_Report.md`.
+V8.4 RESONANCE ORIGIN — CLOSED. 12 audits. Time emergence traced to
+irreducible family-dependent CCI evaluation. L = a + bβ with b=0
+(frozen: SAC/RCS) or b≈0.43 (live: GAN/ICS/CNS). Family type is
+the irreducible differentiator (VRD_01). All structural quantities
+are static; only VarI1/VarTerms respond to β. See `docsV8/V8_4_Closure_Report.md`.
 
-V8.4 RESONANCE ORIGIN. Open question: does resonance structure explain
-the family-dependent time-rate emergence that V8.3 could not resolve?
+V9.0 CLOCKWORK PHYSICS. Synthesizing the V7.4→V8.4 chain into emergent
+physical structure: λ-primitive → static geometry → linear clock
+operator → entropy flow → time → length → speed.
 
 ---
 

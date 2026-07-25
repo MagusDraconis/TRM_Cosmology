@@ -2,10 +2,10 @@
 
 **Version:** 4.0
 **Date:** 2026-07-25
-**Scope:** Clockwork Cosmology V1 through V8.3
+**Scope:** Clockwork Cosmology V1 through V9.0
 **Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
-**Branch:** v8.3-invariant-origin
-**Current Frontier:** V8.3 INVARIANT ORIGIN (CLOSED) — 9 audits, λ1,λ2 primitive
+**Branch:** v8.4-resonance-origin
+**Current Frontier:** V8.4 RESONANCE ORIGIN (CLOSED) → V9.0 CLOCKWORK PHYSICS
 
 ---
 
@@ -2046,7 +2046,8 @@ maintained to prevent overinterpretation:
 | V8.1 | Primitive Origin: Irreducibility + Universality | ~35 | COMPLETE |
 | V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~35 | COMPLETE |
 | V8.3 | Invariant Origin: λ primitive + invariant | 9 | COMPLETE |
-| V8.4 | Resonance Origin | 0 | INITIALIZED |
+| V8.4 | Resonance Origin: Clockwork emergence | 12 | COMPLETE |
+| V9.0 | Clockwork Physics | 0 | INITIALIZED |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
@@ -2068,9 +2069,13 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 **Status:** CLOSED (2026-07-25). 9 audits. λ1,λ2 primitive+invariant. Time emergence family-dependent. Closure report: `docsV8/V8_3_Closure_Report.md`.
 
-### V8.4 — Resonance Origin — INITIALIZED
+### V8.4 — Resonance Origin — COMPLETE
 
-**Status:** Active (2026-07-25). 0 audits. Open: does resonance structure explain family-dependent time-rate emergence?
+**Status:** CLOSED (2026-07-25). 12 audits. Time emergence irreducible family property. Closure report: `docsV8/V8_4_Closure_Report.md`.
+
+### V9.0 — Clockwork Physics — INITIALIZED
+
+**Status:** Active (2026-07-25). 0 audits. Synthesizing V7.4→V8.4 into emergent physical structure.
 
 **Key chain:** Speed from mutual compensation → Chain closed → λ1,λ2 primitive → λ1 representation-independent.
 

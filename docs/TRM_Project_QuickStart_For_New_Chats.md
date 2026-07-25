@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V8.3 INVARIANT ORIGIN (CLOSED) → V8.4 RESONANCE ORIGIN |
-| Current Branch | v8.3-invariant-origin |
+| Current Version | V8.4 RESONANCE ORIGIN (CLOSED) → V9.0 CLOCKWORK PHYSICS |
+| Current Branch | v8.4-resonance-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.3 closed: 9 audits, λ1,λ2 primitive+invariant. V8.4: resonance origin of family-dependent time emergence. |
+| Current Status | V8.4 closed: 12 audits, family type irreducible. V9.0: clockwork physics synthesis. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

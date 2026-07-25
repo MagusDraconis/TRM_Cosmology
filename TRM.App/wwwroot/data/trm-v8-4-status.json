@@ -1,13 +1,11 @@
 {
   "version": "V8.4",
   "branch": "v8.4-resonance-origin",
-  "status": "active",
+  "status": "complete",
   "total_audits": 12,
   "audits_completed": ["ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01","VRD_01"],
-  "key_result": "Resonance concentration identical across families (Δ=0). SAC/RCS frozen (|dE/dβ|=0), GAN/ICS/CNS live. Dynamics determine time emergence (DAO_01,C) (ROA_01,D).",
-  "models": {
-    "ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01","VRD_01": "D"
-  },
+  "key_result": "Time emergence is family-dependent and irreducible. L = a + bβ with b=0 (frozen:SAC/RCS) or b≈0.43 (live:GAN/ICS/CNS). Family type is irreducible differentiator.",
+  "models": {"ROA_01":"D","DAO_01":"C","DFG_01":"C","LFG_01":"A","KLI_01":"A","DKO_01":"A","MTO_01":"C","FCA_01":"A","ETA_01":"A","FOP_01":"B","BOA_01":"B","VRD_01":"C"},
   "test_count": "~3393",
   "failed": 0,
   "last_updated": "2026-07-25"
