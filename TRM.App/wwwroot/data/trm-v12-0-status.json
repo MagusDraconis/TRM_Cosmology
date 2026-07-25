@@ -1,0 +1,10 @@
+{
+  "version": "V12.0",
+  "branch": "v12.0-information-physics",
+  "status": "active",
+  "total_audits": 0,
+  "key_result": "Information Physics: l1 = VarI1/(VarI1+VarTerms) as the fundamental information variable. Exploring whether clockwork physics reduces to information dynamics.",
+  "test_count": "~3393",
+  "failed": 0,
+  "last_updated": "2026-07-25"
+}

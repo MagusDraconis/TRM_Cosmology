@@ -3,8 +3,8 @@
 **Version:** 4.5
 **Date:** 2026-07-25
 
-**Current Version:** V11.0 FAMILY AXIOM PHYSICS (CLOSED — 3 audits)
-**Current Branch:** v11.0-family-axiom-physics
+**Current Version:** V12.0 INFORMATION PHYSICS
+**Current Branch:** v12.0-information-physics
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
