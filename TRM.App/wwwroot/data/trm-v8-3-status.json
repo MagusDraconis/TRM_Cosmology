@@ -2,9 +2,13 @@
   "version": "V8.3",
   "branch": "v8.3-invariant-origin",
   "status": "active",
-  "total_audits": 0,
-  "key_result": "Investigating why speed is the primary invariant of accessibility geometry.",
-  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → ??? → Attractor Occupation → Entropy → Dimension",
+  "total_audits": 1,
+  "audits_completed": ["PIO_01"],
+  "key_result": "Speed invariance emerges from symmetric Time-Length mutual compensation. Neither Time nor Length dominates — both co-evolve preserving the characteristic speed ratio. Accessibility does NOT directly predict Speed.",
+  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Mutual Compensation (PIO_01)",
+  "models": {
+    "PIO_01": "B"
+  },
   "test_count": "~3393",
   "failed": 0,
   "last_updated": "2026-07-25"

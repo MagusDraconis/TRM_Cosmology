@@ -26,21 +26,14 @@ V8.3 INVARIANT ORIGIN. V8.2 established Speed as the primary geometric
 invariant — more stable than Time or Length, surviving all stress tests,
 with Length adjusting to preserve the characteristic speed ratio.
 
-Open question: **Why is speed invariant?**
+PIO_01 complete: Speed invariance emerges from symmetric mutual
+compensation. r(dH_t→dL_t+1) ≈ r(dL_t→dH_t+1) ≈ 0.35 — neither Time
+nor Length dominates the causal direction. Accessibility does NOT
+directly predict Speed (r≈0). Speed is the balanced outcome of two
+co-evolving components.
 
-V8.3 investigates the origin of this invariance.
-
-Full predecessor chain:
-```
-P (Accessibility Potential, irreducible, universal)
-  → Accessibility Gradients → Transfer Pressure → Directed Drift
-  → Temporal Ordering → Emergent Time → Local Rates
-  → Emergent Geometry → Metric Length → Emergent Speed
-  → Time-Length Geometry → Speed Invariant ← V8.2 closure
-  → ??? ← V8.3: WHY is speed invariant?
-```
-
-See `docsV8/V8_2_Closure_Report.md` for full V8.2 audit details.
+Open question: Is the compensation exact enough to be a
+conservation-like relation?
 
 ---
 

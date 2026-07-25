@@ -15,7 +15,7 @@
 | Current Branch | v8.3-invariant-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.3 INVARIANT ORIGIN. V8.2 closed: Speed is primary geometric invariant. V8.3 asks WHY speed is invariant. |
+| Current Status | V8.3 INVARIANT ORIGIN. V8.2 closed. PIO_01: Speed invariance from symmetric Time-Length mutual compensation (Model B). Accessibility does NOT directly predict Speed. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
