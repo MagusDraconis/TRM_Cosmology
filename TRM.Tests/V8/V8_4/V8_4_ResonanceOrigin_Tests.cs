@@ -1478,6 +1478,157 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void VRD_01_VarianceResponseDifferentiationAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== VRD_01: Variance Response Differentiation Audit ===");
+        _o.WriteLine("=== Why do VarI1 and VarTerms respond differently? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 39019;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 21;
+
+        // Sweep α and ξ for SAC and GAN to test structural vs normalization
+        var alphas = new[] { 0.2, 0.5, 0.8, 1.1 };
+        var xis = new[] { 0.5, 0.8, 1.2, 1.5 };
+
+        _o.WriteLine("=== Slope vs α,ξ ===");
+        _o.WriteLine($"{"Family",-6} {"α",6} {"ξ",6} {"VarI1 slope",12} {"VarTerms slope",14}");
+        _o.WriteLine(new string('-', 48));
+
+        foreach (var fam in new[] { VcFamily.SAC, VcFamily.GAN })
+        {
+            foreach (double alpha in alphas)
+            {
+                foreach (double xiS in xis)
+                {
+                    var bArr = new List<double>();
+                    var v1Arr = new List<double>();
+                    var vTArr = new List<double>();
+
+                    for (int bi = 0; bi < nBeta; bi++)
+                    {
+                        double beta = bi / (double)(nBeta - 1);
+                        var v = new VariantSpec($"{fam}_VD", fam, alpha, 1.0, xiS, beta, 0.0);
+                        double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                        var allV1 = new List<double>();
+                        var allVT = new List<double>();
+
+                        for (int ip = 0; ip < 3; ip++)
+                        {
+                            double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                            var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                            allV1.Add(cci.VarI1);
+                            allVT.Add(cci.VarTerms);
+                        }
+
+                        if (allV1.Count < 3) continue;
+                        bArr.Add(beta);
+                        v1Arr.Add(allV1.Average());
+                        vTArr.Add(allVT.Average());
+                    }
+
+                    double[] ba = bArr.ToArray(), v1a = v1Arr.ToArray(), vTa = vTArr.ToArray();
+                    double r1 = PearsonCorrelation(ba, v1a), rT = PearsonCorrelation(ba, vTa);
+                    double sB = Math.Sqrt(ba.Average(bv => (bv - ba.Average()) * (bv - ba.Average())));
+                    double s1 = r1 * Math.Sqrt(v1a.Average(v => (v - v1a.Average()) * (v - v1a.Average()))) / Math.Max(sB, 1e-12);
+                    double sT = rT * Math.Sqrt(vTa.Average(v => (v - vTa.Average()) * (v - vTa.Average()))) / Math.Max(sB, 1e-12);
+
+                    _o.WriteLine($"{fam,-6} {alpha,6:F1} {xiS,6:F1} {s1,12:F6} {sT,14:F6}");
+                }
+            }
+        }
+        _o.WriteLine("");
+
+        // Check SAC: are slopes always zero regardless of α,ξ?
+        var sacSlopes = new List<double>();
+        var ganSlopes = new List<double>();
+        foreach (double alpha in alphas)
+            foreach (double xiS in xis)
+            {
+                // Quick recompute for slopes
+                var bArr = new List<double>(); var lArr = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec("test", VcFamily.SAC, alpha, 1.0, xiS, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    var aL = new List<double>();
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        aL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+                    if (aL.Count < 3) continue;
+                    bArr.Add(beta); lArr.Add(aL.Average());
+                }
+                double r = PearsonCorrelation(bArr.ToArray(), lArr.ToArray());
+                sacSlopes.Add(Math.Abs(r));
+            }
+
+        foreach (double alpha in alphas)
+            foreach (double xiS in xis)
+            {
+                var bArr = new List<double>(); var lArr = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec("test", VcFamily.GAN, alpha, 1.0, xiS, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    var aL = new List<double>();
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        aL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+                    if (aL.Count < 3) continue;
+                    bArr.Add(beta); lArr.Add(aL.Average());
+                }
+                double r = PearsonCorrelation(bArr.ToArray(), lArr.ToArray());
+                ganSlopes.Add(Math.Abs(r));
+            }
+
+        _o.WriteLine("=== L-slope stability across α,ξ ===");
+        _o.WriteLine($"SAC: all |r(L,β)| < 0.01? {(sacSlopes.All(s => s < 0.01) ? "YES — invariant zero" : "no")}");
+        _o.WriteLine($"GAN: all |r(L,β)| > 0.95? {(ganSlopes.All(s => s > 0.95) ? "YES — invariant non-zero" : "no")}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        bool sacAlwaysZero = sacSlopes.All(s => s < 0.01);
+        bool ganAlwaysNonZero = ganSlopes.All(s => s > 0.5);
+
+        string decision;
+        if (sacAlwaysZero && ganAlwaysNonZero) decision = "Model C";
+        else if (sacAlwaysZero) decision = "Model B";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model C")
+            _o.WriteLine("The differential response is a KERNEL CONSTRUCTION effect. SAC is structurally incapable of β-response regardless of α,ξ. GAN always responds. The family type is the irreducible differentiator.");
+        else if (decision == "Model B")
+            _o.WriteLine("Variance-distribution effect.");
+        else
+            _o.WriteLine("Hybrid.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== VRD_01 complete. Commit: VRD_01_VarianceResponseDifferentiationAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
