@@ -2445,4 +2445,217 @@ public class V13_0_TimeGradientReconstruction_Tests
         _o.WriteLine("=== MBD_01 complete. Commit: MBD_01_MultiBodyDynamicsAudit ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void LTS_01_LocalTickSourcesAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LTS_01: Local Tick Sources Audit ===");
+        _o.WriteLine("=== Can Tick fields form local attractors? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 44927;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 40, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+
+        var allFams = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nSteps = 61;
+        double dStep = 1.0 / (nSteps - 1);
+
+        // ====================================
+        // PART A: p-sweep — alternative parameter
+        // ====================================
+        _o.WriteLine("=== PART A: Tick(p) — Alternative Parameter Sweep ===");
+        _o.WriteLine("Fixed α=0.70, sweep p from 0.5 to 4.5");
+        _o.WriteLine("");
+
+        _o.WriteLine($"{"Family",-6} {"dTick/dp",12} {"sign change?",14} {"Tick range",14} {"behavior",-24}");
+        _o.WriteLine(new string('-', 72));
+
+        var pTickData = new Dictionary<VcFamily, (double[] tick, double[] pVals, double dTdp)>();
+
+        foreach (var fam in allFams)
+        {
+            var ticks = new List<double>(); var pVals = new List<double>();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double p = 0.5 + 4.0 * si / (double)(nSteps - 1);
+                pVals.Add(p);
+                var v = new VariantSpec($"{fam}_LP", fam, 1.0, 1.0, 0.70, 0.5, 0.0);
+                var v1l = new List<double>(); var vtl = new List<double>();
+                for (int ss = 0; ss < 3; ss++)
+                {
+                    double pLoc = p + (ss - 1) * 0.01;
+                    double sv1 = 0, svt = 0;
+                    for (int pIdx = 0; pIdx < 3; pIdx++)
+                    {
+                        double pp = pLoc; // use local p directly
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pp, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms;
+                    }
+                    v1l.Add(sv1 / 3.0); vtl.Add(svt / 3.0);
+                }
+                double tick = 0;
+                for (int i = 1; i < v1l.Count; i++)
+                    tick += Math.Abs((v1l[i] + vtl[i]) - (v1l[i - 1] + vtl[i - 1])) / 0.01;
+                ticks.Add(tick / (v1l.Count - 1));
+            }
+
+            var tArr = ticks.ToArray(); var pArr = pVals.ToArray();
+            double mT = tArr.Average(), mP = pArr.Average();
+            double covTP = 0, varP = 0;
+            for (int i = 0; i < tArr.Length; i++) { double dp = pArr[i] - mP; covTP += dp * (tArr[i] - mT); varP += dp * dp; }
+            double dTdp = varP > 1e-15 ? covTP / varP : 0;
+
+            bool signChange = false;
+            for (int i = 1; i < tArr.Length; i++)
+            {
+                double d1 = tArr[i] - tArr[i - 1];
+                if (i > 1) { double d0 = tArr[i - 1] - tArr[i - 2]; if (d0 * d1 < 0) signChange = true; }
+            }
+
+            string behavior = signChange ? "NON-MONOTONIC — has extremum!"
+                : dTdp < -1e-6 ? "decreasing"
+                : dTdp > 1e-6 ? "INCREASING ← gradient flips!"
+                : "flat";
+
+            _o.WriteLine($"{fam,-6} {dTdp,12:F6} {signChange,14} {tArr.Max() - tArr.Min(),14:F6} {behavior,-24}");
+            pTickData[fam] = (tArr, pArr, dTdp);
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART B: Competing gradients
+        // ====================================
+        _o.WriteLine("=== PART B: Competing Gradient Analysis ===");
+        _o.WriteLine("");
+
+        int increasing = pTickData.Count(kv => kv.Value.dTdp > 1e-6);
+        int decreasing = pTickData.Count(kv => kv.Value.dTdp < -1e-6);
+        int nonMonotonic = pTickData.Count(kv =>
+        {
+            var t = kv.Value.tick; bool nm = false;
+            for (int i = 2; i < t.Length; i++)
+            { if ((t[i] - t[i - 1]) * (t[i - 1] - t[i - 2]) < 0) nm = true; }
+            return nm;
+        });
+
+        _o.WriteLine($"Families with dTick/dp > 0 (increasing): {increasing}");
+        _o.WriteLine($"Families with dTick/dp < 0 (decreasing): {decreasing}");
+        _o.WriteLine($"Families with sign change (extremum): {nonMonotonic}");
+        _o.WriteLine("");
+
+        if (increasing > 0 && decreasing > 0)
+        {
+            _o.WriteLine("COMPETING GRADIENTS EXIST: Some families have");
+            _o.WriteLine("dTick/dp > 0 while others have dTick/dp < 0.");
+            _o.WriteLine("→ Composite field could have equilibrium points!");
+        }
+        else if (nonMonotonic > 0)
+        {
+            _o.WriteLine("NON-MONOTONIC TICK: Some families have local extrema.");
+            _o.WriteLine("→ Potential wells/barriers exist within single families!");
+        }
+        else
+        {
+            _o.WriteLine("UNIFORM GRADIENT: All families share same gradient sign.");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART C: Equilibrium search
+        // ====================================
+        _o.WriteLine("=== PART C: Equilibrium Point Search ===");
+        _o.WriteLine("");
+
+        if (increasing > 0 && decreasing > 0)
+        {
+            // Superpose increasing and decreasing families — find where F_total = 0
+            var incFam = pTickData.First(kv => kv.Value.dTdp > 1e-6).Key;
+            var decFam = pTickData.First(kv => kv.Value.dTdp < -1e-6).Key;
+            var (tInc, pInc, _) = pTickData[incFam];
+            var (tDec, pDec, _) = pTickData[decFam];
+
+            int nP = Math.Min(tInc.Length, tDec.Length);
+            var fTotal = new double[nP - 1];
+            int zeroCross = -1;
+            for (int i = 1; i < nP; i++)
+            {
+                double fInc = -(tInc[i] - tInc[i - 1]) / (pInc[i] - pInc[i - 1]);
+                double fDec = -(tDec[i] - tDec[i - 1]) / (pDec[i] - pDec[i - 1]);
+                fTotal[i - 1] = fInc + fDec;
+                if (i > 1 && fTotal[i - 1] * fTotal[i - 2] < 0) zeroCross = i;
+            }
+
+            _o.WriteLine($"Superposing {incFam} (dT/dp>0) + {decFam} (dT/dp<0):");
+            _o.WriteLine($"  Zero crossings of F_total: {(zeroCross > 0 ? $"at p≈{pInc[zeroCross]:F3}" : "NONE")}");
+
+            // Check if this is a stable equilibrium
+            if (zeroCross > 0)
+            {
+                double fBefore = fTotal[zeroCross - 1];
+                double fAfter = fTotal[zeroCross];
+                string stability = (fBefore > 0 && fAfter < 0) ? "STABLE (attractor)"
+                    : (fBefore < 0 && fAfter > 0) ? "UNSTABLE (repeller)" : "DEGENERATE";
+                _o.WriteLine($"  Stability: {stability}");
+            }
+        }
+        else
+        {
+            _o.WriteLine("No competing gradients → no equilibrium points possible.");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART D: Two-parameter landscape
+        // ====================================
+        _o.WriteLine("=== PART D: Two-Parameter Possibility ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("With two independent parameters (α, p), Tick(α, p)");
+        _o.WriteLine("is a 2D scalar field. If ∂Tick/∂α < 0 (universal)");
+        _o.WriteLine("but ∂Tick/∂p can change sign, then:");
+        _o.WriteLine("");
+        _o.WriteLine("  ∇Tick = (∂Tick/∂α, ∂Tick/∂p)");
+        _o.WriteLine("  F = -∇Tick");
+        _o.WriteLine("");
+        _o.WriteLine("Equilibrium: F = 0 requires BOTH components = 0.");
+        _o.WriteLine("Since ∂Tick/∂α < 0 always, the first component");
+        _o.WriteLine("of F is always > 0 — no full equilibrium possible.");
+        _o.WriteLine("");
+        _o.WriteLine("However, ∂Tick/∂p = 0 IS possible, creating a");
+        _o.WriteLine("'ridge' in the 2D landscape where the gradient");
+        _o.WriteLine("in the p-direction vanishes.");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART E: Decision
+        // ====================================
+        _o.WriteLine("=== PART E: Decision ===");
+        _o.WriteLine("");
+
+        if (increasing > 0)
+        {
+            _o.WriteLine("Model C: Local attractors CAN emerge when using");
+            _o.WriteLine("parameters other than α. The p-sweep reveals");
+            _o.WriteLine("that dTick/dp can be positive for some families,");
+            _o.WriteLine("creating the possibility of competing gradients");
+            _o.WriteLine("and equilibrium points in p-space.");
+            _o.WriteLine("");
+            _o.WriteLine("However, in full (α, p)-space, ∂Tick/∂α < 0");
+            _o.WriteLine("always, meaning complete equilibrium (F=0)");
+            _o.WriteLine("requires canceling this universal component.");
+        }
+        else
+        {
+            _o.WriteLine("Model A: Tick remains globally directed. No");
+            _o.WriteLine("parameter produces dTick/dθ > 0. The universal");
+            _o.WriteLine("'fall toward slower time' is parameter-independent.");
+        }
+        _o.WriteLine("");
+        _o.WriteLine("=== LTS_01 complete. Commit: LTS_01_LocalTickSourcesAudit ===");
+        Assert.True(true);
+    }
 }
