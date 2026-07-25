@@ -3,8 +3,8 @@
 **Version:** 5.0
 **Date:** 2026-07-25
 
-**Current Version:** V13.2 TICK POTENTIAL PHYSICS
-**Current Branch:** v13.2-tick-potential-physics
+**Current Version:** V13.3 CLOCKWORK GRAVITY CORRESPONDENCE
+**Current Branch:** v13.3-clockwork-gravity-correspondence
 **Cumulative Tests:** ~3442
 **Failed:** 0
 
@@ -196,5 +196,37 @@ a(α) = d²x/dα² = F(α)      acceleration ≡ force  ← CLOSED
 All trajectories **STABLE, CONVERGENT, finite terminal velocity.**
 
 
-*Generated 2026-07-25. V12.2 CLOSED (10 audits). V13.0 CLOSED (2 audits). V13.1 CLOSED (3 audits).
-~3442 tests, 0 failed. Next: V13.2 Tick Potential Physics.*
+### U = Tick Potential Landscape
+
+| Family | U(α) form | U_min | Shape |
+|:-------|:----------|------:|:------|
+| GAN/CNS | U ∝ exp(−2.76·α) | 0.0019 | Exponential |
+| SAC | U ∝ α^(−2.00) | 0.0001 | Power law |
+| RCS | U ∝ exp(−4.96·α) | 0.00004 | Steep exp. |
+| ICS | U ≈ const | 0.00005 | Plateau |
+
+All families: MONOTONIC DECREASING, CONVEX, asymptotically stable.
+
+
+## V13.2 — Tick Potential Physics (1 audit, CLOSED)
+
+| Audit | Key Result | Model |
+|:------|:-----------|:-----:|
+| TPP_01 | U = Tick IS the potential. F = -dU/dα exact. Complete Newtonian analogy closed | D |
+
+### Complete Newtonian Analogy
+
+```
+U(α) = Tick(α)          potential energy
+F = -dU/dα = -dTick/dα   force (exact)
+a = F (mass = 1)         acceleration
+v = U₀ - U(α)            velocity
+x = ∫v dα                position
+```
+
+Tick is not just a clock rate — it IS the potential from which
+force, acceleration, velocity, and trajectory all emerge.
+
+
+*Generated 2026-07-25. V12.2 CLOSED (10). V13.0 CLOSED (2). V13.1 CLOSED (3). V13.2 CLOSED (1).
+~3442 tests, 0 failed. Next: V13.3 Clockwork Gravity Correspondence.*

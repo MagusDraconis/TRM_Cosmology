@@ -2065,6 +2065,7 @@ maintained to prevent overinterpretation:
 | V12.2 | Duality Physics Correspondence | 10 | COMPLETE |
 | V13.0 | Time Gradient Reconstruction | 2 | COMPLETE |
 | V13.1 | Effective Time Dynamics | 3 | COMPLETE |
+| V13.2 | Tick Potential Physics | 1 | COMPLETE |
 | **Total** | | **3442** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3442 verified
@@ -2109,6 +2110,10 @@ tests with 0 failed is the authoritative current count as of 2026-07-25.
 ### V12.1 — Duality Validation — COMPLETE
 
 **Status:** CLOSED (2026-07-25). 2 audits (DVL_01, DPG_01). Duality robust across 16 config perturbations. Full hierarchy emerges from two orthogonal components.
+
+### V13.2 — Tick Potential Physics — CLOSED
+
+**Status:** CLOSED (2026-07-25). 1 audit (TPP_01). U = Tick IS the potential. F = -dU/dα exact. Monotonic, convex, asymptotically stable. Complete Newtonian analogy: U→F→a→v→x closed.
 
 ### V13.1 — Effective Time Dynamics — CLOSED
 
@@ -2166,9 +2171,9 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V13.1 CLOSED — 3 audits. Complete Newtonian kinematic chain: F→v→x→a=F in α-space. Branch: `v13.1-effective-time-dynamics`. Next: V13.2.
+**Current status:** V13.2 CLOSED — 1 audit. U=Tick=potential, F=-dU/dα exact. Complete Newtonian analogy closed. Branch: `v13.2-tick-potential-physics`. Next: V13.3.
 
-**V1 reconstruction complete:** Tick-gradient force → velocity → trajectory → acceleration. Closed kinematic chain. All trajectories convergent. V1 fully formalized.
+**Full V13 chain:** V13.0 (V1 reconstruction) → V13.1 (Newtonian chain) → V13.2 (potential physics). Tick IS the potential from which force, acceleration, velocity, and trajectory emerge.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
