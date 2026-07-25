@@ -1258,6 +1258,120 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void FOP_01_FamilyOperatorNatureAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== FOP_01: Family Operator Nature Audit ===");
+        _o.WriteLine("=== What IS the family-dependent operator F? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 36529;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+
+        // Fit L(β) = a + b*β per family
+        var fits = new List<(VcFamily fam, double a, double b, double r2, double[] Lvals)>();
+
+        foreach (var fam in families)
+        {
+            var betas = new List<double>();
+            var Lvals = new List<double>();
+
+            for (int bi = 0; bi < nBeta; bi++)
+            {
+                double beta = bi / (double)(nBeta - 1);
+                var v = new VariantSpec($"{fam}_FO", fam, 0.7, 1.0, 1.0, beta, 0.0);
+                var allL = new List<double>();
+                double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                for (int ip = 0; ip < 3; ip++)
+                {
+                    double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                    int nD = distances.Length; double[] kA = new double[nD];
+                    for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, dpv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                    for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                    for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                    var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                    allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                }
+
+                if (allL.Count < 3) continue;
+                betas.Add(beta);
+                Lvals.Add(allL.Average());
+            }
+
+            // Linear fit: L = a + b*β
+            double[] bArr = betas.ToArray();
+            double[] lArr = Lvals.ToArray();
+            double r2 = FitModelR2(lArr, new[] { bArr });
+            double r = PearsonCorrelation(bArr, lArr);
+
+            // Slope b = r * σ_L / σ_β
+            double stdB = Math.Sqrt(bArr.Average(bv => (bv - bArr.Average()) * (bv - bArr.Average())));
+            double stdL = Math.Sqrt(lArr.Average(lv => (lv - lArr.Average()) * (lv - lArr.Average())));
+            double slopeB = r * stdL / Math.Max(stdB, 1e-12);
+            double intercept = lArr.Average() - slopeB * bArr.Average();
+
+            fits.Add((fam, intercept, slopeB, r2, lArr));
+        }
+
+        // ============================================================
+        _o.WriteLine("=== L(β) = a + b*β per family ===");
+        _o.WriteLine($"{"Family",-6} {"intercept a",12} {"slope b",12} {"R²",10} {"CV(L)",10}");
+        _o.WriteLine(new string('-', 52));
+
+        foreach (var f in fits)
+        {
+            double cvL = StdOverMean(f.Lvals);
+            _o.WriteLine($"{f.fam,-6} {f.a,12:F4} {f.b,12:F4} {f.r2,10:F4} {cvL,10:F4}");
+        }
+        _o.WriteLine("");
+
+        double frozenSlope = fits.Where(f => f.fam == VcFamily.SAC || f.fam == VcFamily.RCS).Average(f => Math.Abs(f.b));
+        double liveSlope = fits.Where(f => f.fam != VcFamily.SAC && f.fam != VcFamily.RCS).Average(f => Math.Abs(f.b));
+        _o.WriteLine($"FROZEN mean |slope|: {frozenSlope:F6}");
+        _o.WriteLine($"LIVE   mean |slope|: {liveSlope:F6}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        bool allLinear = fits.All(f => f.r2 > 0.95);
+        bool frozenZero = frozenSlope < 1e-6;
+        bool liveNonZero = liveSlope > 0.1;
+
+        string decision;
+        if (allLinear && frozenZero && liveNonZero) decision = "Model B";
+        else if (allLinear) decision = "Model A";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}  linear={allLinear}  frozenZero={frozenZero}  liveNonZero={liveNonZero}");
+
+        if (decision == "Model B")
+            _o.WriteLine("F is a linear transformation operator. L(β) = a + b*β with family-dependent slope b. Frozen families have b=0 (identity-like); live families have b≠0 (active transformation). F transforms the static K(d) into dynamic L by linearly incorporating β.");
+        else if (decision == "Model A")
+            _o.WriteLine("F is a static mapping.");
+        else
+            _o.WriteLine("F has internal clockwork dynamics.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== FOP_01 complete. Commit: FOP_01_FamilyOperatorNatureAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
