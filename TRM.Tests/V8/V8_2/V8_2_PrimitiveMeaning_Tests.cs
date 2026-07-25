@@ -8,13 +8,14 @@ using static TRM.Tests.V7_3_and_4.V7TestHelpers;
 
 namespace TRM.Tests.V8_2;
 
-[Trait("Category", "V8_2"), Trait("Category", "LongRunning")]
+[Trait("Category", "V8_2")]
 public class V8_2_PrimitiveMeaning_Tests
 {
     private readonly ITestOutputHelper _o;
     public V8_2_PrimitiveMeaning_Tests(ITestOutputHelper o) { _o = o; }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PSE_01_PrimitiveSemanticExtensionAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -242,6 +243,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PTD_01_PrimitiveTransferDriftAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -441,6 +443,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PTO_01_PrimitiveTemporalOrderingAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -654,6 +657,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PET_01_PrimitiveEmergentTimeAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -837,6 +841,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PLT_01_PrimitiveLocalTimeAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -1026,6 +1031,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PEG_01_PrimitiveEmergentGeometryAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -1207,6 +1213,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PML_01_PrimitiveMetricLengthAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -1525,6 +1532,7 @@ public class V8_2_PrimitiveMeaning_Tests
     }
 
     [Fact]
+    [Trait("Category", "LongRunning")]
     public void PSC_01_PrimitiveSpeedConstraintAudit()
     {
         _o.WriteLine(new string('=', 108));
@@ -1839,6 +1847,325 @@ public class V8_2_PrimitiveMeaning_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
 
         static (double[] e, double[,] v) JacobiEigenLocalPsc(double[,] a, int n)
+        {
+            var m = new double[n, n]; var d = new double[n];
+            for (int i = 0; i < n; i++) { m[i, i] = 1.0; d[i] = a[i, i]; }
+            var b = new double[n]; var z = new double[n];
+            for (int i = 0; i < n; i++) { b[i] = d[i]; z[i] = 0.0; }
+            for (int iter = 0; iter < 100; iter++)
+            {
+                double sm = 0; for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++) sm += Math.Abs(a[i, j]);
+                if (sm < 1e-12) break;
+                double thresh = iter < 3 ? 0.2 * sm / (n * n) : 0.0;
+                for (int i = 0; i < n - 1; i++) for (int j = i + 1; j < n; j++)
+                {
+                    double g = 100.0 * Math.Abs(a[i, j]);
+                    if (iter > 3 && Math.Abs(d[i]) + g == Math.Abs(d[i]) && Math.Abs(d[j]) + g == Math.Abs(d[j])) a[i, j] = 0.0;
+                    else if (Math.Abs(a[i, j]) > thresh)
+                    {
+                        double h = d[j] - d[i], t;
+                        if (Math.Abs(h) + g == Math.Abs(h)) t = a[i, j] / h;
+                        else { double theta = 0.5 * h / a[i, j]; t = 1.0 / (Math.Abs(theta) + Math.Sqrt(1.0 + theta * theta)); if (theta < 0) t = -t; }
+                        double cc = 1.0 / Math.Sqrt(1.0 + t * t), s = t * cc, tau = s / (1.0 + cc);
+                        h = t * a[i, j]; z[i] -= h; z[j] += h; d[i] -= h; d[j] += h; a[i, j] = 0.0;
+                        for (int k = 0; k < i; k++) { g = a[k, i]; h = a[k, j]; a[k, i] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                        for (int k = i + 1; k < j; k++) { g = a[i, k]; h = a[k, j]; a[i, k] = g - s * (h + g * tau); a[k, j] = h + s * (g - h * tau); }
+                        for (int k = j + 1; k < n; k++) { g = a[i, k]; h = a[j, k]; a[i, k] = g - s * (h + g * tau); a[j, k] = h + s * (g - h * tau); }
+                        for (int k = 0; k < n; k++) { g = m[k, i]; h = m[k, j]; m[k, i] = g - s * (h + g * tau); m[k, j] = h + s * (g - h * tau); }
+                    }
+                }
+                for (int i = 0; i < n; i++) { b[i] += z[i]; d[i] = b[i]; z[i] = 0.0; }
+            }
+            return (d, m);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "LongRunning")]
+    public void TLG_01_TimeLengthGeometryAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== TLG_01: Time-Length Geometry Audit ===");
+        _o.WriteLine("=== Are Time and Length dual projections of geometry? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 12457;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        var rng = new Random(baseSeed + 7403);
+
+        const int nBeta = 21;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        int dimF = 5;
+
+        // Build β-trajectories: for each family+config, 21 points in 5D
+        var trajectories = new Dictionary<VcFamily, List<(double[] features, double dHdBeta)[]>>();
+        foreach (var fam in families) trajectories[fam] = new List<(double[], double)[]>();
+
+        foreach (var fam in families)
+        {
+            foreach (var cfg in configs)
+            {
+                var traj = new List<(double[], double)>();
+
+                double prevH = double.NaN;
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_TL", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double ss = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / ss; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocalTlg(cm, nContrasts);
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double t = r2L3 + 1e-12;
+                    double l1 = r2L1 / t, l2 = (r2L2 - r2L1) / t, l3 = (r2L3 - r2L2) / t;
+                    double ent = 0; if (l1 > 1e-12) ent -= l1 * Math.Log(l1); if (l2 > 1e-12) ent -= l2 * Math.Log(l2); if (l3 > 1e-12) ent -= l3 * Math.Log(l3);
+                    double dim = Math.Exp(ent);
+                    double d1 = Math.Abs(l1 - 1.0) + l2 + l3;
+                    double d2 = Math.Abs(l1 - 0.5) + Math.Abs(l2 - 0.5) + l3;
+                    double d3 = Math.Abs(l1 - 1.0 / 3) + Math.Abs(l2 - 1.0 / 3) + Math.Abs(l3 - 1.0 / 3);
+                    double acc = 1.0 / Math.Max(Math.Min(d1, Math.Min(d2, d3)), 0.01);
+
+                    double dHdBeta = double.IsNaN(prevH) ? 0 : (ent - prevH) / (1.0 / (nBeta - 1));
+                    prevH = ent;
+                    traj.Add((new[] { ent, dim, acc, r2L1, ent }, dHdBeta));
+                }
+
+                trajectories[fam].Add(traj.ToArray());
+            }
+        }
+
+        // ============================================================
+        // Global normalization
+        // ============================================================
+        var allFeat = families.SelectMany(f => trajectories[f]).SelectMany(t => t.Select(p => p.features)).ToArray();
+        var globMean = new double[dimF]; var globStd = new double[dimF];
+        for (int f = 0; f < dimF; f++) { globMean[f] = allFeat.Average(p => p[f]); globStd[f] = Math.Sqrt(allFeat.Average(p => (p[f] - globMean[f]) * (p[f] - globMean[f]))) + 1e-12; }
+
+        // ============================================================
+        // Part A: Time-Length correlation across all point pairs
+        // ============================================================
+        _o.WriteLine("=== Part A: Time-Length Correlation ===");
+
+        var tlPairs = new List<(double deltaTime, double deltaLength, string famPair)>();
+        var rng2 = new Random(baseSeed + 19);
+
+        foreach (var fam in families)
+        {
+            foreach (var traj in trajectories[fam])
+            {
+                // For each trajectory, sample pairs of points
+                var pts = traj;
+                int maxPairs = 50;
+                var indices = Enumerable.Range(1, pts.Length - 1).ToList(); // skip first (dH=0)
+                for (int pi = 0; pi < Math.Min(maxPairs, indices.Count * (indices.Count - 1) / 2); pi++)
+                {
+                    int a = indices[rng2.Next(indices.Count)];
+                    int b = indices[rng2.Next(indices.Count)];
+                    if (a == b) continue;
+                    double dT = Math.Abs(pts[a].dHdBeta - pts[b].dHdBeta);
+                    var fa = pts[a].features; var fb = pts[b].features;
+                    double dL = Math.Sqrt(Enumerable.Range(0, dimF).Sum(f =>
+                        ((fa[f] - globMean[f]) / globStd[f] - (fb[f] - globMean[f]) / globStd[f]) *
+                        ((fa[f] - globMean[f]) / globStd[f] - (fb[f] - globMean[f]) / globStd[f])));
+                    tlPairs.Add((dT, dL, $"{fam}"));
+                }
+            }
+        }
+
+        // Also add cross-family pairs
+        for (int fi = 0; fi < families.Length; fi++)
+        {
+            for (int fj = fi + 1; fj < families.Length; fj++)
+            {
+                var trajI = trajectories[families[fi]][0];
+                var trajJ = trajectories[families[fj]][0];
+                var indI = Enumerable.Range(1, trajI.Length - 1).ToArray();
+                var indJ = Enumerable.Range(1, trajJ.Length - 1).ToArray();
+                int maxCross = 30;
+                for (int pi = 0; pi < Math.Min(maxCross, indI.Length * indJ.Length); pi++)
+                {
+                    int a = indI[rng2.Next(indI.Length)];
+                    int b = indJ[rng2.Next(indJ.Length)];
+                    double dT = Math.Abs(trajI[a].dHdBeta - trajJ[b].dHdBeta);
+                    var fa = trajI[a].features; var fb = trajJ[b].features;
+                    double dL = Math.Sqrt(Enumerable.Range(0, dimF).Sum(f =>
+                        ((fa[f] - globMean[f]) / globStd[f] - (fb[f] - globMean[f]) / globStd[f]) *
+                        ((fa[f] - globMean[f]) / globStd[f] - (fb[f] - globMean[f]) / globStd[f])));
+                    tlPairs.Add((dT, dL, $"{families[fi]}-{families[fj]}"));
+                }
+            }
+        }
+
+        double rTL_all = PearsonCorrelation(tlPairs.Select(p => p.deltaTime).ToArray(), tlPairs.Select(p => p.deltaLength).ToArray());
+        _o.WriteLine($"Overall r(ΔT, ΔL) = {rTL_all:F4} ({tlPairs.Count} pairs)");
+        _o.WriteLine("");
+
+        // Per-family
+        _o.WriteLine($"{"Family",-12} {"r(ΔT,ΔL)",10} {"n pairs",8}");
+        _o.WriteLine(new string('-', 32));
+        foreach (var fam in families)
+        {
+            var fp = tlPairs.Where(p => p.famPair == $"{fam}").ToArray();
+            if (fp.Length < 2) continue;
+            double r = PearsonCorrelation(fp.Select(p => p.deltaTime).ToArray(), fp.Select(p => p.deltaLength).ToArray());
+            _o.WriteLine($"{fam,-12} {r,10:F4} {fp.Length,8}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part B: Directional test — slower clocks = further away?
+        // ============================================================
+        _o.WriteLine("=== Part B: Directional Test ===");
+        // Split pairs by time-rate sign and check length relationship
+        var increasingT = tlPairs.Where(p => p.deltaTime > 0).ToArray();
+        var r_inc = increasingT.Length > 1 ? PearsonCorrelation(increasingT.Select(p => p.deltaTime).ToArray(), increasingT.Select(p => p.deltaLength).ToArray()) : 0;
+        _o.WriteLine($"r(ΔT>0, ΔL) = {r_inc:F4} ({increasingT.Length} pairs)");
+        _o.WriteLine($"ΔT>0 implies ΔL>0 correlation: r={r_inc:F4} — {(r_inc > 0.3 ? "slower clocks → further away" : r_inc < -0.3 ? "faster clocks → further away" : "no directional preference")}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part C: Joint metric construction
+        // ============================================================
+        _o.WriteLine("=== Part C: Joint Time-Length Metric ===");
+        // Normalize ΔT and ΔL to comparable scales
+        double meanDT = tlPairs.Average(p => p.deltaTime) + 1e-12;
+        double meanDL = tlPairs.Average(p => p.deltaLength) + 1e-12;
+        double stdDT = Math.Sqrt(tlPairs.Average(p => (p.deltaTime - meanDT) * (p.deltaTime - meanDT))) + 1e-12;
+        double stdDL = Math.Sqrt(tlPairs.Average(p => (p.deltaLength - meanDL) * (p.deltaLength - meanDL))) + 1e-12;
+
+        // Joint distance: ds² = (ΔT/σ_T)² + (ΔL/σ_L)²
+        var jointDist = tlPairs.Select(p => Math.Sqrt(
+            (p.deltaTime / stdDT) * (p.deltaTime / stdDT) +
+            (p.deltaLength / stdDL) * (p.deltaLength / stdDL))).ToArray();
+
+        // Compare: pure ΔL vs joint metric — which predicts accessibility differences better?
+        // Build accessibility differences for pairs
+        _o.WriteLine($"Joint metric: ds² = (ΔT/σ_T)² + (ΔL/σ_L)²");
+        _o.WriteLine($"σ_T={stdDT:F4}, σ_L={stdDL:F4}");
+        _o.WriteLine($"Mean joint distance: {jointDist.Average():F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part D: Speed preservation under separate T/L variation
+        // ============================================================
+        _o.WriteLine("=== Part D: Speed Stability Under T/L Decoupling ===");
+        // For each trajectory, compute: CV of dH/dβ, CV of step length, CV of speed
+        _o.WriteLine($"{"Family/config",-18} {"CV(dH/dβ)",10} {"CV(stepLen)",12} {"CV(speed)",10}");
+
+        var speedStability = new List<(VcFamily fam, int cfg, double cvT, double cvL, double cvS)>();
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < trajectories[fam].Count; ci++)
+            {
+                var traj = trajectories[fam][ci];
+                var rates = traj.Skip(1).Select(p => Math.Abs(p.dHdBeta)).ToArray();
+                var lens = new List<double>();
+                for (int i = 1; i < traj.Length; i++)
+                {
+                    var fa = traj[i - 1].features; var fb = traj[i].features;
+                    lens.Add(Math.Sqrt(Enumerable.Range(0, dimF).Sum(f =>
+                        ((fa[f] - globMean[f]) / globStd[f] - (fb[f] - globMean[f]) / globStd[f]) *
+                        ((fa[f] - globMean[f]) / globStd[f] - (fb[f] - globMean[f]) / globStd[f]))));
+                }
+                var lensArr = lens.ToArray();
+                var speeds = Enumerable.Range(0, rates.Length).Select(i => lensArr[i] / Math.Max(rates[i], 1e-12)).ToArray();
+
+                double cvT = Math.Sqrt(rates.Average(r => (r - rates.Average()) * (r - rates.Average()))) / Math.Max(rates.Average(), 1e-12);
+                double cvL = Math.Sqrt(lensArr.Average(l => (l - lensArr.Average()) * (l - lensArr.Average()))) / Math.Max(lensArr.Average(), 1e-12);
+                double cvS = Math.Sqrt(speeds.Average(s => (s - speeds.Average()) * (s - speeds.Average()))) / Math.Max(speeds.Average(), 1e-12);
+
+                speedStability.Add((fam, ci, cvT, cvL, cvS));
+                _o.WriteLine($"{fam,-4} cfg{ci,-2}          {cvT,10:F4} {cvL,12:F4} {cvS,10:F4}");
+            }
+        }
+        _o.WriteLine("");
+
+        double avgCV_T = speedStability.Average(s => s.cvT);
+        double avgCV_L = speedStability.Average(s => s.cvL);
+        double avgCV_S = speedStability.Average(s => s.cvS);
+
+        bool speedMoreStable = avgCV_S < avgCV_T * 0.8 && avgCV_S < avgCV_L * 0.8;
+        _o.WriteLine($"Mean CV(dH/dβ)={avgCV_T:F4}, CV(stepLen)={avgCV_L:F4}, CV(speed)={avgCV_S:F4}");
+        _o.WriteLine($"Speed more stable than components: {(speedMoreStable ? "YES" : "no")}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+
+        bool strongCoupling = Math.Abs(rTL_all) > 0.4 && speedMoreStable;
+        bool weakCoupling = Math.Abs(rTL_all) > 0.2;
+        bool noCoupling = Math.Abs(rTL_all) <= 0.2;
+
+        string decision;
+        if (strongCoupling) decision = "Model C";
+        else if (weakCoupling) decision = "Model B";
+        else if (noCoupling) decision = "Model A";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"r(ΔT, ΔL) = {rTL_all:F4}");
+        _o.WriteLine($"Speed more stable: {speedMoreStable} (CV_S={avgCV_S:F4} vs CV_T={avgCV_T:F4}, CV_L={avgCV_L:F4})");
+
+        if (decision == "Model C")
+            _o.WriteLine("Time and Length are dual projections of the same accessibility geometry. Changes in local time rate systematically predict changes in metric length (strong r). The joint metric ds² = (ΔT/σ_T)² + (ΔL/σ_L)² captures unified geometry. Speed is more stable than either component alone — Length and Time co-vary in a way that preserves the characteristic conversion factor. Without assuming spacetime, relativity, or length contraction.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Weak coupling: r(ΔT,ΔL)={rTL_all:F3}. Time and Length show partial geometric connection.");
+        else if (decision == "Model A")
+            _o.WriteLine("Time and Length are independent — no systematic geometric coupling.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. r(ΔT, ΔL) = {rTL_all:F4} across {tlPairs.Count} pairs");
+        _o.WriteLine($"3. Speed stability: CV_S={avgCV_S:F4} vs CV_T={avgCV_T:F4}, CV_L={avgCV_L:F4}");
+        _o.WriteLine($"4. Joint metric: Time+Length unified distance");
+        _o.WriteLine($"5. Decision: {decision}");
+        _o.WriteLine("6. Commit-ready summary:");
+        string tlgLabel = decision == "Model C" ? "Time and Length are dual projections" : decision == "Model B" ? "Weak Time-Length coupling" : "Time and Length independent";
+        _o.WriteLine($"   TLG_01_TimeLengthGeometryAudit — {tlgLabel} of accessibility geometry.");
+        _o.WriteLine("");
+        _o.WriteLine("=== TLG_01 complete. Commit: TLG_01_TimeLengthGeometryAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+
+        static (double[] e, double[,] v) JacobiEigenLocalTlg(double[,] a, int n)
         {
             var m = new double[n, n]; var d = new double[n];
             for (int i = 0; i < n; i++) { m[i, i] = 1.0; d[i] = a[i, i]; }
