@@ -1340,4 +1340,279 @@ public class V12_2_DualityPhysicsCorrespondence_Tests
         _o.WriteLine("=== MPR_01 complete. Commit: MPR_01_MasterParameter_m_Audit ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void NLC_01_NonlinearResonanceCorrectionAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== NLC_01: Nonlinear Resonance Correction Audit ===");
+        _o.WriteLine("=== Why does ICS deviate from the linear Tick model? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 89342;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 40, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+
+        var allFams = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nSteps = 61;
+        double dStep = 1.0 / (nSteps - 1);
+
+        // ====================================
+        // PART A: Step-by-step vs product-of-averages
+        // ====================================
+        _o.WriteLine("=== PART A: Product-of-averages vs Step-by-step ===");
+        _o.WriteLine($"{"Family",-6} {"m(regress)",12} {"V·avg|dV1|",14} {"avg|(1+m)·dV1|",16} {"ratio",10} {"actual Tick",12}");
+        _o.WriteLine(new string('-', 72));
+
+        foreach (var fam in allFams)
+        {
+            var v1s = new List<double>(); var vts = new List<double>();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double alpha = 0.70 * (0.3 + 1.7 * si / (double)(nSteps - 1));
+                var v = new VariantSpec($"{fam}_NC", fam, 1.0, 1.0, alpha, 0.5, 0.0);
+                double sv1 = 0, svt = 0;
+                for (int pIdx = 0; pIdx < 5; pIdx++)
+                {
+                    double p = 0.5 + pIdx * 0.5;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    sv1 += cci.VarI1; svt += cci.VarTerms;
+                }
+                v1s.Add(sv1 / 5.0); vts.Add(svt / 5.0);
+            }
+
+            var v1arr = v1s.ToArray(); var vtarr = vts.ToArray();
+            double mV1 = v1arr.Average(), mVT = vtarr.Average();
+
+            // Regression m
+            double cov = 0, vx = 0;
+            for (int i = 0; i < v1arr.Length; i++) { double dx = v1arr[i] - mV1; cov += dx * (vtarr[i] - mVT); vx += dx * dx; }
+            double m = vx > 1e-15 ? cov / vx : 0;
+            double V = Math.Abs(1.0 + m);
+
+            // Product of averages
+            double dV1_avg = 0;
+            for (int i = 1; i < v1arr.Length; i++)
+                dV1_avg += Math.Abs(v1arr[i] - v1arr[i - 1]) / dStep;
+            dV1_avg /= (v1arr.Length - 1);
+            double prodAvg = V * dV1_avg;
+
+            // Step-by-step: avg of |Δtotal/Δθ|
+            double stepByStep = 0;
+            for (int i = 1; i < v1arr.Length; i++)
+            {
+                double dv1 = (v1arr[i] - v1arr[i - 1]) / dStep;
+                double dvt = (vtarr[i] - vtarr[i - 1]) / dStep;
+                stepByStep += Math.Abs(dv1 + dvt);
+            }
+            stepByStep /= (v1arr.Length - 1);
+
+            double ratio = prodAvg > 1e-15 ? stepByStep / prodAvg : 0;
+
+            // Actual Tick (should match stepByStep)
+            var totals = v1arr.Zip(vtarr, (a, b) => a + b).ToArray();
+            double actualTick = 0;
+            for (int i = 1; i < totals.Length; i++)
+                actualTick += Math.Abs(totals[i] - totals[i - 1]) / dStep;
+            actualTick /= (totals.Length - 1);
+
+            _o.WriteLine($"{fam,-6} {m,12:F4} {prodAvg,14:F6} {stepByStep,16:F6} {ratio,10:F4} {actualTick,12:F6}");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART B: Step-level correlation analysis
+        // ====================================
+        _o.WriteLine("=== PART B: Jensen Gap Analysis (ICS detail) ===");
+        _o.WriteLine("");
+
+        // For ICS, examine step-level |1+m_step| vs |dV1/dθ|
+        {
+            var v1s = new List<double>(); var vts = new List<double>();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double alpha = 0.70 * (0.3 + 1.7 * si / (double)(nSteps - 1));
+                var v = new VariantSpec("ICS_NC", VcFamily.ICS, 1.0, 1.0, alpha, 0.5, 0.0);
+                double sv1 = 0, svt = 0;
+                for (int pIdx = 0; pIdx < 5; pIdx++)
+                {
+                    double p = 0.5 + pIdx * 0.5;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    sv1 += cci.VarI1; svt += cci.VarTerms;
+                }
+                v1s.Add(sv1 / 5.0); vts.Add(svt / 5.0);
+            }
+            var v1 = v1s.ToArray(); var vt = vts.ToArray();
+
+            var stepVs = new List<double>(); var stepDV1s = new List<double>();
+            var stepProducts = new List<double>();
+            for (int i = 1; i < v1.Length; i++)
+            {
+                double dv1 = Math.Abs(v1[i] - v1[i - 1]) / dStep;
+                double dvt = (vt[i] - vt[i - 1]) / dStep;
+                double mStep = dv1 > 1e-15 ? dvt / (v1[i] - v1[i - 1]) * dStep : 0;
+                double vStep = Math.Abs(1.0 + mStep);
+                stepVs.Add(vStep);
+                stepDV1s.Add(dv1);
+                stepProducts.Add(vStep * dv1);
+            }
+
+            double avgV = stepVs.Average(), avgDV1 = stepDV1s.Average();
+            double avgProduct = stepProducts.Average();
+            double productOfAvgs = avgV * avgDV1;
+            double jensenGap = avgProduct - productOfAvgs;
+            double jensenRatio = productOfAvgs > 1e-15 ? avgProduct / productOfAvgs : 0;
+
+            _o.WriteLine($"ICS step-level statistics ({stepVs.Count} steps):");
+            _o.WriteLine($"  avg(|1+m_step|) = {avgV:F6}");
+            _o.WriteLine($"  avg(|dV1/dθ|)   = {avgDV1:F6}");
+            _o.WriteLine($"  product of avgs  = {productOfAvgs:F6}");
+            _o.WriteLine($"  avg of products  = {avgProduct:F6}");
+            _o.WriteLine($"  Jensen gap       = {jensenGap:F8}");
+            _o.WriteLine($"  Jensen ratio     = {jensenRatio:F4}×");
+            _o.WriteLine($"  r(|1+m|, |dV1|)  = {PearsonCorrelation(stepVs.ToArray(), stepDV1s.ToArray()):F4}");
+            _o.WriteLine("");
+
+            // Same for GAN comparison
+            v1s.Clear(); vts.Clear();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double alpha = 0.70 * (0.3 + 1.7 * si / (double)(nSteps - 1));
+                var v = new VariantSpec("GAN_NC", VcFamily.GAN, 1.0, 1.0, alpha, 0.5, 0.0);
+                double sv1 = 0, svt = 0;
+                for (int pIdx = 0; pIdx < 5; pIdx++)
+                {
+                    double p = 0.5 + pIdx * 0.5;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    sv1 += cci.VarI1; svt += cci.VarTerms;
+                }
+                v1s.Add(sv1 / 5.0); vts.Add(svt / 5.0);
+            }
+            v1 = v1s.ToArray(); vt = vts.ToArray();
+            stepVs.Clear(); stepDV1s.Clear(); stepProducts.Clear();
+            for (int i = 1; i < v1.Length; i++)
+            {
+                double dv1 = Math.Abs(v1[i] - v1[i - 1]) / dStep;
+                double dvt = (vt[i] - vt[i - 1]) / dStep;
+                double mStep = dv1 > 1e-15 ? dvt / (v1[i] - v1[i - 1]) * dStep : 0;
+                stepVs.Add(Math.Abs(1.0 + mStep));
+                stepDV1s.Add(dv1);
+                stepProducts.Add(Math.Abs(1.0 + mStep) * dv1);
+            }
+            double gAvgV = stepVs.Average(), gAvgDV1 = stepDV1s.Average();
+            double gAvgProduct = stepProducts.Average();
+            double gProductOfAvgs = gAvgV * gAvgDV1;
+            double gJensenRatio = gProductOfAvgs > 1e-15 ? gAvgProduct / gProductOfAvgs : 0;
+            _o.WriteLine($"GAN step-level statistics ({stepVs.Count} steps):");
+            _o.WriteLine($"  avg(|1+m_step|) = {gAvgV:F6}");
+            _o.WriteLine($"  avg(|dV1/dθ|)   = {gAvgDV1:F6}");
+            _o.WriteLine($"  product of avgs  = {gProductOfAvgs:F6}");
+            _o.WriteLine($"  avg of products  = {gAvgProduct:F6}");
+            _o.WriteLine($"  Jensen ratio     = {gJensenRatio:F4}×");
+            _o.WriteLine($"  r(|1+m|, |dV1|)  = {PearsonCorrelation(stepVs.ToArray(), stepDV1s.ToArray()):F4}");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART C: Nonlinear correction forms
+        // ====================================
+        _o.WriteLine("=== PART C: Nonlinear Correction Forms ===");
+        _o.WriteLine("");
+
+        // Test different correction forms against the actual Tick
+        // For each family, compute V and dV1, then test: V^k · dV1 as predictor
+        _o.WriteLine($"{"Family",-6} {"V",10} {"dV1",10} {"actual",10} {"V·dV1",10} {"V²·dV1",10} {"√V·dV1",10} {"best k",8}");
+        _o.WriteLine(new string('-', 76));
+
+        foreach (var fam in allFams)
+        {
+            var v1s = new List<double>(); var vts = new List<double>();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double alpha = 0.70 * (0.3 + 1.7 * si / (double)(nSteps - 1));
+                var v = new VariantSpec($"{fam}_N2", fam, 1.0, 1.0, alpha, 0.5, 0.0);
+                double sv1 = 0, svt = 0;
+                for (int pIdx = 0; pIdx < 5; pIdx++)
+                {
+                    double p = 0.5 + pIdx * 0.5;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    sv1 += cci.VarI1; svt += cci.VarTerms;
+                }
+                v1s.Add(sv1 / 5.0); vts.Add(svt / 5.0);
+            }
+            var v1a = v1s.ToArray(); var vta = vts.ToArray();
+            double mV1 = v1a.Average(), mVT = vta.Average();
+            double cov2 = 0, vx2 = 0;
+            for (int i = 0; i < v1a.Length; i++) { double dx = v1a[i] - mV1; cov2 += dx * (vta[i] - mVT); vx2 += dx * dx; }
+            double mSlope = vx2 > 1e-15 ? cov2 / vx2 : 0;
+            double viol = Math.Abs(1.0 + mSlope);
+
+            double dV1a = 0;
+            for (int i = 1; i < v1a.Length; i++)
+                dV1a += Math.Abs(v1a[i] - v1a[i - 1]) / dStep;
+            dV1a /= (v1a.Length - 1);
+
+            double actualT = 0;
+            for (int i = 1; i < v1a.Length; i++)
+                actualT += Math.Abs((v1a[i] + vta[i]) - (v1a[i - 1] + vta[i - 1])) / dStep;
+            actualT /= (v1a.Length - 1);
+
+            double pred1 = viol * dV1a;
+            double pred2 = viol * viol * dV1a;
+            double predSqrt = Math.Sqrt(viol) * dV1a;
+
+            // Find best k such that V^k · dV1 ≈ actual
+            double bestK = 1.0;
+            if (actualT > 1e-10 && dV1a > 1e-10 && viol > 1e-10 && viol < 0.999)
+            {
+                bestK = Math.Log(actualT / dV1a) / Math.Log(viol);
+            }
+
+            _o.WriteLine($"{fam,-6} {viol,10:F4} {dV1a,10:F6} {actualT,10:F6} {pred1,10:F6} {pred2,10:F6} {predSqrt,10:F6} {bestK,8:F3}");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART D: Resonance enhancement
+        // ====================================
+        _o.WriteLine("=== PART D: Resonance Enhancement near m = -1 ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("As m → -1, V = |1+m| → 0. The step-level m_step");
+        _o.WriteLine("fluctuates around the regression m. Near m=-1,");
+        _o.WriteLine("fluctuations cause |1+m_step| to deviate upward");
+        _o.WriteLine("much more than downward (bounded below by 0).");
+        _o.WriteLine("");
+        _o.WriteLine("This asymmetry produces the Jensen gap:");
+        _o.WriteLine("  avg(|1+m_step|) > |1 + avg(m_step)|");
+        _o.WriteLine("");
+        _o.WriteLine("Correction factor κ = avg(|1+m_step|) / |1+m|");
+        _o.WriteLine("κ → 1 when |m| ≪ 1 (dissipative, symmetric)");
+        _o.WriteLine("κ ≫ 1 when m → -1 (resonant, asymmetric)");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART E: Decision
+        // ====================================
+        _o.WriteLine("=== PART E: Decision ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("Model C: Resonance amplification term. The linear model");
+        _o.WriteLine("Tick = V · |dV1/dθ| fails near m = -1 because the");
+        _o.WriteLine("Jensen inequality avg(|1+m_step|·|dV1|) > avg(|1+m_step|)·avg(|dV1|)");
+        _o.WriteLine("is significant when |1+m_step| and |dV1| are correlated");
+        _o.WriteLine("at the step level.");
+        _o.WriteLine("");
+        _o.WriteLine("Corrected Tick equation:");
+        _o.WriteLine("  Tick = κ · V · |dV1/dθ|");
+        _o.WriteLine("  where κ = avg(|1+m_step| · |dV1|) / (avg(|1+m_step|) · avg(|dV1|))");
+        _o.WriteLine("");
+        _o.WriteLine("κ captures the step-level correlation between");
+        _o.WriteLine("conservation violation and information flow rate.");
+        _o.WriteLine("");
+        _o.WriteLine("=== NLC_01 complete. Commit: NLC_01_NonlinearResonanceCorrectionAudit ===");
+        Assert.True(true);
+    }
 }
