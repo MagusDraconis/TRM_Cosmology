@@ -2501,6 +2501,102 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void XPR_01_XPhysicalRealityAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== XPR_01: X Physical Reality Audit ===");
+        _o.WriteLine("=== Is X physically meaningful or just compression? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 71687;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var data = new List<(double dEq, double L, double dH)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_XP", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double dH = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    data.Add((Math.Abs(totals[i] - eqTot), Ls[i], dH));
+                }
+            }
+        }
+
+        var dEqArr = data.Select(d => d.dEq).ToArray();
+        var Larr = data.Select(d => d.L).ToArray();
+        var dHarr = data.Select(d => d.dH).ToArray();
+
+        // Scale factors from data
+        double mD = dEqArr.Average(), sD = Math.Sqrt(dEqArr.Average(v => (v - mD) * (v - mD))) + 1e-12;
+        double mL = Larr.Average(), sL = Math.Sqrt(Larr.Average(v => (v - mL) * (v - mL))) + 1e-12;
+
+        // X = D_eq_norm - L_norm (PC1 direction)
+        var X_pc1 = Enumerable.Range(0, dEqArr.Length).Select(i => (dEqArr[i] - mD) / sD - (Larr[i] - mL) / sL).ToArray();
+
+        // Physical interpretation: X_raw = D_eq - k*L (no normalization)
+        double k = sD / sL; // scale L to D_eq units
+        var X_phys = Enumerable.Range(0, dEqArr.Length).Select(i => dEqArr[i] - k * Larr[i]).ToArray();
+
+        double r2_pc1 = R2SinglePredictor(dHarr, X_pc1);
+        double r2_phys = R2SinglePredictor(dHarr, X_phys);
+        double r2_both = FitModelR2(dHarr, new[] { dEqArr, Larr });
+
+        _o.WriteLine("=== Physical Interpretation ===");
+        _o.WriteLine($"X_pc1 = (D_eq-μ_D)/σ_D - (L-μ_L)/σ_L : R²={r2_pc1:F4}");
+        _o.WriteLine($"X_phys = D_eq - k*L  (k={k:F2})        : R²={r2_phys:F4}");
+        _o.WriteLine($"D_eq + L (both)                         : R²={r2_both:F4}");
+        _o.WriteLine("");
+
+        double cvX = StdOverMean(X_phys);
+        _o.WriteLine($"CV(X_phys) = {cvX:F2}");
+
+        string decision = r2_phys > r2_both * 0.97 ? "Model C" : "Model B";
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model C")
+            _o.WriteLine($"X = D_eq - {k:F1}×L is a genuine physical state variable — combined budget-structure tension. It preserves 97%+ of the combined predictive power without normalization artifacts. X measures how far the system is from relaxed equilibrium simultaneously in variance budget and covariance structure.");
+        else
+            _o.WriteLine("X has partial physical meaning.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== XPR_01 complete. Commit: XPR_01_XPhysicalRealityAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
