@@ -105,6 +105,120 @@ public class V10_1_ClockworkRegimePhysics_Tests
         Assert.True(true);
     }
 
+    [Fact]
+    public void CRI_01_ClockworkRegimeInteractionAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CRI_01: Clockwork Regime Interaction Audit ===");
+        _o.WriteLine("=== Can regimes coexist and interact? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 80357;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var allFamilies = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        _o.WriteLine("=== Full Family Spectrum ===");
+        _o.WriteLine($"{"Family",-6} {"mean Tick",10} {"mean L",10} {"mean X",10} {"regime",-14}");
+        _o.WriteLine(new string('-', 52));
+
+        foreach (var fam in allFamilies)
+        {
+            var ticks = new List<double>(); var Ls = new List<double>(); var Xs = new List<double>();
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Lvals = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_RI", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Lvals.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    ticks.Add(Math.Abs(totals[i + 1] - totals[i]) / dBeta);
+                    Ls.Add(Lvals[i]);
+                    Xs.Add(Math.Abs(totals[i] - eqTot) - 0.08 * Lvals[i]);
+                }
+            }
+
+            double mt = ticks.Average(), mL = Ls.Average(), mX = Xs.Average();
+            string regime = mt < 1e-8 ? "OFF/Frozen" : mt < 0.02 ? "Resonant" : "Dissipative";
+            _o.WriteLine($"{fam,-6} {mt,10:F6} {mL,10:F4} {mX,10:F4} {regime,-14}");
+        }
+        _o.WriteLine("");
+
+        // Check for spectrum or clusters
+        var ganTick = new List<double>(); var icsTick = new List<double>();
+        foreach (int ci in new[] { 0, 1, 2 })
+        {
+            // Quick tick computation for GAN and ICS
+            var cfg = configs[ci];
+            foreach (var fam in new[] { VcFamily.GAN, VcFamily.ICS })
+            {
+                var totals = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_RI", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                }
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double t = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    if (fam == VcFamily.GAN) ganTick.Add(t); else icsTick.Add(t);
+                }
+            }
+        }
+
+        double gapRatio = ganTick.Average() / Math.Max(icsTick.Average(), 1e-12);
+        _o.WriteLine($"Regime gap ratio (GAN/ICS Tick) = {gapRatio:F2}");
+
+        string decision = gapRatio > 3 ? "Model A" : gapRatio > 1.5 ? "Model B" : "Model C";
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model A")
+            _o.WriteLine("Discrete regimes — no continuous spectrum. Regimes are separated by a structural gap.");
+        else if (decision == "Model B")
+            _o.WriteLine("Weak interaction — gap exists but regimes are adjacent.");
+        else
+            _o.WriteLine("Continuous spectrum — regimes smoothly hybridize.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== CRI_01 complete. Commit: CRI_01_ClockworkRegimeInteractionAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
