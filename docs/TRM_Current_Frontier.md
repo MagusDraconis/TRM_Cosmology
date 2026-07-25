@@ -1,20 +1,10 @@
 # TRM Current Frontier
 
-**Version:** 4.5
+**Version:** 5.0
 **Date:** 2026-07-25
 
 **Current Version:** V12.2 DUALITY PHYSICS CORRESPONDENCE
 **Current Branch:** v12.2-duality-physics-correspondence
-**Current Branch:** v12.1-duality-validation
-**Current Branch:** v12.0-information-physics
-**Cumulative Tests:** ~3393
-**Failed:** 0
-
----
-
-V10.1 REGIME PHYSICS — CLOSED. 5 audits. Two irreducible regimes:
-Dissipative (GAN/CNS) and Resonant (ICS). VarI1-VarTerms coupling
-is family-axiom invariant. Next: V11.0 — Family Axiom Physics.
 **Cumulative Tests:** ~3393
 **Failed:** 0
 
@@ -24,36 +14,74 @@ is family-axiom invariant. Next: V11.0 — Family Axiom Physics.
 
 For any new LLM chat or Copilot session, read in this order:
 
-1. `TRM_Current_Frontier.md` (this file) — active frontier, model, constraints, next prompt
-2. `TRM_Project_QuickStart_For_New_Chats.md` — operational briefing, supported findings, open problems
-3. `TRM_Project_Lineage_Overview.md` — complete V1 → V7.9 historical lineage
+1. `TRM_Current_Frontier.md` (this file) — active frontier, model, constraints
+2. `TRM_Project_QuickStart_For_New_Chats.md` — operational briefing
+3. `TRM_Project_Lineage_Overview.md` — complete V1 → V12.2 historical lineage
 
 ---
 
 ## One-Sentence Current State
 
-V9.0/V9.1 CLOCKWORK PHYSICS — CLOSED. 20 audits. Primary observable:
-L = 1-VarI1/VarTerms (CV=0.15). All 6 V1 concepts recovered.
-State space sufficient. Prediction gap resolved. See `docsV9/V9_0_Closure_Report.md`.
+V12.2 DUALITY PHYSICS CORRESPONDENCE. Information-Dynamics Duality is the
+deepest validated layer. Information (l1, concentration, structure) and
+Dynamics (Tick, activity, time flow) are orthogonal irreducible components.
+The Family Axiom generates the duality. Strong correspondence to known
+physics (order-fluctuation, structure-process dualities). Full hierarchy
+emerges from two orthogonal components.
 
 ---
 
-## Current Preferred Model
+## Deepest Validated Chain
 
-**M3++** — unchanged. **Stop-Low policy:**
-- c3OmgS > 0.1: continue M3++ persistence validation
-- c3OmgS ≤ 0.1: stop continuation (low rescue probability)
-- Preserves all rescues. Zero damage. 75% work reduction.
-- Frozen — V5.60 findings are diagnostic only, do not affect policy.
+```
+Family Axiom
+    ↓
+VarI1-VarTerms Coupling (family-dependent, irreducible)
+    ↓
+Information (l1) ↔ Dynamics (Tick)  ← DUALITY (V12.1)
+    ↓
+Regime Classification (OFF / Resonant / Dissipative)
+    ↓
+D_eq, X (unified state)
+    ↓
+dH (time flow), L (observable, CV=0.15)
+    ↓
+Geometry → Length → Speed (V8.2)
+```
 
-**V5.60 SAC dynamics model:**
-- SAC chain: K→Sim→RP→Nm→DL→Cupd→K'
-- Cupd = K₀·exp(-d/ξ) — exponential coupling update
-- Emergence: AMNESIC (first Cupd erases initial K)
-- Dynamics: LIMIT CYCLE with period = 2 epochs
-- km(t) ≈ km_eq + A·exp(-λt)·sin(πt + φ) with λ ≈ 0.01
-- Phase slips: zero at K=0.5 (fully locked pairs)
-- Signal: phase-difference VARIANCE, not slips
+---
+
+## Key Quantitative Results
+
+| Quantity | Value | Meaning |
+|:---------|------:|:--------|
+| L = 1-VarI1/VarTerms | CV=0.15 | Primary observable |
+| X = D_eq - k·L | R²=0.893 | Unified state variable |
+| Info-Dyn duality | orthogonal | Two irreducible components |
+| Regime gap GAN/ICS | 2:1 | Discrete levels |
+| V1 concepts recovered | 6/6 | Full conceptual closure |
+
+---
+
+## Current Research Question (V12.2)
+
+Mapping the Information-Dynamics Duality to known physical dualities
+(order-fluctuation, structure-process, information-entropy) and
+assessing the novel explanatory value of the Clockwork framework.
+
+---
+
+## What Is NOT Claimed
+
+- Physical c, G, SI units, spacetime, SR, GR, Einstein equations
+- Dark matter replacement, physical theory proven
+- Quantitative physical predictions
+- Universal dimensionless invariants
+
+---
+
+*Generated 2026-07-25. This document is the authoritative current-state reference.
+Read TRM_Project_Lineage_Overview.md for complete historical context.*
 
 **V5.60 invariance findings:**
 - c_eff = Ω×MD: CV(seed)=0.80, CV(N)=1.08 — NOT invariant

@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 4.0
+**Version:** 5.0
 **Date:** 2026-07-25
-**Scope:** Clockwork Cosmology V1 through V9.1
+**Scope:** Clockwork Cosmology V1 through V12.2
 **Tests:** ~3393, 0 failed
-**Branch:** v10.0-clockwork-physics-validation
-**Current Frontier:** V10.0 PHYSICS VALIDATION
+**Branch:** v12.2-duality-physics-correspondence
+**Current Frontier:** V12.2 DUALITY PHYSICS CORRESPONDENCE
 
 ---
 
@@ -1048,7 +1048,16 @@ Origin of N-dependent distribution shape remains open. Stop-Low valid. V6 NOT RE
 
 ---
 
-## F4. V7.x — Structure Attractors and p-Distribution
+## F4. V6 — Flux Transport Framework Transition (TRM → TQM)
+
+V6 bridged the RecoverFP analysis (V5) to the multi-family Clockwork program
+(V7+). Key transition: TRM/TQM parameterization standardized. V6_3 terminal
+status established the naming convention and parameter regime used by all
+subsequent versions. This was primarily an infrastructure/consolidation phase.
+
+---
+
+## F5. V7.x — Structure Attractors and p-Distribution
 
 The V7 program investigates structure emergence — what determines the observed
 hierarchy/structure classes in the output, and whether structures are attractors
@@ -2048,6 +2057,12 @@ maintained to prevent overinterpretation:
 | V8.3 | Invariant Origin: λ primitive + invariant | 9 | COMPLETE |
 | V8.4 | Resonance Origin: Clockwork emergence | 12 | COMPLETE |
 | V9.0/V9.1 | Clockwork Dynamics: X+Tick->dH, 6/6 V1 recovered | 26 | COMPLETE |
+| V10.0 | Physics Validation: Two irreducible regimes | 5 | COMPLETE |
+| V10.1 | Regime Physics: VarI1-VarTerms coupling | 5 | COMPLETE |
+| V11.0 | Family Axiom Physics: Deepest chain | 3 | COMPLETE |
+| V12.0 | Information Physics: Duality found | 2 | COMPLETE |
+| V12.1 | Duality Validation: Robustness proven | 2 | COMPLETE |
+| V12.2 | Duality Physics Correspondence | 3 | COMPLETE |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
@@ -2073,30 +2088,34 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 **Status:** CLOSED (2026-07-25). 12 audits. Time emergence irreducible family property. Closure report: `docsV8/V8_4_Closure_Report.md`.
 
-### V9.0/V9.1 — Clockwork Physics — COMPLETE
+### V10.0 — Physics Validation — COMPLETE
 
-**Status:** CLOSED (2026-07-25). 20 audits. L=1-VarI1/VarTerms primary observable (CV=0.15). 6/6 V1 concepts recovered. Prediction gap resolved. Closure report: `docsV9/V9_0_Closure_Report.md`.
+**Status:** CLOSED (2026-07-25). 5 audits (CPV_00 through CRA_01). 6/6 V1 concepts recovered. Two material classes: Dissipative (GAN/CNS merged) and Resonant (ICS).
 
-**Key chain:** Speed from mutual compensation → Chain closed → λ1,λ2 primitive → λ1 representation-independent.
+### V10.1 — Regime Physics — COMPLETE
 
-**Complete V7.4→V8.2 chain:**
+**Status:** CLOSED (2026-07-25). 5 audits (CRP_01 through VCS_01). Two distinct physical regimes characterized. VarI1-VarTerms coupling determines regime. Coupling is family-axiom invariant.
+
+### V11.0 — Family Axiom Physics — COMPLETE
+
+**Status:** CLOSED (2026-07-25). 3 audits (FAP_01, VCP_01, IFP_01). Family Axiom = Variance Coupling Principle. Variance IS information exchange. l1 = VarI1/(VarI1+VarTerms) is deepest information measure.
+
+### V12.0 — Information Physics — COMPLETE
+
+**Status:** CLOSED (2026-07-25). 2 audits (IPR_01, IDD_01). Information and Dynamics are dual. Neither fully reducible. Duality is fundamental — both components required.
+
+### V12.1 — Duality Validation — COMPLETE
+
+**Status:** CLOSED (2026-07-25). 2 audits (DVL_01, DPG_01). Duality robust across 16 config perturbations. Full hierarchy emerges from two orthogonal components.
+
+### V12.2 — Duality Physics Correspondence — ACTIVE
+
+**Status:** ACTIVE. 3 audits (DPC_01, NPV_01, FAG_01). Strong physics correspondence. Family Axiom generates the duality. Branch: `v12.2-duality-physics-correspondence`.
+
+**Deepest validated chain:**
 ```
-Primitive P (Accessibility Potential, irreducible, universal)
-  → Accessibility Gradients → Transfer Pressure (drift field)
-  → Directed Drift → Temporal Ordering → Emergent Time (local rates)
-  → Emergent Geometry (PEG_01)
-  → Metric Length (PML_01)
-  → Emergent Speed (PSC_01)
-  → Time-Length Geometry (TLG_01)
-  → Speed Invariant (PSI_01) ← CURRENT
-  → Attractor Occupation → Entropy H = −Σpi log pi → Dimension D = exp(H)
+Family Axiom → VarI1-VarTerms Coupling → Information(l1) ↔ Dynamics(Tick) → Regime → X → dH, L
 ```
-
-**V8.2 audits:** PSE_01(B/C), PTD_01(C), PTO_01(B/C), PET_01(C), PLT_01(C), PEG_01(C), PML_01(C), PSC_01(C), TLG_01(C), PSI_01(C).
-**Predecessors:** V8.1 (P irreducible, universal). V8.0 (single primitive identity). V7.x (full chain from covariance to attractors).
-**Open:** V8.2 closure, further semantic extension, formalization of emergent geometry.
-
-For the historical frontier context (V5.6+), see section F2 above.
 
 ---
 
@@ -2137,14 +2156,18 @@ theorem-level, not first-principles closure.*
 **Evolution:** Clockwork Cosmology V1 (variable time-rate hypothesis) → V2.x (scalar field
 T(x,t)) → V3.x (multi-sector candidate discipline) → V4.x (internal geometry, calibration,
 prospective prediction) → V5.x (independent replication, regime sensitivity, RecoverFP branch
-analysis, minimal generative core).
+analysis, minimal generative core) → V6.x (Flux Transport) → V7.x (structure attractors,
+covariance/discrimination) → V8.x (emergent geometry, λ primitives, resonance origin) →
+V9.x (clockwork physics, unified state X) → V10.x (two regimes, coupling origin) →
+V11.0 (family axiom physics) → V12.x (information-duality physics).
 
-**Key finding (V5.2):** Seed stability and regime stability are **distinct**.
-**Key finding (V5.6):** Nm is a branch-suppressing normalization stage acting through d-space amplification. Nm-equivalent d transform fully reproduces suppression (V1: 12→0/30). d_mean is the dominant suppressive coordinate. d_max is a marker, not mechanism. Full distribution matching perfectly reproduces B0. Gates A,B,C,D,E reached.
+**Key finding (V12.1):** Information-Dynamics Duality is the deepest validated layer.
+Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
+are two orthogonal irreducible components.
 
-**Current status:** V8.3 CLOSED — λ1,λ2 primitive + invariant. V8.4 INITIALIZED — Resonance Origin. Current branch: `v8.3-invariant-origin`.
+**Current status:** V12.2 ACTIVE — Duality Physics Correspondence. Branch: `v12.2-duality-physics-correspondence`.
 
-**V8.2 predecessor chain:** P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Attractors → Entropy → Dimension. See `docsV8/V8_2_Closure_Report.md`.
+**Deepest validated chain:** Family Axiom → VarI1-VarTerms Coupling → Information(l1) ↔ Dynamics(Tick) → Regime → X → dH, L
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -2154,4 +2177,4 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-25. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V8.3.*
+TRM/TQM project from Clockwork Cosmology V1 through V12.2.*
