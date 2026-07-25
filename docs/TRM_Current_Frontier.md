@@ -31,7 +31,8 @@ Primitive P (Accessibility Potential, irreducible, universal)
   → Temporal Ordering
   → Emergent Time (local rates)
   → Emergent Geometry (PEG_01)
-  → Metric Length (PML_01) ← CURRENT FRONTIER
+  → Metric Length (PML_01)
+  → Emergent Speed (PSC_01) ← CURRENT FRONTIER
   → Attractor Occupation
   → Entropy H = −Σp_i log p_i
   → Dimension D = exp(H)
@@ -51,6 +52,13 @@ Metric axioms (positivity, symmetry, identity) are satisfied. Triangle inequalit
 holds across family triples. Metric distance predicts transfer difficulty and
 attractor accessibility. Length is a measurable consequence of accessibility
 geometry — no rulers, coordinates, or physical space assumed.
+
+PSC_01 establishes: emergent Length and emergent Time jointly imply a
+characteristic propagation-speed constraint. Speed = ΔLength/ΔTime along
+β-trajectories converges to a stable value. Speed is bounded (max/mean ratio
+finite), exhibits diminishing returns with transfer pressure, and serves as
+the natural conversion factor between emergent length and emergent time —
+without assuming physical c, relativity, or spacetime.
 
 ---
 

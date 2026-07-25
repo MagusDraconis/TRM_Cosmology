@@ -5,7 +5,7 @@
 **Scope:** Clockwork Cosmology V1 through V8.2
 **Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
 **Branch:** v8.2-primitive-meaning
-**Current Frontier:** V8.2 PRIMITIVE MEANING (PML_01 complete) — Metric Length from accessibility geometry
+**Current Frontier:** V8.2 PRIMITIVE MEANING (PSC_01 complete) — Emergent Speed from Length/Time conversion
 
 ---
 
@@ -2056,7 +2056,7 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 ### V8.2 — Primitive Meaning — IN PROGRESS
 
-**Status:** Active (2026-07-24). 7 audits complete: PSE_01, PTD_01, PTO_01, PET_01, PLT_01, PEG_01, PML_01.
+**Status:** Active (2026-07-25). 8 audits complete: PSE_01, PTD_01, PTO_01, PET_01, PLT_01, PEG_01, PML_01, PSC_01.
 
 **Complete V7.4→V8.2 chain:**
 ```
@@ -2064,11 +2064,12 @@ Primitive P (Accessibility Potential, irreducible, universal)
   → Accessibility Gradients → Transfer Pressure (drift field)
   → Directed Drift → Temporal Ordering → Emergent Time (local rates)
   → Emergent Geometry (PEG_01)
-  → Metric Length (PML_01) ← CURRENT
+  → Metric Length (PML_01)
+  → Emergent Speed (PSC_01) ← CURRENT
   → Attractor Occupation → Entropy H = −Σpi log pi → Dimension D = exp(H)
 ```
 
-**V8.2 audits:** PSE_01(B/C), PTD_01(C), PTO_01(B/C), PET_01(C), PLT_01(C), PEG_01(C), PML_01(C).
+**V8.2 audits:** PSE_01(B/C), PTD_01(C), PTO_01(B/C), PET_01(C), PLT_01(C), PEG_01(C), PML_01(C), PSC_01(C).
 **Predecessors:** V8.1 (P irreducible, universal). V8.0 (single primitive identity). V7.x (full chain from covariance to attractors).
 **Open:** V8.2 closure, further semantic extension, formalization of emergent geometry.
 
@@ -2142,6 +2143,7 @@ V8.2 audits (PSE_01, PTD_01, PTO_01, PET_01, PLT_01, PEG_01):
 - Accessibility landscape non-uniformity → Local time-rate variation (PLT_01, Model C)
 - Relative local rates → Emergent distance geometry (PEG_01, Model C)
 - Emergent geometry → Metric length, all axioms satisfied (PML_01, Model C)
+- Metric length + emergent time → Characteristic speed bound (PSC_01, Model C)
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
