@@ -15,7 +15,7 @@
 | Current Branch | v8.3-invariant-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.3 INVARIANT ORIGIN. 4 audits. PIO_01(B): Speed from compensation. PRC_01(C): Chain closed. PEO_01(A): λ1,λ2 primitive. PLI_01(C): λ1 representation-independent. |
+| Current Status | V8.3 INVARIANT ORIGIN. 5 audits: PIO_01(B), PRC_01(C), PEO_01(A), PLI_01(C), LTR_01(A). λ1→time-rate is family-dependent: SAC/RCS R²=1.0, others≈0. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

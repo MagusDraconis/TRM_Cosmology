@@ -5,7 +5,7 @@
 **Scope:** Clockwork Cosmology V1 through V8.3
 **Tests:** ~640 (Fact/Theory methods); ~3393 (including suite runs), 0 failed
 **Branch:** v8.3-invariant-origin
-**Current Frontier:** V8.3 INVARIANT ORIGIN (PLI_01 complete) — λ1 representation-independent
+**Current Frontier:** V8.3 INVARIANT ORIGIN (LTR_01 complete) — λ1→time-rate family-dependent
 
 ---
 
@@ -2045,7 +2045,7 @@ maintained to prevent overinterpretation:
 | V8.0 | Foundational Geometry and Primitive Identity | ~40 | COMPLETE |
 | V8.1 | Primitive Origin: Irreducibility + Universality | ~35 | COMPLETE |
 | V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~35 | COMPLETE |
-| V8.3 | Invariant Origin: λ primitive + invariant | 4 | IN PROGRESS |
+| V8.3 | Invariant Origin: λ primitive, λ1→time family-dep | 5 | IN PROGRESS |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified
@@ -2065,7 +2065,7 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 ### V8.3 — Invariant Origin — IN PROGRESS
 
-**Status:** Active (2026-07-25). 4 audits: PIO_01(B), PRC_01(C), PEO_01(A), PLI_01(C).
+**Status:** Active (2026-07-25). 5 audits: PIO_01(B), PRC_01(C), PEO_01(A), PLI_01(C), LTR_01(A). λ1→time-rate family-dependent.
 
 **Key chain:** Speed from mutual compensation → Chain closed → λ1,λ2 primitive → λ1 representation-independent.
 
