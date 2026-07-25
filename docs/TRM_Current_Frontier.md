@@ -3,8 +3,8 @@
 **Version:** 5.0
 **Date:** 2026-07-25
 
-**Current Version:** V12.2 DUALITY PHYSICS CORRESPONDENCE
-**Current Branch:** v12.2-duality-physics-correspondence
+**Current Version:** V13.0 TIME GRADIENT RECONSTRUCTION
+**Current Branch:** v13.0-time-gradient-reconstruction
 **Cumulative Tests:** ~3442
 **Failed:** 0
 
