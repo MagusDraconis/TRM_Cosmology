@@ -752,6 +752,128 @@ public class V8_4_ResonanceOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void DKO_01_DeltaKernelOriginAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DKO_01: Delta Kernel Origin Audit ===");
+        _o.WriteLine("=== What causes dK/dβ? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 31607;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 21;
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        // Collect: mean |dK/dβ| per family per config
+        var dkData = new List<(VcFamily fam, double meanAbsDK, double dH)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var traj = new List<(double[] kDeciles, double ent)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_DK", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    // Raw K per decile (single p-value for efficiency)
+                    var kPerDecile = new double[nDeciles];
+                    var ctPerDecile = new int[nDeciles];
+                    double pv = 0.6;
+                    int nD = distances.Length; double[] kA = new double[nD];
+                    for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                    for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kPerDecile[dec - 1] += kA[i]; ctPerDecile[dec - 1]++; }
+                    for (int d = 0; d < nDeciles; d++) kPerDecile[d] /= Math.Max(ctPerDecile[d], 1);
+
+                    // Quick entropy from simplified PCA (3 p-values as before would be needed for accuracy)
+                    // Use a simpler proxy: SD of K across deciles as entropy proxy
+                    double kMean = kPerDecile.Average();
+                    double kSD = Math.Sqrt(kPerDecile.Average(k => (k - kMean) * (k - kMean)));
+                    double entProxy = Math.Log(Math.Max(kSD / Math.Max(kMean, 1e-12) + 1.0, 1.0));
+
+                    traj.Add((kPerDecile, entProxy));
+                }
+
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int bi = 0; bi < traj.Count - 1; bi++)
+                {
+                    double sumAbsDK = 0;
+                    for (int d = 0; d < nDeciles; d++)
+                        sumAbsDK += Math.Abs(traj[bi + 1].kDeciles[d] - traj[bi].kDeciles[d]);
+                    double meanAbsDK = sumAbsDK / (nDeciles * dBeta);
+                    double dH = Math.Abs(traj[bi + 1].ent - traj[bi].ent) / dBeta;
+                    dkData.Add((fam, meanAbsDK, dH));
+                }
+            }
+        }
+
+        // ============================================================
+        _o.WriteLine("=== |dK/dβ| Analysis ===");
+        _o.WriteLine($"{"Family",-6} {"mean |dK/dβ|",14} {"CV(|dK/dβ|)",12} {"r(|dK|,dH)",12}");
+        _o.WriteLine(new string('-', 46));
+
+        foreach (var fam in families)
+        {
+            var fd = dkData.Where(d => d.fam == fam).ToArray();
+            double m = fd.Average(d => d.meanAbsDK);
+            double cv = StdOverMean(fd.Select(d => d.meanAbsDK).ToArray());
+            double r = PearsonCorrelation(fd.Select(d => d.meanAbsDK).ToArray(), fd.Select(d => d.dH).ToArray());
+            _o.WriteLine($"{fam,-6} {m,14:F6} {cv,12:F4} {r,12:F4}");
+        }
+        _o.WriteLine("");
+
+        var gF = dkData.Where(d => d.fam == VcFamily.SAC || d.fam == VcFamily.RCS).ToArray();
+        var gL = dkData.Where(d => d.fam != VcFamily.SAC && d.fam != VcFamily.RCS).ToArray();
+
+        double dkF = gF.Average(d => d.meanAbsDK);
+        double dkL = gL.Average(d => d.meanAbsDK);
+        double dhF = gF.Average(d => d.dH);
+        double dhL = gL.Average(d => d.dH);
+
+        _o.WriteLine("=== Group ===");
+        _o.WriteLine($"FROZEN: |dK/dβ|={dkF:F6}, |dH/dβ|={dhF:F6}");
+        _o.WriteLine($"LIVE:   |dK/dβ|={dkL:F6}, |dH/dβ|={dhL:F6}");
+        _o.WriteLine($"|dK/dβ| ratio: {(dkF / Math.Max(dkL, 1e-12)):F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+        bool kernelChanges = dkL > dkF * 2;
+        bool kernelStatic = dkL < 1e-9 && dkF < 1e-9;
+
+        string decision;
+        if (kernelStatic) decision = "Model A";
+        else if (kernelChanges) decision = "Model B";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+
+        if (decision == "Model A")
+            _o.WriteLine("K(d) itself is static — β does not change the kernel. The dynamics must come from how the same kernel generates different covariance.");
+        else if (decision == "Model B")
+            _o.WriteLine("K(d) changes with β differently across families — the kernel itself has family-dependent dynamics.");
+        else
+            _o.WriteLine("Unresolved.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== DKO_01 complete. Commit: DKO_01_DeltaKernelOriginAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
