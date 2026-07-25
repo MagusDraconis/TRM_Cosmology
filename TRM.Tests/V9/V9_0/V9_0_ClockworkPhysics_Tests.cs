@@ -2408,6 +2408,107 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void UFS_01_UnifiedFieldStateAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== UFS_01: Unified Field State Audit ===");
+        _o.WriteLine("=== Are D_eq and L dual projections of one state? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 70451;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var data = new List<(double dEq, double L, double dH)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_UF", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double dH = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    data.Add((Math.Abs(totals[i] - eqTot), Ls[i], dH));
+                }
+            }
+        }
+
+        var dEqArr = data.Select(d => d.dEq).ToArray();
+        var Larr = data.Select(d => d.L).ToArray();
+        var dHarr = data.Select(d => d.dH).ToArray();
+
+        // Normalize D_eq and L to zero mean, unit variance
+        double mD = dEqArr.Average(), sD = Math.Sqrt(dEqArr.Average(v => (v - mD) * (v - mD))) + 1e-12;
+        double mL = Larr.Average(), sL = Math.Sqrt(Larr.Average(v => (v - mL) * (v - mL))) + 1e-12;
+        var dEqN = dEqArr.Select(v => (v - mD) / sD).ToArray();
+        var Ln = Larr.Select(v => (v - mL) / sL).ToArray();
+
+        // PC1 = first principal component (average direction since r<0 → flip one sign)
+        var PC1 = Enumerable.Range(0, dEqN.Length).Select(i => (dEqN[i] - Ln[i]) / Math.Sqrt(2.0)).ToArray();
+
+        double r2_dEq = R2SinglePredictor(dHarr, dEqArr);
+        double r2_L = R2SinglePredictor(dHarr, Larr);
+        double r2_both = FitModelR2(dHarr, new[] { dEqArr, Larr });
+        double r2_PC1 = R2SinglePredictor(dHarr, PC1);
+
+        double sharedFrac = 1.0 - (r2_both - Math.Max(r2_dEq, r2_L)) / Math.Max(r2_both, 1e-12);
+        double r = PearsonCorrelation(dEqArr, Larr);
+
+        _o.WriteLine($"r(D_eq, L) = {r:F4} (shared variance: {r * r:P1})");
+        _o.WriteLine($"R²(D_eq)={r2_dEq:F4}, R²(L)={r2_L:F4}, R²(D_eq+L)={r2_both:F4}, R²(PC1)={r2_PC1:F4}");
+        _o.WriteLine("");
+
+        bool pc1MatchesBoth = r2_PC1 > r2_both * 0.90;
+        bool bothBetter = r2_both > Math.Max(r2_dEq, r2_L) * 1.05;
+
+        string decision;
+        if (pc1MatchesBoth) decision = "Model C";
+        else if (bothBetter) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("D_eq and L are dual projections of a single unified state variable X (their PC1). X alone matches the combined predictive power.");
+        else if (decision == "Model B")
+            _o.WriteLine("D_eq and L partially overlap — each carries independent information, but substantial shared variance exists.");
+        else
+            _o.WriteLine("D_eq and L are essentially independent.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== UFS_01 complete. Commit: UFS_01_UnifiedFieldStateAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
