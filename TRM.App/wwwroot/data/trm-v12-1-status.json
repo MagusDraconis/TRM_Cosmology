@@ -2,9 +2,9 @@
   "version": "V12.1",
   "branch": "v12.1-duality-validation",
   "status": "active",
-  "total_audits": 1,
+  "total_audits": 2,
   "key_result": "Information-Dynamics duality validated across 16 (α,ξ) configs. l1 and Tick vary independently, both required. Duality is robust (DVL_01,C)."
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["DVL_01"]
+  "last_updated": "2026-07-25","audits_completed": ["DVL_01","DPG_01"]
 }

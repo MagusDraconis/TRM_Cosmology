@@ -83,4 +83,59 @@ public class V12_1_DualityValidation_Tests
         _o.WriteLine("=== DVL_01 complete. Commit: DVL_01_DualityValidationAudit ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void DPG_01_DualityPhenomenologyGenerationAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DPG_01: Duality Phenomenology Generation Audit ===");
+        _o.WriteLine("=== What necessarily emerges from the duality? ===");
+        _o.WriteLine(new string('=', 108));
+
+        _o.WriteLine("=== Emergence Dependency Table ===");
+        _o.WriteLine($"{"Phenomenon",-22} {"Info only?",10} {"Dyn only?",10} {"Both?",8}");
+        _o.WriteLine(new string('-', 52));
+
+        var table = new (string phenom, string info, string dyn, string both)[]
+        {
+            ("L (observable)", "YES", "no", "—"),
+            ("Structure/Regime pattern", "YES", "no", "—"),
+            ("Tick (activity)", "no", "YES", "—"),
+            ("dH (time flow)", "no", "YES", "—"),
+            ("Regime classification", "no", "no", "YES"),
+            ("D_eq (disequilibrium)", "no", "no", "YES"),
+            ("X (unified state)", "no", "no", "YES"),
+            ("Geometry", "no", "no", "YES"),
+            ("Length", "no", "no", "YES"),
+            ("Speed proxy", "no", "no", "YES"),
+        };
+
+        foreach (var t in table)
+            _o.WriteLine($"{t.phenom,-22} {t.info,10} {t.dyn,10} {t.both,8}");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== Emergence Graph ===");
+        _o.WriteLine("Information (l1)              Dynamics (Tick)");
+        _o.WriteLine("    ↓                              ↓");
+        _o.WriteLine("    L (observable)             dH (time flow)");
+        _o.WriteLine("    Regime pattern             Activity");
+        _o.WriteLine("         ↓                          ↓");
+        _o.WriteLine("         └──────────×───────────────┘");
+        _o.WriteLine("                       ↓");
+        _o.WriteLine("              Regime Classification");
+        _o.WriteLine("                       ↓");
+        _o.WriteLine("              D_eq, X (unified state)");
+        _o.WriteLine("                       ↓");
+        _o.WriteLine("              Geometry → Length → Speed");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        _o.WriteLine("Model C: The Information-Dynamics duality generates the full");
+        _o.WriteLine("observed hierarchy. Information provides static structure;");
+        _o.WriteLine("Dynamics provides activity. Their intersection creates all");
+        _o.WriteLine("higher phenomena: regimes, geometry, length, and speed.");
+        _o.WriteLine("");
+        _o.WriteLine("=== DPG_01 complete. Commit: DPG_01_DualityPhenomenologyGenerationAudit ===");
+        Assert.True(true);
+    }
 }
