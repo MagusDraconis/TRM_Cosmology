@@ -2,9 +2,9 @@
   "version": "V11.0",
   "branch": "v11.0-family-axiom-physics",
   "status": "active",
-  "total_audits": 2,
+  "total_audits": 3,
   "key_result": "Family axiom = Variance Coupling Principle. Determines whether variance flows between I1 and Terms (dissipative) or stays locked (resonant). Physical principle identified (FAP_01,C)."
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["FAP_01","VCP_01"]
+  "last_updated": "2026-07-25","audits_completed": ["FAP_01","VCP_01","IFP_01"]
 }
