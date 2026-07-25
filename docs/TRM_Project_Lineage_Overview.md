@@ -2068,6 +2068,7 @@ maintained to prevent overinterpretation:
 | V13.2 | Tick Potential Physics | 1 | COMPLETE |
 | V13.3 | Clockwork Gravity Correspondence | 3 | COMPLETE |
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
+| V13.5 | Tick Source Theory | 10 | COMPLETE |
 | **Total** | | **3442** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3442 verified
@@ -2112,6 +2113,10 @@ tests with 0 failed is the authoritative current count as of 2026-07-25.
 ### V12.1 — Duality Validation — COMPLETE
 
 **Status:** CLOSED (2026-07-25). 2 audits (DVL_01, DPG_01). Duality robust across 16 config perturbations. Full hierarchy emerges from two orthogonal components.
+
+### V13.5 — Tick Source Theory — CLOSED
+
+**Status:** CLOSED (2026-07-26). 10 audits. Source theory, multi-body, channels, networks, hub selection. r(feedback,funnel)=0.9998. Hub = argmin|m+1|. V13 program complete: 19 audits.
 
 ### V13.4 — Multidimensional Tick Space — CLOSED
 
@@ -2181,9 +2186,9 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V13.4 CLOSED — 1 audit. Tick field conservative in 2D (Model A). Branch: `v13.4-multidimensional-tick-space`. Next: V13.5.
+**Current status:** V13.5 CLOSED — 10 audits. V13 program complete: 19 audits total. Hub-and-spoke networks, channel dynamics law, hub = argmin|m+1|. Branch: `v13.5-tick-source-theory`. Next: V14.0.
 
-**V13 complete chain (10 audits):** V13.0→V13.1→V13.2→V13.3→V13.4. V1 formally recovered. Gradient theory sufficient in ≥2D. Conservative field structure is robust.
+**V13 complete chain (19 audits):** V1 reconstruction → Newtonian chain → Potential physics → Gravity correspondence → Multidimensional → Source/Channels/Networks/Hub. Resonance (m≈-1) selects the organizing hub.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.

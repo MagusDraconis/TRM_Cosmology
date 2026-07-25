@@ -3,8 +3,8 @@
 **Version:** 5.0
 **Date:** 2026-07-25
 
-**Current Version:** V13.5 TICK SOURCE THEORY
-**Current Branch:** v13.5-tick-source-theory
+**Current Version:** V14.0 RESONANCE ORGANIZATION PRINCIPLE
+**Current Branch:** v14.0-resonance-organization-principle
 **Cumulative Tests:** ~3442
 **Failed:** 0
 
@@ -276,5 +276,37 @@ Tick(α, family) on 41×5 grid: F = -∇Tick, ∇×F = 0 exactly.
 The conservative nature is structural, not a 1D artifact.
 
 
-*Generated 2026-07-25. V12.2 (10). V13.0 (2). V13.1 (3). V13.2 (1). V13.3 (3). V13.4 (1).
-~3442 tests, 0 failed. Next: V13.5 Tick Source Theory.*
+## V13.5 — Tick Source Theory (10 audits, CLOSED)
+
+| Audit | Key Result | Model |
+|:------|:-----------|:-----:|
+| TST_01 | Tick source-free, emergent from m and |dV1/dθ| | D |
+| MBD_01 | Linear superposition, no Lagrange points | B |
+| LTS_01 | ICS: dTick/dp>0, competing gradients exist | C |
+| ATP_01 | Saddle-channel topology, 17 ridges | C |
+| CFC_01 | Channels universal: 4/4 pairs | D |
+| SCA_01 | Persistent channels, 4.35× funnel | C |
+| CDL_01 | r(feedback,funnel)=0.9998, fully predictable | D |
+| SPP_01 | 10/15 SPARC analogues | C |
+| CNF_01 | Hub-and-spoke network collapse | C |
+| HSP_01 | m≈-1 selects hub, resonance = mechanism | D |
+
+### Hub Selection Principle
+```
+Hub = argmin_F |m_F + 1|
+```
+
+### Channel Dynamics Law
+```
+p_ridge = f(feedback) (r=0.995), Funnel = f(feedback) (r=0.9998)
+```
+
+### Complete V13 Program (19 audits across 6 sub-versions)
+```
+V13.0→V13.1→V13.2→V13.3→V13.4→V13.5
+V1 reconstruction → Newtonian chain → Potential → Gravity → Multi-D → Channels/Networks
+```
+
+
+*Generated 2026-07-26. V13 program CLOSED (19 audits). ~3442 tests, 0 failed.
+Next: V14.0 Resonance Organization Principle.*
