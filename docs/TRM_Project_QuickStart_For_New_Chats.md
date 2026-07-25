@@ -150,19 +150,31 @@ VarI1-VarTerms coupling strength. No deeper generator has been found.
 
 ## I. Current Research Frontier
 
-### V12.2 DUALITY PHYSICS CORRESPONDENCE
-
-**Branch:** `v12.2-duality-physics-correspondence`
-
-**Completed audits:**
-- **DPC_01** (Duality Physics Correspondence): Strong structural correspondence to known physics — Information↔Dynamics maps to Order↔Entropy Production, Structure↔Process, Regime↔Phase.
-- **NPV_01** (Novel Physics Value): 4 genuinely novel elements identified. Framework provides explanatory value beyond reinterpretation.
-- **FAG_01** (Family Axiom Generator): Family Axiom generates the Information-Dynamics Duality. ON/OFF switch at the axiom level propagates through all layers.
+### V12.2 DUALITY PHYSICS CORRESPONDENCE — CLOSED (10 audits)
 
 **Deepest validated chain:**
 ```
-Family Axiom → VarI1-VarTerms Coupling → Information(l1) ↔ Dynamics(Tick) → Regime → X → dH, L
+Family Axiom → m → (V=|1+m|, |dV1/dθ|) → Tick → Feedback Sign → Regime → Time
 ```
+
+**Key V12.2 findings:**
+- **m = d(VT)/d(V1)** is the master parameter (MPR_01)
+- **Feedback sign** r(|1+m|,|dV1|) = 100% regime classifier (RFB_01)
+- **Tick = |1+m|·|dV1/dθ|** — incomplete conservation IS time flow (IBC_01)
+- **β is measurement coordinate**, not fundamental — SAC/RCS activate under α (BRP_01)
+- **Responsiveness and duality always co-occur** — 0 edge cases (RPP_01)
+- **Step-level m fluctuation** explains ICS Tick (NLC_01)
+- **Family axiom generates the duality** (FAG_01)
+
+| Family | m(α) | V | Tick | r(feedback) | Regime |
+|:-------|------:|---:|-----:|:-----------:|:-------|
+| ICS | −1.04 | 0.04 | 0.009 | −0.61 | RESONANT |
+| SAC | −0.67 | 0.33 | 0.018 | −0.01 | INTERMEDIATE |
+| RCS | −0.47 | 0.53 | 0.016 | +0.92 | DISSIPATIVE |
+| GAN | −0.25 | 0.75 | 0.019 | +0.95 | DISSIPATIVE |
+| CNS | −0.25 | 0.75 | 0.019 | +0.95 | DISSIPATIVE |
+
+**Next: V13.0 — Time Gradient Reconstruction**
 
 ---
 

@@ -1,10 +1,15 @@
 {
   "version": "V12.2",
   "branch": "v12.2-duality-physics-correspondence",
-  "status": "active",
-  "total_audits": 3,
-  "key_result": "Strong structural correspondence to known physics: order-fluctuation, structure-process, information-entropy dualities. Novel discrete regime emergence (DPC_01,B).",
-  "test_count": "~3393",
+  "status": "closed",
+  "total_audits": 10,
+  "key_result": "Information-Dynamics Duality is the deepest validated layer. Feedback sign r(|1+m|,|dV1|) = 100% regime classifier. m = d(VT)/d(V1) is master parameter. β is measurement coordinate, not fundamental. Incomplete conservation IS time flow.",
+  "test_count": "~3442",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["DPC_01","NPV_01","FAG_01"]
+  "last_updated": "2026-07-25",
+  "audits_completed": ["DPC_01","NPV_01","FAG_01","DAT_01","BRP_01","RPP_01","IBC_01","MPR_01","NLC_01","RFB_01"],
+  "deepest_chain": "Family Axiom → m → (V=|1+m|, |dV1/dθ|) → Tick → Feedback Sign → Regime → Time",
+  "regime_classifier": "r(|1+m_step|,|dV1/dθ|) < -0.3 → RESONANT | r > +0.3 → DISSIPATIVE | |r| ≤ 0.3 → INTERMEDIATE",
+  "master_parameter": "m = -1.04 (ICS resonant), -0.67 (SAC intermediate), -0.47 (RCS), -0.25 (GAN/CNS dissipative)",
+  "corrected_findings": "SAC/RCS have NON-ZERO but CONSTANT VarI1/VarTerms (not zero). β-response is parameter-dependent, not fundamental. Tick underprediction for ICS (8.7×) explained by step-level m fluctuation."
 }

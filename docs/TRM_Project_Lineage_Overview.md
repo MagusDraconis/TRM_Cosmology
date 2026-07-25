@@ -2108,14 +2108,9 @@ tests with 0 failed is the authoritative current count as of 2026-07-24.
 
 **Status:** CLOSED (2026-07-25). 2 audits (DVL_01, DPG_01). Duality robust across 16 config perturbations. Full hierarchy emerges from two orthogonal components.
 
-### V12.2 — Duality Physics Correspondence — ACTIVE
+### V12.2 — Duality Physics Correspondence — CLOSED
 
-**Status:** ACTIVE. 3 audits (DPC_01, NPV_01, FAG_01). Strong physics correspondence. Family Axiom generates the duality. Branch: `v12.2-duality-physics-correspondence`.
-
-**Deepest validated chain:**
-```
-Family Axiom → VarI1-VarTerms Coupling → Information(l1) ↔ Dynamics(Tick) → Regime → X → dH, L
-```
+**Status:** CLOSED (2026-07-25). 10 audits (DPC_01 through RFB_01). Deepest validated chain: Family Axiom → m → (V, |dV1/dθ|) → Tick → Feedback → Regime → Time. m = master parameter. r(|1+m|,|dV1|) sign = 100% regime classifier. β is measurement coordinate, not fundamental.
 
 ---
 
@@ -2165,9 +2160,9 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V12.2 ACTIVE — Duality Physics Correspondence. Branch: `v12.2-duality-physics-correspondence`.
+**Current status:** V12.2 CLOSED — 10 audits. Branch: `v12.2-duality-physics-correspondence`. Next: V13.0.
 
-**Deepest validated chain:** Family Axiom → VarI1-VarTerms Coupling → Information(l1) ↔ Dynamics(Tick) → Regime → X → dH, L
+**Deepest validated chain:** Family Axiom → m → (V, |dV1/dθ|) → Tick → Feedback → Regime → Time. m = master parameter. Feedback sign = 100% regime classifier.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
