@@ -4,8 +4,8 @@
 **Date:** 2026-07-25
 **Scope:** Clockwork Cosmology V1 through V9.1
 **Tests:** ~3393, 0 failed
-**Branch:** v9.0-clockwork-physics
-**Current Frontier:** V9.1 CLOCKWORK DYNAMICS (CLOSED) — 26 audits
+**Branch:** v10.0-clockwork-physics-validation
+**Current Frontier:** V10.0 PHYSICS VALIDATION
 
 ---
 

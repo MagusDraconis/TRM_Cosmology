@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V9.1 CLOCKWORK DYNAMICS (CLOSED) |
-| Current Branch | v9.0-clockwork-physics |
+| Current Version | V10.0 PHYSICS VALIDATION |
+| Current Branch | v10.0-clockwork-physics-validation |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | 26 audits. Minimal hierarchy: X+Tick->dH. 6/6 V1 recovered. Closed. Next: physics validation. |
+| Current Status | V9.1 closed (26 audits). V10.0: testing clockwork predictions against physics. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
