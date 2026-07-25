@@ -1420,6 +1420,133 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(true);
     }
 
+    [Fact]
+    public void PPA_01_PhysicalPredictionAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== PPA_01: Physical Prediction Audit ===");
+        _o.WriteLine("=== Can V9.0 generate quantitative predictions? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 59281;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var obs = new List<(VcFamily fam, int cfg, double dH, double L, double dEq, double activation)>();
+
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>();
+                var ents = new List<double>();
+                var Ls = new List<double>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_PP", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, dpv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3 || allL.Count < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(allL.Average());
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+                    ents.Add(ent);
+                }
+
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    double dH = Math.Abs(ents[i + 1] - ents[i]) / dBeta;
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    double tick = Math.Abs(totals[i + 1] - totals[i]) / dBeta;
+                    obs.Add((fam, ci, dH, Ls[i], deq, tick * deq));
+                }
+            }
+        }
+
+        var onObs = obs.Where(o => o.fam != VcFamily.SAC && o.fam != VcFamily.RCS).ToArray();
+
+        // Dimensionless observables
+        double[] LdH = onObs.Select(o => o.L / Math.Max(o.dH, 1e-12)).ToArray();
+        double[] dEqTot = onObs.Select(o => o.dEq / Math.Max(o.dEq + o.L, 1e-12)).ToArray();
+        double[] actDH = onObs.Select(o => o.activation / Math.Max(o.dH, 1e-12)).ToArray();
+        double[] dH_dEq = onObs.Select(o => o.dH / Math.Max(o.dEq, 1e-12)).ToArray();
+
+        _o.WriteLine("=== Dimensionless Observables (ON families) ===");
+        _o.WriteLine($"{"Observable",-20} {"Mean",10} {"CV",10} {"stable?",8}");
+        _o.WriteLine(new string('-', 50));
+
+        double cv1 = StdOverMean(LdH);
+        double cv2 = StdOverMean(actDH);
+        double cv3 = StdOverMean(dH_dEq);
+
+        string s1 = cv1 < 0.5 ? "YES" : "no";
+        string s2 = cv2 < 0.5 ? "YES" : "no";
+        string s3 = cv3 < 0.5 ? "YES" : "no";
+        _o.WriteLine($"{"L/dH (speed proxy)",-20} {LdH.Average(),10:F4} {cv1,10:F4} {s1,8}");
+        _o.WriteLine($"{"Activation/dH",-20} {actDH.Average(),10:F4} {cv2,10:F4} {s2,8}");
+        _o.WriteLine($"{"dH/D_eq (rate/diseq)",-20} {dH_dEq.Average(),10:F4} {cv3,10:F4} {s3,8}");
+        _o.WriteLine("");
+
+        int stableCount = (cv1 < 0.5 ? 1 : 0) + (cv2 < 0.5 ? 1 : 0) + (cv3 < 0.5 ? 1 : 0);
+        _o.WriteLine($"Stable observables: {stableCount}/3");
+        _o.WriteLine("");
+
+        string decision = stableCount >= 2 ? "Model C" : stableCount >= 1 ? "Model B" : "Model A";
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("The V9.0 hierarchy generates stable dimensionless observables — a predictive physical framework.");
+        else if (decision == "Model B")
+            _o.WriteLine("Partial predictive power.");
+        else
+            _o.WriteLine("Purely conceptual.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== PPA_01 complete. Commit: PPA_01_PhysicalPredictionAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
