@@ -2,9 +2,9 @@
   "version": "V10.1",
   "branch": "v10.1-clockwork-regime-physics",
   "status": "active",
-  "total_audits": 0,
-  "key_result": "Regime-specific physics: exploring the two clockwork regimes (GAN/CNS dissipative, ICS resonant) as distinct physical systems.",
+  "total_audits": 1,
+  "key_result": "Two distinct physical regimes: Dissipative (GAN/CNS, high-throughput, low-coherence) and Resonant (ICS, low-throughput, high-coherence). (CRP_01,C)"
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25"
+  "last_updated": "2026-07-25","audits_completed": ["CRP_01"]
 }
