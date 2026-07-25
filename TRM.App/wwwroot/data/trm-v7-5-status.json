@@ -1,23 +1,45 @@
 {
-  "version": "V7.5",
-  "branch": "v7.5-mode-dynamics",
-  "closure_date": "2026-07-24",
-  "status": "closed",
-  "next_branch": "v7.6-mode-resonance",
-  "total_audits": 4,
-  "test_count": 604,
-  "failed": 0,
-  "key_result": "Latent dimensionality is a mode-resonance phenomenon; β acts as coupling constant with 6 resonance peaks in [0,1].",
-  "audits": [
-    { "id": "MDP_01", "focus": "Mode dynamics principle", "decision": "Model B" },
-    { "id": "ICR_01", "focus": "ICS collapse reversal", "decision": "Model C" },
-    { "id": "BMS_01", "focus": "Beta mode survival", "decision": "Model C" },
-    { "id": "MRA_01", "focus": "Mode resonance", "decision": "Model C" }
+  "openProblems": [],
+  "testSummary": {
+    "total": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V7_5",
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "passed": 3442,
+    "verification": "dotnet test --filter FullyQualifiedName~V7_5"
+  },
+  "supportedClaims": [
+    "Mode dynamics characterized across β sweep"
   ],
-  "open_questions": [
-    "How is information transferred between latent modes at resonance?",
-    "Is mode transfer symmetric or directed?",
-    "Does total latent variance remain conserved during transfer?",
-    "Can resonance windows be predicted from kernel parameters?"
-  ]
+  "releaseStatus": "V7.5 MODE DYNAMICS — CLOSED",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "suites": [
+    {
+      "status": "COMPLETE",
+      "tests": 1,
+      "claimCategory": "SUPPORTED",
+      "name": "BMD_01"
+    }
+  ],
+  "date": "2026-07-25",
+  "releaseIntegrity": {
+    "totalTestsVerified": 3442,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V7_5",
+    "mismatch": null,
+    "passedVerified": 3442
+  },
+  "conditionalClaims": [],
+  "hypotheses": [],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V7/V7_5/V7_5_ModeDynamics_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "phase": "Beta-dependent mode dynamics",
+  "documents": []
 }

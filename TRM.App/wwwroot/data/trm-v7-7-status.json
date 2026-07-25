@@ -1,7 +1,45 @@
 {
-  "version": "V7.7",
-  "branch": "v7.7-mode-entropy",
-  "status": "closed",
-  "total_audits": 5,
-  "key_result": "Dim = exp(H) is universal; canonical attractor states govern mode occupation."
+  "openProblems": [],
+  "testSummary": {
+    "total": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V7_7",
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "passed": 3442,
+    "verification": "dotnet test --filter FullyQualifiedName~V7_7"
+  },
+  "supportedClaims": [
+    "Entropy dimension characterized"
+  ],
+  "releaseStatus": "V7.7 MODE ENTROPY — CLOSED",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "suites": [
+    {
+      "status": "COMPLETE",
+      "tests": 1,
+      "claimCategory": "SUPPORTED",
+      "name": "MED_01"
+    }
+  ],
+  "date": "2026-07-25",
+  "releaseIntegrity": {
+    "totalTestsVerified": 3442,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V7_7",
+    "mismatch": null,
+    "passedVerified": 3442
+  },
+  "conditionalClaims": [],
+  "hypotheses": [],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V7/V7_7/V7_7_ModeEntropy_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "phase": "Entropy dimension and phase transitions",
+  "documents": []
 }

@@ -1,8 +1,45 @@
 {
-  "version": "V7.6",
-  "branch": "v7.6-mode-resonance",
-  "status": "closed",
-  "next_branch": "v7.7-mode-entropy",
-  "total_audits": 5,
-  "key_result": "Mode occupation conserved (L1+L2+L3≈1); entropy tracks/generates effective dimension."
+  "openProblems": [],
+  "testSummary": {
+    "total": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V7_6",
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "passed": 3442,
+    "verification": "dotnet test --filter FullyQualifiedName~V7_6"
+  },
+  "supportedClaims": [
+    "Mode resonance structure identified"
+  ],
+  "releaseStatus": "V7.6 MODE RESONANCE — CLOSED",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "suites": [
+    {
+      "status": "COMPLETE",
+      "tests": 1,
+      "claimCategory": "SUPPORTED",
+      "name": "MRC_01"
+    }
+  ],
+  "date": "2026-07-25",
+  "releaseIntegrity": {
+    "totalTestsVerified": 3442,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V7_6",
+    "mismatch": null,
+    "passedVerified": 3442
+  },
+  "conditionalClaims": [],
+  "hypotheses": [],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V7/V7_6/V7_6_ModeResonance_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "phase": "Mode resonance and coupling structure",
+  "documents": []
 }

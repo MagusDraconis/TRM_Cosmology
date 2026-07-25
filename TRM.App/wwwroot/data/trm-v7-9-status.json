@@ -1,7 +1,45 @@
 {
-  "version": "V7.9",
-  "branch": "v7.9-attractor-geometry",
-  "status": "closed",
-  "total_audits": 5,
-  "key_result": "Dimension phases emerge from transfer-field geometry; pressure minima = canonical attractors."
+  "openProblems": [],
+  "testSummary": {
+    "total": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V7_9",
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "passed": 3442,
+    "verification": "dotnet test --filter FullyQualifiedName~V7_9"
+  },
+  "supportedClaims": [
+    "Kernel geometry generates transfer landscape"
+  ],
+  "releaseStatus": "V7.9 ATTRACTOR GEOMETRY — CLOSED",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "suites": [
+    {
+      "status": "COMPLETE",
+      "tests": 1,
+      "claimCategory": "SUPPORTED",
+      "name": "TGO_01"
+    }
+  ],
+  "date": "2026-07-25",
+  "releaseIntegrity": {
+    "totalTestsVerified": 3442,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V7_9",
+    "mismatch": null,
+    "passedVerified": 3442
+  },
+  "conditionalClaims": [],
+  "hypotheses": [],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V7/V7_9/V7_9_AttractorGeometry_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "phase": "Attractor geometry and transfer origin",
+  "documents": []
 }

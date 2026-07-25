@@ -1,1 +1,37 @@
-{"releaseStatus":"V5.20 COMPLETE","phase":"Adaptive Boundary Mechanism","date":"2026-07-18","testSummary":{"total":2666,"passed":2666,"failed":0},"supportedClaims":["Mixed boundary mechanism.","Lower: inducibility (A0 0%→14% at N=65).","Peak: rebMag+orthHiVec+distHi converge at N=72.","Upper: static saturation (A0=100%).","6-driver ranking established."],"finalModel":"M3++ (unchanged), mechanism explained","nextVersion":"V5.21 Low-N Rescue Immunity"}
+{
+  "releaseStatus": "V5.20 COMPLETE",
+  "phase": "Adaptive Boundary Mechanism",
+  "date": "2026-07-18",
+  "testSummary": {
+    "total": 2666,
+    "passed": 2666,
+    "failed": 0,
+    "skipped": 0,
+    "verification": "dotnet test",
+    "command": "dotnet test",
+    "date": "2026-07-18"
+  },
+  "suites": [],
+  "supportedClaims": [
+    "Mixed boundary mechanism.",
+    "Lower: inducibility (A0 0%→14% at N=65).",
+    "Peak: rebMag+orthHiVec+distHi converge at N=72.",
+    "Upper: static saturation (A0=100%).",
+    "6-driver ranking established."
+  ],
+  "conditionalClaims": [],
+  "hypotheses": [],
+  "notClaimed": ["physical constants", "relativity", "quantum mechanics", "cosmology"],
+  "openProblems": [],
+  "documents": [],
+  "roadmap": {
+    "recommendedTestFile": "",
+    "candidateUpdateLaws": []
+  },
+  "releaseIntegrity": {
+    "totalTestsVerified": 2666,
+    "passedVerified": 2666,
+    "verificationMethod": "dotnet test",
+    "mismatch": null
+  }
+}
