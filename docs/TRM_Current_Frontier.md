@@ -45,6 +45,11 @@ entropy CV=2.81 — eigenvalues are ~2000× more stable, and stable from
 the earliest β. The entire V7.4→V8.3 chain bottoms out at the PCA
 eigenvalues.
 
+PLI_01 complete: λ1 is representation-independent. Survives feature
+removal (r=0.82), normalization changes (r=1.00), and arbitrary scaling
+(r=1.00) — overall perturbation r=0.94. λ1 is not a PCA artifact; it is
+a genuine structural invariant of the accessibility landscape.
+
 ---
 
 ## Current Preferred Model

@@ -15,7 +15,7 @@
 | Current Branch | v8.3-invariant-origin |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | V8.3 INVARIANT ORIGIN. V8.2 closed. PIO_01: Speed from compensation (B). PRC_01: Chain closed (C). PEO_01: λ1,λ2 primitive — generate everything (A). |
+| Current Status | V8.3 INVARIANT ORIGIN. 4 audits. PIO_01(B): Speed from compensation. PRC_01(C): Chain closed. PEO_01(A): λ1,λ2 primitive. PLI_01(C): λ1 representation-independent. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---

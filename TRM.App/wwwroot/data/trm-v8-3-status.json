@@ -2,14 +2,15 @@
   "version": "V8.3",
   "branch": "v8.3-invariant-origin",
   "status": "active",
-  "total_audits": 3,
-  "audits_completed": ["PIO_01", "PRC_01", "PEO_01"],
-  "key_result": "Speed from mutual compensation (PIO_01, B). Chain closed (PRC_01, C). Eigenvalues λ1,λ2 primitive — generate everything, reconstructible from nothing (PEO_01, A).",
-  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Mutual Compensation (PIO_01) → Reconstruction Closure (PRC_01) → Eigenvalue Primitive (PEO_01)",
+  "total_audits": 4,
+  "audits_completed": ["PIO_01", "PRC_01", "PEO_01", "PLI_01"],
+  "key_result": "Speed from compensation (PIO_01,B). Chain closed (PRC_01,C). λ1,λ2 primitive (PEO_01,A). λ1 representation-independent, not PCA artifact (PLI_01,C).",
+  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Mutual Compensation (PIO_01) → Reconstruction Closure (PRC_01) → Eigenvalue Primitive (PEO_01) → Lambda Invariance (PLI_01)",
   "models": {
     "PIO_01": "B",
     "PRC_01": "C",
-    "PEO_01": "A"
+    "PEO_01": "A",
+    "PLI_01": "C"
   },
   "test_count": "~3393",
   "failed": 0,
