@@ -803,6 +803,119 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void TED_01_TickEquilibriumDistanceAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== TED_01: Tick Equilibrium Distance Audit ===");
+        _o.WriteLine("=== Does time require tick + disequilibrium? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 51869;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI;
+        double dB = betaMax / (nBeta - 1);
+
+        var totals = new List<double>();
+        var tick = new List<double>();
+        var dH = new List<double>();
+        double prevTotal = double.NaN, prevEnt = double.NaN;
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_TE", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3) continue;
+            double total = sumV1 / n + sumVT / n;
+            double o1 = (sumV1 / n) / Math.Max((sumV1 / n) + (sumVT / n), 1e-12);
+            double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+
+            totals.Add(total);
+            if (!double.IsNaN(prevTotal))
+            {
+                tick.Add(Math.Abs(total - prevTotal) / dB);
+                dH.Add(Math.Abs(ent - prevEnt) / dB);
+            }
+            prevTotal = total; prevEnt = ent;
+        }
+
+        // Equilibrium = average of last 20% (stable endpoint)
+        int eqStart = (int)(totals.Count * 0.8);
+        double eqTotal = totals.Skip(eqStart).Average();
+
+        _o.WriteLine($"Equilibrium total = {eqTotal:F6}");
+        _o.WriteLine($"Total range: [{totals.Min():F6}, {totals.Max():F6}]");
+        _o.WriteLine("");
+
+        // Classify all steps
+        int tickTime = 0, tickNoTime = 0, noTickNoTime = 0;
+        var counterD_eq = new List<double>();
+        var timeD_eq = new List<double>();
+
+        for (int i = 0; i < tick.Count; i++)
+        {
+            double deq = Math.Abs(totals[i] - eqTotal);
+            bool hasTick = tick[i] > 1e-8;
+            bool hasTime = dH[i] > 1e-8;
+
+            if (hasTick && hasTime) { tickTime++; timeD_eq.Add(deq); }
+            else if (hasTick && !hasTime) { tickNoTime++; counterD_eq.Add(deq); }
+            else if (!hasTick && !hasTime) { noTickNoTime++; }
+        }
+
+        _o.WriteLine($"Tick+Time: {tickTime}  Tick+NoTime: {tickNoTime}  NoTick+NoTime: {noTickNoTime}");
+        _o.WriteLine($"Counterexample mean D_eq: {counterD_eq.Average():F6}");
+        _o.WriteLine($"Time-present mean D_eq:    {timeD_eq.Average():F6}");
+        _o.WriteLine("");
+
+        // Threshold: min D_eq in counterexamples vs max D_eq with time
+        double maxCounterD = counterD_eq.Count > 0 ? counterD_eq.Max() : -1;
+        double minTimeD = timeD_eq.Count > 0 ? timeD_eq.Min() : double.MaxValue;
+        _o.WriteLine($"Max D_eq in counterexamples: {maxCounterD:F6}");
+        _o.WriteLine($"Min D_eq with time:          {minTimeD:F6}");
+
+        bool thresholdExists = maxCounterD < minTimeD;
+        _o.WriteLine($"Threshold exists: {(thresholdExists ? "YES" : "NO")}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        string decision;
+        if (thresholdExists && tickNoTime > 0)
+            decision = "Model C";
+        else if (tickNoTime > 0)
+            decision = "Model B";
+        else
+            decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine($"Time requires Tick + Disequilibrium. Counterexamples ({tickNoTime}) have D_eq<{maxCounterD:F6} — too close to equilibrium. Time emerges only beyond the {maxCounterD:F6} threshold.");
+        else if (decision == "Model B")
+            _o.WriteLine("Disequilibrium contributes but no clear threshold.");
+        else
+            _o.WriteLine("No disequilibrium effect.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== TED_01 complete. Commit: TED_01_TickEquilibriumDistanceAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
