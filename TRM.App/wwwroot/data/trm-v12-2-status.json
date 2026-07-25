@@ -2,9 +2,9 @@
   "version": "V12.2",
   "branch": "v12.2-duality-physics-correspondence",
   "status": "active",
-  "total_audits": 1,
+  "total_audits": 2,
   "key_result": "Strong structural correspondence to known physics: order-fluctuation, structure-process, information-entropy dualities. Novel discrete regime emergence (DPC_01,B).",
   "test_count": "~3393",
   "failed": 0,
-  "last_updated": "2026-07-25","audits_completed": ["DPC_01"]
+  "last_updated": "2026-07-25","audits_completed": ["DPC_01","NPV_01"]
 }
