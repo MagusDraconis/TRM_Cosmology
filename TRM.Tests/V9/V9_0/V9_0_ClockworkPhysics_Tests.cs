@@ -2210,6 +2210,105 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void DLO_01_DynamicToObservableBridgeAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== DLO_01: Dynamic-to-Observable Bridge Audit ===");
+        _o.WriteLine("=== How does D_eq transform into L? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 67957;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var onFamilies = new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS };
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var pairs = new List<(double dEq, double L)>();
+
+        foreach (var fam in onFamilies)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Ls = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_DL", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n);
+                    Ls.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                for (int i = 0; i < totals.Count; i++)
+                {
+                    double deq = Math.Abs(totals[i] - eqTot);
+                    pairs.Add((deq, Ls[i]));
+                }
+            }
+        }
+
+        var dEqArr = pairs.Select(p => p.dEq).ToArray();
+        var Larr = pairs.Select(p => p.L).ToArray();
+
+        double r = PearsonCorrelation(dEqArr, Larr);
+
+        // Linear vs quadratic fit
+        double r2_lin = R2SinglePredictor(Larr, dEqArr);
+        // Quadratic: use dEq and dEq² as features
+        var dEq2 = dEqArr.Select(d => d * d).ToArray();
+        double r2_quad = FitModelR2(Larr, new[] { dEqArr, dEq2 });
+
+        _o.WriteLine($"D_eq → L: r={r:F4}, R²(linear)={r2_lin:F4}, R²(quad)={r2_quad:F4}");
+        _o.WriteLine($"ΔR² (nonlinear gain) = {r2_quad - r2_lin:F4}");
+        _o.WriteLine("");
+
+        // Lag: D_eq(t) → L(t+1) vs L(t) → D_eq(t+1)
+        var lagFwd = new List<(double d, double l)>();
+        var lagBwd = new List<(double l, double d)>();
+        for (int i = 0; i < pairs.Count - 1; i++)
+        {
+            lagFwd.Add((pairs[i].dEq, pairs[i + 1].L));
+            lagBwd.Add((pairs[i].L, pairs[i + 1].dEq));
+        }
+        double rFwd = PearsonCorrelation(lagFwd.Select(p => p.d).ToArray(), lagFwd.Select(p => p.l).ToArray());
+        double rBwd = PearsonCorrelation(lagBwd.Select(p => p.l).ToArray(), lagBwd.Select(p => p.d).ToArray());
+        _o.WriteLine($"Lag: D_eq(t)→L(t+1) r={rFwd:F4}, L(t)→D_eq(t+1) r={rBwd:F4} (instantaneous r={r:F4})");
+        _o.WriteLine("");
+
+        string decision;
+        if (r2_quad - r2_lin < 0.02 && Math.Abs(r) > 0.7) decision = "Model A";
+        else if (r2_quad - r2_lin > 0.05) decision = "Model B";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model A")
+            _o.WriteLine("D_eq → L is a direct linear mapping. No bridge layer needed.");
+        else if (decision == "Model B")
+            _o.WriteLine("Nonlinear bridge exists between D_eq and L.");
+        else
+            _o.WriteLine("Family-dependent or bridge-variable mapping.");
+        _o.WriteLine("");
+        _o.WriteLine("=== DLO_01 complete. Commit: DLO_01_DynamicToObservableBridgeAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
