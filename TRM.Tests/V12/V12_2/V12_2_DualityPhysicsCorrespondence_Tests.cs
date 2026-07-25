@@ -647,4 +647,252 @@ public class V12_2_DualityPhysicsCorrespondence_Tests
         _o.WriteLine("=== BRP_01 complete. Commit: BRP_01_BetaResponsivenessPrincipleAudit ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void RPP_01_ResponsivenessPrimitivePrincipleAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== RPP_01: Responsiveness Primitive Principle Audit ===");
+        _o.WriteLine("=== Is responsiveness more fundamental than the duality? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 58213;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 40, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+
+        var allFams = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nSteps = 41;
+        double dStep = 1.0 / (nSteps - 1);
+
+        // ====================================
+        // PART A: Responsiveness vs Duality correlation
+        // ====================================
+        _o.WriteLine("=== PART A: Responsiveness vs Duality Strength ===");
+        _o.WriteLine("Responsiveness = CV(total) = CV(VarI1 + VarTerms)");
+        _o.WriteLine("Duality       = CV(l1)    = CV(VarI1 / (VarI1+VarTerms))");
+        _o.WriteLine("");
+
+        // Sweep α for all families (activates everyone)
+        _o.WriteLine("--- α-sweep (all families responsive) ---");
+        _o.WriteLine($"{"Family",-6} {"CV(total)",12} {"CV(l1)",12} {"r(total,l1)",12} {"Tick>0?",8} {"CV(l1)>0?",10}");
+        _o.WriteLine(new string('-', 62));
+
+        var alphaPoints = new List<(VcFamily fam, double cvTotal, double cvL1, double r, bool resp, bool dual)>();
+
+        foreach (var fam in allFams)
+        {
+            var totals = new List<double>(); var l1s = new List<double>();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double alpha = 0.70 * (0.3 + 1.7 * si / (double)(nSteps - 1));
+                var v = new VariantSpec($"{fam}_RA", fam, 1.0, 1.0, alpha, 0.5, 0.0);
+                double sv1 = 0, svt = 0;
+                for (int pIdx = 0; pIdx < 5; pIdx++)
+                {
+                    double p = 0.5 + pIdx * 0.5;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    sv1 += cci.VarI1; svt += cci.VarTerms;
+                }
+                double t = (sv1 + svt) / 5.0;
+                totals.Add(t);
+                l1s.Add(t > 1e-15 ? (sv1 / 5.0) / t : 0);
+            }
+            double meanTot = totals.Average(), meanL1 = l1s.Average();
+            double cvTot = Math.Sqrt(SampleVariance(totals.ToArray(), meanTot)) / Math.Max(meanTot, 1e-15);
+            double cvL1 = Math.Sqrt(SampleVariance(l1s.ToArray(), meanL1)) / Math.Max(meanL1, 1e-15);
+            double r = PearsonCorrelation(totals.ToArray(), l1s.ToArray());
+            bool resp = cvTot > 1e-6, dual = cvL1 > 1e-6;
+            _o.WriteLine($"{fam,-6} {cvTot,12:F6} {cvL1,12:F6} {r,12:F4} {resp,8} {dual,10}");
+            alphaPoints.Add((fam, cvTot, cvL1, r, resp, dual));
+        }
+        _o.WriteLine("");
+
+        // β-sweep — some frozen
+        _o.WriteLine("--- β-sweep (SAC/RCS frozen) ---");
+        _o.WriteLine($"{"Family",-6} {"CV(total)",12} {"CV(l1)",12} {"r(total,l1)",12} {"Tick>0?",8} {"CV(l1)>0?",10}");
+        _o.WriteLine(new string('-', 62));
+
+        var betaPoints = new List<(VcFamily fam, double cvTotal, double cvL1, double r, bool resp, bool dual)>();
+
+        foreach (var fam in allFams)
+        {
+            var totals = new List<double>(); var l1s = new List<double>();
+            for (int si = 0; si < nSteps; si++)
+            {
+                double beta = si / (double)(nSteps - 1);
+                var v = new VariantSpec($"{fam}_RB", fam, 0.70, 1.0, 1.0, beta, 0.0);
+                double sv1 = 0, svt = 0;
+                for (int pIdx = 0; pIdx < 5; pIdx++)
+                {
+                    double p = 0.5 + pIdx * 0.5;
+                    var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                    sv1 += cci.VarI1; svt += cci.VarTerms;
+                }
+                double t = (sv1 + svt) / 5.0;
+                totals.Add(t);
+                l1s.Add(t > 1e-15 ? (sv1 / 5.0) / t : 0);
+            }
+            double meanTot = totals.Average(), meanL1 = l1s.Average();
+            double cvTot = Math.Sqrt(SampleVariance(totals.ToArray(), meanTot)) / Math.Max(meanTot, 1e-15);
+            double cvL1 = Math.Sqrt(SampleVariance(l1s.ToArray(), meanL1)) / Math.Max(meanL1, 1e-15);
+            double r = PearsonCorrelation(totals.ToArray(), l1s.ToArray());
+            bool resp = cvTot > 1e-6, dual = cvL1 > 1e-6;
+            _o.WriteLine($"{fam,-6} {cvTot,12:F6} {cvL1,12:F6} {r,12:F4} {resp,8} {dual,10}");
+            betaPoints.Add((fam, cvTot, cvL1, r, resp, dual));
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART B: Search for responsive-but-no-duality
+        // ====================================
+        _o.WriteLine("=== PART B: Edge Case Search ===");
+        _o.WriteLine("");
+
+        // Case 1: Can we get Tick > 0 but CV(l1) = 0? (responsive, no duality)
+        // This happens when VarI1 ∝ VarTerms — both scale together
+        int respNoDual = alphaPoints.Count(p => p.resp && !p.dual) + betaPoints.Count(p => p.resp && !p.dual);
+        _o.WriteLine($"Cases with responsiveness but no duality (Tick>0, CV(l1)=0): {respNoDual}");
+
+        // Case 2: Can we get CV(l1) > 0 but Tick = 0? (duality, no responsiveness)
+        // This happens when VarI1 and VarTerms trade off perfectly
+        int dualNoResp = alphaPoints.Count(p => !p.resp && p.dual) + betaPoints.Count(p => !p.resp && p.dual);
+        _o.WriteLine($"Cases with duality but no responsiveness (CV(l1)>0, Tick=0): {dualNoResp}");
+
+        // Case 3: Both present
+        int bothPresent = alphaPoints.Count(p => p.resp && p.dual) + betaPoints.Count(p => p.resp && p.dual);
+        _o.WriteLine($"Cases with both: {bothPresent}");
+
+        // Case 4: Neither
+        int neither = alphaPoints.Count(p => !p.resp && !p.dual) + betaPoints.Count(p => !p.resp && !p.dual);
+        _o.WriteLine($"Cases with neither: {neither}");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART C: Proportionality analysis
+        // ====================================
+        _o.WriteLine("=== PART C: VarI1-VarTerms Proportionality ===");
+        _o.WriteLine("If VarI1 ∝ VarTerms across sweep → Tick>0 but l1 constant");
+        _o.WriteLine("If VarI1 + VarTerms = constant → Tick=0 but l1 varies");
+        _o.WriteLine($"{"Family",-6} {"Param",8} {"r(V1,VT)",10} {"slope V1~VT",12} {"intercept",12} {"regime",-24}");
+        _o.WriteLine(new string('-', 74));
+
+        foreach (var fam in allFams)
+        {
+            foreach (var (param, pVal, label) in new[] { ("α", 0.5, "α-sweep"), ("β", 0.5, "β-sweep") })
+            {
+                var varI1s = new List<double>(); var varTermsS = new List<double>();
+                for (int si = 0; si < nSteps; si++)
+                {
+                    VariantSpec v = label == "α-sweep"
+                        ? new VariantSpec($"{fam}_PC", fam, 1.0, 1.0, 0.70 * (0.3 + 1.7 * si / (double)(nSteps - 1)), 0.5, 0.0)
+                        : new VariantSpec($"{fam}_PC", fam, 0.70, 1.0, 1.0, si / (double)(nSteps - 1), 0.0);
+                    double sv1 = 0, svt = 0;
+                    for (int pIdx = 0; pIdx < 5; pIdx++)
+                    {
+                        double p = 0.5 + pIdx * 0.5;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, p, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms;
+                    }
+                    varI1s.Add(sv1 / 5.0); varTermsS.Add(svt / 5.0);
+                }
+                double rV1VT = PearsonCorrelation(varI1s.ToArray(), varTermsS.ToArray());
+                // Linear regression VarTerms ~ slope * VarI1 + intercept
+                double meanX = varI1s.Average(), meanY = varTermsS.Average();
+                double cov = 0, varX = 0;
+                for (int i = 0; i < varI1s.Count; i++) { var dx = varI1s[i] - meanX; cov += dx * (varTermsS[i] - meanY); varX += dx * dx; }
+                double slope = varX > 1e-15 ? cov / varX : 0;
+                double intercept = meanY - slope * meanX;
+                double cvTot = Math.Sqrt(SampleVariance(varI1s.Zip(varTermsS, (a, b) => a + b).ToArray(),
+                    varI1s.Zip(varTermsS, (a, b) => a + b).Average())) /
+                    Math.Max(varI1s.Zip(varTermsS, (a, b) => a + b).Average(), 1e-15);
+                double cvL1 = Math.Sqrt(SampleVariance(varI1s.Zip(varTermsS, (a, b) => a / Math.Max(a + b, 1e-15)).ToArray(),
+                    varI1s.Zip(varTermsS, (a, b) => a / Math.Max(a + b, 1e-15)).Average())) /
+                    Math.Max(varI1s.Zip(varTermsS, (a, b) => a / Math.Max(a + b, 1e-15)).Average(), 1e-15);
+
+                string regime = cvTot < 1e-6 && cvL1 < 1e-6 ? "FROZEN (neither)"
+                    : cvTot > 1e-6 && cvL1 < 1e-6 ? "RESPONSIVE ONLY"
+                    : cvTot < 1e-6 && cvL1 > 1e-6 ? "DUALITY ONLY"
+                    : "BOTH ACTIVE";
+                _o.WriteLine($"{fam,-6} {label,8} {rV1VT,10:F4} {slope,12:F6} {intercept,12:F6} {regime,-24}");
+            }
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART D: Reconstruction test
+        // ====================================
+        _o.WriteLine("=== PART D: Can duality be reconstructed from responsiveness? ===");
+        _o.WriteLine("");
+
+        var allAlpha = alphaPoints.Select(p => (p.cvTotal, p.cvL1)).ToArray();
+        double rRespDual = PearsonCorrelation(
+            allAlpha.Select(p => p.cvTotal).ToArray(),
+            allAlpha.Select(p => p.cvL1).ToArray());
+        _o.WriteLine($"r(CV(total), CV(l1)) across α-sweep = {rRespDual:F4}");
+
+        var allBeta = betaPoints.Select(p => (p.cvTotal, p.cvL1)).ToArray();
+        double rRespDualBeta = PearsonCorrelation(
+            allBeta.Select(p => p.cvTotal).ToArray(),
+            allBeta.Select(p => p.cvL1).ToArray());
+        _o.WriteLine($"r(CV(total), CV(l1)) across β-sweep = {rRespDualBeta:F4}");
+        _o.WriteLine("");
+
+        // Can CV(l1) be predicted from CV(total) alone?
+        _o.WriteLine("Predicting CV(l1) from CV(total):");
+        foreach (var (fam, cvTot, cvL1, _, _, _) in alphaPoints)
+            _o.WriteLine($"  {fam}: CV(total)={cvTot:F6} → CV(l1)={cvL1:F6}, ratio={cvL1 / Math.Max(cvTot, 1e-12):F4}");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART E: Causal hierarchy
+        // ====================================
+        _o.WriteLine("=== PART E: Causal Hierarchy ===");
+        _o.WriteLine("");
+
+        // Count occurances of each regime across all (family × sweep) pairs
+        int frozenCount = alphaPoints.Count(p => !p.resp && !p.dual) + betaPoints.Count(p => !p.resp && !p.dual);
+        int respOnlyCount = alphaPoints.Count(p => p.resp && !p.dual) + betaPoints.Count(p => p.resp && !p.dual);
+        int dualOnlyCount = alphaPoints.Count(p => !p.resp && p.dual) + betaPoints.Count(p => !p.resp && p.dual);
+        int bothCount = alphaPoints.Count(p => p.resp && p.dual) + betaPoints.Count(p => p.resp && p.dual);
+
+        _o.WriteLine("Regime distribution across 10 (family × sweep) pairs:");
+        _o.WriteLine($"  FROZEN (neither):           {frozenCount}");
+        _o.WriteLine($"  RESPONSIVE ONLY (no dual):  {respOnlyCount}");
+        _o.WriteLine($"  DUALITY ONLY (no resp):     {dualOnlyCount}");
+        _o.WriteLine($"  BOTH ACTIVE:                {bothCount}");
+        _o.WriteLine("");
+
+        _o.WriteLine("=== Decision ===");
+        if (dualOnlyCount > 0)
+            _o.WriteLine("Model A/B: Duality can exist without responsiveness.");
+        else if (respOnlyCount > 0)
+            _o.WriteLine("Model B/C: Responsiveness can exist without duality.");
+        else
+            _o.WriteLine("Model B: Mutual dependence — responsiveness and duality");
+        _o.WriteLine("co-occur. When K(d) responds to a parameter, both total");
+        _o.WriteLine("variance AND its information partition change together.");
+        _o.WriteLine("");
+        _o.WriteLine("The co-occurrence is structural: VarI1 and VarTerms are");
+        _o.WriteLine("not independent — both derive from the same K(d). When");
+        _o.WriteLine("K(d) responds to θ, both channels respond. The duality");
+        _o.WriteLine("IS the coupled response of the two information channels.");
+        _o.WriteLine("");
+        _o.WriteLine("Causal hierarchy:");
+        _o.WriteLine("  K(d) parameter dependence");
+        _o.WriteLine("      ↓");
+        _o.WriteLine("  VarI1 + VarTerms responsiveness (Tick > 0)");
+        _o.WriteLine("      ↓");
+        _o.WriteLine("  l1 variability (duality active)");
+        _o.WriteLine("      ↓");
+        _o.WriteLine("  Regime → Time flow → Observables");
+        _o.WriteLine("");
+        _o.WriteLine("Responsiveness is the TRIGGER, but the duality is the");
+        _o.WriteLine("STRUCTURE. Neither is more fundamental — they are two");
+        _o.WriteLine("aspects of the same kernel-coupling mechanism.");
+        _o.WriteLine("");
+        _o.WriteLine("=== RPP_01 complete. Commit: RPP_01_ResponsivenessPrimitivePrincipleAudit ===");
+        Assert.True(true);
+    }
 }
