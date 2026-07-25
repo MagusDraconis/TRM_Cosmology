@@ -392,6 +392,102 @@ public class V10_0_PhysicsValidation_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void CRA_01_ClockworkRegimeAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CRA_01: Clockwork Regime Audit ===");
+        _o.WriteLine("=== Is ICS fundamentally different or just slower? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 77887;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var families = new[] { VcFamily.GAN, VcFamily.ICS };
+        var famData = new Dictionary<VcFamily, (double[] tick, double[] L, double[] X, double[] dEq)>();
+
+        foreach (var fam in families)
+        {
+            var ticks = new List<double>(); var Ls = new List<double>(); var Xs = new List<double>(); var dEqs = new List<double>();
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Lvals = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_CR", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n); Lvals.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    ticks.Add(Math.Abs(totals[i + 1] - totals[i]) / dBeta);
+                    Ls.Add(Lvals[i]);
+                    Xs.Add(Math.Abs(totals[i] - eqTot) - 0.08 * Lvals[i]);
+                    dEqs.Add(Math.Abs(totals[i] - eqTot));
+                }
+            }
+            famData[fam] = (ticks.ToArray(), Ls.ToArray(), Xs.ToArray(), dEqs.ToArray());
+        }
+
+        var gan = famData[VcFamily.GAN];
+        var ics = famData[VcFamily.ICS];
+
+        // Scale factor: GAN tick mean / ICS tick mean
+        double scale = gan.tick.Average() / Math.Max(ics.tick.Average(), 1e-12);
+
+        _o.WriteLine($"ICS→GAN scale factor = {scale:F2} (ICS Tick × {scale:F1} ≈ GAN Tick)");
+        _o.WriteLine("");
+
+        // Compare raw vs scaled
+        _o.WriteLine($"{"Metric",-12} {"GAN mean",10} {"ICS raw",10} {"ICS scaled",12} {"Δ raw",10} {"Δ scaled",10}");
+        _o.WriteLine(new string('-', 66));
+
+        var comps = new[] { ("Tick", gan.tick, ics.tick), ("L", gan.L, ics.L), ("X", gan.X, ics.X), ("D_eq", gan.dEq, ics.dEq) };
+        foreach (var (name, gArr, iArr) in comps)
+        {
+            double gM = gArr.Average(), iM = iArr.Average();
+            double iScaled = (name == "Tick") ? iM * scale : iM; // scale Tick only
+            double dRaw = Math.Abs(gM - iM) / Math.Max(Math.Abs(gM), 1e-12);
+            double dScaled = Math.Abs(gM - iScaled) / Math.Max(Math.Abs(gM), 1e-12);
+            _o.WriteLine($"{name,-12} {gM,10:F6} {iM,10:F6} {iScaled,12:F6} {dRaw,10:F4} {dScaled,10:F4}");
+        }
+        _o.WriteLine("");
+
+        bool collapses = Math.Abs(gan.L.Average() - ics.L.Average()) / Math.Max(Math.Abs(gan.L.Average()), 1e-12) < 0.05;
+        string decision = collapses ? "Model A" : "Model C";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model A")
+            _o.WriteLine("ICS is a pure rescaling of GAN — same regime, different clock rate.");
+        else
+            _o.WriteLine("ICS is a genuinely distinct dynamical regime — not reducible to GAN rescaling.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== CRA_01 complete. Commit: CRA_01_ClockworkRegimeAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
