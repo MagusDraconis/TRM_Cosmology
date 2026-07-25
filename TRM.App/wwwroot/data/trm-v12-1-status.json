@@ -1,11 +1,58 @@
 {
-  "version": "V12.1",
-  "branch": "v12.1-duality-validation",
-  "status": "complete",
-  "total_audits": 2,
-  "audits_completed": ["DVL_01","DPG_01"],
-  "key_result": "Information-Dynamics duality robust and irreducible. Full hierarchy emerges from duality.",
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V12.1 DUALITY VALIDATION — CLOSED",
+  "phase": "Duality robustness across perturbations",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV12/V12_1_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Duality robust across 16 configs",
+    "Full hierarchy emerges from duality"
+  ],
+  "suites": [
+    {
+      "name": "DVL_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "DPG_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V12_1",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V12_1"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V12_1",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V12/V12_1/V12_1_DualityValidation_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

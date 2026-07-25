@@ -1,11 +1,58 @@
 {
-  "version": "V12.0",
-  "branch": "v12.0-information-physics",
-  "status": "complete",
-  "total_audits": 2,
-  "audits_completed": ["IPR_01","IDD_01"],
-  "key_result": "Information-Dynamics duality is the deepest irreducible layer. Two orthogonal components generate all clockwork structure.",
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V12.0 INFORMATION PHYSICS — CLOSED",
+  "phase": "Information-Dynamics Duality discovery",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV12/V12_0_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Information and Dynamics are dual, neither fully reducible",
+    "Duality is fundamental"
+  ],
+  "suites": [
+    {
+      "name": "IPR_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "IDD_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V12_0",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V12_0"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V12_0",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V12/V12_0/V12_0_InformationPhysics_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

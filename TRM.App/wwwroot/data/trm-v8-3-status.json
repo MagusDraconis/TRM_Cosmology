@@ -1,23 +1,101 @@
 {
-  "version": "V8.3",
-  "branch": "v8.3-invariant-origin",
-  "status": "complete",
-  "total_audits": 9,
-  "audits_completed": ["PIO_01", "PRC_01", "PEO_01", "PLI_01", "LTR_01", "KSD_01", "POA_01", "PST_01", "TTA_01"],
-  "key_result": "λ1,λ2 primitive (PEO_01,A) and invariant (PLI_01,C). Chain closed (PRC_01,C). Speed from compensation (PIO_01,B). Oscillation-λ dual (POA_01,B). Time-rate emergence fundamentally family-dependent.",
-  "full_chain": "λ1,λ2 → Accessibility → Transfer Pressure → Drift → Ordering → Time → Local Rates → Geometry → Length → Speed",
-  "models": {
-    "PIO_01": "B",
-    "PRC_01": "C",
-    "PEO_01": "A",
-    "PLI_01": "C",
-    "LTR_01": "A",
-    "KSD_01": "D",
-    "POA_01": "B",
-    "PST_01": "A",
-    "TTA_01": "A"
+  "releaseStatus": "V8.3 INVARIANT ORIGIN — CLOSED",
+  "phase": "λ primitives, invariant origin, time emergence",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV8/V8_3_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "λ1,λ2 are primitive — generate everything, reconstructible from nothing",
+    "λ1 representation-independent",
+    "No universal tick generator"
+  ],
+  "suites": [
+    {
+      "name": "PIO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PRC_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PEO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PLI_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "LTR_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "KSD_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PST_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "TTA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "POA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V8_3",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V8_3"
   },
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V8_3",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V8/V8_3/V8_3_InvariantOrigin_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

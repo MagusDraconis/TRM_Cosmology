@@ -1,24 +1,76 @@
 {
-  "version": "V8.2",
-  "branch": "v8.2-primitive-meaning",
-  "status": "complete",
-  "total_audits": 10,
-  "audits_completed": ["PSE_01", "PTD_01", "PTO_01", "PET_01", "PLT_01", "PEG_01", "PML_01", "PSC_01", "TLG_01", "PSI_01"],
-  "key_result": "Primitive P = Accessibility Potential. Full semantic chain from primitive to emergent geometry: Accessibility → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed Invariant. Time, Length, Speed, and Geometry all emerge from accessibility without physical assumptions.",
-  "full_chain": "P(Accessibility) → Gradient → Transfer Pressure → Drift → Temporal Ordering → Emergent Time → Local Rates → Emergent Geometry → Metric Length → Speed → Time-Length Geometry → Speed Invariant → Attractor Occupation → Entropy → Dimension",
-  "models": {
-    "PSE_01": "B/C",
-    "PTD_01": "C",
-    "PTO_01": "B/C",
-    "PET_01": "C",
-    "PLT_01": "C",
-    "PEG_01": "C",
-    "PML_01": "C",
-    "PSC_01": "C",
-    "TLG_01": "C",
-    "PSI_01": "C"
+  "releaseStatus": "V8.2 PRIMITIVE MEANING — CLOSED",
+  "phase": "Emergent geometry from accessibility potential",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV8/V8_2_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Time, Length, Speed emerge from accessibility",
+    "Speed is primary geometric invariant (CV=0.46)"
+  ],
+  "suites": [
+    {
+      "name": "PEG_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PML_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PSC_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "TLG_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PSI_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V8_2",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V8_2"
   },
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V8_2",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V8/V8_2/V8_2_PrimitiveMeaning_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

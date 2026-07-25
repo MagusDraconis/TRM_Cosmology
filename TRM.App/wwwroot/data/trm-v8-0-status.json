@@ -1,8 +1,64 @@
 {
-  "version": "V8.0",
-  "branch": "v8.0-foundational-geometry",
-  "status": "closed",
-  "next_branch": "v8.1-primitive-origin",
-  "total_audits": 3,
-  "key_result": "Primitive P identified; entire V7.4→V8.0 chain reduces to single kernel quantity."
+  "releaseStatus": "V8.0 FOUNDATIONAL GEOMETRY — CLOSED",
+  "phase": "Primitive geometry and kernel identity",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV8/V8_0_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Primitive P identified",
+    "Entire V7.4→V8.0 chain reduces to single kernel quantity"
+  ],
+  "suites": [
+    {
+      "name": "PGA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PSP_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PSC_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V8_0",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V8_0"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V8_0",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V8/V8_0/V8_0_FoundationalGeometry_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

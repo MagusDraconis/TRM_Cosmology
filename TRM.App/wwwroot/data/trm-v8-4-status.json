@@ -1,12 +1,113 @@
 {
-  "version": "V8.4",
-  "branch": "v8.4-resonance-origin",
-  "status": "complete",
-  "total_audits": 12,
-  "audits_completed": ["ROA_01","DAO_01","DFG_01","LFG_01","KLI_01","DKO_01","MTO_01","FCA_01","ETA_01","FOP_01","BOA_01","VRD_01"],
-  "key_result": "Time emergence is family-dependent and irreducible. L = a + bβ with b=0 (frozen:SAC/RCS) or b≈0.43 (live:GAN/ICS/CNS). Family type is irreducible differentiator.",
-  "models": {"ROA_01":"D","DAO_01":"C","DFG_01":"C","LFG_01":"A","KLI_01":"A","DKO_01":"A","MTO_01":"C","FCA_01":"A","ETA_01":"A","FOP_01":"B","BOA_01":"B","VRD_01":"C"},
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V8.4 RESONANCE ORIGIN — CLOSED",
+  "phase": "Family-dependent clockwork emergence",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV8/V8_4_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "SAC/RCS have ZERO entropy dynamics",
+    "Family type irreducible differentiator",
+    "L dynamics controlled by family type"
+  ],
+  "suites": [
+    {
+      "name": "ROA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "DAO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "DFG_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "LFG_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "KLI_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "DKO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "MTO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "FCA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "BOA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "VRD_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "FOP_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V8_4",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V8_4"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V8_4",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V8/V8_4/V8_4_ResonanceOrigin_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

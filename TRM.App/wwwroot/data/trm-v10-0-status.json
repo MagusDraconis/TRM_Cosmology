@@ -1,11 +1,77 @@
 {
-  "version": "V10.0",
-  "branch": "v10.0-clockwork-physics-validation",
-  "status": "complete",
-  "total_audits": 5,
-  "audits_completed": ["CPV_00","CDN_01","CMC_01","MCA_01","CRA_01"],
-  "key_result": "Physical analogy established. Two regimes: GAN/CNS (dissipative) and ICS (resonant). No universal invariant. Clockwork physics is regime-dependent.",
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V10.0 PHYSICS VALIDATION — CLOSED",
+  "phase": "Clockwork predictions validated against physics",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV10/V10_0_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "6/6 concepts map to physics",
+    "Two irreducible material classes",
+    "GAN≡CNS merged"
+  ],
+  "suites": [
+    {
+      "name": "CPV_00",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "CDN_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "CMC_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "MCA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "CRA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V10_0",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V10_0"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V10_0",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V10/V10_0/V10_0_PhysicsValidation_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

@@ -1,12 +1,95 @@
 {
-  "version": "V9.1",
-  "branch": "v9.0-clockwork-physics",
-  "status": "complete",
-  "total_audits": 26,
-  "audits_completed": ["CPF_01","CGA_01","VBT_01","BAO_01","BOC_02","WPO_01","BDC_01","TDO_01","TED_01","CTA_01","CAI_01","DEO_01","DGO_01","VRC_01","PPA_01","CMP_01","MSO_01","SSC_01","OMA_01","LOC_01","LPF_01","DLO_01","MCH_01","UFS_01","XPR_01","XCO_01"],
-  "key_result": "First fully closed Clockwork Dynamics. Minimal hierarchy: Family -> X = D_eq - kL + Tick -> dH. 6/6 V1 recovered. Next: physics validation.",
-  "models": {"CPF_01":"C","CGA_01":"D","VBT_01":"C","BAO_01":"A","BOC_02":"A","WPO_01":"B","BDC_01":"C","TDO_01":"B","TED_01":"B","CTA_01":"C","CAI_01":"D","DEO_01":"C","DGO_01":"A","VRC_01":"C","PPA_01":"A","CMP_01":"D","MSO_01":"D","SSC_01":"A","OMA_01":"A","LOC_01":"C","LPF_01":"B","DLO_01":"D","MCH_01":"B","UFS_01":"C","XPR_01":"C","XCO_01":"B"},
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V9.0/V9.1 CLOCKWORK PHYSICS — CLOSED",
+  "phase": "Framework closure, unified state X, primary observable L",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV9/V9_0_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "L=1-VarI1/VarTerms, CV=0.15",
+    "X=D_eq-kL unified state, R²=0.893",
+    "6/6 V1 concepts recovered"
+  ],
+  "suites": [
+    {
+      "name": "CPF_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "VBT_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "CTA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "MCH_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "UFS_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "XPR_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "OMA_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "LOC_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V9_0",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V9_0"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V9_0",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V9/V9_0/V9_0_ClockworkPhysics_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

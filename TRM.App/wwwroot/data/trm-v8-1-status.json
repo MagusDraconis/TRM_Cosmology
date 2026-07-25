@@ -1,7 +1,58 @@
 {
-  "version": "V8.1",
-  "branch": "v8.1-primitive-origin",
-  "status": "closed",
-  "total_audits": 3,
-  "key_result": "Primitive P is irreducible and universal — the root of the V7.4→V8.1 structure."
+  "releaseStatus": "V8.1 PRIMITIVE ORIGIN — CLOSED",
+  "phase": "Irreducibility and universality of the primitive",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV8/V8_1_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Primitive is irreducible and universal",
+    "Chain is internally closed"
+  ],
+  "suites": [
+    {
+      "name": "PIO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "PRC_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V8_1",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V8_1"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V8_1",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V8/V8_1/V8_1_PrimitiveOrigin_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

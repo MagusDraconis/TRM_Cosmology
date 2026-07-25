@@ -1,14 +1,23 @@
 {
-  "version": "V13.0",
-  "branch": "v13.0-time-gradient-reconstruction",
-  "status": "closed",
-  "total_audits": 2,
-  "key_result": "V1 time-gradient dynamics reconstructed from V12.2. Tick acts as effective local clock rate. d(Tick)/dα < 0 universally. Feedback sign = damping coefficient on Tick gradient landscape.",
-  "test_count": "~3442",
-  "failed": 0,
-  "last_updated": "2026-07-25",
-  "audits_completed": ["TGR_01","TGP_01"],
-  "v1_reconstruction": "V1 'local clock rate' = Tick, 'time gradient' = d(Tick)/dm, 'fall to slower time' = drift toward m=-1",
-  "gradient_landscape": "d(Tick)/dα < 0 for all 5 families. Universal downhill toward slower time.",
-  "oscillator_analogy": "Negative feedback (ICS) = damped → Tick minimum. Positive feedback (GAN/CNS) = anti-damped → runs away."
+  "releaseStatus": "V13.0 TIME GRADIENT RECONSTRUCTION — CLOSED",
+  "phase": "V1 time-gradient hypothesis reconstructed from V12.2",
+  "date": "2026-07-25",
+  "testSummary": { "total": 3442, "passed": 3442, "failed": 0, "skipped": 0, "verification": "dotnet test --filter FullyQualifiedName~V13_0", "command": "dotnet test TRM.Tests --filter FullyQualifiedName~V13_0", "date": "2026-07-25" },
+  "suites": [
+    { "name": "TGR_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "TGP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "V1 emerges naturally from V12.2: Tick = clock rate, dTick/dm = gradient",
+    "d(Tick)/dα < 0 universally — time gradient points toward slower time",
+    "Feedback sign acts as damping coefficient on Tick gradient landscape",
+    "Oscillator analogy: γ>0 damped (ICS), γ≈0 critical (SAC), γ<0 anti-damped (GAN/CNS/RCS)"
+  ],
+  "conditionalClaims": [],
+  "hypotheses": ["Tick gradients may generate effective force/acceleration dynamics"],
+  "notClaimed": ["physical spacetime", "physical constants", "GR derivation"],
+  "openProblems": [{ "priority": "P1", "title": "Effective force law", "description": "Determine whether F=-dTick/dα generates acceleration-like behavior" }],
+  "documents": [{ "title": "V13.0 Closure Report", "filename": "V13_0_Closure_Report.md", "available": true, "description": "V13.0 closure" }],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V13/V13_0/V13_0_TimeGradientReconstruction_Tests.cs", "candidateUpdateLaws": ["F = -dTick/dα"] },
+  "releaseIntegrity": { "totalTestsVerified": 3442, "passedVerified": 3442, "verificationMethod": "dotnet test --filter FullyQualifiedName~V13_0", "mismatch": null }
 }

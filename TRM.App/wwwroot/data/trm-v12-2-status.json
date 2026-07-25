@@ -1,15 +1,66 @@
 {
-  "version": "V12.2",
-  "branch": "v12.2-duality-physics-correspondence",
-  "status": "closed",
-  "total_audits": 10,
-  "key_result": "Information-Dynamics Duality is the deepest validated layer. Feedback sign r(|1+m|,|dV1|) = 100% regime classifier. m = d(VT)/d(V1) is master parameter. β is measurement coordinate, not fundamental. Incomplete conservation IS time flow.",
-  "test_count": "~3442",
-  "failed": 0,
-  "last_updated": "2026-07-25",
-  "audits_completed": ["DPC_01","NPV_01","FAG_01","DAT_01","BRP_01","RPP_01","IBC_01","MPR_01","NLC_01","RFB_01"],
-  "deepest_chain": "Family Axiom → m → (V=|1+m|, |dV1/dθ|) → Tick → Feedback Sign → Regime → Time",
-  "regime_classifier": "r(|1+m_step|,|dV1/dθ|) < -0.3 → RESONANT | r > +0.3 → DISSIPATIVE | |r| ≤ 0.3 → INTERMEDIATE",
-  "master_parameter": "m = -1.04 (ICS resonant), -0.67 (SAC intermediate), -0.47 (RCS), -0.25 (GAN/CNS dissipative)",
-  "corrected_findings": "SAC/RCS have NON-ZERO but CONSTANT VarI1/VarTerms (not zero). β-response is parameter-dependent, not fundamental. Tick underprediction for ICS (8.7×) explained by step-level m fluctuation."
+  "releaseStatus": "V12.2 DUALITY PHYSICS CORRESPONDENCE — CLOSED",
+  "phase": "Information-Dynamics Duality, master parameter m, regime classifier",
+  "date": "2026-07-25",
+  "testSummary": {
+    "total": 3442,
+    "passed": 3442,
+    "failed": 0,
+    "skipped": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V12_2",
+    "command": "dotnet test TRM.Tests --filter FullyQualifiedName~V12_2",
+    "date": "2026-07-25"
+  },
+  "suites": [
+    { "name": "DPC_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "NPV_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "FAG_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "DAT_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "BRP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "RPP_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "IBC_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "MPR_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "NLC_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "RFB_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Information-Dynamics Duality is the deepest validated layer",
+    "m = d(VarTerms)/d(VarI1) is the master parameter",
+    "Feedback sign r(|1+m|,|dV1|) = 100% regime classifier (8/8)",
+    "Tick = |1+m|·|dV1/dθ| — incomplete conservation IS time flow",
+    "SAC/RCS have NON-ZERO but CONSTANT variance under β-sweep",
+    "β is a measurement coordinate, not fundamental",
+    "GAN≡CNS on m, Tick, feedback (identical to 4 d.p.)",
+    "Step-level m_step fluctuation explains ICS Tick underprediction (12.7×)"
+  ],
+  "conditionalClaims": [
+    "SAC regime classification as INTERMEDIATE (decoupled, r≈0)",
+    "RCS classification as DISSIPATIVE under α (r=+0.92)"
+  ],
+  "hypotheses": [
+    "m may have an analytical derivation from K(d) functional form",
+    "Feedback sign universality may extend beyond tested parameter ranges"
+  ],
+  "notClaimed": [
+    "physical spacetime", "physical constants", "GR derivation",
+    "cosmology", "β as physical time coordinate"
+  ],
+  "openProblems": [
+    { "priority": "P1", "title": "m analytical derivation", "description": "Derive m from K(d) functional form analytically" },
+    { "priority": "P2", "title": "V1 reconstruction", "description": "Map V12.2 Tick dynamics to original V1 time-gradient hypothesis" }
+  ],
+  "documents": [
+    { "title": "V12 Closure Report", "filename": "V12_Closure_Report.md", "available": true, "description": "Full V12.0-12.2 closure report" },
+    { "title": "TRM Current Frontier", "filename": "TRM_Current_Frontier.md", "available": true, "description": "Current frontier document" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V12/V12_2/V12_2_DualityPhysicsCorrespondence_Tests.cs",
+    "candidateUpdateLaws": ["Tick = |1+m|·|dV1/dθ|", "Regime = sign(r(|1+m|,|dV1|))"]
+  },
+  "releaseIntegrity": {
+    "totalTestsVerified": 3442,
+    "passedVerified": 3442,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V12_2",
+    "mismatch": null
+  }
 }

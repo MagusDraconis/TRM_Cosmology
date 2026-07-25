@@ -1,15 +1,27 @@
 {
-  "version": "V13.1",
-  "branch": "v13.1-effective-time-dynamics",
-  "status": "closed",
-  "total_audits": 3,
-  "key_result": "Complete Newtonian kinematic chain emerges from Tick-gradient force: F=-dTick/dα → v=Tick₀-Tick → x=∫v dα → a=F. V1 time-gradient hypothesis fully reconstructed as closed kinematic chain in α-space.",
-  "test_count": "~3442",
-  "failed": 0,
-  "last_updated": "2026-07-25",
-  "audits_completed": ["ETD_01","TGF_01","TDT_01"],
-  "kinematic_chain": "F=-dTick/dα (force) → v=Tick₀-Tick(α) (velocity) → x=∫v dα (position) → a=d²x/dα²=F (acceleration ≡ force, CLOSED)",
-  "terminal_velocities": "RCS:99%, GAN/CNS:96%, SAC:92%, ICS:60% of Tick₀",
-  "force_law": "F ∝ Tick for GAN/CNS (R²=0.997), RCS (R²=0.994), SAC (R²=0.924). ICS: R²=0.38 (flat, at minimum)",
-  "trajectories": "All CONVERGENT, STABLE, finite terminal velocity. No divergence, no oscillation."
+  "releaseStatus": "V13.1 EFFECTIVE TIME DYNAMICS — CLOSED",
+  "phase": "Complete Newtonian kinematic chain from Tick-gradient force",
+  "date": "2026-07-25",
+  "testSummary": { "total": 3442, "passed": 3442, "failed": 0, "skipped": 0, "verification": "dotnet test --filter FullyQualifiedName~V13_0", "command": "dotnet test TRM.Tests --filter FullyQualifiedName~V13_0", "date": "2026-07-25" },
+  "suites": [
+    { "name": "ETD_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "TGF_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" },
+    { "name": "TDT_01", "tests": 1, "status": "COMPLETE", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Complete Newtonian kinematic chain: F=-dTick/dα → v=Tick₀-Tick → x=∫v dα → a=F (CLOSED)",
+    "F = -dTick/dα > 0 universally — force toward slower time, 5/5 V1 match",
+    "All trajectories STABLE, CONVERGENT, finite terminal velocity",
+    "Tick(α) = damped oscillator: d²T/dα² = -ω²·T - γ·dT/dα",
+    "F ∝ Tick for GAN/CNS/RCS (R²=0.92-0.997)",
+    "ICS: resonant plateau (60% terminal, flattest trajectory)",
+    "GAN/CNS: exponential decay Tick ∝ exp(-2.76·α), R²=0.988"
+  ],
+  "conditionalClaims": [],
+  "hypotheses": ["Tick gradients may define a potential function for effective gravity"],
+  "notClaimed": ["physical spacetime", "physical constants", "GR derivation", "physical gravity"],
+  "openProblems": [{ "priority": "P1", "title": "Tick potential", "description": "Define potential U(α) such that F=-dU/dα from Tick landscape" }],
+  "documents": [{ "title": "V13.1 Closure Report", "filename": "V13_1_Closure_Report.md", "available": true, "description": "V13.1 closure with kinematic chain" }],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V13/V13_0/V13_0_TimeGradientReconstruction_Tests.cs", "candidateUpdateLaws": ["F=-dTick/dα", "v=Tick₀-Tick", "a=F"] },
+  "releaseIntegrity": { "totalTestsVerified": 3442, "passedVerified": 3442, "verificationMethod": "dotnet test --filter FullyQualifiedName~V13_0", "mismatch": null }
 }

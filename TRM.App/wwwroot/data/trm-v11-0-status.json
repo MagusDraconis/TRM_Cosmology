@@ -1,11 +1,65 @@
 {
-  "version": "V11.0",
-  "branch": "v11.0-family-axiom-physics",
-  "status": "complete",
-  "total_audits": 3,
-  "audits_completed": ["FAP_01","VCP_01","IFP_01"],
-  "key_result": "Information Exchange is deepest principle. l1 = VarI1/(VarI1+VarTerms) determines all regimes and dynamics.",
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V11.0 FAMILY AXIOM PHYSICS — CLOSED",
+  "phase": "Family axiom = Variance Coupling = Information Exchange",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV11/V11_0_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Family Axiom = Variance Coupling Principle",
+    "Variance IS information exchange",
+    "l1=VarI1/(VarI1+VarTerms) is fundamental"
+  ],
+  "suites": [
+    {
+      "name": "FAP_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "VCP_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "IFP_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V11_0",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V11_0"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V11_0",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V11/V11_0/V11_0_FamilyAxiomPhysics_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }

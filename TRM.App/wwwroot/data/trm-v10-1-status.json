@@ -1,11 +1,77 @@
 {
-  "version": "V10.1",
-  "branch": "v10.1-clockwork-regime-physics",
-  "status": "complete",
-  "total_audits": 5,
-  "audits_completed": ["CRP_01","CRI_01","CQL_01","RSO_01","VCS_01"],
-  "key_result": "Two regimes (Dissipative GAN/CNS, Resonant ICS) are irreducible family-axiom properties. VarI1-VarTerms coupling is invariant to α,ξ. Regime duality is built into kernel definition.",
-  "test_count": "~3393",
-  "failed": 0,
-  "last_updated": "2026-07-25"
+  "releaseStatus": "V10.1 REGIME PHYSICS — CLOSED",
+  "phase": "Regime characterization, coupling origin",
+  "notClaimed": [
+    "physical spacetime",
+    "physical constants",
+    "GR derivation",
+    "cosmology"
+  ],
+  "documents": [],
+  "date": "2026-07-25",
+  "conditionalClaims": [],
+  "openProblems": [
+    {
+      "title": "See closure report",
+      "priority": "P2",
+      "description": "See docsV10/V10_1_Closure_Report.md"
+    }
+  ],
+  "supportedClaims": [
+    "Two distinct regimes characterized",
+    "VarI1-VarTerms coupling determines regime",
+    "Coupling is family-axiom invariant"
+  ],
+  "suites": [
+    {
+      "name": "CRP_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "CRI_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "CQL_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "RSO_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "name": "VCS_01",
+      "claimCategory": "SUPPORTED",
+      "tests": 1,
+      "status": "COMPLETE"
+    }
+  ],
+  "testSummary": {
+    "passed": 3442,
+    "command": "dotnet test --filter FullyQualifiedName~V10_1",
+    "total": 3442,
+    "date": "2026-07-25",
+    "skipped": 0,
+    "failed": 0,
+    "verification": "dotnet test --filter FullyQualifiedName~V10_1"
+  },
+  "releaseIntegrity": {
+    "passedVerified": 3442,
+    "mismatch": null,
+    "verificationMethod": "dotnet test --filter FullyQualifiedName~V10_1",
+    "totalTestsVerified": 3442
+  },
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V10/V10_1/V10_1_ClockworkRegimePhysics_Tests.cs",
+    "candidateUpdateLaws": []
+  },
+  "hypotheses": []
 }
