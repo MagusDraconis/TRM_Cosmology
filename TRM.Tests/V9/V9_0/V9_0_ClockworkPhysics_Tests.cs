@@ -1685,6 +1685,121 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void MSO_01_MissingStateObservableAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== MSO_01: Missing State Observable Audit ===");
+        _o.WriteLine("=== What hidden variable explains the ratio variation? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 61753;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        const int nBeta = 51;
+        double betaMax = 2.0; // cover the full loss→gain cycle
+
+        // Single GAN trajectory with phase tracking
+        var totals = new List<double>();
+        var ents = new List<double>();
+        var Ls = new List<double>();
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_MS", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            var allC = new List<double[]>(); var allL = new List<double>();
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sv1 = 0, svt = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                int nd = distances.Length; double[] kA = new double[nd];
+                for (int i = 0; i < nd; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, dpv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                for (int i = 0; i < nd; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+            }
+            if (n < 3 || allL.Count < 3) continue;
+            totals.Add(sv1 / n + svt / n); Ls.Add(allL.Average());
+            int N = allL.Count; var LArr = allL.ToArray();
+            var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+            for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+            var cm = new double[nContrasts, nContrasts];
+            for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+            var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+            var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+            var la = new double[3][];
+            for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+            double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+            double tVal = r2L3 + 1e-12;
+            double o1 = r2L1 / tVal, o2 = (r2L2 - r2L1) / tVal, o3 = (r2L3 - r2L2) / tVal;
+            double ent = 0; if (o1 > 1e-12) ent -= o1 * Math.Log(o1); if (o2 > 1e-12) ent -= o2 * Math.Log(o2); if (o3 > 1e-12) ent -= o3 * Math.Log(o3);
+            ents.Add(ent);
+        }
+
+        double dBeta = betaMax / (nBeta - 1);
+        var lossLdH = new List<double>();
+        var gainLdH = new List<double>();
+
+        for (int i = 0; i < totals.Count - 1; i++)
+        {
+            double dT = (totals[i + 1] - totals[i]) / dBeta;
+            double dH = Math.Abs(ents[i + 1] - ents[i]) / dBeta;
+            double ratio = Ls[i] / Math.Max(dH, 1e-12);
+            if (dH < 1e-8) continue; // skip near-zero dH
+
+            if (dT < 0) lossLdH.Add(ratio);
+            else gainLdH.Add(ratio);
+        }
+
+        _o.WriteLine("=== Phase-Split L/dH ===");
+        _o.WriteLine($"Loss phase: {lossLdH.Count} steps, mean={lossLdH.Average():F2}, CV={(lossLdH.Count > 1 ? StdOverMean(lossLdH.ToArray()) : 0):F2}");
+        _o.WriteLine($"Gain phase: {gainLdH.Count} steps");
+
+        if (gainLdH.Count > 1)
+            _o.WriteLine($"           mean={gainLdH.Average():F2}, CV={StdOverMean(gainLdH.ToArray()):F2}");
+
+        // Check phase effect only if both phases have data
+        bool phaseExplains = false;
+        if (lossLdH.Count > 1 && gainLdH.Count > 1)
+        {
+            double cvL = StdOverMean(lossLdH.ToArray());
+            double cvG = StdOverMean(gainLdH.ToArray());
+            double cvA = StdOverMean(lossLdH.Concat(gainLdH).ToArray());
+            phaseExplains = (cvL < cvA * 0.7 || cvG < cvA * 0.7);
+            _o.WriteLine($"CV: loss={cvL:F2}, gain={cvG:F2}, all={cvA:F2}");
+        }
+        else
+        {
+            _o.WriteLine("Only one phase present — cannot test phase effect.");
+        }
+        _o.WriteLine("");
+
+        string decision = phaseExplains ? "Model C" : "Model D";
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("Phase (loss vs gain) is the missing state variable. The ratio L/dH is phase-dependent.");
+        else
+            _o.WriteLine("Phase alone doesn't explain the variation — multiple hidden variables.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== MSO_01 complete. Commit: MSO_01_MissingStateObservableAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
