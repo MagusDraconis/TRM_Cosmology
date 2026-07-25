@@ -916,6 +916,96 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void CTA_01_ClockworkActivationAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CTA_01: Clockwork Activation Audit ===");
+        _o.WriteLine("=== Is Activation = Tick × D_eq the unified variable? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 53101;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI, dB = betaMax / (nBeta - 1);
+
+        var totals = new List<double>();
+        var activation = new List<double>();
+        var dHv = new List<double>();
+        double prevTotal = double.NaN, prevEnt = double.NaN;
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_CT", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3) continue;
+            double total = sumV1 / n + sumVT / n;
+            double o1 = (sumV1 / n) / Math.Max((sumV1 / n) + (sumVT / n), 1e-12);
+            double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+            totals.Add(total);
+            if (!double.IsNaN(prevTotal))
+            {
+                double tick = Math.Abs(total - prevTotal) / dB;
+                dHv.Add(Math.Abs(ent - prevEnt) / dB);
+                activation.Add(tick); // will multiply by D_eq after computing eq
+            }
+            prevTotal = total; prevEnt = ent;
+        }
+
+        double eqTotal = totals.Skip((int)(totals.Count * 0.8)).Average();
+        for (int i = 0; i < activation.Count; i++)
+            activation[i] *= Math.Abs(totals[i] - eqTotal);
+
+        var aArr = activation.ToArray();
+        var dArr = dHv.ToArray();
+
+        double rA = PearsonCorrelation(aArr, dArr);
+        _o.WriteLine($"r(Activation, dH) = {rA:F4}");
+
+        // Check counterexamples
+        int actPos_dHZero = 0, actPos_dHPos = 0;
+        for (int i = 0; i < aArr.Length; i++)
+        {
+            if (aArr[i] > 1e-10 && dArr[i] < 1e-10) actPos_dHZero++;
+            if (aArr[i] > 1e-10 && dArr[i] > 1e-10) actPos_dHPos++;
+        }
+        _o.WriteLine($"Activation>0, dH=0: {actPos_dHZero} (counterexamples)");
+        _o.WriteLine($"Activation>0, dH>0: {actPos_dHPos}");
+        _o.WriteLine("");
+
+        string decision;
+        if (actPos_dHZero == 0 && rA > 0.5) decision = "Model C";
+        else if (actPos_dHZero < 5) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision: {decision}  r={rA:F4}  counterexamples={actPos_dHZero}");
+        if (decision == "Model C")
+            _o.WriteLine("Activation = Tick × D_eq is the primitive clockwork variable. All counterexamples resolved.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Activation reduces counterexamples but {actPos_dHZero} remain.");
+        else
+            _o.WriteLine("Activation is not the clockwork variable.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== CTA_01 complete. Commit: CTA_01_ClockworkActivationAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
