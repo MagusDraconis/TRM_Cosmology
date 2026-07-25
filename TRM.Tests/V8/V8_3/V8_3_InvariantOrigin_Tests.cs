@@ -930,6 +930,183 @@ public class V8_3_InvariantOrigin_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void LTR_01_LambdaToTimeRateAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== LTR_01: Lambda To Time-Rate Audit ===");
+        _o.WriteLine("=== Can λ1 predict local time rates? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 19553;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var contrastDefs = new (string name, int i, int j)[] { ("K1-K10", 1, 10), ("K2-K8", 2, 8), ("K4-K6", 4, 6), ("K3-K7", 3, 7), ("K1-K5", 1, 5), ("K5-K9", 5, 9) };
+        int nContrasts = 6;
+        var families = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
+        const int nBeta = 31;
+
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+
+        var steps = new List<(VcFamily fam, double lam1, double lam2, double dH)>();
+        foreach (var fam in families)
+        {
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var pointData = new List<(double lam1, double lam2, double ent)>();
+
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_LR", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    var allC = new List<double[]>(); var allL = new List<double>();
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double pv = 0.1 + ip * 0.45; if (pv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pv, v);
+                        int nD = distances.Length; double[] kA = new double[nD];
+                        for (int i = 0; i < nD; i++) { double x = distances[i] / (xi + 1e-15); kA[i] = k0 * Math.Exp(-v.Alpha * Math.Pow(x, pv)); kA[i] = Math.Clamp(kA[i], 0.0, k0); }
+                        var kD = new double[nDeciles + 1]; var ct = new int[nDeciles + 1];
+                        for (int i = 0; i < nD; i++) { int dec = 1; while (dec < nDeciles && distances[i] > decileBounds[dec]) dec++; kD[dec] += kA[i]; ct[dec]++; }
+                        for (int d = 1; d <= nDeciles; d++) kD[d] /= Math.Max(ct[d], 1);
+                        var ctr = new double[nContrasts]; for (int c = 0; c < nContrasts; c++) ctr[c] = kD[contrastDefs[c].i] - kD[contrastDefs[c].j];
+                        allC.Add(ctr); allL.Add(Math.Clamp(1.0 - cci.VarI1 / (cci.VarTerms + 1e-15), 0.0, 1.0));
+                    }
+
+                    if (allL.Count < 3) continue;
+                    int N = allL.Count; var LArr = allL.ToArray();
+                    var X = new double[N][]; for (int i = 0; i < N; i++) X[i] = (double[])allC[i].Clone();
+                    for (int c = 0; c < nContrasts; c++) { double m = Enumerable.Range(0, N).Average(i => X[i][c]); double vr = Enumerable.Range(0, N).Select(i => (X[i][c] - m) * (X[i][c] - m)).Average(); double s = Math.Sqrt(vr) + 1e-12; for (int i = 0; i < N; i++) X[i][c] = (X[i][c] - m) / s; }
+                    var cm = new double[nContrasts, nContrasts];
+                    for (int a = 0; a < nContrasts; a++) for (int b = 0; b < nContrasts; b++) cm[a, b] = PearsonCorrelation(Enumerable.Range(0, N).Select(i => allC[i][a]).ToArray(), Enumerable.Range(0, N).Select(i => allC[i][b]).ToArray());
+                    var (ee, ev) = JacobiEigenLocal(cm, nContrasts);
+                    var sEE = ee.OrderByDescending(e => e).ToArray();
+
+                    var pe = Enumerable.Range(0, nContrasts).OrderByDescending(i => ee[i]).ToArray();
+                    var la = new double[3][];
+                    for (int k = 0; k < 3; k++) { la[k] = new double[N]; int er = pe[k]; for (int i = 0; i < N; i++) { double s = 0; for (int c = 0; c < nContrasts; c++) s += X[i][c] * ev[er, c]; la[k][i] = s; } }
+                    double r2L1 = R2SinglePredictor(LArr, la[0]), r2L2 = FitModelR2(LArr, new[] { la[0], la[1] }), r2L3 = FitModelR2(LArr, new[] { la[0], la[1], la[2] });
+                    double tVal = r2L3 + 1e-12;
+                    double occ1 = r2L1 / tVal, occ2 = (r2L2 - r2L1) / tVal, occ3 = (r2L3 - r2L2) / tVal;
+                    double ent = 0; if (occ1 > 1e-12) ent -= occ1 * Math.Log(occ1); if (occ2 > 1e-12) ent -= occ2 * Math.Log(occ2); if (occ3 > 1e-12) ent -= occ3 * Math.Log(occ3);
+
+                    pointData.Add((sEE[0], sEE[1], ent));
+                }
+
+                for (int i = 0; i < pointData.Count - 1; i++)
+                {
+                    double dHb = Math.Abs(pointData[i + 1].ent - pointData[i].ent) / (1.0 / (nBeta - 1));
+                    steps.Add((fam, pointData[i].lam1, pointData[i].lam2, dHb));
+                }
+            }
+        }
+
+        var Lam1 = steps.Select(s => s.lam1).ToArray();
+        var Lam2 = steps.Select(s => s.lam2).ToArray();
+        var DH = steps.Select(s => s.dH).ToArray();
+
+        // ============================================================
+        // Part A: λ → dH/dβ
+        // ============================================================
+        _o.WriteLine("=== Part A: λ → Time Rate ===");
+        _o.WriteLine($"N = {steps.Count} steps");
+
+        double r_Lam1_dH = PearsonCorrelation(Lam1, DH);
+        double r2_Lam1 = R2SinglePredictor(DH, Lam1);
+        double r2_Lam12 = FitModelR2(DH, new[] { Lam1, Lam2 });
+        double r2_Lam2 = R2SinglePredictor(DH, Lam2);
+
+        _o.WriteLine($"r(λ1, dH/dβ)      = {r_Lam1_dH:F4}");
+        _o.WriteLine($"R²(dH ~ λ1)        = {r2_Lam1:F4}");
+        _o.WriteLine($"R²(dH ~ λ2)        = {r2_Lam2:F4}");
+        _o.WriteLine($"R²(dH ~ λ1+λ2)     = {r2_Lam12:F4}");
+        _o.WriteLine($"ΔR²(λ2 beyond λ1)  = {r2_Lam12 - r2_Lam1:F4}");
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part B: Quartile analysis
+        // ============================================================
+        _o.WriteLine("=== Part B: Clock Rate by λ1 Quartile ===");
+        var sortedByLam = steps.OrderBy(s => s.lam1).ToArray();
+        int qSize = sortedByLam.Length / 4;
+        _o.WriteLine($"{"λ1 quartile",-14} {"mean λ1",10} {"mean dH/dβ",12}");
+        _o.WriteLine(new string('-', 38));
+        for (int q = 0; q < 4; q++)
+        {
+            int start = q * qSize; int end = (q == 3) ? sortedByLam.Length : (q + 1) * qSize;
+            var slice = sortedByLam[start..end];
+            _o.WriteLine($"Q{q + 1,-13} {slice.Average(s => s.lam1),10:F4} {slice.Average(s => s.dH),12:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // Part C: Cross-family
+        // ============================================================
+        _o.WriteLine("=== Part C: Cross-Family λ1 → dH/dβ ===");
+        _o.WriteLine($"{"Family",-6} {"r(λ1,dH)",10} {"R²(λ1)",10} {"R²(λ1+λ2)",12}");
+        _o.WriteLine(new string('-', 40));
+        foreach (var fam in families)
+        {
+            var fd = steps.Where(s => s.fam == fam).ToArray();
+            var fL1 = fd.Select(s => s.lam1).ToArray();
+            var fL2 = fd.Select(s => s.lam2).ToArray();
+            var fDH = fd.Select(s => s.dH).ToArray();
+
+            double fc = PearsonCorrelation(fL1, fDH);
+            double fc1 = R2SinglePredictor(fDH, fL1);
+            double fc12 = FitModelR2(fDH, new[] { fL1, fL2 });
+
+            _o.WriteLine($"{fam,-6} {fc,10:F4} {fc1,10:F4} {fc12,12:F4}");
+        }
+        _o.WriteLine("");
+
+        // ============================================================
+        // Decision
+        // ============================================================
+        _o.WriteLine("=== Decision ===");
+
+        bool strongC = r2_Lam1 > 0.4 && r2_Lam12 - r2_Lam1 < 0.1;
+        bool partialC = r2_Lam1 > 0.15;
+
+        string decision;
+        if (strongC) decision = "Model C";
+        else if (partialC) decision = "Model B";
+        else decision = "Model A";
+
+        _o.WriteLine($"Decision model: {decision}");
+        _o.WriteLine($"r(λ1,dH/dβ)={r_Lam1_dH:F4}, R²(λ1)={r2_Lam1:F4}, R²(λ1+λ2)={r2_Lam12:F4}");
+
+        if (decision == "Model C")
+            _o.WriteLine("Local time rates emerge directly from λ1 — the eigenvalue is the clock-rate generator.");
+        else if (decision == "Model B")
+            _o.WriteLine($"Partial: λ1 explains {r2_Lam1:P1} of time-rate variance.");
+        else
+            _o.WriteLine("No λ1→time-rate connection.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== OUTPUT ===");
+        _o.WriteLine("1. Executive determination");
+        _o.WriteLine($"   {decision}");
+        _o.WriteLine($"2. r(λ1,dH/dβ)={r_Lam1_dH:F4}, R²={r2_Lam1:F4}");
+        _o.WriteLine("3. Commit-ready summary:");
+        string ltrLabel = decision == "Model C" ? "λ1 generates time rates" : decision == "Model B" ? "λ1 partially predicts time rates" : "No λ1→time connection";
+        _o.WriteLine($"   LTR_01_LambdaToTimeRateAudit — {ltrLabel}.");
+        _o.WriteLine("");
+        _o.WriteLine("=== LTR_01 complete. Commit: LTR_01_LambdaToTimeRateAudit ===");
+
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double[,] CovMatrix(double[][] X, int nF, int N)
     {
         var cm = new double[nF, nF];
