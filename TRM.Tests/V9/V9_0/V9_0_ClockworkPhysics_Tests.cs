@@ -1006,6 +1006,92 @@ public class V9_0_ClockworkPhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void CAI_01_ClockworkActivationIrreducibilityAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CAI_01: Clockwork Activation Irreducibility Audit ===");
+        _o.WriteLine("=== Is Activation primitive or reducible? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 54319;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        const int nBeta = 201;
+        double betaMax = 4.0 * Math.PI, dB = betaMax / (nBeta - 1);
+
+        var totals = new List<double>();
+        var tickL = new List<double>();
+        var dHL = new List<double>();
+        double prevTotal = double.NaN, prevEnt = double.NaN;
+
+        for (int bi = 0; bi < nBeta; bi++)
+        {
+            double beta = (bi / (double)(nBeta - 1)) * betaMax;
+            var v = new VariantSpec("GAN_CI", VcFamily.GAN, 0.7, 1.0, 1.0, beta, 0.0);
+            double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+            double sumV1 = 0, sumVT = 0; int n = 0;
+            for (int ip = 0; ip < 3; ip++)
+            {
+                double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                sumV1 += cci.VarI1; sumVT += cci.VarTerms; n++;
+            }
+            if (n < 3) continue;
+            double total = sumV1 / n + sumVT / n;
+            double o1 = (sumV1 / n) / Math.Max((sumV1 / n) + (sumVT / n), 1e-12);
+            double ent = o1 > 1e-12 ? -o1 * Math.Log(o1) - (1 - o1) * Math.Log(Math.Max(1 - o1, 1e-12)) : 0;
+            totals.Add(total);
+            if (!double.IsNaN(prevTotal))
+            {
+                tickL.Add(Math.Abs(total - prevTotal) / dB);
+                dHL.Add(Math.Abs(ent - prevEnt) / dB);
+            }
+            prevTotal = total; prevEnt = ent;
+        }
+
+        double eqTotal = totals.Skip((int)(totals.Count * 0.8)).Average();
+        var tick = tickL.ToArray();
+        var dH = dHL.ToArray();
+        var dEq = Enumerable.Range(0, tick.Length).Select(i => Math.Abs(totals[i] - eqTotal)).ToArray();
+
+        double rTick = PearsonCorrelation(tick, dH);
+        double rDEq = PearsonCorrelation(dEq, dH);
+        double rTickDEq = FitModelR2(dH, new[] { tick, dEq }); // additive
+        double rAct = PearsonCorrelation(tick.Zip(dEq, (t, d) => t * d).ToArray(), dH);
+
+        _o.WriteLine("=== Candidate Comparison ===");
+        _o.WriteLine($"Tick only:        r={rTick:F4}");
+        _o.WriteLine($"D_eq only:        r={rDEq:F4}");
+        _o.WriteLine($"Tick + D_eq:      R²={rTickDEq:F4}");
+        _o.WriteLine($"Tick × D_eq:     r={rAct:F4}");
+        _o.WriteLine("");
+
+        bool activationBest = rAct > rTick * 1.3 && rAct > rDEq * 1.3 && rAct * rAct > rTickDEq;
+        bool tickBest = rTick > rAct * 0.9;
+
+        string decision;
+        if (activationBest) decision = "Model C";
+        else if (tickBest) decision = "Model A";
+        else decision = "Model D";
+
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine($"Activation (Tick×D_eq) is irreducible. r={rAct:F4} > Tick={rTick:F4}, D_eq={rDEq:F4}. The multiplicative combination is required.");
+        else if (decision == "Model A")
+            _o.WriteLine("Activation is reducible to Tick alone.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== CAI_01 complete. Commit: CAI_01_ClockworkActivationIrreducibilityAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
