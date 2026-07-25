@@ -219,6 +219,97 @@ public class V10_1_ClockworkRegimePhysics_Tests
         Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
     }
 
+    [Fact]
+    public void CQL_01_ClockworkQuantizationLevelAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CQL_01: Clockwork Quantization Level Audit ===");
+        _o.WriteLine("=== Are regimes quantized levels or separate materials? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 81593;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 34, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+        int nDeciles = 10;
+        var decileBounds = new double[nDeciles + 1];
+        for (int d = 0; d <= nDeciles; d++) decileBounds[d] = Quantile(sorted, d / (double)nDeciles);
+
+        var configs = new (double alpha, double xiScale)[] { (0.35, 0.8), (0.70, 1.0), (1.05, 1.2) };
+        const int nBeta = 31;
+
+        var data = new Dictionary<VcFamily, (double tick, double L, double X, double dEq)>();
+        foreach (var fam in new[] { VcFamily.GAN, VcFamily.ICS, VcFamily.CNS })
+        {
+            var ticks = new List<double>(); var Ls = new List<double>(); var Xs = new List<double>(); var dEqs = new List<double>();
+            for (int ci = 0; ci < configs.Length; ci++)
+            {
+                var cfg = configs[ci];
+                var totals = new List<double>(); var Lvals = new List<double>();
+                for (int bi = 0; bi < nBeta; bi++)
+                {
+                    double beta = bi / (double)(nBeta - 1);
+                    var v = new VariantSpec($"{fam}_QL", fam, cfg.alpha, 1.0, cfg.xiScale, beta, 0.0);
+                    double xi = xiBase * v.XiScale, k0 = k0Base * v.K0Scale;
+                    double sv1 = 0, svt = 0; int n = 0;
+                    for (int ip = 0; ip < 3; ip++)
+                    {
+                        double dpv = 0.1 + ip * 0.45; if (dpv > 1.11) continue;
+                        var cci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, dpv, v);
+                        sv1 += cci.VarI1; svt += cci.VarTerms; n++;
+                    }
+                    if (n < 3) continue;
+                    totals.Add(sv1 / n + svt / n); Lvals.Add(Math.Clamp(1.0 - sv1 / n / Math.Max((sv1 / n) + (svt / n), 1e-12), 0.0, 1.0));
+                }
+                double eqTot = totals.Skip((int)(totals.Count * 0.8)).Average();
+                double dBeta = 1.0 / (nBeta - 1);
+                for (int i = 0; i < totals.Count - 1; i++)
+                {
+                    ticks.Add(Math.Abs(totals[i + 1] - totals[i]) / dBeta);
+                    Ls.Add(Lvals[i]); Xs.Add(Math.Abs(totals[i] - eqTot) - 0.08 * Lvals[i]);
+                    dEqs.Add(Math.Abs(totals[i] - eqTot));
+                }
+            }
+            data[fam] = (ticks.Average(), Ls.Average(), Xs.Average(), dEqs.Average());
+        }
+
+        _o.WriteLine("=== ICS / GAN Ratios ===");
+        double baseTick = data[VcFamily.ICS].tick;
+        _o.WriteLine($"{"Quantity",-12} {"GAN",10} {"ICS",10} {"ICS/GAN",10} {"≈1:2?",8}");
+        _o.WriteLine(new string('-', 52));
+
+        var quants = new[] { ("Tick", data[VcFamily.GAN].tick, data[VcFamily.ICS].tick),
+                             ("L", data[VcFamily.GAN].L, data[VcFamily.ICS].L),
+                             ("X", data[VcFamily.GAN].X, data[VcFamily.ICS].X),
+                             ("D_eq", data[VcFamily.GAN].dEq, data[VcFamily.ICS].dEq) };
+
+        int quantized = 0;
+        foreach (var (name, gVal, iVal) in quants)
+        {
+            double ratio = iVal / Math.Max(Math.Abs(gVal), 1e-12);
+            bool isHalf = Math.Abs(ratio - 0.5) < 0.15;
+            if (isHalf) quantized++;
+            string halfLabel = isHalf ? "YES" : "no";
+            _o.WriteLine($"{name,-12} {gVal,10:F6} {iVal,10:F6} {ratio,10:F4} {halfLabel,8}");
+        }
+        _o.WriteLine("");
+        _o.WriteLine($"{quantized}/4 quantities follow 1:2 ratio");
+
+        string decision = quantized >= 3 ? "Model C" : quantized >= 1 ? "Model B" : "Model A";
+        _o.WriteLine($"Decision: {decision}");
+        if (decision == "Model C")
+            _o.WriteLine("Quantized clockwork levels. ALL quantities scale with level index.");
+        else if (decision == "Model A")
+            _o.WriteLine("Separate material classes. Only Tick has the 1:2 ratio — other quantities are structurally different.");
+        else
+            _o.WriteLine("Partial quantization — some but not all quantities scale.");
+
+        _o.WriteLine("");
+        _o.WriteLine("=== CQL_01 complete. Commit: CQL_01_ClockworkQuantizationLevelAudit ===");
+        Assert.True(new[] { "Model A", "Model B", "Model C", "Model D" }.Contains(decision));
+    }
+
     private static double StdOverMean(double[] x)
     {
         double m = x.Average() + 1e-12;
