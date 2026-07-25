@@ -13,7 +13,7 @@
 |:-----|:------|
 | Current Version | V12.2 DUALITY PHYSICS CORRESPONDENCE |
 | Current Branch | v12.2-duality-physics-correspondence |
-| Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
+| Total Tests | ~640 (Fact/Theory methods); ~3442 (including suite runs) |
 | Failed Tests | 0 |
 | Current Status | V12.2: Information-Dynamics Duality validated. Family Axiom generates duality. 3 audits (DPC_01, NPV_01, FAG_01). |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
@@ -83,7 +83,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 | V12.1 | Duality Validation: Robustness | Duality survives 16 config perturbations. Hierarchy emerges (DPG_01) |
 | V12.2 | Duality Physics: Correspondence | Strong physics analogues. 4 novel elements. Family axiom generates duality |
 
-**Cumulative total: ~3393 tests, 0 failed.**
+**Cumulative total: ~3442 tests, 0 failed.**
 
 ---
 
@@ -102,7 +102,7 @@ classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIM
 11. **Speed is primary geometric invariant** (V8.2 PSI_01) — CV=0.46 vs CV(Time)=1.15.
 12. **λ1 primitive and invariant** (V8.3) — generates everything, reconstructible from nothing, representation-independent.
 13. **V1 concepts fully recovered** (V9.0 CPV_00) — 6/6 conceptual correspondence validated.
-14. **Zero-failure test suite** — ~3393 tests, 0 failed. Claim discipline enforced at every phase.
+14. **Zero-failure test suite** — ~3442 tests, 0 failed. Claim discipline enforced at every phase.
 
 ---
 
@@ -186,7 +186,7 @@ After reviewing, identify:
 Maintain strict claim discipline. For every statement, classify as:
 SUPPORTED / CONDITIONAL / HYPOTHESIS / NOT CLAIMED.
 
-Do not introduce new theory. ~3393 tests, 0 failures.
+Do not introduce new theory. ~3442 tests, 0 failures.
 ```
 
 ---
