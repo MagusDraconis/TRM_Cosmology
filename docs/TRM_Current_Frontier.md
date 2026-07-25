@@ -3,7 +3,7 @@
 **Version:** 4.5
 **Date:** 2026-07-25
 
-**Current Version:** V12.1 DUALITY VALIDATION
+**Current Version:** V12.1 DUALITY VALIDATION (CLOSED) → V12.2 DUALITY PHYSICS CORRESPONDENCE
 **Current Branch:** v12.1-duality-validation
 **Current Branch:** v12.0-information-physics
 **Cumulative Tests:** ~3393
