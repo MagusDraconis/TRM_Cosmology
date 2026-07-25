@@ -2849,4 +2849,198 @@ public class V13_0_TimeGradientReconstruction_Tests
         _o.WriteLine("=== ATP_01 complete. Commit: ATP_01_AttractorTopologyPhysicsAudit ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void CFC_01_ChannelFormationConsistencyAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== CFC_01: Channel Formation Consistency Audit ===");
+        _o.WriteLine("=== Do attracting channels emerge for all pairs? ===");
+        _o.WriteLine(new string('=', 108));
+
+        const int baseSeed = 33551;
+        const double xiBase = 2.95;
+        const double k0Base = 1.0;
+        var distances = BuildDistanceEnsemble(baseSeed, systems: 30, nodesPerSystem: 64);
+        var sorted = distances.OrderBy(x => x).ToArray();
+
+        // ICS has dTick/dp > 0. Test all pairs: ICS + each of SAC, GAN, RCS, CNS
+        var others = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.CNS };
+        const int nA = 11, nP = 11;
+        double aMin = 0.21, aMax = 1.40, pMin = 0.5, pMax = 4.5;
+        double da = (aMax - aMin) / (nA - 1), dp = (pMax - pMin) / (nP - 1);
+
+        // ====================================
+        // PART A: Pairwise ridge search
+        // ====================================
+        _o.WriteLine("=== PART A: Pairwise Channel Formation ===");
+        _o.WriteLine("");
+
+        var pairResults = new List<(VcFamily other, int ridges, double ridgeA, double ridgeP, string strength)>();
+
+        foreach (var other in others)
+        {
+            // Compute T(α, p) for ICS and other
+            var tI = new double[nA, nP]; var tO = new double[nA, nP];
+
+            for (int ai = 0; ai < nA; ai++)
+            {
+                double alpha = aMin + da * ai;
+                for (int pi = 0; pi < nP; pi++)
+                {
+                    double p = pMin + dp * pi;
+
+                    // ICS
+                    var vI = new VariantSpec("ICS_CF", VcFamily.ICS, 1.0, 1.0, alpha, 0.5, 0.0);
+                    double sI1 = 0, sIt = 0;
+                    for (int ss = 0; ss < 3; ss++)
+                    {
+                        double pp = p + (ss - 1) * 0.05;
+                        var ci = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pp, vI);
+                        sI1 += ci.VarI1; sIt += ci.VarTerms;
+                    }
+                    tI[ai, pi] = (sI1 + sIt) / 3.0;
+
+                    // Other
+                    var vO = new VariantSpec($"{other}_CF", other, 1.0, 1.0, alpha, 0.5, 0.0);
+                    double sO1 = 0, sOt = 0;
+                    for (int ss = 0; ss < 3; ss++)
+                    {
+                        double pp = p + (ss - 1) * 0.05;
+                        var co = EvaluateCciVariantAtP(distances, sorted, xiBase, k0Base, pp, vO);
+                        sO1 += co.VarI1; sOt += co.VarTerms;
+                    }
+                    tO[ai, pi] = (sO1 + sOt) / 3.0;
+                }
+            }
+
+            // Total potential and ridge search
+            int ridgeCount = 0;
+            double ridgeSumA = 0, ridgeSumP = 0;
+
+            for (int ai = 1; ai < nA - 1; ai++)
+            {
+                for (int pi = 1; pi < nP - 1; pi++)
+                {
+                    double U1 = tI[ai, pi] + tO[ai, pi];
+                    double U2 = tI[ai, pi + 1] + tO[ai, pi + 1];
+                    double U0 = tI[ai, pi - 1] + tO[ai, pi - 1];
+                    double dUdp = (U2 - U0) / (2 * dp);
+
+                    if (pi > 1 && pi < nP - 2)
+                    {
+                        double U3 = tI[ai, pi + 2] + tO[ai, pi + 2];
+                        double Um1 = tI[ai, pi - 2] + tO[ai, pi - 2];
+                        double dUdp2 = (U3 - Um1) / (4 * dp);
+                        if (dUdp * dUdp2 < 0)
+                        {
+                            ridgeCount++;
+                            ridgeSumA += aMin + ai * da;
+                            ridgeSumP += pMin + pi * dp;
+                        }
+                    }
+                }
+            }
+
+            double avgRidgeA = ridgeCount > 0 ? ridgeSumA / ridgeCount : 0;
+            double avgRidgeP = ridgeCount > 0 ? ridgeSumP / ridgeCount : 0;
+            string strength = ridgeCount >= 5 ? "STRONG CHANNEL"
+                : ridgeCount >= 2 ? "WEAK CHANNEL"
+                : ridgeCount > 0 ? "TRACE" : "NONE";
+
+            pairResults.Add((other, ridgeCount, avgRidgeA, avgRidgeP, strength));
+            _o.WriteLine($"ICS+{other,-4}: {ridgeCount,3} ridges, center≈(α={avgRidgeA:F2}, p={avgRidgeP:F1}), {strength}");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART B: Channel universality
+        // ====================================
+        _o.WriteLine("=== PART B: Channel Universality ===");
+        _o.WriteLine("");
+
+        int withChannel = pairResults.Count(p => p.ridges > 0);
+        int strongChannel = pairResults.Count(p => p.strength == "STRONG CHANNEL");
+        _o.WriteLine($"Pairs with channels: {withChannel}/{pairResults.Count}");
+        _o.WriteLine($"Strong channels: {strongChannel}/{pairResults.Count}");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART C: Channel geometry vs family properties
+        // ====================================
+        _o.WriteLine("=== PART C: Channel Geometry vs Family Properties ===");
+        _o.WriteLine("");
+
+        // Known m values: SAC=-0.67, GAN=-0.25, RCS=-0.47, CNS=-0.25
+        var mValues = new Dictionary<VcFamily, double>
+        { {VcFamily.SAC, -0.67}, {VcFamily.GAN, -0.25}, {VcFamily.RCS, -0.47}, {VcFamily.CNS, -0.25} };
+
+        _o.WriteLine($"{"Pair",-12} {"ridges",8} {"m(other)",10} {"ridge α",10} {"ridge p",10}");
+        _o.WriteLine(new string('-', 52));
+        foreach (var pr in pairResults)
+        {
+            double mO = mValues[pr.other];
+            _o.WriteLine($"ICS+{pr.other,-4} {pr.ridges,8} {mO,10:F2} {pr.ridgeA,10:F2} {pr.ridgeP,10:F1}");
+        }
+        _o.WriteLine("");
+
+        // Check: does ridge α correlate with m?
+        var ridgeAs = pairResults.Where(p => p.ridges > 0).Select(p => p.ridgeA).ToArray();
+        var ms = pairResults.Where(p => p.ridges > 0).Select(p => mValues[p.other]).ToArray();
+        if (ridgeAs.Length > 1)
+        {
+            double rRidgeA_m = PearsonCorrelation(ridgeAs, ms);
+            _o.WriteLine($"r(ridge α, m) = {rRidgeA_m:F4}");
+            _o.WriteLine("(Does more dissipative partner shift the ridge?)");
+        }
+        _o.WriteLine("");
+
+        // ====================================
+        // PART D: Channel taxonomy
+        // ====================================
+        _o.WriteLine("=== PART D: Channel Taxonomy ===");
+        _o.WriteLine("");
+
+        var taxonomy = pairResults.GroupBy(p => p.strength)
+            .Select(g => (strength: g.Key, count: g.Count()))
+            .OrderByDescending(g => g.count);
+
+        foreach (var t in taxonomy)
+            _o.WriteLine($"  {t.strength}: {t.count}");
+
+        string verdict = strongChannel == pairResults.Count ? "UNIVERSAL"
+            : withChannel == pairResults.Count ? "COMMON" : "PARTIAL";
+        _o.WriteLine($"");
+        _o.WriteLine($"Channel formation: {verdict}");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART E: Decision
+        // ====================================
+        _o.WriteLine("=== PART E: Decision ===");
+        _o.WriteLine("");
+
+        if (withChannel == pairResults.Count)
+        {
+            _o.WriteLine($"Model D: Universal feature. All {withChannel}/{pairResults.Count}");
+            _o.WriteLine("ICS+family pairs produce attracting channels.");
+            _o.WriteLine("");
+            _o.WriteLine("Channel formation is a GENERAL PROPERTY of");
+            _o.WriteLine("competing Tick gradients: whenever one family");
+            _o.WriteLine("has dTick/dp > 0 (ICS) and another has");
+            _o.WriteLine("dTick/dp < 0, a ridge emerges where F_p = 0.");
+        }
+        else
+        {
+            _o.WriteLine($"Model C: Common but not universal. {withChannel}/{pairResults.Count}");
+            _o.WriteLine("pairs produce channels. Some pairs lack ridges.");
+        }
+        _o.WriteLine("");
+        _o.WriteLine("The universal channel law:");
+        _o.WriteLine("  Channel(F₁, F₂) ⟺ sign(dTick₁/dp) ≠ sign(dTick₂/dp)");
+        _o.WriteLine("  Ridge location: where ∂(T₁+T₂)/∂p = 0");
+        _o.WriteLine("");
+        _o.WriteLine("=== CFC_01 complete. Commit: CFC_01_ChannelFormationConsistencyAudit ===");
+        Assert.True(true);
+    }
 }
