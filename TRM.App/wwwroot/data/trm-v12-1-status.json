@@ -1,0 +1,10 @@
+{
+  "version": "V12.1",
+  "branch": "v12.1-duality-validation",
+  "status": "active",
+  "total_audits": 0,
+  "key_result": "Validating the Information-Dynamics duality as the irreducible foundation of clockwork physics.",
+  "test_count": "~3393",
+  "failed": 0,
+  "last_updated": "2026-07-25"
+}
