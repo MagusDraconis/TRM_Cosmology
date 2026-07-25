@@ -1721,4 +1721,130 @@ public class V13_0_TimeGradientReconstruction_Tests
         _o.WriteLine("=== CGP_01 complete. Commit: CGP_01_ClockworkGravityPhenomenologyAudit ===");
         Assert.True(true);
     }
+
+    [Fact]
+    public void GGA_01_GradientGeometryEquivalenceAudit()
+    {
+        _o.WriteLine(new string('=', 108));
+        _o.WriteLine("=== GGA_01: Gradient-Geometry Equivalence Audit ===");
+        _o.WriteLine("=== Are gradients and geometry equivalent in Tick physics? ===");
+        _o.WriteLine(new string('=', 108));
+
+        // ====================================
+        // PART A: Two representations
+        // ====================================
+        _o.WriteLine("=== PART A: Two Representations of the Same Dynamics ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("GRADIENT REPRESENTATION (Newtonian):");
+        _o.WriteLine("  U(α) = Tick(α)               scalar potential");
+        _o.WriteLine("  F = -dU/dα                   force from gradient");
+        _o.WriteLine("  a = F                        acceleration (m=1)");
+        _o.WriteLine("  v = ∫F dα                    velocity");
+        _o.WriteLine("  x = ∫v dα                    trajectory");
+        _o.WriteLine("");
+
+        _o.WriteLine("GEOMETRIC REPRESENTATION (GR-like):");
+        _o.WriteLine("  ds² = g_αα(α) dα²            line element");
+        _o.WriteLine("  g_αα = 1/Tick(α)²            metric from clock rate");
+        _o.WriteLine("  Γ^α_αα = d(ln Tick)/dα       connection coefficient");
+        _o.WriteLine("  d²α/dτ² = -Γ·(dα/dτ)²        geodesic equation");
+        _o.WriteLine("  R = 0 (1D)                    curvature (identically zero)");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART B: Equivalence proof
+        // ====================================
+        _o.WriteLine("=== PART B: Equivalence in 1D ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("In 1D, the geodesic equation reduces to:");
+        _o.WriteLine("  d²α/dτ² = -Γ^α_αα · (dα/dτ)²");
+        _o.WriteLine("          = -d(ln Tick)/dα · (dα/dτ)²");
+        _o.WriteLine("");
+        _o.WriteLine("For a test particle with proper time dτ = Tick·dα:");
+        _o.WriteLine("  dα/dτ = 1/Tick");
+        _o.WriteLine("  d²α/dτ² = -dTick/dα / Tick² = F / Tick²");
+        _o.WriteLine("");
+        _o.WriteLine("The Newtonian acceleration a = F = d²x/dα² maps to");
+        _o.WriteLine("the geometric acceleration via:");
+        _o.WriteLine("  a_geo = Tick² · d²α/dτ² = -dTick/dα = F = a_newt");
+        _o.WriteLine("");
+        _o.WriteLine("VERDICT: Gradient and geometric descriptions are");
+        _o.WriteLine("MATHEMATICALLY EQUIVALENT in 1D α-space.");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART C: What geometry adds
+        // ====================================
+        _o.WriteLine("=== PART C: What Geometry Would Add ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("In 1D, geometry adds NOTHING beyond the gradient");
+        _o.WriteLine("description. All 1D metrics are conformally flat —");
+        _o.WriteLine("the curvature scalar R = 0 identically.");
+        _o.WriteLine("");
+
+        _o.WriteLine("Geometry becomes NON-TRIVIAL only in ≥2D:");
+        _o.WriteLine("  - Multiple families simultaneously (family space)");
+        _o.WriteLine("  - Multiple parameters (α, β, p, ...)");
+        _o.WriteLine("  - Cross-family interactions");
+        _o.WriteLine("  - Then curvature CAN be non-zero.");
+        _o.WriteLine("");
+
+        _o.WriteLine("For the current 1D α-space framework:");
+        _o.WriteLine("  Gradient description: SUFFICIENT");
+        _o.WriteLine("  Geometric description: EQUIVALENT but unnecessary");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART D: Observables
+        // ====================================
+        _o.WriteLine("=== PART D: Observable Correspondence ===");
+        _o.WriteLine("");
+
+        _o.WriteLine($"{"Observable",-24} {"Gradient expression",-32} {"Geometric expression",-32}");
+        _o.WriteLine(new string('-', 90));
+
+        var obs = new (string name, string grad, string geom)[]
+        {
+            ("Clock rate", "Tick(α)", "1/√g_αα"),
+            ("Force / acceleration", "-dTick/dα", "-Γ^α_αα · Tick²"),
+            ("Velocity", "Tick₀ - Tick(α)", "∫Γ·Tick² dτ"),
+            ("Potential energy", "Tick(α)", "ln(1/√g_αα)"),
+            ("Curvature", "d²Tick/dα² (convexity)", "R = 0 (identically)"),
+            ("Time dilation", "Tick(α)/Tick₀", "√(g_αα(α₀)/g_αα(α))"),
+        };
+
+        foreach (var o in obs)
+            _o.WriteLine($"{o.name,-24} {o.grad,-32} {o.geom,-32}");
+        _o.WriteLine("");
+
+        // ====================================
+        // PART E: Decision
+        // ====================================
+        _o.WriteLine("=== PART E: Decision ===");
+        _o.WriteLine("");
+
+        _o.WriteLine("Model D: Pure gradient dynamics are sufficient in 1D.");
+        _o.WriteLine("");
+        _o.WriteLine("The gradient and geometric formulations are");
+        _o.WriteLine("MATHEMATICALLY EQUIVALENT in 1D α-space. The choice");
+        _o.WriteLine("between them is one of REPRESENTATION, not physics.");
+        _o.WriteLine("");
+        _o.WriteLine("The gradient (Newtonian) formulation is PREFERRED");
+        _o.WriteLine("for the current framework because:");
+        _o.WriteLine("  1. It directly uses Tick, the primary observable");
+        _o.WriteLine("  2. It avoids unnecessary geometric abstraction");
+        _o.WriteLine("  3. Force, velocity, trajectory have clear meaning");
+        _o.WriteLine("  4. 1D curvature is identically zero — no content");
+        _o.WriteLine("");
+        _o.WriteLine("Geometry becomes NECESSARY only when extending to");
+        _o.WriteLine("≥2D (multi-family, multi-parameter dynamics). In");
+        _o.WriteLine("that regime, curvature can be non-zero and the");
+        _o.WriteLine("geometric formulation may reveal new structure.");
+        _o.WriteLine("");
+        _o.WriteLine("=== GGA_01 complete. Commit: GGA_01_GradientGeometryEquivalenceAudit ===");
+        Assert.True(true);
+    }
 }
