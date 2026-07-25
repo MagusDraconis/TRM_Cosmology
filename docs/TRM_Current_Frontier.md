@@ -1,9 +1,9 @@
 # TRM Current Frontier
 
-**Version:** 4.0
+**Version:** 4.1
 **Date:** 2026-07-25
 
-**Current Version:** V9.0/V9.1 CLOCKWORK PHYSICS (CLOSED — 20 audits)
+**Current Version:** V9.1 CLOCKWORK DYNAMICS (CLOSED — 26 audits)
 **Current Branch:** v9.0-clockwork-physics
 **Cumulative Tests:** ~3393
 **Failed:** 0
@@ -12,11 +12,11 @@
 
 ## One-Sentence Current State
 
-V9.0/V9.1 CLOCKWORK PHYSICS — CLOSED. 20 audits. Full hierarchy:
-Family axiom → static λ-space + dynamic VarI1/VarTerms → D_eq →
-Activation → dH (time flow). Primary observable: L = 1-VarI1/VarTerms
-(CV=0.15). 6/6 V1 concepts recovered. State space >80% complete.
-Prediction gap resolved via L observable instead of unstable ratios.
+V9.1 CLOCKWORK DYNAMICS — CLOSED. First fully closed framework.
+Minimal hierarchy: Family → X = D_eq - k·L + Tick → dH (time flow).
+6/6 V1 concepts recovered. L = 1-VarI1/VarTerms is primary
+observable (CV=0.15). Conceptual + dynamic closure achieved.
+Next phase: physics validation.
 See `docsV9/V9_0_Closure_Report.md`.
 **Cumulative Tests:** ~3393
 **Failed:** 0

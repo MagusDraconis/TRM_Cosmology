@@ -5,7 +5,7 @@
 **Scope:** Clockwork Cosmology V1 through V9.1
 **Tests:** ~3393, 0 failed
 **Branch:** v9.0-clockwork-physics
-**Current Frontier:** V9.0/V9.1 CLOCKWORK PHYSICS (CLOSED) — 20 audits
+**Current Frontier:** V9.1 CLOCKWORK DYNAMICS (CLOSED) — 26 audits
 
 ---
 
@@ -2047,7 +2047,7 @@ maintained to prevent overinterpretation:
 | V8.2 | Primitive Meaning: Semantics → Emergent Geometry | ~35 | COMPLETE |
 | V8.3 | Invariant Origin: λ primitive + invariant | 9 | COMPLETE |
 | V8.4 | Resonance Origin: Clockwork emergence | 12 | COMPLETE |
-| V9.0/V9.1 | Clockwork Physics: L observable, prediction resolved | 20 | COMPLETE |
+| V9.0/V9.1 | Clockwork Dynamics: X+Tick->dH, 6/6 V1 recovered | 26 | COMPLETE |
 | **Total** | | **3393** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3393 verified

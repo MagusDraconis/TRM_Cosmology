@@ -11,11 +11,11 @@
 
 | Item | Value |
 |:-----|:------|
-| Current Version | V9.0/V9.1 CLOCKWORK PHYSICS |
+| Current Version | V9.1 CLOCKWORK DYNAMICS (CLOSED) |
 | Current Branch | v9.0-clockwork-physics |
 | Total Tests | ~640 (Fact/Theory methods); ~3393 (including suite runs) |
 | Failed Tests | 0 |
-| Current Status | 20 audits. L primary observable (CV=0.15). 6/6 V1 recovered. Closed. |
+| Current Status | 26 audits. Minimal hierarchy: X+Tick->dH. 6/6 V1 recovered. Closed. Next: physics validation. |
 | Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
 
 ---
