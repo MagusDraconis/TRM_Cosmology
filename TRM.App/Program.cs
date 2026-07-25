@@ -25,8 +25,7 @@ builder.Services.AddScoped<IWeakFieldService, WeakFieldService>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(sp.GetRequiredService<IConfiguration>()["BaseUrl"] ?? "https://localhost:5001/") });
 builder.Services.AddScoped<TrmStatusService>();
 
-// V6 geometry service
-builder.Services.AddScoped<V6GeometryService>();
+// V6 core geometry (ComputeI1 used by V7+ test infrastructure)
 
 var app = builder.Build();
 
