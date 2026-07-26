@@ -1,39 +1,35 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 3.5
+**Version:** 3.6
 **Date:** 2026-07-26
 
 CURRENT VERSION
-V15.0 TICK LAW UNIFICATION
+V15.1 FRACTAL GRAMMAR PRINCIPLE
 
 CURRENT BRANCH
-v14.4-wave-grammar-dynamics (CLOSING)
+v15.1-predictive-wave-grammar (CLOSED)
 
 CURRENT STATUS
-V13 CLOSED. V14.0-V14.4 CLOSED (29 audits total).
-V15.0 ACTIVE (2 audits: TLA_01, TLU_01).
+V13 CLOSED. V14 CLOSED (29 audits). V15.0-V15.1 CLOSED (6 audits).
+V15.2 ACTIVE.
 
-V14.4 SUMMARY (4 audits)
-- WGD_01: Grammar→Tick R²=1.000 (SUPPORTED)
-- GHP_01: G3>G2>G1 hierarchy by ablation (SUPPORTED)
-- GBP_01: 4/8 cells forbidden, selection rules (CONDITIONAL)
-- GEP_01: 2 axioms explain all forbidden states (SUPPORTED)
+V15.1 SUMMARY (4 audits)
+- PWG_01: Hierarchy predicts unseen kernels (83% accuracy, CONDITIONAL)
+- KAP_01: Architecture is independent layer (SUPPORTED, ΔR²=+0.21)
+- AOP_01: Architecture grammar ≡ wave grammar (SUPPORTED, isomorphic)
+- FGP_01: Depth-2 fractal — 2³→4 repeats at L1,L2 (SUPPORTED)
 
-V15.0 SUMMARY (2 audits so far)
-- TLA_01: Axioms emerge from 3 Tick-Lattice Laws (SUPPORTED)
-- TLU_01: Laws unified under Kernel-Tick Consistency (SUPPORTED)
-
-FULL HIERARCHY:
-  Kernel-Tick Consistency (Master Law)
-    → Conservation Consistency + Wave Coherence
-      → Axioms (G3⇒G1, G1⊥G2)
-        → 4-mode Grammar
-          → Tick Field (|m|, dT/dp)
-            → Organization (HUB/SPOKE, channels, networks)
+COMPLETE HIERARCHY:
+  L0: Kernel-Tick Consistency
+  L1: Architecture Grammar [2³→4]
+  L2: Wave Grammar [2³→4, isomorphic to L1]
+  L3: Tick Field [continuous]
+  L4: Organization [consequence]
 
 NEXT RESEARCH FRONTIER
-V15.0: Complete Tick-Lattice formalism.
-What else follows from Kernel-Tick Consistency?
+V15.2 Kernel-Tick Consistency Principle.
+What else follows from the master law?
+Are there other 2³→4 structures waiting to be discovered?
 
 ---
 

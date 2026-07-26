@@ -2,9 +2,9 @@
 
 **Version:** 5.0
 **Date:** 2026-07-26
-**Scope:** Clockwork Cosmology V1 through V15.0
-**Current Frontier:** V15.0 Tick Law Unification
-**Current Branch:** v14.4-wave-grammar-dynamics (CLOSING)
+**Scope:** Clockwork Cosmology V1 through V15.1
+**Current Frontier:** V15.1 Fractal Grammar Principle
+**Current Branch:** v14.4-wave-grammar-dynamics (CLOSED)
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -24,10 +24,20 @@ V14.4 CLOSED SUMMARY (4 audits)
 - GBP_01: 4/8 cells forbidden; selection rules (CONDITIONAL).
 - GEP_01: 2 axioms explain all forbidden states (SUPPORTED).
 
-V15.0 ACTIVE
+V15.0 CLOSED SUMMARY (2 audits)
+- TLA_01: Axioms from Tick-Lattice Laws (SUPPORTED).
+- TLU_01: Laws unified under Kernel-Tick Consistency (SUPPORTED).
+
+V15.1 CLOSED SUMMARY (4 audits)
+- PWG_01: Hierarchy predicts unseen kernels (CONDITIONAL).
+- KAP_01: Architecture is independent layer (SUPPORTED).
+- AOP_01: Architecture grammar ≡ wave grammar (SUPPORTED).
+- FGP_01: Depth-2 fractal — 2³→4 repeats at L1,L2 (SUPPORTED).
+
+V15.2 ACTIVE
 Research focus:
-Tick Law Unification.
-All structure follows from KERNEL-TICK CONSISTENCY.
+Kernel-Tick Consistency Principle.
+What else follows from the master law?
 Master law → Conservation + Coherence → Axioms → Grammar → Organization.
 
 ---
