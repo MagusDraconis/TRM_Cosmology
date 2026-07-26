@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 5.9
+**Version:** 6.0
 **Date:** 2026-07-26
 
-**Current Version:** V16.0 PREDICTIONS BEFORE DATA
-**Current Branch:** v16.0-predictions-before-data (CLOSING)
-**Cumulative Tests:** ~3946
+**Current Version:** V16.1 GEOMETRIC COMPLETENESS
+**Current Branch:** v16.1-manifold-geometry-principle (CLOSING)
+**Cumulative Tests:** ~3949
 **Failed:** 0
 
 ---

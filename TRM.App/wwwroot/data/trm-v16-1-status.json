@@ -1,0 +1,30 @@
+{
+  "releaseStatus": "V16.1 GEOMETRIC COMPLETENESS — COMPLETED",
+  "phase": "Unifying all layers under manifold geometry",
+  "date": "2026-07-26",
+  "testSummary": { "total": 3949, "passed": 3949, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V16_1", "date": "2026-07-26" },
+  "suites": [
+    { "name": "V16_1", "tests": 3, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Architecture = (width, theta) manifold tuple (MGP_01)",
+    "All 4 architectures uniquely reconstructible from geometry alone",
+    "sign = POS iff |m| > theta — PERFECT geometric rule 8/8 (GSP_01)",
+    "Geometry is informationally complete (GCP_01)",
+    "Algebra, grammar, and architecture are DERIVED layers unified under geometry",
+    "The true primitive is the |m|-manifold (width, theta)"
+  ],
+  "conditionalClaims": [
+    "Geometry explains most but not all continuous variance (theta values are emergent)"
+  ],
+  "hypotheses": [],
+  "notClaimed": ["physical gravity", "theta derivation from first principles"],
+  "openProblems": [
+    { "priority": "P1", "title": "Theta prediction", "description": "Can theta be predicted from operator structure alone?" }
+  ],
+  "documents": [
+    { "title": "V16 Closure Report", "filename": "docsV16/V16_Closure_Report.md", "available": true, "description": "V16 audit history" }
+  ],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V16/V16_1/V16_1_ManifoldGeometryPrinciple_Tests.cs", "candidateUpdateLaws": ["sign = sgn(|m|-theta)", "Architecture = (width,theta)"] },
+  "releaseIntegrity": { "totalTestsVerified": 3949, "passedVerified": 3949, "verificationMethod": "dotnet test", "mismatch": null }
+}
