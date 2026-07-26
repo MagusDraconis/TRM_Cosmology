@@ -1,35 +1,26 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 3.6
+**Version:** 3.7
 **Date:** 2026-07-26
 
 CURRENT VERSION
-V15.1 FRACTAL GRAMMAR PRINCIPLE
+V15.2 KERNEL-TICK CONSISTENCY PRINCIPLE
 
 CURRENT BRANCH
-v15.1-predictive-wave-grammar (CLOSED)
+v15.2-kernel-tick-consistency-principle (CLOSING)
 
 CURRENT STATUS
-V13 CLOSED. V14 CLOSED (29 audits). V15.0-V15.1 CLOSED (6 audits).
-V15.2 ACTIVE.
+V13 CLOSED. V14 CLOSED (29 audits). V15.0-V15.2 CLOSED (8 audits).
 
-V15.1 SUMMARY (4 audits)
-- PWG_01: Hierarchy predicts unseen kernels (83% accuracy, CONDITIONAL)
-- KAP_01: Architecture is independent layer (SUPPORTED, ΔR²=+0.21)
-- AOP_01: Architecture grammar ≡ wave grammar (SUPPORTED, isomorphic)
-- FGP_01: Depth-2 fractal — 2³→4 repeats at L1,L2 (SUPPORTED)
-
-COMPLETE HIERARCHY:
-  L0: Kernel-Tick Consistency
-  L1: Architecture Grammar [2³→4]
-  L2: Wave Grammar [2³→4, isomorphic to L1]
-  L3: Tick Field [continuous]
-  L4: Organization [consequence]
+V15.2 SUMMARY (2 audits)
+- KTC_01: KTC is minimal and necessary (SUPPORTED)
+  Only KTC produces exactly 4 modes; weaker principles give 6 or 8.
+- BSP_01: Hierarchy holds at boundaries 88% (SUPPORTED)
+  PURE/RATIONAL are α-invariant; STRETCHED spans |m|=[0.28,2.57].
 
 NEXT RESEARCH FRONTIER
-V15.2 Kernel-Tick Consistency Principle.
-What else follows from the master law?
-Are there other 2³→4 structures waiting to be discovered?
+V15.3 Architecture Transition Principle.
+How do architectures transition under parameter limits?
 
 ---
 

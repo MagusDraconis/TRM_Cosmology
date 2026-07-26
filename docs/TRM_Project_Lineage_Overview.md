@@ -2,8 +2,8 @@
 
 **Version:** 5.0
 **Date:** 2026-07-26
-**Scope:** Clockwork Cosmology V1 through V15.1
-**Current Frontier:** V15.1 Fractal Grammar Principle
+**Scope:** Clockwork Cosmology V1 through V15.2
+**Current Frontier:** V15.2 Kernel-Tick Consistency Principle
 **Current Branch:** v14.4-wave-grammar-dynamics (CLOSED)
 
 V13.5 CLOSED SUMMARY
@@ -34,10 +34,12 @@ V15.1 CLOSED SUMMARY (4 audits)
 - AOP_01: Architecture grammar ≡ wave grammar (SUPPORTED).
 - FGP_01: Depth-2 fractal — 2³→4 repeats at L1,L2 (SUPPORTED).
 
-V15.2 ACTIVE
-Research focus:
-Kernel-Tick Consistency Principle.
-What else follows from the master law?
+V15.2 CLOSED SUMMARY (2 audits)
+- KTC_01: KTC is minimal and necessary (SUPPORTED).
+- BSP_01: Hierarchy holds at boundaries 88% (SUPPORTED).
+
+V15.3 NEXT
+Research focus: Architecture Transition Principle.
 Master law → Conservation + Coherence → Axioms → Grammar → Organization.
 
 ---
