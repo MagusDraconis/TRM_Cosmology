@@ -2,36 +2,33 @@
 
 **Version:** 5.0
 **Date:** 2026-07-26
-**Scope:** Clockwork Cosmology V1 through V14.3
-**Current Frontier:** V14.3 Wave Grammar Principle
-**Current Branch:** v14.3-wave-grammar-principle (CLOSING)
+**Scope:** Clockwork Cosmology V1 through V15.0
+**Current Frontier:** V15.0 Tick Law Unification
+**Current Branch:** v14.4-wave-grammar-dynamics (CLOSING)
 
 V13.5 CLOSED SUMMARY
-- Tick Source Theory completed.
-- Multi-body dynamics completed.
-- Channel formation completed.
-- Channel network formation completed.
-- Hub Selection Principle completed.
+- Tick Source Theory completed. Hub Selection Principle completed.
 
 V14.0/V14.1 CLOSED SUMMARY
-- Resonance Organization Principle audit (21 audits).
-- Organization = f(|m|, Mode) — two irreducible factors.
-- 4 wave-mode classes: C, O, R, D. GAN ≡ CNS.
+- Resonance Organization Principle audit (21 audits). Organization = f(|m|, Mode).
 
 V14.2 CLOSED SUMMARY
 - MOP_02: Mode Origin Principle — 2×2 grammar discovered.
 
 V14.3 CLOSED SUMMARY
-- WGP_01: 2×2 grammar is GENERATIVE (SUPPORTED).
-- WGP_02: 3rd generator required; MODE_R ≠ MODE_D (CONDITIONAL).
-- WGP_03: G1,G2,G3 IRREDUCIBLE — no latent reduction (FALSIFIED).
-- Minimal grammar dimension: 3.
+- 3 audits: Grammar is generative, irreducible (dimension 3).
 
-V14.4 NEXT
+V14.4 CLOSED SUMMARY (4 audits)
+- WGD_01: Grammar→Tick deterministic (SUPPORTED).
+- GHP_01: Generator hierarchy G3>G2>G1 (SUPPORTED).
+- GBP_01: 4/8 cells forbidden; selection rules (CONDITIONAL).
+- GEP_01: 2 axioms explain all forbidden states (SUPPORTED).
+
+V15.0 ACTIVE
 Research focus:
-Wave Grammar Dynamics.
-How do G1, G2, G3 interact dynamically?
-Which of the 2³=8 grammar cells are accessible?
+Tick Law Unification.
+All structure follows from KERNEL-TICK CONSISTENCY.
+Master law → Conservation + Coherence → Axioms → Grammar → Organization.
 
 ---
 

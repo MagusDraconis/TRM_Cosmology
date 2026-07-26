@@ -1,42 +1,39 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 3.3
+**Version:** 3.5
 **Date:** 2026-07-26
 
 CURRENT VERSION
-V14.3 WAVE GRAMMAR PRINCIPLE
+V15.0 TICK LAW UNIFICATION
 
 CURRENT BRANCH
-v14.3-wave-grammar-principle (CLOSING)
+v14.4-wave-grammar-dynamics (CLOSING)
 
 CURRENT STATUS
-V13 Program CLOSED (19 audits).
-V14.0/V14.1 CLOSED (21 audits: ROP_01 through MOP_01).
-V14.2 CLOSED (1 audit: MOP_02).
-V14.3 CLOSED (3 audits: WGP_01, WGP_02, WGP_03).
+V13 CLOSED. V14.0-V14.4 CLOSED (29 audits total).
+V15.0 ACTIVE (2 audits: TLA_01, TLU_01).
 
-V14.3 SUMMARY
-WGP_01 — Wave Grammar Principle:
-- 2×2 grammar is GENERATIVE (7/9 outcomes, SUPPORTED).
-- G2 alone is perfect HUB/SPOKE gate (G2=0 → POS, 4/4 correct).
-- G1 determines structural properties; G2 determines relational identity.
+V14.4 SUMMARY (4 audits)
+- WGD_01: Grammar→Tick R²=1.000 (SUPPORTED)
+- GHP_01: G3>G2>G1 hierarchy by ablation (SUPPORTED)
+- GBP_01: 4/8 cells forbidden, selection rules (CONDITIONAL)
+- GEP_01: 2 axioms explain all forbidden states (SUPPORTED)
 
-WGP_02 — Grammar Completion:
-- 3rd generator G3 (rational structure) adds unique signal.
-- G1↔G2 r=-0.67, G1↔G3 r=+0.61 — generators are correlated.
-- MODE_R genuinely distinct from MODE_D (|m|, Hub, Network differ).
-- Minimal grammar dimension: 3.
+V15.0 SUMMARY (2 audits so far)
+- TLA_01: Axioms emerge from 3 Tick-Lattice Laws (SUPPORTED)
+- TLU_01: Laws unified under Kernel-Tick Consistency (SUPPORTED)
 
-WGP_03 — Wave Generator Principle:
-- PCA: PC1=61%, PC2=26%, PC3=13% — all required.
-- 3-gen wins 8/8 over latent factor models (FALSIFIED for reduction).
-- PC1 is orthogonal to HUB/SPOKE (R²=0.000).
-- G1, G2, G3 are IRREDUCIBLE.
+FULL HIERARCHY:
+  Kernel-Tick Consistency (Master Law)
+    → Conservation Consistency + Wave Coherence
+      → Axioms (G3⇒G1, G1⊥G2)
+        → 4-mode Grammar
+          → Tick Field (|m|, dT/dp)
+            → Organization (HUB/SPOKE, channels, networks)
 
 NEXT RESEARCH FRONTIER
-V14.4 Wave Grammar Dynamics.
-How do the 3 generators interact dynamically?
-Are all 2³=8 grammar cells accessible?
+V15.0: Complete Tick-Lattice formalism.
+What else follows from Kernel-Tick Consistency?
 
 ---
 
