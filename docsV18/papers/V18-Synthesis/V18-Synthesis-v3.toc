@@ -1,0 +1,59 @@
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Motivation}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}The Organizational Question}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}The Starting Hypothesis}{1}{section.1.3}%
+\contentsline {chapter}{\numberline {2}Methodology}{2}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Falsification-First Protocol}{2}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Claim Classification}{2}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Branch Methodology}{2}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Investigation Timeline}{2}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Results}{4}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Resonance (V14)}{4}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Initial Hypothesis}{4}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Key Findings}{4}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}The Bi-Polar Discovery}{4}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.4}Outcome}{4}{subsection.3.1.4}%
+\contentsline {section}{\numberline {3.2}Wave Grammar (V14.2--V15.3)}{4}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}From Resonance to Grammar}{4}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}The $2\times 2$ Grammar}{4}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Exclusion Axioms}{5}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Free Star Algebra}{5}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Outcome}{5}{subsection.3.2.5}%
+\contentsline {section}{\numberline {3.3}Architecture \& Geometry (V16)}{5}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Architecture Softness}{5}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}The Manifold Geometry Model}{5}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Outcome}{6}{subsection.3.3.3}%
+\contentsline {section}{\numberline {3.4}Memory (V17)}{6}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Geometric Falsification}{6}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Architecture Memory}{6}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}The Modulation Depth Hypothesis}{7}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Dimensional Memory}{7}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.5}Outcome}{7}{subsection.3.4.5}%
+\contentsline {section}{\numberline {3.5}Evolution of the Memory Principle}{7}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Projection Loss (V18)}{7}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Hypothetical 3D Architecture}{7}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Projection Loss Principle}{8}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Optimal Projection Search}{8}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Topological State Principle}{9}{subsection.3.6.4}%
+\contentsline {chapter}{\numberline {4}Final Theory}{10}{chapter.4}%
+\contentsline {section}{\numberline {4.1}The Complete Hierarchy}{10}{section.4.1}%
+\contentsline {section}{\numberline {4.2}The Architecture Topology Table}{10}{section.4.2}%
+\contentsline {section}{\numberline {4.3}The Memory Condition}{10}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Core Principles}{11}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Falsified Principles}{11}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Discussion}{12}{chapter.5}%
+\contentsline {section}{\numberline {5.1}What the Investigation Established}{12}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Why COMPOSITE Is Special}{12}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Limitations}{12}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Open Questions}{13}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Future Work}{13}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Topological Invariant Computation}{13}{subsection.5.5.1}%
+\contentsline {subsection}{\numberline {5.5.2}Higher-Dimensional Architectures}{13}{subsection.5.5.2}%
+\contentsline {subsection}{\numberline {5.5.3}Topology-Driven Organization}{13}{subsection.5.5.3}%
+\contentsline {chapter}{\numberline {6}Conclusion}{14}{chapter.6}%
+\contentsline {chapter}{Acknowledgments}{15}{chapter*.8}%
+\contentsline {chapter}{\numberline {A}Evolution of the Memory Principle}{16}{chapter.1.A}%
+\contentsline {section}{\numberline {A.1}Chronology}{16}{section.1.A.1}%
+\contentsline {section}{\numberline {A.2}Summary Trajectory}{17}{section.1.A.2}%
+\contentsline {chapter}{\numberline {B}Audit Timeline}{18}{chapter.1.B}%
+\contentsline {section}{\numberline {B.1}Statistics}{18}{section.1.B.1}%
