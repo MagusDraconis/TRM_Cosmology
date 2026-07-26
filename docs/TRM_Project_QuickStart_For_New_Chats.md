@@ -4,23 +4,22 @@
 **Date:** 2026-07-26
 
 CURRENT VERSION
-V15.2 KERNEL-TICK CONSISTENCY PRINCIPLE
+V15.3 OPERATOR ALGEBRA PRINCIPLE
 
 CURRENT BRANCH
-v15.2-kernel-tick-consistency-principle (CLOSING)
+v15.3-architecture-transition-principle (CLOSING)
 
-CURRENT STATUS
-V13 CLOSED. V14 CLOSED (29 audits). V15.0-V15.2 CLOSED (8 audits).
-
-V15.2 SUMMARY (2 audits)
-- KTC_01: KTC is minimal and necessary (SUPPORTED)
-  Only KTC produces exactly 4 modes; weaker principles give 6 or 8.
-- BSP_01: Hierarchy holds at boundaries 88% (SUPPORTED)
-  PURE/RATIONAL are α-invariant; STRETCHED spans |m|=[0.28,2.57].
+V15.3 SUMMARY (3 audits)
+- ATP_01: Architectures connected by star topology (SUPPORTED)
+  PURE=identity; all transitions go through PURE; cross-phase FORBIDDEN
+- OAP_01: Architecture space = Free Star Algebra (SUPPORTED)
+  ⟨E,M,R | g∘h=⊥ for g≠h⟩; KTC = algebraic closure law
+- AUP_01: FSA uniquely compatible with TRM (SUPPORTED)
+  All alternative algebras fail on ≥1 observation
 
 NEXT RESEARCH FRONTIER
-V15.3 Architecture Transition Principle.
-How do architectures transition under parameter limits?
+V16.0 Predictions Before Data.
+What does the Free Star Algebra predict that hasn't been observed yet?
 
 ---
 

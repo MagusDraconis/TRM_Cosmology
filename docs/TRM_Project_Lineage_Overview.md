@@ -38,8 +38,13 @@ V15.2 CLOSED SUMMARY (2 audits)
 - KTC_01: KTC is minimal and necessary (SUPPORTED).
 - BSP_01: Hierarchy holds at boundaries 88% (SUPPORTED).
 
-V15.3 NEXT
-Research focus: Architecture Transition Principle.
+V15.3 CLOSED SUMMARY (3 audits)
+- ATP_01: Architectures connected by star topology (SUPPORTED).
+- OAP_01: Architecture space = Free Star Algebra (SUPPORTED).
+- AUP_01: FSA uniquely compatible with TRM (SUPPORTED).
+
+V16.0 NEXT
+Research focus: Predictions Before Data.
 Master law → Conservation + Coherence → Axioms → Grammar → Organization.
 
 ---
