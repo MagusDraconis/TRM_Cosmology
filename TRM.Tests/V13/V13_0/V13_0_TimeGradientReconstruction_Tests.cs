@@ -2462,7 +2462,7 @@ public class V13_0_TimeGradientReconstruction_Tests
 
         var allFams = new[] { VcFamily.SAC, VcFamily.GAN, VcFamily.RCS, VcFamily.ICS, VcFamily.CNS };
         const int nSteps = 61;
-        double dStep = 1.0 / (nSteps - 1);
+        
 
         // ====================================
         // PART A: p-sweep — alternative parameter
