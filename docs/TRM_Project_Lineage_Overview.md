@@ -1,10 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 5.0
+**Version:** 6.0
 **Date:** 2026-07-26
-**Scope:** Clockwork Cosmology V1 through V15.2
-**Current Frontier:** V15.2 Kernel-Tick Consistency Principle
-**Current Branch:** v14.4-wave-grammar-dynamics (CLOSED)
+**Scope:** Clockwork Cosmology V1 through V18.2
+**Current Frontier:** V18.2 Topological State Principle — CLOSED
+**Current Branch:** v18.0-hypothetical-3d-architecture (CLOSING)
+**Next Branch:** v19.0-topological-memory-theory
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -43,9 +44,52 @@ V15.3 CLOSED SUMMARY (3 audits)
 - OAP_01: Architecture space = Free Star Algebra (SUPPORTED).
 - AUP_01: FSA uniquely compatible with TRM (SUPPORTED).
 
-V16.0 NEXT
-Research focus: Predictions Before Data.
-Master law → Conservation + Coherence → Axioms → Grammar → Organization.
+V16.0 CLOSED SUMMARY (5 audits)
+- PBD_01: FSA predicts novel kernels 86% sign, 100% arch (SUPPORTED).
+- ASP_01: COMPOSITE overwhelmingly POS — original GAN was outlier (CONDITIONAL).
+- HSP_01: Hardness = operator parameter count (SUPPORTED).
+- TUP_01: HARD = SOFT with displaced threshold (CONDITIONAL).
+
+V16.1 CLOSED SUMMARY (3 audits)
+- MGP_01: Architecture reduces to manifold geometry — sign = sgn(|m|-θ) (initially SUPPORTED).
+- GSP_01/GCP_01: Geometric sign principle validated within 1D architectures.
+
+V17.0 CLOSED SUMMARY (6 audits)
+- GFT_01: Geometric sign rule FALSIFIED (22/298 violations).
+- AMP_01: Architecture contains irreducible memory (SUPPORTED).
+- PTP_01: Phase transition partially explains violations (CONDITIONAL).
+- CEP_01: COMPOSITE 33% violation rate (SUPPORTED).
+
+V17.1 CLOSED SUMMARY (4 audits)
+- AMQ_01: Architecture adds ΔR²=+0.10 beyond geometry (SUPPORTED).
+- CMP_01: β is memory coordinate, t=71.0 (SUPPORTED).
+- MDP_01: μ=βγ insufficient — loses phase structure (FALSIFIED).
+- CSP_01: COMPOSITE is genuinely 2D (SUPPORTED).
+
+V17.2 CLOSED SUMMARY (2 audits)
+- SDP_01: Memory determined by state-space dimension (SUPPORTED).
+- DMP_01: Memory = max(0, dim-1)·k, k~4.1pp (CONDITIONAL).
+
+V18.0 CLOSED SUMMARY (1 audit)
+- H3D_01: Dimensional law FALSIFIED for 3D — α adds no memory.
+
+V18.1 CLOSED SUMMARY (2 audits)
+- PLP_01: Memory = ProjectionLoss(State→|m|) (SUPPORTED).
+- ILP_01: All memory is information-theoretic (SUPPORTED).
+
+V18.2 CLOSED SUMMARY (3 audits)
+- OPP_01: |m| is optimal 1D projection (SUPPORTED).
+- MLP_01: Full 4D leaves 38.7% residual — architecture IRREDUCIBLE.
+- TSP_01: 38.7% residual is topological (SUPPORTED).
+
+V18 DELIVERABLES
+- V18-Synthesis-v3.pdf — 23-page theory paper
+- V18_Closure_Report.md — Complete audit history
+- Tag: v18.0-theoretical-synthesis
+
+V19.0 NEXT
+Research focus: Topological Memory Theory.
+Formalize topological invariants of sign bifurcation surface.
 
 ---
 

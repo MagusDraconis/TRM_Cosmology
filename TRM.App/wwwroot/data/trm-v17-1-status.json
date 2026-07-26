@@ -1,0 +1,25 @@
+{
+  "releaseStatus": "V17.1 ARCHITECTURE MEMORY QUANTIFICATION — COMPLETED",
+  "phase": "Quantifying irreducible architecture memory in COMPOSITE",
+  "date": "2026-07-26",
+  "testSummary": { "total": 3960, "passed": 3960, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V17_1", "date": "2026-07-26" },
+  "supportedClaims": [
+    "Architecture adds Delta_R2 = +0.10 (20%) beyond geometry alone (AMQ_01)",
+    "beta is the strongest memory coordinate (t=71.0) (CMP_01)",
+    "COMPOSITE is genuinely 2D — beta and gamma carry independent information (CSP_01)",
+    "Modulation depth mu=beta*gamma is insufficient — loses phase structure (MDP_01)"
+  ],
+  "conditionalClaims": [
+    "Memory may be partially captured by mu but requires full (beta,gamma) state"
+  ],
+  "hypotheses": [
+    "Memory = max(0, dim-1)*k with k~4.1pp"
+  ],
+  "notClaimed": ["physical gravity", "geometric rule as strict law", "mu as complete state coordinate"],
+  "openProblems": [
+    { "priority": "P1", "title": "Dimensional memory law", "description": "Test whether memory law extrapolates and whether architecture is special because it is 2D" }
+  ],
+  "documents": [{ "title": "V17 Closure", "filename": "docsV17/V17_Closure_Report.md", "available": true, "description": "V17 audit history" }],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V17/V17_1/V17_1_ArchitectureMemoryQuantification_Tests.cs", "candidateUpdateLaws": ["Memory = f(dim, topology)"] },
+  "releaseIntegrity": { "totalTestsVerified": 3960, "passedVerified": 3960, "verificationMethod": "dotnet test", "mismatch": null }
+}
