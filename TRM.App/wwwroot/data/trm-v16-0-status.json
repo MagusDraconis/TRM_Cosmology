@@ -1,0 +1,31 @@
+{
+  "releaseStatus": "V16.0 PREDICTIONS BEFORE DATA — COMPLETED",
+  "phase": "Validating FSA predictions and discovering architecture softness",
+  "date": "2026-07-26",
+  "testSummary": { "total": 3946, "passed": 3946, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V16_0", "date": "2026-07-26" },
+  "suites": [
+    { "name": "V16_0", "tests": 5, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "FSA predicts novel kernels: 86% sign, 100% architecture accuracy (PBD_01)",
+    "ICS_beta+2 achieves |m|=4.27 - deepest HUB ever observed",
+    "Hardness = operator parameter count: nullary=HARD, unary=SOFT (HSP_01)",
+    "HARD = SOFT with displaced threshold (TUP_01)",
+    "Sign = sgn(|m| - theta_arch) with architecture-dependent theta",
+    "Architecture determines accessibility; parameters determine occupancy"
+  ],
+  "conditionalClaims": [
+    "COMPOSITE is overwhelmingly POS — original GAN (beta=0.5,gamma=0.5) was the outlier (ASP_01)",
+    "Exact SOFT theta values are emergent, not derivable from algebra alone (TUP_01)"
+  ],
+  "hypotheses": [],
+  "notClaimed": ["physical gravity", "unified theta formula", "complete parameter manifold"],
+  "openProblems": [
+    { "priority": "P1", "title": "Manifold geometry", "description": "What is the geometry of the architecture state space?" }
+  ],
+  "documents": [
+    { "title": "V15 Summary", "filename": "docs/V15/V15_Summary.md", "available": true, "description": "V15 audit history" }
+  ],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V16/V16_0/V16_0_PredictionsBeforeData_Tests.cs", "candidateUpdateLaws": ["Hardness = param count", "sign = sgn(|m|-theta)", "HARD = SOFT displaced"] },
+  "releaseIntegrity": { "totalTestsVerified": 3946, "passedVerified": 3946, "verificationMethod": "dotnet test", "mismatch": null }
+}

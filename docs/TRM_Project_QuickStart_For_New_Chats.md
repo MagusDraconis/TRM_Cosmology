@@ -1,25 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 3.7
+**Version:** 3.8
 **Date:** 2026-07-26
 
 CURRENT VERSION
-V15.3 OPERATOR ALGEBRA PRINCIPLE
+V16.0 PREDICTIONS BEFORE DATA
 
-CURRENT BRANCH
-v15.3-architecture-transition-principle (CLOSING)
-
-V15.3 SUMMARY (3 audits)
-- ATP_01: Architectures connected by star topology (SUPPORTED)
-  PURE=identity; all transitions go through PURE; cross-phase FORBIDDEN
-- OAP_01: Architecture space = Free Star Algebra (SUPPORTED)
-  ⟨E,M,R | g∘h=⊥ for g≠h⟩; KTC = algebraic closure law
-- AUP_01: FSA uniquely compatible with TRM (SUPPORTED)
-  All alternative algebras fail on ≥1 observation
+V16.0 SUMMARY (4 audits)
+- PBD_01: FSA predicts novel kernels 86% sign, 100% architecture (SUPPORTED)
+- ASP_01: COMPOSITE is overwhelmingly POS — original assumption inverted (CONDITIONAL)
+- HSP_01: Hardness = operator parameter count; nullary=HARD, unary=SOFT (SUPPORTED)
+- TUP_01: HARD = SOFT with displaced threshold; θ is emergent (CONDITIONAL)
 
 NEXT RESEARCH FRONTIER
-V16.0 Predictions Before Data.
-What does the Free Star Algebra predict that hasn't been observed yet?
+V16.1 Manifold Geometry Principle.
 
 ---
 
