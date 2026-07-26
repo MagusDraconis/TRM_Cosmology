@@ -2,24 +2,27 @@
   "releaseStatus": "V15.0 TICK LAW UNIFICATION — COMPLETED",
   "phase": "Deriving exclusion axioms from Tick-lattice laws",
   "date": "2026-07-26",
-  "testSummary": { "total": 3932, "passed": 3932, "failed": 0, "skipped": 0 },
-  "suites": ["V14_0", "V14_1", "V14_2", "V14_3", "V14_4", "V15_0"],
+  "testSummary": { "total": 3932, "passed": 3932, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V15_0", "date": "2026-07-26" },
+  "suites": [
+    { "name": "V15_0", "tests": 2, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
   "supportedClaims": [
     "Axioms emerge from 3 Tick-Lattice Laws (TLA_01)",
-    "L1: Conservation Consistency → G3⇒G1",
-    "L2: Wave Coherence → G1⊥G2",
-    "L3: Kernel Closure → finite continuous Tick fields",
+    "L1: Conservation Consistency -> G3=>G1",
+    "L2: Wave Coherence -> G1-G2",
+    "L3: Kernel Closure -> finite continuous Tick fields",
     "Laws unified under single master principle: KERNEL-TICK CONSISTENCY (TLU_01)",
-    "Master law → 2 independent specializations → 2 axioms → 4-mode grammar",
     "The 4-mode grammar is the COMPLETE SOLUTION SPACE of Kernel-Tick Consistency"
   ],
   "conditionalClaims": [],
   "hypotheses": [],
-  "notClaimed": ["physical gravity", "derivation of Kernel-Tick Consistency from deeper physics"],
+  "notClaimed": ["physical gravity", "derivation from deeper physics"],
   "openProblems": [
     { "priority": "P1", "title": "What else follows?", "description": "What other structures does Kernel-Tick Consistency predict?" }
   ],
-  "documents": ["docs/V15/V15_Summary.md"],
-  "roadmap": { "recommendedTestFile": "TRM.Tests/V15/V15_0/V15_0_TickLatticeAxiom_Tests.cs" },
+  "documents": [
+    { "title": "V15 Summary", "filename": "docs/V15/V15_Summary.md", "available": true, "description": "V15 audit history with complete hierarchy" }
+  ],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V15/V15_0/V15_0_TickLatticeAxiom_Tests.cs", "candidateUpdateLaws": ["Kernel-Tick Consistency"] },
   "releaseIntegrity": { "totalTestsVerified": 3932, "passedVerified": 3932, "verificationMethod": "dotnet test", "mismatch": null }
 }

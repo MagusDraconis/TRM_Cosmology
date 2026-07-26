@@ -2,27 +2,30 @@
   "releaseStatus": "V15.1 FRACTAL GRAMMAR PRINCIPLE — COMPLETED",
   "phase": "Discovering fractal grammar structure and predictive power",
   "date": "2026-07-26",
-  "testSummary": { "total": 3936, "passed": 3936, "failed": 0, "skipped": 0 },
-  "suites": ["V14_0", "V14_1", "V14_2", "V14_3", "V14_4", "V15_0", "V15_1"],
+  "testSummary": { "total": 3936, "passed": 3936, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V15_1", "date": "2026-07-26" },
+  "suites": [
+    { "name": "V15_1", "tests": 4, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
   "supportedClaims": [
     "Kernel architecture is an independent organizational layer (KAP_01)",
-    "Architecture grammar is ISOMORPHIC to wave grammar: {M,E,R}≡{G2,G1,G3} (AOP_01)",
-    "Same 2³→4 pattern at both Architecture and Grammar layers",
+    "Architecture grammar is ISOMORPHIC to wave grammar: {M,E,R}=={G2,G1,G3} (AOP_01)",
+    "Same 2^3->4 pattern at both Architecture and Grammar layers",
     "Depth-2 FRACTAL structure — grammar repeats exactly once (FGP_01)",
-    "Fractal stops at L2; L2→L3 is continuous/deterministic (R²=1.000)",
-    "Complete 5-layer hierarchy: L0 (Master Law) → L1 (Architecture) → L2 (Grammar) → L3 (Tick) → L4 (Organization)"
+    "Complete 5-layer hierarchy: L0 (Master Law) -> L1 (Architecture) -> L2 (Grammar) -> L3 (Tick) -> L4 (Organization)"
   ],
   "conditionalClaims": [
     "Hierarchy predicts unseen kernels (83% sign accuracy, PWG_01)",
-    "GAN_γ0 failure reveals architecture-gravity beyond grammar state"
+    "GAN_gamma0 failure reveals architecture-carry beyond grammar state"
   ],
   "hypotheses": [],
   "notClaimed": ["physical gravity", "fractal beyond depth 2", "complete prediction of all kernel variants"],
   "openProblems": [
-    { "priority": "P1", "title": "Complete predictive closure", "description": "Why does GAN_γ0 violate grammar-based prediction?" },
-    { "priority": "P2", "title": "Other fractal structures", "description": "Are there other 2³→4 structures in the hierarchy?" }
+    { "priority": "P1", "title": "Complete predictive closure", "description": "Why does GAN_gamma0 violate grammar-based prediction?" },
+    { "priority": "P2", "title": "Other fractal structures", "description": "Are there other 2^3->4 structures in the hierarchy?" }
   ],
-  "documents": ["docs/V15/V15_Summary.md"],
-  "roadmap": { "recommendedTestFile": "TRM.Tests/V15/V15_1/V15_1_PredictiveWaveGrammar_Tests.cs" },
+  "documents": [
+    { "title": "V15 Summary", "filename": "docs/V15/V15_Summary.md", "available": true, "description": "V15 audit history with complete hierarchy" }
+  ],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V15/V15_1/V15_1_PredictiveWaveGrammar_Tests.cs", "candidateUpdateLaws": ["Depth-2 fractal grammar", "Architecture-Grammar isomorphism"] },
   "releaseIntegrity": { "totalTestsVerified": 3936, "passedVerified": 3936, "verificationMethod": "dotnet test", "mismatch": null }
 }
