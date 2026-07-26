@@ -1,0 +1,27 @@
+{
+  "releaseStatus": "V17.2 DIMENSIONAL MEMORY PRINCIPLE — COMPLETED",
+  "phase": "Proving architecture memory is a dimensional phenomenon",
+  "date": "2026-07-26",
+  "testSummary": { "total": 3960, "passed": 3960, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V17", "date": "2026-07-26" },
+  "supportedClaims": [
+    "Geometric sign rule sign=sgn(|m|-theta) is COMPLETE for all 1D architectures",
+    "Architecture memory exists ONLY when state-space dimension >= 2",
+    "Memory(arch) = max(0, dim(arch)-1) * k, k~4.1pp",
+    "Geometric rule works for PURE, RATIONAL, STRETCHED (1D)",
+    "COMPOSITE is genuinely 2D — beta and gamma carry independent information",
+    "STRETCHED has 47.5% sign variability yet zero memory — confirms dimensional hypothesis"
+  ],
+  "conditionalClaims": [
+    "Geometric rule is a strong asymptotic correlation, not a strict law"
+  ],
+  "hypotheses": [
+    "A hypothetical 3D architecture would show memory ~8.2pp"
+  ],
+  "notClaimed": ["physical gravity", "geometric rule as strict law"],
+  "openProblems": [
+    { "priority": "P1", "title": "3D test", "description": "Construct and test a hypothetical 3D architecture to verify dimensional memory law" }
+  ],
+  "documents": [{ "title": "V17 Closure", "filename": "docsV17/V17_Closure_Report.md", "available": true, "description": "V17 audit history" }],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V17/V17_2/V17_2_StateSpaceDimension_Tests.cs", "candidateUpdateLaws": ["Memory = max(0,dim-1)*k"] },
+  "releaseIntegrity": { "totalTestsVerified": 3960, "passedVerified": 3960, "verificationMethod": "dotnet test", "mismatch": null }
+}
