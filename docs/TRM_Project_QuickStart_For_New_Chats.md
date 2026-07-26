@@ -1,22 +1,43 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 2.7
-**Date:** 2026-07-24
-**Read time:** < 5 minutes
-**Primary reference:** `docs/TRM_Project_Lineage_Overview.md`, `docs/TRM_Current_Frontier.md`
+**Version:** 3.1
+**Date:** 2026-07-26
 
----
+CURRENT VERSION
+V14.1 MODE ORGANIZATION PRINCIPLE
 
-## A. Project Snapshot
+CURRENT BRANCH
+v14.0-resonance-organization-principle (CLOSING)
 
-| Item | Value |
-|:-----|:------|
-| Current Version | V12.2 DUALITY PHYSICS CORRESPONDENCE |
-| Current Branch | v12.2-duality-physics-correspondence |
-| Total Tests | ~640 (Fact/Theory methods); ~3442 (including suite runs) |
-| Failed Tests | 0 |
-| Current Status | V12.2: Information-Dynamics Duality validated. Family Axiom generates duality. 3 audits (DPC_01, NPV_01, FAG_01). |
-| Primary References | `TRM_Project_Lineage_Overview.md`, `TRM_Current_Frontier.md` |
+CURRENT STATUS
+V13 Program CLOSED (19 audits).
+V14.0/V14.1 CLOSED (21 audits: ROP_01 through MOP_01).
+
+V14 FINAL SUMMARY
+Organization = f(|m|, Mode)
+
+Two irreducible factors:
+1. |m| = |d(VT)/d(V1)| — continuous budget-tradeoff coordinate
+2. Wave-Mode class — categorical kernel-topology type
+
+Four wave-mode classes:
+  MODE_C (Conservation): SAC — pure exponential, POS dT/dp, HUB
+  MODE_O (Overshoot):    ICS — stretched exponential, POS dT/dp, HUB
+  MODE_R (Rational):     RCS — inverse power, NEG dT/dp, SPOKE
+  MODE_D (Dissipative):  GAN,CNS — modulated/floored, NEG dT/dp, SPOKE
+
+KEY V14 RESULTS
+- No universal resonance principle (ROP_01: CONDITIONAL).
+- Raw |m| is the true coordinate; |m+1| is folded projection (WOC_07: SUPPORTED).
+- dT/dp sign reversal is the binary organizational gate (WOC_05: CONDITIONAL).
+- Cascade: Wave→Tick→FB→Resonance→Org supported (WOC_01: SUPPORTED).
+- m=-1 is a genuine kink but not uniquely optimal (WOC_08/09).
+- SAC is α-invariant fixed-point attractor (WOC_12/WOC_13).
+- Kernel topology irreducible beyond |m| (WOC_15: SUPPORTED).
+- 4 mode classes reduce 6 topology features losslessly (MOP_01: SUPPORTED).
+
+NEXT RESEARCH FRONTIER
+V14.2 Mode Origin Principle (why these four modes emerge).
 
 ---
 
@@ -24,9 +45,10 @@
 
 TRM/TQM is a **constrained effective theory** of collective frequency emergence in finite
 coupled phase-oscillator lattices, closed under exactly two irreducible structural inputs
-(I1: closure-family ansatz; I2: bridge-band prior), with a fully auditable prospective
-prediction pipeline verified through independent replication, ensemble validation, and
-regime sensitivity analysis — no physical constants, spacetime, or GR are claimed as derived.
+(I1: closure-family ansatz; I2: bridge-band prior). Organizational state is determined by
+the continuous budget-tradeoff coordinate |m| = |d(VT)/d(V1)| and the categorical wave-mode
+class of the coupling kernel. Four irreducible mode classes exist: Conservation (SAC),
+Overshoot (ICS), Rational (RCS), and Dissipative (GAN,CNS).
 
 ---
 

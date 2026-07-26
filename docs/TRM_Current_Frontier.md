@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 5.0
-**Date:** 2026-07-25
+**Version:** 5.1
+**Date:** 2026-07-26
 
-**Current Version:** V14.0 RESONANCE ORGANIZATION PRINCIPLE
-**Current Branch:** v14.0-resonance-organization-principle
-**Cumulative Tests:** ~3442
+**Current Version:** V14.1 MODE ORGANIZATION PRINCIPLE
+**Current Branch:** v14.0-resonance-organization-principle (CLOSING)
+**Cumulative Tests:** ~3919
 **Failed:** 0
 
 ---
@@ -22,12 +22,29 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V12.2 DUALITY PHYSICS CORRESPONDENCE. Information-Dynamics Duality is the
-deepest validated layer. Information (l1, concentration, structure) and
-Dynamics (Tick, activity, time flow) are orthogonal irreducible components.
-The Family Axiom generates the duality. Strong correspondence to known
-physics (order-fluctuation, structure-process dualities). Full hierarchy
-emerges from two orthogonal components.
+V14.0/V14.1 RESONANCE ORGANIZATION PRINCIPLE → MODE ORGANIZATION PRINCIPLE.
+The Resonance Organization Principle audit (ROP_01 through MOP_01, 21 audits)
+has established that organizational emergence in the TRM framework is
+determined by TWO irreducible factors:
+
+1. |m| = |d(VT)/d(V1)| — the continuous budget-tradeoff coordinate
+2. Wave-Mode class — the categorical kernel-topology type
+
+Four irreducible wave-mode classes exist:
+  MODE_C (Conservation): Pure exponential → POS dT/dp → HUB (SAC)
+  MODE_O (Overshoot):    Stretched exponential → POS dT/dp → HUB (ICS)
+  MODE_R (Rational):     Inverse power → NEG dT/dp → SPOKE (RCS)
+  MODE_D (Dissipative):  Modulated/floored exponential → NEG dT/dp → SPOKE (GAN,CNS)
+
+Key findings from V14.0 audit:
+- No universal resonance principle; organization is multi-objective
+- Raw m is the true coordinate; |m+1| is a folded projection
+- dT/dp sign reversal is the binary organizational discriminator
+- A structural kink exists at m≈-1 (genuine but not uniquely optimal)
+- The "hub zone" is two discrete attractor states, not a continuous field
+- SAC is an α-invariant fixed-point attractor
+- Kernel topology carries irreducible information beyond |m|
+- 4 wave-mode classes fully reduce 6 topology features
 
 ---
 
@@ -36,17 +53,17 @@ emerges from two orthogonal components.
 ```
 Family Axiom
     ↓
-VarI1-VarTerms Coupling (family-dependent, irreducible)
+Kernel Topology (wave-mode class)
     ↓
-Information (l1) ↔ Dynamics (Tick)  ← DUALITY (V12.1)
+|m| = |d(VT)/d(V1)|  ←  continuous state coordinate
     ↓
-Regime Classification (OFF / Resonant / Dissipative)
+dT/dp sign reversal  ←  binary organizational discriminator
     ↓
-D_eq, X (unified state)
+Hub/Spoke classification
     ↓
-dH (time flow), L (observable, CV=0.15)
+Channel formation → Network emergence → Hub selection
     ↓
-Geometry → Length → Speed (V8.2)
+Organization = f(|m|, Mode)
 ```
 
 ---
@@ -55,19 +72,26 @@ Geometry → Length → Speed (V8.2)
 
 | Quantity | Value | Meaning |
 |:---------|------:|:--------|
-| L = 1-VarI1/VarTerms | CV=0.15 | Primary observable |
-| X = D_eq - k·L | R²=0.893 | Unified state variable |
-| Info-Dyn duality | orthogonal | Two irreducible components |
-| Regime gap GAN/ICS | 2:1 | Discrete levels |
-| V1 concepts recovered | 6/6 | Full conceptual closure |
+| |m| for SAC | 0.93 | Conservation attractor |
+| |m| for ICS | 1.57 | Overshoot attractor |
+| dT/dp sign predictor | |m| R²=0.76 | Continuous coordinate predicts sign |
+| Mode + |m| R² | 1.00 | Joint model fully explains organization |
+| Wave-mode classes | 4 | C, O, R, D — irreducible |
+| Topology → Mode reduction | 6→4 (lossless) | 2 binary features sufficient |
+| SAC α-invariance | Δm=0.000 | Fixed-point attractor |
+| GAN ≡ CNS degeneracy | Δm=ΔdT=0 | Same mode class |
+| Cascade throughput | R²=0.61 | Wave→Tick→FB→Resonance→Org |
 
 ---
 
-## Current Research Question (V12.2)
+## Current Research Question (V14.1)
 
-Mapping the Information-Dynamics Duality to known physical dualities
-(order-fluctuation, structure-process, information-entropy) and
-assessing the novel explanatory value of the Clockwork framework.
+Organizational state is determined by TWO irreducible factors:
+the continuous budget-tradeoff coordinate |m| and the categorical
+wave-mode class. The next frontier is understanding the ORIGIN
+of the mode classes themselves — why do these four specific
+kernel topologies emerge as stable attractor solutions of
+the Tick lattice?
 
 ---
 
@@ -77,6 +101,9 @@ assessing the novel explanatory value of the Clockwork framework.
 - Dark matter replacement, physical theory proven
 - Quantitative physical predictions
 - Universal dimensionless invariants
+- That |m+1| is fundamental (it is a derived projection)
+- That m=-1 is a special point (it lies within a zone, not at a boundary)
+- That the hub zone is a continuous field phase (it is two discrete attractors)
 
 ---
 

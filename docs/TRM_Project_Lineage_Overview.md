@@ -1,11 +1,35 @@
 # TRM Project Lineage Overview
 
 **Version:** 5.0
-**Date:** 2026-07-25
-**Scope:** Clockwork Cosmology V1 through V13.0
-**Tests:** ~3442, 0 failed
-**Branch:** v13.0-time-gradient-reconstruction
-**Current Frontier:** V13.0 TIME GRADIENT RECONSTRUCTION
+**Date:** 2026-07-26
+**Scope:** Clockwork Cosmology V1 through V13.5
+**Current Frontier:** V14.1 Mode Organization Principle
+**Current Branch:** v14.0-resonance-organization-principle (CLOSING)
+
+V13.5 CLOSED SUMMARY
+- Tick Source Theory completed.
+- Multi-body dynamics completed.
+- Channel formation completed.
+- Channel network formation completed.
+- Hub Selection Principle completed.
+
+V14.0/V14.1 CLOSED SUMMARY
+- Resonance Organization Principle audit completed (21 audits).
+- No universal resonance — organization is multi-objective.
+- Raw |m| is the true coordinate; |m+1| is a derived projection.
+- dT/dp sign reversal is the binary organizational discriminator.
+- Cascade structure: Wave→Tick→FB→Resonance→Org (R²=0.61 throughput).
+- SAC is an α-invariant fixed-point attractor.
+- Kernel topology carries irreducible information beyond |m|.
+- 4 irreducible wave-mode classes: C (Conservation), O (Overshoot), R (Rational), D (Dissipative).
+- GAN ≡ CNS are the same mode class.
+- Organization = f(|m|, Mode) — two irreducible factors.
+
+V14.2 NEXT
+Research focus:
+Mode Origin Principle.
+Why do these four specific wave-mode classes emerge?
+What determines which kernel topologies are stable attractor solutions?
 
 ---
 
