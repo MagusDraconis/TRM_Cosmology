@@ -1,0 +1,32 @@
+{
+  "releaseStatus": "V14.1 MODE ORGANIZATION PRINCIPLE — COMPLETED",
+  "phase": "Reducing kernel topology to irreducible wave-mode classes",
+  "date": "2026-07-26",
+  "testSummary": { "total": 3922, "passed": 3922, "failed": 0, "skipped": 0 },
+  "suites": ["V14_0", "V14_1"],
+  "supportedClaims": [
+    "Organization = f(|m|, Mode) — two irreducible factors",
+    "Raw |m| is the true coordinate; |m+1| is a folded projection",
+    "dT/dp sign reversal is the binary organizational discriminator",
+    "Cascade: Wave→Tick→FB→Resonance→Org (R²=0.61 throughput)",
+    "SAC is an α-invariant fixed-point attractor",
+    "Kernel topology carries irreducible information beyond |m|",
+    "4 wave-mode classes reduce 6 topology features losslessly (MOP_01)"
+  ],
+  "conditionalClaims": [
+    "No universal resonance principle (ROP_01)",
+    "Bi-polar landscape: SAC (conservation) vs ICS (dynamics) (BOP_01)",
+    "Resonance-primary with Tick secondary (TOP_01)",
+    "Hub zone is two discrete attractor states (WOC_10)",
+    "Sign reversal is binary gate + continuous dial (WOC_05)"
+  ],
+  "hypotheses": [
+    "Resonance identity is multi-faceted (ROP_01B)",
+    "m=-1 is genuine kink but not uniquely optimal (WOC_09)"
+  ],
+  "notClaimed": ["physical gravity", "SPARC prediction", "universal resonance", "m=-1 as fundamental constant"],
+  "openProblems": [],
+  "documents": ["docs/V14/V14_Summary.md"],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V14/V14_0/V14_0_ResonanceOrganizationPrinciple_Tests.cs" },
+  "releaseIntegrity": { "totalTestsVerified": 3922, "passedVerified": 3922, "verificationMethod": "dotnet test", "mismatch": null }
+}

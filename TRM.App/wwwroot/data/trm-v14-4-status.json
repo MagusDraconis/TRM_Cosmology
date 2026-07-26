@@ -1,0 +1,25 @@
+{
+  "releaseStatus": "V14.4 WAVE GRAMMAR DYNAMICS — COMPLETED",
+  "phase": "Discovering exclusion axioms and grammar dynamics",
+  "date": "2026-07-26",
+  "testSummary": { "total": 3930, "passed": 3930, "failed": 0, "skipped": 0 },
+  "suites": ["V14_0", "V14_1", "V14_2", "V14_3", "V14_4"],
+  "supportedClaims": [
+    "Grammar→Tick deterministic R²=1.000 (WGD_01)",
+    "Generator hierarchy: G3>G2>G1 by ablation loss (GHP_01)",
+    "2 exclusion axioms (G3⇒G1, G1⊥G2) fully determine 4 allowed states from 8 logical cells (GEP_01)",
+    "4 modes are the COMPLETE SET of viable kernel types",
+    "Forbidden states excluded structurally, not dynamically"
+  ],
+  "conditionalClaims": [
+    "4/8 cells forbidden; selection rules G3⇒G1, G1⊥G2 (GBP_01)"
+  ],
+  "hypotheses": [],
+  "notClaimed": ["physical gravity", "dynamical instability of forbidden states", "all-8-cells viability"],
+  "openProblems": [
+    { "priority": "P1", "title": "Why the exclusion axioms?", "description": "Do axioms emerge from deeper Tick-lattice structure?" }
+  ],
+  "documents": ["docs/V14/V14_Summary.md"],
+  "roadmap": { "recommendedTestFile": "TRM.Tests/V14/V14_4/V14_4_WaveGrammarDynamics_Tests.cs" },
+  "releaseIntegrity": { "totalTestsVerified": 3930, "passedVerified": 3930, "verificationMethod": "dotnet test", "mismatch": null }
+}
