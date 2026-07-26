@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 5.5
+**Version:** 5.6
 **Date:** 2026-07-26
 
-**Current Version:** V15.0 TICK LAW UNIFICATION
-**Current Branch:** v14.4-wave-grammar-dynamics (CLOSING)
-**Cumulative Tests:** ~3927
+**Current Version:** V15.1 FRACTAL GRAMMAR PRINCIPLE
+**Current Branch:** v15.1-predictive-wave-grammar (CLOSING)
+**Cumulative Tests:** ~3930
 **Failed:** 0
 
 ---
