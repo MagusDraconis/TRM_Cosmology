@@ -1,11 +1,12 @@
 # TRM Project Lineage Overview
 
-**Version:** 6.0
-**Date:** 2026-07-26
-**Scope:** Clockwork Cosmology V1 through V18.2
-**Current Frontier:** V18.2 Topological State Principle — CLOSED
-**Current Branch:** v18.0-hypothetical-3d-architecture (CLOSING)
-**Next Branch:** v19.0-topological-memory-theory
+**Version:** 7.0
+**Date:** 2026-07-27
+**Scope:** Clockwork Cosmology V1 through V19.10
+**Current Frontier:** V19.10 Emergent Dimension Structure — V19 CLOSED
+**Current Branch:** v19.0-topological-memory-theory (CLOSING)
+**Next Branch:** v20.0
+**Current Branch:** v19.0-topological-memory-theory
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -87,9 +88,83 @@ V18 DELIVERABLES
 - V18_Closure_Report.md — Complete audit history
 - Tag: v18.0-theoretical-synthesis
 
-V19.0 NEXT
-Research focus: Topological Memory Theory.
-Formalize topological invariants of sign bifurcation surface.
+V19.0 ACTIVE (1 audit)
+- TMI_01: Topological Memory Invariant established (SUPPORTED).
+
+V19.1 ACTIVE (5 audits)
+- PDP_01: Path Degeneracy Principle — how |m| projection collapses paths.
+- PMI_01: Projection Multiplicity Invariant — counting distinct (β,γ)→|m| mappings.
+- RAP_01: Regional Ambiguity Principle — sign ambiguity regions in |m|.
+- RRP_01: Resonance Relocation Principle — how parameter changes shift sign boundaries.
+- SAD_01: Sign Ambiguous Degeneracy — degeneracy structure of ambiguous |m| values.
+
+V19.2 ACTIVE (2 audits)
+- AGM_01: Ambiguity Geometry Metric — metric structure of ambiguity regions.
+- TBI_01: Topological Boundary Invariant — topological boundary properties.
+
+V19.3 ACTIVE (2 audits)
+- BDI_01: Boundary Dimension Invariant — boundary dimension as primitive invariant (SUPPORTED).
+- BMM_01: Boundary Measure Memory — boundary measure predicts memory magnitude (CONDITIONAL).
+
+V19.4 ACTIVE (1 audit)
+- BGP_01: Boundary Generation Principle — codimension-1 law SUPPORTED.
+  dim(boundary) = dim(param_space) - 1 generically for smooth sign functions.
+  Generation chain: Independent params → Sign flips → Boundary → Memory iff dim(bdry) ≥ 1.
+  All 4 architectures confirmed: PURE/RATIONAL (no boundary), STRETCHED (0D point),
+  COMPOSITE (1D curve). Predicted 3D architecture → 2D boundary surface → memory > 4.1pp.
+
+V19.5 ACTIVE (1 audit)
+- HBD_01: Hypothetical Boundary Dimension — codim-1 extrapolates to 3D SUPPORTED.
+  Both GAN (18³) and CNS (14³) 3D sweeps produce 2D boundary surfaces.
+  GAN: 22.2% boundary cells, 361.8 pts/bin degeneracy (surface-like ambiguity).
+  CNS: 42.9% boundary cells (kernel-family robust).
+  α creates boundary volume by making (β,γ) boundary curve exist at all α.
+  Refinement: effective sign dimension ≤ param dimension.
+  dim(boundary) = dim_eff(sign) - 1. Memory > 4.1pp predicted for 3D architectures.
+
+V19.6 ACTIVE (1 audit)
+- PDI_01: Projection Dimension Invariant — Δ = bdim-1 controls memory SUPPORTED.
+  Δ < 0 → M=0 (STRETCHED: Δ=-1), Δ ≥ 0 → M>0 (COMPOSITE: Δ=0, M=4.1pp),
+  Δ > 0 → M larger (3D CNS: Δ=1, predicted >4.1pp).
+  Δeff = bdim - proj_eff FAILS to distinguish STRETCHED from COMPOSITE.
+  Ambient-based Δ is the correct invariant.
+  Chain: Δ ≥ 0 ⟺ bdim ≥ 1 ⟺ dim_eff(sign) ≥ 2 ⟺ memory > 0.
+  Unifies DMP_01 (state-space dimension), BGP_01 (codim-1), HBD_01 (3D) into Δ.
+
+V19.7 ACTIVE (1 audit)
+- DEM_01: Dimensional Excess Magnitude — existence×magnitude decomposition SUPPORTED.
+  M = [Δ ≥ 0] · k · span · avg_degen.
+  Topological trigger: [Δ ≥ 0] = 0 if Δ < 0 (STRETCHED → M=0), 1 if Δ ≥ 0.
+  Geometric amplifier: k · projected_boundary_measure, where k = 0.0359.
+  COMPOSITE: 1 × 0.0359 × 114.3 = 4.1pp. 3D GAN: 4.31pp, 3D CNS: 6.53pp predicted.
+  STRETCHED confirms separation: span>0 but [Δ=-1]=0 → M=0 despite measurable geometry.
+  Topology gates existence; geometry sets magnitude.
+
+V19.8 ACTIVE (1 audit)
+- GEP_01: Geometry Emergence Principle — geometry emerges from boundary structure SUPPORTED.
+  Emergence chain: Indep params → Boundary → Geometry → Δ≥0 gate → Memory.
+  Geometry PRECEDES memory: STRETCHED (bdim=0) has geometry (span=0.05, degen=5.0) but Δ=-1.
+  bdim→degen: r²=0.93. Degeneracy and projMeasure monotonic in bdim.
+  Each bdim increment produces richer geometric object (point→curve→surface).
+  Memory is first OBSERVABLE of un-gated emergent geometry.
+
+V19.9 ACTIVE (1 audit)
+- CBG_01: Codimension Boundary Generation — mathematical necessity SUPPORTED.
+  Codim-1 follows from implicit function theorem: sign boundary = φ⁻¹(0)
+  for SINGLE constraint φ = sign(dT/dp). 1 constraint → dim reduces by 1.
+  Empirical: 0 codim-2 points in 50×50 COMPOSITE search.
+  Binary sign (±1) → single constraint → codim-1 is logically forced.
+  Explains WHY BGP_01's codim-1 law holds — it's a THEOREM, not an observation.
+
+V19.10 CLOSING (1 audit)
+- EDS_01: Emergent Dimension Structure — bdim as PRIMARY generator SUPPORTED.
+  Capstone synthesis: bdim generates geometry, geometry gates through Δ,
+  memory emerges as derived observable M = [Δ≥0]·k·ProjMeasure.
+  C(bdim) monotonic: 0.10 → 4.12 → 7.16. Hierarchy strictly ordered:
+  Param → Boundary → Geometry → Gate → Memory. 17 audits, 0 falsifications.
+  V19 CLOSED. Next: V20.
+
+V18 DELIVERABLES
 
 ---
 
@@ -2281,5 +2356,5 @@ equations, dark matter replacement, physical theory proven.
 
 ---
 
-*Generated 2026-07-25. This document is the authoritative historical overview of the
+*Generated 2026-07-27. This document is the authoritative historical overview of the
 TRM/TQM project from Clockwork Cosmology V1 through V12.2.*

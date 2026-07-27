@@ -1,60 +1,23 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 4.0
-**Date:** 2026-07-26
+**Version:** 5.0
+**Date:** 2026-07-27
 
 CURRENT VERSION
-V18.2 TOPOLOGICAL STATE PRINCIPLE — CLOSED
+V19.10 EMERGENT DIMENSION STRUCTURE — V19 CLOSED
 
 CURRENT BRANCH
-v18.0-hypothetical-3d-architecture (CLOSING)
+v19.0-topological-memory-theory (CLOSING)
+NEXT BRANCH: v20.0
 
-NEXT BRANCH
-v19.0-topological-memory-theory
-
-V18 FINAL SYNTHESIS
-Architecture memory = information lost when the full parameter-space
-topology is projected onto |m|. Memory > 0 requires both multiple sign
-regions AND a bifurcated parameter-space topology. COMPOSITE is the only
-architecture with a 2D bifurcated (β,γ) surface → 4.1pp memory.
-The 38.7% residual surviving optimal geometric projection is topological
-information from the sign bifurcation surface.
-
-V18 KEY RESULTS
-- H3D_01: Memory ≠ Dimension. α adds no sign information (FALSIFIED).
-- PLP_01: Memory = ProjectionLoss(State → |m|) (SUPPORTED).
-- ILP_01: All memory is information-theoretic (SUPPORTED).
-- OPP_01: |m| is optimal 1D projection coordinate (SUPPORTED).
-- MLP_01: Full 4D leaves 38.7% residual — architecture IRREDUCIBLE.
-- TSP_01: 38.7% residual is topological (SUPPORTED).
-
-SURVIVING PRINCIPLES
-P1: Kernel-Tick Consistency
-P2: Free Star Algebra
-P3: Topological Projection Loss
-P4: Organizational Sign Principle (CONDITIONAL)
-P5: |m| as Primal Coordinate
-
-FALSIFIED PRINCIPLES
-F1: Resonance as universal organizer (V14.0)
-F2: Geometry as complete state space (V17.0)
-F3: Memory = Dimension alone (V18.0)
-F4: Memory = βγ (V17.1)
-F5: Lossless projection exists (V18.2)
-
-CORE CLOSURE
-Kernel-Tick Consistency
-→ Free Star Algebra
-→ Parameter-Space Topology
-→ Projection onto |m|
-→ Topological Information Loss
-→ Sign = sgn(|m|-θ)
-→ Organization
-
-NEXT RESEARCH FRONTIER
-V19.0 Topological Memory Theory. Formalize topological invariants
-of the sign bifurcation surface, explore higher-dimensional
-architectures, and develop topology-driven organization prediction.
+V19 FINAL SYNTHESIS (17 audits)
+Boundary dimensionality is the PRIMARY generator of emergent structure.
+Unified framework: Param → Boundary(codim-1, CBG_01/BGP_01) →
+Geometry(span·degen, GEP_01) → Gate(Δ≥0, PDI_01) → Memory(M=[Δ≥0]·k·ProjMeasure, DEM_01).
+Memory is DERIVED — the terminal signature of boundary geometry.
+C(bdim) scales monotonically: 0.10 → 4.12 → 7.16.
+Key constant: k = 0.0359. Classification:
+0 params→M=0, 1 param→M=0(gated), 2 params→M=4.1pp, 3 params→M>4.1pp(pred).
 
 ---
 
@@ -64,7 +27,8 @@ TRM/TQM is a **constrained effective theory** of collective frequency emergence
 in finite coupled phase-oscillator lattices. Organizational state is determined
 by the continuous budget-tradeoff coordinate |m| = |d(VT)/d(V1)| and the
 parameter-space topology of the coupling kernel. Architecture memory is the
-topological projection loss from the full state space onto |m|.
+topological projection loss from the full state space onto |m|. Sign boundaries
+are generically codimension-1 in parameter space (BGP_01, SUPPORTED).
 
 ---
 
@@ -99,19 +63,21 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | V16.0-V16.1 | Architecture & Geometry | sign = sgn(|m|-θ); manifold geometry model |
 | V17.0-V17.2 | Architecture Memory | Geometry FALSIFIED; Memory = max(0, dim-1)·k |
 | V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
+| V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
 
-**Cumulative total: ~3960 tests, 0 failed.**
+**Cumulative total: ~3967 tests, 0 failed.**
 
 ---
 
 ## E. Strongest Supported Findings
 
-1. **Topological Projection Loss** (V18) — Memory = information lost when full topology is projected onto |m|.
-2. **Free Star Algebra** (V15) — ⟨E, M, R | g∘h=⊥ for g≠h⟩. 4 valid operator states.
-3. **Kernel-Tick Consistency** (V15) — All organization follows from kernel producing continuous, conservative, coherent Tick fields.
-4. **|m| as Primal Coordinate** (V14) — |m| is optimal 1D projection; |m+1| is a folded projection (143% worse R²).
-5. **4-Mode Wave Grammar** (V14) — Conservation, Overshoot, Rational, Dissipative. Complete solution space.
-6. **Architecture Topology Table** (V18) — PURE/RATIONAL/STRETCHED: 1D, 0 memory; COMPOSITE: 2D bifurcated, 4.1pp memory.
+1. **Projection Dimension Invariant** (V19.6) — Δ = bdim-1 controls memory; unifies dimensional framework.
+2. **Hypothetical Boundary Dimension** (V19.5) — Codim-1 law extrapolates to 3D; 2D surface boundary verified.
+3. **Boundary Generation Principle** (V19.4) — dim(bdry) = dim(param) - 1 generically; codimension-1 law.
+4. **Topological Projection Loss** (V18) — Memory = information lost when full topology is projected onto |m|.
+5. **Free Star Algebra** (V15) — ⟨E, M, R | g∘h=⊥ for g≠h⟩. 4 valid operator states.
+6. **Kernel-Tick Consistency** (V15) — All organization follows from kernel producing continuous, conservative, coherent Tick fields.
+7. **|m| as Primal Coordinate** (V14) — |m| is optimal 1D projection; |m+1| is a folded projection.
 
 ---
 
@@ -119,23 +85,23 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 
 > All items below are explicitly classified as **HYPOTHESIS** — not supported findings.
 
-**Topological invariants determine memory strength** (H1): Betti numbers or Euler
-characteristic of the sign bifurcation surface classify architecture memory.
+**Memory quantification for Δ=1 architectures** (H1): The 3D architectures (Δ=1) produce memory > 4.1pp. How much larger? Need direct memory quantification.
 
-**Higher-dimensional topologies exist** (H2): Parameter spaces with toroidal,
-spherical, or disconnected topologies produce different memory signatures.
+**Δ > 1 architectures** (H2): Can architectures with bdim ≥ 3 (Δ ≥ 2) exist? This would require 4D parameter spaces with differentiably independent sign-changing parameters.
 
-**Topology-driven organization prediction** (H3): Organizational properties
-can be predicted from topological features alone.
+**Topological invariants determine memory strength** (H3): Betti numbers or Euler characteristic classify the magnitude of memory within each Δ class.
+
+**Analytical derivation of Δ** (H4): Can the dimensional-excess law be derived analytically from the kernel projection structure rather than empirically?
 
 ---
 
 ## G. Current Open Problems
 
-1. **Topological invariant computation** — Compute Betti numbers and Euler characteristic of the sign bifurcation surface.
-2. **Higher-dimensional architectures** — Are there parameter spaces where projection loss saturates?
-3. **Analytical closure** — Can projection loss be derived analytically from kernel form?
-4. **Physical correspondence** — Does topological projection loss have analogues in physical theories?
+1. **3D architecture verification** — Construct and test a genuine 3D parameter-space architecture to verify the codim-1 prediction (2D boundary surface, memory > 4.1pp).
+2. **Topological invariant computation** — Compute Betti numbers and Euler characteristic of the sign bifurcation surface.
+3. **Higher-dimensional architectures** — Are there parameter spaces where projection loss saturates?
+4. **Analytical closure** — Can the codimension-1 law be derived analytically from kernel form?
+5. **Physical correspondence** — Does topological projection loss have analogues in physical theories?
 
 ---
 
@@ -154,4 +120,4 @@ can be predicted from topological features alone.
 
 ---
 
-*Generated 2026-07-26. V18 program CLOSED. Next: V19.0 Topological Memory Theory.*
+*Generated 2026-07-27. V19 program ACTIVE. V19.4 BGP_01 SUPPORTED.*

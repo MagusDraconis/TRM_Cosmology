@@ -1,12 +1,12 @@
 # TRM Current Frontier
 
-**Version:** 7.0
-**Date:** 2026-07-26
+**Version:** 8.0
+**Date:** 2026-07-27
 
-**Current Version:** V18.2 TOPOLOGICAL STATE PRINCIPLE — CLOSED
-**Current Branch:** v18.0-hypothetical-3d-architecture (CLOSING)
-**Next Branch:** v19.0-topological-memory-theory
-**Cumulative Tests:** ~3960
+**Current Version:** V19.10 EMERGENT DIMENSION STRUCTURE — V19 CLOSED
+**Current Branch:** v19.0-topological-memory-theory (CLOSING)
+**Next Branch:** v20.0
+**Cumulative Tests:** ~3967
 **Failed:** 0
 
 ---
@@ -23,13 +23,14 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V18.2 TOPOLOGICAL PROJECTION LOSS. Architecture memory is the information
-lost when the full parameter-space topology is projected onto the master
-coordinate |m|. Memory > 0 requires both multiple sign regions AND a
-bifurcated parameter-space topology. COMPOSITE is the only architecture
-with a 2D bifurcated (β,γ) surface → 4.1pp memory. Architecture is
-best described by parameter-space topology. The 38.7% residual surviving
-optimal geometric projection is topological information.
+V19 CLOSED — TOPOLOGICAL MEMORY THEORY. 17 audits (V19.0–V19.10), 0 falsifications.
+Boundary dimensionality (bdim) is the PRIMARY generator of emergent structure.
+The unified framework: Param space → Boundary (codim-1, CBG_01/BGP_01) →
+Geometry (span, degen, ProjMeasure, GEP_01) → Gate (Δ≥0, PDI_01) →
+Memory (M=[Δ≥0]·k·ProjMeasure, DEM_01). Memory is a DERIVED observable —
+the terminal signature of boundary geometry. Architecture classification:
+0 params→no bdry→M=0, 1 param→0D bdry→M=0, 2 params→1D bdry→M=4.1pp,
+3 params→2D bdry→M>4.1pp (predicted). Key constant: k=0.0359.
 
 ---
 
@@ -55,27 +56,29 @@ Organization (Hub/Spoke/Network)
 
 ## Architecture Topology Table
 
-| Architecture | Param Space | Topology | Sign Regions | Memory |
-|:------------|:------------|:---------|:-------------|:-------|
-| PURE (SAC)    | LINE (α)    | TRIVIAL  | 1 (POS)      | 0      |
-| RATIONAL (RCS)| LINE (α)    | TRIVIAL  | 1 (NEG)      | 0      |
-| STRETCHED (ICS)| LINE (β)   | BINARY   | 2            | 0      |
-| COMPOSITE (GAN/CNS)| SURFACE (β,γ)| BIFURCATED | 2       | 4.1 pp |
+| Architecture | Param Dim | Bdim | Δ | C(bdim) | M |
+|:---|---:|---:|---:|---:|---:|
+| PURE | 1 | — | n/a | 0.00 | 0 |
+| RATIONAL | 1 | — | n/a | 0.00 | 0 |
+| STRETCHED | 1 | 0D | -1 | 0.10 | 0 |
+| COMPOSITE | 2 | 1D | 0 | 4.12 | 4.1 pp |
+| 3D GAN | 3 | 2D | +1 | 7.54 | ~11.7 pp (pred) |
+| 3D CNS | 3 | 2D | +1 | 6.79 | ~6.5 pp (pred) |
 
 ---
 
 ## Memory Condition
 
 ``
-Memory > 0 ⟺ Sign regions > 1 ∧ Topology is BIFURCATED
+M = [Δ ≥ 0] · k · ProjMeasure
 ``
 
-LINE topology with 2 sign regions has zero memory (STRETCHED).
-SURFACE topology with bifurcation has nonzero memory (COMPOSITE).
+where ProjMeasure = span(|m|_ambig) × avg_degeneracy, k = 0.0359.
+Boundary dimension (bdim) → Δ → Gate → Memory. All derived from bdim.
 
 ---
 
-## Surviving Principles (V14-V18)
+## Surviving Principles (V14-V19)
 
 | # | Principle | Status |
 |:-:|:----------|:------:|
@@ -84,6 +87,13 @@ SURFACE topology with bifurcation has nonzero memory (COMPOSITE).
 | P3 | Topological Projection Loss | SUPPORTED |
 | P4 | Organizational Sign Principle | CONDITIONAL |
 | P5 | |m| as Primal Coordinate | SUPPORTED |
+| P6 | Boundary Generation Principle | SUPPORTED |
+| P7 | Hypothetical Boundary Dimension | SUPPORTED |
+| P8 | Projection Dimension Invariant | SUPPORTED |
+| P9 | Dimensional Excess Magnitude | SUPPORTED |
+| P10 | Geometry Emergence Principle | SUPPORTED |
+| P11 | Codimension Boundary Generation | SUPPORTED |
+| P12 | Emergent Dimension Structure | SUPPORTED |
 
 ---
 
@@ -115,16 +125,58 @@ SURFACE topology with bifurcation has nonzero memory (COMPOSITE).
 
 ---
 
-## Current Research Frontier (V19.0)
+## Current Research Frontier (V19.0-V19.7)
 
-**Topological Memory Theory**
+**Topological Memory Theory — Active Audits (14 audits)**
+
+V19.0 TMI_01: Topological Memory Invariant (SUPPORTED)
+V19.1 PDP_01, PMI_01, RAP_01, RRP_01, SAD_01: Path degeneracy and sign ambiguity (5 audits)
+V19.2 AGM_01, TBI_01: Ambiguity geometry and topological boundary (2 audits)
+V19.3 BDI_01, BMM_01: Boundary dimension as primitive invariant; boundary measure (2 audits)
+V19.4 BGP_01: Boundary Generation Principle — codimension-1 law (SUPPORTED)
+V19.5 HBD_01: Hypothetical Boundary Dimension — 3D codim-1 verified (SUPPORTED)
+V19.6 PDI_01: Projection Dimension Invariant — Δ controls memory (SUPPORTED)
+V19.7 DEM_01: Dimensional Excess Magnitude — M = existence(Δ) × magnitude(geo) (SUPPORTED)
+
+Key findings:
+- BGP_01: Boundary dimension derives from param-space dimension (codim-1).
+- HBD_01: Codim-1 extrapolates to 3D (2D surface boundaries, kernel-family robust).
+- PDI_01: Memory controlled by Δ = bdim-1. Δ < 0 → M=0, Δ ≥ 0 → M>0.
+- DEM_01: M = [Δ ≥ 0] · k · span · avg_degen. Topology gates, geometry amplifies.
+  COMPOSITE: k × 114.3 = 4.1pp → k = 0.0359. 3D GAN: 4.3pp, 3D CNS: 6.5pp predicted.
+  The decomposition cleanly separates existence (topological) from magnitude (geometric).
 
 Research questions:
-1. Compute explicit topological invariants (Betti numbers, Euler characteristic)
-   of the sign bifurcation surface in COMPOSITE's (β,γ) plane.
-2. Explore parameter spaces with exotic topologies (toroidal, spherical, disconnected).
-3. Develop topology-driven organization prediction without reference to kernel form.
-4. Determine whether memory strength is determined by topological genus.
+1. Verify 3D memory predictions (4.3pp GAN, 6.5pp CNS) with direct memory quantification.
+2. Compute topological invariants (Betti numbers, Euler characteristic).
+3. Explore exotic parameter-space topologies (toroidal, spherical).
+4. Test whether Δ > 1 architectures exist (bdim ≥ 3).
+
+---
+
+## V19 Program Summary (17 audits, CLOSED)
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V19.0 | TMI_01 | Topological memory invariant established |
+| V19.1 | PDP_01, PMI_01, RAP_01, RRP_01, SAD_01 | Path degeneracy, projection multiplicity, sign ambiguity |
+| V19.2 | AGM_01, TBI_01 | Ambiguity geometry metric, topological boundary invariant |
+| V19.3 | BDI_01, BMM_01 | Boundary dimension as primitive; boundary measure for magnitude |
+| V19.4 | BGP_01 | Boundary Generation Principle — codimension-1 law SUPPORTED |
+| V19.5 | HBD_01 | Hypothetical Boundary Dimension — codim-1 extrapolates to 3D SUPPORTED |
+| V19.6 | PDI_01 | Projection Dimension Invariant — Δ = bdim-1 controls memory SUPPORTED |
+| V19.7 | DEM_01 | Dimensional Excess Magnitude — M = existence(Δ) × magnitude(geo) SUPPORTED |
+| V19.8 | GEP_01 | Geometry Emergence Principle — geometry emerges from boundary SUPPORTED |
+| V19.9 | CBG_01 | Codimension Boundary Generation — mathematical necessity SUPPORTED |
+| V19.10 | EDS_01 | Emergent Dimension Structure — bdim as PRIMARY generator SUPPORTED |
+
+### V19 Deliverables
+- Unified framework: Param → Boundary(φ⁻¹(0), codim-1) → Geometry(span·degen) → Gate(Δ≥0) → Memory
+- Codimension-1 law mathematically explained (CBG_01: implicit function theorem)
+- Dimensional excess invariant Δ = bdim - 1 (PDI_01)
+- Memory decomposition: M = [Δ≥0]·k·ProjMeasure, k=0.0359 (DEM_01)
+- 3D architecture predictions verified: GAN 2D surface, CNS 2D surface (HBD_01)
+- Complete architecture classification by boundary dimension
 
 ---
 
@@ -198,4 +250,4 @@ Research questions:
 
 ---
 
-*Generated 2026-07-26. V18 program CLOSED. Next: V19.0 Topological Memory Theory.*
+*Generated 2026-07-27. V19 program CLOSED (17 audits). V19.10 EDS_01: bdim is PRIMARY generator, memory is DERIVED. Next: V20.*
