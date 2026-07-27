@@ -1,9 +1,9 @@
 # TRM Project Lineage Overview
 
-**Version:** 7.1
+**Version:** 7.4
 **Date:** 2026-07-27
-**Scope:** Clockwork Cosmology V1 through V19.10
-**Current Frontier:** V20.0 Boundary Geometry Theory — STARTING
+**Scope:** Clockwork Cosmology V1 through V20.2
+**Current Frontier:** V20.2 Zero-Set Geometry Structure — ACTIVE
 **Current Branch:** v20.0-boundary-geometry-theory
 
 V13.5 CLOSED SUMMARY
@@ -162,13 +162,26 @@ V19.10 CLOSING (1 audit)
   Param → Boundary → Geometry → Gate → Memory. 17 audits, 0 falsifications.
   V19 CLOSED. Next: V20.
 
-V20.0 STARTING
-Research focus: Boundary Geometry Theory.
-- Quantify memory for 3D architectures (direct measurement).
-- Derive projected geometry analytically from kernel form.
-- Compute topological invariants (Betti numbers, Euler characteristic).
-- Explore higher-dimensional architectures (bdim ≥ 3, Δ ≥ 2).
-- Test analytical geometry reconstruction from kernel.
+V20.0 ACTIVE (1 audit)
+- SGE_01: Spatial Geometry Emergence — boundary carries intrinsic metric SUPPORTED.
+  COMPOSITE 1D boundary is a valid metric space: 100% triangle inequality.
+  d_boundary↔d_proj: r=0.707 (r²=0.50). Arc length=2.99, 5-NN preservation=17.3%.
+  Boundary is isomorphic to 1D manifold. Metric implicit, not externally imposed.
+  Spatial geometry and memory co-emerge at bdim≥1.
+
+V20.1 ACTIVE (1 audit)
+- SCO_01: Sign Constraint Origin — phi from KTC chain SUPPORTED.
+  phi(p) = sign(dT/dp(p)) approx sgn(|m|-theta). Origin chain invariant:
+  KTC -> Kernel -> CCI -> |m| -> dT/dp -> phi -> Boundary.
+  STRETCHED: theta=0.983, 100% accuracy. COMPOSITE: theta=0.640, 95.8%.
+  Threshold form universal for 1D/2D. KTC is ultimate origin of phi.
+
+V20.2 ACTIVE (1 audit)
+- ZGS_01: Zero-Set Geometry Structure — phi^{-1}(0) already contains geometry SUPPORTED.
+  Automatic: 1 connected component, path-connected, induced Euclidean metric.
+  Derived: arc length ~2.00, curvature (mean 1.59 rad, high turning).
+  Zero-set as subset of R^n IS a geometric object. No external axioms needed.
+  phi is the sole geometric generator.
 
 V18 DELIVERABLES
 

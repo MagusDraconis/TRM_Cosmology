@@ -1,11 +1,10 @@
 # TRM Current Frontier
 
-**Version:** 8.1
+**Version:** 8.4
 **Date:** 2026-07-27
 
-**Current Version:** V20.0 BOUNDARY GEOMETRY THEORY — STARTING
-**Current Branch:** v20.0-boundary-geometry-theory
-**Cumulative Tests:** ~3967
+**Current Version:** V20.2 ZERO-SET GEOMETRY STRUCTURE — ACTIVE
+**Cumulative Tests:** ~3970
 **Failed:** 0
 
 ---
@@ -22,13 +21,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 STARTING — BOUNDARY GEOMETRY THEORY. V19 established that boundary
-dimensionality (bdim) is the PRIMARY generator and memory is DERIVED.
-V20 will quantify the geometric structure: directly measure memory for
-3D architectures, derive geometry from kernel form analytically, compute
-topological invariants (Betti numbers, Euler characteristic), and explore
-higher-dimensional architectures (bdim ≥ 3). Key equation from V19:
-M = [Δ ≥ 0] · 0.0359 · span · avg_degen. k = 0.0359.
+V20.2 ZERO-SET GEOMETRY STRUCTURE. ZGS_01 (SUPPORTED): phi^{-1}(0)
+already contains geometry. Automatic: set membership, topology, Hausdorff
+dimension, connectedness (1 component), path-connectedness, induced metric.
+Derived: intrinsic metric (arc length ~2.00), curvature (mean 1.59 rad),
+path ordering. The zero-set as subset of R^n IS a geometric object —
+no additional axioms needed. phi is the SOLE geometric generator.
 
 ---
 
@@ -92,6 +90,9 @@ Boundary dimension (bdim) → Δ → Gate → Memory. All derived from bdim.
 | P10 | Geometry Emergence Principle | SUPPORTED |
 | P11 | Codimension Boundary Generation | SUPPORTED |
 | P12 | Emergent Dimension Structure | SUPPORTED |
+| P13 | Spatial Geometry Emergence | SUPPORTED |
+| P14 | Sign Constraint Origin | SUPPORTED |
+| P15 | Zero-Set Geometry Structure | SUPPORTED |
 
 ---
 
@@ -152,16 +153,21 @@ Research questions:
 
 ---
 
-## V20 Program (STARTING)
+## V20 Program (ACTIVE)
 
-**Boundary Geometry Theory** — quantifying the geometric structure.
+**Boundary Geometry Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V20.0 | SGE_01 | Spatial Geometry Emergence — boundary carries intrinsic metric SUPPORTED |
+| V20.1 | SCO_01 | Sign Constraint Origin — φ from KTC chain, threshold form universal SUPPORTED |
 
 Research questions:
-1. Directly measure memory for 3D GAN and CNS architectures.
+1. Directly measure memory for 3D architectures.
 2. Derive projected boundary measure analytically from kernel form.
 3. Compute topological invariants (Betti numbers, Euler characteristic).
-4. Explore Δ ≥ 2 architectures (bdim ≥ 3, 4D parameter spaces).
-5. Test whether geometry can be reconstructed from kernel analytically.
+4. Explore geodesic structure on 2D boundary surfaces.
+5. Test analytical geometry reconstruction from kernel.
 
 ---
 
@@ -261,4 +267,4 @@ Research questions:
 
 ---
 
-*Generated 2026-07-27. V19 CLOSED (17 audits). V20 STARTING: Boundary Geometry Theory.*
+*Generated 2026-07-27. V20 ACTIVE (3 audits). V20.2 ZGS_01 SUPPORTED: phi^{-1}(0) already contains geometry.*

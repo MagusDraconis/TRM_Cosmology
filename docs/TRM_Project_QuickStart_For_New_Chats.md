@@ -1,19 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 5.1
+**Version:** 5.3
 **Date:** 2026-07-27
 
 CURRENT VERSION
-V20.0 BOUNDARY GEOMETRY THEORY — STARTING
+V20.1 SIGN CONSTRAINT ORIGIN — ACTIVE
 
 CURRENT BRANCH
 v20.0-boundary-geometry-theory
 
-V20 RESEARCH FRONTIER
-V19 CLOSED (17 audits, 0 falsifications). Boundary dimensionality is the
-PRIMARY generator; memory is DERIVED: M = [Δ≥0]·0.0359·span·degen.
-V20 will: (1) directly measure 3D memory, (2) derive geometry from kernel
-analytically, (3) compute topological invariants, (4) explore bdim≥3.
+V20.1 SYNTHESIS
+SCO_01 (SUPPORTED): phi originates from KTC -> Kernel -> CCI -> |m| -> dT/dp -> phi.
+STRETCHED: theta=0.983, 100% accuracy. COMPOSITE: theta=0.640, 95.8% accuracy.
+phi approx sgn(|m|-theta) is universal for 1D/2D architectures.
+Ultimate origin: Kernel-Tick Consistency (V15). KTC is the deepest principle.
 
 ---
 
