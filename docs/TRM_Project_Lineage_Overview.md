@@ -1,12 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 7.0
+**Version:** 7.1
 **Date:** 2026-07-27
 **Scope:** Clockwork Cosmology V1 through V19.10
-**Current Frontier:** V19.10 Emergent Dimension Structure — V19 CLOSED
-**Current Branch:** v19.0-topological-memory-theory (CLOSING)
-**Next Branch:** v20.0
-**Current Branch:** v19.0-topological-memory-theory
+**Current Frontier:** V20.0 Boundary Geometry Theory — STARTING
+**Current Branch:** v20.0-boundary-geometry-theory
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -163,6 +161,14 @@ V19.10 CLOSING (1 audit)
   C(bdim) monotonic: 0.10 → 4.12 → 7.16. Hierarchy strictly ordered:
   Param → Boundary → Geometry → Gate → Memory. 17 audits, 0 falsifications.
   V19 CLOSED. Next: V20.
+
+V20.0 STARTING
+Research focus: Boundary Geometry Theory.
+- Quantify memory for 3D architectures (direct measurement).
+- Derive projected geometry analytically from kernel form.
+- Compute topological invariants (Betti numbers, Euler characteristic).
+- Explore higher-dimensional architectures (bdim ≥ 3, Δ ≥ 2).
+- Test analytical geometry reconstruction from kernel.
 
 V18 DELIVERABLES
 

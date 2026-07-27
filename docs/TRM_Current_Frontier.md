@@ -1,11 +1,10 @@
 # TRM Current Frontier
 
-**Version:** 8.0
+**Version:** 8.1
 **Date:** 2026-07-27
 
-**Current Version:** V19.10 EMERGENT DIMENSION STRUCTURE — V19 CLOSED
-**Current Branch:** v19.0-topological-memory-theory (CLOSING)
-**Next Branch:** v20.0
+**Current Version:** V20.0 BOUNDARY GEOMETRY THEORY — STARTING
+**Current Branch:** v20.0-boundary-geometry-theory
 **Cumulative Tests:** ~3967
 **Failed:** 0
 
@@ -23,14 +22,13 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V19 CLOSED — TOPOLOGICAL MEMORY THEORY. 17 audits (V19.0–V19.10), 0 falsifications.
-Boundary dimensionality (bdim) is the PRIMARY generator of emergent structure.
-The unified framework: Param space → Boundary (codim-1, CBG_01/BGP_01) →
-Geometry (span, degen, ProjMeasure, GEP_01) → Gate (Δ≥0, PDI_01) →
-Memory (M=[Δ≥0]·k·ProjMeasure, DEM_01). Memory is a DERIVED observable —
-the terminal signature of boundary geometry. Architecture classification:
-0 params→no bdry→M=0, 1 param→0D bdry→M=0, 2 params→1D bdry→M=4.1pp,
-3 params→2D bdry→M>4.1pp (predicted). Key constant: k=0.0359.
+V20 STARTING — BOUNDARY GEOMETRY THEORY. V19 established that boundary
+dimensionality (bdim) is the PRIMARY generator and memory is DERIVED.
+V20 will quantify the geometric structure: directly measure memory for
+3D architectures, derive geometry from kernel form analytically, compute
+topological invariants (Betti numbers, Euler characteristic), and explore
+higher-dimensional architectures (bdim ≥ 3). Key equation from V19:
+M = [Δ ≥ 0] · 0.0359 · span · avg_degen. k = 0.0359.
 
 ---
 
@@ -154,6 +152,19 @@ Research questions:
 
 ---
 
+## V20 Program (STARTING)
+
+**Boundary Geometry Theory** — quantifying the geometric structure.
+
+Research questions:
+1. Directly measure memory for 3D GAN and CNS architectures.
+2. Derive projected boundary measure analytically from kernel form.
+3. Compute topological invariants (Betti numbers, Euler characteristic).
+4. Explore Δ ≥ 2 architectures (bdim ≥ 3, 4D parameter spaces).
+5. Test whether geometry can be reconstructed from kernel analytically.
+
+---
+
 ## V19 Program Summary (17 audits, CLOSED)
 
 | Version | Audits | Key Result |
@@ -250,4 +261,4 @@ Research questions:
 
 ---
 
-*Generated 2026-07-27. V19 program CLOSED (17 audits). V19.10 EDS_01: bdim is PRIMARY generator, memory is DERIVED. Next: V20.*
+*Generated 2026-07-27. V19 CLOSED (17 audits). V20 STARTING: Boundary Geometry Theory.*

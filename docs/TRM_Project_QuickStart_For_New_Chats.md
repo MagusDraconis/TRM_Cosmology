@@ -1,23 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 5.0
+**Version:** 5.1
 **Date:** 2026-07-27
 
 CURRENT VERSION
-V19.10 EMERGENT DIMENSION STRUCTURE — V19 CLOSED
+V20.0 BOUNDARY GEOMETRY THEORY — STARTING
 
 CURRENT BRANCH
-v19.0-topological-memory-theory (CLOSING)
-NEXT BRANCH: v20.0
+v20.0-boundary-geometry-theory
 
-V19 FINAL SYNTHESIS (17 audits)
-Boundary dimensionality is the PRIMARY generator of emergent structure.
-Unified framework: Param → Boundary(codim-1, CBG_01/BGP_01) →
-Geometry(span·degen, GEP_01) → Gate(Δ≥0, PDI_01) → Memory(M=[Δ≥0]·k·ProjMeasure, DEM_01).
-Memory is DERIVED — the terminal signature of boundary geometry.
-C(bdim) scales monotonically: 0.10 → 4.12 → 7.16.
-Key constant: k = 0.0359. Classification:
-0 params→M=0, 1 param→M=0(gated), 2 params→M=4.1pp, 3 params→M>4.1pp(pred).
+V20 RESEARCH FRONTIER
+V19 CLOSED (17 audits, 0 falsifications). Boundary dimensionality is the
+PRIMARY generator; memory is DERIVED: M = [Δ≥0]·0.0359·span·degen.
+V20 will: (1) directly measure 3D memory, (2) derive geometry from kernel
+analytically, (3) compute topological invariants, (4) explore bdim≥3.
 
 ---
 
@@ -64,6 +60,7 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | V17.0-V17.2 | Architecture Memory | Geometry FALSIFIED; Memory = max(0, dim-1)·k |
 | V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
 | V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
+| V20.0+ | Boundary Geometry Theory (STARTING) | Quantify geometry; analytical derivation; topological invariants |
 
 **Cumulative total: ~3967 tests, 0 failed.**
 
