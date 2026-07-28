@@ -1,19 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 5.3
-**Date:** 2026-07-27
+**Version:** 6.0
+**Date:** 2026-07-28
 
 CURRENT VERSION
-V20.1 SIGN CONSTRAINT ORIGIN — ACTIVE
+V21.0 BOUNDARY DYNAMICS THEORY — STARTING
 
 CURRENT BRANCH
-v20.0-boundary-geometry-theory
+v21.0-boundary-dynamics-theory
 
-V20.1 SYNTHESIS
-SCO_01 (SUPPORTED): phi originates from KTC -> Kernel -> CCI -> |m| -> dT/dp -> phi.
-STRETCHED: theta=0.983, 100% accuracy. COMPOSITE: theta=0.640, 95.8% accuracy.
-phi approx sgn(|m|-theta) is universal for 1D/2D architectures.
-Ultimate origin: Kernel-Tick Consistency (V15). KTC is the deepest principle.
+PREVIOUS VERSION
+V20 CLOSED: Boundary Geometry Theory — "Geometry Emergence Phase" (11 audits, 11 SUPPORTED).
+Intrinsic geometry emerges from constraint-generated boundary structures.
+Geometry is primary; memory is a derived observable.
+Closure report: docs/V20/V20_Closure_Report.md. Tag: v20.0-intrinsic-geometry-emergence.
 
 ---
 
@@ -60,21 +60,23 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | V17.0-V17.2 | Architecture Memory | Geometry FALSIFIED; Memory = max(0, dim-1)·k |
 | V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
 | V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
-| V20.0+ | Boundary Geometry Theory (STARTING) | Quantify geometry; analytical derivation; topological invariants |
+| V20.0-V20.10 | Boundary Geometry Theory (CLOSED) | Geometry is primary; intrinsic metric, dimension, curvature, homogeneity, symmetry |
+| V21.0+ | Boundary Dynamics Theory (STARTING) | Can intrinsic geometry support propagation, flow, or dynamics? |
 
-**Cumulative total: ~3967 tests, 0 failed.**
+**Cumulative total: ~3981 tests, 0 failed.**
 
 ---
 
 ## E. Strongest Supported Findings
 
-1. **Projection Dimension Invariant** (V19.6) — Δ = bdim-1 controls memory; unifies dimensional framework.
-2. **Hypothetical Boundary Dimension** (V19.5) — Codim-1 law extrapolates to 3D; 2D surface boundary verified.
-3. **Boundary Generation Principle** (V19.4) — dim(bdry) = dim(param) - 1 generically; codimension-1 law.
-4. **Topological Projection Loss** (V18) — Memory = information lost when full topology is projected onto |m|.
-5. **Free Star Algebra** (V15) — ⟨E, M, R | g∘h=⊥ for g≠h⟩. 4 valid operator states.
-6. **Kernel-Tick Consistency** (V15) — All organization follows from kernel producing continuous, conservative, coherent Tick fields.
-7. **|m| as Primal Coordinate** (V14) — |m| is optimal 1D projection; |m+1| is a folded projection.
+1. **Intrinsic Geometry Emergence** (V20) — KTC → φ → φ⁻¹(0) → intrinsic metric → geodesics → dimension → curvature → homogeneity → symmetry. Geometry is primary; memory is a derived observable.
+2. **Projection Dimension Invariant** (V19.6) — Δ = bdim-1 controls memory; unifies dimensional framework.
+3. **Hypothetical Boundary Dimension** (V19.5) — Codim-1 law extrapolates to 3D; 2D surface boundary verified.
+4. **Boundary Generation Principle** (V19.4) — dim(bdry) = dim(param) - 1 generically; codimension-1 law.
+5. **Topological Projection Loss** (V18) — Memory = information lost when full topology is projected onto |m|.
+6. **Free Star Algebra** (V15) — ⟨E, M, R | g∘h=⊥ for g≠h⟩. 4 valid operator states.
+7. **Kernel-Tick Consistency** (V15) — All organization follows from kernel producing continuous, conservative, coherent Tick fields.
+8. **|m| as Primal Coordinate** (V14) — |m| is optimal 1D projection; |m+1| is a folded projection.
 
 ---
 
@@ -82,23 +84,23 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 
 > All items below are explicitly classified as **HYPOTHESIS** — not supported findings.
 
-**Memory quantification for Δ=1 architectures** (H1): The 3D architectures (Δ=1) produce memory > 4.1pp. How much larger? Need direct memory quantification.
+**Boundary dynamics feasibility** (H1): Can intrinsic geometry support propagation, flow, or dynamics without importing external physics? Candidate chain: KTC → Constraint → Geometry → Dynamics → Time-like behavior.
 
-**Δ > 1 architectures** (H2): Can architectures with bdim ≥ 3 (Δ ≥ 2) exist? This would require 4D parameter spaces with differentiably independent sign-changing parameters.
+**Wave equation emergence** (H2): Does the intrinsic metric support wave-like solutions? Does the boundary admit a natural Laplacian or d'Alembertian?
 
-**Topological invariants determine memory strength** (H3): Betti numbers or Euler characteristic classify the magnitude of memory within each Δ class.
+**Time-like parameter emergence** (H3): Can a time-like ordering or causal structure emerge from boundary dynamics alone?
 
-**Analytical derivation of Δ** (H4): Can the dimensional-excess law be derived analytically from the kernel projection structure rather than empirically?
+**Physical correspondence** (H4): Does topological projection loss have analogues in physical theories?
 
 ---
 
 ## G. Current Open Problems
 
-1. **3D architecture verification** — Construct and test a genuine 3D parameter-space architecture to verify the codim-1 prediction (2D boundary surface, memory > 4.1pp).
-2. **Topological invariant computation** — Compute Betti numbers and Euler characteristic of the sign bifurcation surface.
-3. **Higher-dimensional architectures** — Are there parameter spaces where projection loss saturates?
-4. **Analytical closure** — Can the codimension-1 law be derived analytically from kernel form?
-5. **Physical correspondence** — Does topological projection loss have analogues in physical theories?
+1. **Boundary dynamics** — Can intrinsic geometry support propagation, flow, or dynamics? Key question for V21.
+2. **Wave equation on intrinsic boundary** — Does the intrinsic metric support a natural Laplacian or wave operator?
+3. **Time-like parameter** — Can a time-like ordering or causal structure emerge from boundary dynamics?
+4. **Higher-dimensional boundary dynamics** — Do 2D boundary surfaces (bdim=2) support richer dynamics than 1D?
+5. **Physical correspondence** — Do boundary dynamics have analogues in physical field theories?
 
 ---
 
@@ -117,4 +119,4 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 
 ---
 
-*Generated 2026-07-27. V19 program ACTIVE. V19.4 BGP_01 SUPPORTED.*
+*Generated 2026-07-28. V20 CLOSED (11 audits, 11 SUPPORTED). V21.0 STARTING: Boundary Dynamics Theory.*

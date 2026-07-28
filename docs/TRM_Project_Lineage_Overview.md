@@ -1,10 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 7.4
-**Date:** 2026-07-27
-**Scope:** Clockwork Cosmology V1 through V20.2
-**Current Frontier:** V20.2 Zero-Set Geometry Structure — ACTIVE
-**Current Branch:** v20.0-boundary-geometry-theory
+**Version:** 8.0
+**Date:** 2026-07-28
+**Scope:** Clockwork Cosmology V1 through V20.10
+**Current Frontier:** V21.0 Boundary Dynamics Theory — STARTING
+**Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
+**Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -162,28 +163,96 @@ V19.10 CLOSING (1 audit)
   Param → Boundary → Geometry → Gate → Memory. 17 audits, 0 falsifications.
   V19 CLOSED. Next: V20.
 
-V20.0 ACTIVE (1 audit)
+V20.0 CLOSED (1 audit)
 - SGE_01: Spatial Geometry Emergence — boundary carries intrinsic metric SUPPORTED.
-  COMPOSITE 1D boundary is a valid metric space: 100% triangle inequality.
-  d_boundary↔d_proj: r=0.707 (r²=0.50). Arc length=2.99, 5-NN preservation=17.3%.
-  Boundary is isomorphic to 1D manifold. Metric implicit, not externally imposed.
-  Spatial geometry and memory co-emerge at bdim≥1.
+  COMPOSITE 1D boundary: valid metric space, 100% triangle inequality.
+  d_boundary↔d_proj: r=0.707. Arc length=2.99, 5-NN preservation=17.3%.
+  Boundary isomorphic to 1D manifold. Metric implicit, not externally imposed.
 
-V20.1 ACTIVE (1 audit)
-- SCO_01: Sign Constraint Origin — phi from KTC chain SUPPORTED.
-  phi(p) = sign(dT/dp(p)) approx sgn(|m|-theta). Origin chain invariant:
-  KTC -> Kernel -> CCI -> |m| -> dT/dp -> phi -> Boundary.
-  STRETCHED: theta=0.983, 100% accuracy. COMPOSITE: theta=0.640, 95.8%.
-  Threshold form universal for 1D/2D. KTC is ultimate origin of phi.
+V20.1 CLOSED (1 audit)
+- SCO_01: Sign Constraint Origin — φ from KTC chain SUPPORTED.
+  φ(p) = sign(dT/dp(p)) ≈ sgn(|m|-θ). Origin chain invariant:
+  KTC → Kernel → CCI → |m| → dT/dp → φ → Boundary.
+  STRETCHED: θ=0.983, 100% accuracy. COMPOSITE: θ=0.640, 95.8%.
+  Threshold form universal. KTC is ultimate origin of φ.
 
-V20.2 ACTIVE (1 audit)
-- ZGS_01: Zero-Set Geometry Structure — phi^{-1}(0) already contains geometry SUPPORTED.
+V20.2 CLOSED (1 audit)
+- ZGS_01: Zero-Set Geometry Structure — φ⁻¹(0) already contains geometry SUPPORTED.
   Automatic: 1 connected component, path-connected, induced Euclidean metric.
   Derived: arc length ~2.00, curvature (mean 1.59 rad, high turning).
   Zero-set as subset of R^n IS a geometric object. No external axioms needed.
-  phi is the sole geometric generator.
 
-V18 DELIVERABLES
+V20.3 CLOSED (1 audit)
+- IGS_01: Intrinsic Geometry Structure — geometry survives ambient removal SUPPORTED.
+  Intrinsic geometry reconstructed from boundary alone matches ambient at r=0.998.
+  Geometry is not inherited from embedding space.
+
+V20.4 CLOSED (1 audit)
+- IMS_01: Intrinsic Metric Structure — intrinsic distance concept SUPPORTED.
+  Distance defined using only internal boundary structure.
+  Intrinsic arc lengths and geodesic distances are well-defined on 1D boundary.
+
+V20.5 CLOSED (1 audit)
+- ICG_01: Intrinsic Curvature Generation — curvature from boundary alone SUPPORTED.
+  Boundary possesses intrinsic curvature detectable without ambient coordinates.
+  Curvature is a structural property of boundary geometry.
+
+V20.6 CLOSED (1 audit)
+- ICS_02: Intrinsic Curvature Surface — curvature threshold bdim≥2 SUPPORTED.
+  1D boundaries intrinsically flat. 2D surfaces support non-zero curvature.
+  Establishes P16: Curvature Threshold Principle.
+
+V20.7 CLOSED (1 audit)
+- LGS_01: Local Geometry Structure — local geometric quantities intrinsic SUPPORTED.
+  Tangent spaces, local curvature, metric tensor components recoverable intrinsically.
+
+V20.8 CLOSED (1 audit)
+- IDE_01: Intrinsic Dimension Emergence — dimension from metric growth SUPPORTED.
+  Growth rate of volume vs. radius distinguishes bdim=1 from bdim=2.
+  Establishes P15: Intrinsic Dimension Principle.
+
+V20.9 CLOSED (1 audit)
+- LHI_01: Local Homogeneity Invariance — geometry locally homogeneous SUPPORTED.
+  Local geometric properties statistically invariant under boundary translation.
+  Establishes P17: Local Homogeneity Principle.
+
+V20.10 CLOSING (1 audit)
+- SGS_01: Symmetry Generation Structure — symmetry from homogeneity SUPPORTED.
+  Symmetry transformations emerge from homogeneous boundary geometry.
+  Establishes P18: Symmetry Emergence Principle.
+  V20 CLOSED. Next: V21.
+
+V20 DELIVERABLES
+- V20_Closure_Report.md — Complete audit history (11 audits, 11 SUPPORTED)
+- Tag: v20.0-intrinsic-geometry-emergence
+- Branch closed: v20.0-boundary-geometry-theory
+- Next branch: v21.0-boundary-dynamics-theory
+
+### V20 Core Discovery
+```
+KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics
+→ Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry
+```
+Geometry is primary. Memory is a derived observable:
+```
+Boundary → Geometry → Projection → Memory
+```
+
+### V20 Surviving Principles
+
+| # | Principle | Status |
+|:-:|:----------|:------:|
+| P12 | Sign Constraint Origin Principle | SUPPORTED |
+| P13 | Zero-Set Geometry Principle | SUPPORTED |
+| P14 | Intrinsic Geometry Principle | SUPPORTED |
+| P15 | Intrinsic Dimension Principle | SUPPORTED |
+| P16 | Curvature Threshold Principle | SUPPORTED |
+| P17 | Local Homogeneity Principle | SUPPORTED |
+| P18 | Symmetry Emergence Principle | SUPPORTED |
+
+V21.0 STARTING
+- Boundary Dynamics Theory. Can intrinsic geometry support propagation,
+  flow, or dynamics? Candidate: KTC → Constraint → Geometry → Dynamics → Time-like behavior.
 
 ---
 
@@ -2247,10 +2316,11 @@ maintained to prevent overinterpretation:
 | V13.3 | Clockwork Gravity Correspondence | 3 | COMPLETE |
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
-| **Total** | | **3442** | **0 failed** |
+| V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
+| **Total** | | **3453** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3442 verified
-tests with 0 failed is the authoritative current count as of 2026-07-25.
+Note: Test counts represent version-specific test suites. The cumulative total of 3453 verified
+tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
 
@@ -2364,9 +2434,9 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V13.5 CLOSED — 10 audits. V13 program complete: 19 audits total. Hub-and-spoke networks, channel dynamics law, hub = argmin|m+1|. Branch: `v13.5-tick-source-theory`. Next: V14.0.
+**Current status:** V20.10 CLOSED — 11 audits, 11 SUPPORTED. Boundary Geometry Theory complete. Intrinsic geometry emerges from constraint-generated boundary structures. Geometry is primary; memory is a derived observable. Closure report: `docs/V20/V20_Closure_Report.md`. Tag: `v20.0-intrinsic-geometry-emergence`. Branch closed: `v20.0-boundary-geometry-theory`. Next: V21.0 Boundary Dynamics Theory. Branch: `v21.0-boundary-dynamics-theory`.
 
-**V13 complete chain (19 audits):** V1 reconstruction → Newtonian chain → Potential physics → Gravity correspondence → Multidimensional → Source/Channels/Networks/Hub. Resonance (m≈-1) selects the organizing hub.
+**V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -2375,5 +2445,5 @@ equations, dark matter replacement, physical theory proven.
 
 ---
 
-*Generated 2026-07-27. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V12.2.*
+*Generated 2026-07-28. This document is the authoritative historical overview of the
+TRM/TQM project from Clockwork Cosmology V1 through V20.10.*

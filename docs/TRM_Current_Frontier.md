@@ -1,10 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 8.4
-**Date:** 2026-07-27
+**Version:** 9.0
+**Date:** 2026-07-28
 
-**Current Version:** V20.2 ZERO-SET GEOMETRY STRUCTURE — ACTIVE
-**Cumulative Tests:** ~3970
+**Current Version:** V21.0 BOUNDARY DYNAMICS THEORY — STARTING
+**Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
+**Cumulative Tests:** ~3981
 **Failed:** 0
 
 ---
@@ -21,12 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20.2 ZERO-SET GEOMETRY STRUCTURE. ZGS_01 (SUPPORTED): phi^{-1}(0)
-already contains geometry. Automatic: set membership, topology, Hausdorff
-dimension, connectedness (1 component), path-connectedness, induced metric.
-Derived: intrinsic metric (arc length ~2.00), curvature (mean 1.59 rad),
-path ordering. The zero-set as subset of R^n IS a geometric object —
-no additional axioms needed. phi is the SOLE geometric generator.
+V20 CLOSED. V21.0 STARTING. V20 established that intrinsic geometry
+emerges from constraint-generated boundary structures without assuming
+space beforehand: KTC → φ → φ⁻¹(0) → intrinsic metric → geodesics →
+dimension → curvature → homogeneity → symmetry. Geometry is primary;
+memory is a derived observable. V21 asks: can intrinsic geometry support
+propagation, flow, or dynamics?
 
 ---
 
@@ -153,21 +154,56 @@ Research questions:
 
 ---
 
-## V20 Program (ACTIVE)
+## V20 Program (CLOSED — 2026-07-28)
 
-**Boundary Geometry Theory**
+**Boundary Geometry Theory — "Geometry Emergence Phase"**
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V20.0 | SGE_01 | Spatial Geometry Emergence — boundary carries intrinsic metric SUPPORTED |
 | V20.1 | SCO_01 | Sign Constraint Origin — φ from KTC chain, threshold form universal SUPPORTED |
+| V20.2 | ZGS_01 | Zero-Set Geometry Structure — φ⁻¹(0) already contains geometry SUPPORTED |
+| V20.3 | IGS_01 | Intrinsic Geometry Structure — geometry survives ambient removal SUPPORTED |
+| V20.4 | IMS_01 | Intrinsic Metric Structure — intrinsic distance concept SUPPORTED |
+| V20.5 | ICG_01 | Intrinsic Curvature Generation — curvature from boundary alone SUPPORTED |
+| V20.6 | ICS_02 | Intrinsic Curvature Surface — curvature threshold bdim≥2 SUPPORTED |
+| V20.7 | LGS_01 | Local Geometry Structure — local geometric quantities intrinsic SUPPORTED |
+| V20.8 | IDE_01 | Intrinsic Dimension Emergence — dimension from metric growth SUPPORTED |
+| V20.9 | LHI_01 | Local Homogeneity Invariance — geometry locally homogeneous SUPPORTED |
+| V20.10 | SGS_01 | Symmetry Generation Structure — symmetry from homogeneity SUPPORTED |
 
-Research questions:
-1. Directly measure memory for 3D architectures.
-2. Derive projected boundary measure analytically from kernel form.
-3. Compute topological invariants (Betti numbers, Euler characteristic).
-4. Explore geodesic structure on 2D boundary surfaces.
-5. Test analytical geometry reconstruction from kernel.
+**11 audits, 11 SUPPORTED, 0 failed.**
+
+### V20 Core Discovery
+```
+KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics
+→ Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry
+```
+Geometry is primary. Memory is a derived observable:
+```
+Boundary → Geometry → Projection → Memory
+```
+
+Closure report: `docs/V20/V20_Closure_Report.md`
+Tag: `v20.0-intrinsic-geometry-emergence`
+
+---
+
+## V21 Program (STARTING)
+
+**Boundary Dynamics Theory**
+
+Research question:
+> Can intrinsic geometry support propagation, flow, or dynamics?
+
+Candidate chain:
+```
+KTC → Constraint → Geometry → Dynamics → Time-like behavior
+```
+
+No claims about physical spacetime.
+
+Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
@@ -267,4 +303,4 @@ Research questions:
 
 ---
 
-*Generated 2026-07-27. V20 ACTIVE (3 audits). V20.2 ZGS_01 SUPPORTED: phi^{-1}(0) already contains geometry.*
+*Generated 2026-07-28. V20 CLOSED (11 audits, 11 SUPPORTED). V21.0 STARTING: Boundary Dynamics Theory.*
