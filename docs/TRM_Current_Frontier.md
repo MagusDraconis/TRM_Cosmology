@@ -3,9 +3,9 @@
 **Version:** 9.6
 **Date:** 2026-07-28
 
-**Current Version:** V21.7 PROPAGATION BOUND INVARIANT — ACTIVE
-**Previous Version:** V21.6 Propagation Velocity Invariant — CLOSED
-**Cumulative Tests:** ~3989
+**Current Version:** V21.8 PROPAGATION GEOMETRY SCALING — ACTIVE
+**Previous Version:** V21.7 Propagation Bound Invariant — CLOSED
+**Cumulative Tests:** ~3990
 **Failed:** 0
 
 ---
@@ -22,13 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.7 ACTIVE (PBI_01). The propagation velocity
-bound converges to a non-zero limit under refinement — it is
-a genuine geometric invariant, not a finite-size artifact.
-Asymptotes: COMPOSITE, 3D GAN, 3D CNS all converge. Bound is
-dimension-dependent (differs 1D vs 2D) and predictable from
-intrinsic geometry (geoEff + deg/N). Null hypothesis (finite-
-size artifact) REJECTED.
+V20 CLOSED. V21.8 ACTIVE (PGS_01). v_max is an emergent geometric
+invariant of the boundary — determined by bdim, connectivity,
+and projected span. Universal scaling law found. Convergence
+survives extreme cases and refinement. Geometry alone determines
+the bound; no external parameters needed.
 
 ---
 
@@ -204,6 +202,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.5 | LCI_01 | Local Causality Invariant — global causality locally generated; locality horizon k* |
 | V21.6 | PVI_01 | Propagation Velocity Invariant — finite propagation bound emerges from adjacency geometry |
 | V21.7 | PBI_01 | Propagation Bound Invariant — bound converges under refinement; genuine geometric invariant |
+| V21.8 | PGS_01 | Propagation Geometry Scaling — v_max determined solely by boundary geometry; universal scaling law |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?

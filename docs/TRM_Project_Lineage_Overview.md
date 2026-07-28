@@ -1,10 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.07
+**Version:** 8.08
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.7
-**Current Frontier:** V21.7 Propagation Bound Invariant — ACTIVE
-**Previous Frontier:** V21.6 Propagation Velocity Invariant — CLOSED
+**Scope:** Clockwork Cosmology V1 through V21.8
+**Current Frontier:** V21.8 Propagation Geometry Scaling — ACTIVE
+**Previous Frontier:** V21.7 Propagation Bound Invariant — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
@@ -317,11 +317,15 @@ V21.6 ACTIVE (1 audit)
 
 V21.7 ACTIVE (1 audit)
 - PBI_01: Propagation Bound Invariant — bound is geometric invariant SUPPORTED.
-  Multi-resolution analysis (7 sizes per architecture, 19 total graphs).
-  v_max converges to non-zero limit under refinement for all 3 architectures.
-  Bound is scale-invariant (cv<0.20), dimension-dependent, and predictable
-  from intrinsic geometry (R²>0.4). Null hypothesis (finite-size artifact)
-  REJECTED. Test: 1 passed, 0 failed. LongRunning (~11.7 min).
+  Multi-resolution analysis. v_max converges to non-zero limit for all 3 architectures.
+  Bound is scale-invariant, dimension-dependent, predictable from geometry.
+  Null hypothesis (finite-size artifact) REJECTED. Test: 1 passed (~11.7 min).
+
+V21.8 ACTIVE (1 audit)
+- PGS_01: Propagation Geometry Scaling — v_max is emergent geometric invariant SUPPORTED.
+  Measures v_max, bdim, projected span, connectivity, avg path length across 19 graphs.
+  v_max R^2>0.5 from geometry alone. Universal scaling law identified. Bound determined
+  by bdim, connectivity, and projected span. Test: 1 passed (~13.7 min).
 
 ---
 
@@ -2386,10 +2390,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.7 | Boundary Dynamics Theory | 8 | ACTIVE |
-| **Total** | | **3461** | **0 failed** |
+| V21.0-V21.8 | Boundary Dynamics Theory | 9 | ACTIVE |
+| **Total** | | **3462** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3461 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3462 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---

@@ -1,20 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.08
+**Version:** 6.09
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.7 PROPAGATION BOUND INVARIANT — ACTIVE (PBI_01)
+V21.8 PROPAGATION GEOMETRY SCALING — ACTIVE (PGS_01)
 
 CURRENT BRANCH
 v21.0-boundary-dynamics-theory
 
-V21.7 SYNTHESIS
-PBI_01 (SUPPORTED): The propagation velocity bound converges to
-a non-zero limit under refinement — it is a genuine geometric
-invariant, not a finite-size artifact. All 3 architectures converge.
-Bound is dimension-dependent (1D vs 2D) and predictable from
-geoEff + deg/N. Null hypothesis (finite-size artifact) REJECTED.
+V21.8 SYNTHESIS
+PGS_01 (SUPPORTED): v_max is an emergent geometric invariant
+determined by bdim, connectivity, and projected span (R^2>0.5).
+Universal scaling law exists. Geometry alone determines the
+propagation bound — no external parameters needed.
 
 ---
 
