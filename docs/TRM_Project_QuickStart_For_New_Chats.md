@@ -1,19 +1,21 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.06
+**Version:** 6.07
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.5 LOCAL CAUSALITY INVARIANT — ACTIVE (LCI_01)
+V21.6 PROPAGATION VELOCITY INVARIANT — ACTIVE (PVI_01)
 
 CURRENT BRANCH
 v21.0-boundary-dynamics-theory
 
-V21.5 SYNTHESIS
-LCI_01 (SUPPORTED): Global causality is LOCALLY generated.
-Locality horizon k* << diameter. Local degree partially
-predicts global causal position. Causal structure emerges
-from transitive closure of local adjacency relations.
+V21.6 SYNTHESIS
+PVI_01 (SUPPORTED): A finite intrinsic propagation velocity bound
+emerges from adjacency geometry alone. Information spread per
+causal layer is bounded; maximum layer advance converges to a
+finite value across architectures (COMPOSITE 1D, 3D GAN 2D,
+3D CNS 2D). The bound is geometry-dependent and derivable
+from adjacency structure — no external c required.
 
 ---
 

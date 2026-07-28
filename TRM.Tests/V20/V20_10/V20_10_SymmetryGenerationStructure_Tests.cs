@@ -308,41 +308,30 @@ public class V20_10_SymmetryGenerationStructure_Tests
 
         // Use adjacency matrix A for spectrum (simpler)
         // Power iteration with deflation
+        // Compute one eigenvalue via power iteration for analysis
         var v = new double[N];
-        for (int eig = 0; eig < k; eig++)
+        for (int i = 0; i < N; i++) v[i] = rng.NextDouble() - 0.5;
+        double norm = Math.Sqrt(v.Sum(x => x * x));
+        for (int i = 0; i < N; i++) v[i] /= (norm + 1e-15);
+
+        double lambda = 0;
+        for (int iter = 0; iter < 30; iter++)
         {
-            for (int i = 0; i < N; i++) v[i] = rng.NextDouble() - 0.5;
-            // Orthogonalize against previous eigenvectors
-            // (simplified: just power iterate)
-            double norm = Math.Sqrt(v.Sum(x => x * x));
-            for (int i = 0; i < N; i++) v[i] /= (norm + 1e-15);
-
-            double lambda = 0;
-            for (int iter = 0; iter < 30; iter++)
-            {
-                var w = new double[N];
-                for (int i = 0; i < N; i++)
-                {
-                    double sum = 0;
-                    foreach (int j in adj[i])
-                        sum += v[j] / Math.Sqrt(deg[i] * deg[j] + 1e-15);
-                    w[i] = sum;
-                }
-                double wNorm = Math.Sqrt(w.Sum(x => x * x));
-                if (wNorm < 1e-12) break;
-                lambda = 0;
-                for (int i = 0; i < N; i++)
-                { v[i] = w[i] / wNorm; lambda += v[i] * w[i] / N; }
-            }
-            evals.Add(lambda);
-
-            // Deflate
+            var w = new double[N];
             for (int i = 0; i < N; i++)
-                for (int j = 0; j < N; j++)
-                    if (adj[i].Contains(j))
-                        { /* simplified — skip full deflation for speed */ }
-            break; // Just get one eigenvalue for analysis
+            {
+                double sum = 0;
+                foreach (int j in adj[i])
+                    sum += v[j] / Math.Sqrt(deg[i] * deg[j] + 1e-15);
+                w[i] = sum;
+            }
+            double wNorm = Math.Sqrt(w.Sum(x => x * x));
+            if (wNorm < 1e-12) break;
+            lambda = 0;
+            for (int i = 0; i < N; i++)
+            { v[i] = w[i] / wNorm; lambda += v[i] * w[i] / N; }
         }
+        evals.Add(lambda);
 
         // For richer spectrum, compute from smaller random subgraph
         int sampleSize = Math.Min(50, N);

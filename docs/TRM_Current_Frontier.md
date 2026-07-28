@@ -3,9 +3,9 @@
 **Version:** 9.6
 **Date:** 2026-07-28
 
-**Current Version:** V21.5 LOCAL CAUSALITY INVARIANT — ACTIVE
-**Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
-**Cumulative Tests:** ~3987
+**Current Version:** V21.6 PROPAGATION VELOCITY INVARIANT — ACTIVE
+**Previous Version:** V21.5 Local Causality Invariant — CLOSED
+**Cumulative Tests:** ~3988
 **Failed:** 0
 
 ---
@@ -22,12 +22,13 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.5 ACTIVE (LCI_01). Global causality is LOCALLY
-generated — the locality horizon k* (where L(k*) > 95% of causal
-pairs are captured) is substantially smaller than the boundary
-diameter. Local degree partially predicts global causal position.
-The boundary's causal structure emerges from transitive closure
-of local adjacency relations.
+V20 CLOSED. V21.6 ACTIVE (PVI_01). A finite intrinsic propagation
+velocity bound emerges from adjacency geometry alone. Information
+spread per causal layer is bounded; the maximum layer advance
+(diameter/N) converges to a finite value across all architectures.
+The bound is geometry-dependent (varies with dimension) and
+derivable from adjacency structure. Causal propagation has an
+intrinsic maximum rate — no external c required.
 
 ---
 
@@ -201,6 +202,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.3 | CSI_01 | Causal Structure Invariant — causality primary (reachability), tau secondary (coordinate) |
 | V21.4 | RCI_01 | Reachability Causality Invariant — causality IS reachability; tau eliminated |
 | V21.5 | LCI_01 | Local Causality Invariant — global causality locally generated; locality horizon k* |
+| V21.6 | PVI_01 | Propagation Velocity Invariant — finite propagation bound emerges from adjacency geometry |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?

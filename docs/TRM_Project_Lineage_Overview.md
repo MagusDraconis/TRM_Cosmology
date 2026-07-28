@@ -1,10 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.05
+**Version:** 8.06
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.5
-**Current Frontier:** V21.4 Reachability Causality Invariant — ACTIVE
-**Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
+**Scope:** Clockwork Cosmology V1 through V21.6
+**Current Frontier:** V21.6 Propagation Velocity Invariant — ACTIVE
+**Previous Frontier:** V21.5 Local Causality Invariant — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
@@ -308,6 +308,17 @@ V21.5 ACTIVE (1 audit)
   is dominantly LOCAL. Degree partially predicts BFS distance (R² measured).
   Causal structure emerges from transitive closure of local adjacency.
   Compared 1D vs 2D locality. Test: 1 passed, 0 failed. LongRunning (~10.2 min).
+
+V21.6 ACTIVE (1 audit)
+- PVI_01: Propagation Velocity Invariant — finite propagation bound SUPPORTED.
+  Information spread per causal layer analysed across 3 architectures
+  (COMPOSITE 1D, 3D GAN 2D, 3D CNS 2D). Max layer advance (diameter/N)
+  converges to finite value: propagation IS bounded. Stable peak layer
+  structure indicates maximum rate emerges. Bound is geometry-dependent
+  (varies with dimension) and derivable from adjacency structure alone.
+  No external speed parameter (c) required. Intrinsic geometry → finite
+  velocity → causal ordering → proto-time. Test: 1 passed, 0 failed.
+  LongRunning (~6.1 min).
 
 ---
 
@@ -2372,10 +2383,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.5 | Boundary Dynamics Theory | 6 | ACTIVE |
-| **Total** | | **3459** | **0 failed** |
+| V21.0-V21.6 | Boundary Dynamics Theory | 7 | ACTIVE |
+| **Total** | | **3460** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3457 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3460 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
