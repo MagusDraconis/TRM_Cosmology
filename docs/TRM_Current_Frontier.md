@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V24.0 CONNECTIVITY GRADIENT — ACTIVE
+**Current Version:** V24.0 CONNECTIVITY GRADIENT ORIGIN — ACTIVE
 **Previous Version:** V23.3 Curvature Source — CLOSED
-**Cumulative Tests:** ~3999
+**Cumulative Tests:** ~4000
 **Failed:** 0
 
 ---
@@ -240,7 +240,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V24.0 | — | Starting — can curvature be derived from connectivity structure alone? |
+| V24.0 | CGO_01 | Connectivity Gradient Origin — gradients derive from boundary geometry; not primitive |
 
 Research question:
 > Is connectivity gradient the primitive geometric object?
