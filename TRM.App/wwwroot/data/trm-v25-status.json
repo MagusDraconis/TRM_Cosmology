@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V25.0 PHYSICAL CORRESPONDENCE — ACTIVE",
+  "phase": "Physical Correspondence Program — mapping TRM structural laws to known physics",
+  "date": "2026-07-28",
+  "testSummary": { "total": 4003, "passed": 4003, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V25 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Gravitational correspondence: does TRM curvature map to spacetime curvature?",
+    "Cosmological correspondence: does TRM propagation bound relate to expansion rate?",
+    "Quantum correspondence: does TRM degeneracy relate to uncertainty or superposition?",
+    "Dimensional correspondence: does TRM bdim=3 correspond to physical 3+1 spacetime?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical gravity derivation", "General Relativity replacement", "physical c derivation", "quantum mechanics derivation"],
+  "openProblems": [
+    { "priority": "P0", "title": "Curvature-gravity mapping", "description": "Does TRM effective curvature R_eff correspond to gravitational curvature? Can a correspondence be established without assuming GR?" },
+    { "priority": "P1", "title": "Dimensional emergence", "description": "Can TRM bdim=3 be mapped to physical 3+1 spacetime? Does the codim-1 law extend to 3D boundaries?" },
+    { "priority": "P2", "title": "Cosmological constants", "description": "Do TRM propagation constants map to cosmological parameters?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["KTC", "Constraint", "Geometry", "Propagation", "Velocity", "Bound", "Universality", "Time", "Tick", "Metric", "Causal Structure", "Curvature", "Dilation", "Density", "Sign"],
+    "invertedHierarchy": "sign(dT/dp) ∈ {+1,-1} is the deepest primitive. All geometry, dynamics, and structure derive from this single constraint."
+  },
+  "trmGoalAssessment": {
+    "time": "Proto-temporal metric complete (V22). Dilation law established (V23.2).",
+    "space": "Intrinsic geometry from V20-V21. Curvature from V23. Density from V24.",
+    "length": "ds^2/(v_bound^2*Tick^2) invariant. Chain complete through sign constraint.",
+    "c": "v_bound is the propagation speed proxy. Now asking: does this correspond to physical c?"
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V25.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V25.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V24/V24_3/V24_3_SignConstraintOrigin_Tests.cs",
+    "nextPhase": "V25.0 Physical Correspondence — mapping TRM to known physics",
+    "nextBranch": "v25-physical-correspondence",
+    "previousBranch": "v24.0-connectivity-gradient",
+    "tag": "v24.0-connectivity-gradient",
+    "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Physical Correspondence",
+    "keyConstants": { "deepest_primitive": "sign(dT/dp)", "chain_depth": "19 versions" }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

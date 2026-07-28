@@ -1,22 +1,20 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.05
+**Version:** 7.06
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V24.0 CONNECTIVITY GRADIENT — ACTIVE
+V25.0 PHYSICAL CORRESPONDENCE — ACTIVE
 
 CURRENT BRANCH
-v24.0-connectivity-gradient
+v25-physical-correspondence
 
-V23 CLOSED (4 audits, 4 SUPPORTED)
-V23 Final Principle: Boundary connectivity gradient is the
-primitive source of curvature. Curvature, dilation, and source
-all trace back to connectivity inhomogeneity.
+V24 CLOSED (4 audits, 4 SUPPORTED)
+V24 Final Principle: sign(dT/dp) ∈ {+1,-1} is the deepest
+primitive. Chain: sign -> boundary -> density -> curvature -> dilation.
 
-V24.0 BEGINS: Connectivity Gradient Theory
-Is connectivity gradient the primitive geometric object?
-Can curvature be derived from connectivity structure alone?
+V25.0 BEGINS: Physical Correspondence Program
+Can TRM structural laws be mapped to physical phenomena?
 
 ---
 

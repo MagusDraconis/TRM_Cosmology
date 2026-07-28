@@ -1,10 +1,20 @@
 {
-  "releaseStatus": "V24.0 CONNECTIVITY GRADIENT — ACTIVE",
+  "releaseStatus": "V24.3 SIGN CONSTRAINT ORIGIN — V24 CLOSED",
   "phase": "Connectivity Gradient Theory — is connectivity gradient the primitive geometric object?",
   "date": "2026-07-28",
-  "testSummary": { "total": 3999, "passed": 3999, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V24 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4003, "passed": 4003, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V24 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [
+    { "name": "V24_0_ConnectivityGradientOrigin", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V24_1_BoundaryDensityCurvature", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V24_2_BoundaryDensityOrigin", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V24_3_SignConstraintOrigin", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Connectivity Gradient Origin: gradients derive from boundary geometry (CGO_01)",
+    "Boundary Density Curvature: density is primitive source of curvature (BDC_01)",
+    "Boundary Density Origin: density derives from param/boundary dimension (BDO_01)",
+    "Sign Constraint Origin: sign(dT/dp) is the deepest primitive (SCO_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Connectivity gradient = primitive: is local degree variation the fundamental geometric object?",
@@ -42,8 +52,8 @@
     "nextBranch": "v24.0-connectivity-gradient",
     "previousBranch": "v23.0-curvature-emergence-theory",
     "tag": "v23.0-curvature-emergence-theory",
-    "candidateDynamicsChain": "KTC -> ... -> Source -> Connectivity Gradient",
-    "keyConstants": { "curvature_source": "connectivity gradient", "connection_to_curvature": "r > 0.4" }
+    "candidateDynamicsChain": "KTC -> ... -> Source -> Connectivity Gradient -> Density -> Sign Constraint",
+    "keyConstants": { "primitive": "sign(dT/dp)", "chain_depth": "V19-V24" }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 4, "passedVerified": 4, "verificationMethod": "dotnet test", "mismatch": null }
 }

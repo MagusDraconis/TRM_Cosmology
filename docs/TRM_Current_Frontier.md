@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V24.3 SIGN CONSTRAINT ORIGIN — ACTIVE
-**Previous Version:** V24.2 Boundary Density Origin — CLOSED
+**Current Version:** V25.0 PHYSICAL CORRESPONDENCE — ACTIVE
+**Previous Version:** V24.3 Sign Constraint Origin — CLOSED
 **Cumulative Tests:** ~4003
 **Failed:** 0
 
@@ -22,12 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24.0 ACTIVE.
-V23 Curvature Emergence Theory — 4 audits, 4 SUPPORTED.
-Curvature, dilation, and source established. V23 Final Principle:
-Boundary connectivity gradient is the primitive source of curvature.
-V24.0 begins: Connectivity Gradient — can curvature be derived
-solely from connectivity structure?
+V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
+V25.0 ACTIVE. V24 Connectivity Gradient Theory — 4 audits,
+4 SUPPORTED. Sign constraint established as deepest primitive.
+V25.0 begins: Physical Correspondence Program — can TRM
+structural laws be mapped to known physical phenomena?
 
 ---
 
@@ -244,6 +243,26 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V24.1 | BDC_01 | Boundary Density Curvature — density is primitive source; chain may reduce |
 | V24.2 | BDO_01 | Boundary Density Origin — density derives from param/boundary dimension |
 | V24.3 | SCO_01 | Sign Constraint Origin — binary sign constraint is deepest primitive |
+
+## V25 Program (ACTIVE)
+
+**Physical Correspondence Program**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V25.0 | — | Starting — map TRM structural laws to known physical phenomena |
+
+Research question:
+> Can TRM structural laws (sign→boundary→density→curvature→dilation)
+> be mapped to known physical phenomena? Does TRM geometry correspond
+> to gravitational or cosmological structure?
+
+Candidate chain:
+```
+TRM Primitive → Boundary → Geometry → Propagation → Metric
+    → Causal Structure → Curvature → Dilation
+    → Physical Correspondence?
+```
 
 Research question:
 > Is connectivity gradient the primitive geometric object?
