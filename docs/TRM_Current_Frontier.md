@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V25.1 PHYSICAL PREDICTION DIFFERENTIATOR — ACTIVE
-**Previous Version:** V25.0 Physical Correspondence — CLOSED
-**Cumulative Tests:** ~4005
+**Current Version:** V25.2 PREDICTION RANKING — ACTIVE
+**Previous Version:** V25.1 Physical Prediction Differentiator — CLOSED
+**Cumulative Tests:** ~4006
 **Failed:** 0
 
 ---
@@ -252,6 +252,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 |:--------|:-------|:-----------|
 | V25.0 | PCP_01 | Physical Correspondence — 8 correspondence pairs; qualitative STRONG match with physics |
 | V25.1 | PPD_01 | Physical Prediction Differentiator — 8 distinctive, testable, falsifiable predictions |
+| V25.2 | PRS_01 | Prediction Ranking Survivability — ranked by evidence; strongest candidate identified |
 
 Research question:
 > Can TRM structural laws (sign→boundary→density→curvature→dilation)
