@@ -27,7 +27,7 @@ else
     var s = _status;
 
 <MudText Typo="Typo.h4" GutterBottom="true">TRM Project Status</MudText>
-<MudStack Row="true" Spacing="1" Class="mb-4">
+    <MudStack Row="true" Spacing="1" Class="mb-4" Justify="Justify.Center">
     <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoFirst" Disabled="@(_firstDisabled)">⏮ First</MudButton>
     <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoPrevious" Disabled="@(_prevDisabled)">◀ Back</MudButton>
     <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@_currentVersionLabel</MudChip>
