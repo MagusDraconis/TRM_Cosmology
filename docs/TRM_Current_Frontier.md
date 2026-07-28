@@ -5,7 +5,7 @@
 
 **Current Version:** V23.0 CURVATURE EMERGENCE — ACTIVE
 **Previous Version:** V22.3 Causal Structure — CLOSED
-**Cumulative Tests:** ~3995
+**Cumulative Tests:** ~3996
 **Failed:** 0
 
 ---
@@ -22,12 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22 CLOSED. V23.0 ACTIVE. V22 completed:
-Temporal Emergence Theory — 4 audits, 4 SUPPORTED.
-Time emerges from propagation. Tick is primitive. Unified space-
-time metric. Causal structure from cone. V22 Final Principle:
-ds = v_bound · Tick · dT. V23.0 begins Curvature Emergence
-Theory — can the space-time metric support intrinsic curvature?
+V20 CLOSED. V21 CLOSED. V22 CLOSED. V23.0 ACTIVE (CEM_01).
+Curvature emerges from geometric inhomogeneities. Paths bend
+toward denser regions. Effective curvature R_eff from connectivity
+gradients. 2D curvature > 1D by factor >1.3. Cone shape varies
+with local geometry. Flat/curved distinction is measurable from
+boundary geometry alone.
 
 ---
 
@@ -229,7 +229,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V23.0 | — | Starting — can the space-time metric support intrinsic curvature? |
+| V23.0 | CEM_01 | Curvature Emergence — paths bend toward denser regions; effective curvature from geometry |
 
 Research question:
 > Can the unified space-time metric ds^2/(v^2*T^2) support
