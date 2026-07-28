@@ -3,9 +3,9 @@
 **Version:** 9.7
 **Date:** 2026-07-28
 
-**Current Version:** V22.2 SPACE-TIME METRIC — ACTIVE
-**Previous Version:** V22.1 Tick Metric Invariance — CLOSED
-**Cumulative Tests:** ~3994
+**Current Version:** V22.3 CAUSAL STRUCTURE — ACTIVE
+**Previous Version:** V22.2 Space-Time Metric — CLOSED
+**Cumulative Tests:** ~3995
 **Failed:** 0
 
 ---
@@ -227,6 +227,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V22.0 | TPI_01 | Temporal Propagation Invariant — time emerges from propagation geometry; proto-temporal metric |
 | V22.1 | TMI_01 | Tick Metric Invariance — Tick is the primitive temporal unit; temporal intervals = Tick counts |
 | V22.2 | STM_01 | Space-Time Metric — unified metric emerges; ds^2/(v^2*T^2) invariant |
+| V22.3 | CAU_01 | Causal Structure — causal cone emerges from propagation + Tick; events classified |
 
 Research question:
 > Can Tick serve as the fundamental temporal unit, enabling
