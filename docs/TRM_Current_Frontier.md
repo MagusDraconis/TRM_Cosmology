@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V25.2 PREDICTION RANKING — ACTIVE
-**Previous Version:** V25.1 Physical Prediction Differentiator — CLOSED
-**Cumulative Tests:** ~4006
+**Current Version:** V25.3 UNIVERSAL PROPAGATION FALSIFICATION — ACTIVE
+**Previous Version:** V25.2 Prediction Ranking — CLOSED
+**Cumulative Tests:** ~4007
 **Failed:** 0
 
 ---
@@ -253,6 +253,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V25.0 | PCP_01 | Physical Correspondence — 8 correspondence pairs; qualitative STRONG match with physics |
 | V25.1 | PPD_01 | Physical Prediction Differentiator — 8 distinctive, testable, falsifiable predictions |
 | V25.2 | PRS_01 | Prediction Ranking Survivability — ranked by evidence; strongest candidate identified |
+| V25.3 | UPF_01 | Universal Propagation Falsification — bound survives extreme testing; no counterexample |
 
 Research question:
 > Can TRM structural laws (sign→boundary→density→curvature→dilation)
