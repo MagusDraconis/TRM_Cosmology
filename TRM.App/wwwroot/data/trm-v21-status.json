@@ -1,15 +1,19 @@
 {
-  "releaseStatus": "V21.5 LOCAL CAUSALITY INVARIANT — ACTIVE",
-  "phase": "Boundary Dynamics Theory — causality = reachability, proto-time eliminated",
+  "releaseStatus": "V21.9 UNIVERSAL PROPAGATION INVARIANT — V21 CLOSED",
+  "phase": "Boundary Dynamics Theory — universal geometric propagation invariant established",
   "date": "2026-07-28",
-  "testSummary": { "total": 4, "passed": 4, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "testSummary": { "total": 10, "passed": 10, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
   "suites": [
     { "name": "V21_0_BoundaryDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_1_IntrinsicDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_2_ProtoTimeUniqueness", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_3_CausalStructureInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_4_ReachabilityCausalityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
-    { "name": "V21_5_LocalCausalityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V21_5_LocalCausalityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_6_PropagationVelocityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_7_PropagationBoundInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_8_PropagationGeometryScaling", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_9_UniversalPropagationInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Boundary Dynamics Principle: intrinsic boundary geometry supports native dynamics (BDP_01)",
@@ -17,33 +21,37 @@
     "Proto-Time Uniqueness: tau is partially invariant across propagation methods; causal structure is the most stable property (PTU_01)",
     "Causal Structure Invariant: causality is PRIMARY (derived from reachability), tau is SECONDARY (scalar coordinate) (CSI_01)",
     "Reachability Causality Invariant: causality IS reachability; proto-time can be eliminated entirely (RCI_01)",
-    "Local Causality Invariant: global causality is locally generated; locality horizon k* << diameter (LCI_01)"
+    "Local Causality Invariant: global causality is locally generated; locality horizon k* << diameter (LCI_01)",
+    "Propagation Velocity Invariant: finite propagation bound emerges from adjacency geometry alone (PVI_01)",
+    "Propagation Bound Invariant: bound converges to non-zero limit under refinement; genuine geometric invariant (PBI_01)",
+    "Propagation Geometry Scaling: v_max determined solely by boundary geometry; universal scaling law (PGS_01)",
+    "Universal Propagation Invariant: all architectures converge to common bound; universal invariant exists (UPI_01)"
   ],
   "conditionalClaims": [],
   "hypotheses": [
-    "Boundary dynamics: intrinsic geometry can support propagation, flow, or dynamics",
+    "Temporal emergence: does the universal propagation bound define an intrinsic temporal scale (V22)?",
+    "Proto-time as coordinate: can time be fully derived from propagation geometry?",
     "Wave equation emergence: intrinsic metric supports a natural Laplacian or d'Alembertian",
-    "Time-like parameter: causal structure emerges from boundary dynamics alone",
     "2D boundary dynamics: bdim=2 surfaces support richer dynamics than 1D"
   ],
   "falsifiedClaims": [],
   "notClaimed": ["physical spacetime", "General Relativity", "physical c", "physical G", "SI units", "physical theory"],
   "openProblems": [
-    { "priority": "P0", "title": "Wave equation emergence", "description": "Define a natural Laplacian on the intrinsic boundary metric. Test propagation of wave-like solutions on the reachability graph." },
-    { "priority": "P1", "title": "Wave operator definition", "description": "Define a natural Laplacian on the intrinsic boundary metric. Test propagation of wave-like solutions." },
+    { "priority": "P0", "title": "Temporal emergence", "description": "Does the universal propagation bound define an intrinsic temporal scale? Can time emerge from propagation geometry alone? (V22.0 TPI_01)" },
+    { "priority": "P1", "title": "Wave equation emergence", "description": "Define a natural Laplacian on the intrinsic boundary metric. Test propagation of wave-like solutions on the reachability graph." },
     { "priority": "P2", "title": "Field equation emergence", "description": "Does boundary geometry admit field equations or evolution laws from intrinsic structure?" },
   ],
   "documents": [
     { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
-    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V21.0" },
-    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V20.10" }
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V22.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V22.0" }
   ],
   "roadmap": {
-    "recommendedTestFile": "TRM.Tests/V21/V21_0/V21_0_BoundaryDynamicsPrinciple_Tests.cs",
-    "candidateDynamicsChain": "KTC -> Constraint -> Geometry -> Dynamics -> Time-like behavior",
+    "recommendedTestFile": "TRM.Tests/V21/V21_9/V21_9_UniversalPropagationInvariant_Tests.cs",
+    "candidateDynamicsChain": "KTC -> Constraint -> Geometry -> Dynamics -> Propagation -> Velocity -> Bound -> Universality",
     "inheritedFrom": "V20 intrinsic geometry (metric, geodesics, dimension, curvature, homogeneity, symmetry)",
     "branch": "v21.0-boundary-dynamics-theory",
     "previousTag": "v20.0-intrinsic-geometry-emergence"
   },
-  "releaseIntegrity": { "totalTestsVerified": 5, "passedVerified": 5, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 10, "passedVerified": 10, "verificationMethod": "dotnet test", "mismatch": null }
 }
