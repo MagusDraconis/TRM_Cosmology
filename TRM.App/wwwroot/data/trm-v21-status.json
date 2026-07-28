@@ -1,13 +1,15 @@
 {
-  "releaseStatus": "V21.0 BOUNDARY DYNAMICS PRINCIPLE — ACTIVE",
+  "releaseStatus": "V21.1 INTRINSIC DYNAMICS PRINCIPLE — ACTIVE",
   "phase": "Boundary Dynamics Theory — can intrinsic geometry support propagation, flow, or dynamics?",
   "date": "2026-07-28",
-  "testSummary": { "total": 1, "passed": 1, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "testSummary": { "total": 2, "passed": 2, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
   "suites": [
-    { "name": "V21_0_BoundaryDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V21_0_BoundaryDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_1_IntrinsicDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
-    "Boundary Dynamics Principle: intrinsic boundary geometry supports native dynamics (BDP_01)"
+    "Boundary Dynamics Principle: intrinsic boundary geometry supports native dynamics (BDP_01)",
+    "Intrinsic Dynamics Principle: dynamics emerges from geometry, proto-time emerges as BFS ordering (IDP_01)"
   ],
   "conditionalClaims": [],
   "hypotheses": [
@@ -19,10 +21,9 @@
   "falsifiedClaims": [],
   "notClaimed": ["physical spacetime", "General Relativity", "physical c", "physical G", "SI units", "physical theory"],
   "openProblems": [
-    { "priority": "P0", "title": "Boundary dynamics feasibility", "description": "Can intrinsic geometry support propagation, flow, or dynamics without importing external physics?" },
-    { "priority": "P1", "title": "Wave operator definition", "description": "Define a natural Laplacian on the intrinsic boundary metric." },
-    { "priority": "P2", "title": "Time-like parameter", "description": "Investigate whether a time-like ordering emerges from boundary dynamics." },
-    { "priority": "P3", "title": "Dynamical field equations", "description": "Determine whether boundary geometry admits field equations or evolution laws." }
+    { "priority": "P0", "title": "Proto-time refinement", "description": "Refine proto-time parameter: test transitivity, develop causal cone metrics, test wave equation emergence." },
+    { "priority": "P1", "title": "Wave operator definition", "description": "Define a natural Laplacian on the intrinsic boundary metric. Test propagation of wave-like solutions." },
+    { "priority": "P2", "title": "Field equation emergence", "description": "Does boundary geometry admit field equations or evolution laws from intrinsic structure?" },
   ],
   "documents": [
     { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
@@ -36,5 +37,5 @@
     "branch": "v21.0-boundary-dynamics-theory",
     "previousTag": "v20.0-intrinsic-geometry-emergence"
   },
-  "releaseIntegrity": { "totalTestsVerified": 1, "passedVerified": 1, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 2, "passedVerified": 2, "verificationMethod": "dotnet test", "mismatch": null }
 }

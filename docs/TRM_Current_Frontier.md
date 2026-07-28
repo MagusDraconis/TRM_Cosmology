@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 9.1
+**Version:** 9.2
 **Date:** 2026-07-28
 
-**Current Version:** V21.0 BOUNDARY DYNAMICS PRINCIPLE — ACTIVE
+**Current Version:** V21.1 INTRINSIC DYNAMICS PRINCIPLE — ACTIVE
 **Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
-**Cumulative Tests:** ~3982
+**Cumulative Tests:** ~3983
 **Failed:** 0
 
 ---
@@ -22,10 +22,11 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.0 ACTIVE (BDP_01). V21 asks: can intrinsic geometry support
-propagation, flow, or dynamics? First audit tests neighborhood propagation,
-geodesic preference, diffusion, and characteristic scale on intrinsic
-boundary graphs (1D COMPOSITE, 2D 3D GAN).
+V20 CLOSED. V21.1 ACTIVE (IDP_01). Dynamics emerges from intrinsic
+geometry alone — no external time assumed. Proto-time emerges as BFS
+distance (tau) from a reference source on the boundary graph. Tau is
+monotonic, transitive, irreversible, and defines light cones and a
+partial causal order. Propagation is dimension-dependent.
 
 ---
 
@@ -187,13 +188,14 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 ---
 
-## V21 Program (STARTING)
+## V21 Program (ACTIVE)
 
 **Boundary Dynamics Theory**
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V21.0 | BDP_01 | Boundary Dynamics Principle — intrinsic propagation, geodesic preference, dimension dependence |
+| V21.1 | IDP_01 | Intrinsic Dynamics Principle — dynamics emerges from geometry, proto-time emerges as BFS ordering |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?
@@ -305,4 +307,4 @@ Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11 audits, 11 SUPPORTED). V21.0 ACTIVE: BDP_01 Boundary Dynamics Principle.*
+*Generated 2026-07-28. V20 CLOSED (11 audits). V21 ACTIVE (2 audits): BDP_01 + IDP_01.*
