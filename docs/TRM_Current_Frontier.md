@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V25.0 PHYSICAL CORRESPONDENCE — ACTIVE
-**Previous Version:** V24.3 Sign Constraint Origin — CLOSED
-**Cumulative Tests:** ~4004
+**Current Version:** V25.1 PHYSICAL PREDICTION DIFFERENTIATOR — ACTIVE
+**Previous Version:** V25.0 Physical Correspondence — CLOSED
+**Cumulative Tests:** ~4005
 **Failed:** 0
 
 ---
@@ -251,6 +251,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V25.0 | PCP_01 | Physical Correspondence — 8 correspondence pairs; qualitative STRONG match with physics |
+| V25.1 | PPD_01 | Physical Prediction Differentiator — 8 distinctive, testable, falsifiable predictions |
 
 Research question:
 > Can TRM structural laws (sign→boundary→density→curvature→dilation)
