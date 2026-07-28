@@ -3,9 +3,9 @@
 **Version:** 9.7
 **Date:** 2026-07-28
 
-**Current Version:** V22.1 TICK METRIC INVARIANCE — ACTIVE
-**Previous Version:** V22.0 Temporal Propagation Invariant — CLOSED
-**Cumulative Tests:** ~3993
+**Current Version:** V22.2 SPACE-TIME METRIC — ACTIVE
+**Previous Version:** V22.1 Tick Metric Invariance — CLOSED
+**Cumulative Tests:** ~3994
 **Failed:** 0
 
 ---
@@ -22,14 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22.1 ACTIVE (TMI_01). Tick IS the
-fundamental temporal unit of TRM. dt_tick = avgPath/(v_max*Tick)
-is resolution-invariant (within-arch CV<0.20) and architecture-
-invariant (cross-arch CV<0.25). Temporal intervals reduce to
-Tick counts: T = n_hops * dt_per_hop. Per-hop temporal cost is
-constant across all architectures. Proto-temporal metric:
-ds = v_bound * Tick * dT. Tick completes the chain from
-propagation geometry to time.
+V20 CLOSED. V21 CLOSED. V22.2 ACTIVE (STM_01). TRM propagation
+geometry defines a unified space-time metric. ds^2/(v_bound^2*Tick^2)
+is invariant under refinement (CV<0.25) and architecture-independent.
+Best metric form: ds^2/(v^2*T^2) is constant. Spatial intervals (ds)
+and temporal intervals (dT) are linked through v_bound and Tick.
+Complete chain: Adjacency -> Propagation -> v_bound -> Tick -> Metric.
 
 ---
 
@@ -222,6 +220,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 |:--------|:-------|:-----------|
 | V22.0 | TPI_01 | Temporal Propagation Invariant — time emerges from propagation geometry; proto-temporal metric |
 | V22.1 | TMI_01 | Tick Metric Invariance — Tick is the primitive temporal unit; temporal intervals = Tick counts |
+| V22.2 | STM_01 | Space-Time Metric — unified metric emerges; ds^2/(v^2*T^2) invariant |
 
 Research question:
 > Can Tick serve as the fundamental temporal unit, enabling
