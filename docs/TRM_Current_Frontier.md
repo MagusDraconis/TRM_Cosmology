@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V24.1 BOUNDARY DENSITY CURVATURE — ACTIVE
-**Previous Version:** V24.0 Connectivity Gradient Origin — CLOSED
-**Cumulative Tests:** ~4001
+**Current Version:** V24.2 BOUNDARY DENSITY ORIGIN — ACTIVE
+**Previous Version:** V24.1 Boundary Density Curvature — CLOSED
+**Cumulative Tests:** ~4002
 **Failed:** 0
 
 ---
@@ -242,6 +242,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 |:--------|:-------|:-----------|
 | V24.0 | CGO_01 | Connectivity Gradient Origin — gradients derive from boundary geometry; not primitive |
 | V24.1 | BDC_01 | Boundary Density Curvature — density is primitive source; chain may reduce |
+| V24.2 | BDO_01 | Boundary Density Origin — density derives from param/boundary dimension |
 
 Research question:
 > Is connectivity gradient the primitive geometric object?
