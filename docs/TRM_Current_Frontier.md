@@ -1,6 +1,6 @@
 # TRM Current Frontier
 
-**Version:** 9.7
+**Version:** 9.8
 **Date:** 2026-07-28
 
 **Current Version:** V23.3 CURVATURE SOURCE — ACTIVE
@@ -16,18 +16,20 @@ For any new LLM chat or Copilot session, read in this order:
 
 1. TRM_Current_Frontier.md (this file) — active frontier, model, constraints
 2. TRM_Project_QuickStart_For_New_Chats.md — operational briefing
-3. TRM_Project_Lineage_Overview.md — complete V1 → V22 historical lineage
+3. TRM_Project_Lineage_Overview.md — complete V1 → V23 historical lineage
 
 ---
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22 CLOSED. V23.0 ACTIVE (CEM_01).
-Curvature emerges from geometric inhomogeneities. Paths bend
-toward denser regions. Effective curvature R_eff from connectivity
-gradients. 2D curvature > 1D by factor >1.3. Cone shape varies
-with local geometry. Flat/curved distinction is measurable from
-boundary geometry alone.
+V20 CLOSED. V21 CLOSED. V22 CLOSED. V23.3 ACTIVE (CCS_01).
+V23 Curvature Emergence Theory — 4 audits, 4 SUPPORTED.
+Curvature emerges from connectivity gradients (dominant source).
+Curvature interacts with causal structure (cone distortion,
+temporal dilation). Quantitative dilation law: ΔTick = α·√R_eff.
+Flat limit recovers zero dilation. GAN/CNS collapse onto same
+curve. Complete chain: Geometry → Propagation → Time → Metric →
+Causal Structure → Curvature → Dilation → Source.
 
 ---
 
@@ -52,7 +54,7 @@ Boundary Dimension (bdim) → Geometry (V20)
     ↓
 Propagation → Velocity → Bound (V21)
     ↓
-Universality → Time → Tick (V22)
+Universality → Time → Tick → Metric → Causal Structure → Curvature (V23)
 ``
 
 ---

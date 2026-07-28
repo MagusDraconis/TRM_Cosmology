@@ -1,10 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 9.02
+**Version:** 9.03
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V23.0
-**Current Frontier:** V23.0 Curvature Emergence — ACTIVE
-**Previous Frontier:** V22.3 Causal Structure — CLOSED
+**Scope:** Clockwork Cosmology V1 through V23.3
+**Current Frontier:** V23.3 Curvature Source — ACTIVE
+**Previous Frontier:** V23.2 Curvature Dilation Law — CLOSED
 **Current Branch:** v23.0-curvature-emergence-theory
 
 V13.5 CLOSED SUMMARY
@@ -2435,10 +2435,10 @@ maintained to prevent overinterpretation:
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
 V22.0-V22.3 | Temporal Emergence Theory | 4 | COMPLETE |
-| V23.0 | Curvature Emergence Theory | 0 | ACTIVE |
-| **Total** | | **3995** | **0 failed** |
+| V23.0-V23.3 | Curvature Emergence Theory | 4 | ACTIVE |
+| **Total** | | **3999** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3995 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3999 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
@@ -2553,7 +2553,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V23.0 ACTIVE. V22 CLOSED (4 audits, all SUPPORTED). V21 CLOSED (10 audits). Unified space-time metric and causal structure established. Branch: `v23.0-curvature-emergence-theory`.
+**Current status:** V23.3 ACTIVE (CCS_01). V23 has 4 audits, all SUPPORTED. V22 CLOSED (4 audits). V21 CLOSED (10 audits). Complete chain through curvature source. Branch: `v23.0-curvature-emergence-theory`.
 **V21 complete chain (10 audits):** KTC → Propagation → Velocity → Bound → Universality. Universal geometric propagation invariant established.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein

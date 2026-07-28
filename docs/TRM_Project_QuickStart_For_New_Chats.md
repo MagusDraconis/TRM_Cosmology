@@ -1,23 +1,20 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.03
+**Version:** 7.04
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V23.0 CURVATURE EMERGENCE — ACTIVE
+V23.3 CURVATURE SOURCE — ACTIVE (CCS_01)
 
 CURRENT BRANCH
 v23.0-curvature-emergence-theory
 
-V22 CLOSED (4 audits, 4 SUPPORTED)
-V22 Final Principle: Temporal intervals are NOT fundamental.
-They emerge from propagation over boundary-generated geometry.
-Tick is the primitive temporal unit and the universal propagation
-bound provides the space-time conversion factor.
-ds = v_bound · Tick · dT
-
-V23.0 BEGINS: Curvature Emergence Theory
-Can the space-time metric support intrinsic curvature?
+V23.3 SYNTHESIS
+V23 Curvature Emergence Theory — 4 audits, 4 SUPPORTED.
+Curvature emerges from connectivity gradients (dominant source).
+Curvature interacts with causal structure (cone distortion,
+temporal dilation). Quantitative dilation law: ΔTick = α·√R_eff.
+Source identified: boundary inhomogeneity drives curvature.
 
 ---
 

@@ -2,9 +2,19 @@
   "releaseStatus": "V23.0 CURVATURE EMERGENCE — ACTIVE",
   "phase": "Curvature Emergence Theory — can the space-time metric support intrinsic curvature?",
   "date": "2026-07-28",
-  "testSummary": { "total": 3995, "passed": 3995, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V23 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 3999, "passed": 3999, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V23 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [
+    { "name": "V23_0_CurvatureEmergence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V23_1_CurvatureGeometryInteraction", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V23_2_CurvatureDilationLaw", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V23_3_CurvatureSource", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Curvature Emergence: geometric inhomogeneities bend propagation paths (CEM_01)",
+    "Curvature-Geometry Interaction: curvature alters causal cones and propagation speed (CGI_01)",
+    "Curvature Dilation Law: temporal dilation = alpha * sqrt(R_eff) (CDL_01)",
+    "Curvature Source: boundary connectivity gradient is the dominant source (CCS_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Curvature emergence: can the unified space-time metric support intrinsic curvature?",
@@ -42,8 +52,8 @@
     "nextBranch": "v23.0-curvature-emergence-theory",
     "previousBranch": "v22.0-temporal-emergence-theory",
     "tag": "v22.0-temporal-emergence-theory",
-    "candidateDynamicsChain": "KTC -> ... -> Causal Structure -> Curvature",
-    "keyConstants": { "cone_efficiency_t1": "~constant", "boundary_fraction": "<0.15" }
+    "candidateDynamicsChain": "KTC -> ... -> Causal Structure -> Curvature -> Dilation -> Source",
+    "keyConstants": { "dilation_law": "sqrt(R_eff)", "curvature_source": "connectivity gradient" }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 4, "passedVerified": 4, "verificationMethod": "dotnet test", "mismatch": null }
 }
