@@ -3,9 +3,9 @@
 **Version:** 9.7
 **Date:** 2026-07-28
 
-**Current Version:** V23.0 CURVATURE EMERGENCE — ACTIVE
-**Previous Version:** V22.3 Causal Structure — CLOSED
-**Cumulative Tests:** ~3996
+**Current Version:** V23.1 CURVATURE GEOMETRY INTERACTION — ACTIVE
+**Previous Version:** V23.0 Curvature Emergence — CLOSED
+**Cumulative Tests:** ~3997
 **Failed:** 0
 
 ---
@@ -230,6 +230,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V23.0 | CEM_01 | Curvature Emergence — paths bend toward denser regions; effective curvature from geometry |
+| V23.1 | CGI_01 | Curvature-Geometry Interaction — curvature alters propagation; cone distortion + temporal dilation |
 
 Research question:
 > Can the unified space-time metric ds^2/(v^2*T^2) support
