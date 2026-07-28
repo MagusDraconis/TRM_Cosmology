@@ -2,9 +2,13 @@
   "releaseStatus": "V25.0 PHYSICAL CORRESPONDENCE — ACTIVE",
   "phase": "Physical Correspondence Program — mapping TRM structural laws to known physics",
   "date": "2026-07-28",
-  "testSummary": { "total": 4003, "passed": 4003, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V25 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4004, "passed": 4004, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V25 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [
+    { "name": "V25_0_PhysicalCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Physical Correspondence: 8 TRM-physics pairs, 3 STRONG, 5 WEAK, 0 NONE (PCP_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Gravitational correspondence: does TRM curvature map to spacetime curvature?",
@@ -43,7 +47,7 @@
     "previousBranch": "v24.0-connectivity-gradient",
     "tag": "v24.0-connectivity-gradient",
     "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Physical Correspondence",
-    "keyConstants": { "deepest_primitive": "sign(dT/dp)", "chain_depth": "19 versions" }
+    "keyConstants": { "strong_correspondences": 3, "total_pairs_evaluated": 8 }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 1, "passedVerified": 1, "verificationMethod": "dotnet test", "mismatch": null }
 }

@@ -5,7 +5,7 @@
 
 **Current Version:** V25.0 PHYSICAL CORRESPONDENCE — ACTIVE
 **Previous Version:** V24.3 Sign Constraint Origin — CLOSED
-**Cumulative Tests:** ~4003
+**Cumulative Tests:** ~4004
 **Failed:** 0
 
 ---
@@ -250,7 +250,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V25.0 | — | Starting — map TRM structural laws to known physical phenomena |
+| V25.0 | PCP_01 | Physical Correspondence — 8 correspondence pairs; qualitative STRONG match with physics |
 
 Research question:
 > Can TRM structural laws (sign→boundary→density→curvature→dilation)
