@@ -1,43 +1,47 @@
 {
-  "releaseStatus": "V22.0 TEMPORAL PROPAGATION INVARIANT — ACTIVE",
-  "phase": "Temporal Emergence Theory — time emerges from propagation geometry",
+  "releaseStatus": "V22.1 TICK METRIC INVARIANCE — ACTIVE",
+  "phase": "Temporal Emergence Theory — Tick is the primitive temporal unit",
   "date": "2026-07-28",
-  "testSummary": { "total": 1, "passed": 1, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V22 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "testSummary": { "total": 2, "passed": 2, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V22 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
   "suites": [
-    { "name": "V22_0_TemporalPropagationInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V22_0_TemporalPropagationInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V22_1_TickMetricInvariance", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Temporal Propagation Invariant: time emerges from propagation geometry alone (TPI_01)",
     "Tick = mean|d(VarI1+VarTerms)/da| measures intrinsic change rate",
     "v_max/Tick maps propagation to Tick units (cross-arch CV < 0.30)",
     "distance/Tick is constant across resolutions and architectures",
-    "Proto-temporal metric: dt = ds / v_bound"
+    "Proto-temporal metric: dt = ds / v_bound",
+    "Tick Metric Invariance: Tick is the primitive temporal unit (TMI_01)",
+    "dt_tick = avgPath/(v_max*Tick) is resolution-invariant (within-arch CV < 0.20)",
+    "dt_tick is architecture-invariant (cross-arch CV < 0.25)",
+    "Temporal intervals reduce to Tick counts: T = n_hops * dt_per_hop",
+    "Proto-temporal metric complete: ds = v_bound * Tick * dT"
   ],
-  "conditionalClaims": [],
   "hypotheses": [
-    "Proto-temporal dynamics: can time-evolution equations be derived from propagation?",
+    "Proto-temporal dynamics: can time-evolution equations be derived from Tick metric?",
     "Wave equation on intrinsic boundary: does the proto-temporal metric support a natural d'Alembertian?",
-    "Field equation emergence: does the temporal metric admit evolution laws?",
-    "2D temporal dynamics: do bdim=2 surfaces support richer temporal structure?"
+    "Field equation emergence: does the temporal metric admit evolution laws?"
   ],
   "falsifiedClaims": [],
   "notClaimed": ["physical time", "General Relativity", "physical c", "physical G", "SI units", "physical theory"],
   "openProblems": [
-    { "priority": "P0", "title": "Proto-temporal dynamics", "description": "Can time-evolution equations be derived from the propagation bound and proto-temporal metric?" },
+    { "priority": "P0", "title": "Proto-temporal dynamics", "description": "Can time-evolution equations be derived from the Tick-based proto-temporal metric?" },
     { "priority": "P1", "title": "Wave equation emergence", "description": "Does the proto-temporal metric support a natural d'Alembertian operator?" },
     { "priority": "P2", "title": "Field equation emergence", "description": "Does the temporal structure admit field equations or conservation laws?" }
   ],
   "documents": [
     { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
-    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V22.0" },
-    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V22.0" }
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V22.1" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V22.1" }
   ],
   "roadmap": {
-    "recommendedTestFile": "TRM.Tests/V22/V22_0/V22_0_TemporalPropagationInvariant_Tests.cs",
-    "candidateDynamicsChain": "KTC -> Constraint -> Geometry -> Propagation -> Velocity -> Bound -> Universality -> Time",
+    "recommendedTestFile": "TRM.Tests/V22/V22_1/V22_1_TickMetricInvariance_Tests.cs",
+    "candidateDynamicsChain": "KTC -> Constraint -> Geometry -> Propagation -> Velocity -> Bound -> Universality -> Time -> Tick",
     "inheritedFrom": "V21 universal propagation invariant (bound converges, geometry-controlled, universal)",
     "branch": "v22.0-temporal-emergence-theory",
     "previousTag": "v21.0-boundary-dynamics-theory"
   },
-  "releaseIntegrity": { "totalTestsVerified": 1, "passedVerified": 1, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 2, "passedVerified": 2, "verificationMethod": "dotnet test", "mismatch": null }
 }

@@ -1,6 +1,6 @@
 # TRM Current Frontier
 
-**Version:** 9.6
+**Version:** 9.7
 **Date:** 2026-07-28
 
 **Current Version:** V22.1 TICK METRIC INVARIANCE — ACTIVE
@@ -16,7 +16,7 @@ For any new LLM chat or Copilot session, read in this order:
 
 1. TRM_Current_Frontier.md (this file) — active frontier, model, constraints
 2. TRM_Project_QuickStart_For_New_Chats.md — operational briefing
-3. TRM_Project_Lineage_Overview.md — complete V1 → V18 historical lineage
+3. TRM_Project_Lineage_Overview.md — complete V1 → V22 historical lineage
 
 ---
 
@@ -49,6 +49,12 @@ Topological Information Loss L
 Sign = sgn(|m|-θ), ± topology
     ↓
 Organization (Hub/Spoke/Network)
+    ↓
+Boundary Dimension (bdim) → Geometry (V20)
+    ↓
+Propagation → Velocity → Bound (V21)
+    ↓
+Universality → Time → Tick (V22)
 ``
 
 ---
@@ -218,7 +224,8 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V22.1 | TMI_01 | Tick Metric Invariance — Tick is the primitive temporal unit; temporal intervals = Tick counts |
 
 Research question:
-> Can intrinsic geometry support propagation, flow, or dynamics?
+> Can Tick serve as the fundamental temporal unit, enabling
+> a complete proto-temporal metric from propagation geometry?
 
 Candidate chain:
 ```
