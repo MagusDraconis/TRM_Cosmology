@@ -1,10 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.06
+**Version:** 8.07
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.6
-**Current Frontier:** V21.6 Propagation Velocity Invariant — ACTIVE
-**Previous Frontier:** V21.5 Local Causality Invariant — CLOSED
+**Scope:** Clockwork Cosmology V1 through V21.7
+**Current Frontier:** V21.7 Propagation Bound Invariant — ACTIVE
+**Previous Frontier:** V21.6 Propagation Velocity Invariant — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
@@ -311,14 +311,17 @@ V21.5 ACTIVE (1 audit)
 
 V21.6 ACTIVE (1 audit)
 - PVI_01: Propagation Velocity Invariant — finite propagation bound SUPPORTED.
-  Information spread per causal layer analysed across 3 architectures
-  (COMPOSITE 1D, 3D GAN 2D, 3D CNS 2D). Max layer advance (diameter/N)
-  converges to finite value: propagation IS bounded. Stable peak layer
-  structure indicates maximum rate emerges. Bound is geometry-dependent
-  (varies with dimension) and derivable from adjacency structure alone.
-  No external speed parameter (c) required. Intrinsic geometry → finite
-  velocity → causal ordering → proto-time. Test: 1 passed, 0 failed.
-  LongRunning (~6.1 min).
+  Information spread per causal layer analysed across 3 architectures.
+  Max layer advance converges to finite value. Bound is geometry-dependent
+  and derivable from adjacency alone. Test: 1 passed, 0 failed (~6.1 min).
+
+V21.7 ACTIVE (1 audit)
+- PBI_01: Propagation Bound Invariant — bound is geometric invariant SUPPORTED.
+  Multi-resolution analysis (7 sizes per architecture, 19 total graphs).
+  v_max converges to non-zero limit under refinement for all 3 architectures.
+  Bound is scale-invariant (cv<0.20), dimension-dependent, and predictable
+  from intrinsic geometry (R²>0.4). Null hypothesis (finite-size artifact)
+  REJECTED. Test: 1 passed, 0 failed. LongRunning (~11.7 min).
 
 ---
 
@@ -2383,10 +2386,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.6 | Boundary Dynamics Theory | 7 | ACTIVE |
-| **Total** | | **3460** | **0 failed** |
+| V21.0-V21.7 | Boundary Dynamics Theory | 8 | ACTIVE |
+| **Total** | | **3461** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3460 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3461 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---

@@ -3,9 +3,9 @@
 **Version:** 9.6
 **Date:** 2026-07-28
 
-**Current Version:** V21.6 PROPAGATION VELOCITY INVARIANT — ACTIVE
-**Previous Version:** V21.5 Local Causality Invariant — CLOSED
-**Cumulative Tests:** ~3988
+**Current Version:** V21.7 PROPAGATION BOUND INVARIANT — ACTIVE
+**Previous Version:** V21.6 Propagation Velocity Invariant — CLOSED
+**Cumulative Tests:** ~3989
 **Failed:** 0
 
 ---
@@ -22,13 +22,13 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.6 ACTIVE (PVI_01). A finite intrinsic propagation
-velocity bound emerges from adjacency geometry alone. Information
-spread per causal layer is bounded; the maximum layer advance
-(diameter/N) converges to a finite value across all architectures.
-The bound is geometry-dependent (varies with dimension) and
-derivable from adjacency structure. Causal propagation has an
-intrinsic maximum rate — no external c required.
+V20 CLOSED. V21.7 ACTIVE (PBI_01). The propagation velocity
+bound converges to a non-zero limit under refinement — it is
+a genuine geometric invariant, not a finite-size artifact.
+Asymptotes: COMPOSITE, 3D GAN, 3D CNS all converge. Bound is
+dimension-dependent (differs 1D vs 2D) and predictable from
+intrinsic geometry (geoEff + deg/N). Null hypothesis (finite-
+size artifact) REJECTED.
 
 ---
 
@@ -203,6 +203,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.4 | RCI_01 | Reachability Causality Invariant — causality IS reachability; tau eliminated |
 | V21.5 | LCI_01 | Local Causality Invariant — global causality locally generated; locality horizon k* |
 | V21.6 | PVI_01 | Propagation Velocity Invariant — finite propagation bound emerges from adjacency geometry |
+| V21.7 | PBI_01 | Propagation Bound Invariant — bound converges under refinement; genuine geometric invariant |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?
