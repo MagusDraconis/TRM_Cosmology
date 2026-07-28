@@ -6,7 +6,6 @@
 **Current Frontier:** V22.0 Temporal Propagation Invariant — ACTIVE
 **Previous Frontier:** V21.9 Universal Propagation Invariant — CLOSED
 **Current Branch:** v22.0-temporal-emergence-theory
-**Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -257,7 +256,7 @@ V21.0 STARTING
 
 ---
 
-V21.0 ACTIVE (1 audit)
+V21.0 CLOSED (1 audit)
 - BDP_01: Boundary Dynamics Principle — intrinsic propagation SUPPORTED.
   Neighborhood propagation, geodesic preference, diffusion, characteristic scale
   all emerge from boundary graph adjacency alone. No external time parameter —
@@ -265,7 +264,7 @@ V21.0 ACTIVE (1 audit)
   Propagation IS dimension-dependent. Geodesics are natural propagation paths.
   Test: 1 passed, 0 failed. LongRunning (~10 min).
 
-V21.1 ACTIVE (1 audit)
+V21.1 CLOSED (1 audit)
 - IDP_01: Intrinsic Dynamics Principle — proto-time emergence SUPPORTED.
   Dynamics emerges from intrinsic geometry alone — no external time assumed.
   Proto-time tau = BFS distance from source on boundary graph. Tau is:
@@ -277,14 +276,14 @@ V21.1 ACTIVE (1 audit)
 
 ---
 
-V21.2 ACTIVE (1 audit)
+V21.2 CLOSED (1 audit)
 - PTU_01: Proto-Time Uniqueness — tau partially invariant SUPPORTED.
   Four tau construction methods compared. Causal structure and monotonicity
   are the MOST stable properties. Proto-time has HARD CORE (causal+monotonic,
   geometric) and SOFT SHELL (exact values, layer boundaries, method-dependent).
   Test: 1 passed, 0 failed. LongRunning (~10.5 min, MC diffusion).
 
-V21.3 ACTIVE (1 audit)
+V21.3 CLOSED (1 audit)
 - CSI_01: Causal Structure Invariant — causality primary, tau secondary SUPPORTED.
   Causal structure is PRIMARY — derived from graph reachability without any tau.
   Tau is SECONDARY — a scalar coordinate labeling the causal graph. Causal core
@@ -293,7 +292,7 @@ V21.3 ACTIVE (1 audit)
   Compared via pairwise Jaccard, agreement rate, consensus (≥3/4), core (4/4).
   Test: 1 passed, 0 failed. LongRunning (~10.3 min, causal pair sets).
 
-V21.4 ACTIVE (1 audit)
+V21.4 CLOSED (1 audit)
 - RCI_01: Reachability Causality Invariant — causality = reachability SUPPORTED.
   R_s(u,v) ≡ d(s,u) < d(s,v) defined purely from BFS distance. Compared reachability
   against 4 tau-based methods via Jaccard, FPR, FNR, transitivity, tie-breaking.
@@ -302,7 +301,7 @@ V21.4 ACTIVE (1 audit)
   (arbitrary). Complete emergence: Adjacency → Distance → Reachability (causal).
   Test: 1 passed, 0 failed. LongRunning (~10.4 min).
 
-V21.5 ACTIVE (1 audit)
+V21.5 CLOSED (1 audit)
 - LCI_01: Local Causality Invariant — global causality locally generated SUPPORTED.
   Locality fraction L(k) = causal pairs with both nodes within k hops.
   Locality horizon k* = min k where L(k) > 0.95. k* << diameter → causality
@@ -310,24 +309,24 @@ V21.5 ACTIVE (1 audit)
   Causal structure emerges from transitive closure of local adjacency.
   Compared 1D vs 2D locality. Test: 1 passed, 0 failed. LongRunning (~10.2 min).
 
-V21.6 ACTIVE (1 audit)
+V21.6 CLOSED (1 audit)
 - PVI_01: Propagation Velocity Invariant — finite propagation bound SUPPORTED.
   Information spread per causal layer analysed across 3 architectures.
   Max layer advance converges to finite value. Bound is geometry-dependent
   and derivable from adjacency alone. Test: 1 passed, 0 failed (~6.1 min).
 
-V21.7 ACTIVE (1 audit)
+V21.7 CLOSED (1 audit)
 - PBI_01: Propagation Bound Invariant — bound is geometric invariant SUPPORTED.
   Multi-resolution analysis. v_max converges to non-zero limit for all 3 architectures.
   Bound is scale-invariant, dimension-dependent, predictable from geometry.
   Null hypothesis (finite-size artifact) REJECTED. Test: 1 passed (~11.7 min).
 
-V21.8 ACTIVE (1 audit)
+V21.8 CLOSED (1 audit)
 - PGS_01: Propagation Geometry Scaling — v_max is emergent geometric invariant SUPPORTED.
   Measures v_max, bdim, projSpan, connectivity, avg path length across 19 graphs.
   Best scaling law: v_max = f(bdim, projSpan). Test: 1 passed (~13.7 min).
 
-V21.9 ACTIVE (1 audit)
+V21.9 CLOSED (1 audit)
 - UPI_01: Universal Propagation Invariant — bound is universal across architectures SUPPORTED.
   Cross-architecture comparison. Best normalization: v_max/projSpan (CV<0.20).
   95% CIs overlap. GAN vs CNS consistent. Candidate universal K found. Test: 1 passed (~15.5 min).
@@ -2526,9 +2525,8 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V21.5 ACTIVE — 6 audits. Global causality is locally generated. Branch: `v21.0-boundary-dynamics-theory`.
-
-**V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
+**Current status:** V22.0 ACTIVE (TPI_01). V21 CLOSED (10 audits, all SUPPORTED). Time emerges from propagation geometry. Branch: `v22.0-temporal-emergence-theory`.
+**V21 complete chain (10 audits):** KTC → Propagation → Velocity → Bound → Universality. Universal geometric propagation invariant established.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
