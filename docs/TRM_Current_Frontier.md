@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V23.3 CURVATURE SOURCE — ACTIVE
-**Previous Version:** V23.2 Curvature Dilation Law — CLOSED
+**Current Version:** V24.0 CONNECTIVITY GRADIENT — ACTIVE
+**Previous Version:** V23.3 Curvature Source — CLOSED
 **Cumulative Tests:** ~3999
 **Failed:** 0
 
@@ -22,14 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22 CLOSED. V23.3 ACTIVE (CCS_01).
+V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24.0 ACTIVE.
 V23 Curvature Emergence Theory — 4 audits, 4 SUPPORTED.
-Curvature emerges from connectivity gradients (dominant source).
-Curvature interacts with causal structure (cone distortion,
-temporal dilation). Quantitative dilation law: ΔTick = α·√R_eff.
-Flat limit recovers zero dilation. GAN/CNS collapse onto same
-curve. Complete chain: Geometry → Propagation → Time → Metric →
-Causal Structure → Curvature → Dilation → Source.
+Curvature, dilation, and source established. V23 Final Principle:
+Boundary connectivity gradient is the primitive source of curvature.
+V24.0 begins: Connectivity Gradient — can curvature be derived
+solely from connectivity structure?
 
 ---
 
@@ -225,7 +223,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V22.2 | STM_01 | Space-Time Metric — unified metric emerges; ds^2/(v^2*T^2) invariant |
 | V22.3 | CAU_01 | Causal Structure — causal cone emerges from propagation + Tick; events classified |
 
-## V23 Program (ACTIVE)
+## V23 Program (CLOSED)
 
 **Curvature Emergence Theory**
 
@@ -235,6 +233,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V23.1 | CGI_01 | Curvature-Geometry Interaction — curvature alters propagation; cone distortion + temporal dilation |
 | V23.2 | CDL_01 | Curvature Dilation Law — dilation = f(sqrt(R_eff)); universal across GAN/CNS |
 | V23.3 | CCS_01 | Curvature Source — 5 candidates ranked; dominant source identified |
+
+## V24 Program (ACTIVE)
+
+**Connectivity Gradient Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V24.0 | — | Starting — can curvature be derived from connectivity structure alone? |
+
+Research question:
+> Is connectivity gradient the primitive geometric object?
+> Can curvature, dilation, and propagation be expressed
+> entirely in terms of connectivity structure?
+
+Candidate chain:
+```
+KTC → ... → Curvature → Connectivity Gradient → Geometry?
+```
 
 Research question:
 > Can the unified space-time metric ds^2/(v^2*T^2) support

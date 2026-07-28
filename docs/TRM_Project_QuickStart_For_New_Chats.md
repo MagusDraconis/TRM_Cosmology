@@ -1,20 +1,22 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.04
+**Version:** 7.05
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V23.3 CURVATURE SOURCE — ACTIVE (CCS_01)
+V24.0 CONNECTIVITY GRADIENT — ACTIVE
 
 CURRENT BRANCH
-v23.0-curvature-emergence-theory
+v24.0-connectivity-gradient
 
-V23.3 SYNTHESIS
-V23 Curvature Emergence Theory — 4 audits, 4 SUPPORTED.
-Curvature emerges from connectivity gradients (dominant source).
-Curvature interacts with causal structure (cone distortion,
-temporal dilation). Quantitative dilation law: ΔTick = α·√R_eff.
-Source identified: boundary inhomogeneity drives curvature.
+V23 CLOSED (4 audits, 4 SUPPORTED)
+V23 Final Principle: Boundary connectivity gradient is the
+primitive source of curvature. Curvature, dilation, and source
+all trace back to connectivity inhomogeneity.
+
+V24.0 BEGINS: Connectivity Gradient Theory
+Is connectivity gradient the primitive geometric object?
+Can curvature be derived from connectivity structure alone?
 
 ---
 

@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 9.03
+**Version:** 9.04
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V23.3
-**Current Frontier:** V23.3 Curvature Source — ACTIVE
-**Previous Frontier:** V23.2 Curvature Dilation Law — CLOSED
-**Current Branch:** v23.0-curvature-emergence-theory
+**Scope:** Clockwork Cosmology V1 through V24.0
+**Current Frontier:** V24.0 Connectivity Gradient — ACTIVE
+**Previous Frontier:** V23.3 Curvature Source — CLOSED
+**Current Branch:** v24.0-connectivity-gradient
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -2435,7 +2435,8 @@ maintained to prevent overinterpretation:
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
 V22.0-V22.3 | Temporal Emergence Theory | 4 | COMPLETE |
-| V23.0-V23.3 | Curvature Emergence Theory | 4 | ACTIVE |
+| V23.0-V23.3 | Curvature Emergence Theory | 4 | COMPLETE |
+| V24.0 | Connectivity Gradient Theory | 0 | ACTIVE |
 | **Total** | | **3999** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3999 verified

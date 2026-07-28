@@ -1,5 +1,5 @@
 {
-  "releaseStatus": "V23.0 CURVATURE EMERGENCE — ACTIVE",
+  "releaseStatus": "V23.3 CURVATURE SOURCE — V23 CLOSED",
   "phase": "Curvature Emergence Theory — can the space-time metric support intrinsic curvature?",
   "date": "2026-07-28",
   "testSummary": { "total": 3999, "passed": 3999, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V23 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },

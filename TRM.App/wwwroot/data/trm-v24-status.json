@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V24.0 CONNECTIVITY GRADIENT — ACTIVE",
+  "phase": "Connectivity Gradient Theory — is connectivity gradient the primitive geometric object?",
+  "date": "2026-07-28",
+  "testSummary": { "total": 3999, "passed": 3999, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V24 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Connectivity gradient = primitive: is local degree variation the fundamental geometric object?",
+    "Curvature from connectivity: can R_eff be derived from connectivity gradients alone?",
+    "Dimensionality from connectivity: does bdim emerge from connectivity statistics?",
+    "Universal connectivity law: is there a universal scaling of connectivity across architectures?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical gravity", "General Relativity", "physical c", "SI units", "physical theory"],
+  "openProblems": [
+    { "priority": "P0", "title": "Connectivity primacy", "description": "Is local connectivity gradient the primitive geometric object? Can all geometric properties (dimension, curvature, metric) be expressed in terms of connectivity?" },
+    { "priority": "P1", "title": "Dimensionality from connectivity", "description": "Does boundary dimension emerge from connectivity statistics? Can bdim=1 vs bdim=2 be distinguished by connectivity alone?" },
+    { "priority": "P2", "title": "Connectivity law", "description": "Is there a universal scaling law for connectivity across all TRM architectures?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["KTC", "Constraint", "Geometry", "Propagation", "Velocity", "Bound", "Universality", "Time", "Tick", "Metric", "Causal Structure", "Curvature", "Dilation", "Source"],
+    "invertedHierarchy": "Connectivity gradient is the primitive source. Geometry, propagation, and time are derived."
+  },
+  "trmGoalAssessment": {
+    "time": "Temporal metric established (V22). Curvature dilation law established (V23.2).",
+    "space": "Intrinsic geometry from V20-V21. Space-time metric from V22. Curvature from V23.",
+    "length": "ds^2/(v_bound^2*Tick^2) invariant. Curvature correlates with connectivity gradient.",
+    "c": "v_bound is the propagation speed proxy. Tick is the fundamental temporal unit."
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V24.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V24.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V23/V23_3/V23_3_CurvatureSource_Tests.cs",
+    "nextPhase": "V24.0 Connectivity Gradient Theory — is connectivity gradient the primitive object?",
+    "nextBranch": "v24.0-connectivity-gradient",
+    "previousBranch": "v23.0-curvature-emergence-theory",
+    "tag": "v23.0-curvature-emergence-theory",
+    "candidateDynamicsChain": "KTC -> ... -> Source -> Connectivity Gradient",
+    "keyConstants": { "curvature_source": "connectivity gradient", "connection_to_curvature": "r > 0.4" }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}
