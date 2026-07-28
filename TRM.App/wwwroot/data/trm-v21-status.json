@@ -1,5 +1,5 @@
 {
-  "releaseStatus": "V21.4 REACHABILITY CAUSALITY INVARIANT — ACTIVE",
+  "releaseStatus": "V21.5 LOCAL CAUSALITY INVARIANT — ACTIVE",
   "phase": "Boundary Dynamics Theory — causality = reachability, proto-time eliminated",
   "date": "2026-07-28",
   "testSummary": { "total": 4, "passed": 4, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
@@ -8,14 +8,16 @@
     { "name": "V21_1_IntrinsicDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_2_ProtoTimeUniqueness", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_3_CausalStructureInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
-    { "name": "V21_4_ReachabilityCausalityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V21_4_ReachabilityCausalityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_5_LocalCausalityInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Boundary Dynamics Principle: intrinsic boundary geometry supports native dynamics (BDP_01)",
     "Intrinsic Dynamics Principle: dynamics emerges from geometry, proto-time emerges as BFS ordering (IDP_01)",
     "Proto-Time Uniqueness: tau is partially invariant across propagation methods; causal structure is the most stable property (PTU_01)",
     "Causal Structure Invariant: causality is PRIMARY (derived from reachability), tau is SECONDARY (scalar coordinate) (CSI_01)",
-    "Reachability Causality Invariant: causality IS reachability; proto-time can be eliminated entirely (RCI_01)"
+    "Reachability Causality Invariant: causality IS reachability; proto-time can be eliminated entirely (RCI_01)",
+    "Local Causality Invariant: global causality is locally generated; locality horizon k* << diameter (LCI_01)"
   ],
   "conditionalClaims": [],
   "hypotheses": [

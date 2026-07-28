@@ -1,20 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.05
+**Version:** 6.06
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.4 REACHABILITY CAUSALITY INVARIANT — ACTIVE (RCI_01)
+V21.5 LOCAL CAUSALITY INVARIANT — ACTIVE (LCI_01)
 
 CURRENT BRANCH
 v21.0-boundary-dynamics-theory
 
-V21.4 SYNTHESIS
-RCI_01 (SUPPORTED): Causality IS reachability. R_s(u,v) = d(s,u) < d(s,v)
-defined purely from BFS distance. Proto-time tau can be ELIMINATED —
-it is a redundant scalar coordinate. Tie-breaking on equal-distance
-nodes is method-dependent (arbitrary). Emergence: Adjacency → Distance
-→ Reachability (causal structure). No tau, no propagation model needed.
+V21.5 SYNTHESIS
+LCI_01 (SUPPORTED): Global causality is LOCALLY generated.
+Locality horizon k* << diameter. Local degree partially
+predicts global causal position. Causal structure emerges
+from transitive closure of local adjacency relations.
 
 ---
 
@@ -62,9 +61,9 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
 | V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
 | V20.0-V20.10 | Boundary Geometry Theory (CLOSED) | Geometry is primary; intrinsic metric, dimension, curvature, homogeneity, symmetry |
-| V21.0-V21.4 | Boundary Dynamics Theory (ACTIVE) | BDP+IDP+PTU+CSI+RCI: causality = reachability, tau eliminated |
+| V21.0-V21.5 | Boundary Dynamics Theory (ACTIVE) | BDP+...+LCI: local causality, degree predictor |
 
-**Cumulative total: ~3986 tests, 0 failed.**
+**Cumulative total: ~3987 tests, 0 failed.**
 
 ---
 

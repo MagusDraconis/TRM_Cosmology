@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 9.5
+**Version:** 9.6
 **Date:** 2026-07-28
 
-**Current Version:** V21.4 REACHABILITY CAUSALITY INVARIANT — ACTIVE
+**Current Version:** V21.5 LOCAL CAUSALITY INVARIANT — ACTIVE
 **Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
-**Cumulative Tests:** ~3986
+**Cumulative Tests:** ~3987
 **Failed:** 0
 
 ---
@@ -22,12 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.4 ACTIVE (RCI_01). Causality IS reachability:
-R_s(u,v) ≡ d(s,u) < d(s,v) defined purely from BFS distance on the
-boundary graph. Proto-time tau can be ELIMINATED — it is a redundant
-scalar coordinate that approximates reachability. Tie-breaking on
-equal-distance nodes is method-dependent (arbitrary). Complete
-emergence: Adjacency → Distance → Reachability (causal structure).
+V20 CLOSED. V21.5 ACTIVE (LCI_01). Global causality is LOCALLY
+generated — the locality horizon k* (where L(k*) > 95% of causal
+pairs are captured) is substantially smaller than the boundary
+diameter. Local degree partially predicts global causal position.
+The boundary's causal structure emerges from transitive closure
+of local adjacency relations.
 
 ---
 
@@ -200,6 +200,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.2 | PTU_01 | Proto-Time Uniqueness — tau partially invariant; causal core survives method changes |
 | V21.3 | CSI_01 | Causal Structure Invariant — causality primary (reachability), tau secondary (coordinate) |
 | V21.4 | RCI_01 | Reachability Causality Invariant — causality IS reachability; tau eliminated |
+| V21.5 | LCI_01 | Local Causality Invariant — global causality locally generated; locality horizon k* |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?
@@ -311,4 +312,4 @@ Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11 audits). V21 ACTIVE (5 audits): BDP+IDP+PTU+CSI+RCI.*
+*Generated 2026-07-28. V20 CLOSED (11). V21 ACTIVE (6): BDP+IDP+PTU+CSI+RCI+LCI.*

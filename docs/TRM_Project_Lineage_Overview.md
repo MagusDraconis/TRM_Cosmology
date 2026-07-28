@@ -2,7 +2,7 @@
 
 **Version:** 8.05
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.4
+**Scope:** Clockwork Cosmology V1 through V21.5
 **Current Frontier:** V21.4 Reachability Causality Invariant — ACTIVE
 **Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
@@ -300,6 +300,14 @@ V21.4 ACTIVE (1 audit)
   scalar coordinate. Tie-breaking on equal-distance nodes is method-dependent
   (arbitrary). Complete emergence: Adjacency → Distance → Reachability (causal).
   Test: 1 passed, 0 failed. LongRunning (~10.4 min).
+
+V21.5 ACTIVE (1 audit)
+- LCI_01: Local Causality Invariant — global causality locally generated SUPPORTED.
+  Locality fraction L(k) = causal pairs with both nodes within k hops.
+  Locality horizon k* = min k where L(k) > 0.95. k* << diameter → causality
+  is dominantly LOCAL. Degree partially predicts BFS distance (R² measured).
+  Causal structure emerges from transitive closure of local adjacency.
+  Compared 1D vs 2D locality. Test: 1 passed, 0 failed. LongRunning (~10.2 min).
 
 ---
 
@@ -2364,8 +2372,8 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.4 | Boundary Dynamics Theory | 5 | ACTIVE |
-| **Total** | | **3458** | **0 failed** |
+| V21.0-V21.5 | Boundary Dynamics Theory | 6 | ACTIVE |
+| **Total** | | **3459** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3457 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
@@ -2482,7 +2490,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V21.4 ACTIVE — 5 audits. Causality = reachability; proto-time eliminated. Branch: `v21.0-boundary-dynamics-theory`.
+**Current status:** V21.5 ACTIVE — 6 audits. Global causality is locally generated. Branch: `v21.0-boundary-dynamics-theory`.
 
 **V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
 
@@ -2494,4 +2502,4 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-28. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V21.4.*
+TRM/TQM project from Clockwork Cosmology V1 through V21.5.*
