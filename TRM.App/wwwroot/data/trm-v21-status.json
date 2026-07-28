@@ -1,0 +1,36 @@
+{
+  "releaseStatus": "V21.0 BOUNDARY DYNAMICS THEORY — STARTING",
+  "phase": "Boundary Dynamics Theory — can intrinsic geometry support propagation, flow, or dynamics?",
+  "date": "2026-07-28",
+  "testSummary": { "total": 0, "passed": 0, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21", "date": null },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Boundary dynamics: intrinsic geometry can support propagation, flow, or dynamics",
+    "Wave equation emergence: intrinsic metric supports a natural Laplacian or d'Alembertian",
+    "Time-like parameter: causal structure emerges from boundary dynamics alone",
+    "2D boundary dynamics: bdim=2 surfaces support richer dynamics than 1D"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical spacetime", "General Relativity", "physical c", "physical G", "SI units", "physical theory"],
+  "openProblems": [
+    { "priority": "P0", "title": "Boundary dynamics feasibility", "description": "Can intrinsic geometry support propagation, flow, or dynamics without importing external physics?" },
+    { "priority": "P1", "title": "Wave operator definition", "description": "Define a natural Laplacian on the intrinsic boundary metric." },
+    { "priority": "P2", "title": "Time-like parameter", "description": "Investigate whether a time-like ordering emerges from boundary dynamics." },
+    { "priority": "P3", "title": "Dynamical field equations", "description": "Determine whether boundary geometry admits field equations or evolution laws." }
+  ],
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V21.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V20.10" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": null,
+    "candidateDynamicsChain": "KTC -> Constraint -> Geometry -> Dynamics -> Time-like behavior",
+    "inheritedFrom": "V20 intrinsic geometry (metric, geodesics, dimension, curvature, homogeneity, symmetry)",
+    "branch": "v21.0-boundary-dynamics-theory",
+    "previousTag": "v20.0-intrinsic-geometry-emergence"
+  },
+  "releaseIntegrity": { "totalTestsVerified": null, "passedVerified": null, "verificationMethod": null, "mismatch": null }
+}

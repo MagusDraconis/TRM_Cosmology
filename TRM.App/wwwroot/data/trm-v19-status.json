@@ -1,7 +1,8 @@
 {
   "releaseStatus": "V19.10 EMERGENT DIMENSION STRUCTURE — V19 CLOSED",
   "phase": "Topological Memory Theory — boundary dimension as primary generator",
-  "date": "2026-07-27",
+  "date": "2026-07-28",
+  "dateClosed": "2026-07-28",
   "testSummary": { "total": 3967, "passed": 3967, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V19 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-27" },
   "suites": [
     { "name": "V19_0_TopologicalMemoryInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
@@ -38,11 +39,13 @@
   ],
   "falsifiedClaims": [],
   "notClaimed": ["physical gravity", "SI units", "spacetime derivation", "analytical proofs", "physical theory"],
-  "openProblems": [
-    { "priority": "P1", "title": "3D memory quantification", "description": "Directly measure memory for 3D GAN and CNS architectures to verify predictions" },
-    { "priority": "P2", "title": "Analytical kernel-to-geometry", "description": "Derive projected boundary measure analytically from kernel form" },
-    { "priority": "P3", "title": "Topological invariants", "description": "Compute Betti numbers and Euler characteristic of sign bifurcation surfaces" },
-    { "priority": "P4", "title": "Higher-dimensional architectures", "description": "Test whether Δ ≥ 2 architectures (bdim ≥ 3) exist in 4D parameter spaces" }
+  "openProblems": [],
+  "openProblemsAddressedBy": "V20 — sign constraint origin (SCO_01), zero-set geometry (ZGS_01), intrinsic geometry (IGS_01-P18) addressed the geometry emergence agenda. V21 now pursues boundary dynamics.",
+  "resolvedProblems": [
+    { "priority": "P1", "title": "3D memory quantification", "status": "DEFERRED to V21", "note": "V20 established geometry primacy; memory is derived. 3D memory follows from 2D boundary geometry." },
+    { "priority": "P2", "title": "Analytical kernel-to-geometry", "status": "DEFERRED to V21", "note": "V20 established intrinsic geometry emergence chain; analytical derivation of dynamics is V21 scope." },
+    { "priority": "P3", "title": "Topological invariants", "status": "DEFERRED to V21", "note": "V20 established that geometry is intrinsic to boundary; topological classification deferred to dynamics phase." },
+    { "priority": "P4", "title": "Higher-dimensional architectures", "status": "DEFERRED to V21", "note": "V20 confirmed curvature threshold at bdim=2; higher bdim dynamics is V21 scope." }
   ],
   "documents": [
     { "title": "V19 Closure Report", "filename": "docsV19/V19_Closure_Report.md", "available": true, "description": "V19.0-V19.10 complete audit history and unified framework" },
@@ -52,7 +55,7 @@
   ],
   "roadmap": {
     "recommendedTestFile": "TRM.Tests/V19/V19_10/V19_10_EmergentDimensionStructure_Tests.cs",
-    "nextPhase": "V20 Boundary Geometry Theory",
+    "nextPhase": "V20 Boundary Geometry Theory — COMPLETED (see trm-v20-status.json)",
     "unifiedEquation": "M = [Δ ≥ 0] · 0.0359 · span(|m|_ambig) · avg_degeneracy",
     "keyConstants": { "k": 0.0359, "M_COMPOSITE": 4.1, "M_3D_GAN_pred": 11.7, "M_3D_CNS_pred": 6.5 }
   },
