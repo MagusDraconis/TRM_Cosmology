@@ -3,8 +3,8 @@
 **Version:** 9.7
 **Date:** 2026-07-28
 
-**Current Version:** V22.3 CAUSAL STRUCTURE — ACTIVE
-**Previous Version:** V22.2 Space-Time Metric — CLOSED
+**Current Version:** V23.0 CURVATURE EMERGENCE — ACTIVE
+**Previous Version:** V22.3 Causal Structure — CLOSED
 **Cumulative Tests:** ~3995
 **Failed:** 0
 
@@ -22,18 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22.2 ACTIVE (STM_01). TRM propagation
-geometry defines a unified space-time metric. ds^2/(v_bound^2*Tick^2)
-is invariant under refinement (CV<0.25) and architecture-independent.
-
-V22 FINAL PRINCIPLE
-Temporal intervals are not fundamental.
-They emerge from propagation over boundary-generated geometry.
-Tick is the primitive temporal unit and the
-universal propagation bound provides the
-space-time conversion factor.
-
-ds = v_bound · Tick · dT
+V20 CLOSED. V21 CLOSED. V22 CLOSED. V23.0 ACTIVE. V22 completed:
+Temporal Emergence Theory — 4 audits, 4 SUPPORTED.
+Time emerges from propagation. Tick is primitive. Unified space-
+time metric. Causal structure from cone. V22 Final Principle:
+ds = v_bound · Tick · dT. V23.0 begins Curvature Emergence
+Theory — can the space-time metric support intrinsic curvature?
 
 ---
 
@@ -218,7 +212,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.8 | PGS_01 | Propagation Geometry Scaling — v_max determined solely by boundary geometry; universal scaling law |
 | V21.9 | UPI_01 | Universal Propagation Invariant — bound is universal; all architectures converge to common limit |
 
-## V22 Program (ACTIVE)
+## V22 Program (CLOSED)
 
 **Temporal Emergence Theory**
 
@@ -228,6 +222,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V22.1 | TMI_01 | Tick Metric Invariance — Tick is the primitive temporal unit; temporal intervals = Tick counts |
 | V22.2 | STM_01 | Space-Time Metric — unified metric emerges; ds^2/(v^2*T^2) invariant |
 | V22.3 | CAU_01 | Causal Structure — causal cone emerges from propagation + Tick; events classified |
+
+## V23 Program (ACTIVE)
+
+**Curvature Emergence Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V23.0 | — | Starting — can the space-time metric support intrinsic curvature? |
+
+Research question:
+> Can the unified space-time metric ds^2/(v^2*T^2) support
+> intrinsic curvature? Does the causal cone structure imply
+> geodesic deviation?
+
+Candidate chain:
+```
+KTC → ... → Causal Structure → Curvature → Gravity?
+```
 
 Research question:
 > Can Tick serve as the fundamental temporal unit, enabling

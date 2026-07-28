@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V23.0 CURVATURE EMERGENCE — ACTIVE",
+  "phase": "Curvature Emergence Theory — can the space-time metric support intrinsic curvature?",
+  "date": "2026-07-28",
+  "testSummary": { "total": 3995, "passed": 3995, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V23 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Curvature emergence: can the unified space-time metric support intrinsic curvature?",
+    "Geodesic deviation: does the causal cone structure produce geodesic deviation?",
+    "Curvature from Tick: can curvature be expressed in terms of Tick gradients?",
+    "Einstein-analog: does the TRM metric admit Einstein-like field equations?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical gravity", "General Relativity", "physical c", "physical G", "SI units", "physical theory"],
+  "openProblems": [
+    { "priority": "P0", "title": "Curvature emergence", "description": "Can the unified space-time metric ds^2/(v^2*T^2) support intrinsic curvature? Does the causal cone structure imply geodesic deviation?" },
+    { "priority": "P1", "title": "Tick gradients", "description": "Can curvature be expressed in terms of spatial variations in Tick (dTick/ds)?" },
+    { "priority": "P2", "title": "Field equations", "description": "Does the TRM metric admit Einstein-like field equations from propagation geometry?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["KTC", "Constraint", "Geometry", "Propagation", "Velocity", "Bound", "Universality", "Time", "Tick", "Metric", "Causal Structure"],
+    "invertedHierarchy": "Geometry is primary. Time is derived. Tick is primitive. Metric emerges from propagation."
+  },
+  "trmGoalAssessment": {
+    "time": "Causal structure emerges from propagation and Tick (CAU_01). Causal cone: ds <= v_bound*Tick*t.",
+    "space": "Intrinsic geometry from V20-V21. Space-time metric from V22.2 (STM_01).",
+    "length": "ds^2/(v_bound^2*Tick^2) invariant under refinement.",
+    "c": "v_bound is the propagation speed proxy. Tick is the fundamental temporal unit."
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V23.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V23.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V22/V22_3/V22_3_CausalStructure_Tests.cs",
+    "nextPhase": "V23.0 Curvature Emergence Theory — can the space-time metric support intrinsic curvature?",
+    "nextBranch": "v23.0-curvature-emergence-theory",
+    "previousBranch": "v22.0-temporal-emergence-theory",
+    "tag": "v22.0-temporal-emergence-theory",
+    "candidateDynamicsChain": "KTC -> ... -> Causal Structure -> Curvature",
+    "keyConstants": { "cone_efficiency_t1": "~constant", "boundary_fraction": "<0.15" }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

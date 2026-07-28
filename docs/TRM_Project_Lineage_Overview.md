@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 9.01
+**Version:** 9.02
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V22.1
-**Current Frontier:** V22.1 Tick Metric Invariance — ACTIVE
-**Previous Frontier:** V22.0 Temporal Propagation Invariant — CLOSED
-**Current Branch:** v22.0-temporal-emergence-theory
+**Scope:** Clockwork Cosmology V1 through V23.0
+**Current Frontier:** V23.0 Curvature Emergence — ACTIVE
+**Previous Frontier:** V22.3 Causal Structure — CLOSED
+**Current Branch:** v23.0-curvature-emergence-theory
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -337,19 +337,39 @@ V21 CLOSED. V22.0 STARTING.
 
 ---
 
-V22.0 ACTIVE (1 audit)
+V22.0 CLOSED (1 audit)
 - TPI_01: Temporal Propagation Invariant — time emerges from propagation SUPPORTED.
   Tick = mean|d(VarI1+VarTerms)/da| computed via ComputeFull at grid samples.
   v_max/Tick maps propagation to Tick units (cross-arch CV<0.30). distance/Tick is
   reasonably constant. Proto-temporal metric: dt = ds / v_bound. Time emerges from
   propagation geometry alone. Test: 1 passed (~16.1 min).
 
-V22.1 ACTIVE (1 audit)
+V22.1 CLOSED (1 audit)
 - TMI_01: Tick Metric Invariance — Tick is primitive temporal unit SUPPORTED.
   dt_tick = avgPath/(v_max*Tick) is resolution-invariant (within-arch CV<0.20)
   and architecture-invariant (cross-arch CV<0.25). Per-hop temporal cost constant.
   Temporal intervals reduce to Tick counts. Proto-temporal metric: ds = v_bound * Tick * dT.
   Test: 1 passed (~14.3 min).
+
+V22.2 CLOSED (1 audit)
+- STM_01: Space-Time Metric — unified metric emerges SUPPORTED.
+  ds^2/(v_bound^2*Tick^2) invariant under refinement. Architecture-independent.
+  Best metric form: ds^2/(v^2*T^2) = constant. Test: 1 passed (~15.2 min).
+
+V22.3 CLOSED (1 audit)
+- CAU_01: Causal Structure — causal cone emerges SUPPORTED.
+  ds = v_bound*Tick*dT defines causal cone. Events classified: reachable/boundary/unreachable.
+  Cone stable across architectures. Coverage time finite. Test: 1 passed (~11.5 min).
+
+V22 CLOSED. V23.0 STARTING.
+- Curvature Emergence Theory. Can the unified space-time metric support intrinsic curvature?
+  Candidate: Metric -> Curvature -> Gravity? Inherits from V22 metric and causal structure.
+
+---
+
+V23.0 ACTIVE (0 audits)
+- Starting. Research question: Can ds^2/(v^2*T^2) support intrinsic curvature?
+  Does the causal cone structure imply geodesic deviation?
 
 ---
 
@@ -2414,10 +2434,11 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V22.0-V22.2 | Temporal Emergence Theory | 3 | ACTIVE |
-| **Total** | | **3466** | **0 failed** |
+V22.0-V22.3 | Temporal Emergence Theory | 4 | COMPLETE |
+| V23.0 | Curvature Emergence Theory | 0 | ACTIVE |
+| **Total** | | **3995** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3466 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3995 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
@@ -2532,7 +2553,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V22.0 ACTIVE (TPI_01). V21 CLOSED (10 audits, all SUPPORTED). Time emerges from propagation geometry. Branch: `v22.0-temporal-emergence-theory`.
+**Current status:** V23.0 ACTIVE. V22 CLOSED (4 audits, all SUPPORTED). V21 CLOSED (10 audits). Unified space-time metric and causal structure established. Branch: `v23.0-curvature-emergence-theory`.
 **V21 complete chain (10 audits):** KTC → Propagation → Velocity → Bound → Universality. Universal geometric propagation invariant established.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein

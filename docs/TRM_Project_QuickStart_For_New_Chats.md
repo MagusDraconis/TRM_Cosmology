@@ -1,25 +1,23 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.02
+**Version:** 7.03
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V22.2 SPACE-TIME METRIC — ACTIVE (STM_01)
+V23.0 CURVATURE EMERGENCE — ACTIVE
 
 CURRENT BRANCH
-v22.0-temporal-emergence-theory
+v23.0-curvature-emergence-theory
 
-V22 SYNTHESIS
-Temporal intervals are NOT fundamental. They emerge from
-propagation over boundary-generated geometry. Tick is the
-primitive temporal unit and the universal propagation bound
-provides the space-time conversion factor.
-
+V22 CLOSED (4 audits, 4 SUPPORTED)
+V22 Final Principle: Temporal intervals are NOT fundamental.
+They emerge from propagation over boundary-generated geometry.
+Tick is the primitive temporal unit and the universal propagation
+bound provides the space-time conversion factor.
 ds = v_bound · Tick · dT
 
-V22.0 TPI_01 — Time emerges from propagation (SUPPORTED)
-V22.1 TMI_01 — Tick is primitive (SUPPORTED)
-V22.2 STM_01 — Unified metric emerges (SUPPORTED)
+V23.0 BEGINS: Curvature Emergence Theory
+Can the space-time metric support intrinsic curvature?
 
 ---
 
