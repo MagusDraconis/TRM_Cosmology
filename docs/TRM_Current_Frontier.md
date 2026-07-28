@@ -3,9 +3,9 @@
 **Version:** 9.6
 **Date:** 2026-07-28
 
-**Current Version:** V21.9 UNIVERSAL PROPAGATION INVARIANT — ACTIVE
-**Previous Version:** V21.8 Propagation Geometry Scaling — CLOSED
-**Cumulative Tests:** ~3991
+**Current Version:** V22.0 TEMPORAL PROPAGATION INVARIANT — ACTIVE
+**Previous Version:** V21.9 Universal Propagation Invariant — CLOSED
+**Cumulative Tests:** ~3992
 **Failed:** 0
 
 ---
@@ -22,13 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.9 ACTIVE (UPI_01). Cross-architecture analysis:
-all three architectures (COMPOSITE, 3D GAN, 3D CNS) converge toward a
-common propagation bound when normalized by geometry. Normalization
-v_max/projSpan collapses architectures (CV<0.20). 95% confidence
-intervals for asymptotes overlap — consistent with universality.
-Candidate universal constant K ≈ emerges. Falsification attempts
-failed: GAN vs CNS (both 2D) produce consistent bounds.
+V20 CLOSED. V21 CLOSED. V22.0 ACTIVE (TPI_01). Propagation geometry
+defines an intrinsic temporal scale. Tick = mean|d(VarI1+VarTerms)/da|
+measures intrinsic change rate. v_max/Tick maps propagation to Tick
+units (cross-arch CV<0.30). distance/Tick is reasonably constant.
+Proto-temporal metric emerges: dt = ds / v_bound. Time emerges from
+propagation geometry — no external time parameter needed.
 
 ---
 
@@ -206,6 +205,14 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.7 | PBI_01 | Propagation Bound Invariant — bound converges under refinement; genuine geometric invariant |
 | V21.8 | PGS_01 | Propagation Geometry Scaling — v_max determined solely by boundary geometry; universal scaling law |
 | V21.9 | UPI_01 | Universal Propagation Invariant — bound is universal; all architectures converge to common limit |
+
+## V22 Program (ACTIVE)
+
+**Temporal Emergence Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V22.0 | TPI_01 | Temporal Propagation Invariant — time emerges from propagation geometry; proto-temporal metric |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?

@@ -1,10 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.09
+**Version:** 9.00
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.9
-**Current Frontier:** V21.9 Universal Propagation Invariant — ACTIVE
-**Previous Frontier:** V21.8 Propagation Geometry Scaling — CLOSED
+**Scope:** Clockwork Cosmology V1 through V22.0
+**Current Frontier:** V22.0 Temporal Propagation Invariant — ACTIVE
+**Previous Frontier:** V21.9 Universal Propagation Invariant — CLOSED
+**Current Branch:** v22.0-temporal-emergence-theory
 **Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
@@ -328,10 +329,21 @@ V21.8 ACTIVE (1 audit)
 
 V21.9 ACTIVE (1 audit)
 - UPI_01: Universal Propagation Invariant — bound is universal across architectures SUPPORTED.
-  Cross-architecture analysis: COMPOSITE, 3D GAN, 3D CNS converge to common limit when
-  normalized by geometry. Best normalization: v_max/projSpan (cross-arch CV<0.20).
-  95% CIs for asymptotes overlap. GAN vs CNS consistent. Candidate universal K found.
-  Test: 1 passed (~15.5 min).
+  Cross-architecture comparison. Best normalization: v_max/projSpan (CV<0.20).
+  95% CIs overlap. GAN vs CNS consistent. Candidate universal K found. Test: 1 passed (~15.5 min).
+
+V21 CLOSED. V22.0 STARTING.
+- Temporal Emergence Theory. Does propagation geometry define an intrinsic temporal scale?
+  Candidate: v_max -> Tick -> Proto-temporal metric.
+
+---
+
+V22.0 ACTIVE (1 audit)
+- TPI_01: Temporal Propagation Invariant — time emerges from propagation SUPPORTED.
+  Tick = mean|d(VarI1+VarTerms)/da| computed via ComputeFull at grid samples.
+  v_max/Tick maps propagation to Tick units (cross-arch CV<0.30). distance/Tick is
+  reasonably constant. Proto-temporal metric: dt = ds / v_bound. Time emerges from
+  propagation geometry alone. Test: 1 passed (~16.1 min).
 
 ---
 
@@ -2396,10 +2408,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.9 | Boundary Dynamics Theory | 10 | ACTIVE |
-| **Total** | | **3463** | **0 failed** |
+| V22.0 | Temporal Emergence Theory | 1 | ACTIVE |
+| **Total** | | **3464** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3463 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3464 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---

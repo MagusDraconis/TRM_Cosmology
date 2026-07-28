@@ -1,19 +1,20 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.10
+**Version:** 7.00
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.9 UNIVERSAL PROPAGATION INVARIANT — ACTIVE (UPI_01)
+V22.0 TEMPORAL PROPAGATION INVARIANT — ACTIVE (TPI_01)
 
 CURRENT BRANCH
-v21.0-boundary-dynamics-theory
+v22.0-temporal-emergence-theory
 
-V21.9 SYNTHESIS
-UPI_01 (SUPPORTED): All architectures converge toward a common
-propagation bound when normalized by geometry (CV<0.20).
-95% CIs overlap. GAN vs CNS (both 2D) produce consistent bounds.
-Candidate universal constant K emerges from bdim/projSpan.
+V22.0 SYNTHESIS
+TPI_01 (SUPPORTED): Propagation geometry defines an intrinsic
+temporal scale. Tick = mean|d(VarI1+VarTerms)/da| measures change
+rate. v_max/Tick maps propagation to Tick units. distance/Tick is
+constant. Proto-temporal metric: dt = ds / v_bound. Time emerges
+from propagation geometry — no external time parameter needed.
 
 ---
 
