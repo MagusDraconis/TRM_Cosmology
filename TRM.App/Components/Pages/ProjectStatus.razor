@@ -34,6 +34,14 @@ else
     <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoNext" Disabled="@(_nextDisabled)">Forward ▶</MudButton>
     <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="GoNewest" Disabled="@(_newestDisabled)">Newest ⏭</MudButton>
 </MudStack>
+<MudStack Row="true" Spacing="2" Class="mb-4" Justify="Justify.Center" Style="max-width: 600px; margin: 0 auto;">
+    <MudText Typo="Typo.caption" Style="min-width: 48px; text-align: right;">@(StatusService.GetAvailableVersions().FirstOrDefault() ?? "v0")</MudText>
+    <MudSlider Value="_sliderIndex" ValueChanged="@(async (int v) => { _sliderIndex = v; await OnSliderChanged(); })"
+               Min="0" Max="@(_sliderMax)" Immediate="true"
+               Variant="Variant.Outlined" Color="Color.Primary"
+               Style="flex: 1;" />
+    <MudText Typo="Typo.caption" Style="min-width: 48px;">@(StatusService.GetAvailableVersions().LastOrDefault() ?? "v?")</MudText>
+</MudStack>
 <MudText Typo="Typo.body1">Current status of the Temporal Rate Matrix (TRM) research program.</MudText>
 <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-4">Info: This page is updated nearly every day, and at least once every week.</MudText>
 
@@ -217,12 +225,16 @@ else
     private bool _nextDisabled = true;
     private bool _firstDisabled = true;
     private bool _newestDisabled = true;
+    private int _sliderIndex;
+    private int _sliderMax;
+    private bool _sliderUpdating;
 
     protected override async Task OnInitializedAsync()
     {
         _status = await StatusService.GetStatusAsync();
         _loadError = _status is null;
         _loading = false;
+        _sliderMax = Math.Max(0, StatusService.GetAvailableVersions().Count - 1);
         UpdateNavigationState();
     }
 
@@ -242,6 +254,31 @@ else
         _nextDisabled = StatusService.GetNextVersion() is null;
         _firstDisabled = StatusService.GetFirstVersion() == _currentVersionLabel;
         _newestDisabled = StatusService.GetNewestVersion() == _currentVersionLabel;
+
+        // Sync slider without triggering change handler
+        if (!_sliderUpdating)
+        {
+            var versions = StatusService.GetAvailableVersions();
+            var idx = versions.IndexOf(_currentVersionLabel ?? "");
+            if (idx >= 0) _sliderIndex = idx;
+            _sliderMax = Math.Max(0, versions.Count - 1);
+        }
+    }
+
+    private async Task OnSliderChanged()
+    {
+        _sliderUpdating = true;
+        try
+        {
+            var versions = StatusService.GetAvailableVersions();
+            if (_sliderIndex >= 0 && _sliderIndex < versions.Count)
+            {
+                var version = versions[_sliderIndex];
+                if (version != _currentVersionLabel)
+                    await LoadAndRefresh(version);
+            }
+        }
+        finally { _sliderUpdating = false; }
     }
 
     private async Task GoFirst() { var v = StatusService.GetFirstVersion(); if (v is not null) await LoadAndRefresh(v); }
