@@ -1,19 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.0
+**Version:** 6.01
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.0 BOUNDARY DYNAMICS THEORY — STARTING
+V21.0 BOUNDARY DYNAMICS PRINCIPLE — ACTIVE (BDP_01)
 
 CURRENT BRANCH
 v21.0-boundary-dynamics-theory
 
-PREVIOUS VERSION
-V20 CLOSED: Boundary Geometry Theory — "Geometry Emergence Phase" (11 audits, 11 SUPPORTED).
-Intrinsic geometry emerges from constraint-generated boundary structures.
-Geometry is primary; memory is a derived observable.
-Closure report: docs/V20/V20_Closure_Report.md. Tag: v20.0-intrinsic-geometry-emergence.
+V21.0 STATUS
+BDP_01 (SUPPORTED): Intrinsic boundary geometry supports native dynamics.
+Neighborhood propagation, geodesic preference, diffusion, and characteristic
+scale all emerge from boundary graph adjacency alone. No external time
+parameter — hop count IS the dynamical parameter.
 
 ---
 
@@ -61,9 +61,9 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
 | V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
 | V20.0-V20.10 | Boundary Geometry Theory (CLOSED) | Geometry is primary; intrinsic metric, dimension, curvature, homogeneity, symmetry |
-| V21.0+ | Boundary Dynamics Theory (STARTING) | Can intrinsic geometry support propagation, flow, or dynamics? |
+| V21.0+ | Boundary Dynamics Theory (ACTIVE) | BDP_01: intrinsic propagation, geodesic preference, dimension dependence |
 
-**Cumulative total: ~3981 tests, 0 failed.**
+**Cumulative total: ~3982 tests, 0 failed.**
 
 ---
 
@@ -119,4 +119,4 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11 audits, 11 SUPPORTED). V21.0 STARTING: Boundary Dynamics Theory.*
+*Generated 2026-07-28. V20 CLOSED. V21.0 ACTIVE: BDP_01 Boundary Dynamics Principle.*

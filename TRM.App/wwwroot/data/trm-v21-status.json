@@ -1,10 +1,14 @@
 {
-  "releaseStatus": "V21.0 BOUNDARY DYNAMICS THEORY — STARTING",
+  "releaseStatus": "V21.0 BOUNDARY DYNAMICS PRINCIPLE — ACTIVE",
   "phase": "Boundary Dynamics Theory — can intrinsic geometry support propagation, flow, or dynamics?",
   "date": "2026-07-28",
-  "testSummary": { "total": 0, "passed": 0, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21", "date": null },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 1, "passed": 1, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "suites": [
+    { "name": "V21_0_BoundaryDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Boundary Dynamics Principle: intrinsic boundary geometry supports native dynamics (BDP_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Boundary dynamics: intrinsic geometry can support propagation, flow, or dynamics",
@@ -26,11 +30,11 @@
     { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V20.10" }
   ],
   "roadmap": {
-    "recommendedTestFile": null,
+    "recommendedTestFile": "TRM.Tests/V21/V21_0/V21_0_BoundaryDynamicsPrinciple_Tests.cs",
     "candidateDynamicsChain": "KTC -> Constraint -> Geometry -> Dynamics -> Time-like behavior",
     "inheritedFrom": "V20 intrinsic geometry (metric, geodesics, dimension, curvature, homogeneity, symmetry)",
     "branch": "v21.0-boundary-dynamics-theory",
     "previousTag": "v20.0-intrinsic-geometry-emergence"
   },
-  "releaseIntegrity": { "totalTestsVerified": null, "passedVerified": null, "verificationMethod": null, "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 1, "passedVerified": 1, "verificationMethod": "dotnet test", "mismatch": null }
 }

@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 9.0
+**Version:** 9.1
 **Date:** 2026-07-28
 
-**Current Version:** V21.0 BOUNDARY DYNAMICS THEORY — STARTING
+**Current Version:** V21.0 BOUNDARY DYNAMICS PRINCIPLE — ACTIVE
 **Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
-**Cumulative Tests:** ~3981
+**Cumulative Tests:** ~3982
 **Failed:** 0
 
 ---
@@ -22,12 +22,10 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.0 STARTING. V20 established that intrinsic geometry
-emerges from constraint-generated boundary structures without assuming
-space beforehand: KTC → φ → φ⁻¹(0) → intrinsic metric → geodesics →
-dimension → curvature → homogeneity → symmetry. Geometry is primary;
-memory is a derived observable. V21 asks: can intrinsic geometry support
-propagation, flow, or dynamics?
+V20 CLOSED. V21.0 ACTIVE (BDP_01). V21 asks: can intrinsic geometry support
+propagation, flow, or dynamics? First audit tests neighborhood propagation,
+geodesic preference, diffusion, and characteristic scale on intrinsic
+boundary graphs (1D COMPOSITE, 2D 3D GAN).
 
 ---
 
@@ -193,6 +191,10 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 **Boundary Dynamics Theory**
 
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V21.0 | BDP_01 | Boundary Dynamics Principle — intrinsic propagation, geodesic preference, dimension dependence |
+
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?
 
@@ -303,4 +305,4 @@ Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11 audits, 11 SUPPORTED). V21.0 STARTING: Boundary Dynamics Theory.*
+*Generated 2026-07-28. V20 CLOSED (11 audits, 11 SUPPORTED). V21.0 ACTIVE: BDP_01 Boundary Dynamics Principle.*

@@ -1,9 +1,9 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.0
+**Version:** 8.01
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V20.10
-**Current Frontier:** V21.0 Boundary Dynamics Theory — STARTING
+**Scope:** Clockwork Cosmology V1 through V21.0
+**Current Frontier:** V21.0 Boundary Dynamics Principle — ACTIVE
 **Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
@@ -253,6 +253,16 @@ Boundary → Geometry → Projection → Memory
 V21.0 STARTING
 - Boundary Dynamics Theory. Can intrinsic geometry support propagation,
   flow, or dynamics? Candidate: KTC → Constraint → Geometry → Dynamics → Time-like behavior.
+
+---
+
+V21.0 ACTIVE (1 audit)
+- BDP_01: Boundary Dynamics Principle — intrinsic propagation SUPPORTED.
+  Neighborhood propagation, geodesic preference, diffusion, characteristic scale
+  all emerge from boundary graph adjacency alone. No external time parameter —
+  hop count IS the dynamical parameter. 1D COMPOSITE and 2D 3D GAN boundaries tested.
+  Propagation IS dimension-dependent. Geodesics are natural propagation paths.
+  Test: 1 passed, 0 failed. LongRunning (~10 min).
 
 ---
 
@@ -2317,9 +2327,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| **Total** | | **3453** | **0 failed** |
+| V21.0 | Boundary Dynamics Principle | 1 | ACTIVE |
+| **Total** | | **3454** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3453 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3454 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
@@ -2434,7 +2445,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V20.10 CLOSED — 11 audits, 11 SUPPORTED. Boundary Geometry Theory complete. Intrinsic geometry emerges from constraint-generated boundary structures. Geometry is primary; memory is a derived observable. Closure report: `docs/V20/V20_Closure_Report.md`. Tag: `v20.0-intrinsic-geometry-emergence`. Branch closed: `v20.0-boundary-geometry-theory`. Next: V21.0 Boundary Dynamics Theory. Branch: `v21.0-boundary-dynamics-theory`.
+**Current status:** V21.0 ACTIVE — 1 audit (BDP_01). Boundary Dynamics Principle. Intrinsic boundary geometry supports native dynamics: neighborhood propagation, geodesic preference, diffusion, characteristic scale. Branch: `v21.0-boundary-dynamics-theory`.
 
 **V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
 
@@ -2446,4 +2457,4 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-28. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V20.10.*
+TRM/TQM project from Clockwork Cosmology V1 through V21.0.*
