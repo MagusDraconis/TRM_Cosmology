@@ -1,17 +1,19 @@
 {
-  "releaseStatus": "V21.2 PROTO-TIME UNIQUENESS — ACTIVE",
+  "releaseStatus": "V21.3 CAUSAL STRUCTURE INVARIANT — ACTIVE",
   "phase": "Boundary Dynamics Theory — can intrinsic geometry support propagation, flow, or dynamics?",
   "date": "2026-07-28",
-  "testSummary": { "total": 3, "passed": 3, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "testSummary": { "total": 4, "passed": 4, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V21 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
   "suites": [
     { "name": "V21_0_BoundaryDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
     { "name": "V21_1_IntrinsicDynamicsPrinciple", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
-    { "name": "V21_2_ProtoTimeUniqueness", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V21_2_ProtoTimeUniqueness", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V21_3_CausalStructureInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Boundary Dynamics Principle: intrinsic boundary geometry supports native dynamics (BDP_01)",
     "Intrinsic Dynamics Principle: dynamics emerges from geometry, proto-time emerges as BFS ordering (IDP_01)",
-    "Proto-Time Uniqueness: tau is partially invariant across propagation methods; causal structure is the most stable property (PTU_01)"
+    "Proto-Time Uniqueness: tau is partially invariant across propagation methods; causal structure is the most stable property (PTU_01)",
+    "Causal Structure Invariant: causality is PRIMARY (derived from reachability), tau is SECONDARY (scalar coordinate labeling causal graph) (CSI_01)"
   ],
   "conditionalClaims": [],
   "hypotheses": [
@@ -39,5 +41,5 @@
     "branch": "v21.0-boundary-dynamics-theory",
     "previousTag": "v20.0-intrinsic-geometry-emergence"
   },
-  "releaseIntegrity": { "totalTestsVerified": 3, "passedVerified": 3, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 4, "passedVerified": 4, "verificationMethod": "dotnet test", "mismatch": null }
 }

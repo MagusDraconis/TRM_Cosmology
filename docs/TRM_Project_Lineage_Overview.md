@@ -1,9 +1,9 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.03
+**Version:** 8.04
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.2
-**Current Frontier:** V21.2 Proto-Time Uniqueness — ACTIVE
+**Scope:** Clockwork Cosmology V1 through V21.3
+**Current Frontier:** V21.3 Causal Structure Invariant — ACTIVE
 **Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
@@ -278,13 +278,19 @@ V21.1 ACTIVE (1 audit)
 
 V21.2 ACTIVE (1 audit)
 - PTU_01: Proto-Time Uniqueness — tau partially invariant SUPPORTED.
-  Four tau construction methods compared: BFS, degree-weighted Dijkstra,
-  diffusion Monte Carlo (first-passage), wavefront with processing delay.
-  Causal structure and monotonicity are the MOST stable properties across
-  methods. Proto-time has a HARD CORE (causal + monotonic) that is geometric
-  and a SOFT SHELL (exact values, layer boundaries) that depends on propagation rule.
-  Compared via Spearman rank, layer Jaccard, causal agreement, edge monotonicity.
+  Four tau construction methods compared. Causal structure and monotonicity
+  are the MOST stable properties. Proto-time has HARD CORE (causal+monotonic,
+  geometric) and SOFT SHELL (exact values, layer boundaries, method-dependent).
   Test: 1 passed, 0 failed. LongRunning (~10.5 min, MC diffusion).
+
+V21.3 ACTIVE (1 audit)
+- CSI_01: Causal Structure Invariant — causality primary, tau secondary SUPPORTED.
+  Causal structure is PRIMARY — derived from graph reachability without any tau.
+  Tau is SECONDARY — a scalar coordinate labeling the causal graph. Causal core
+  (pairs ordered identically across all 4 methods) is large and method-invariant.
+  Emergence: Adjacency → Reachability (causal) → Tau (coordinate).
+  Compared via pairwise Jaccard, agreement rate, consensus (≥3/4), core (4/4).
+  Test: 1 passed, 0 failed. LongRunning (~10.3 min, causal pair sets).
 
 ---
 
@@ -2349,10 +2355,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.2 | Boundary Dynamics Theory | 3 | ACTIVE |
-| **Total** | | **3456** | **0 failed** |
+| V21.0-V21.3 | Boundary Dynamics Theory | 4 | ACTIVE |
+| **Total** | | **3457** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3456 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3457 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
@@ -2467,7 +2473,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V21.2 ACTIVE — 3 audits (BDP_01 + IDP_01 + PTU_01). Boundary Dynamics Theory. Proto-time partially invariant: causal structure is the hard geometric core. Branch: `v21.0-boundary-dynamics-theory`.
+**Current status:** V21.3 ACTIVE — 4 audits. Causal structure is primary; tau is a secondary coordinate. Branch: `v21.0-boundary-dynamics-theory`.
 
 **V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
 
@@ -2479,4 +2485,4 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-28. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V21.2.*
+TRM/TQM project from Clockwork Cosmology V1 through V21.3.*
