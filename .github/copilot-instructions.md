@@ -9,6 +9,32 @@
 - For xUnit in this project, long-running tests must be excluded from default test runs and executed only when explicitly required, as individual long-running tests may take minutes to up to one hour.
 - Long calculation tests should be skipped by default and only run in an explicit long-running test mode.
 - **Performance optimization:** When writing or modifying tests that contain many independent loop iterations (e.g., seed sweeps, parameter scans, variant comparisons), use `Parallel.For`, `Parallel.ForEach`, or `Parallel.Invoke` to distribute work across CPU cores. Collect results in thread-safe collections (`ConcurrentDictionary`, `ConcurrentBag`), then output sequentially after parallel work completes. This is especially important for tests tagged `LongRunning`.
+
+  **Parallel output pattern (preferred):** Never use `lock(_o) _o.WriteLine(...)` inside parallel loops — this serializes work and causes contention. Instead, collect output strings into a `ConcurrentDictionary<int, string>` keyed by `Interlocked.Increment(ref counter)`, then emit in order after parallel work completes:
+  ```csharp
+  var outputRows = new ConcurrentDictionary<int, string>();
+  int rowIdx = 0;
+  Parallel.ForEach(items, item => {
+      // ... compute ...
+      int r = Interlocked.Increment(ref rowIdx);
+      outputRows[r] = $"  result: {value}";
+  });
+  foreach (var kv in outputRows.OrderBy(k => k.Key))
+      _o.WriteLine(kv.Value);
+  ```
+
+  **Output volume (critical):** Minimize I/O in long-running tests. Use `StringBuilder` to accumulate all output, then emit once: `_o.WriteLine(sb.ToString())`. A single `WriteLine` call is orders of magnitude faster than hundreds of individual calls. This applies to both sequential and parallel sections.
+
+  **Parallel architecture pattern:** When processing multiple architectures at multiple resolutions, use sequential outer loops (one per architecture) with `Parallel.ForEach` inside for resolution-level parallelism. Do NOT use nested `Parallel.Invoke` wrapping calls that themselves contain `Parallel.For` — this causes thread explosion and process crashes. Inner `Build3DGraph` already uses `Parallel.For` internally.
+  ```csharp
+  foreach (var (arch, fam, sizes) in architectures)
+  {
+      Parallel.ForEach(sizes, nGrid => { /* build, measure, collect */ });
+      // emit ordered output for this architecture
+  }
+  ```
+
+  **Thread-safe collections for results:** Use `ConcurrentBag<T>` for accumulating result objects from parallel work. Avoid `lock`-guarded `List<T>.Add()` inside parallel regions.
 - TRM.Tests is intentionally used as a fast calculation/audit harness rather than a classic unit-test suite; many green assertions (including `Assert.True(true)`) are intentional and not meant as strict behavioral verification.
 
 ## Shared Code Organization
