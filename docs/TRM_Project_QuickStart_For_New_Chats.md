@@ -1,20 +1,25 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.01
+**Version:** 7.02
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V22.1 TICK METRIC INVARIANCE — ACTIVE (TMI_01)
+V22.2 SPACE-TIME METRIC — ACTIVE (STM_01)
 
 CURRENT BRANCH
 v22.0-temporal-emergence-theory
 
-V22.1 SYNTHESIS
-TMI_01 (SUPPORTED): Tick IS the primitive temporal unit.
-dt_tick = avgPath/(v_max*Tick) is resolution-invariant and
-architecture-invariant. Temporal intervals = Tick counts.
-Per-hop temporal cost is constant. Proto-temporal metric:
-ds = v_bound * Tick * dT.
+V22 SYNTHESIS
+Temporal intervals are NOT fundamental. They emerge from
+propagation over boundary-generated geometry. Tick is the
+primitive temporal unit and the universal propagation bound
+provides the space-time conversion factor.
+
+ds = v_bound · Tick · dT
+
+V22.0 TPI_01 — Time emerges from propagation (SUPPORTED)
+V22.1 TMI_01 — Tick is primitive (SUPPORTED)
+V22.2 STM_01 — Unified metric emerges (SUPPORTED)
 
 ---
 

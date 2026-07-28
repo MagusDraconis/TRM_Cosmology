@@ -25,9 +25,15 @@ For any new LLM chat or Copilot session, read in this order:
 V20 CLOSED. V21 CLOSED. V22.2 ACTIVE (STM_01). TRM propagation
 geometry defines a unified space-time metric. ds^2/(v_bound^2*Tick^2)
 is invariant under refinement (CV<0.25) and architecture-independent.
-Best metric form: ds^2/(v^2*T^2) is constant. Spatial intervals (ds)
-and temporal intervals (dT) are linked through v_bound and Tick.
-Complete chain: Adjacency -> Propagation -> v_bound -> Tick -> Metric.
+
+V22 FINAL PRINCIPLE
+Temporal intervals are not fundamental.
+They emerge from propagation over boundary-generated geometry.
+Tick is the primitive temporal unit and the
+universal propagation bound provides the
+space-time conversion factor.
+
+ds = v_bound · Tick · dT
 
 ---
 

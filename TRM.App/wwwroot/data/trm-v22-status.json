@@ -1,23 +1,24 @@
 {
-  "releaseStatus": "V22.1 TICK METRIC INVARIANCE — ACTIVE",
-  "phase": "Temporal Emergence Theory — Tick is the primitive temporal unit",
+  "releaseStatus": "V22.2 SPACE-TIME METRIC — ACTIVE",
+  "phase": "Temporal Emergence Theory — space-time metric emerges from propagation geometry",
   "date": "2026-07-28",
-  "testSummary": { "total": 3993, "passed": 3993, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V22 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "testSummary": { "total": 3994, "passed": 3994, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V22 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
   "suites": [
     { "name": "V22_0_TemporalPropagationInvariant", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
-    { "name": "V22_1_TickMetricInvariance", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V22_1_TickMetricInvariance", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V22_2_SpaceTimeMetric", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
     "Temporal Propagation Invariant: time emerges from propagation geometry alone (TPI_01)",
+    "Tick Metric Invariance: Tick is the primitive temporal unit (TMI_01)",
+    "Space-Time Metric: ds^2/(v_bound^2*Tick^2) is invariant — unified metric emerges (STM_01)",
     "Tick = mean|d(VarI1+VarTerms)/da| measures intrinsic change rate",
     "v_max/Tick maps propagation to Tick units (cross-arch CV < 0.30)",
-    "distance/Tick is constant across resolutions and architectures",
-    "Proto-temporal metric: dt = ds / v_bound",
-    "Tick Metric Invariance: Tick is the primitive temporal unit (TMI_01)",
-    "dt_tick = avgPath/(v_max*Tick) is resolution-invariant (within-arch CV < 0.20)",
-    "dt_tick is architecture-invariant (cross-arch CV < 0.25)",
+    "dt_tick = avgPath/(v_max*Tick) is resolution-invariant and architecture-invariant",
     "Temporal intervals reduce to Tick counts: T = n_hops * dt_per_hop",
-    "Proto-temporal metric complete: ds = v_bound * Tick * dT"
+    "Proto-temporal metric: ds = v_bound * Tick * dT",
+    "V22 FINAL PRINCIPLE: Temporal intervals are NOT fundamental. They emerge from propagation over boundary-generated geometry. Tick is the primitive temporal unit and the universal propagation bound provides the space-time conversion factor.",
+    "ds^2/(v_bound^2*Tick^2) is invariant under refinement and architecture-independent"
   ],
   "hypotheses": [
     "Proto-temporal dynamics: can time-evolution equations be derived from Tick metric?",
