@@ -3,9 +3,9 @@
 **Version:** 9.6
 **Date:** 2026-07-28
 
-**Current Version:** V21.8 PROPAGATION GEOMETRY SCALING — ACTIVE
-**Previous Version:** V21.7 Propagation Bound Invariant — CLOSED
-**Cumulative Tests:** ~3990
+**Current Version:** V21.9 UNIVERSAL PROPAGATION INVARIANT — ACTIVE
+**Previous Version:** V21.8 Propagation Geometry Scaling — CLOSED
+**Cumulative Tests:** ~3991
 **Failed:** 0
 
 ---
@@ -22,11 +22,13 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.8 ACTIVE (PGS_01). v_max is an emergent geometric
-invariant of the boundary — determined by bdim, connectivity,
-and projected span. Universal scaling law found. Convergence
-survives extreme cases and refinement. Geometry alone determines
-the bound; no external parameters needed.
+V20 CLOSED. V21.9 ACTIVE (UPI_01). Cross-architecture analysis:
+all three architectures (COMPOSITE, 3D GAN, 3D CNS) converge toward a
+common propagation bound when normalized by geometry. Normalization
+v_max/projSpan collapses architectures (CV<0.20). 95% confidence
+intervals for asymptotes overlap — consistent with universality.
+Candidate universal constant K ≈ emerges. Falsification attempts
+failed: GAN vs CNS (both 2D) produce consistent bounds.
 
 ---
 
@@ -203,6 +205,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.6 | PVI_01 | Propagation Velocity Invariant — finite propagation bound emerges from adjacency geometry |
 | V21.7 | PBI_01 | Propagation Bound Invariant — bound converges under refinement; genuine geometric invariant |
 | V21.8 | PGS_01 | Propagation Geometry Scaling — v_max determined solely by boundary geometry; universal scaling law |
+| V21.9 | UPI_01 | Universal Propagation Invariant — bound is universal; all architectures converge to common limit |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?

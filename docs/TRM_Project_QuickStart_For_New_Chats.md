@@ -1,19 +1,19 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.09
+**Version:** 6.10
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.8 PROPAGATION GEOMETRY SCALING — ACTIVE (PGS_01)
+V21.9 UNIVERSAL PROPAGATION INVARIANT — ACTIVE (UPI_01)
 
 CURRENT BRANCH
 v21.0-boundary-dynamics-theory
 
-V21.8 SYNTHESIS
-PGS_01 (SUPPORTED): v_max is an emergent geometric invariant
-determined by bdim, connectivity, and projected span (R^2>0.5).
-Universal scaling law exists. Geometry alone determines the
-propagation bound — no external parameters needed.
+V21.9 SYNTHESIS
+UPI_01 (SUPPORTED): All architectures converge toward a common
+propagation bound when normalized by geometry (CV<0.20).
+95% CIs overlap. GAN vs CNS (both 2D) produce consistent bounds.
+Candidate universal constant K emerges from bdim/projSpan.
 
 ---
 

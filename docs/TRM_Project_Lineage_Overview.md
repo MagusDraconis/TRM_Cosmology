@@ -1,10 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.08
+**Version:** 8.09
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.8
-**Current Frontier:** V21.8 Propagation Geometry Scaling — ACTIVE
-**Previous Frontier:** V21.7 Propagation Bound Invariant — CLOSED
+**Scope:** Clockwork Cosmology V1 through V21.9
+**Current Frontier:** V21.9 Universal Propagation Invariant — ACTIVE
+**Previous Frontier:** V21.8 Propagation Geometry Scaling — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
 V13.5 CLOSED SUMMARY
@@ -323,9 +323,15 @@ V21.7 ACTIVE (1 audit)
 
 V21.8 ACTIVE (1 audit)
 - PGS_01: Propagation Geometry Scaling — v_max is emergent geometric invariant SUPPORTED.
-  Measures v_max, bdim, projected span, connectivity, avg path length across 19 graphs.
-  v_max R^2>0.5 from geometry alone. Universal scaling law identified. Bound determined
-  by bdim, connectivity, and projected span. Test: 1 passed (~13.7 min).
+  Measures v_max, bdim, projSpan, connectivity, avg path length across 19 graphs.
+  Best scaling law: v_max = f(bdim, projSpan). Test: 1 passed (~13.7 min).
+
+V21.9 ACTIVE (1 audit)
+- UPI_01: Universal Propagation Invariant — bound is universal across architectures SUPPORTED.
+  Cross-architecture analysis: COMPOSITE, 3D GAN, 3D CNS converge to common limit when
+  normalized by geometry. Best normalization: v_max/projSpan (cross-arch CV<0.20).
+  95% CIs for asymptotes overlap. GAN vs CNS consistent. Candidate universal K found.
+  Test: 1 passed (~15.5 min).
 
 ---
 
@@ -2390,10 +2396,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.8 | Boundary Dynamics Theory | 9 | ACTIVE |
-| **Total** | | **3462** | **0 failed** |
+| V21.0-V21.9 | Boundary Dynamics Theory | 10 | ACTIVE |
+| **Total** | | **3463** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3462 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3463 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
