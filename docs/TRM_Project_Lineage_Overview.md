@@ -1,9 +1,9 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.02
+**Version:** 8.03
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.1
-**Current Frontier:** V21.1 Intrinsic Dynamics Principle — ACTIVE
+**Scope:** Clockwork Cosmology V1 through V21.2
+**Current Frontier:** V21.2 Proto-Time Uniqueness — ACTIVE
 **Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
@@ -273,6 +273,18 @@ V21.1 ACTIVE (1 audit)
   Propagation is dimension-dependent (1D vs 2D boundaries differ).
   Emergence chain extended: KTC → ... → Symmetry → Propagation → Ordering → Proto-time.
   Test: 1 passed, 0 failed. LongRunning (~10.5 min).
+
+---
+
+V21.2 ACTIVE (1 audit)
+- PTU_01: Proto-Time Uniqueness — tau partially invariant SUPPORTED.
+  Four tau construction methods compared: BFS, degree-weighted Dijkstra,
+  diffusion Monte Carlo (first-passage), wavefront with processing delay.
+  Causal structure and monotonicity are the MOST stable properties across
+  methods. Proto-time has a HARD CORE (causal + monotonic) that is geometric
+  and a SOFT SHELL (exact values, layer boundaries) that depends on propagation rule.
+  Compared via Spearman rank, layer Jaccard, causal agreement, edge monotonicity.
+  Test: 1 passed, 0 failed. LongRunning (~10.5 min, MC diffusion).
 
 ---
 
@@ -2337,10 +2349,10 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.1 | Boundary Dynamics Theory | 2 | ACTIVE |
-| **Total** | | **3455** | **0 failed** |
+| V21.0-V21.2 | Boundary Dynamics Theory | 3 | ACTIVE |
+| **Total** | | **3456** | **0 failed** |
 
-Note: Test counts represent version-specific test suites. The cumulative total of 3455 verified
+Note: Test counts represent version-specific test suites. The cumulative total of 3456 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
 
 ---
@@ -2455,7 +2467,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V21.1 ACTIVE — 2 audits (BDP_01 + IDP_01). Boundary Dynamics Theory. Dynamics emerges from intrinsic geometry; proto-time emerges as BFS ordering parameter. Branch: `v21.0-boundary-dynamics-theory`.
+**Current status:** V21.2 ACTIVE — 3 audits (BDP_01 + IDP_01 + PTU_01). Boundary Dynamics Theory. Proto-time partially invariant: causal structure is the hard geometric core. Branch: `v21.0-boundary-dynamics-theory`.
 
 **V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
 
@@ -2467,4 +2479,4 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-28. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V21.1.*
+TRM/TQM project from Clockwork Cosmology V1 through V21.2.*

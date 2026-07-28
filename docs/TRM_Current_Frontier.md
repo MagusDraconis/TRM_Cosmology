@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 9.2
+**Version:** 9.3
 **Date:** 2026-07-28
 
-**Current Version:** V21.1 INTRINSIC DYNAMICS PRINCIPLE — ACTIVE
+**Current Version:** V21.2 PROTO-TIME UNIQUENESS — ACTIVE
 **Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
-**Cumulative Tests:** ~3983
+**Cumulative Tests:** ~3984
 **Failed:** 0
 
 ---
@@ -22,11 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.1 ACTIVE (IDP_01). Dynamics emerges from intrinsic
-geometry alone — no external time assumed. Proto-time emerges as BFS
-distance (tau) from a reference source on the boundary graph. Tau is
-monotonic, transitive, irreversible, and defines light cones and a
-partial causal order. Propagation is dimension-dependent.
+V20 CLOSED. V21.2 ACTIVE (PTU_01). Proto-time tau is partially
+invariant across propagation methods (BFS, degree-weighted, diffusion,
+wavefront). Causal structure and monotonicity are the MOST stable
+properties — they survive method changes. Proto-time has a hard
+geometric core (causal + monotonic) and a soft algorithm-dependent
+shell (exact tau values, layer boundaries).
 
 ---
 
@@ -196,6 +197,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 |:--------|:-------|:-----------|
 | V21.0 | BDP_01 | Boundary Dynamics Principle — intrinsic propagation, geodesic preference, dimension dependence |
 | V21.1 | IDP_01 | Intrinsic Dynamics Principle — dynamics emerges from geometry, proto-time emerges as BFS ordering |
+| V21.2 | PTU_01 | Proto-Time Uniqueness — tau partially invariant; causal core survives method changes |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?
@@ -307,4 +309,4 @@ Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11 audits). V21 ACTIVE (2 audits): BDP_01 + IDP_01.*
+*Generated 2026-07-28. V20 CLOSED (11 audits). V21 ACTIVE (3 audits): BDP_01 + IDP_01 + PTU_01.*

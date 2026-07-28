@@ -1,19 +1,20 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 6.02
+**Version:** 6.03
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V21.1 INTRINSIC DYNAMICS PRINCIPLE — ACTIVE (IDP_01)
+V21.2 PROTO-TIME UNIQUENESS — ACTIVE (PTU_01)
 
 CURRENT BRANCH
 v21.0-boundary-dynamics-theory
 
-V21.1 SYNTHESIS
-IDP_01 (SUPPORTED): Dynamics emerges from intrinsic geometry alone.
-Proto-time tau = BFS distance from source is monotonic, transitive,
-irreversible, and defines light cones and a partial causal order.
-Propagation is dimension-dependent. No external time assumed.
+V21.2 SYNTHESIS
+PTU_01 (SUPPORTED): Proto-time tau is partially invariant across
+4 methods (BFS, degree-weighted, diffusion MC, wavefront). Causal
+structure and monotonicity survive method changes — they form the
+hard geometric core. Exact tau values and layer boundaries depend
+on propagation rule — they form the soft algorithm-dependent shell.
 
 ---
 
@@ -61,9 +62,9 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
 | V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
 | V20.0-V20.10 | Boundary Geometry Theory (CLOSED) | Geometry is primary; intrinsic metric, dimension, curvature, homogeneity, symmetry |
-| V21.0-V21.1 | Boundary Dynamics Theory (ACTIVE) | BDP_01 + IDP_01: intrinsic propagation, proto-time emergence |
+| V21.0-V21.2 | Boundary Dynamics Theory (ACTIVE) | BDP_01 + IDP_01 + PTU_01: proto-time uniqueness, causal invariance |
 
-**Cumulative total: ~3983 tests, 0 failed.**
+**Cumulative total: ~3984 tests, 0 failed.**
 
 ---
 
@@ -119,4 +120,4 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED. V21 ACTIVE: BDP_01 + IDP_01 (2 audits, proto-time emergence).*
+*Generated 2026-07-28. V20 CLOSED. V21 ACTIVE: 3 audits (BDP_01 + IDP_01 + PTU_01).*
