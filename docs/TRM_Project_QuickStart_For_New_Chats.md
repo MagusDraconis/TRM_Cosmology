@@ -1,20 +1,20 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.00
+**Version:** 7.01
 **Date:** 2026-07-28
 
 CURRENT VERSION
-V22.0 TEMPORAL PROPAGATION INVARIANT — ACTIVE (TPI_01)
+V22.1 TICK METRIC INVARIANCE — ACTIVE (TMI_01)
 
 CURRENT BRANCH
 v22.0-temporal-emergence-theory
 
-V22.0 SYNTHESIS
-TPI_01 (SUPPORTED): Propagation geometry defines an intrinsic
-temporal scale. Tick = mean|d(VarI1+VarTerms)/da| measures change
-rate. v_max/Tick maps propagation to Tick units. distance/Tick is
-constant. Proto-temporal metric: dt = ds / v_bound. Time emerges
-from propagation geometry — no external time parameter needed.
+V22.1 SYNTHESIS
+TMI_01 (SUPPORTED): Tick IS the primitive temporal unit.
+dt_tick = avgPath/(v_max*Tick) is resolution-invariant and
+architecture-invariant. Temporal intervals = Tick counts.
+Per-hop temporal cost is constant. Proto-temporal metric:
+ds = v_bound * Tick * dT.
 
 ---
 

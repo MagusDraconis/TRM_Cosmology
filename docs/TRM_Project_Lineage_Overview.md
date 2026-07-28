@@ -1,10 +1,10 @@
 # TRM Project Lineage Overview
 
-**Version:** 9.00
+**Version:** 9.01
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V22.0
-**Current Frontier:** V22.0 Temporal Propagation Invariant — ACTIVE
-**Previous Frontier:** V21.9 Universal Propagation Invariant — CLOSED
+**Scope:** Clockwork Cosmology V1 through V22.1
+**Current Frontier:** V22.1 Tick Metric Invariance — ACTIVE
+**Previous Frontier:** V22.0 Temporal Propagation Invariant — CLOSED
 **Current Branch:** v22.0-temporal-emergence-theory
 
 V13.5 CLOSED SUMMARY
@@ -343,6 +343,13 @@ V22.0 ACTIVE (1 audit)
   v_max/Tick maps propagation to Tick units (cross-arch CV<0.30). distance/Tick is
   reasonably constant. Proto-temporal metric: dt = ds / v_bound. Time emerges from
   propagation geometry alone. Test: 1 passed (~16.1 min).
+
+V22.1 ACTIVE (1 audit)
+- TMI_01: Tick Metric Invariance — Tick is primitive temporal unit SUPPORTED.
+  dt_tick = avgPath/(v_max*Tick) is resolution-invariant (within-arch CV<0.20)
+  and architecture-invariant (cross-arch CV<0.25). Per-hop temporal cost constant.
+  Temporal intervals reduce to Tick counts. Proto-temporal metric: ds = v_bound * Tick * dT.
+  Test: 1 passed (~14.3 min).
 
 ---
 
@@ -2407,8 +2414,8 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V22.0 | Temporal Emergence Theory | 1 | ACTIVE |
-| **Total** | | **3464** | **0 failed** |
+| V22.0-V22.1 | Temporal Emergence Theory | 2 | ACTIVE |
+| **Total** | | **3465** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3464 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
