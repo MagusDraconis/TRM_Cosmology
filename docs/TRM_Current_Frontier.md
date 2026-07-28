@@ -1,11 +1,11 @@
 # TRM Current Frontier
 
-**Version:** 9.4
+**Version:** 9.5
 **Date:** 2026-07-28
 
-**Current Version:** V21.3 CAUSAL STRUCTURE INVARIANT — ACTIVE
+**Current Version:** V21.4 REACHABILITY CAUSALITY INVARIANT — ACTIVE
 **Previous Version:** V20.10 Symmetry Generation Structure — CLOSED
-**Cumulative Tests:** ~3985
+**Cumulative Tests:** ~3986
 **Failed:** 0
 
 ---
@@ -22,12 +22,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21.3 ACTIVE (CSI_01). Causal structure is PRIMARY —
-derived from graph reachability without any tau. Tau is SECONDARY —
-a scalar coordinate labeling the causal graph. The causal CORE
-(pairs ordered the same way across all 4 propagation methods) is
-large and survives method changes. Emergence: Adjacency → Reachability
-(causal structure) → Tau (proto-time coordinate).
+V20 CLOSED. V21.4 ACTIVE (RCI_01). Causality IS reachability:
+R_s(u,v) ≡ d(s,u) < d(s,v) defined purely from BFS distance on the
+boundary graph. Proto-time tau can be ELIMINATED — it is a redundant
+scalar coordinate that approximates reachability. Tie-breaking on
+equal-distance nodes is method-dependent (arbitrary). Complete
+emergence: Adjacency → Distance → Reachability (causal structure).
 
 ---
 
@@ -199,6 +199,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V21.1 | IDP_01 | Intrinsic Dynamics Principle — dynamics emerges from geometry, proto-time emerges as BFS ordering |
 | V21.2 | PTU_01 | Proto-Time Uniqueness — tau partially invariant; causal core survives method changes |
 | V21.3 | CSI_01 | Causal Structure Invariant — causality primary (reachability), tau secondary (coordinate) |
+| V21.4 | RCI_01 | Reachability Causality Invariant — causality IS reachability; tau eliminated |
 
 Research question:
 > Can intrinsic geometry support propagation, flow, or dynamics?
@@ -310,4 +311,4 @@ Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11 audits). V21 ACTIVE (4 audits): BDP + IDP + PTU + CSI.*
+*Generated 2026-07-28. V20 CLOSED (11 audits). V21 ACTIVE (5 audits): BDP+IDP+PTU+CSI+RCI.*

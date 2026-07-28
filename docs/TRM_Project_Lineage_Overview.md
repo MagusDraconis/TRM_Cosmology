@@ -1,9 +1,9 @@
 # TRM Project Lineage Overview
 
-**Version:** 8.04
+**Version:** 8.05
 **Date:** 2026-07-28
-**Scope:** Clockwork Cosmology V1 through V21.3
-**Current Frontier:** V21.3 Causal Structure Invariant — ACTIVE
+**Scope:** Clockwork Cosmology V1 through V21.4
+**Current Frontier:** V21.4 Reachability Causality Invariant — ACTIVE
 **Previous Frontier:** V20.10 Symmetry Generation Structure — CLOSED
 **Current Branch:** v21.0-boundary-dynamics-theory
 
@@ -291,6 +291,15 @@ V21.3 ACTIVE (1 audit)
   Emergence: Adjacency → Reachability (causal) → Tau (coordinate).
   Compared via pairwise Jaccard, agreement rate, consensus (≥3/4), core (4/4).
   Test: 1 passed, 0 failed. LongRunning (~10.3 min, causal pair sets).
+
+V21.4 ACTIVE (1 audit)
+- RCI_01: Reachability Causality Invariant — causality = reachability SUPPORTED.
+  R_s(u,v) ≡ d(s,u) < d(s,v) defined purely from BFS distance. Compared reachability
+  against 4 tau-based methods via Jaccard, FPR, FNR, transitivity, tie-breaking.
+  Causality IS reachability. Proto-time tau can be ELIMINATED — it is a redundant
+  scalar coordinate. Tie-breaking on equal-distance nodes is method-dependent
+  (arbitrary). Complete emergence: Adjacency → Distance → Reachability (causal).
+  Test: 1 passed, 0 failed. LongRunning (~10.4 min).
 
 ---
 
@@ -2355,8 +2364,8 @@ maintained to prevent overinterpretation:
 | V13.4 | Multidimensional Tick Space | 1 | COMPLETE |
 | V13.5 | Tick Source Theory | 10 | COMPLETE |
 | V20.0-V20.10 | Boundary Geometry Theory | 11 | COMPLETE |
-| V21.0-V21.3 | Boundary Dynamics Theory | 4 | ACTIVE |
-| **Total** | | **3457** | **0 failed** |
+| V21.0-V21.4 | Boundary Dynamics Theory | 5 | ACTIVE |
+| **Total** | | **3458** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3457 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.
@@ -2473,7 +2482,7 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V21.3 ACTIVE — 4 audits. Causal structure is primary; tau is a secondary coordinate. Branch: `v21.0-boundary-dynamics-theory`.
+**Current status:** V21.4 ACTIVE — 5 audits. Causality = reachability; proto-time eliminated. Branch: `v21.0-boundary-dynamics-theory`.
 
 **V20 complete chain (11 audits):** KTC → φ → φ⁻¹(0) → Boundary → Intrinsic Metric → Geodesics → Intrinsic Dimension → Local Geometry → Curvature → Homogeneity → Symmetry. Every step emerges without assuming space beforehand.
 
@@ -2485,4 +2494,4 @@ equations, dark matter replacement, physical theory proven.
 ---
 
 *Generated 2026-07-28. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V21.3.*
+TRM/TQM project from Clockwork Cosmology V1 through V21.4.*
