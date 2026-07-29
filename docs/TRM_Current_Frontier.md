@@ -5,7 +5,7 @@
 
 **Current Version:** V31.0 ROTATION CURVE CORRESPONDENCE — ACTIVE
 **Previous Version:** V30.7 Baryonic Test Robustness — CLOSED
-**Cumulative Tests:** ~4035
+**Cumulative Tests:** ~4036
 **Failed:** 0
 
 ---
@@ -327,7 +327,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V31.0 | — | Starting — compare individual SPARC rotation curves to TRM propagation |
+| V31.0 | RTC_01 | Rotation Curve Correspondence — 72% shape agreement; r=0.83 slope correlation |
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM
