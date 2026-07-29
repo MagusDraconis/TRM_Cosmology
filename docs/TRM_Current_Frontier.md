@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V29.3 TRM UNIQUE CORE — ACTIVE
-**Previous Version:** V29.2 Sign Universality — CLOSED
-**Cumulative Tests:** ~4026
+**Current Version:** V29.4 DATA DIFFERENTIATION — ACTIVE
+**Previous Version:** V29.3 TRM Unique Core — CLOSED
+**Cumulative Tests:** ~4027
 **Failed:** 0
 
 ---
@@ -308,6 +308,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V29.1 | UBO_01 | Universal Bound Origin — universality from codim-1 + boundary thickness |
 | V29.2 | SUA_01 | Sign Universality — TRM sign uniquely powerful: 6/6 vs next-best 3/6 |
 | V29.3 | TUC_01 | TRM Unique Core — 9 results classified; 5 TRM-UNIQUE, 4 viable targets |
+| V29.4 | DDP_01 | Data Differentiation Path — TRM differs from BOTH generic geometry AND GR |
 
 Research question:
 > Can the TRM propagation bound v_max be measured or constrained
