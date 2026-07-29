@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V28.4 BOUNDARY GEOMETRY SUFFICIENCY — ACTIVE
-**Previous Version:** V28.3 Geometry Axiom Theorem — CLOSED
-**Cumulative Tests:** ~4021
+**Current Version:** V28.5 PROPAGATION DOMAIN SEPARATION — ACTIVE
+**Previous Version:** V28.4 Boundary Geometry Sufficiency — CLOSED
+**Cumulative Tests:** ~4022
 **Failed:** 0
 
 ---
@@ -297,6 +297,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V28.2 | UPT_01 | Universal Propagation Theorem — v_max partially promoted from CONTINGENT to NECESSARY |
 | V28.3 | GAT_01 | Geometry Axiom Theorem — geometry appears at step 2 (boundary surface); unavoidable |
 | V28.4 | BGS_01 | Boundary Geometry Sufficiency — boundary alone generates ALL spatial; Tick adds temporal |
+| V28.5 | PDS_01 | Propagation Domain Separation — propagation is bridge: spatial core + temporal bridge |
 
 Research question:
 > What are the full consequences of the two-axiom foundation?
