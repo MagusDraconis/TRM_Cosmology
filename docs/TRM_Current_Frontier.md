@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V31.9 TICK GRADIENT SCALING — ACTIVE
-**Previous Version:** V31.8 Amplitude Missing Factor — CLOSED
+**Current Version:** V32.0 REAL TICK DYNAMICS — ACTIVE
+**Previous Version:** V31.9 Tick Gradient Scaling — CLOSED
 **Cumulative Tests:** ~4045
 **Failed:** 0
 
@@ -24,12 +24,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
 V25 CLOSED. V26 CLOSED. V27 CLOSED. V28 CLOSED. V29 CLOSED.
-V30 CLOSED. V31.0 ACTIVE. V30 First Contact With Data — 8 audits,
-8 SUPPORTED. Density primacy established: BARYON+MIXED=85.4%
-(robust under threshold variation). TRM confronted with real
-SPARC data. V31.0 begins: Rotation Curve Correspondence —
-can individual SPARC rotation curves be compared to TRM
-propagation profiles?
+V30 CLOSED. V31 CLOSED. V32.0 ACTIVE. V31 Rotation Curve
+Correspondence — 10 audits, 10 SUPPORTED. Full pipeline:
+shape prediction, density viability, flow channels, failure
+analysis, two-layer model, amplitude factor. V32.0 begins:
+Real Tick Dynamics — deploy real TRM Tick computation from
+oscillator dynamics to galactic data.
 
 ---
 
@@ -321,7 +321,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V30.6 | BRN_01 | Baryonic Raw Numbers — exact counts: BARYON=66, MIXED=80, DM=25, B+M=85.4% |
 | V30.7 | RBT_01 | Baryonic Test Robustness — B+M=[71.9%,85.4%] across 4 threshold sets |
 
-## V31 Program (ACTIVE)
+## V31 Program (CLOSED)
 
 **Rotation Curve Correspondence**
 
@@ -337,6 +337,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.7 | SAC_01 | Spiral Arm Channel — disk-channel correlation r=0.03; need 2D density maps |
 | V31.8 | AMF_01 | Amplitude Missing Factor — density gradient strength r=-0.72; dominates amplitude |
 | V31.9 | TGS_01 | Tick Gradient Scaling — simple proxy insufficient (-3.5%); needs real Tick |
+
+## V32 Program (ACTIVE)
+
+**Real Tick Dynamics**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V32.0 | — | Starting — deploy real TRM Tick from oscillator dynamics to galactic data |
+
+Research question:
+> Can real TRM Tick (computed from oscillator dynamics via
+> ComputeFull) resolve the amplitude scaling problem identified
+> in V31? Does the two-layer model complete with proper Tick?
+
+Candidate chain:
+```
+{sign, Tick} → v_max → rotation curves → shape (gradient) → amplitude (Tick)
+```
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM

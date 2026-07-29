@@ -1,10 +1,32 @@
 {
-  "releaseStatus": "V31.0 ROTATION CURVE CORRESPONDENCE — ACTIVE",
+  "releaseStatus": "V31.9 TICK GRADIENT SCALING — V31 CLOSED",
   "phase": "Rotation Curve Correspondence — comparing individual SPARC rotation curves to TRM propagation profiles",
   "date": "2026-07-29",
-  "testSummary": { "total": 4035, "passed": 4035, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V31 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4045, "passed": 4045, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V31 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "name": "V31_0_RotationCurveCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_1_GravityDifferentiation", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_2_FlowChannelPrediction", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_3_FlowChannelFailure", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_4_DmGalaxyMorphology", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_5_LowSurfaceBrightnessFailure", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_6_GeometryStrengthSeparation", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_7_SpiralArmChannel", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_8_AmplitudeMissingFactor", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V31_9_TickGradientScaling", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Rotation Curve: 72% shape agreement; r=0.83 slope correlation (RTC_01)",
+    "Gravity Differentiation: density viable without DM (GDC_01)",
+    "Flow Channel: strong alignment r=0.65; partial structure (FCP_01)",
+    "Channel Failure: DM galaxies show weaker channels (FCF_01)",
+    "DM Morphology: DM = LSB dwarfs (vFlat 80 vs 173, SB 581 vs 20952) (DMG_01)",
+    "LSB Failure: shape 80% works, amplitude 5.7% fails in Very LSB (LSB_01)",
+    "Two-Layer Model: shape 72% vs amp 29%; r=-0.12 decorrelated (GSA_01)",
+    "Spiral Arm: 1D correlation r=0.03; 2D maps needed (SAC_01)",
+    "Amplitude Factor: gradient strength r=-0.72 dominates (AMF_01)",
+    "Tick Scaling: simple proxy insufficient; real Tick needed (TGS_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Individual fit: can TRM v_max be extracted from individual SPARC rotation curves?",
@@ -42,8 +64,8 @@
     "nextBranch": "v31-rotation-curve",
     "previousBranch": "v30-first-contact",
     "tag": "v30-first-contact",
-    "candidateDynamicsChain": "{sign, Tick} → v_max → Density Primacy → Rotation Curves",
-    "keyConstants": { "b_plus_m_pct": 85.4, "baryon_count": 66, "mixed_count": 80, "dm_count": 25 }
+    "candidateDynamicsChain": "Density → Shape (r=0.83) → Amplitude (r=-0.72) → Tick (needed)",
+    "keyConstants": { "shape_agreement": "72%", "amp_agreement": "29%", "gradient_strength_r": -0.72 }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 10, "passedVerified": 10, "verificationMethod": "dotnet test", "mismatch": null }
 }

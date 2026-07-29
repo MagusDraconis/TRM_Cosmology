@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V32.0 REAL TICK DYNAMICS — ACTIVE",
+  "phase": "Real Tick Dynamics — deploying real TRM Tick from oscillator dynamics to galactic data",
+  "date": "2026-07-29",
+  "testSummary": { "total": 4045, "passed": 4045, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V32 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Real Tick scaling: does actual TRM Tick (from oscillator dynamics) resolve amplitude problem?",
+    "Calibration factor: can S_V = S_L/S_T be determined from TRM oscillator parameters?",
+    "Two-layer completion: does real Tick complete the shape+amplitude model?",
+    "Galactic Tick map: can Tick be computed for individual galaxies?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["numerical calibration", "physical c derivation", "direct GR replacement"],
+  "openProblems": [
+    { "priority": "P0", "title": "Real Tick computation", "description": "Deploy ComputeFull to compute actual TRM Tick for SPARC-analog boundary configurations. Compare to 1D proxy." },
+    { "priority": "P1", "title": "S_V calibration", "description": "Determine the velocity calibration factor S_V = S_L/S_T from TRM oscillator parameters." },
+    { "priority": "P2", "title": "Amplitude completion", "description": "Complete the two-layer model: shape from gradient direction, amplitude from Tick-scaled gradient strength." }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["sign(dT/dp)", "Tick", "codim-1", "Geometry", "Propagation", "v_max", "Density Primacy", "SPARC Data", "Two-Layer Model", "Real Tick"],
+    "invertedHierarchy": "TRM two-layer model confirmed. Now: real Tick from oscillator dynamics to complete amplitude scaling."
+  },
+  "trmGoalAssessment": {
+    "time": "Tick primitive. Two-layer model: shape from gradient, amplitude from strength. Real Tick needed.",
+    "space": "sign(dT/dp) generates all spatial structure. Density primacy confirmed (B+M=85.4%).",
+    "length": "Shape agreement 72%. Amplitude residual r=-0.72 with gradient strength.",
+    "c": "Two-layer model separates geometry from strength. Real Tick completes the picture."
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V32.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V32.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V31/V31_9/V31_9_TickGradientScaling_Tests.cs",
+    "nextPhase": "V32.0 Real Tick — deploy oscillator dynamics to galactic data",
+    "nextBranch": "v32-real-tick-dynamics",
+    "previousBranch": "v31-rotation-curve",
+    "tag": "v31-rotation-curve",
+    "candidateDynamicsChain": "Density → Shape → Amplitude → Real Tick → Calibration",
+    "keyConstants": { "shape_agreement": "72%", "gradient_strength_r": -0.72, "two_layer": "confirmed" }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

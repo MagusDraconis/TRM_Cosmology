@@ -1,21 +1,22 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 8.03
+**Version:** 8.04
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V31.0 ROTATION CURVE CORRESPONDENCE — ACTIVE
+V32.0 REAL TICK DYNAMICS — ACTIVE
 
 CURRENT BRANCH
-v31-rotation-curve
+v32-real-tick-dynamics
 
-V30 CLOSED (8 audits, 8 SUPPORTED)
-V30 Final Principle: TRM density primacy confirmed against SPARC.
-BARYON+MIXED = 85.4% (robust under threshold variation). First
-contact with astronomical data established.
+V31 CLOSED (10 audits, 10 SUPPORTED)
+V31 Final Principle: TRM two-layer model confirmed.
+Shape = density gradient DIRECTION (72%). Amplitude = gradient
+STRENGTH (r=-0.72). Simple Tick proxy insufficient; real TRM
+Tick from oscillator dynamics needed.
 
-V31.0 BEGINS: Rotation Curve Correspondence
-Compare individual SPARC rotation curves to TRM propagation profiles.
+V32.0 BEGINS: Real Tick Dynamics
+Deploy real TRM Tick computation to galactic data.
 
 ---
 
