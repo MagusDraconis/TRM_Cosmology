@@ -1,0 +1,50 @@
+{
+  "releaseStatus": "V26.0 OBSERVABLE CORRESPONDENCE — ACTIVE",
+  "phase": "Observable Correspondence Program — mapping TRM predictions to astronomical/cosmological observables",
+  "date": "2026-07-29",
+  "testSummary": { "total": 4007, "passed": 4007, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V26 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Galactic rotation: does TRM v_max correspond to observed galactic rotation speeds?",
+    "Cosmological expansion: does the propagation bound relate to Hubble-like expansion?",
+    "Gravitational lensing: does TRM curvature-dilation correspond to lensing observations?",
+    "CMB correspondence: does TRM boundary structure relate to CMB anisotropies?",
+    "Large-scale structure: does TRM density-curvature chain predict cosmic web patterns?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical gravity derivation", "GR replacement", "physical c derivation", "direct astronomical prediction"],
+  "openProblems": [
+    { "priority": "P0", "title": "Galactic rotation curves", "description": "Can TRM propagation bound v_max be mapped to observed flat rotation curves? Does the density-curvature-dilation chain predict the Tully-Fisher relation?" },
+    { "priority": "P1", "title": "Cosmological expansion", "description": "Does TRM propagation framework provide an alternative to dark energy? Can dT/dp gradients produce apparent acceleration?" },
+    { "priority": "P2", "title": "Gravitational lensing", "description": "Does TRM curvature correspond quantitatively to lensing deflection angles at galactic and cluster scales?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["KTC", "Constraint", "Geometry", "Propagation", "Velocity", "Bound", "Universality", "Time", "Tick", "Metric", "Causal Structure", "Curvature", "Dilation", "Density", "Sign", "Physical Correspondence", "Falsification"],
+    "invertedHierarchy": "sign(dT/dp) ∈ {+1,-1} is the deepest primitive. V25 established physical correspondence. V26 asks: can this be observed?"
+  },
+  "trmGoalAssessment": {
+    "time": "Proto-temporal metric + dilation law (V22-V23). Tick is primitive temporal unit.",
+    "space": "Intrinsic geometry (V20-V21). Curvature (V23). Density (V24). Physical correspondence (V25).",
+    "length": "ds^2/(v_bound^2*Tick^2) invariant. Universal propagation bound survives falsification.",
+    "c": "v_max is strongest candidate for physical correspondence. Now asking: is it OBSERVABLE?"
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V26.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V26.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V25/V25_3/V25_3_UniversalPropagationFalsification_Tests.cs",
+    "nextPhase": "V26.0 Observable Correspondence — can TRM predictions be observed?",
+    "nextBranch": "v26-observable-correspondence",
+    "previousBranch": "v25-physical-correspondence",
+    "tag": "v25-physical-correspondence",
+    "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Physical Correspondence -> Observable Correspondence",
+    "keyConstants": { "strongest_candidate": "v_max universality", "survivability": ">80%" }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

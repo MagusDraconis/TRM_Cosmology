@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V25.3 UNIVERSAL PROPAGATION FALSIFICATION — ACTIVE
-**Previous Version:** V25.2 Prediction Ranking — CLOSED
+**Current Version:** V26.0 OBSERVABLE CORRESPONDENCE — ACTIVE
+**Previous Version:** V25.3 Universal Propagation Falsification — CLOSED
 **Cumulative Tests:** ~4007
 **Failed:** 0
 
@@ -23,10 +23,12 @@ For any new LLM chat or Copilot session, read in this order:
 ## One-Sentence Current State
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
-V25.0 ACTIVE. V24 Connectivity Gradient Theory — 4 audits,
-4 SUPPORTED. Sign constraint established as deepest primitive.
-V25.0 begins: Physical Correspondence Program — can TRM
-structural laws be mapped to known physical phenomena?
+V25 CLOSED. V26.0 ACTIVE. V25 Physical Correspondence — 4 audits,
+4 SUPPORTED. Qualitative correspondence established. Distinctive
+predictions ranked. Propagation bound survives falsification.
+V26.0 begins: Observable Correspondence Program — can TRM
+predictions be mapped to measurable astronomical/cosmological
+observables?
 
 ---
 
@@ -244,7 +246,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V24.2 | BDO_01 | Boundary Density Origin — density derives from param/boundary dimension |
 | V24.3 | SCO_01 | Sign Constraint Origin — binary sign constraint is deepest primitive |
 
-## V25 Program (ACTIVE)
+## V25 Program (CLOSED)
 
 **Physical Correspondence Program**
 
@@ -254,6 +256,26 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V25.1 | PPD_01 | Physical Prediction Differentiator — 8 distinctive, testable, falsifiable predictions |
 | V25.2 | PRS_01 | Prediction Ranking Survivability — ranked by evidence; strongest candidate identified |
 | V25.3 | UPF_01 | Universal Propagation Falsification — bound survives extreme testing; no counterexample |
+
+## V26 Program (ACTIVE)
+
+**Observable Correspondence Program**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V26.0 | — | Starting — map TRM predictions to astronomical/cosmological observables |
+
+Research question:
+> Can TRM predictions (v_max, dilation, curvature, metric) be
+> mapped to measurable astronomical or cosmological quantities?
+> Does the TRM propagation bound correspond to an observable
+> speed limit at galactic or cosmic scales?
+
+Candidate chain:
+```
+Sign → Boundary → Density → Curvature → Dilation
+    → Physical Correspondence → Observable Correspondence?
+```
 
 Research question:
 > Can TRM structural laws (sign→boundary→density→curvature→dilation)

@@ -1,13 +1,19 @@
 {
-  "releaseStatus": "V25.0 PHYSICAL CORRESPONDENCE — ACTIVE",
+  "releaseStatus": "V25.3 UNIVERSAL PROPAGATION FALSIFICATION — V25 CLOSED",
   "phase": "Physical Correspondence Program — mapping TRM structural laws to known physics",
   "date": "2026-07-28",
-  "testSummary": { "total": 4004, "passed": 4004, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V25 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-28" },
+  "testSummary": { "total": 4007, "passed": 4007, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V25 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
   "suites": [
-    { "name": "V25_0_PhysicalCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+    { "name": "V25_0_PhysicalCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V25_1_PhysicalPredictionDifferentiator", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V25_2_PredictionRankingSurvivability", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V25_3_UniversalPropagationFalsification", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
   ],
   "supportedClaims": [
-    "Physical Correspondence: 8 TRM-physics pairs, 3 STRONG, 5 WEAK, 0 NONE (PCP_01)"
+    "Physical Correspondence: 8 TRM-physics pairs, 3 STRONG, 5 WEAK, 0 NONE (PCP_01)",
+    "Physical Prediction Differentiator: 8 distinctive, testable, falsifiable predictions (PPD_01)",
+    "Prediction Ranking: universal propagation bound is strongest candidate (PRS_01)",
+    "Universal Propagation Falsification: bound survives extreme testing; no counterexample (UPF_01)"
   ],
   "conditionalClaims": [],
   "hypotheses": [
@@ -46,8 +52,8 @@
     "nextBranch": "v25-physical-correspondence",
     "previousBranch": "v24.0-connectivity-gradient",
     "tag": "v24.0-connectivity-gradient",
-    "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Physical Correspondence",
-    "keyConstants": { "strong_correspondences": 3, "total_pairs_evaluated": 8 }
+    "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Physical Correspondence -> Falsification Survival",
+    "keyConstants": { "strong_correspondences": 3, "survivability_score": ">80%", "unique_predictions": 8 }
   },
-  "releaseIntegrity": { "totalTestsVerified": 1, "passedVerified": 1, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 4, "passedVerified": 4, "verificationMethod": "dotnet test", "mismatch": null }
 }

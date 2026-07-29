@@ -1,20 +1,22 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.06
-**Date:** 2026-07-28
+**Version:** 7.07
+**Date:** 2026-07-29
 
 CURRENT VERSION
-V25.0 PHYSICAL CORRESPONDENCE — ACTIVE
+V26.0 OBSERVABLE CORRESPONDENCE — ACTIVE
 
 CURRENT BRANCH
-v25-physical-correspondence
+v26-observable-correspondence
 
-V24 CLOSED (4 audits, 4 SUPPORTED)
-V24 Final Principle: sign(dT/dp) ∈ {+1,-1} is the deepest
-primitive. Chain: sign -> boundary -> density -> curvature -> dilation.
+V25 CLOSED (4 audits, 4 SUPPORTED)
+V25 Final Principle: TRM exhibits qualitative structural isomorphism
+with known physics. Universal propagation bound survives extreme
+falsification testing. 8 distinctive, falsifiable predictions.
 
-V25.0 BEGINS: Physical Correspondence Program
-Can TRM structural laws be mapped to physical phenomena?
+V26.0 BEGINS: Observable Correspondence Program
+Can TRM predictions be mapped to measurable astronomical
+or cosmological observables?
 
 ---
 
