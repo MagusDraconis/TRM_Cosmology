@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V26.3 INDEPENDENT CONVERGENCE — ACTIVE
-**Previous Version:** V26.2 Universal Bound Correspondence — CLOSED
-**Cumulative Tests:** ~4011
+**Current Version:** V26.4 CROSS-SYSTEM CORRESPONDENCE — ACTIVE
+**Previous Version:** V26.3 Independent Convergence — CLOSED
+**Cumulative Tests:** ~4012
 **Failed:** 0
 
 ---
@@ -267,6 +267,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V26.1 | PRC_01 | Physical Relation Correspondence — 5/8 STRONG structural matches with physical relations |
 | V26.2 | UBC_01 | Universal Bound Correspondence — v_max shares 6/10 properties with c; deep correspondence |
 | V26.3 | ICI_01 | Independent Convergence — ALL 5 correspondences discovered before physics comparison |
+| V26.4 | CCP_01 | Cross-System Correspondence — bound appears in non-TRM graphs; TRM adds specificity |
 
 Research question:
 > Can TRM predictions (v_max, dilation, curvature, metric) be
