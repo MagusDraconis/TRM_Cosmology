@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V27.0 STRUCTURAL CORRESPONDENCE — ACTIVE
+**Current Version:** V27.0 STRUCTURAL CORE SEPARATION — ACTIVE
 **Previous Version:** V26.4 Cross-System Correspondence — CLOSED
-**Cumulative Tests:** ~4012
+**Cumulative Tests:** ~4013
 **Failed:** 0
 
 ---
@@ -274,7 +274,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V27.0 | — | Starting — what is the minimal structural framework for TRM-physics correspondence? |
+| V27.0 | SCS_01 | Structural Core Separation — 7/10 TRM-unique; minimal primitive set: {sign, codim-1, tick} |
 
 Research question:
 > What is the minimal set of structural axioms needed to
