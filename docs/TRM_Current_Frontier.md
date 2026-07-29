@@ -5,7 +5,7 @@
 
 **Current Version:** V33.0 GRADIENT DYNAMICS THEORY — ACTIVE
 **Previous Version:** V32 GRADIENT DYNAMICS — CLOSED
-**Cumulative Tests:** ~4053
+**Cumulative Tests:** ~4059
 **Failed:** 0
 
 ---
@@ -374,11 +374,24 @@ TRM_Gravity(galaxy) = {
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
+| V33.0 | QGI_01 | Quantum Gradient Invariance — oscillator-level scan: ∇VarI1→trend, |∇VarI1|→|VarI1| |
+| V33.1 | OGC_01 | Oscillator-to-Gravity Chain — 5-level trace: Osc→Param→Bound→Graph→Galactic |
+| V33.2 | IBL_01 | Information Bottleneck Layer — paired transition analysis; ranks bottlenecks by Δ |
+| V33.3 | BES_01 | Boundary Emergence Strength — boundary vs discarded: gradient/curvature/coherence amplification |
+| V33.4 | BSC_01 | Boundary Signal Concentration — 4-zone + random control; tests 4 amplification mechanisms |
+| V33.5 | BAG_01 | Boundary Amplified Gravity — raw vs curvature-weighted ∇ρ on SPARC; galactic application |
+| V33.6 | AGE_01 | Amplitude Gradient Exponent — 4 models fitted; bootstrap α stability; best-fit exponent |
+| V33.7 | RPL_01 | Residual Power Law — α per population; CI overlap; pooled vs class-specific; universality test |
+| V33.8 | TGO_01 | Tick Gradient Origin — causal direction: Tick→Gradient vs Gradient→Tick; correlation matrix |
+| V33.9 | FGO_01 | Feedback Gradient Origin — ∇fb as primitive: boundary selection, reconstruction, source ranking |
+| V33.10 | FBT_01 | Feedback Birth Theorem — deeper origin: oscillator mismatch → fb? fb↔|m| identity test |
+| V33.11 | TGR_01 | Tick Geometry Resonance — feedback loop: Geometry→Tick? Tick→∇fb? 4 loop signals |
+| V33.12 | RLS_01 | Resonance Loop Stability — loop gain G=G1×G2×G3×G4; saturation; attractor classification |
 
 Research question:
-> Can the density-gradient law be combined with real TRM Tick to
-> produce calibrated galactic dynamics predictions? Determine S_V
-> calibration and deploy Tick to individual SPARC galaxies.
+> Is the Tick-Geometry loop self-sustaining? Compute loop gain G as
+> product of 4 stage amplifications. Classify as amplifying (G>1),
+> neutral (G≈1), or damped (G<1). Test saturation and attractors.
 
 Candidate chain:
 ```

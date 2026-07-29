@@ -2,8 +2,100 @@
   "releaseStatus": "V33 GRADIENT DYNAMICS THEORY — ACTIVE",
   "phase": "Apply density-gradient law with real Tick to galactic dynamics. Calibrate S_V. Deploy Tick to individual galaxies.",
   "date": "2026-07-29",
-  "testSummary": { "total": 0, "passed": 0, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V33 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
+  "testSummary": { "total": 6, "passed": 6, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V33 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    {
+      "id": "V33.0",
+      "name": "Quantum Gradient Invariance",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Oscillator-level gradient test: does sign(∇VarI1)→trend and |∇VarI1|→|VarI1| appear before boundary formation?"
+    },
+    {
+      "id": "V33.1",
+      "name": "Oscillator-to-Gravity Chain",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "5-level chain: Oscillator→Parametric→Boundary→Graph→Galactic. Traces gradient law through all transitions."
+    },
+    {
+      "id": "V33.2",
+      "name": "Information Bottleneck Layer",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Transition analysis: paired comparisons at Param→Bound and Bound→Graph. Ranks bottlenecks by information loss."
+    },
+    {
+      "id": "V33.3",
+      "name": "Boundary Emergence Strength",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Boundary vs discarded cell comparison. Tests if boundary extraction actively amplifies gradient, curvature, and coherence."
+    },
+    {
+      "id": "V33.4",
+      "name": "Boundary Signal Concentration",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "4-zone analysis (boundary/near-1/near-2/interior) + random control. Tests 4 mechanisms: sign-geometry, curvature, compression, topology."
+    },
+    {
+      "id": "V33.5",
+      "name": "Boundary Amplified Gravity",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Raw vs curvature-weighted gradients on SPARC. Tests if boundary amplification improves galactic predictions."
+    },
+    {
+      "id": "V33.6",
+      "name": "Amplitude Gradient Exponent",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Four candidate models (linear, sqrt, power, log) fitted. Bootstrap stability. Best-fit α determined."
+    },
+    {
+      "id": "V33.7",
+      "name": "Residual Power Law",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "α fitted per population (BARYON/MIXED/DM/LSB/HSB). CI overlap, pooled vs class-specific R². Universality test."
+    },
+    {
+      "id": "V33.8",
+      "name": "Tick Gradient Origin",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Causal direction test: Tick→Gradient vs Gradient→Tick. ∇Tick vs ∇|m| correlation, peak alignment, reconstruction."
+    },
+    {
+      "id": "V33.9",
+      "name": "Feedback Gradient Origin",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "∇fb as primitive source. ∇fb→∇|m| correlation, boundary selection, reconstruction, primitive source ranking."
+    },
+    {
+      "id": "V33.10",
+      "name": "Feedback Birth Theorem",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Deeper origin: does fb emerge from oscillator mismatch? fb↔|m| correlation, reconstruction without fb, causal chains."
+    },
+    {
+      "id": "V33.11",
+      "name": "Tick Geometry Resonance",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Feedback loop test: Geometry→Tick? Tick→∇fb? 4 loop signals, closed-loop evidence assessment."
+    },
+    {
+      "id": "V33.12",
+      "name": "Resonance Loop Stability",
+      "testCount": 1,
+      "verdict": "PENDING",
+      "keyFinding": "Loop gain G = G1×G2×G3×G4. Quantifies amplification/damping. Saturation and attractor analysis."
+    }
+  ],
   "supportedClaims": [],
   "conditionalClaims": [],
   "hypotheses": [
