@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V27.2 PRIMITIVE REDUCTION THEOREM — ACTIVE
-**Previous Version:** V27.1 Minimal Primitive Set — CLOSED
-**Cumulative Tests:** ~4015
+**Current Version:** V27.3 SIGN-TICK INDEPENDENCE — ACTIVE
+**Previous Version:** V27.2 Primitive Reduction Theorem — CLOSED
+**Cumulative Tests:** ~4016
 **Failed:** 0
 
 ---
@@ -277,6 +277,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V27.0 | SCS_01 | Structural Core Separation — 7/10 TRM-unique; minimal primitive set: {sign, codim-1, tick} |
 | V27.1 | MPS_01 | Minimal Primitive Set — ablation confirms: all 3 primitives are necessary |
 | V27.2 | PRT_01 | Primitive Reduction Theorem — codim-1 is theorem, not primitive; axioms reduce to 2 |
+| V27.3 | STI_01 | Sign–Tick Independence — sign and Tick are independent; 2 irreducible axioms |
 
 Research question:
 > What is the minimal set of structural axioms needed to
