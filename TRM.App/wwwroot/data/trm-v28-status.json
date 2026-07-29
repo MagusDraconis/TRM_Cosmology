@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V28.0 DIRECTION–TICK — ACTIVE",
+  "phase": "Direction–Tick Theory — exploring the consequences of the two-axiom foundation",
+  "date": "2026-07-29",
+  "testSummary": { "total": 4016, "passed": 4016, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V28 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Direction primacy: is sign(dT/dp) the root of all spatial geometry?",
+    "Tick primacy: is Tick the root of all temporal structure?",
+    "Unified Direction-Tick: can all TRM laws be expressed in terms of Direction × Tick?",
+    "Physical emergence: does the two-axiom system suffice for physical correspondence?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical gravity derivation", "GR replacement", "physical c derivation", "complete physical theory"],
+  "openProblems": [
+    { "priority": "P0", "title": "Direction-Tick synthesis", "description": "Can all TRM observables (v_max, curvature, dilation, metric) be expressed as functions of sign(dT/dp) and Tick alone?" },
+    { "priority": "P1", "title": "Axiom minimization", "description": "Is the two-axiom set truly minimal? Can further reduction (to 1 axiom) be proven impossible?" },
+    { "priority": "P2", "title": "Physical bridge", "description": "Can the two-axiom foundation provide a bridge to physical observables without additional assumptions?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["sign(dT/dp)", "Tick", "codim-1 (theorem)", "Geometry", "Propagation", "Curvature", "Dilation", "Metric", "Causality", "Physics"],
+    "invertedHierarchy": "TRM reduces to 2 irreducible primitives: Direction (sign) and Tick. All else is derived via theorems and emergent properties."
+  },
+  "trmGoalAssessment": {
+    "time": "Tick is the primitive temporal unit. Temporal metric established (V22).",
+    "space": "sign(dT/dp) generates all geometry via codim-1 boundary theorem.",
+    "length": "Propagation bound v_max survives all falsification (V25.3). Cross-system tested (V26.4).",
+    "c": "Two-axiom foundation: Direction + Tick. Minimal, irreducible, sufficient."
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V28.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V28.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V27/V27_3/V27_3_SignTickIndependence_Tests.cs",
+    "nextPhase": "V28.0 Direction–Tick — exploring two-axiom consequences",
+    "nextBranch": "v28-direction-tick",
+    "previousBranch": "v27-structural-correspondence",
+    "tag": "v27-structural-correspondence",
+    "candidateDynamicsChain": "{sign, Tick} → codim-1 → Geometry → Propagation → Curvature → Dilation → Metric → Causality",
+    "keyConstants": { "axioms": ["sign(dT/dp)", "Tick"], "theorem": "codim-1 boundary" }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

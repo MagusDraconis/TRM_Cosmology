@@ -1,10 +1,21 @@
 {
-  "releaseStatus": "V27.0 STRUCTURAL CORRESPONDENCE — ACTIVE",
+  "releaseStatus": "V27.3 SIGN–TICK INDEPENDENCE — V27 CLOSED",
   "phase": "Structural Correspondence Theory — identifying the minimal framework for TRM-physics correspondence",
   "date": "2026-07-29",
-  "testSummary": { "total": 4012, "passed": 4012, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V27 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4016, "passed": 4016, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V27 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "name": "V27_0_StructuralCoreSeparation", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V27_1_MinimalPrimitiveSet", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V27_2_PrimitiveReductionTheorem", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V27_3_SignTickIndependence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Structural Core: 7/10 TRM-unique; minimal set {sign, codim-1, tick} (SCS_01)",
+    "Minimal Primitive Set: ablation confirms 3 primitives necessary (MPS_01)",
+    "Primitive Reduction: codim-1 is theorem not primitive; axioms reduce to 2 (PRT_01)",
+    "Sign–Tick Independence: 2 irreducible axioms; one axiom insufficient (STI_01)",
+    "V27 FINAL: TRM reduces to two irreducible primitives — Direction (sign) and Tick"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Minimal structure: can the TRM-physics correspondence be reduced to N essential axioms?",
@@ -37,13 +48,13 @@
     { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
   ],
   "roadmap": {
-    "recommendedTestFile": "TRM.Tests/V26/V26_4/V26_4_CrossSystemCorrespondence_Tests.cs",
-    "nextPhase": "V27.0 Structural Correspondence — what is the minimal framework?",
-    "nextBranch": "v27-structural-correspondence",
-    "previousBranch": "v26-observable-correspondence",
-    "tag": "v26-observable-correspondence",
-    "candidateDynamicsChain": "Sign -> Boundary -> Propagation -> Correspondence -> Minimal Structure",
-    "keyConstants": { "cross_system_categories": 5, "total_configs_tested": 15 }
+    "recommendedTestFile": "TRM.Tests/V27/V27_3/V27_3_SignTickIndependence_Tests.cs",
+    "nextPhase": "V28.0 Direction–Tick — exploring the two-axiom foundation",
+    "nextBranch": "v28-direction-tick",
+    "previousBranch": "v27-structural-correspondence",
+    "tag": "v27-structural-correspondence",
+    "candidateDynamicsChain": "{sign, Tick} → Geometry → Propagation → Curvature → Time → Physics",
+    "keyConstants": { "minimal_axiom_set": ["sign(dT/dp)", "Tick"], "theorem": "codim-1 boundary" }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 4, "passedVerified": 4, "verificationMethod": "dotnet test", "mismatch": null }
 }

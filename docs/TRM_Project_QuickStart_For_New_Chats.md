@@ -1,22 +1,25 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.08
+**Version:** 8.00
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V27.0 STRUCTURAL CORRESPONDENCE — ACTIVE
+V28.0 DIRECTION–TICK — ACTIVE
 
 CURRENT BRANCH
-v27-structural-correspondence
+v28-direction-tick
 
-V26 CLOSED (5 audits, 5 SUPPORTED)
-V26 Final Principle: TRM correspondences are independently discovered,
-structurally deep, and cross-system tested. The propagation bound
-is a generic geometric principle — TRM adds specificity via
-sign constraint, universality, and dimensional dependence.
+V27 CLOSED (4 audits, 4 SUPPORTED)
 
-V27.0 BEGINS: Structural Correspondence Theory
-What is the minimal structural framework for TRM-physics correspondence?
+V27 FINAL MINIMAL AXIOM SET
+  Axiom A: sign(dT/dp) ∈ {+1,-1}
+  Axiom B: Tick = mean|d(VarI1+VarTerms)/dα|
+  Theorem: codim-1 boundary
+  Derived: geometry, curvature, dilation, metric, causality, propagation
+  Result: TRM reduces to two irreducible primitives: Direction and Tick.
+
+V28.0 BEGINS: Direction–Tick Theory
+Exploring the consequences of the two-axiom foundation.
 
 ---
 

@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V27.3 SIGN-TICK INDEPENDENCE — ACTIVE
-**Previous Version:** V27.2 Primitive Reduction Theorem — CLOSED
+**Current Version:** V28.0 DIRECTION–TICK — ACTIVE
+**Previous Version:** V27.3 Sign–Tick Independence — CLOSED
 **Cumulative Tests:** ~4016
 **Failed:** 0
 
@@ -23,11 +23,18 @@ For any new LLM chat or Copilot session, read in this order:
 ## One-Sentence Current State
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
-V25 CLOSED. V26 CLOSED. V27.0 ACTIVE. V26 Observable Correspondence
-— 5 audits, 5 SUPPORTED. Observable mappings, relation correspondence,
-bound deep structure, independent convergence, cross-system tested.
-V27.0 begins: Structural Correspondence Theory — what is the minimal
-structural framework that reproduces TRM-physics correspondences?
+V25 CLOSED. V26 CLOSED. V27 CLOSED. V28.0 ACTIVE.
+V27 Structural Core Theory — 4 audits, 4 SUPPORTED.
+
+V27 FINAL MINIMAL AXIOM SET
+  Axiom A: sign(dT/dp) ∈ {+1,-1}
+  Axiom B: Tick = mean|d(VarI1+VarTerms)/dα|
+  Theorem: codim-1 boundary
+  Derived: geometry, curvature, dilation, metric, causality, propagation
+  Result: TRM reduces to two irreducible primitives: Direction and Tick.
+
+V28.0 begins: Direction–Tick — exploring the consequences
+  of the two-axiom foundation.
 
 ---
 
@@ -278,6 +285,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V27.1 | MPS_01 | Minimal Primitive Set — ablation confirms: all 3 primitives are necessary |
 | V27.2 | PRT_01 | Primitive Reduction Theorem — codim-1 is theorem, not primitive; axioms reduce to 2 |
 | V27.3 | STI_01 | Sign–Tick Independence — sign and Tick are independent; 2 irreducible axioms |
+
+## V28 Program (ACTIVE)
+
+**Direction–Tick Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V28.0 | — | Starting — exploring the two-axiom foundation: Direction and Tick |
+
+Research question:
+> What are the full consequences of the two-axiom foundation?
+> Can all physical phenomena be expressed in terms of
+> Direction (sign) and Tick?
+
+Candidate chain:
+```
+{sign, Tick} → Geometry → Propagation → Curvature → Time → Physics
+```
 
 Research question:
 > What is the minimal set of structural axioms needed to
