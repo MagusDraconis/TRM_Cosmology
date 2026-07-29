@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V30.0 FIRST CONTACT WITH DATA — ACTIVE
+**Current Version:** V30.0 SPARC CALIBRATION — ACTIVE
 **Previous Version:** V29.4 Data Differentiation — CLOSED
-**Cumulative Tests:** ~4027
+**Cumulative Tests:** ~4028
 **Failed:** 0
 
 ---
@@ -315,7 +315,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V30.0 | — | Starting — load real astronomical data; compare TRM to observations |
+| V30.0 | SDC_01 | SPARC Calibration — 2 tests calibration-free NOW; first contact established |
 
 Research question:
 > Does TRM's universal propagation bound correspond to observed
