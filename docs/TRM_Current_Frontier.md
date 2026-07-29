@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V31.2 FLOW CHANNEL PREDICTION — ACTIVE
-**Previous Version:** V31.1 Gravity Differentiation — CLOSED
-**Cumulative Tests:** ~4038
+**Current Version:** V31.3 FLOW CHANNEL FAILURE — ACTIVE
+**Previous Version:** V31.2 Flow Channel Prediction — CLOSED
+**Cumulative Tests:** ~4039
 **Failed:** 0
 
 ---
@@ -330,6 +330,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.0 | RTC_01 | Rotation Curve Correspondence — 72% shape agreement; r=0.83 slope correlation |
 | V31.1 | GDC_01 | Gravity Differentiation — density viable; 29% strict, mean residual 0.19 |
 | V31.2 | FCP_01 | Flow Channel Prediction — strong alignment r=0.65; partial channel structure |
+| V31.3 | FCF_01 | Flow Channel Failure — DM galaxies show weaker channels; fragmentation higher |
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM
