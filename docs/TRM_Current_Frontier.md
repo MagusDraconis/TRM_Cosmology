@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V31.5 LSB FAILURE — ACTIVE
-**Previous Version:** V31.4 DM Galaxy Morphology — CLOSED
-**Cumulative Tests:** ~4041
+**Current Version:** V31.6 GEOMETRY STRENGTH SEPARATION — ACTIVE
+**Previous Version:** V31.5 LSB Failure — CLOSED
+**Cumulative Tests:** ~4042
 **Failed:** 0
 
 ---
@@ -333,6 +333,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.3 | FCF_01 | Flow Channel Failure — DM galaxies show weaker channels; fragmentation higher |
 | V31.4 | DMG_01 | DM Galaxy Morphology — DM = low surface brightness (581 vs 20952); distinct population |
 | V31.5 | LSB_01 | LSB Failure — Very LSB: shape 80% but denseOK 5.7%; DM=51.4% |
+| V31.6 | GSA_01 | Geometry-Strength Separation — shape 72% vs amp 29%; r=-0.12; two-layer model |
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM
