@@ -5,7 +5,7 @@
 
 **Current Version:** V29.0 MEASUREMENT PATHWAY — ACTIVE
 **Previous Version:** V28.5 Propagation Domain Separation — CLOSED
-**Cumulative Tests:** ~4022
+**Cumulative Tests:** ~4023
 **Failed:** 0
 
 ---
@@ -304,7 +304,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V29.0 | — | Starting — can TRM predictions be experimentally tested? |
+| V29.0 | MPO_01 | Measurement Pathway — v_max↔rotation curves is #1; can test TODAY with SPARC |
 
 Research question:
 > Can the TRM propagation bound v_max be measured or constrained
