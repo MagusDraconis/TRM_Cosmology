@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V28.0 DIRECTION–TICK COUPLING — ACTIVE
-**Previous Version:** V27.3 Sign–Tick Independence — CLOSED
-**Cumulative Tests:** ~4017
+**Current Version:** V28.1 NECESSARY CONSEQUENCE STRUCTURE — ACTIVE
+**Previous Version:** V28.0 Direction–Tick Coupling — CLOSED
+**Cumulative Tests:** ~4018
 **Failed:** 0
 
 ---
@@ -293,6 +293,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V28.0 | DTC_01 | Direction–Tick Coupling — sign and Tick fundamentally separate; 2 axioms irreducible |
+| V28.1 | NCS_01 | Necessary Consequence Structure — 4/10 NECESSARY (theorem-level), 6/10 CONTINGENT |
 
 Research question:
 > What are the full consequences of the two-axiom foundation?
