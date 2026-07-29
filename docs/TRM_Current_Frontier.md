@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V31.4 DM GALAXY MORPHOLOGY — ACTIVE
-**Previous Version:** V31.3 Flow Channel Failure — CLOSED
-**Cumulative Tests:** ~4040
+**Current Version:** V31.5 LSB FAILURE — ACTIVE
+**Previous Version:** V31.4 DM Galaxy Morphology — CLOSED
+**Cumulative Tests:** ~4041
 **Failed:** 0
 
 ---
@@ -332,6 +332,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.2 | FCP_01 | Flow Channel Prediction — strong alignment r=0.65; partial channel structure |
 | V31.3 | FCF_01 | Flow Channel Failure — DM galaxies show weaker channels; fragmentation higher |
 | V31.4 | DMG_01 | DM Galaxy Morphology — DM = low surface brightness (581 vs 20952); distinct population |
+| V31.5 | LSB_01 | LSB Failure — Very LSB: shape 80% but denseOK 5.7%; DM=51.4% |
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM
