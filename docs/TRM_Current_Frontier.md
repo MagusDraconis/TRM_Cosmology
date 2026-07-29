@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V26.0 OBSERVABLE CORRESPONDENCE MAPPING — ACTIVE
-**Previous Version:** V25.3 Universal Propagation Falsification — CLOSED
-**Cumulative Tests:** ~4008
+**Current Version:** V26.1 PHYSICAL RELATION CORRESPONDENCE — ACTIVE
+**Previous Version:** V26.0 Observable Correspondence Mapping — CLOSED
+**Cumulative Tests:** ~4009
 **Failed:** 0
 
 ---
@@ -264,6 +264,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V26.0 | OCM_01 | Observable Correspondence Mapping — 8 observable mappings; propagation bound most measurable |
+| V26.1 | PRC_01 | Physical Relation Correspondence — 5/8 STRONG structural matches with physical relations |
 
 Research question:
 > Can TRM predictions (v_max, dilation, curvature, metric) be
