@@ -5,7 +5,7 @@
 
 **Current Version:** V32.0 REAL TICK DYNAMICS — ACTIVE
 **Previous Version:** V31.9 Tick Gradient Scaling — CLOSED
-**Cumulative Tests:** ~4045
+**Cumulative Tests:** ~4046
 **Failed:** 0
 
 ---
@@ -344,7 +344,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V32.0 | — | Starting — deploy real TRM Tick from oscillator dynamics to galactic data |
+| V32.0 | RTD_01 | Real Tick Dynamics — |m|↔Tick r=-0.42; partially independent; can modulate amplitude |
 
 Research question:
 > Can real TRM Tick (computed from oscillator dynamics via
