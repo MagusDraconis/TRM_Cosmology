@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V30.3 BARYONIC TEST PREDICTION — ACTIVE
-**Previous Version:** V30.2 SPARC Structural Prediction — CLOSED
-**Cumulative Tests:** ~4031
+**Current Version:** V30.4 BARYONIC TEST RESULTS — ACTIVE
+**Previous Version:** V30.3 Baryonic Test Prediction — CLOSED
+**Cumulative Tests:** ~4032
 **Failed:** 0
 
 ---
@@ -319,6 +319,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V30.1 | QST_01 | Qualitative SPARC Test — 5/6 tests calibration-free; TRM ready for first contact |
 | V30.2 | SPA_01 | SPARC Structural Prediction — P1-P5 tests executed on real SPARC data |
 | V30.3 | BTP_01 | Baryonic Test Prediction — density-dominance classification across SPARC |
+| V30.4 | BTR_01 | Baryonic Test Results — class distribution reported; density primacy broadly survives |
 
 Research question:
 > Does TRM's universal propagation bound correspond to observed
