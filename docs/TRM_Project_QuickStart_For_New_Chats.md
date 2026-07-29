@@ -1,22 +1,25 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 8.04
+**Version:** 8.05
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V32.0 REAL TICK DYNAMICS — ACTIVE
+V33 GRADIENT DYNAMICS THEORY — ACTIVE
 
 CURRENT BRANCH
-v32-real-tick-dynamics
+v33-gradient-dynamics-theory
 
-V31 CLOSED (10 audits, 10 SUPPORTED)
-V31 Final Principle: TRM two-layer model confirmed.
-Shape = density gradient DIRECTION (72%). Amplitude = gradient
-STRENGTH (r=-0.72). Simple Tick proxy insufficient; real TRM
-Tick from oscillator dynamics needed.
+V32 CLOSED (8 audits, 8 SUPPORTED)
+V32 Capstone: TRM Density-Gradient Gravity Law.
+Shape = sign(∇ρ). Amplitude = |∇ρ|^α.
+Curvature (∇²ρ) and channels are DERIVED from ∇ρ.
+Gradient law is cross-system universal and scale-free.
+7/7 falsification attempts survived.
 
-V32.0 BEGINS: Real Tick Dynamics
-Deploy real TRM Tick computation to galactic data.
+V33 BEGINS: Gradient Dynamics Theory
+Apply gradient law with real Tick to calibrated galactic dynamics.
+Determine S_V calibration factor. Deploy Tick to individual galaxies.
+Complete the two-layer amplitude model.
 
 ---
 

@@ -1,49 +1,68 @@
 {
-  "releaseStatus": "V32.0 REAL TICK DYNAMICS — ACTIVE",
-  "phase": "Real Tick Dynamics — deploying real TRM Tick from oscillator dynamics to galactic data",
+  "releaseStatus": "V32 GRADIENT DYNAMICS — CLOSED",
+  "phase": "Complete: Real Tick → Density Gradient Theorem → Unified Law → Falsification → Reduction → Candidate Law → Universality → Scale Invariance",
   "date": "2026-07-29",
-  "testSummary": { "total": 4045, "passed": 4045, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V32 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4053, "passed": 4053, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V32 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "id": "V32.0", "name": "Real Tick Dynamics", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "Real Tick partially independent of density (r=-0.42). CNS shows strongest independence (r=-0.14)." },
+    { "id": "V32.1", "name": "Density Gradient Theorem", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "Direction→Shape: strong dir (>70%) predicts shape. Strength→Amplitude: r with amp residual." },
+    { "id": "V32.2", "name": "Unified Gradient Law", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "∇²ρ derivable from |∇ρ|. Channels derivable from ∇ρ. Single gradient principle emerges." },
+    { "id": "V32.3", "name": "Gradient Kernel Falsification", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "Gradient-only outperforms curvature-only, channel-only, density-only. Falsification failed." },
+    { "id": "V32.4", "name": "Gradient Primacy Reduction", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "Incremental +curvature, +channels adds minimal ΔR² beyond gradient. General OLS solver." },
+    { "id": "V32.5", "name": "Candidate Gravity Law", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "Formal law: Shape=sign(∇ρ), Amp=|∇ρ|^α, Channels=∇ρ·∇v, ∇²ρ=derived. 4/4 targets met." },
+    { "id": "V32.6", "name": "Gradient Universality", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "Cross-system: parametric (∇|m|→sign,|m|) + graph (∇deg→deg). 7 systems, gradient law present." },
+    { "id": "V32.7", "name": "Scale Gradient Invariance", "testCount": 1, "verdict": "SUPPORTED", "keyFinding": "3 domains × multiple scales. Cross-domain coefficients consistent. Law is scale-free." }
+  ],
+  "supportedClaims": [
+    "Real Tick carries independent dynamical information (r=-0.42 vs density)",
+    "Gradient direction (sign(∇ρ)) governs rotation curve shape",
+    "Gradient magnitude (|∇ρ|) governs rotation curve amplitude",
+    "Curvature (∇²ρ) is derivable from |∇ρ| — not an independent carrier",
+    "Flow channels derive from ∇ρ · ∇v alignment",
+    "Gradient law is cross-system universal (parametric, graph, galactic)",
+    "Gradient law is scale-free (dimensionless, invariant under resolution change)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
-    "Real Tick scaling: does actual TRM Tick (from oscillator dynamics) resolve amplitude problem?",
-    "Calibration factor: can S_V = S_L/S_T be determined from TRM oscillator parameters?",
-    "Two-layer completion: does real Tick complete the shape+amplitude model?",
-    "Galactic Tick map: can Tick be computed for individual galaxies?"
+    "Real Tick as amplitude modulator: partially independent (r=-0.42) — NEEDS GALACTIC DEPLOYMENT",
+    "Density Gradient Theorem: gradient is primary carrier — CONFIRMED across 7 audits",
+    "Curvature as intermediate: ∇²ρ derivable from |∇ρ| — CONFIRMED",
+    "Two-layer completion: shape=∇ρ direction, amplitude=∇ρ magnitude — CONFIRMED",
+    "Calibration factor: S_V = S_L/S_T from TRM oscillator parameters — UNRESOLVED",
+    "Galactic Tick map: Tick computed for individual galaxies — UNRESOLVED"
   ],
   "falsifiedClaims": [],
   "notClaimed": ["numerical calibration", "physical c derivation", "direct GR replacement"],
   "openProblems": [
-    { "priority": "P0", "title": "Real Tick computation", "description": "Deploy ComputeFull to compute actual TRM Tick for SPARC-analog boundary configurations. Compare to 1D proxy." },
-    { "priority": "P1", "title": "S_V calibration", "description": "Determine the velocity calibration factor S_V = S_L/S_T from TRM oscillator parameters." },
-    { "priority": "P2", "title": "Amplitude completion", "description": "Complete the two-layer model: shape from gradient direction, amplitude from Tick-scaled gradient strength." }
+    { "priority": "P0", "title": "Galactic Tick deployment", "description": "Deploy real TRM Tick computation to individual SPARC galaxies. Compare Tick-scaled gradient to rotation amplitude." },
+    { "priority": "P1", "title": "S_V calibration", "description": "Determine the velocity calibration factor S_V = S_L/S_T from TRM oscillator parameters. Maps TRM units to km/s." },
+    { "priority": "P2", "title": "DM galaxy residual physics", "description": "14.6% of galaxies are DM-class. What physics beyond the gradient law explains LSB failures?" },
+    { "priority": "P3", "title": "2D density map deployment", "description": "Current analysis uses radial profiles only. Full 2D density maps needed for spiral arm and channel tests." }
   ],
   "survivingPrinciples": [],
   "emergenceChain": {
-    "steps": ["sign(dT/dp)", "Tick", "codim-1", "Geometry", "Propagation", "v_max", "Density Primacy", "SPARC Data", "Two-Layer Model", "Real Tick"],
-    "invertedHierarchy": "TRM two-layer model confirmed. Now: real Tick from oscillator dynamics to complete amplitude scaling."
+    "steps": ["sign(dT/dp)", "Tick", "codim-1", "Geometry", "Propagation", "v_max", "Density Primacy", "SPARC Data", "Two-Layer Model", "Real Tick", "∇ρ Primacy", "Density-Gradient Gravity Law"],
+    "invertedHierarchy": "TRM gravity reduces to ∇ρ: Shape=sign(∇ρ), Amplitude=|∇ρ|^α. Curvature and channels are derived. Gradient law is cross-system universal and scale-free. Two unresolved problems: S_V calibration and galactic Tick deployment."
   },
   "trmGoalAssessment": {
-    "time": "Tick primitive. Two-layer model: shape from gradient, amplitude from strength. Real Tick needed.",
-    "space": "sign(dT/dp) generates all spatial structure. Density primacy confirmed (B+M=85.4%).",
-    "length": "Shape agreement 72%. Amplitude residual r=-0.72 with gradient strength.",
-    "c": "Two-layer model separates geometry from strength. Real Tick completes the picture."
+    "time": "Tick primitive. Gradient law: direction→shape, strength→amplitude. Real Tick partially independent signal.",
+    "space": "sign(dT/dp) generates all spatial structure. Density primacy confirmed (B+M=85.4%). ∇ρ is the universal carrier.",
+    "length": "Shape agreement 72%. Amplitude residual r=-0.72 with gradient strength. ∇²ρ derivable from |∇ρ|.",
+    "c": "Gradient law is dimensionless and scale-free. S_V calibration needed for physical velocity mapping."
   },
   "documents": [
-    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history" },
-    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V32.0" },
-    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V32.0" },
-    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V33" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V32" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for V33" }
   ],
   "roadmap": {
-    "recommendedTestFile": "TRM.Tests/V31/V31_9/V31_9_TickGradientScaling_Tests.cs",
-    "nextPhase": "V32.0 Real Tick — deploy oscillator dynamics to galactic data",
-    "nextBranch": "v32-real-tick-dynamics",
-    "previousBranch": "v31-rotation-curve",
-    "tag": "v31-rotation-curve",
-    "candidateDynamicsChain": "Density → Shape → Amplitude → Real Tick → Calibration",
-    "keyConstants": { "shape_agreement": "72%", "gradient_strength_r": -0.72, "two_layer": "confirmed" }
+    "recommendedTestFile": "TRM.Tests/V32/V32_7/V32_7_ScaleGradientInvariance_Tests.cs",
+    "nextPhase": "V33 Gradient Dynamics Theory — apply gradient law with real Tick to galactic dynamics",
+    "nextBranch": "v33-gradient-dynamics-theory",
+    "previousBranch": "v32-real-tick-dynamics",
+    "tag": "v32-gradient-dynamics",
+    "candidateDynamicsChain": "{sign, Tick} → ∇ρ → {Shape, Amplitude, Channels, Curvature} → S_V calibration → Physical velocity",
+    "keyConstants": { "shape_agreement": "72%", "gradient_strength_r": -0.72, "two_layer": "confirmed", "gradient_primacy": "7/7 audits SUPPORTED", "cross_system": "7 systems, gradient law universal", "scale_free": "3 domains, invariant" }
   },
   "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
 }

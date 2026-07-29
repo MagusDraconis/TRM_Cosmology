@@ -1,0 +1,48 @@
+{
+  "releaseStatus": "V33 GRADIENT DYNAMICS THEORY — ACTIVE",
+  "phase": "Apply density-gradient law with real Tick to galactic dynamics. Calibrate S_V. Deploy Tick to individual galaxies.",
+  "date": "2026-07-29",
+  "testSummary": { "total": 0, "passed": 0, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V33 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Gradient-Tick unification: does real Tick × |∇ρ| complete the amplitude prediction?",
+    "S_V calibration: can oscillator parameters determine the physical velocity scale?",
+    "Galactic Tick map: can Tick be computed for individual SPARC galaxies?",
+    "Amplitude completion: does gradient law + Tick achieve >50% amplitude prediction?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["numerical calibration", "physical c derivation", "direct GR replacement", "dark matter fitting"],
+  "openProblems": [
+    { "priority": "P0", "title": "S_V calibration", "description": "Determine velocity calibration factor S_V = S_L/S_T from TRM oscillator parameters." },
+    { "priority": "P1", "title": "Galactic Tick deployment", "description": "Compute real TRM Tick for individual SPARC galaxies using their density profiles." },
+    { "priority": "P2", "title": "Amplitude completion", "description": "Combine gradient strength with Tick scaling to predict absolute rotation velocity." }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["sign(dT/dp)", "Tick", "codim-1", "Geometry", "Propagation", "v_max", "Density Primacy", "SPARC Data", "Two-Layer Model", "Real Tick", "∇ρ Primacy", "Density-Gradient Gravity Law", "Gradient Dynamics Theory"],
+    "invertedHierarchy": "V32 established the gradient law. V33 applies it: ∇ρ × Tick → calibrated galactic dynamics."
+  },
+  "trmGoalAssessment": {
+    "time": "Tick primitive. Real Tick + gradient = candidate complete dynamics.",
+    "space": "sign(dT/dp) generates all spatial structure. ∇ρ is the universal spatial carrier.",
+    "length": "Gradient law: Shape=sign(∇ρ), Amplitude=|∇ρ|^α. S_V maps to physical units.",
+    "c": "Gradient law is dimensionless. S_V calibration needed. Tick provides amplitude modulation."
+  },
+  "documents": [
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V33" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V32" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for V33" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V32/V32_7/V32_7_ScaleGradientInvariance_Tests.cs",
+    "nextPhase": "V33 Gradient Dynamics Theory — combine ∇ρ law with real Tick for calibrated prediction",
+    "nextBranch": "v33-gradient-dynamics-theory",
+    "previousBranch": "v32-gradient-dynamics",
+    "tag": "v32-gradient-dynamics",
+    "candidateDynamicsChain": "{sign, Tick} → ∇ρ → {Shape, Amplitude} → S_V → Physical velocity (km/s)",
+    "keyConstants": { "gradient_primacy": "7/7 audits SUPPORTED", "cross_system": "universal", "scale_free": "confirmed", "tick_density_r": -0.42 }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

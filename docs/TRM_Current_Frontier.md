@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V32.0 REAL TICK DYNAMICS — ACTIVE
-**Previous Version:** V31.9 Tick Gradient Scaling — CLOSED
-**Cumulative Tests:** ~4046
+**Current Version:** V33.0 GRADIENT DYNAMICS THEORY — ACTIVE
+**Previous Version:** V32 GRADIENT DYNAMICS — CLOSED
+**Cumulative Tests:** ~4053
 **Failed:** 0
 
 ---
@@ -22,14 +22,15 @@ For any new LLM chat or Copilot session, read in this order:
 
 ## One-Sentence Current State
 
-V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
-V25 CLOSED. V26 CLOSED. V27 CLOSED. V28 CLOSED. V29 CLOSED.
-V30 CLOSED. V31 CLOSED. V32.0 ACTIVE. V31 Rotation Curve
-Correspondence — 10 audits, 10 SUPPORTED. Full pipeline:
-shape prediction, density viability, flow channels, failure
-analysis, two-layer model, amplitude factor. V32.0 begins:
-Real Tick Dynamics — deploy real TRM Tick computation from
-oscillator dynamics to galactic data.
+V30 CLOSED. V31 CLOSED. V32 CLOSED. V33 ACTIVE.
+V32 Gradient Dynamics — 8 audits, 8 SUPPORTED. Complete chain:
+Real Tick → Density Gradient Theorem → Unified Law → Falsification
+→ Primacy Reduction → Candidate Gravity Law → Universality → Scale
+Invariance. Capstone: TRM density-gradient gravity law:
+Shape=sign(∇ρ), Amplitude=|∇ρ|^α. ∇²ρ and channels are derived.
+Gradient law is cross-system universal and scale-free.
+V33 begins: Gradient Dynamics Theory — apply gradient law with
+real Tick to calibrated galactic dynamics.
 
 ---
 
@@ -338,57 +339,51 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.8 | AMF_01 | Amplitude Missing Factor — density gradient strength r=-0.72; dominates amplitude |
 | V31.9 | TGS_01 | Tick Gradient Scaling — simple proxy insufficient (-3.5%); needs real Tick |
 
-## V32 Program (ACTIVE)
+## V32 Program (CLOSED)
 
-**Real Tick Dynamics**
+**Gradient Dynamics — 8 audits, 8 SUPPORTED**
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V32.0 | RTD_01 | Real Tick Dynamics — |m|↔Tick r=-0.42; partially independent; can modulate amplitude |
+| V32.1 | DGT_01 | Density Gradient Theorem — unified gradient law: direction→shape, strength→amp |
+| V32.2 | UGL_01 | Unified Gradient Law — reduction test: can everything reduce to ∇ρ? |
+| V32.3 | GKF_01 | Gradient Kernel Falsification — 5-model battle: gradient vs curvature vs channel vs density vs full |
+| V32.4 | GPR_01 | Gradient Primacy Reduction — incremental: grad→+curv→+chan→full; general OLS k-predictor solver |
+| V32.5 | CGL_01 | Candidate Gravity Law — capstone: formal law Shape=sign(∇ρ), Amp=|∇ρ|^α, ∇²ρ derived |
+| V32.6 | GUV_01 | Gradient Universality — cross-system: param-space (∇|m|) + graph (∇deg); 7 systems tested |
+| V32.7 | SGI_01 | Scale Gradient Invariance — 3 domains × 3 scales: parametric (3 grids), graph (3 N), galactic (3 size bins) |
+
+**Capstone Result: TRM Density-Gradient Gravity Law**
+```
+TRM_Gravity(galaxy) = {
+    Shape      = sign(∇ρ)              [direction of density gradient]
+    Amplitude  = |∇ρ|^α                [magnitude of density gradient]
+    Channels   = ∇ρ · ∇v               [flow alignment, emergent]
+    Curvature  = ∇²ρ = derived(|∇ρ|)   [second-order, not independent]
+}
+```
+- Cross-system universal: parametric, graph, galactic domains
+- Scale-free: coefficients invariant under resolution change
+- Falsification survived: gradient-only beats all alternatives
+- Reduction: curvature and channels add negligible ΔR²
+
+## V33 Program (ACTIVE)
+
+**Gradient Dynamics Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
 
 Research question:
-> Can real TRM Tick (computed from oscillator dynamics via
-> ComputeFull) resolve the amplitude scaling problem identified
-> in V31? Does the two-layer model complete with proper Tick?
+> Can the density-gradient law be combined with real TRM Tick to
+> produce calibrated galactic dynamics predictions? Determine S_V
+> calibration and deploy Tick to individual SPARC galaxies.
 
 Candidate chain:
 ```
-{sign, Tick} → v_max → rotation curves → shape (gradient) → amplitude (Tick)
+{sign, Tick} → ∇ρ → {Shape, Amplitude} → S_V calibration → Physical velocity (km/s)
 ```
-
-Research question:
-> Can individual SPARC rotation curves be compared to TRM
-> propagation profiles? Does v_max (asymptotic bound) correspond
-> to observed v_flat on a galaxy-by-galaxy basis?
-
-Candidate chain:
-```
-{sign, Tick} → v_max → rotation curves → individual fit → prediction
-```
-
-Research question:
-> Does TRM's universal propagation bound correspond to observed
-> galaxy dynamics? Can TRM predictions be compared quantitatively
-> to SPARC rotation curves, BTFR, and other datasets?
-
-Candidate chain:
-```
-{sign, Tick} → v_max → SPARC comparison → First contact
-```
-
-Research question:
-> Can the TRM propagation bound v_max be measured or constrained
-> with current experimental technology? What measurement pathways
-> exist for testing the correspondence?
-
-Candidate chain:
-```
-{sign, Tick} → Propagation → Bound → Measurement → Test
-```
-
-Research question:
-> What are the full consequences of the two-axiom foundation?
-> Can all physical phenomena be expressed in terms of
 > Direction (sign) and Tick?
 
 Candidate chain:
