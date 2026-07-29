@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 9.06
+**Version:** 9.07
 **Date:** 2026-07-29
-**Scope:** Clockwork Cosmology V1 through V26.0
-**Current Frontier:** V26.0 Observable Correspondence — ACTIVE
-**Previous Frontier:** V25.3 Universal Propagation Falsification — CLOSED
-**Current Branch:** v26-observable-correspondence
+**Scope:** Clockwork Cosmology V1 through V27.0
+**Current Frontier:** V27.0 Structural Correspondence — ACTIVE
+**Previous Frontier:** V26.4 Cross-System Correspondence — CLOSED
+**Current Branch:** v27-structural-correspondence
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -2438,8 +2438,9 @@ V22.0-V22.3 | Temporal Emergence Theory | 4 | COMPLETE |
 | V23.0-V23.3 | Curvature Emergence Theory | 4 | COMPLETE |
 | V24.0-V24.3 | Connectivity Gradient Theory | 4 | COMPLETE |
 | V25.0-V25.3 | Physical Correspondence Program | 4 | COMPLETE |
-| V26.0 | Observable Correspondence Program | 0 | ACTIVE |
-| **Total** | | **4007** | **0 failed** |
+| V26.0-V26.4 | Observable Correspondence Program | 5 | COMPLETE |
+| V27.0 | Structural Correspondence Theory | 0 | ACTIVE |
+| **Total** | | **4012** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3999 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.

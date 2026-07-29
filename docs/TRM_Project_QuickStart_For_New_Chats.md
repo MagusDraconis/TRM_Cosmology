@@ -1,22 +1,22 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 7.07
+**Version:** 7.08
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V26.0 OBSERVABLE CORRESPONDENCE — ACTIVE
+V27.0 STRUCTURAL CORRESPONDENCE — ACTIVE
 
 CURRENT BRANCH
-v26-observable-correspondence
+v27-structural-correspondence
 
-V25 CLOSED (4 audits, 4 SUPPORTED)
-V25 Final Principle: TRM exhibits qualitative structural isomorphism
-with known physics. Universal propagation bound survives extreme
-falsification testing. 8 distinctive, falsifiable predictions.
+V26 CLOSED (5 audits, 5 SUPPORTED)
+V26 Final Principle: TRM correspondences are independently discovered,
+structurally deep, and cross-system tested. The propagation bound
+is a generic geometric principle — TRM adds specificity via
+sign constraint, universality, and dimensional dependence.
 
-V26.0 BEGINS: Observable Correspondence Program
-Can TRM predictions be mapped to measurable astronomical
-or cosmological observables?
+V27.0 BEGINS: Structural Correspondence Theory
+What is the minimal structural framework for TRM-physics correspondence?
 
 ---
 

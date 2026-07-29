@@ -1,10 +1,22 @@
 {
-  "releaseStatus": "V26.0 OBSERVABLE CORRESPONDENCE — ACTIVE",
+  "releaseStatus": "V26.4 CROSS-SYSTEM CORRESPONDENCE — V26 CLOSED",
   "phase": "Observable Correspondence Program — mapping TRM predictions to astronomical/cosmological observables",
   "date": "2026-07-29",
-  "testSummary": { "total": 4007, "passed": 4007, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V26 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4012, "passed": 4012, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V26 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "name": "V26_0_ObservableCorrespondenceMapping", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V26_1_PhysicalRelationCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V26_2_UniversalBoundCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V26_3_IndependentConvergence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V26_4_CrossSystemCorrespondence", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Observable Correspondence: 8 mappings evaluated; v_max most measurable (OCM_01)",
+    "Physical Relation Correspondence: 5/8 STRONG structural matches (PRC_01)",
+    "Universal Bound Correspondence: v_max 6/10 shared with c; 73% depth (UBC_01)",
+    "Independent Convergence: all 5 results discovered before physics comparison (ICI_01)",
+    "Cross-System Correspondence: bound is generic; TRM adds specificity (CCP_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Galactic rotation: does TRM v_max correspond to observed galactic rotation speeds?",
@@ -43,8 +55,8 @@
     "nextBranch": "v26-observable-correspondence",
     "previousBranch": "v25-physical-correspondence",
     "tag": "v25-physical-correspondence",
-    "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Physical Correspondence -> Observable Correspondence",
-    "keyConstants": { "strongest_candidate": "v_max universality", "survivability": ">80%" }
+    "candidateDynamicsChain": "Sign -> Boundary -> Density -> Curvature -> Dilation -> Observable Correspondence -> Cross-System",
+    "keyConstants": { "strongest_observable": "v_max", "structural_depth": "73%", "independent_results": 5 }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 5, "passedVerified": 5, "verificationMethod": "dotnet test", "mismatch": null }
 }

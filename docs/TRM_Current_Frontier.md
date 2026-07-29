@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V26.4 CROSS-SYSTEM CORRESPONDENCE — ACTIVE
-**Previous Version:** V26.3 Independent Convergence — CLOSED
+**Current Version:** V27.0 STRUCTURAL CORRESPONDENCE — ACTIVE
+**Previous Version:** V26.4 Cross-System Correspondence — CLOSED
 **Cumulative Tests:** ~4012
 **Failed:** 0
 
@@ -23,12 +23,11 @@ For any new LLM chat or Copilot session, read in this order:
 ## One-Sentence Current State
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
-V25 CLOSED. V26.0 ACTIVE. V25 Physical Correspondence — 4 audits,
-4 SUPPORTED. Qualitative correspondence established. Distinctive
-predictions ranked. Propagation bound survives falsification.
-V26.0 begins: Observable Correspondence Program — can TRM
-predictions be mapped to measurable astronomical/cosmological
-observables?
+V25 CLOSED. V26 CLOSED. V27.0 ACTIVE. V26 Observable Correspondence
+— 5 audits, 5 SUPPORTED. Observable mappings, relation correspondence,
+bound deep structure, independent convergence, cross-system tested.
+V27.0 begins: Structural Correspondence Theory — what is the minimal
+structural framework that reproduces TRM-physics correspondences?
 
 ---
 
@@ -268,6 +267,25 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V26.2 | UBC_01 | Universal Bound Correspondence — v_max shares 6/10 properties with c; deep correspondence |
 | V26.3 | ICI_01 | Independent Convergence — ALL 5 correspondences discovered before physics comparison |
 | V26.4 | CCP_01 | Cross-System Correspondence — bound appears in non-TRM graphs; TRM adds specificity |
+
+## V27 Program (ACTIVE)
+
+**Structural Correspondence Theory**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V27.0 | — | Starting — what is the minimal structural framework for TRM-physics correspondence? |
+
+Research question:
+> What is the minimal set of structural axioms needed to
+> reproduce the TRM-physics correspondences? Can we strip TRM
+> down to its essential structural core?
+
+Candidate chain:
+```
+Sign → Boundary → Propagation → Metric → Curvature
+    → Correspondence → Minimal Structure
+```
 
 Research question:
 > Can TRM predictions (v_max, dilation, curvature, metric) be

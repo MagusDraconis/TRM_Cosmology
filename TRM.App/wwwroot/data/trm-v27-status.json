@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V27.0 STRUCTURAL CORRESPONDENCE — ACTIVE",
+  "phase": "Structural Correspondence Theory — identifying the minimal framework for TRM-physics correspondence",
+  "date": "2026-07-29",
+  "testSummary": { "total": 4012, "passed": 4012, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V27 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Minimal structure: can the TRM-physics correspondence be reduced to N essential axioms?",
+    "Axiomatic closure: is the sign constraint logically sufficient for all observed correspondences?",
+    "Structural necessity: which TRM properties are logically necessary vs contingent?",
+    "Universality class: does TRM belong to a universality class of sign-constrained geometries?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical gravity derivation", "GR replacement", "physical c derivation", "complete axiomatic system"],
+  "openProblems": [
+    { "priority": "P0", "title": "Minimal axiom set", "description": "What is the minimal set of axioms needed to reproduce all TRM-physics correspondences? Can any axiom be eliminated?" },
+    { "priority": "P1", "title": "Structural necessity", "description": "Are codim-1, binary sign, and connectivity gradient all logically necessary? Which are contingent on specific parameter choices?" },
+    { "priority": "P2", "title": "Universality classification", "description": "Does TRM belong to a universality class of sign-constrained boundary geometries? What other systems share this class?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["KTC", "Constraint", "Geometry", "Propagation", "Velocity", "Bound", "Universality", "Time", "Tick", "Metric", "Causal Structure", "Curvature", "Dilation", "Density", "Sign", "Physical Correspondence", "Observable Correspondence"],
+    "invertedHierarchy": "sign(dT/dp) ∈ {+1,-1} is the deepest primitive. V25-V26 established physical and observable correspondence. V27 asks: what is the minimal structural core?"
+  },
+  "trmGoalAssessment": {
+    "time": "Temporal metric + dilation law (V22-V23). Cross-system tested (V26.4).",
+    "space": "Intrinsic geometry (V20-V21). Curvature (V23). Cross-system tested.",
+    "length": "ds^2/(v_bound^2*Tick^2) invariant. Propagation bound survives all testing.",
+    "c": "v_max is generic graph property; TRM adds specificity via sign constraint and universality."
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history (11 audits, 11 SUPPORTED)" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V27.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V27.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V26/V26_4/V26_4_CrossSystemCorrespondence_Tests.cs",
+    "nextPhase": "V27.0 Structural Correspondence — what is the minimal framework?",
+    "nextBranch": "v27-structural-correspondence",
+    "previousBranch": "v26-observable-correspondence",
+    "tag": "v26-observable-correspondence",
+    "candidateDynamicsChain": "Sign -> Boundary -> Propagation -> Correspondence -> Minimal Structure",
+    "keyConstants": { "cross_system_categories": 5, "total_configs_tested": 15 }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}
