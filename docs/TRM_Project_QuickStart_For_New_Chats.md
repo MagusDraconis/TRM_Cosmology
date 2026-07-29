@@ -1,24 +1,21 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 8.01
+**Version:** 8.02
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V29.0 MEASUREMENT PATHWAY — ACTIVE
+V30.0 FIRST CONTACT WITH DATA — ACTIVE
 
 CURRENT BRANCH
-v29-measurement-pathway
+v30-first-contact
 
-V28 CLOSED (6 audits, 6 SUPPORTED)
+V29 CLOSED (5 audits, 5 SUPPORTED)
+V29 Final Principle: TRM has uniquely identifiable, measurable,
+GR-distinguishable observable predictions. v_max is the strongest
+candidate with a direct pathway via SPARC rotation curves.
 
-V28 FINAL PRINCIPLE
-TRM reduces to two irreducible primitives:
-  sign(dT/dp) — ALL spatial structure
-  Tick       — ALL temporal structure
-Propagation = bridge: ds = v_bound · Tick · dT
-
-V29.0 BEGINS: Measurement Pathway Audit
-Can TRM predictions be experimentally tested?
+V30.0 BEGINS: First Contact With Data
+Load real astronomical data. Compare TRM predictions to observations.
 
 ---
 

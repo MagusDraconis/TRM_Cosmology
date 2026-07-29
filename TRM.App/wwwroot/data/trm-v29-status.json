@@ -1,10 +1,22 @@
 {
-  "releaseStatus": "V29.0 MEASUREMENT PATHWAY — ACTIVE",
+  "releaseStatus": "V29.4 DATA DIFFERENTIATION — V29 CLOSED",
   "phase": "Measurement Pathway Audit — can TRM predictions be experimentally tested?",
   "date": "2026-07-29",
-  "testSummary": { "total": 4022, "passed": 4022, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V29 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4027, "passed": 4027, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V29 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "name": "V29_0_MeasurementPathway", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V29_1_UniversalBoundOrigin", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V29_2_SignUniversality", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V29_3_TrmUniqueCore", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V29_4_DataDifferentiationPath", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Measurement Pathway: v_max↔rotation is #1 target; testable TODAY (MPO_01)",
+    "Universal Bound Origin: universality from codim-1 + boundary thickness (UBO_01)",
+    "Sign Universality: TRM sign uniquely powerful 6/6 vs next-best 4/6 (SUA_01)",
+    "TRM Unique Core: 5 TRM-UNIQUE viable experimental targets (TUC_01)",
+    "Data Differentiation: TRM differs from BOTH generic geometry AND GR (DDP_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Galactic rotation: can v_max be measured in galactic dynamics (flat rotation curves)?",
@@ -42,8 +54,8 @@
     "nextBranch": "v29-measurement-pathway",
     "previousBranch": "v28-direction-tick",
     "tag": "v28-direction-tick",
-    "candidateDynamicsChain": "{sign, Tick} → Bridge → Physics → Measurement",
-    "keyConstants": { "bridge_formula": "ds = v_bound * Tick * dT", "primitives": ["Direction", "Tick"] }
+    "candidateDynamicsChain": "{sign, Tick} → Bridge → Measurement → Unique Core → Data Differentiation",
+    "keyConstants": { "best_target": "v_max", "best_dataset": "SPARC", "TRM_unique_predictions": 5 }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 5, "passedVerified": 5, "verificationMethod": "dotnet test", "mismatch": null }
 }

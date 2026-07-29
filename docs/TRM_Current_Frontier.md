@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V29.4 DATA DIFFERENTIATION — ACTIVE
-**Previous Version:** V29.3 TRM Unique Core — CLOSED
+**Current Version:** V30.0 FIRST CONTACT WITH DATA — ACTIVE
+**Previous Version:** V29.4 Data Differentiation — CLOSED
 **Cumulative Tests:** ~4027
 **Failed:** 0
 
@@ -23,17 +23,16 @@ For any new LLM chat or Copilot session, read in this order:
 ## One-Sentence Current State
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
-V25 CLOSED. V26 CLOSED. V27 CLOSED. V28 CLOSED. V29.0 ACTIVE.
-V28 Direction–Tick Theory — 6 audits, 6 SUPPORTED.
+V25 CLOSED. V26 CLOSED. V27 CLOSED. V28 CLOSED. V29 CLOSED.
+V30.0 ACTIVE. V29 Measurement Pathway — 5 audits, 5 SUPPORTED.
 
-V28 FINAL PRINCIPLE
-TRM reduces to two irreducible primitives:
-  sign(dT/dp) — generates ALL spatial structure (geometry, curvature, propagation)
-  Tick       — generates ALL temporal structure (intervals, dilation, metric)
-Propagation is the bridge: ds = v_bound · Tick · dT
+V29 established: TRM has uniquely identifiable, measurable,
+GR-distinguishable observable predictions. The universal
+propagation bound (v_max) is the strongest candidate, with
+a direct measurement pathway via galactic rotation curves (SPARC).
 
-V29.0 begins: Measurement Pathway — can TRM predictions be
-  experimentally tested with current technology?
+V30.0 begins: FIRST CONTACT WITH DATA — load real astronomical
+data and compare TRM predictions against actual observations.
 
 ---
 
@@ -298,7 +297,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V28.4 | BGS_01 | Boundary Geometry Sufficiency — boundary alone generates ALL spatial; Tick adds temporal |
 | V28.5 | PDS_01 | Propagation Domain Separation — propagation is bridge: spatial core + temporal bridge |
 
-## V29 Program (ACTIVE)
+## V29 Program (CLOSED)
 
 **Measurement Pathway Audit**
 
@@ -309,6 +308,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V29.2 | SUA_01 | Sign Universality — TRM sign uniquely powerful: 6/6 vs next-best 3/6 |
 | V29.3 | TUC_01 | TRM Unique Core — 9 results classified; 5 TRM-UNIQUE, 4 viable targets |
 | V29.4 | DDP_01 | Data Differentiation Path — TRM differs from BOTH generic geometry AND GR |
+
+## V30 Program (ACTIVE)
+
+**First Contact With Data**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V30.0 | — | Starting — load real astronomical data; compare TRM to observations |
+
+Research question:
+> Does TRM's universal propagation bound correspond to observed
+> galaxy dynamics? Can TRM predictions be compared quantitatively
+> to SPARC rotation curves, BTFR, and other datasets?
+
+Candidate chain:
+```
+{sign, Tick} → v_max → SPARC comparison → First contact
+```
 
 Research question:
 > Can the TRM propagation bound v_max be measured or constrained
