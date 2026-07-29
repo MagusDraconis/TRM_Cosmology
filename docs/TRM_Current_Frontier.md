@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V28.0 DIRECTION–TICK — ACTIVE
+**Current Version:** V28.0 DIRECTION–TICK COUPLING — ACTIVE
 **Previous Version:** V27.3 Sign–Tick Independence — CLOSED
-**Cumulative Tests:** ~4016
+**Cumulative Tests:** ~4017
 **Failed:** 0
 
 ---
@@ -292,7 +292,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V28.0 | — | Starting — exploring the two-axiom foundation: Direction and Tick |
+| V28.0 | DTC_01 | Direction–Tick Coupling — sign and Tick fundamentally separate; 2 axioms irreducible |
 
 Research question:
 > What are the full consequences of the two-axiom foundation?
