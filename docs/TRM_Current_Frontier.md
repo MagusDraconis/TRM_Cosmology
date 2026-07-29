@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V29.1 UNIVERSAL BOUND ORIGIN — ACTIVE
-**Previous Version:** V29.0 Measurement Pathway — CLOSED
-**Cumulative Tests:** ~4024
+**Current Version:** V29.2 SIGN UNIVERSALITY — ACTIVE
+**Previous Version:** V29.1 Universal Bound Origin — CLOSED
+**Cumulative Tests:** ~4025
 **Failed:** 0
 
 ---
@@ -306,6 +306,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 |:--------|:-------|:-----------|
 | V29.0 | MPO_01 | Measurement Pathway — v_max↔rotation curves is #1; can test TODAY with SPARC |
 | V29.1 | UBO_01 | Universal Bound Origin — universality from codim-1 + boundary thickness |
+| V29.2 | SUA_01 | Sign Universality — TRM sign uniquely powerful: 6/6 vs next-best 3/6 |
 
 Research question:
 > Can the TRM propagation bound v_max be measured or constrained
