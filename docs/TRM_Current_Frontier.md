@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V28.5 PROPAGATION DOMAIN SEPARATION — ACTIVE
-**Previous Version:** V28.4 Boundary Geometry Sufficiency — CLOSED
+**Current Version:** V29.0 MEASUREMENT PATHWAY — ACTIVE
+**Previous Version:** V28.5 Propagation Domain Separation — CLOSED
 **Cumulative Tests:** ~4022
 **Failed:** 0
 
@@ -23,18 +23,17 @@ For any new LLM chat or Copilot session, read in this order:
 ## One-Sentence Current State
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
-V25 CLOSED. V26 CLOSED. V27 CLOSED. V28.0 ACTIVE.
-V27 Structural Core Theory — 4 audits, 4 SUPPORTED.
+V25 CLOSED. V26 CLOSED. V27 CLOSED. V28 CLOSED. V29.0 ACTIVE.
+V28 Direction–Tick Theory — 6 audits, 6 SUPPORTED.
 
-V27 FINAL MINIMAL AXIOM SET
-  Axiom A: sign(dT/dp) ∈ {+1,-1}
-  Axiom B: Tick = mean|d(VarI1+VarTerms)/dα|
-  Theorem: codim-1 boundary
-  Derived: geometry, curvature, dilation, metric, causality, propagation
-  Result: TRM reduces to two irreducible primitives: Direction and Tick.
+V28 FINAL PRINCIPLE
+TRM reduces to two irreducible primitives:
+  sign(dT/dp) — generates ALL spatial structure (geometry, curvature, propagation)
+  Tick       — generates ALL temporal structure (intervals, dilation, metric)
+Propagation is the bridge: ds = v_bound · Tick · dT
 
-V28.0 begins: Direction–Tick — exploring the consequences
-  of the two-axiom foundation.
+V29.0 begins: Measurement Pathway — can TRM predictions be
+  experimentally tested with current technology?
 
 ---
 
@@ -286,7 +285,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V27.2 | PRT_01 | Primitive Reduction Theorem — codim-1 is theorem, not primitive; axioms reduce to 2 |
 | V27.3 | STI_01 | Sign–Tick Independence — sign and Tick are independent; 2 irreducible axioms |
 
-## V28 Program (ACTIVE)
+## V28 Program (CLOSED)
 
 **Direction–Tick Theory**
 
@@ -298,6 +297,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V28.3 | GAT_01 | Geometry Axiom Theorem — geometry appears at step 2 (boundary surface); unavoidable |
 | V28.4 | BGS_01 | Boundary Geometry Sufficiency — boundary alone generates ALL spatial; Tick adds temporal |
 | V28.5 | PDS_01 | Propagation Domain Separation — propagation is bridge: spatial core + temporal bridge |
+
+## V29 Program (ACTIVE)
+
+**Measurement Pathway Audit**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V29.0 | — | Starting — can TRM predictions be experimentally tested? |
+
+Research question:
+> Can the TRM propagation bound v_max be measured or constrained
+> with current experimental technology? What measurement pathways
+> exist for testing the correspondence?
+
+Candidate chain:
+```
+{sign, Tick} → Propagation → Bound → Measurement → Test
+```
 
 Research question:
 > What are the full consequences of the two-axiom foundation?

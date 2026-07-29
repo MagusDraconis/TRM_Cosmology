@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V29.0 MEASUREMENT PATHWAY — ACTIVE",
+  "phase": "Measurement Pathway Audit — can TRM predictions be experimentally tested?",
+  "date": "2026-07-29",
+  "testSummary": { "total": 4022, "passed": 4022, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V29 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Galactic rotation: can v_max be measured in galactic dynamics (flat rotation curves)?",
+    "Cosmological correspondence: can v_max be related to Hubble-like expansion?",
+    "Direct measurement: can v_max be tested in controlled oscillator experiments?",
+    "Numerical calibration: can TRM Tick be calibrated against physical time units?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["physical measurement derivation", "direct astronomical prediction", "numerical equivalence to c"],
+  "openProblems": [
+    { "priority": "P0", "title": "Galactic measurement pathway", "description": "Can TRM v_max be compared to observed galactic rotation velocities (v_flat ≈ 200 km/s)? Does the asymptotic bound map to MOND a0?" },
+    { "priority": "P1", "title": "Oscillator experiment", "description": "Can TRM propagation be tested in controlled coupled-phase-oscillator experiments at lab scale?" },
+    { "priority": "P2", "title": "Numerical calibration", "description": "What calibration factor maps TRM Tick to physical seconds? Can this be determined from first principles?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["sign(dT/dp)", "Tick", "codim-1", "Geometry", "Propagation", "Bridge", "Physics", "Measurement"],
+    "invertedHierarchy": "sign(dT/dp) → space. Tick → time. Propagation = bridge. Now: can this be measured?"
+  },
+  "trmGoalAssessment": {
+    "time": "Tick is primitive temporal unit. Bridge ds = v_bound·Tick·dT (V28.5).",
+    "space": "sign(dT/dp) generates all spatial structure (V28.4).",
+    "length": "Bound sufficiency established. Propagation bound is theorem-level (V28.2).",
+    "c": "v_max is the bridge constant. Now asking: is it MEASURABLE?"
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V29.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V29.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V28/V28_5/V28_5_PropagationDomainSeparation_Tests.cs",
+    "nextPhase": "V29.0 Measurement Pathway — experimental testability",
+    "nextBranch": "v29-measurement-pathway",
+    "previousBranch": "v28-direction-tick",
+    "tag": "v28-direction-tick",
+    "candidateDynamicsChain": "{sign, Tick} → Bridge → Physics → Measurement",
+    "keyConstants": { "bridge_formula": "ds = v_bound * Tick * dT", "primitives": ["Direction", "Tick"] }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}

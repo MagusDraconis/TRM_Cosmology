@@ -1,10 +1,25 @@
 {
-  "releaseStatus": "V28.0 DIRECTION–TICK — ACTIVE",
+  "releaseStatus": "V28.5 PROPAGATION DOMAIN SEPARATION — V28 CLOSED",
   "phase": "Direction–Tick Theory — exploring the consequences of the two-axiom foundation",
   "date": "2026-07-29",
-  "testSummary": { "total": 4016, "passed": 4016, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V28 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4022, "passed": 4022, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V28 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "name": "V28_0_DirectionTickCoupling", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V28_1_NecessaryConsequenceStructure", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V28_2_UniversalPropagationTheorem", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V28_3_GeometryAxiomTheorem", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V28_4_BoundaryGeometrySufficiency", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V28_5_PropagationDomainSeparation", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "Direction-Tick Coupling: no hidden coupling; 2 axioms irreducible (DTC_01)",
+    "Necessary Consequence: 4/10 NECESSARY, 6/10 CONTINGENT (NCS_01)",
+    "Propagation Theorem: v_max existence/bounded/convergent are NECESSARY (UPT_01)",
+    "Geometry Axiom: geometry appears at boundary surface; unavoidable (GAT_01)",
+    "Boundary Sufficiency: boundary = complete spatial theory; Tick = temporal (BGS_01)",
+    "Propagation Domain: propagation is space-time bridge — spatial core, temporal bridge (PDS_01)",
+    "V28 FINAL: sign(dT/dp) → ALL spatial. Tick → ALL temporal. Propagation = bridge: ds = v·Tick·dT"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Direction primacy: is sign(dT/dp) the root of all spatial geometry?",
@@ -42,8 +57,8 @@
     "nextBranch": "v28-direction-tick",
     "previousBranch": "v27-structural-correspondence",
     "tag": "v27-structural-correspondence",
-    "candidateDynamicsChain": "{sign, Tick} → codim-1 → Geometry → Propagation → Curvature → Dilation → Metric → Causality",
-    "keyConstants": { "axioms": ["sign(dT/dp)", "Tick"], "theorem": "codim-1 boundary" }
+    "candidateDynamicsChain": "{sign, Tick} → boundary → geometry → propagation → bridge → time",
+    "keyConstants": { "primitives": ["sign(dT/dp)=Direction", "Tick"], "bridge": "ds = v_bound * Tick * dT" }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 6, "passedVerified": 6, "verificationMethod": "dotnet test", "mismatch": null }
 }

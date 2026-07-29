@@ -1,25 +1,24 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 8.00
+**Version:** 8.01
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V28.0 DIRECTION–TICK — ACTIVE
+V29.0 MEASUREMENT PATHWAY — ACTIVE
 
 CURRENT BRANCH
-v28-direction-tick
+v29-measurement-pathway
 
-V27 CLOSED (4 audits, 4 SUPPORTED)
+V28 CLOSED (6 audits, 6 SUPPORTED)
 
-V27 FINAL MINIMAL AXIOM SET
-  Axiom A: sign(dT/dp) ∈ {+1,-1}
-  Axiom B: Tick = mean|d(VarI1+VarTerms)/dα|
-  Theorem: codim-1 boundary
-  Derived: geometry, curvature, dilation, metric, causality, propagation
-  Result: TRM reduces to two irreducible primitives: Direction and Tick.
+V28 FINAL PRINCIPLE
+TRM reduces to two irreducible primitives:
+  sign(dT/dp) — ALL spatial structure
+  Tick       — ALL temporal structure
+Propagation = bridge: ds = v_bound · Tick · dT
 
-V28.0 BEGINS: Direction–Tick Theory
-Exploring the consequences of the two-axiom foundation.
+V29.0 BEGINS: Measurement Pathway Audit
+Can TRM predictions be experimentally tested?
 
 ---
 
