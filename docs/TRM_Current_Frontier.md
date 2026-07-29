@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V31.7 SPIRAL ARM CHANNEL — ACTIVE
-**Previous Version:** V31.6 Geometry Strength Separation — CLOSED
-**Cumulative Tests:** ~4043
+**Current Version:** V31.8 AMPLITUDE MISSING FACTOR — ACTIVE
+**Previous Version:** V31.7 Spiral Arm Channel — CLOSED
+**Cumulative Tests:** ~4044
 **Failed:** 0
 
 ---
@@ -335,6 +335,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.5 | LSB_01 | LSB Failure — Very LSB: shape 80% but denseOK 5.7%; DM=51.4% |
 | V31.6 | GSA_01 | Geometry-Strength Separation — shape 72% vs amp 29%; r=-0.12; two-layer model |
 | V31.7 | SAC_01 | Spiral Arm Channel — disk-channel correlation r=0.03; need 2D density maps |
+| V31.8 | AMF_01 | Amplitude Missing Factor — density gradient strength r=-0.72; dominates amplitude |
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM
