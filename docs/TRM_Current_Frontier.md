@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V26.0 OBSERVABLE CORRESPONDENCE — ACTIVE
+**Current Version:** V26.0 OBSERVABLE CORRESPONDENCE MAPPING — ACTIVE
 **Previous Version:** V25.3 Universal Propagation Falsification — CLOSED
-**Cumulative Tests:** ~4007
+**Cumulative Tests:** ~4008
 **Failed:** 0
 
 ---
@@ -263,7 +263,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
-| V26.0 | — | Starting — map TRM predictions to astronomical/cosmological observables |
+| V26.0 | OCM_01 | Observable Correspondence Mapping — 8 observable mappings; propagation bound most measurable |
 
 Research question:
 > Can TRM predictions (v_max, dilation, curvature, metric) be
