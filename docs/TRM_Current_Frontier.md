@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V28.2 UNIVERSAL PROPAGATION THEOREM — ACTIVE
-**Previous Version:** V28.1 Necessary Consequence Structure — CLOSED
-**Cumulative Tests:** ~4019
+**Current Version:** V28.3 GEOMETRY AXIOM THEOREM — ACTIVE
+**Previous Version:** V28.2 Universal Propagation Theorem — CLOSED
+**Cumulative Tests:** ~4020
 **Failed:** 0
 
 ---
@@ -295,6 +295,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V28.0 | DTC_01 | Direction–Tick Coupling — sign and Tick fundamentally separate; 2 axioms irreducible |
 | V28.1 | NCS_01 | Necessary Consequence Structure — 4/10 NECESSARY (theorem-level), 6/10 CONTINGENT |
 | V28.2 | UPT_01 | Universal Propagation Theorem — v_max partially promoted from CONTINGENT to NECESSARY |
+| V28.3 | GAT_01 | Geometry Axiom Theorem — geometry appears at step 2 (boundary surface); unavoidable |
 
 Research question:
 > What are the full consequences of the two-axiom foundation?
