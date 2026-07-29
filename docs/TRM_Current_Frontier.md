@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V28.1 NECESSARY CONSEQUENCE STRUCTURE — ACTIVE
-**Previous Version:** V28.0 Direction–Tick Coupling — CLOSED
-**Cumulative Tests:** ~4018
+**Current Version:** V28.2 UNIVERSAL PROPAGATION THEOREM — ACTIVE
+**Previous Version:** V28.1 Necessary Consequence Structure — CLOSED
+**Cumulative Tests:** ~4019
 **Failed:** 0
 
 ---
@@ -294,6 +294,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 |:--------|:-------|:-----------|
 | V28.0 | DTC_01 | Direction–Tick Coupling — sign and Tick fundamentally separate; 2 axioms irreducible |
 | V28.1 | NCS_01 | Necessary Consequence Structure — 4/10 NECESSARY (theorem-level), 6/10 CONTINGENT |
+| V28.2 | UPT_01 | Universal Propagation Theorem — v_max partially promoted from CONTINGENT to NECESSARY |
 
 Research question:
 > What are the full consequences of the two-axiom foundation?
