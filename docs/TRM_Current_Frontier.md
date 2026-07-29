@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V30.0 SPARC CALIBRATION — ACTIVE
-**Previous Version:** V29.4 Data Differentiation — CLOSED
-**Cumulative Tests:** ~4028
+**Current Version:** V30.1 QUALITATIVE SPARC TEST — ACTIVE
+**Previous Version:** V30.0 SPARC Calibration — CLOSED
+**Cumulative Tests:** ~4029
 **Failed:** 0
 
 ---
@@ -316,6 +316,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | Version | Audits | Key Result |
 |:--------|:-------|:-----------|
 | V30.0 | SDC_01 | SPARC Calibration — 2 tests calibration-free NOW; first contact established |
+| V30.1 | QST_01 | Qualitative SPARC Test — 5/6 tests calibration-free; TRM ready for first contact |
 
 Research question:
 > Does TRM's universal propagation bound correspond to observed
