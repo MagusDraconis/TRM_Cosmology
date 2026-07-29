@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V30.6 BARYONIC RAW NUMBERS — ACTIVE
-**Previous Version:** V30.5 Baryonic Test Statistics — CLOSED
-**Cumulative Tests:** ~4034
+**Current Version:** V30.7 BARYONIC TEST ROBUSTNESS — ACTIVE
+**Previous Version:** V30.6 Baryonic Raw Numbers — CLOSED
+**Cumulative Tests:** ~4035
 **Failed:** 0
 
 ---
@@ -322,6 +322,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V30.4 | BTR_01 | Baryonic Test Results — class distribution reported; density primacy broadly survives |
 | V30.5 | BTS_01 | Baryonic Test Statistics — complete statistics; top 10 confirmations + failures |
 | V30.6 | BRN_01 | Baryonic Raw Numbers — exact counts: BARYON=66, MIXED=80, DM=25, B+M=85.4% |
+| V30.7 | RBT_01 | Baryonic Test Robustness — B+M=[71.9%,85.4%] across 4 threshold sets |
 
 Research question:
 > Does TRM's universal propagation bound correspond to observed
