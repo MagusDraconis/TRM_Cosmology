@@ -3,9 +3,9 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V31.8 AMPLITUDE MISSING FACTOR — ACTIVE
-**Previous Version:** V31.7 Spiral Arm Channel — CLOSED
-**Cumulative Tests:** ~4044
+**Current Version:** V31.9 TICK GRADIENT SCALING — ACTIVE
+**Previous Version:** V31.8 Amplitude Missing Factor — CLOSED
+**Cumulative Tests:** ~4045
 **Failed:** 0
 
 ---
@@ -336,6 +336,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V31.6 | GSA_01 | Geometry-Strength Separation — shape 72% vs amp 29%; r=-0.12; two-layer model |
 | V31.7 | SAC_01 | Spiral Arm Channel — disk-channel correlation r=0.03; need 2D density maps |
 | V31.8 | AMF_01 | Amplitude Missing Factor — density gradient strength r=-0.72; dominates amplitude |
+| V31.9 | TGS_01 | Tick Gradient Scaling — simple proxy insufficient (-3.5%); needs real Tick |
 
 Research question:
 > Can individual SPARC rotation curves be compared to TRM
