@@ -1,11 +1,11 @@
 # TRM Project Lineage Overview
 
-**Version:** 10.02
+**Version:** 10.03
 **Date:** 2026-07-29
-**Scope:** Clockwork Cosmology V1 through V30.0
-**Current Frontier:** V30.0 First Contact With Data — ACTIVE
-**Previous Frontier:** V29.4 Data Differentiation — CLOSED
-**Current Branch:** v30-first-contact
+**Scope:** Clockwork Cosmology V1 through V31.0
+**Current Frontier:** V31.0 Rotation Curve Correspondence — ACTIVE
+**Previous Frontier:** V30.7 Baryonic Test Robustness — CLOSED
+**Current Branch:** v31-rotation-curve
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -2442,8 +2442,9 @@ V22.0-V22.3 | Temporal Emergence Theory | 4 | COMPLETE |
 | V27.0-V27.3 | Structural Core Theory | 4 | COMPLETE |
 | V28.0-V28.5 | Direction–Tick Theory | 6 | COMPLETE |
 | V29.0-V29.4 | Measurement Pathway | 5 | COMPLETE |
-| V30.0 | First Contact With Data | 0 | ACTIVE |
-| **Total** | | **4027** | **0 failed** |
+| V30.0-V30.7 | First Contact With Data | 8 | COMPLETE |
+| V31.0 | Rotation Curve Correspondence | 0 | ACTIVE |
+| **Total** | | **4035** | **0 failed** |
 
 Note: Test counts represent version-specific test suites. The cumulative total of 3999 verified
 tests with 0 failed is the authoritative current count as of 2026-07-28.

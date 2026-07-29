@@ -1,10 +1,28 @@
 {
-  "releaseStatus": "V30.0 FIRST CONTACT WITH DATA — ACTIVE",
+  "releaseStatus": "V30.7 BARYONIC TEST ROBUSTNESS — V30 CLOSED",
   "phase": "First Contact With Data — loading real astronomical data to compare against TRM predictions",
   "date": "2026-07-29",
-  "testSummary": { "total": 4027, "passed": 4027, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V30 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
-  "suites": [],
-  "supportedClaims": [],
+  "testSummary": { "total": 4035, "passed": 4035, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V30 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [
+    { "name": "V30_0_SparcCalibration", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_1_QualitativeSparcTest", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_2_SparcStructuralPrediction", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_3_BaryonicTestPrediction", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_4_BaryonicTestResults", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_5_BaryonicTestStatistics", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_6_BaryonicRawNumbers", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" },
+    { "name": "V30_7_BaryonicTestRobustness", "tests": 1, "status": "PASS", "claimCategory": "SUPPORTED" }
+  ],
+  "supportedClaims": [
+    "SPARC Calibration: 2 tests calibration-free; first contact established (SDC_01)",
+    "Qualitative SPARC Test: 5/6 tests calibration-free (QST_01)",
+    "SPARC Structural Prediction: P1-P5 executed on SPARC data (SPA_01)",
+    "Baryonic Test Prediction: density-dominance classification (BTP_01)",
+    "Baryonic Test Results: class distribution reported (BTR_01)",
+    "Baryonic Test Statistics: complete statistics (BTS_01)",
+    "Baryonic Raw Numbers: BARYON=66, MIXED=80, DM=25, B+M=85.4% (BRN_01)",
+    "Baryonic Robustness: B+M=[71.9%,85.4%] across 4 thresholds (RBT_01)"
+  ],
   "conditionalClaims": [],
   "hypotheses": [
     "Galactic rotation: does TRM v_max correspond to observed v_flat distribution?",
@@ -42,8 +60,8 @@
     "nextBranch": "v30-first-contact",
     "previousBranch": "v29-measurement-pathway",
     "tag": "v29-measurement-pathway",
-    "candidateDynamicsChain": "{sign, Tick} → v_max → SPARC → First contact with data",
-    "keyConstants": { "best_target": "v_max universality", "best_dataset": "SPARC" }
+    "candidateDynamicsChain": "{sign, Tick} → v_max → SPARC → Density Primacy → B+M=85.4%",
+    "keyConstants": { "baryon_count": 66, "mixed_count": 80, "dm_count": 25, "b_plus_m_pct": 85.4 }
   },
-  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+  "releaseIntegrity": { "totalTestsVerified": 8, "passedVerified": 8, "verificationMethod": "dotnet test", "mismatch": null }
 }

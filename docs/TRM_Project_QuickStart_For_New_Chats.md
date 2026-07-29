@@ -1,21 +1,21 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 8.02
+**Version:** 8.03
 **Date:** 2026-07-29
 
 CURRENT VERSION
-V30.0 FIRST CONTACT WITH DATA — ACTIVE
+V31.0 ROTATION CURVE CORRESPONDENCE — ACTIVE
 
 CURRENT BRANCH
-v30-first-contact
+v31-rotation-curve
 
-V29 CLOSED (5 audits, 5 SUPPORTED)
-V29 Final Principle: TRM has uniquely identifiable, measurable,
-GR-distinguishable observable predictions. v_max is the strongest
-candidate with a direct pathway via SPARC rotation curves.
+V30 CLOSED (8 audits, 8 SUPPORTED)
+V30 Final Principle: TRM density primacy confirmed against SPARC.
+BARYON+MIXED = 85.4% (robust under threshold variation). First
+contact with astronomical data established.
 
-V30.0 BEGINS: First Contact With Data
-Load real astronomical data. Compare TRM predictions to observations.
+V31.0 BEGINS: Rotation Curve Correspondence
+Compare individual SPARC rotation curves to TRM propagation profiles.
 
 ---
 

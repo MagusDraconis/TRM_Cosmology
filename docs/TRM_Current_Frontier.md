@@ -3,8 +3,8 @@
 **Version:** 9.8
 **Date:** 2026-07-28
 
-**Current Version:** V30.7 BARYONIC TEST ROBUSTNESS — ACTIVE
-**Previous Version:** V30.6 Baryonic Raw Numbers — CLOSED
+**Current Version:** V31.0 ROTATION CURVE CORRESPONDENCE — ACTIVE
+**Previous Version:** V30.7 Baryonic Test Robustness — CLOSED
 **Cumulative Tests:** ~4035
 **Failed:** 0
 
@@ -24,15 +24,12 @@ For any new LLM chat or Copilot session, read in this order:
 
 V20 CLOSED. V21 CLOSED. V22 CLOSED. V23 CLOSED. V24 CLOSED.
 V25 CLOSED. V26 CLOSED. V27 CLOSED. V28 CLOSED. V29 CLOSED.
-V30.0 ACTIVE. V29 Measurement Pathway — 5 audits, 5 SUPPORTED.
-
-V29 established: TRM has uniquely identifiable, measurable,
-GR-distinguishable observable predictions. The universal
-propagation bound (v_max) is the strongest candidate, with
-a direct measurement pathway via galactic rotation curves (SPARC).
-
-V30.0 begins: FIRST CONTACT WITH DATA — load real astronomical
-data and compare TRM predictions against actual observations.
+V30 CLOSED. V31.0 ACTIVE. V30 First Contact With Data — 8 audits,
+8 SUPPORTED. Density primacy established: BARYON+MIXED=85.4%
+(robust under threshold variation). TRM confronted with real
+SPARC data. V31.0 begins: Rotation Curve Correspondence —
+can individual SPARC rotation curves be compared to TRM
+propagation profiles?
 
 ---
 
@@ -309,7 +306,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V29.3 | TUC_01 | TRM Unique Core — 9 results classified; 5 TRM-UNIQUE, 4 viable targets |
 | V29.4 | DDP_01 | Data Differentiation Path — TRM differs from BOTH generic geometry AND GR |
 
-## V30 Program (ACTIVE)
+## V30 Program (CLOSED)
 
 **First Contact With Data**
 
@@ -323,6 +320,24 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V30.5 | BTS_01 | Baryonic Test Statistics — complete statistics; top 10 confirmations + failures |
 | V30.6 | BRN_01 | Baryonic Raw Numbers — exact counts: BARYON=66, MIXED=80, DM=25, B+M=85.4% |
 | V30.7 | RBT_01 | Baryonic Test Robustness — B+M=[71.9%,85.4%] across 4 threshold sets |
+
+## V31 Program (ACTIVE)
+
+**Rotation Curve Correspondence**
+
+| Version | Audits | Key Result |
+|:--------|:-------|:-----------|
+| V31.0 | — | Starting — compare individual SPARC rotation curves to TRM propagation |
+
+Research question:
+> Can individual SPARC rotation curves be compared to TRM
+> propagation profiles? Does v_max (asymptotic bound) correspond
+> to observed v_flat on a galaxy-by-galaxy basis?
+
+Candidate chain:
+```
+{sign, Tick} → v_max → rotation curves → individual fit → prediction
+```
 
 Research question:
 > Does TRM's universal propagation bound correspond to observed

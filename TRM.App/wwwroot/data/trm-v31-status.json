@@ -1,0 +1,49 @@
+{
+  "releaseStatus": "V31.0 ROTATION CURVE CORRESPONDENCE — ACTIVE",
+  "phase": "Rotation Curve Correspondence — comparing individual SPARC rotation curves to TRM propagation profiles",
+  "date": "2026-07-29",
+  "testSummary": { "total": 4035, "passed": 4035, "failed": 0, "skipped": 0, "verification": "dotnet test", "command": "dotnet test TRM.Tests --filter Category=V31 --settings TRM.Tests/long-running.runsettings", "date": "2026-07-29" },
+  "suites": [],
+  "supportedClaims": [],
+  "conditionalClaims": [],
+  "hypotheses": [
+    "Individual fit: can TRM v_max be extracted from individual SPARC rotation curves?",
+    "Galaxy-by-galaxy: does v_flat correlate with TRM boundary density per galaxy?",
+    "Universal asymptote: does the v_max asymptote match v_flat distribution?",
+    "Profile shape: does TRM propagation profile shape match rotation curve shape?"
+  ],
+  "falsifiedClaims": [],
+  "notClaimed": ["curve fitting", "parameter optimization", "individual galaxy prediction"],
+  "openProblems": [
+    { "priority": "P0", "title": "Individual v_max extraction", "description": "Extract v_max (asymptotic velocity) from individual SPARC rotation curves. Compare to TRM v_max prediction per galaxy." },
+    { "priority": "P1", "title": "Profile comparison", "description": "Does TRM propagation profile shape match observed rotation curve shape (rising → flat → decline)?" },
+    { "priority": "P2", "title": "Universal fit", "description": "Can a single TRM v_max parameter fit all SPARC galaxies simultaneously?" }
+  ],
+  "survivingPrinciples": [],
+  "emergenceChain": {
+    "steps": ["sign(dT/dp)", "Tick", "codim-1", "Geometry", "Propagation", "v_max", "Density Primacy", "SPARC Data", "Rotation Curves"],
+    "invertedHierarchy": "TRM density primacy confirmed (B+M=85.4%). Now: individual rotation curve comparison."
+  },
+  "trmGoalAssessment": {
+    "time": "Tick primitive. Bridge ds = v_bound·Tick·dT.",
+    "space": "sign(dT/dp) generates all spatial structure. Density primacy confirmed.",
+    "length": "B+M=85.4%. Robust under threshold variation [71.9%,85.4%].",
+    "c": "Now asking: does TRM v_max profile match individual galaxy rotation curves?"
+  },
+  "documents": [
+    { "title": "V20 Closure Report", "filename": "docs/V20/V20_Closure_Report.md", "available": true, "description": "V20.0-V20.10 complete audit history" },
+    { "title": "TRM Current Frontier", "filename": "docs/TRM_Current_Frontier.md", "available": true, "description": "Living frontier document for V31.0" },
+    { "title": "TRM Project Lineage Overview", "filename": "docs/TRM_Project_Lineage_Overview.md", "available": true, "description": "Authoritative historical overview through V31.0" },
+    { "title": "TRM Project QuickStart", "filename": "docs/TRM_Project_QuickStart_For_New_Chats.md", "available": true, "description": "Operational briefing for new chats and reviewers" }
+  ],
+  "roadmap": {
+    "recommendedTestFile": "TRM.Tests/V30/V30_7/V30_7_BaryonicTestRobustness_Tests.cs",
+    "nextPhase": "V31.0 Rotation Curve — individual curve comparison",
+    "nextBranch": "v31-rotation-curve",
+    "previousBranch": "v30-first-contact",
+    "tag": "v30-first-contact",
+    "candidateDynamicsChain": "{sign, Tick} → v_max → Density Primacy → Rotation Curves",
+    "keyConstants": { "b_plus_m_pct": 85.4, "baryon_count": 66, "mixed_count": 80, "dm_count": 25 }
+  },
+  "releaseIntegrity": { "totalTestsVerified": 0, "passedVerified": 0, "verificationMethod": "dotnet test", "mismatch": null }
+}
