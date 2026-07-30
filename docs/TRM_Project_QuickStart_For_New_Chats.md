@@ -1,7 +1,7 @@
 # TRM Project QuickStart For New Chats
 
-**Version:** 8.05
-**Date:** 2026-07-29
+**Version:** 8.20
+**Date:** 2026-07-30
 
 CURRENT VERSION
 V33 GRADIENT DYNAMICS THEORY — ACTIVE
@@ -11,15 +11,16 @@ v33-gradient-dynamics-theory
 
 V32 CLOSED (8 audits, 8 SUPPORTED)
 V32 Capstone: TRM Density-Gradient Gravity Law.
-Shape = sign(∇ρ). Amplitude = |∇ρ|^α.
-Curvature (∇²ρ) and channels are DERIVED from ∇ρ.
-Gradient law is cross-system universal and scale-free.
+Shape = sign(∇ρ) remains the directional candidate.
+Amplitude = |∇ρ|^α is now CONDITIONAL (AGE_01, RPL_01).
+Channels (∇ρ · ∇v) and Curvature (∇²ρ) remain derived observables in the V32 reduction frame.
+Within the V32 test frame, the gradient law was cross-system universal and scale-free.
 7/7 falsification attempts survived.
 
-V33 BEGINS: Gradient Dynamics Theory
-Apply gradient law with real Tick to calibrated galactic dynamics.
-Determine S_V calibration factor. Deploy Tick to individual galaxies.
-Complete the two-layer amplitude model.
+V33 ACTIVE (13 audits complete through RLS_01)
+QGI_01 through RLS_01 completed under claim governance.
+Current focus: consolidate validated hierarchy and interaction claims,
+and keep the resonance loop at hypothesis level pending stronger closure.
 
 ---
 
@@ -56,61 +57,86 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 
 ---
 
-## D. Project Evolution
+## D. Origin Chain (Minimal)
 
-| Version | One-Sentence Description | Key Outcome |
-|:--------|:-------------------------|:------------|
-| V14.0-V14.4 | Resonance → Wave Grammar | Resonance FALSIFIED; 2x2 grammar discovered |
-| V15.0-V15.3 | Foundational Laws | Kernel-Tick Consistency; Free Star Algebra |
-| V16.0-V16.1 | Architecture & Geometry | sign = sgn(|m|-θ); manifold geometry model |
-| V17.0-V17.2 | Architecture Memory | Geometry FALSIFIED; Memory = max(0, dim-1)·k |
-| V18.0-V18.2 | Projection Loss & Topology | Memory = ProjectionLoss; 38.7% topological residual |
-| V19.0-V19.10 | Topological Memory Theory (CLOSED) | bdim=PRIMARY; M=[Δ≥0]·k·ProjMeasure; unified framework |
-| V20.0-V20.10 | Boundary Geometry Theory (CLOSED) | Geometry is primary; intrinsic metric, dimension, curvature, homogeneity, symmetry |
-| V21.0-V21.5 | Boundary Dynamics Theory (ACTIVE) | BDP+...+LCI: local causality, degree predictor |
+1. Kernel-Tick Consistency (KTC) and Free Star Algebra establish the structural base.
+2. Projection to |m| creates topological information loss and sign boundary structure.
+3. Boundary dimension controls geometry and memory gating.
+4. Geometry supports propagation, temporal structure, and curvature observables.
+5. V32 established a gradient-based reduced candidate in galactic application.
+6. V33 tests oscillator-to-feedback-to-gradient hierarchy and loop diagnostics under strict governance.
 
-**Cumulative total: ~3987 tests, 0 failed.**
+**Cumulative total: ~4059 tests, 0 failed.**
 
 ---
 
-## E. Strongest Supported Findings
+## E. Current Frontier In 10 Lines
 
-1. **Intrinsic Geometry Emergence** (V20) — KTC → φ → φ⁻¹(0) → intrinsic metric → geodesics → dimension → curvature → homogeneity → symmetry. Geometry is primary; memory is a derived observable.
-2. **Projection Dimension Invariant** (V19.6) — Δ = bdim-1 controls memory; unifies dimensional framework.
-3. **Hypothetical Boundary Dimension** (V19.5) — Codim-1 law extrapolates to 3D; 2D surface boundary verified.
-4. **Boundary Generation Principle** (V19.4) — dim(bdry) = dim(param) - 1 generically; codimension-1 law.
-5. **Topological Projection Loss** (V18) — Memory = information lost when full topology is projected onto |m|.
-6. **Free Star Algebra** (V15) — ⟨E, M, R | g∘h=⊥ for g≠h⟩. 4 valid operator states.
-7. **Kernel-Tick Consistency** (V15) — All organization follows from kernel producing continuous, conservative, coherent Tick fields.
-8. **|m| as Primal Coordinate** (V14) — |m| is optimal 1D projection; |m+1| is a folded projection.
+- V33 is ACTIVE with 13 completed audits through RLS_01.
+- Validated hierarchy: Oscillator interaction -> mismatch/divergence -> fb -> ∇fb -> ∇|m| -> boundary -> geometry -> dynamics.
+- Validated interaction: geometry -> tick anomaly -> feedback amplification.
+- Interaction evidence is SUPPORTED; theorem-level loop closure is NOT CLAIMED.
+- Shape = sign(∇ρ) is retained only as boundary-amplified directional candidate.
+- Amplitude = |∇ρ|^α is CONDITIONAL (AGE_01, RPL_01).
+- Channels (∇ρ · ∇v) are derived observables.
+- Curvature (∇²ρ) is a derived observable.
+- Claim discipline remains strict: SUPPORTED / CONDITIONAL / HYPOTHESIS / NOT CLAIMED.
+- Compatibility gate: every new derivation must recover the V3.4 calculation in the appropriate limit.
 
 ---
 
-## F. Current Hypotheses
+## F. V33 Core Discoveries
+
+| Audit | Finding | Status | Implication |
+|:------|:--------|:------:|:------------|
+| QGI_01 | Oscillator-level gradient trend law detected | SUPPORTED | Validates micro-level gradient signal basis |
+| BSC_01 | Boundary zones concentrate multiple signal channels | SUPPORTED | Boundary is a measurable amplification layer |
+| BAG_01 | Boundary-conditioned gradient improves galactic application behavior | SUPPORTED | Supports boundary-aware gravity candidate usage |
+| TGO_01 | Tick-gradient directionality tested and ranked | SUPPORTED | Tick participates in gradient formation pathway |
+| FGO_01 | ∇fb identified as dominant upstream gradient generator candidate | SUPPORTED | Elevates feedback-gradient pathway in hierarchy |
+| FBT_01 | Oscillator mismatch/divergence linked to fb birth | SUPPORTED | Anchors fb origin at oscillator-interaction level |
+| TGR_01 | Geometry-tick-feedback interaction signatures detected | SUPPORTED | Confirms coupled interaction, not yet closed loop theorem |
+| RLS_01 | Loop gain classification and saturation audit completed | SUPPORTED | Resonance loop remains hypothesis-level mechanism pending closure criteria |
+
+All V33 audits represented: QGI_01, OGC_01, IBL_01, BES_01, BSC_01, BAG_01,
+AGE_01, RPL_01, TGO_01, FGO_01, FBT_01, TGR_01, RLS_01.
+
+---
+
+## G. Current Hypotheses
 
 > All items below are explicitly classified as **HYPOTHESIS** — not supported findings.
 
-**Boundary dynamics feasibility** (H1): Can intrinsic geometry support propagation, flow, or dynamics without importing external physics? Candidate chain: KTC → Constraint → Geometry → Dynamics → Time-like behavior.
+**Resonance-loop closure** (H1): Can the geometry↔Tick↔feedback interaction be promoted from interaction evidence to a stronger closure hypothesis test with stable class behavior across cohorts?
 
-**Wave equation emergence** (H2): Does the intrinsic metric support wave-like solutions? Does the boundary admit a natural Laplacian or d'Alembertian?
+**Universal amplitude law** (H2): Can a single global exponent $\alpha$ explain amplitude across populations without class-conditioned residual structure (RPL_01 currently prevents promotion)?
 
-**Time-like parameter emergence** (H3): Can a time-like ordering or causal structure emerge from boundary dynamics alone?
+**Minimal causal direction set** (H3): Is the smallest validated directed chain oscillator mismatch → fb → ∇fb → ∇|m|, or are additional mediators required for robust transport claims?
 
-**Physical correspondence** (H4): Does topological projection loss have analogues in physical theories?
-
----
-
-## G. Current Open Problems
-
-1. **Boundary dynamics** — Can intrinsic geometry support propagation, flow, or dynamics? Key question for V21.
-2. **Wave equation on intrinsic boundary** — Does the intrinsic metric support a natural Laplacian or wave operator?
-3. **Time-like parameter** — Can a time-like ordering or causal structure emerge from boundary dynamics?
-4. **Higher-dimensional boundary dynamics** — Do 2D boundary surfaces (bdim=2) support richer dynamics than 1D?
-5. **Physical correspondence** — Do boundary dynamics have analogues in physical field theories?
+**V3.4 compatibility closure** (H4): Does every new V33 derivation reproduce the V3.4 calculation in the appropriate limit for all audited pathways?
 
 ---
 
-## H. Not Claimed
+## H. Current Open Problems
+
+1. **Loop closure criteria** — Define promotion gates from interaction evidence (TGR_01, RLS_01) to closed-loop theorem claim.
+2. **Amplitude governance** — Determine whether amplitude stays class-conditional or can be reduced to one exponent family.
+3. **Boundary vs non-boundary decomposition** — Quantify irreducible boundary gain versus transport-layer gain.
+4. **Directional robustness** — Re-test Tick→Gradient directionality under stronger perturbation and holdout protocols.
+5. **V3.4 limit map** — Publish explicit limit-recovery tests for each V33 chain segment.
+
+---
+
+## I. 60-Second Restart Path
+
+1. Read this file section E first (Current Frontier In 10 Lines).
+2. Read section F (V33 Core Discoveries) for audit anchors.
+3. Apply claim discipline labels before generating any narrative.
+4. Enforce V3.4 compatibility checks for every new derivation.
+
+---
+
+## J. Not Claimed
 
 | Item | Status |
 |:-----|:------:|
@@ -122,7 +148,9 @@ Results are classified into four categories: **SUPPORTED, CONDITIONAL, HYPOTHESI
 | Dark matter replaced or explained | NOT CLAIMED |
 | Physical theory proven | NOT CLAIMED |
 | Architecture = topology as identity | NOT CLAIMED |
+| Resonance loop theorem-level closure | NOT CLAIMED |
+| Universal single-exponent amplitude law across all populations | NOT CLAIMED |
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED. V21 ACTIVE: 5 audits.*
+*Generated 2026-07-30. V33 ACTIVE through RLS_01 (13 audits represented).*

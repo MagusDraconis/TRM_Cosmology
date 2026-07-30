@@ -2,10 +2,47 @@
 
 **Version:** 10.04
 **Date:** 2026-07-29
-**Scope:** Clockwork Cosmology V1 through V32
+**Scope:** Clockwork Cosmology V1 through V33
 **Current Frontier:** V33 Gradient Dynamics Theory — ACTIVE
 **Previous Frontier:** V32 Gradient Dynamics — CLOSED
 **Current Branch:** v33-gradient-dynamics-theory
+
+V33 ACTIVE SUMMARY (13 audits complete through RLS_01)
+- QGI_01: Oscillator-level gradient trend law (SUPPORTED).
+- OGC_01: Oscillator→Param→Boundary→Graph→Galactic trace established (SUPPORTED).
+- IBL_01: Bottleneck layer ranking across transitions (SUPPORTED).
+- BES_01: Boundary emergence amplifies gradient/curvature/coherence channels (SUPPORTED).
+- BSC_01: Boundary signal concentration validated with zone and random controls (SUPPORTED).
+- BAG_01: Boundary-amplified gradient application on SPARC validated (SUPPORTED).
+- AGE_01: Gradient-exponent amplitude model fit/bootstrapped (SUPPORTED).
+- RPL_01: Residual power-law structure tested; universality remains conditional.
+- TGO_01: Tick-gradient origin directionality tested (SUPPORTED).
+- FGO_01: Feedback-gradient upstream generator pathway ranked and reconstructed (SUPPORTED).
+- FBT_01: Oscillator mismatch/divergence linked to fb birth (SUPPORTED).
+- TGR_01: Geometry-Tick-Feedback interaction signals validated (SUPPORTED).
+- RLS_01: Loop-gain/saturation classification completed; loop closure remains HYPOTHESIS.
+
+V33 CLAIM GOVERNANCE UPDATE
+- Shape = sign(∇ρ): retained as SUPPORTED directional rule in boundary-amplified application.
+- Amplitude = |∇ρ|^α: downgraded to CONDITIONAL universality pending full closure from AGE_01/RPL_01.
+- Compatibility requirement: every new derivation must reproduce the V3.4 calculation
+  in the appropriate limit.
+
+Current Frontier In 10 Lines
+- V33 is ACTIVE with 13 completed audits through RLS_01.
+- Validated hierarchy: Oscillator interaction → mismatch/divergence → fb → ∇fb → ∇|m| → boundary → geometry → dynamics.
+- Validated interaction: geometry → tick anomaly → feedback amplification.
+- Interaction evidence is SUPPORTED; theorem-level loop closure is NOT CLAIMED.
+- Shape = sign(∇ρ) survives only as boundary-amplified directional candidate.
+- Amplitude = |∇ρ|^α remains CONDITIONAL (AGE_01, RPL_01).
+- Channels (∇ρ · ∇v) are derived observables.
+- Curvature (∇²ρ) is a derived observable.
+- Claim labels are strict: SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIMED.
+- Compatibility gate: every new derivation must reproduce V3.4 in the appropriate limit.
+
+V32 CLOSED SUMMARY (8 audits)
+- RTD_01, DGT_01, UGL_01, GKF_01, GPR_01, CGL_01, GUV_01, SGI_01 completed.
+- Capstone candidate form introduced and stress-tested under falsification gates.
 
 V13.5 CLOSED SUMMARY
 - Tick Source Theory completed. Hub Selection Principle completed.
@@ -2562,8 +2599,13 @@ V11.0 (family axiom physics) → V12.x (information-duality physics).
 Information (l1, concentration, structure) and Dynamics (Tick, activity, time flow)
 are two orthogonal irreducible components.
 
-**Current status:** V23.3 ACTIVE (CCS_01). V23 has 4 audits, all SUPPORTED. V22 CLOSED (4 audits). V21 CLOSED (10 audits). Complete chain through curvature source. Branch: `v23.0-curvature-emergence-theory`.
-**V21 complete chain (10 audits):** KTC → Propagation → Velocity → Bound → Universality. Universal geometric propagation invariant established.
+**Current status:** V33 ACTIVE through RLS_01. V33 has 13 completed audits
+(QGI_01 through RLS_01) under claim governance. V32 CLOSED (8 audits).
+Current branch: `v33-gradient-dynamics-theory`.
+**Current validated hierarchy:** Oscillator interaction → mismatch/divergence → fb → ∇fb →
+∇|m| → boundary → geometry → dynamics.
+**Current validated interaction:** geometry → tick anomaly → feedback amplification.
+**Current hypothesis:** resonance-loop closure beyond interaction evidence.
 
 **What is NOT claimed:** Physical c, physical G, SI units, spacetime, SR, GR, Einstein
 equations, dark matter replacement, physical theory proven.
@@ -2572,5 +2614,5 @@ equations, dark matter replacement, physical theory proven.
 
 ---
 
-*Generated 2026-07-28. This document is the authoritative historical overview of the
-TRM/TQM project from Clockwork Cosmology V1 through V21.5.*
+*Generated 2026-07-30. This document is the authoritative historical overview of the
+TRM/TQM project from Clockwork Cosmology V1 through V33.*

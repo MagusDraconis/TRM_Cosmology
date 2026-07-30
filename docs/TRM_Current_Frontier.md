@@ -1,9 +1,9 @@
 # TRM Current Frontier
 
-**Version:** 9.8
-**Date:** 2026-07-28
+**Version:** 9.9
+**Date:** 2026-07-30
 
-**Current Version:** V33.0 GRADIENT DYNAMICS THEORY — ACTIVE
+**Current Version:** V33 GRADIENT DYNAMICS THEORY — ACTIVE (through V33.12 RLS_01)
 **Previous Version:** V32 GRADIENT DYNAMICS — CLOSED
 **Cumulative Tests:** ~4059
 **Failed:** 0
@@ -16,21 +16,16 @@ For any new LLM chat or Copilot session, read in this order:
 
 1. TRM_Current_Frontier.md (this file) — active frontier, model, constraints
 2. TRM_Project_QuickStart_For_New_Chats.md — operational briefing
-3. TRM_Project_Lineage_Overview.md — complete V1 → V23 historical lineage
+3. TRM_Project_Lineage_Overview.md — complete V1 → V33 historical lineage
 
 ---
 
 ## One-Sentence Current State
 
-V30 CLOSED. V31 CLOSED. V32 CLOSED. V33 ACTIVE.
-V32 Gradient Dynamics — 8 audits, 8 SUPPORTED. Complete chain:
-Real Tick → Density Gradient Theorem → Unified Law → Falsification
-→ Primacy Reduction → Candidate Gravity Law → Universality → Scale
-Invariance. Capstone: TRM density-gradient gravity law:
-Shape=sign(∇ρ), Amplitude=|∇ρ|^α. ∇²ρ and channels are derived.
-Gradient law is cross-system universal and scale-free.
-V33 begins: Gradient Dynamics Theory — apply gradient law with
-real Tick to calibrated galactic dynamics.
+V32 CLOSED. V33 ACTIVE with 13 completed audits (QGI_01 through RLS_01).
+V33 validates an oscillator→feedback→gradient→boundary pathway,
+and validates geometry-tick-feedback interaction diagnostics,
+while keeping resonance-loop closure at hypothesis level.
 
 ---
 
@@ -57,6 +52,88 @@ Propagation → Velocity → Bound (V21)
     ↓
 Universality → Time → Tick → Metric → Causal Structure → Curvature (V23)
 ``
+
+---
+
+## V33 Frontier Rewrite
+
+### A. Validated Hierarchy (SUPPORTED)
+
+```
+Oscillator interaction
+    -> mismatch/divergence
+    -> fb
+    -> ∇fb
+    -> ∇|m|
+    -> boundary
+    -> geometry
+    -> dynamics
+```
+
+### B. Validated Interaction (SUPPORTED)
+
+```
+geometry
+    -> tick anomaly
+    -> feedback amplification
+```
+
+Interpretation: interaction is validated as a coupling layer (TGR_01),
+not as theorem-level loop closure.
+
+### C. Resonance-Loop Hypothesis (HYPOTHESIS)
+
+RLS_01 validated loop diagnostics, gain measurements, and saturation classification.
+Promotion from interaction evidence to closure hypothesis testing remains OPEN.
+
+---
+
+## Current Frontier In 10 Lines
+
+- V33 is ACTIVE with 13 completed audits through RLS_01.
+- Validated hierarchy: Oscillator interaction -> mismatch/divergence -> fb -> ∇fb -> ∇|m| -> boundary -> geometry -> dynamics.
+- Validated interaction: geometry -> tick anomaly -> feedback amplification.
+- This interaction is SUPPORTED as coupling evidence, not theorem-level loop closure.
+- V32 shape rule survives only as boundary-amplified directional candidate: Shape = sign(∇ρ).
+- V32 amplitude rule is CONDITIONAL: Amplitude = |∇ρ|^α (universality not yet promoted).
+- Channels (∇ρ · ∇v) are treated as derived observables.
+- Curvature (∇²ρ) is treated as a derived observable.
+- Claim discipline is strict: SUPPORTED, CONDITIONAL, HYPOTHESIS, NOT CLAIMED.
+- Compatibility requirement: every new derivation must reproduce the V3.4 calculation in the appropriate limit.
+
+---
+
+## V33 Core Discoveries
+
+| Audit | Finding | Status | Implication |
+|:------|:--------|:------:|:------------|
+| QGI_01 | Oscillator-level gradient trend law identified | SUPPORTED | Micro-level gradient source is measurable |
+| BSC_01 | Boundary signal concentration across zones and controls | SUPPORTED | Boundary acts as amplification/concentration layer |
+| BAG_01 | Boundary-amplified gradient application on SPARC | SUPPORTED | Supports boundary-aware gradient application |
+| TGO_01 | Tick-gradient directionality audit completed | SUPPORTED | Tick participates in gradient origin pathway |
+| FGO_01 | Feedback gradient ranked as upstream generator candidate | SUPPORTED | Elevates ∇fb in causal hierarchy |
+| FBT_01 | Oscillator mismatch linked to fb birth | SUPPORTED | Places fb origin at oscillator-interaction layer |
+| TGR_01 | Geometry-Tick-Feedback interaction signals measured | SUPPORTED | Confirms coupled interaction layer |
+| RLS_01 | Loop gain and saturation classification completed | SUPPORTED | Keeps loop closure as hypothesis pending stricter promotion gates |
+
+All V33 audits represented in frontier scope:
+QGI_01, OGC_01, IBL_01, BES_01, BSC_01, BAG_01, AGE_01, RPL_01,
+TGO_01, FGO_01, FBT_01, TGR_01, RLS_01.
+
+---
+
+## V32 Statement Governance Review
+
+| Statement | Governance After V33.5-V33.7 | Rationale |
+|:----------|:------------------------------|:----------|
+| Shape = sign(∇ρ) | SUPPORTED (directional rule) | BAG_01 preserves directional utility in boundary-amplified application |
+| Amplitude = |∇ρ|^α | CONDITIONAL | AGE_01 and RPL_01 support gradient-exponent modeling but leave universality/class pooling unresolved |
+| Channels = ∇ρ · ∇v | DERIVED OBSERVABLE | Retained as emergent alignment metric, not primitive causal law |
+| Curvature = ∇²ρ | DERIVED OBSERVABLE | Treated as second-order observable, not fundamental primitive |
+
+Operational wording now used:
+- Shape: directional candidate governed by sign of gradient.
+- Amplitude: gradient-exponent model, potentially class-conditional.
 
 ---
 
@@ -134,9 +211,9 @@ Boundary dimension (bdim) → Δ → Gate → Memory. All derived from bdim.
 
 ---
 
-## Current Research Frontier (V19.0-V19.7)
+## Foundational Memory-Theory Snapshot (V19.0-V19.10, CLOSED)
 
-**Topological Memory Theory — Active Audits (14 audits)**
+**Topological Memory Theory — closed historical layer (17 audits)**
 
 V19.0 TMI_01: Topological Memory Invariant (SUPPORTED)
 V19.1 PDP_01, PMI_01, RAP_01, RRP_01, SAD_01: Path degeneracy and sign ambiguity (5 audits)
@@ -146,6 +223,9 @@ V19.4 BGP_01: Boundary Generation Principle — codimension-1 law (SUPPORTED)
 V19.5 HBD_01: Hypothetical Boundary Dimension — 3D codim-1 verified (SUPPORTED)
 V19.6 PDI_01: Projection Dimension Invariant — Δ controls memory (SUPPORTED)
 V19.7 DEM_01: Dimensional Excess Magnitude — M = existence(Δ) × magnitude(geo) (SUPPORTED)
+V19.8 GEP_01: Geometry Emergence Principle (SUPPORTED)
+V19.9 CBG_01: Codimension Boundary Generation (SUPPORTED)
+V19.10 EDS_01: Emergent Dimension Structure (SUPPORTED)
 
 Key findings:
 - BGP_01: Boundary dimension derives from param-space dimension (codim-1).
@@ -198,7 +278,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 
 ---
 
-## V21 Program (ACTIVE)
+## V21 Program (CLOSED)
 
 **Boundary Dynamics Theory**
 
@@ -237,7 +317,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V23.2 | CDL_01 | Curvature Dilation Law — dilation = f(sqrt(R_eff)); universal across GAN/CNS |
 | V23.3 | CCS_01 | Curvature Source — 5 candidates ranked; dominant source identified |
 
-## V24 Program (ACTIVE)
+## V24 Program (CLOSED)
 
 **Connectivity Gradient Theory**
 
@@ -259,7 +339,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V25.2 | PRS_01 | Prediction Ranking Survivability — ranked by evidence; strongest candidate identified |
 | V25.3 | UPF_01 | Universal Propagation Falsification — bound survives extreme testing; no counterexample |
 
-## V26 Program (ACTIVE)
+## V26 Program (CLOSED)
 
 **Observable Correspondence Program**
 
@@ -271,7 +351,7 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V26.3 | ICI_01 | Independent Convergence — ALL 5 correspondences discovered before physics comparison |
 | V26.4 | CCP_01 | Cross-System Correspondence — bound appears in non-TRM graphs; TRM adds specificity |
 
-## V27 Program (ACTIVE)
+## V27 Program (CLOSED)
 
 **Structural Correspondence Theory**
 
@@ -354,19 +434,18 @@ Tag: `v20.0-intrinsic-geometry-emergence`
 | V32.6 | GUV_01 | Gradient Universality — cross-system: param-space (∇|m|) + graph (∇deg); 7 systems tested |
 | V32.7 | SGI_01 | Scale Gradient Invariance — 3 domains × 3 scales: parametric (3 grids), graph (3 N), galactic (3 size bins) |
 
-**Capstone Result: TRM Density-Gradient Gravity Law**
+**Historical V32 Candidate Form (non-primitive, governance-scoped)**
 ```
 TRM_Gravity(galaxy) = {
-    Shape      = sign(∇ρ)              [direction of density gradient]
-    Amplitude  = |∇ρ|^α                [magnitude of density gradient]
-    Channels   = ∇ρ · ∇v               [flow alignment, emergent]
-    Curvature  = ∇²ρ = derived(|∇ρ|)   [second-order, not independent]
+    Shape      = sign(∇ρ)              [directional candidate, boundary-amplified use]
+    Amplitude  = |∇ρ|^α                [conditional candidate, class/pooled status unresolved]
+    Channels   = ∇ρ · ∇v               [derived observable]
+    Curvature  = ∇²ρ = derived(|∇ρ|)   [derived observable]
 }
 ```
-- Cross-system universal: parametric, graph, galactic domains
-- Scale-free: coefficients invariant under resolution change
-- Falsification survived: gradient-only beats all alternatives
-- Reduction: curvature and channels add negligible ΔR²
+- Cross-system universality and scale findings are preserved as V32 frame results.
+- These V32 reductions do NOT promote gradient as deepest primitive in V33 governance.
+- Curvature/channels remain derived observables in this candidate frame.
 
 ## V33 Program (ACTIVE)
 
@@ -383,94 +462,29 @@ TRM_Gravity(galaxy) = {
 | V33.6 | AGE_01 | Amplitude Gradient Exponent — 4 models fitted; bootstrap α stability; best-fit exponent |
 | V33.7 | RPL_01 | Residual Power Law — α per population; CI overlap; pooled vs class-specific; universality test |
 | V33.8 | TGO_01 | Tick Gradient Origin — causal direction: Tick→Gradient vs Gradient→Tick; correlation matrix |
-| V33.9 | FGO_01 | Feedback Gradient Origin — ∇fb as primitive: boundary selection, reconstruction, source ranking |
+| V33.9 | FGO_01 | Feedback Gradient Origin — ∇fb as upstream generator candidate: boundary selection, reconstruction, source ranking |
 | V33.10 | FBT_01 | Feedback Birth Theorem — deeper origin: oscillator mismatch → fb? fb↔|m| identity test |
 | V33.11 | TGR_01 | Tick Geometry Resonance — feedback loop: Geometry→Tick? Tick→∇fb? 4 loop signals |
 | V33.12 | RLS_01 | Resonance Loop Stability — loop gain G=G1×G2×G3×G4; saturation; attractor classification |
 
-Research question:
-> Is the Tick-Geometry loop self-sustaining? Compute loop gain G as
-> product of 4 stage amplifications. Classify as amplifying (G>1),
-> neutral (G≈1), or damped (G<1). Test saturation and attractors.
+Current V33 active question:
+> Can the measured geometry-tick-feedback interaction be promoted from
+> interaction evidence to a stronger closure hypothesis test under
+> stricter governance gates?
 
-Candidate chain:
-```
-{sign, Tick} → ∇ρ → {Shape, Amplitude} → S_V calibration → Physical velocity (km/s)
-```
-> Direction (sign) and Tick?
-
-Candidate chain:
-```
-{sign, Tick} → Geometry → Propagation → Curvature → Time → Physics
-```
-
-Research question:
-> What is the minimal set of structural axioms needed to
-> reproduce the TRM-physics correspondences? Can we strip TRM
-> down to its essential structural core?
-
-Candidate chain:
-```
-Sign → Boundary → Propagation → Metric → Curvature
-    → Correspondence → Minimal Structure
-```
-
-Research question:
-> Can TRM predictions (v_max, dilation, curvature, metric) be
-> mapped to measurable astronomical or cosmological quantities?
-> Does the TRM propagation bound correspond to an observable
-> speed limit at galactic or cosmic scales?
-
-Candidate chain:
-```
-Sign → Boundary → Density → Curvature → Dilation
-    → Physical Correspondence → Observable Correspondence?
-```
-
-Research question:
-> Can TRM structural laws (sign→boundary→density→curvature→dilation)
-> be mapped to known physical phenomena? Does TRM geometry correspond
-> to gravitational or cosmological structure?
-
-Candidate chain:
-```
-TRM Primitive → Boundary → Geometry → Propagation → Metric
-    → Causal Structure → Curvature → Dilation
-    → Physical Correspondence?
-```
-
-Research question:
-> Is connectivity gradient the primitive geometric object?
-> Can curvature, dilation, and propagation be expressed
-> entirely in terms of connectivity structure?
-
-Candidate chain:
-```
-KTC → ... → Curvature → Connectivity Gradient → Geometry?
-```
-
-Research question:
-> Can the unified space-time metric ds^2/(v^2*T^2) support
-> intrinsic curvature? Does the causal cone structure imply
-> geodesic deviation?
-
-Candidate chain:
-```
-KTC → ... → Causal Structure → Curvature → Gravity?
-```
-
-Research question:
-> Can Tick serve as the fundamental temporal unit, enabling
-> a complete proto-temporal metric from propagation geometry?
-
-Candidate chain:
-```
-KTC → Constraint → Geometry → Dynamics → Time-like behavior
-```
+Compatibility requirement:
+> Every new derivation must reproduce the V3.4 calculation in the
+> appropriate limit.
 
 No claims about physical spacetime.
 
-Branch: `v21.0-boundary-dynamics-theory`
+Branch: `v33-gradient-dynamics-theory`
+
+---
+
+Historical Archive Notice:
+The program summaries below preserve historical audit outcomes.
+They are not statements of current deepest-priority frontier claims.
 
 ---
 
@@ -570,4 +584,4 @@ Branch: `v21.0-boundary-dynamics-theory`
 
 ---
 
-*Generated 2026-07-28. V20 CLOSED (11). V21 ACTIVE (6): BDP+IDP+PTU+CSI+RCI+LCI.*
+*Generated 2026-07-30. V33 ACTIVE through RLS_01 (13 audits represented).*
