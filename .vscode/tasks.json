@@ -29,6 +29,32 @@
             ],
             "problemMatcher": "$msCompile",
             "group": "build"
+        },
+        {
+            "label": "test TRM.Tests (Fast)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "test",
+                "${workspaceFolder}\\TRM.Tests\\TRM.Tests.csproj",
+                "--settings",
+                "${workspaceFolder}\\TRM.Tests\\fast.runsettings"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "test"
+        },
+        {
+            "label": "test TRM.Tests (LongRunning)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "test",
+                "${workspaceFolder}\\TRM.Tests\\TRM.Tests.csproj",
+                "--settings",
+                "${workspaceFolder}\\TRM.Tests\\long-running.runsettings"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "test"
         }
     ]
 }
